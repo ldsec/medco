@@ -1,0 +1,24 @@
+diff --git a/edu.harvard.i2b2.crc/src/server/edu/harvard/i2b2/crc/dao/pdo/input/EidListTypeHandler.java b/edu.harvard.i2b2.crc/src/server/edu/harvard/i2b2/crc/dao/pdo/input/EidListTypeHandler.java
+index c68b82a..def4007 100755
+--- a/edu.harvard.i2b2.crc/src/server/edu/harvard/i2b2/crc/dao/pdo/input/EidListTypeHandler.java
++++ b/edu.harvard.i2b2.crc/src/server/edu/harvard/i2b2/crc/dao/pdo/input/EidListTypeHandler.java
+@@ -242,13 +242,12 @@ public class EidListTypeHandler extends CRCDAO implements
+ 
+ 	public String getTempTableName() {
+ 		String tempTableName = "";
+-		if (dataSourceLookup.getServerType().equalsIgnoreCase(
+-				DAOFactoryHelper.ORACLE)) {
+-			tempTableName = this.getDbSchemaName()
+-					+ FactRelatedQueryHandler.TEMP_PARAM_TABLE;
+-		} else {
+-			tempTableName = this.getDbSchemaName()
+-					+ SQLServerFactRelatedQueryHandler.TEMP_PDO_INPUTLIST_TABLE;
++		if (dataSourceLookup.getServerType().equalsIgnoreCase(DAOFactoryHelper.ORACLE)) {
++			tempTableName = this.getDbSchemaName() + FactRelatedQueryHandler.TEMP_PARAM_TABLE;
++		} else if (dataSourceLookup.getServerType().equalsIgnoreCase(DAOFactoryHelper.SQLSERVER)) {
++			tempTableName = this.getDbSchemaName() + SQLServerFactRelatedQueryHandler.TEMP_PDO_INPUTLIST_TABLE;
++		} else if (dataSourceLookup.getServerType().equalsIgnoreCase(DAOFactoryHelper.POSTGRESQL)) {
++			tempTableName = FactRelatedQueryHandler.TEMP_PARAM_TABLE;
+ 		}
+ 		return tempTableName;
+ 	}

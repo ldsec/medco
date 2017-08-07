@@ -1,0 +1,57 @@
+version: '3.1'
+services:
+  i2b2-server-srv1:
+    build:
+      context: ./i2b2-server
+      args:
+        - I2B2_DOMAIN_NAME_ARG=i2b2demotest
+        - UNLYNX_GROUP_KEY_FILE_ARG=srv1-3-5-group.toml
+        - UNLYNX_ENTRYPOINT_IDX_ARG=0
+    ports:
+      - "8082:8080"
+      - "9992:9990"
+    networks:
+      medco-network-srv1:
+        aliases:
+          - i2b2-server
+    volumes:
+      - ./configuration:/opt/configuration
+    depends_on:
+      - i2b2-database-srv1
+
+  i2b2-database-srv1:
+    build:
+      context: ./i2b2-database
+      args:
+        - I2B2_DOMAIN_NAME_ARG=i2b2demotest
+    ports:
+      - "5434:5432"
+    networks:
+      medco-network-srv1:
+        aliases:
+          - i2b2-database
+
+  i2b2-web-srv1:
+    build:
+      context: ./i2b2-web
+      args:
+        - I2B2_DOMAIN_NAME_ARG=i2b2demotest
+    ports:
+      - "82:80"
+    networks:
+      medco-network-srv1:
+        aliases:
+          - i2b2-web
+
+  unlynx-srv1:
+    build:
+      context: ./unlynx
+      args:
+        - UNLYNX_KEY_FILE_ARG=srv1-private.toml
+    network_mode: "host"
+    volumes:
+      - ./configuration:/opt/configuration
+
+networks:
+  medco-network-srv1:
+    driver: bridge

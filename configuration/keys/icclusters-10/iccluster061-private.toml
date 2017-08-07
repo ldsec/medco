@@ -1,0 +1,6 @@
+# This file contains your private key.
+# Do not give it away lightly!
+Public = "46b824371989d3f06eb643dd321d8e2b266abbc8da93ee698191f99a6788ad8a"
+Private = "84677a97ba6a7ec87dbbca2f69653444bb8ed09d5f44a521010d961a7c04270f"
+Address = "tcp://10.90.39.12:2000"
+Description = "MedCo iccluster 3"

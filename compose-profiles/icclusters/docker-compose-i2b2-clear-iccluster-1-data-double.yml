@@ -1,0 +1,57 @@
+version: '3.1'
+services:
+  i2b2-server:
+    build:
+      context: ../../i2b2-server
+      args:
+        - I2B2_DOMAIN_NAME_ARG=i2b2demotest
+        - UNLYNX_GROUP_KEY_FILE_ARG=iccluster-group.toml
+        - UNLYNX_ENTRYPOINT_IDX_ARG=0
+    ports:
+      - "8080:8080"
+      - "9990:9990"
+    networks:
+      - medco-network
+    volumes:
+      - ../../configuration:/opt/configuration
+    depends_on:
+      - i2b2-database-clear-double
+
+  i2b2-database-clear-double:
+    build:
+      context: ../../i2b2-database
+      args:
+        - I2B2_DOMAIN_NAME_ARG=i2b2demotest
+    ports:
+      - "5432:5432"
+    networks:
+      medco-network:
+        aliases:
+          - i2b2-database
+
+  i2b2-web:
+    build:
+      context: ../../i2b2-web
+      args:
+        - I2B2_DOMAIN_NAME_ARG=i2b2demotest
+    ports:
+      - "80:80"
+    networks:
+      - medco-network
+
+  unlynx:
+    build:
+      context: ../../unlynx
+      args:
+        - UNLYNX_KEY_FILE_ARG=iccluster-1.toml
+    ports:
+      - "2000:2000"
+      - "2001:2001"
+    networks:
+      - medco-network
+    volumes:
+      - ../../configuration:/opt/configuration
+
+networks:
+  medco-network:
+    driver: bridge

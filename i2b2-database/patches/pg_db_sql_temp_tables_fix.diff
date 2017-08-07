@@ -1,0 +1,133 @@
+diff --git a/edu.harvard.i2b2.data/Release_1-7/NewInstall/Crcdata/scripts/procedures/postgresql/CREATE_TEMP_EID_TABLE.sql b/edu.harvard.i2b2.data/Release_1-7/NewInstall/Crcdata/scripts/procedures/postgresql/CREATE_TEMP_EID_TABLE.sql
+index 349a99f..9368907 100644
+--- a/edu.harvard.i2b2.data/Release_1-7/NewInstall/Crcdata/scripts/procedures/postgresql/CREATE_TEMP_EID_TABLE.sql
++++ b/edu.harvard.i2b2.data/Release_1-7/NewInstall/Crcdata/scripts/procedures/postgresql/CREATE_TEMP_EID_TABLE.sql
+@@ -4,7 +4,7 @@ BEGIN
+     EXECUTE 'create table ' ||  tempPatientMappingTableName || ' (
+         ENCOUNTER_MAP_ID        varchar(200) NOT NULL,
+         ENCOUNTER_MAP_ID_SOURCE     varchar(50) NOT NULL,
+-        PROJECT_ID              VARCHAR(50) NOT NULL,
++        PROJECT_ID              VARCHAR(50) NOT NULL DEFAULT ''Demo'',
+         PATIENT_MAP_ID          varchar(200), 
+         PATIENT_MAP_ID_SOURCE   varchar(50), 
+         ENCOUNTER_ID            varchar(200) NOT NULL,
+@@ -21,7 +21,7 @@ BEGIN
+     EXECUTE 'CREATE INDEX idx_' || tempPatientMappingTableName || '_stateid_eid_id ON ' || tempPatientMappingTableName || '  (PROCESS_STATUS_FLAG)';  
+     EXCEPTION
+     WHEN OTHERS THEN
+-        RAISE NOTICE '%%%', SQLSTATE,  ' - ' , SQLERRM;
++        RAISE NOTICE '%%%', SQLSTATE || ' - ' || SQLERRM;
+ END;
+ $body$
+ LANGUAGE PLPGSQL;
+diff --git a/edu.harvard.i2b2.data/Release_1-7/NewInstall/Crcdata/scripts/procedures/postgresql/CREATE_TEMP_PATIENT_TABLE.sql b/edu.harvard.i2b2.data/Release_1-7/NewInstall/Crcdata/scripts/procedures/postgresql/CREATE_TEMP_PATIENT_TABLE.sql
+index c717821..7c675a5 100644
+--- a/edu.harvard.i2b2.data/Release_1-7/NewInstall/Crcdata/scripts/procedures/postgresql/CREATE_TEMP_PATIENT_TABLE.sql
++++ b/edu.harvard.i2b2.data/Release_1-7/NewInstall/Crcdata/scripts/procedures/postgresql/CREATE_TEMP_PATIENT_TABLE.sql
+@@ -27,7 +27,7 @@ BEGIN
+     EXECUTE 'CREATE INDEX idx_' || tempPatientDimensionTableName || '_pat_id ON ' || tempPatientDimensionTableName || '  (patient_id, patient_id_source,patient_num)';
+     EXCEPTION
+     WHEN OTHERS THEN
+-        RAISE NOTICE '%%%', SQLSTATE,  ' - ' , SQLERRM;
++        RAISE NOTICE '%%%', SQLSTATE || ' - ' || SQLERRM;
+ END;
+ $body$
+ LANGUAGE PLPGSQL;
+diff --git a/edu.harvard.i2b2.data/Release_1-7/NewInstall/Crcdata/scripts/procedures/postgresql/CREATE_TEMP_PID_TABLE.sql b/edu.harvard.i2b2.data/Release_1-7/NewInstall/Crcdata/scripts/procedures/postgresql/CREATE_TEMP_PID_TABLE.sql
+index 1b6963c..988b88b 100644
+--- a/edu.harvard.i2b2.data/Release_1-7/NewInstall/Crcdata/scripts/procedures/postgresql/CREATE_TEMP_PID_TABLE.sql
++++ b/edu.harvard.i2b2.data/Release_1-7/NewInstall/Crcdata/scripts/procedures/postgresql/CREATE_TEMP_PID_TABLE.sql
+@@ -8,7 +8,7 @@ BEGIN
+ 		PATIENT_ID_STATUS varchar(50), 
+ 		PATIENT_ID  varchar(200),
+ 		PATIENT_ID_SOURCE varchar(50),
+-		PROJECT_ID   VARCHAR(50) ,
++		PROJECT_ID   VARCHAR(50) default ''Demo'',
+ 		PATIENT_NUM numeric(38,0),
+ 		PATIENT_MAP_ID_STATUS varchar(50), 
+ 		PROCESS_STATUS_FLAG char(1), 
+@@ -24,7 +24,7 @@ BEGIN
+ 	(PROCESS_STATUS_FLAG)';
+ 	EXCEPTION
+ 	WHEN OTHERS THEN
+-		RAISE NOTICE '%%%', SQLSTATE,  ' - ' , SQLERRM;
++		RAISE NOTICE '%%%', SQLSTATE || ' - ' || SQLERRM;
+ END;
+ $body$
+ LANGUAGE PLPGSQL;
+diff --git a/edu.harvard.i2b2.data/Release_1-7/NewInstall/Crcdata/scripts/procedures/postgresql/CREATE_TEMP_TABLE.sql b/edu.harvard.i2b2.data/Release_1-7/NewInstall/Crcdata/scripts/procedures/postgresql/CREATE_TEMP_TABLE.sql
+index 13f47ec..a939c81 100644
+--- a/edu.harvard.i2b2.data/Release_1-7/NewInstall/Crcdata/scripts/procedures/postgresql/CREATE_TEMP_TABLE.sql
++++ b/edu.harvard.i2b2.data/Release_1-7/NewInstall/Crcdata/scripts/procedures/postgresql/CREATE_TEMP_TABLE.sql
+@@ -11,7 +11,7 @@ BEGIN
+         patient_id_source  varchar(50) not null,
+         provider_id   varchar(50),
+         start_date   timestamp, 
+-        modifier_cd varchar(100),
++        modifier_cd varchar(100) not null DEFAULT ''@'',
+         instance_num numeric(18,0),
+         valtype_cd varchar(50),
+         tval_char varchar(255),
+diff --git a/edu.harvard.i2b2.data/Release_1-7/NewInstall/Crcdata/scripts/procedures/postgresql/CREATE_TEMP_VISIT_TABLE.sql b/edu.harvard.i2b2.data/Release_1-7/NewInstall/Crcdata/scripts/procedures/postgresql/CREATE_TEMP_VISIT_TABLE.sql
+index 83b56dd..48e39bf 100644
+--- a/edu.harvard.i2b2.data/Release_1-7/NewInstall/Crcdata/scripts/procedures/postgresql/CREATE_TEMP_VISIT_TABLE.sql
++++ b/edu.harvard.i2b2.data/Release_1-7/NewInstall/Crcdata/scripts/procedures/postgresql/CREATE_TEMP_VISIT_TABLE.sql
+@@ -5,7 +5,7 @@ BEGIN
+     EXECUTE 'create table ' ||  tempTableName || ' (
+         encounter_id                    varchar(200) not null,
+         encounter_id_source             varchar(50) not null, 
+-        project_id                      varchar(50) not null,
++        project_id                      varchar(50) not null DEFAULT ''Demo'',
+         patient_id                      varchar(200) not null,
+         patient_id_source               varchar(50) not null,
+         encounter_num                   numeric(38,0), 
+@@ -27,4 +27,4 @@ BEGIN
+         RAISE EXCEPTION 'An error was encountered - % -ERROR- %',SQLSTATE,SQLERRM;    
+ END;
+ $body$
+-LANGUAGE PLPGSQL;
+\ No newline at end of file
++LANGUAGE PLPGSQL;
+diff --git a/edu.harvard.i2b2.data/Release_1-7/NewInstall/Crcdata/scripts/procedures/postgresql/INSERT_EID_MAP_FROMTEMP.sql b/edu.harvard.i2b2.data/Release_1-7/NewInstall/Crcdata/scripts/procedures/postgresql/INSERT_EID_MAP_FROMTEMP.sql
+index d2a8b25..21366d6 100644
+--- a/edu.harvard.i2b2.data/Release_1-7/NewInstall/Crcdata/scripts/procedures/postgresql/INSERT_EID_MAP_FROMTEMP.sql
++++ b/edu.harvard.i2b2.data/Release_1-7/NewInstall/Crcdata/scripts/procedures/postgresql/INSERT_EID_MAP_FROMTEMP.sql
+@@ -8,6 +8,8 @@ maxEncounterNum bigint;
+ distinctEidCur REFCURSOR;
+ disEncounterId varchar(100); 
+ disEncounterIdSource varchar(100);
++disPatientId varchar(100);
++disPatientIdSource varchar(100);
+ 
+ BEGIN
+     EXECUTE ' delete  from ' || tempEidTableName ||  ' t1  where 
+@@ -21,9 +23,9 @@ BEGIN
+     if coalesce(maxEncounterNum::text, '') = '' then 
+         maxEncounterNum := 0;
+     end if;
+-    open distinctEidCur for EXECUTE 'SELECT distinct encounter_id,encounter_id_source from ' || tempEidTableName ||' ' ;
++    open distinctEidCur for EXECUTE 'SELECT distinct encounter_id,encounter_id_source,patient_map_id,patient_map_id_source from ' || tempEidTableName ||' ' ;
+     loop
+-        FETCH distinctEidCur INTO disEncounterId, disEncounterIdSource;
++        FETCH distinctEidCur INTO disEncounterId, disEncounterIdSource,disPatientId,disPatientIdSource;
+         IF NOT FOUND THEN EXIT; END IF; -- apply on distinctEidCur
+             -- dbms_output.put_line(disEncounterId);
+             if  disEncounterIdSource = 'HIVE'  THEN 
+@@ -65,8 +67,8 @@ BEGIN
+                     maxEncounterNum := maxEncounterNum + 1 ;
+                     --TODO : add update colunn
+                     EXECUTE ' insert into ' || tempEidTableName ||' (encounter_map_id,encounter_map_id_source,encounter_id,encounter_id_source,encounter_num,process_status_flag
+-                        ,encounter_map_id_status,update_date,download_date,import_date,sourcesystem_cd,project_id) 
+-                    values($1,''HIVE'',$2,''HIVE'',$3,''P'',''A'',Now(),Now(),Now(),''edu.harvard.i2b2.crc'',''HIVE'')' using maxEncounterNum,maxEncounterNum,maxEncounterNum; 
++                        ,encounter_map_id_status,update_date,download_date,import_date,sourcesystem_cd,project_id,patient_map_id,patient_map_id_source) 
++                    values($1,''HIVE'',$2,''HIVE'',$3,''P'',''A'',Now(),Now(),Now(),''edu.harvard.i2b2.crc'',''HIVE'', $4, $5)' using maxEncounterNum,maxEncounterNum,maxEncounterNum,disPatientId,disPatientIdSource;  
+                     EXECUTE ' update ' || tempEidTableName ||' set encounter_num =  $1 , process_status_flag = ''P'' 
+                     where encounter_id = $2 and  not exists (select 1 from 
+                         encounter_mapping em where em.encounter_ide = encounter_map_id
+@@ -106,4 +108,4 @@ and coalesce(encounter_mapping.update_date,to_date(''01-JAN-1900'',''DD-MON-YYYY
+         RAISE EXCEPTION 'An error was encountered - % -ERROR- %',SQLSTATE,SQLERRM;
+     end;
+     $body$
+-    LANGUAGE PLPGSQL;
+\ No newline at end of file
++    LANGUAGE PLPGSQL;

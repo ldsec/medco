@@ -1,0 +1,4 @@
+[[servers]]
+  Address = "tcp://10.90.39.14:2000"
+  Public = "GU1JgJhl1fuVmAChQTsdfKYQCr1HZ7Za85i8t0l+/hY="
+  Description = "MedCo iccluster 5"
