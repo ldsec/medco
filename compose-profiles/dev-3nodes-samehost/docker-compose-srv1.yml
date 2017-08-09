@@ -1,0 +1,70 @@
+version: '2.2'
+services:
+  i2b2-server-srv1:
+    extends:
+      file: ../docker-compose-common.yml
+      service: i2b2-server
+    build:
+      args:
+        - UNLYNX_GROUP_KEY_FILE_ARG=dev-3nodes-samehost/group.toml
+        - UNLYNX_ENTRYPOINT_IDX_ARG=1
+    ports:
+      - "8084:8080"
+      - "9994:9990"
+    networks:
+      medco-network-srv1:
+        aliases:
+          - i2b2-server
+
+  i2b2-database-srv1:
+    extends:
+      file: ../docker-compose-common.yml
+      service: i2b2-database
+    ports:
+      - "5436:5432"
+    networks:
+      medco-network-srv1:
+        aliases:
+          - i2b2-database
+
+  i2b2-web-srv1:
+    extends:
+      file: ../docker-compose-common.yml
+      service: i2b2-web
+    ports:
+      - "84:80"
+    networks:
+      medco-network-srv1:
+        aliases:
+          - i2b2-web
+
+  unlynx-srv1:
+    extends:
+      file: ../docker-compose-common.yml
+      service: unlynx
+    build:
+      args:
+        - UNLYNX_KEY_FILE_ARG=dev-3nodes-samehost/srv1-private.toml
+    ports:
+      - "2004:2004"
+      - "2005:2005"
+    networks:
+      medco-network-srv1:
+        aliases:
+          - unlynx
+      cothority-network:
+        aliases:
+          - unlynx-srv1
+        ipv4_address: 172.16.205.11
+
+networks:
+  medco-network-srv1:
+    driver: bridge
+
+  medco-network:
+    external:
+      name: dev3nodessamehost_medco-network
+
+  cothority-network:
+    external:
+      name: dev3nodessamehost_cothority-network

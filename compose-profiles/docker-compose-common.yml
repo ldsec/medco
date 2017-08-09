@@ -1,0 +1,53 @@
+version: '2.2'
+services:
+  i2b2-server:
+    build:
+      context: ../i2b2-server
+      args:
+        - I2B2_DOMAIN_NAME_ARG=medcodeployment
+        - UNLYNX_GROUP_KEY_FILE_ARG=srv1-3-5-group.toml
+        - UNLYNX_ENTRYPOINT_IDX_ARG=0
+    ports:
+      - "8080"
+      - "9990"
+    networks:
+      - medco-network
+    volumes:
+      - ../configuration:/opt/configuration
+
+  i2b2-database:
+    build:
+      context: ../i2b2-database
+      args:
+        - I2B2_DOMAIN_NAME_ARG=medcodeployment
+    ports:
+      - "5432"
+    networks:
+      - medco-network
+
+  i2b2-web:
+    build:
+      context: ../i2b2-web
+      args:
+        - I2B2_DOMAIN_NAME_ARG=medcodeployment
+    ports:
+      - "80"
+    networks:
+      - medco-network
+
+  unlynx:
+    build:
+      context: ../unlynx
+      args:
+        - UNLYNX_KEY_FILE_ARG=srv1-private.toml
+    ports:
+      - "2000"
+      - "2001"
+    networks:
+      - medco-network
+    volumes:
+      - ../configuration:/opt/configuration
+
+networks:
+  medco-network:
+    driver: bridge

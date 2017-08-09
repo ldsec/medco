@@ -1,0 +1,72 @@
+version: '2.2'
+services:
+  i2b2-server-srv0:
+    extends:
+      file: ../docker-compose-common.yml
+      service: i2b2-server
+    build:
+      args:
+        - UNLYNX_GROUP_KEY_FILE_ARG=dev-3nodes-samehost/group.toml
+        - UNLYNX_ENTRYPOINT_IDX_ARG=0
+    ports:
+      - "8082:8080"
+      - "9992:9990"
+    networks:
+      medco-network-srv0:
+        aliases:
+          - i2b2-server
+
+  i2b2-database-srv0:
+    extends:
+      file: ../docker-compose-common.yml
+      service: i2b2-database
+    ports:
+      - "5434:5432"
+    networks:
+      medco-network-srv0:
+        aliases:
+          - i2b2-database
+
+  i2b2-web-srv0:
+    extends:
+      file: ../docker-compose-common.yml
+      service: i2b2-web
+    ports:
+      - "82:80"
+    networks:
+      medco-network-srv0:
+        aliases:
+          - i2b2-web
+
+  unlynx-srv0:
+    extends:
+      file: ../docker-compose-common.yml
+      service: unlynx
+    build:
+      args:
+        - UNLYNX_KEY_FILE_ARG=dev-3nodes-samehost/srv0-private.toml
+    ports:
+      - "2002:2002"
+      - "2003:2003"
+    networks:
+      medco-network-srv0:
+        aliases:
+          - unlynx
+      cothority-network:
+        aliases:
+          - unlynx-srv0
+        ipv4_address: 172.16.205.10
+
+networks:
+  medco-network-srv0:
+    driver: bridge
+
+  medco-network:
+    driver: bridge
+
+  cothority-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.205.0/24
