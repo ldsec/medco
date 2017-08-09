@@ -1,10 +1,8 @@
 FROM golang:1.8
 
 # environment variables
-ARG UNLYNX_KEY_FILE_ARG="private.toml"
-ENV UNLYNX_REPO="github.com/JoaoAndreSa/MedCo" \
-    UNLYNX_REPO_BRANCH="query_filtering_i2b2" \
-    UNLYNX_KEY_FILE="$UNLYNX_KEY_FILE_ARG"
+ENV UNLYNX_REPO="github.com/lca1/unlynx" \
+    UNLYNX_REPO_BRANCH="master"
 
 # get maximum of dependencies and cache them
 RUN go get -v -d gopkg.in/dedis/onet.v1/... && \
@@ -25,8 +23,9 @@ WORKDIR app/unlynxI2b2
 RUN go get -v -d ./... && \
     go install -v ./...
 
-
 # conf and run
+ARG UNLYNX_KEY_FILE_ARG="private.toml"
+ENV UNLYNX_KEY_FILE="$UNLYNX_KEY_FILE_ARG"
 EXPOSE 2000 2001
 VOLUME /opt/configuration
 WORKDIR /opt/configuration
