@@ -8,8 +8,10 @@ ENV I2B2_VERSION="v1.7.08a" \
     LIGHTTPD_WEB_ROOT="/var/www/html"
 
 # requirements
-RUN apt-get -y update && \
-    apt-get -y install lighttpd php5-cgi curl libcurl3 php5-common php5-cli php5-curl git phppgadmin php5-pgsql wget tar && \
+RUN echo "deb http://httpredir.debian.org/debian jessie-backports main contrib non-free" >> /etc/apt/sources.list && \
+    apt-get -y update && \
+    apt-get -y install lighttpd php5-cgi curl libcurl3 php5-common php5-cli php5-curl git php5-pgsql wget tar && \
+    apt-get -y -t jessie-backports install postgresql-client && \
     apt-get -y clean && \
     lighttpd-enable-mod fastcgi-php
 
@@ -35,7 +37,8 @@ RUN wget http://downloads.sourceforge.net/phppgadmin/phpPgAdmin-5.1.tar.gz?downl
     mv phpPgAdmin-5.1 phppgadmin && \
     sed -i "s/'host'] = ''/'host'] = 'i2b2-database'/" phppgadmin/conf/config.inc.php && \
     sed -i "s/ = 'PostgreSQL'/ = '$I2B2_DOMAIN_NAME PostgreSQL Server'/" phppgadmin/conf/config.inc.php && \
-    sed -i "s/'extra_login_security'] = true/'extra_login_security'] = false/" phppgadmin/conf/config.inc.php
+    sed -i "s/'extra_login_security'] = true/'extra_login_security'] = false/" phppgadmin/conf/config.inc.php && \
+    sed -i "/\$cmd = \$exe/c\$cmd = \$exe;" phppgadmin/dbexport.php
 
 # fix permissions + bug fix
 RUN chown -R www-data:www-data "$LIGHTTPD_WEB_ROOT" && \
