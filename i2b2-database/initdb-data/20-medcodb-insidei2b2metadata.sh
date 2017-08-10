@@ -2,25 +2,26 @@
 set -e
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EOSQL
--- ################### medco_data ###################
-create schema medco_data;
+-- ################### CRC DB ###################
 
-create table medco_data.enc_observation_fact (
-    encounter_id character varying(50) not null,
-    patient_id character varying(50) not null,
-    provider_id character varying(50) not null,
-    enc_concept_id character varying(500) not null
-);
+-- add custom column in the patient dimension table containing the dummy flag
+ALTER TABLE i2b2demodata.patient_dimension ADD COLUMN enc_dummy_flag_cd character(88);
+COMMENT ON COLUMN i2b2demodata.patient_dimension.enc_dummy_flag_cd IS 'base64-encoded encrypted dummy flag (0 or 1)';
+INSERT INTO i2b2demodata.code_lookup VALUES ('patient_dimension', 'enc_dummy_flag_cd', 'CRC_COLUMN_DESCRIPTOR', 'Encrypted Dummy Flag', NULL, NULL, NULL, NULL, 'NOW()', NULL, 1);
 
 
--- access rights
-create role medco_data login password 'demouser';
-grant all on schema medco_data to medco_data;
-grant all privileges on all tables in schema medco_data to medco_data;
 
--- ################### medco_ontology ###################
+-- ################### ONT DB ###################
 -- i2b2 ontology medco: in postgresql i2b2 DB!
 -- todo: currently added in i2b2metadata demo table
+
+-- add medco-specific schemes (prefix to the concept codes)
+insert into i2b2metadata.schemes(c_key, c_name, c_description) values
+    ('TAG:', 'TAG', 'MedCo tagged value (using Deterministic Distributed Tagging)');
+insert into i2b2metadata.schemes(c_key, c_name, c_description) values
+    ('C_ENC:', 'C_ENC', 'MedCo encrypted value (using collective key)');
+insert into i2b2metadata.schemes(c_key, c_name, c_description) values
+    ('CLEAR:', 'CLEAR', 'MedCo clear value');
 
 -- clinical sensitive ontology
 CREATE TABLE i2b2metadata.clinical_sensitive (
@@ -124,20 +125,8 @@ ALTER TABLE ONLY i2b2metadata.genomic
 ALTER TABLE ONLY i2b2metadata.genomic
     ADD CONSTRAINT basecode_un3 UNIQUE (c_basecode);
 
--- schemes table
-
-
-insert into i2b2metadata.schemes(c_key, c_name, c_description) values
-    ('MEDCO_ENC:', 'MEDCO_ENC', 'MedCo encrypted values');
-insert into i2b2metadata.schemes(c_key, c_name, c_description) values
-    ('MEDCO_CLEAR:', 'MEDCO_CLEAR', 'MedCo clear values');
-insert into i2b2metadata.schemes(c_key, c_name, c_description) values
-    ('MEDCO_ADMIN:', 'MEDCO_ADMIN', 'MedCo administrative entries');
-insert into i2b2metadata.schemes(c_key, c_name, c_description) values
-    ('MEDCO_GEN:', 'MEDCO_GEN', 'MedCo genomic entries');
 
 -- table_access table
-
 insert into i2b2metadata.table_access (c_table_cd, c_table_name, c_protected_access, c_hlevel, c_fullname, c_name,
     c_synonym_cd, c_visualattributes, c_facttablecolumn, c_dimtablename,
     c_columnname, c_columndatatype, c_operator, c_dimcode, c_tooltip) VALUES
@@ -153,8 +142,6 @@ insert into i2b2metadata.table_access (c_table_cd, c_table_name, c_protected_acc
     c_columnname, c_columndatatype, c_operator, c_dimcode, c_tooltip) VALUES
     ('GENOMIC', 'GENOMIC', 'N', 2, '\\medco\\genomic\\', 'MedCo Genomic Entries',
     'N', 'CA', 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\genomic\\', 'MedCo Genomic Entries');
-
--- access rights
 
 
 -- tables ont init
@@ -215,7 +202,23 @@ alter table i2b2metadata.clinical_non_sensitive owner to i2b2metadata;
 alter table i2b2metadata.genomic owner to i2b2metadata;
 grant all on schema i2b2metadata to i2b2metadata;
 grant all privileges on all tables in schema i2b2metadata to i2b2metadata;
-alter table medco_data.enc_observation_fact owner to medco_data;
+--alter table medco_data.enc_observation_fact owner to medco_data;
 
+
+-- ################### OLD ###################
+--create schema medco_data;
+
+--create table medco_data.enc_observation_fact (
+--    encounter_id character varying(50) not null,
+--    patient_id character varying(50) not null,
+--    provider_id character varying(50) not null,
+--    enc_concept_id character varying(500) not null
+--);
+
+
+-- access rights
+--create role medco_data login password 'demouser';
+--grant all on schema medco_data to medco_data;
+--grant all privileges on all tables in schema medco_data to medco_data;
 
 EOSQL
