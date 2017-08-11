@@ -1,22 +1,18 @@
--- all the metadata, using the values parsed
--- check how to make link with dataset (desc it, use email sent before)
+-- this file contains a full example set of SQL statements that should be produced by the MedCo loading tool
 
--- schema i2b2metadata: ontology cell (ONT)
--- schema i2b2demodata: data repository cell (CRC)
+-- random information
+-- warning about potential confusion: patient_id != sample_id in i2b2, but same in 95% of the dataset
+-- row containing the name of the fields in the dataset files: the 6th row for clinical, 2nd for genomic
 
--- add the things that must be modified in queries
---todo: get into md file for documentation, dataloading.md
-
--- warning about confusion: poatient_id != sample_id in i2b2, but same in 95% of dataset
--- name of fields: the 6th row for clinical, 2nd for genomic
-
--- loading
+-- loading order
 -- 1. ontology in i2b2metadata.{clinical_sensitive, clinical_non_sensitive, genomic} + i2b2demodata.concept_dimension
 -- 2. patients + samples in i2b2demodata.{patient_mapping, encounter_mapping, patient_dimension, visit_dimension} + provider_dimension
 -- 3. data in observation_fact
 
+
+
 ------------------------------------------------------------------------------------------------------------------------
------SCHEMA i2b2metadata------------------------------------------------------------------------------------------------
+-----SCHEMA i2b2metadata (ontology cell ONT)----------------------------------------------------------------------------
 -----TABLE clinical_sensitive-------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
 -- ontology data for sensitive clinical attributes, from the clinical dataset
@@ -76,7 +72,7 @@ INSERT INTO i2b2metadata.genomic VALUES (3, '\\medco\\genomic\\Genomic_Annotatio
 
 
 ------------------------------------------------------------------------------------------------------------------------
------SCHEMA i2b2demodata------------------------------------------------------------------------------------------------
+-----SCHEMA i2b2demodata (data repository cell CRC)---------------------------------------------------------------------
 -----TABLE concept_dimension--------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
 -- reduced set of ontology data specific to the CRC, that is joined to the observation_fact table to answer queries
@@ -154,7 +150,6 @@ INSERT INTO i2b2demodata.visit_dimension VALUES (36, 40, NULL, NULL, NULL, NULL,
 INSERT INTO i2b2demodata.visit_dimension VALUES (30, 39, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'NOW()', 'chuv', 1);
 
 
-
 ------------------------------------------------------------------------------------------------------------------------
 -----TABLE provider_dimension-------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
@@ -175,7 +170,6 @@ INSERT INTO i2b2demodata.observation_fact VALUES (39, 30, 'CLEAR:1', 'chuv', 'NO
 INSERT INTO i2b2demodata.observation_fact VALUES (39, 30, 'CLEAR:2', 'chuv', 'NOW()', '@', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'chuv', NULL, NULL, NULL, NULL, 'NOW()', NULL, 1, 1);
 INSERT INTO i2b2demodata.observation_fact VALUES (40, 36, 'CLEAR:1', 'chuv', 'NOW()', '@', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'chuv', NULL, NULL, NULL, NULL, 'NOW()', NULL, 1, 1);
 INSERT INTO i2b2demodata.observation_fact VALUES (40, 36, 'CLEAR:3', 'chuv', 'NOW()', '@', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'chuv', NULL, NULL, NULL, NULL, 'NOW()', NULL, 1, 1);
-
 
 -- encrypted observation facts, contains both clinical sensitive and genomic tagged values (1 tagged value = 32B = 44 base64 characters)
 -- here as an example we are adding 3 sensitive attributes
