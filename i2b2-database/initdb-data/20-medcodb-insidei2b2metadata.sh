@@ -17,9 +17,9 @@ INSERT INTO i2b2demodata.code_lookup VALUES ('patient_dimension', 'enc_dummy_fla
 
 -- add medco-specific schemes (prefix to the concept codes)
 insert into i2b2metadata.schemes(c_key, c_name, c_description) values
-    ('TAG:', 'TAG', 'MedCo tagged value (using Deterministic Distributed Tagging)');
+    ('TAG_ID:', 'TAG_ID', 'MedCo tag identifier');
 insert into i2b2metadata.schemes(c_key, c_name, c_description) values
-    ('C_ENC:', 'C_ENC', 'MedCo encrypted value (using collective key)');
+    ('ENC_ID:', 'ENC_ID', 'MedCo sensitive concept identifier (to be encrypted)');
 insert into i2b2metadata.schemes(c_key, c_name, c_description) values
     ('CLEAR:', 'CLEAR', 'MedCo clear value');
 
