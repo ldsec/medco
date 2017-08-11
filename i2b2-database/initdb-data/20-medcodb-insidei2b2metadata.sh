@@ -2,6 +2,8 @@
 set -e
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EOSQL
+-- todo: integrate medco ontology into shrine
+
 -- ################### CRC DB ###################
 
 -- add custom column in the patient dimension table containing the dummy flag
@@ -165,37 +167,6 @@ download_date, import_date, valuetype_cd, m_applied_path) values
 'NOW()', 'NOW()', 'NOW()', 'MEDCO_GEN', '@');
 
 
--- next usable id init
-insert into i2b2metadata.clinical_sensitive (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum,
-c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, update_date,
-download_date, import_date, valuetype_cd, m_applied_path) values
-('3', '\medco\clinical\sensitive\next_usable_id\', 'nextEncUsableId', 'N', 'LH', '0', 'concept_cd', 'concept_dimension', 'concept_path',
-'T', 'LIKE', '\medco\clinical\sensitive\next_usable_id\', 'The next usable id for Unlynx encryption.', '\medco\clinical\sensitive\next_usable_id\',
-'NOW()', 'NOW()', 'NOW()', 'MEDCO_ADMIN', '@');
-insert into i2b2metadata.clinical_non_sensitive (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum,
-c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, update_date,
-download_date, import_date, valuetype_cd, m_applied_path) values
-('3', '\medco\clinical\nonsensitive\next_usable_id\', 'nextClearUsableId', 'N', 'LH', '0', 'concept_cd', 'concept_dimension', 'concept_path',
-'T', 'LIKE', '\medco\clinical\nonsensitive\next_usable_id\', 'The next usable id for non sensitive clinical data.', '\medco\clinical\nonsensitive\next_usable_id\',
-'NOW()', 'NOW()', 'NOW()', 'MEDCO_ADMIN', '@');
-
-insert into i2b2metadata.clinical_sensitive (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum, c_basecode,
-c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, update_date,
-download_date, import_date, valuetype_cd, m_applied_path) values
-('4', '\medco\clinical\sensitive\next_usable_id\1\', '1', 'N', 'LH', '0', 'MEDCO_ADMIN:nextEncUsableId', 'concept_cd', 'concept_dimension', 'concept_path',
-'T', 'LIKE', '\medco\clinical\sensitive\next_usable_id\1\', 'The next usable id for Unlynx encryption.',
-'NOW()', 'NOW()', 'NOW()', 'MEDCO_ADMIN', '@');
-insert into i2b2metadata.clinical_non_sensitive (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum, c_basecode,
-c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, update_date,
-download_date, import_date, valuetype_cd, m_applied_path) values
-('4', '\medco\clinical\nonsensitive\next_usable_id\1\', '1', 'N', 'LH', '0', 'MEDCO_ADMIN:nextClearUsableId', 'concept_cd', 'concept_dimension', 'concept_path',
-'T', 'LIKE', '\medco\clinical\nonsensitive\next_usable_id\1\', 'The next usable id for non sensitive clinical data.',
-'NOW()', 'NOW()', 'NOW()', 'MEDCO_ADMIN', '@');
-
--- todo: db lookup for medco?? yes in i2b2hive.ont_db_lookup add entry
--- setup i2b2-medco ontology todo: when setting up shrine, change to the schema of medco/shrine ontology !!
-
-
 -- fix permissions
 alter table i2b2metadata.clinical_sensitive owner to i2b2metadata;
 alter table i2b2metadata.clinical_non_sensitive owner to i2b2metadata;
@@ -220,5 +191,33 @@ grant all privileges on all tables in schema i2b2metadata to i2b2metadata;
 --create role medco_data login password 'demouser';
 --grant all on schema medco_data to medco_data;
 --grant all privileges on all tables in schema medco_data to medco_data;
+
+
+-- next usable id init
+--insert into i2b2metadata.clinical_sensitive (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum,
+--c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, update_date,
+--download_date, import_date, valuetype_cd, m_applied_path) values
+--('3', '\medco\clinical\sensitive\next_usable_id\', 'nextEncUsableId', 'N', 'LH', '0', 'concept_cd', 'concept_dimension', 'concept_path',
+--'T', 'LIKE', '\medco\clinical\sensitive\next_usable_id\', 'The next usable id for Unlynx encryption.', '\medco\clinical\sensitive\next_usable_id\',
+--'NOW()', 'NOW()', 'NOW()', 'MEDCO_ADMIN', '@');
+--insert into i2b2metadata.clinical_non_sensitive (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum,
+--c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, update_date,
+--download_date, import_date, valuetype_cd, m_applied_path) values
+--('3', '\medco\clinical\nonsensitive\next_usable_id\', 'nextClearUsableId', 'N', 'LH', '0', 'concept_cd', 'concept_dimension', 'concept_path',
+--'T', 'LIKE', '\medco\clinical\nonsensitive\next_usable_id\', 'The next usable id for non sensitive clinical data.', '\medco\clinical\nonsensitive\next_usable_id\',
+--'NOW()', 'NOW()', 'NOW()', 'MEDCO_ADMIN', '@');
+
+--insert into i2b2metadata.clinical_sensitive (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum, c_basecode,
+--c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, update_date,
+--download_date, import_date, valuetype_cd, m_applied_path) values
+--('4', '\medco\clinical\sensitive\next_usable_id\1\', '1', 'N', 'LH', '0', 'MEDCO_ADMIN:nextEncUsableId', 'concept_cd', 'concept_dimension', 'concept_path',
+--'T', 'LIKE', '\medco\clinical\sensitive\next_usable_id\1\', 'The next usable id for Unlynx encryption.',
+--'NOW()', 'NOW()', 'NOW()', 'MEDCO_ADMIN', '@');
+--insert into i2b2metadata.clinical_non_sensitive (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum, c_basecode,
+--c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, update_date,
+--download_date, import_date, valuetype_cd, m_applied_path) values
+--('4', '\medco\clinical\nonsensitive\next_usable_id\1\', '1', 'N', 'LH', '0', 'MEDCO_ADMIN:nextClearUsableId', 'concept_cd', 'concept_dimension', 'concept_path',
+--'T', 'LIKE', '\medco\clinical\nonsensitive\next_usable_id\1\', 'The next usable id for non sensitive clinical data.',
+--'NOW()', 'NOW()', 'NOW()', 'MEDCO_ADMIN', '@');
 
 EOSQL
