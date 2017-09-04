@@ -28,4 +28,9 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EO
     update i2b2pm.pm_cell_data set url = 'http://i2b2-server:8080/i2b2/services/IMService/' where url = 'http://localhost:9090/i2b2/services/IMService/';
 EOSQL
 
-
+# add encrypted dummy flags for patient_dimension in crc schema
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EOSQL
+    ALTER TABLE i2b2demodata.patient_dimension ADD COLUMN enc_dummy_flag_cd character(88);
+    COMMENT ON COLUMN i2b2demodata.patient_dimension.enc_dummy_flag_cd IS 'base64-encoded encrypted dummy flag (0 or 1)';
+    INSERT INTO i2b2demodata.code_lookup VALUES ('patient_dimension', 'enc_dummy_flag_cd', 'CRC_COLUMN_DESCRIPTOR', 'Encrypted Dummy Flag', NULL, NULL, NULL, NULL, 'NOW()', NULL, 1);
+EOSQL
