@@ -2,7 +2,7 @@ FROM golang:1.8
 
 # environment variables
 ENV UNLYNX_REPO="github.com/lca1/unlynx" \
-    UNLYNX_REPO_BRANCH="master"
+    UNLYNX_REPO_BRANCH="newI2B2"
 
 # get maximum of dependencies and cache them
 RUN go get -v -d gopkg.in/dedis/onet.v1/... && \
@@ -19,7 +19,7 @@ RUN git clone https://$UNLYNX_REPO.git . && \
     git checkout $UNLYNX_REPO_BRANCH
 
 # get remaining dependencies, compile and install unlynxI2b2 binary, and make it available in the shared folder
-WORKDIR app/unlynxI2b2
+WORKDIR app/i2b2
 RUN go get -v -d ./... && \
     go install -v ./...
 
@@ -29,7 +29,7 @@ ENV UNLYNX_KEY_FILE="$UNLYNX_KEY_FILE_ARG"
 EXPOSE 2000 2001
 VOLUME /opt/configuration
 WORKDIR /opt/configuration
-ENTRYPOINT ["sh", "-c", "unlynxI2b2 -d 1 server -c /opt/configuration/keys/$UNLYNX_KEY_FILE"]
+ENTRYPOINT ["sh", "-c", "i2b2 -d 1 server -c /opt/configuration/keys/$UNLYNX_KEY_FILE"]
 # TODO switch for prod:
 # TODO: debug option to modify
 # TODO: logs to put in unlynx folder (now: stdin)
