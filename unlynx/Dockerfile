@@ -25,11 +25,12 @@ RUN go get -v -d ./... && \
 
 # conf and run
 ARG UNLYNX_KEY_FILE_ARG="private.toml"
-ENV UNLYNX_KEY_FILE="$UNLYNX_KEY_FILE_ARG"
+ENV UNLYNX_KEY_FILE="$UNLYNX_KEY_FILE_ARG" \
+    UNLYNX_BIN_EXPORT_PATH="/opt/configuration/unlynxI2b2"
 EXPOSE 2000 2001
 VOLUME /opt/configuration
 WORKDIR /opt/configuration
-ENTRYPOINT ["sh", "-c", "i2b2 -d 1 server -c /opt/configuration/keys/$UNLYNX_KEY_FILE"]
+ENTRYPOINT ["sh", "-c", "rm -f $UNLYNX_BIN_EXPORT_PATH && cp -a $(which unlynxI2b2) $UNLYNX_BIN_EXPORT_PATH && chmod 777 $UNLYNX_BIN_EXPORT_PATH && unlynxI2b2 -d 1 server -c /opt/configuration/keys/$UNLYNX_KEY_FILE"]
 # TODO switch for prod:
 # TODO: debug option to modify
 # TODO: logs to put in unlynx folder (now: stdin)

@@ -1,41 +1,37 @@
--- all the metadata, using the values parsed
--- check how to make link with dataset (desc it, use email sent before)
+-- this file contains a full example set of SQL statements that should be produced by the MedCo loading tool
 
--- schema i2b2metadata: ontology cell (ONT)
--- schema i2b2demodata: data repository cell (CRC)
+-- random information
+-- warning about potential confusion: patient_id != sample_id in i2b2, but same in 95% of the dataset
+-- row containing the name of the fields in the dataset files: the 6th row for clinical, 2nd for genomic
 
--- add the things that must be modified in queries
---todo: get into md file for documentation, dataloading.md
+-- loading order
+-- 1. ontology in shrine_ont.{clinical_sensitive, clinical_non_sensitive, genomic}
+-- 2. ontology in i2b2metadata.{sensitive_tagged, non_sensitive_clear} + i2b2demodata.concept_dimension
+-- 3. patients + samples in i2b2demodata.{patient_mapping, encounter_mapping, patient_dimension, visit_dimension} + provider_dimension
+-- 4. data in observation_fact
 
--- warning about confusion: poatient_id != sample_id in i2b2, but same in 95% of dataset
--- name of fields: the 6th row for clinical, 2nd for genomic
 
--- loading
--- 1. ontology in i2b2metadata.{clinical_sensitive, clinical_non_sensitive, genomic} + i2b2demodata.concept_dimension
--- 2. patients + samples in i2b2demodata.{patient_mapping, encounter_mapping, patient_dimension, visit_dimension} + provider_dimension
--- 3. data in observation_fact
 
 ------------------------------------------------------------------------------------------------------------------------
------SCHEMA i2b2metadata------------------------------------------------------------------------------------------------
+-----SCHEMA shrine_ont (SHRINE ontology cell ONT)----------------------------------------------------------------------------
 -----TABLE clinical_sensitive-------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
 -- ontology data for sensitive clinical attributes, from the clinical dataset
 --- example with 2 clinical fields classified as sensitive (PRIMARY_TUMOR_LOCALIZATION_TYPE and CANCER_TYPE_DETAILED)
 
 -- 1 entry per field (= 2), level 3
-INSERT INTO i2b2metadata.clinical_sensitive VALUES (3, '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\', 'PRIMARY_TUMOR_LOCALIZATION_TYPE', 'N', 'CA ', NULL, NULL, NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\', 'Sensitive field encrypted by Unlynx', '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\', 'NOW()', NULL, NULL, NULL, 'C_ENC', '@', NULL, NULL, NULL, NULL);
-INSERT INTO i2b2metadata.clinical_sensitive VALUES (3, '\\medco\\clinical\\sensitive\\CANCER_TYPE_DETAILED\\', 'CANCER_TYPE_DETAILED', 'N', 'CA ', NULL, NULL, NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\sensitive\\CANCER_TYPE_DETAILED\\', 'Sensitive field encrypted by Unlynx', '\\medco\\clinical\\sensitive\\CANCER_TYPE_DETAILED\\', 'NOW()', NULL, NULL, NULL, 'C_ENC', '@', NULL, NULL, NULL, NULL);
+INSERT INTO shrine_ont.clinical_sensitive VALUES (3, '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\', 'PRIMARY_TUMOR_LOCALIZATION_TYPE', 'N', 'CA ', NULL, NULL, NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\', 'Sensitive field encrypted by Unlynx', '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\', 'NOW()', NULL, NULL, NULL, 'ENC_ID', '@', NULL, NULL, NULL, NULL);
+INSERT INTO shrine_ont.clinical_sensitive VALUES (3, '\\medco\\clinical\\sensitive\\CANCER_TYPE_DETAILED\\', 'CANCER_TYPE_DETAILED', 'N', 'CA ', NULL, NULL, NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\sensitive\\CANCER_TYPE_DETAILED\\', 'Sensitive field encrypted by Unlynx', '\\medco\\clinical\\sensitive\\CANCER_TYPE_DETAILED\\', 'NOW()', NULL, NULL, NULL, 'ENC_ID', '@', NULL, NULL, NULL, NULL);
 
 -- 1 entry per different value occurring for each field (= 5 + 1), level 4
--- c_basecode column is of the form "C_ENC:X", with X being an integer > 1 that is incremental, with each value
--- having such a unique ID within all the C_ENC values, it is this ID that is encrypted
+-- c_basecode column is of the form "ENC_ID:X", with X being a random and unique (within the ENC_ID values) integer
 -- notice the special "<empty>" value, which for when there is no value at all in the dataset
-INSERT INTO i2b2metadata.clinical_sensitive VALUES (4, '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\Mucosal\\', 'Mucosal', 'N', 'LA ', NULL, 'C_ENC:1', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\Mucosal\\', 'Sensitive value encrypted by Unlynx', '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\Mucosal\\', 'NOW()', NULL, NULL, NULL, 'C_ENC', '@', NULL, NULL, NULL, NULL);
-INSERT INTO i2b2metadata.clinical_sensitive VALUES (4, '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\<empty>\\', '<empty>', 'N', 'LA ', NULL, 'C_ENC:2', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\<empty>\\', 'Sensitive value encrypted by Unlynx', '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\<empty>\\', 'NOW()', NULL, NULL, NULL, 'C_ENC', '@', NULL, NULL, NULL, NULL);
-INSERT INTO i2b2metadata.clinical_sensitive VALUES (4, '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\Acral\\', 'Acral', 'N', 'LA ', NULL, 'C_ENC:3', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\Acral\\', 'Sensitive value encrypted by Unlynx', '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\Acral\\', 'NOW()', NULL, NULL, NULL, 'C_ENC', '@', NULL, NULL, NULL, NULL);
-INSERT INTO i2b2metadata.clinical_sensitive VALUES (4, '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\Skin\\', 'Skin', 'N', 'LA ', NULL, 'C_ENC:4', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\Skin\\', 'Sensitive value encrypted by Unlynx', '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\Skin\\', 'NOW()', NULL, NULL, NULL, 'C_ENC', '@', NULL, NULL, NULL, NULL);
-INSERT INTO i2b2metadata.clinical_sensitive VALUES (4, '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\Uveal\\', 'Uveal', 'N', 'LA ', NULL, 'C_ENC:5', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\Uveal\\', 'Sensitive value encrypted by Unlynx', '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\Uveal\\', 'NOW()', NULL, NULL, NULL, 'C_ENC', '@', NULL, NULL, NULL, NULL);
-INSERT INTO i2b2metadata.clinical_sensitive VALUES (4, '\\medco\\clinical\\sensitive\\CANCER_TYPE_DETAILED\\Cutaneous Melanoma\\', 'Cutaneous Melanoma', 'N', 'LA ', NULL, 'C_ENC:6', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\sensitive\\CANCER_TYPE_DETAILED\\Cutaneous Melanoma\\', 'Sensitive value encrypted by Unlynx', '\\medco\\clinical\\sensitive\\CANCER_TYPE_DETAILED\\Cutaneous Melanoma\\', 'NOW()', NULL, NULL, NULL, 'C_ENC', '@', NULL, NULL, NULL, NULL);
+INSERT INTO shrine_ont.clinical_sensitive VALUES (4, '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\Mucosal\\', 'Mucosal', 'N', 'LA ', NULL, 'ENC_ID:1', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\Mucosal\\', 'Sensitive value encrypted by Unlynx', '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\Mucosal\\', 'NOW()', NULL, NULL, NULL, 'ENC_ID', '@', NULL, NULL, NULL, NULL);
+INSERT INTO shrine_ont.clinical_sensitive VALUES (4, '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\<empty>\\', '<empty>', 'N', 'LA ', NULL, 'ENC_ID:2', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\<empty>\\', 'Sensitive value encrypted by Unlynx', '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\<empty>\\', 'NOW()', NULL, NULL, NULL, 'ENC_ID', '@', NULL, NULL, NULL, NULL);
+INSERT INTO shrine_ont.clinical_sensitive VALUES (4, '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\Acral\\', 'Acral', 'N', 'LA ', NULL, 'ENC_ID:3', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\Acral\\', 'Sensitive value encrypted by Unlynx', '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\Acral\\', 'NOW()', NULL, NULL, NULL, 'ENC_ID', '@', NULL, NULL, NULL, NULL);
+INSERT INTO shrine_ont.clinical_sensitive VALUES (4, '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\Skin\\', 'Skin', 'N', 'LA ', NULL, 'ENC_ID:4', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\Skin\\', 'Sensitive value encrypted by Unlynx', '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\Skin\\', 'NOW()', NULL, NULL, NULL, 'ENC_ID', '@', NULL, NULL, NULL, NULL);
+INSERT INTO shrine_ont.clinical_sensitive VALUES (4, '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\Uveal\\', 'Uveal', 'N', 'LA ', NULL, 'ENC_ID:5', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\Uveal\\', 'Sensitive value encrypted by Unlynx', '\\medco\\clinical\\sensitive\\PRIMARY_TUMOR_LOCALIZATION_TYPE\\Uveal\\', 'NOW()', NULL, NULL, NULL, 'ENC_ID', '@', NULL, NULL, NULL, NULL);
+INSERT INTO shrine_ont.clinical_sensitive VALUES (4, '\\medco\\clinical\\sensitive\\CANCER_TYPE_DETAILED\\Cutaneous Melanoma\\', 'Cutaneous Melanoma', 'N', 'LA ', NULL, 'ENC_ID:6', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\sensitive\\CANCER_TYPE_DETAILED\\Cutaneous Melanoma\\', 'Sensitive value encrypted by Unlynx', '\\medco\\clinical\\sensitive\\CANCER_TYPE_DETAILED\\Cutaneous Melanoma\\', 'NOW()', NULL, NULL, NULL, 'ENC_ID', '@', NULL, NULL, NULL, NULL);
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -45,40 +41,64 @@ INSERT INTO i2b2metadata.clinical_sensitive VALUES (4, '\\medco\\clinical\\sensi
 --- example with 2 clinical fields classified as non sensitive (CANCER_TYPE and PRIMARY_DIAGNOSIS)
 
 -- 1 entry per field (= 2), level 3
-INSERT INTO i2b2metadata.clinical_non_sensitive VALUES (3, '\\medco\\clinical\\nonsensitive\\CANCER_TYPE\\', 'CANCER_TYPE', 'N', 'CA ', NULL, NULL, NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\nonsensitive\\CANCER_TYPE\\', 'Non-sensitive field', '\\medco\\clinical\\nonsensitive\\CANCER_TYPE\\', 'NOW()', NULL, NULL, NULL, 'CLEAR', '@', NULL, NULL, NULL, NULL);
-INSERT INTO i2b2metadata.clinical_non_sensitive VALUES (3, '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\', 'PRIMARY_DIAGNOSIS', 'N', 'CA ', NULL, NULL, NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\', 'Non-sensitive field', '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\', 'NOW()', NULL, NULL, NULL, 'CLEAR', '@', NULL, NULL, NULL, NULL);
+INSERT INTO shrine_ont.clinical_non_sensitive VALUES (3, '\\medco\\clinical\\nonsensitive\\CANCER_TYPE\\', 'CANCER_TYPE', 'N', 'CA ', NULL, NULL, NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\nonsensitive\\CANCER_TYPE\\', 'Non-sensitive field', '\\medco\\clinical\\nonsensitive\\CANCER_TYPE\\', 'NOW()', NULL, NULL, NULL, 'CLEAR', '@', NULL, NULL, NULL, NULL);
+INSERT INTO shrine_ont.clinical_non_sensitive VALUES (3, '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\', 'PRIMARY_DIAGNOSIS', 'N', 'CA ', NULL, NULL, NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\', 'Non-sensitive field', '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\', 'NOW()', NULL, NULL, NULL, 'CLEAR', '@', NULL, NULL, NULL, NULL);
 
 -- 1 entry per different value occurring for each field (= 3 + 1), level 4
--- c_basecode column is of the form "CLEAR:X", with X being an integer > 1 that is incremental, with each value
--- having such a unique ID within all the CLEAR values
+-- c_basecode column is of the form "CLEAR:X", with X being a unique integer (within the CLEAR values), not necessarly random
 -- notice the special "<empty>" value, which for when there is no value at all in the dataset
-INSERT INTO i2b2metadata.clinical_non_sensitive VALUES (4, '\\medco\\clinical\\nonsensitive\\CANCER_TYPE\\Melanoma\\', 'Melanoma', 'N', 'LA ', NULL, 'CLEAR:1', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\nonsensitive\\CANCER_TYPE\\Melanoma\\', 'Non-sensitive value', '\\medco\\clinical\\nonsensitive\\CANCER_TYPE\\Melanoma\\', 'NOW()', NULL, NULL, NULL, 'CLEAR', '@', NULL, NULL, NULL, NULL);
-INSERT INTO i2b2metadata.clinical_non_sensitive VALUES (4, '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\Melanoma\\', 'Melanoma', 'N', 'LA ', NULL, 'CLEAR:2', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\Melanoma\\', 'Non-sensitive value', '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\Melanoma\\', 'NOW()', NULL, NULL, NULL, 'CLEAR', '@', NULL, NULL, NULL, NULL);
-INSERT INTO i2b2metadata.clinical_non_sensitive VALUES (4, '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\<empty>\\', '<empty>', 'N', 'LA ', NULL, 'CLEAR:3', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\<empty>\\', 'Non-sensitive value', '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\<empty>\\', 'NOW()', NULL, NULL, NULL, 'CLEAR', '@', NULL, NULL, NULL, NULL);
-INSERT INTO i2b2metadata.clinical_non_sensitive VALUES (4, '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\Not Melanoma\\', 'Not Melanoma', 'N', 'LA ', NULL, 'CLEAR:4', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\Not Melanoma\\', 'Non-sensitive value', '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\Not Melanoma\\', 'NOW()', NULL, NULL, NULL, 'CLEAR', '@', NULL, NULL, NULL, NULL);
+INSERT INTO shrine_ont.clinical_non_sensitive VALUES (4, '\\medco\\clinical\\nonsensitive\\CANCER_TYPE\\Melanoma\\', 'Melanoma', 'N', 'LA ', NULL, 'CLEAR:1', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\nonsensitive\\CANCER_TYPE\\Melanoma\\', 'Non-sensitive value', '\\medco\\clinical\\nonsensitive\\CANCER_TYPE\\Melanoma\\', 'NOW()', NULL, NULL, NULL, 'CLEAR', '@', NULL, NULL, NULL, NULL);
+INSERT INTO shrine_ont.clinical_non_sensitive VALUES (4, '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\Melanoma\\', 'Melanoma', 'N', 'LA ', NULL, 'CLEAR:2', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\Melanoma\\', 'Non-sensitive value', '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\Melanoma\\', 'NOW()', NULL, NULL, NULL, 'CLEAR', '@', NULL, NULL, NULL, NULL);
+INSERT INTO shrine_ont.clinical_non_sensitive VALUES (4, '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\<empty>\\', '<empty>', 'N', 'LA ', NULL, 'CLEAR:3', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\<empty>\\', 'Non-sensitive value', '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\<empty>\\', 'NOW()', NULL, NULL, NULL, 'CLEAR', '@', NULL, NULL, NULL, NULL);
+INSERT INTO shrine_ont.clinical_non_sensitive VALUES (4, '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\Not Melanoma\\', 'Not Melanoma', 'N', 'LA ', NULL, 'CLEAR:4', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\Not Melanoma\\', 'Non-sensitive value', '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\Not Melanoma\\', 'NOW()', NULL, NULL, NULL, 'CLEAR', '@', NULL, NULL, NULL, NULL);
 
 
 ------------------------------------------------------------------------------------------------------------------------
------TABLE genomic------------------------------------------------------------------------------------------------------
+-----TABLE genomic_annotations------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
 -- ontology data for genomic attributes, from the genomic dataset
---- example with 1 annotation (i.e. 1 column) named Protein_Position
---- there are 1 entry for the dataset itself (level 2), and as many entries (level 3) as there are annotations (here just one)
-
--- escape XML values + escape for csv encoding
--- see class server/ch/epfl/lca1/medco/loader/genomic/GenomicLoader.java, methods genXmlAnnotationsMetadata() and genXmlAnnotationsValues() for the XML format
-INSERT INTO i2b2metadata.genomic VALUES (2, '\\medco\\genomic\\Genomic_Annotations_skcm_broad\\', 'Genomic Annotations (skcm_broad)', 'N', 'CA ', NULL, NULL,
-    '<genomic_annotations_metadata> <annotations_name><name>Protein_Position</name></annotations_name> <nb_variants>456998</nb_variants> <assay_information>???</assay_information> <variant_ids>X,Y,Z</variant_ids> </genomic_annotations_metadata>',
-    'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\genomic\\Genomic_Annotations_skcm_broad\\', 'Genomic annotations and sample data', '\\medco\\genomic\\Genomic_Annotations_skcm_broad\\', 'NOW()', NULL, NULL, NULL, 'C_ENC', '@', NULL, NULL, NULL, NULL);
-
-INSERT INTO i2b2metadata.genomic VALUES (3, '\\medco\\genomic\\Genomic_Annotations_skcm_broad\\Protein_Position\\', 'Protein_Position', 'N', 'LA ', NULL, NULL,
-    '<genomic_annotations_values>X,Y,Z</genomic_annotations_values>',
-    'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\genomic\\Genomic_Annotations_skcm_broad\\Protein_Position\\', 'Genomic annotations and sample data', '\\medco\\genomic\\Genomic_Annotations_skcm_broad\\Protein_Position\\', 'NOW()', NULL, NULL, NULL, 'C_ENC', '@', NULL, NULL, NULL, NULL);
+--- example with 2 variants that has 2 and 3 annotations, in the special annotations table
+INSERT INTO shrine_ont.genomic_annotations VALUES ('-8976521235638865', '{Protein_Position:600/766, Hugo_Symbol:BRCA1}');
+INSERT INTO shrine_ont.genomic_annotations VALUES ('-2938472982331123', '{Protein_Position:722/766, Hugo_Symbol:PRPF, atf:3.2}');
 
 
 
 ------------------------------------------------------------------------------------------------------------------------
------SCHEMA i2b2demodata------------------------------------------------------------------------------------------------
+-----SCHEMA i2b2metadata (ontology cell ONT)----------------------------------------------------------------------------
+-----TABLE sensitive_tagged---------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
+-- ontology data for all sensitive attributes, in encrypted / tagged form for i2b2 to answer queries
+--- example with several tagged values (both clinical and genomic)
+INSERT INTO i2b2metadata.sensitive_tagged VALUES (2, '\\medco\\tagged\\EkaojcPm7U3qsQp0bhzaLZLYenL/+yNS5j39TFcLU1u=\\', '', 'N', 'LA ', NULL, 'TAG_ID:563255632', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\tagged\\EkaojcPm7U3qsQp0bhzaLZLYenL/+yNS5j39TFcLU1u=\\', NULL, NULL, 'NOW()', NULL, NULL, NULL, 'TAG_ID', '@', NULL, NULL, NULL, NULL);
+INSERT INTO i2b2metadata.sensitive_tagged VALUES (2, '\\medco\\tagged\\BMSfLSsNrDeTssfy57z5DfT8V/4u9cE7UWFjgBPpu7y=\\', '', 'N', 'LA ', NULL, 'TAG_ID:2325434152', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\tagged\\BMSfLSsNrDeTssfy57z5DfT8V/4u9cE7UWFjgBPpu7y=\\', NULL, NULL, 'NOW()', NULL, NULL, NULL, 'TAG_ID', '@', NULL, NULL, NULL, NULL);
+INSERT INTO i2b2metadata.sensitive_tagged VALUES (2, '\\medco\\tagged\\eTssfFjgBPBMSfLSsNrDpu7yy57z5DfT8V/4u9cE7UW=\\', '', 'N', 'LA ', NULL, 'TAG_ID:2011256355', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\tagged\\eTssfFjgBPBMSfLSsNrDpu7yy57z5DfT8V/4u9cE7UW=\\', NULL, NULL, 'NOW()', NULL, NULL, NULL, 'TAG_ID', '@', NULL, NULL, NULL, NULL);
+INSERT INTO i2b2metadata.sensitive_tagged VALUES (2, '\\medco\\tagged\\U3qsQp0bhzaEkaojcP39TFcLU1um7LZLYenL/+yNS5j=\\', '', 'N', 'LA ', NULL, 'TAG_ID:321455215', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\tagged\\U3qsQp0bhzaEkaojcP39TFcLU1um7LZLYenL/+yNS5j=\\', NULL, NULL, 'NOW()', NULL, NULL, NULL, 'TAG_ID', '@', NULL, NULL, NULL, NULL);
+INSERT INTO i2b2metadata.sensitive_tagged VALUES (2, '\\medco\\tagged\\8V/4u9cE7UWFjgBPpu7yBMSfLSsNrDeTssfy57z5DfT=\\', '', 'N', 'LA ', NULL, 'TAG_ID:984949149', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\tagged\\8V/4u9cE7UWFjgBPpu7yBMSfLSsNrDeTssfy57z5DfT=\\', NULL, NULL, 'NOW()', NULL, NULL, NULL, 'TAG_ID', '@', NULL, NULL, NULL, NULL);
+INSERT INTO i2b2metadata.sensitive_tagged VALUES (2, '\\medco\\tagged\\WFjgBPpu7yBMSfLSsNrDeTs8V/sfy57z5DfT4u9cE7U=\\', '', 'N', 'LA ', NULL, 'TAG_ID:1052524212', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\tagged\\WFjgBPpu7yBMSfLSsNrDeTs8V/sfy57z5DfT4u9cE7U=\\', NULL, NULL, 'NOW()', NULL, NULL, NULL, 'TAG_ID', '@', NULL, NULL, NULL, NULL);
+
+
+------------------------------------------------------------------------------------------------------------------------
+-----TABLE non_sensitive_clear------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
+-- ontology data for non-sensitive clinical attributes, from the clinical dataset
+--- example with 2 clinical fields classified as non sensitive (CANCER_TYPE and PRIMARY_DIAGNOSIS)
+
+-- 1 entry per field (= 2), level 3
+INSERT INTO i2b2metadata.non_sensitive_clear VALUES (3, '\\medco\\clinical\\nonsensitive\\CANCER_TYPE\\', 'CANCER_TYPE', 'N', 'CA ', NULL, NULL, NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\nonsensitive\\CANCER_TYPE\\', 'Non-sensitive field', '\\medco\\clinical\\nonsensitive\\CANCER_TYPE\\', 'NOW()', NULL, NULL, NULL, 'CLEAR', '@', NULL, NULL, NULL, NULL);
+INSERT INTO i2b2metadata.non_sensitive_clear VALUES (3, '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\', 'PRIMARY_DIAGNOSIS', 'N', 'CA ', NULL, NULL, NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\', 'Non-sensitive field', '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\', 'NOW()', NULL, NULL, NULL, 'CLEAR', '@', NULL, NULL, NULL, NULL);
+
+-- 1 entry per different value occurring for each field (= 3 + 1), level 4
+-- c_basecode column is of the form "CLEAR:X", with X being a unique integer (within the CLEAR values), not necessarly random
+-- notice the special "<empty>" value, which for when there is no value at all in the dataset
+INSERT INTO i2b2metadata.non_sensitive_clear VALUES (4, '\\medco\\clinical\\nonsensitive\\CANCER_TYPE\\Melanoma\\', 'Melanoma', 'N', 'LA ', NULL, 'CLEAR:1', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\nonsensitive\\CANCER_TYPE\\Melanoma\\', 'Non-sensitive value', '\\medco\\clinical\\nonsensitive\\CANCER_TYPE\\Melanoma\\', 'NOW()', NULL, NULL, NULL, 'CLEAR', '@', NULL, NULL, NULL, NULL);
+INSERT INTO i2b2metadata.non_sensitive_clear VALUES (4, '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\Melanoma\\', 'Melanoma', 'N', 'LA ', NULL, 'CLEAR:2', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\Melanoma\\', 'Non-sensitive value', '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\Melanoma\\', 'NOW()', NULL, NULL, NULL, 'CLEAR', '@', NULL, NULL, NULL, NULL);
+INSERT INTO i2b2metadata.non_sensitive_clear VALUES (4, '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\<empty>\\', '<empty>', 'N', 'LA ', NULL, 'CLEAR:3', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\<empty>\\', 'Non-sensitive value', '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\<empty>\\', 'NOW()', NULL, NULL, NULL, 'CLEAR', '@', NULL, NULL, NULL, NULL);
+INSERT INTO i2b2metadata.non_sensitive_clear VALUES (4, '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\Not Melanoma\\', 'Not Melanoma', 'N', 'LA ', NULL, 'CLEAR:4', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\Not Melanoma\\', 'Non-sensitive value', '\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\Not Melanoma\\', 'NOW()', NULL, NULL, NULL, 'CLEAR', '@', NULL, NULL, NULL, NULL);
+
+
+
+------------------------------------------------------------------------------------------------------------------------
+-----SCHEMA i2b2demodata (data repository cell CRC)---------------------------------------------------------------------
 -----TABLE concept_dimension--------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
 -- reduced set of ontology data specific to the CRC, that is joined to the observation_fact table to answer queries
@@ -93,12 +113,13 @@ INSERT INTO i2b2demodata.concept_dimension VALUES ('\\medco\\clinical\\nonsensit
 INSERT INTO i2b2demodata.concept_dimension VALUES ('\\medco\\clinical\\nonsensitive\\PRIMARY_DIAGNOSIS\\Not Melanoma\\', 'CLEAR:4', 'Not Melanoma', NULL, NULL, NULL, 'NOW()', NULL, NULL);
 
 -- tagged concepts (both clinical sensitive and genomic)
-INSERT INTO i2b2demodata.concept_dimension VALUES ('\\medco\\tagged\\EkaojcPm7U3qsQp0bhzaLZLYenL/+yNS5j39TFcLU1u=\\', 'TAG:EkaojcPm7U3qsQp0bhzaLZLYenL/+yNS5j39TFcLU1u=', NULL, NULL, NULL, NULL, 'NOW()', NULL, NULL);
-INSERT INTO i2b2demodata.concept_dimension VALUES ('\\medco\\tagged\\BMSfLSsNrDeTssfy57z5DfT8V/4u9cE7UWFjgBPpu7y=\\', 'TAG:BMSfLSsNrDeTssfy57z5DfT8V/4u9cE7UWFjgBPpu7y=', NULL, NULL, NULL, NULL, 'NOW()', NULL, NULL);
-INSERT INTO i2b2demodata.concept_dimension VALUES ('\\medco\\tagged\\eTssfFjgBPBMSfLSsNrDpu7yy57z5DfT8V/4u9cE7UW=\\', 'TAG:eTssfFjgBPBMSfLSsNrDpu7yy57z5DfT8V/4u9cE7UW=', NULL, NULL, NULL, NULL, 'NOW()', NULL, NULL);
-INSERT INTO i2b2demodata.concept_dimension VALUES ('\\medco\\tagged\\U3qsQp0bhzaEkaojcP39TFcLU1um7LZLYenL/+yNS5j=\\', 'TAG:U3qsQp0bhzaEkaojcP39TFcLU1um7LZLYenL/+yNS5j=', NULL, NULL, NULL, NULL, 'NOW()', NULL, NULL);
-INSERT INTO i2b2demodata.concept_dimension VALUES ('\\medco\\tagged\\8V/4u9cE7UWFjgBPpu7yBMSfLSsNrDeTssfy57z5DfT=\\', 'TAG:8V/4u9cE7UWFjgBPpu7yBMSfLSsNrDeTssfy57z5DfT=', NULL, NULL, NULL, NULL, 'NOW()', NULL, NULL);
-INSERT INTO i2b2demodata.concept_dimension VALUES ('\\medco\\tagged\\WFjgBPpu7yBMSfLSsNrDeTs8V/sfy57z5DfT4u9cE7U=\\', 'TAG:WFjgBPpu7yBMSfLSsNrDeTs8V/sfy57z5DfT4u9cE7U=', NULL, NULL, NULL, NULL, 'NOW()', NULL, NULL);
+-- concept_cd is a unique, random 32-bits integer with the "TAG_ID" prefix
+INSERT INTO i2b2demodata.concept_dimension VALUES ('\\medco\\tagged\\EkaojcPm7U3qsQp0bhzaLZLYenL/+yNS5j39TFcLU1u=\\', 'TAG_ID:563255632', NULL, NULL, NULL, NULL, 'NOW()', NULL, NULL);
+INSERT INTO i2b2demodata.concept_dimension VALUES ('\\medco\\tagged\\BMSfLSsNrDeTssfy57z5DfT8V/4u9cE7UWFjgBPpu7y=\\', 'TAG_ID:2325434152', NULL, NULL, NULL, NULL, 'NOW()', NULL, NULL);
+INSERT INTO i2b2demodata.concept_dimension VALUES ('\\medco\\tagged\\eTssfFjgBPBMSfLSsNrDpu7yy57z5DfT8V/4u9cE7UW=\\', 'TAG_ID:2011256355', NULL, NULL, NULL, NULL, 'NOW()', NULL, NULL);
+INSERT INTO i2b2demodata.concept_dimension VALUES ('\\medco\\tagged\\U3qsQp0bhzaEkaojcP39TFcLU1um7LZLYenL/+yNS5j=\\', 'TAG_ID:321455215', NULL, NULL, NULL, NULL, 'NOW()', NULL, NULL);
+INSERT INTO i2b2demodata.concept_dimension VALUES ('\\medco\\tagged\\8V/4u9cE7UWFjgBPpu7yBMSfLSsNrDeTssfy57z5DfT=\\', 'TAG_ID:984949149', NULL, NULL, NULL, NULL, 'NOW()', NULL, NULL);
+INSERT INTO i2b2demodata.concept_dimension VALUES ('\\medco\\tagged\\WFjgBPpu7yBMSfLSsNrDeTs8V/sfy57z5DfT4u9cE7U=\\', 'TAG_ID:1052524212', NULL, NULL, NULL, NULL, 'NOW()', NULL, NULL);
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -155,7 +176,6 @@ INSERT INTO i2b2demodata.visit_dimension VALUES (36, 40, NULL, NULL, NULL, NULL,
 INSERT INTO i2b2demodata.visit_dimension VALUES (30, 39, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'NOW()', 'chuv', 1);
 
 
-
 ------------------------------------------------------------------------------------------------------------------------
 -----TABLE provider_dimension-------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
@@ -177,13 +197,12 @@ INSERT INTO i2b2demodata.observation_fact VALUES (39, 30, 'CLEAR:2', 'chuv', 'NO
 INSERT INTO i2b2demodata.observation_fact VALUES (40, 36, 'CLEAR:1', 'chuv', 'NOW()', '@', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'chuv', NULL, NULL, NULL, NULL, 'NOW()', NULL, 1, 1);
 INSERT INTO i2b2demodata.observation_fact VALUES (40, 36, 'CLEAR:3', 'chuv', 'NOW()', '@', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'chuv', NULL, NULL, NULL, NULL, 'NOW()', NULL, 1, 1);
 
-
 -- encrypted observation facts, contains both clinical sensitive and genomic tagged values (1 tagged value = 32B = 44 base64 characters)
 -- here as an example we are adding 3 sensitive attributes
-INSERT INTO i2b2demodata.observation_fact VALUES (39, 30, 'TAG:EkaojcPm7U3qsQp0bhzaLZLYenL/+yNS5j39TFcLU1u=', 'chuv', 'NOW()', '@', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'chuv', NULL, NULL, NULL, NULL, 'NOW()', NULL, 1, 1);
-INSERT INTO i2b2demodata.observation_fact VALUES (39, 30, 'TAG:BMSfLSsNrDeTssfy57z5DfT8V/4u9cE7UWFjgBPpu7y=', 'chuv', 'NOW()', '@', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'chuv', NULL, NULL, NULL, NULL, 'NOW()', NULL, 1, 1);
-INSERT INTO i2b2demodata.observation_fact VALUES (39, 30, 'TAG:eTssfFjgBPBMSfLSsNrDpu7yy57z5DfT8V/4u9cE7UW=', 'chuv', 'NOW()', '@', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'chuv', NULL, NULL, NULL, NULL, 'NOW()', NULL, 1, 1);
-INSERT INTO i2b2demodata.observation_fact VALUES (40, 36, 'TAG:U3qsQp0bhzaEkaojcP39TFcLU1um7LZLYenL/+yNS5j=', 'chuv', 'NOW()', '@', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'chuv', NULL, NULL, NULL, NULL, 'NOW()', NULL, 1, 1);
-INSERT INTO i2b2demodata.observation_fact VALUES (40, 36, 'TAG:8V/4u9cE7UWFjgBPpu7yBMSfLSsNrDeTssfy57z5DfT=', 'chuv', 'NOW()', '@', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'chuv', NULL, NULL, NULL, NULL, 'NOW()', NULL, 1, 1);
-INSERT INTO i2b2demodata.observation_fact VALUES (40, 36, 'TAG:WFjgBPpu7yBMSfLSsNrDeTs8V/sfy57z5DfT4u9cE7U=', 'chuv', 'NOW()', '@', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'chuv', NULL, NULL, NULL, NULL, 'NOW()', NULL, 1, 1);
+INSERT INTO i2b2demodata.observation_fact VALUES (39, 30, 'TAG_ID:563255632', 'chuv', 'NOW()', '@', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'chuv', NULL, NULL, NULL, NULL, 'NOW()', NULL, 1, 1);
+INSERT INTO i2b2demodata.observation_fact VALUES (39, 30, 'TAG_ID:2325434152', 'chuv', 'NOW()', '@', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'chuv', NULL, NULL, NULL, NULL, 'NOW()', NULL, 1, 1);
+INSERT INTO i2b2demodata.observation_fact VALUES (39, 30, 'TAG_ID:2011256355', 'chuv', 'NOW()', '@', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'chuv', NULL, NULL, NULL, NULL, 'NOW()', NULL, 1, 1);
+INSERT INTO i2b2demodata.observation_fact VALUES (40, 36, 'TAG_ID:563255632', 'chuv', 'NOW()', '@', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'chuv', NULL, NULL, NULL, NULL, 'NOW()', NULL, 1, 1);
+INSERT INTO i2b2demodata.observation_fact VALUES (40, 36, 'TAG_ID:2325434152', 'chuv', 'NOW()', '@', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'chuv', NULL, NULL, NULL, NULL, 'NOW()', NULL, 1, 1);
+INSERT INTO i2b2demodata.observation_fact VALUES (40, 36, 'TAG_ID:984949149', 'chuv', 'NOW()', '@', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'chuv', NULL, NULL, NULL, NULL, 'NOW()', NULL, 1, 1);
 
