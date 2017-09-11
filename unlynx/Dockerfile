@@ -30,7 +30,7 @@ ENV UNLYNX_KEY_FILE="$UNLYNX_KEY_FILE_ARG" \
 EXPOSE 2000 2001
 VOLUME /opt/configuration
 WORKDIR /opt/configuration
-ENTRYPOINT ["sh", "-c", "rm -f $UNLYNX_BIN_EXPORT_PATH && cp -a $(which unlynxI2b2) $UNLYNX_BIN_EXPORT_PATH && chmod 777 $UNLYNX_BIN_EXPORT_PATH && unlynxI2b2 -d 1 server -c /opt/configuration/keys/$UNLYNX_KEY_FILE"]
+ENTRYPOINT ["sh", "-c", "rm -f $UNLYNX_BIN_EXPORT_PATH && cp -a $(which i2b2) $UNLYNX_BIN_EXPORT_PATH && chmod 777 $UNLYNX_BIN_EXPORT_PATH && $UNLYNX_BIN_EXPORT_PATH -d 1 server -c /opt/configuration/keys/$UNLYNX_KEY_FILE"]
 # TODO switch for prod:
 # TODO: debug option to modify
 # TODO: logs to put in unlynx folder (now: stdin)
