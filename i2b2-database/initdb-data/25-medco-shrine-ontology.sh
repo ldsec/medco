@@ -200,6 +200,15 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EO
         'T', 'LIKE', '\medco\genomic\', 'MedCo Genomic Annotations', '\medco\genomic\',
         'NOW()', 'NOW()', 'NOW()', 'GEN', '@');
 
+-- genomic annotations table
+    CREATE TABLE shrine_ont.genomic_annotations (
+        variant_id bigint not null,
+        variant_annotations json not null
+    );
+    ALTER TABLE shrine_ont.genomic_annotations OWNER TO shrine_ont;
+    ALTER TABLE ONLY shrine_ont.genomic_annotations
+        ADD CONSTRAINT variant_id_pk PRIMARY KEY (variant_id);
+
 
 -- authorizations
 grant all on schema shrine_ont to shrine_ont;
