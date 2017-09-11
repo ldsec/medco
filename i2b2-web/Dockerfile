@@ -25,6 +25,13 @@ RUN git clone https://github.com/i2b2/i2b2-webclient.git . && \
 RUN cp -R "$I2B2_WEB_DIR" "$LIGHTTPD_WEB_ROOT/i2b2-admin" && \
     cp -R "$I2B2_WEB_DIR" "$LIGHTTPD_WEB_ROOT/i2b2-client"
 
+# todo: change this
+# tmp for niccolo: download and install the medco-i2b2 webclient
+ENV MEDCO_I2B2_WEB_DIR="$LIGHTTPD_WEB_ROOT/medco-i2b2-client"
+WORKDIR "$MEDCO_I2B2_WEB_DIR"
+RUN git clone https://c4science.ch/diffusion/4897/i-b-webclient.git . && \
+    chmod -R 777 .
+
 # copy and apply settings
 COPY i2b2-web-writeconfig.sh .
 RUN chmod -R +x ./i2b2-web-writeconfig.sh && sleep 1 && /bin/bash -c ./i2b2-web-writeconfig.sh
