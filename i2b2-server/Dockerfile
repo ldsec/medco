@@ -109,16 +109,16 @@ RUN git clone https://c4science.ch/source/medco-i2b2-cell.git . && \
 
 ## install
 ARG UNLYNX_GROUP_KEY_FILE_ARG="group.toml"
-ENV UNLYNX_GROUP_KEY_FILE="$UNLYNX_GROUP_KEY_FILE_ARG"
+ARG UNLYNX_ENTRYPOINT_IDX_ARG="0"
+ENV UNLYNX_GROUP_KEY_FILE="$UNLYNX_GROUP_KEY_FILE_ARG" \
+    UNLYNX_ENTRYPOINT_IDX="$UNLYNX_ENTRYPOINT_IDX_ARG"
 RUN sed -i "/jboss.home/c\jboss.home=$JBOSS_HOME" build.properties && \
     sed -i "/medco.unlynx.groupfilepath/c\medco.unlynx.groupfilepath=$CONF_DIR/keys/$UNLYNX_GROUP_KEY_FILE" etc/spring/medcoapp/medco.properties && \
+    sed -i "/medco.unlynx.entrypointidx/c\medco.unlynx.entrypointidx=$UNLYNX_ENTRYPOINT_IDX" etc/spring/medcoapp/medco.properties && \
     ant -f build.xml clean all deploy
 
 # run
-ARG UNLYNX_ENTRYPOINT_IDX_ARG="0"
-ENV UNLYNX_ENTRYPOINT_IDX="$UNLYNX_ENTRYPOINT_IDX_ARG"
 VOLUME $I2B2_FR_FILES_DIR $CONF_DIR
 EXPOSE 8080 9990
 ENTRYPOINT \
-    sed -i "/medco.unlynx.entrypointidx/c\medco.unlynx.entrypointidx=$UNLYNX_ENTRYPOINT_IDX" etc/spring/medcoapp/medco.properties && \
     exec /opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0 -bmanagement 0.0.0.0
