@@ -15,6 +15,9 @@ services:
       medco-network-srv1:
         aliases:
           - i2b2-server
+      cothority-network:
+        aliases:
+          - i2b2-server-srv1
 
   i2b2-database-srv1:
     extends:
