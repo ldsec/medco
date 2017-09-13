@@ -11,7 +11,8 @@ RUN go get -v -d gopkg.in/dedis/onet.v1/... && \
     go get -v -d github.com/Knetic/govaluate/... && \
     go get -v -d github.com/btcsuite/goleveldb/... && \
     go get -v -d github.com/r0fls/gostats/... && \
-    go get -v -d github.com/fanliao/go-concurrentMap/...
+    go get -v -d github.com/fanliao/go-concurrentMap/... && \
+    go get -v -d github.com/lib/pq/...
 
 # get sources and switch branch
 WORKDIR /go/src/$UNLYNX_REPO

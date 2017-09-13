@@ -5,6 +5,7 @@ FROM jboss/wildfly:10.0.0.Final
 ARG I2B2_DOMAIN_NAME_ARG="i2b2demo"
 
 ENV AXIS2_VERSION="1.7.1" \
+    AXIS2_LOGLEVEL="DEBUG" \
     I2B2_VERSION="v1.7.08b.0002" \
     I2B2_SRC_DIR="/opt/i2b2-src" \
     I2B2_DOMAIN_NAME="$I2B2_DOMAIN_NAME_ARG" \
@@ -29,7 +30,9 @@ RUN wget "http://archive.apache.org/dist/axis/axis2/java/core/$AXIS2_VERSION/axi
     unzip -j "axis2-$AXIS2_VERSION-war.zip" "axis2.war" && \
     unzip "axis2.war" -d "i2b2.war" && \
     rm "axis2.war" && \
-    touch "i2b2.war.dodeploy"
+    touch "i2b2.war.dodeploy" && \
+    sed -i "/^log4j.rootCategory=/c\log4j.rootCategory=$AXIS2_LOGLEVEL, CONSOLE" /opt/jboss/wildfly/standalone/deployments/i2b2.war/WEB-INF/classes/log4j.properties
+
 
 # download, patch, compile and deploy i2b2
 WORKDIR "$I2B2_SRC_DIR"
@@ -101,6 +104,7 @@ RUN sed -i "/jboss.home/c\jboss.home=$JBOSS_HOME" build.properties && \
     sed -i "/im.ws.pm.url/c\im.ws.pm.url=http://localhost:8080/i2b2/services/PMService/getServices" etc/spring/im.properties && \
     ant -f master_build.xml clean build-all deploy
 
+ENV NOCACHE="f"
 # MedCo cell
 ## download
 WORKDIR "$MEDCO_SRC_DIR"
