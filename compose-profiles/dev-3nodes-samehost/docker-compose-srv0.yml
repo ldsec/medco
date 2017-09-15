@@ -50,6 +50,7 @@ services:
     build:
       args:
         - UNLYNX_KEY_FILE_ARG=dev-3nodes-samehost/srv0-private.toml
+        - UNLYNX_DEBUG_LEVEL_ARG=1                
     ports:
       - "2002:2002"
       - "2003:2003"

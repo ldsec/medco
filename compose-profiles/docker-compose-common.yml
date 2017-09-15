@@ -42,6 +42,7 @@ services:
       context: ../unlynx
       args:
         - UNLYNX_KEY_FILE_ARG=srv1-private.toml
+        - UNLYNX_DEBUG_LEVEL_ARG=1
     ports:
       - "2000"
       - "2001"

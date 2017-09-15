@@ -14,6 +14,7 @@ RUN go get -v -d gopkg.in/dedis/onet.v1/... && \
     go get -v -d github.com/fanliao/go-concurrentMap/... && \
     go get -v -d github.com/lib/pq/...
 
+ENV NOCACHE="l56"
 # get sources and switch branch
 WORKDIR /go/src/$UNLYNX_REPO
 RUN git clone https://$UNLYNX_REPO.git . && \
@@ -26,15 +27,17 @@ RUN go get -v -d ./... && \
 
 # conf and run
 ARG UNLYNX_KEY_FILE_ARG="private.toml"
+ARG UNLYNX_DEBUG_LEVEL_ARG="1"
 ENV UNLYNX_KEY_FILE="$UNLYNX_KEY_FILE_ARG" \
-    UNLYNX_BIN_EXPORT_PATH="/opt/configuration/unlynxI2b2"
+    UNLYNX_BIN_EXPORT_PATH="/opt/configuration/unlynxI2b2" \
+    UNLYNX_DEBUG_LEVEL="$UNLYNX_DEBUG_LEVEL_ARG"
 ENV UNLYNX_KEY_FILE_PATH="/opt/configuration/keys/$UNLYNX_KEY_FILE" \
     UNLYNX_DDT_SECRETS_FILE_PATH="/opt/configuration/keys/$UNLYNX_KEY_FILE.secrets.toml"
 
 EXPOSE 2000 2001
 VOLUME /opt/configuration
 WORKDIR /opt/configuration
-ENTRYPOINT ["sh", "-c", "rm -f $UNLYNX_BIN_EXPORT_PATH && cp -a $(which i2b2) $UNLYNX_BIN_EXPORT_PATH && chmod 777 $UNLYNX_BIN_EXPORT_PATH && $UNLYNX_BIN_EXPORT_PATH -d 1 server -c $UNLYNX_KEY_FILE_PATH"]
+ENTRYPOINT ["sh", "-c", "rm -f $UNLYNX_BIN_EXPORT_PATH && cp -a $(which i2b2) $UNLYNX_BIN_EXPORT_PATH && chmod 777 $UNLYNX_BIN_EXPORT_PATH && $UNLYNX_BIN_EXPORT_PATH -d $UNLYNX_DEBUG_LEVEL server -c $UNLYNX_KEY_FILE_PATH"]
 # TODO switch for prod:
 # TODO: debug option to modify
 # TODO: logs to put in unlynx folder (now: stdin)

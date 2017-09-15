@@ -39,6 +39,7 @@ services:
     build:
       args:
         - UNLYNX_KEY_FILE_ARG=exp-3nodes-icclusters/srv0-private.toml
+        - UNLYNX_DEBUG_LEVEL_ARG=5
     ports:
       - "2000:2000"
       - "2001:2001"
