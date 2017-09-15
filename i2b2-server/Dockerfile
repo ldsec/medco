@@ -5,7 +5,8 @@ FROM jboss/wildfly:10.0.0.Final
 ARG I2B2_DOMAIN_NAME_ARG="i2b2demo"
 
 ENV AXIS2_VERSION="1.7.1" \
-    AXIS2_LOGLEVEL="DEBUG" \
+    AXIS2_LOGLEVEL="INFO" \
+    UNLYNX_DEBUG_LEVEL="1" \
     I2B2_VERSION="v1.7.08b.0002" \
     I2B2_SRC_DIR="/opt/i2b2-src" \
     I2B2_DOMAIN_NAME="$I2B2_DOMAIN_NAME_ARG" \
@@ -119,6 +120,7 @@ ENV UNLYNX_GROUP_KEY_FILE="$UNLYNX_GROUP_KEY_FILE_ARG" \
 RUN sed -i "/jboss.home/c\jboss.home=$JBOSS_HOME" build.properties && \
     sed -i "/medco.unlynx.groupfilepath/c\medco.unlynx.groupfilepath=$CONF_DIR/keys/$UNLYNX_GROUP_KEY_FILE" etc/spring/medcoapp/medco.properties && \
     sed -i "/medco.unlynx.entrypointidx/c\medco.unlynx.entrypointidx=$UNLYNX_ENTRYPOINT_IDX" etc/spring/medcoapp/medco.properties && \
+    sed -i "/medco.unlynx.debuglevel/c\medco.unlynx.debuglevel=$UNLYNX_DEBUG_LEVEL" etc/spring/medcoapp/medco.properties && \
     ant -f build.xml clean all deploy
 
 # run
