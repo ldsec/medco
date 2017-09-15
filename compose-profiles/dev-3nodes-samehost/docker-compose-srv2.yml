@@ -8,6 +8,8 @@ services:
       args:
         - UNLYNX_GROUP_KEY_FILE_ARG=dev-3nodes-samehost/group.toml
         - UNLYNX_ENTRYPOINT_IDX_ARG=2
+        - AXIS2_LOGLEVEL_ARG=DEBUG
+        - UNLYNX_DEBUG_LEVEL_ARG=5
     ports:
       - "8086:8080"
       - "9996:9990"

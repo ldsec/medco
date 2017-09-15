@@ -3,10 +3,10 @@ FROM jboss/wildfly:10.0.0.Final
 
 # variables, JBOSS_HOME, WILDFLY_VERSION exists and set
 ARG I2B2_DOMAIN_NAME_ARG="i2b2demo"
+ARG AXIS2_LOGLEVEL_ARG="INFO"
 
 ENV AXIS2_VERSION="1.7.1" \
-    AXIS2_LOGLEVEL="INFO" \
-    UNLYNX_DEBUG_LEVEL="1" \
+    AXIS2_LOGLEVEL="$AXIS2_LOGLEVEL_ARG" \
     I2B2_VERSION="v1.7.08b.0002" \
     I2B2_SRC_DIR="/opt/i2b2-src" \
     I2B2_DOMAIN_NAME="$I2B2_DOMAIN_NAME_ARG" \
@@ -115,8 +115,11 @@ RUN git clone https://c4science.ch/source/medco-i2b2-cell.git . && \
 ## install
 ARG UNLYNX_GROUP_KEY_FILE_ARG="group.toml"
 ARG UNLYNX_ENTRYPOINT_IDX_ARG="0"
+ARG UNLYNX_DEBUG_LEVEL_ARG="1"
 ENV UNLYNX_GROUP_KEY_FILE="$UNLYNX_GROUP_KEY_FILE_ARG" \
-    UNLYNX_ENTRYPOINT_IDX="$UNLYNX_ENTRYPOINT_IDX_ARG"
+    UNLYNX_ENTRYPOINT_IDX="$UNLYNX_ENTRYPOINT_IDX_ARG" \
+    UNLYNX_DEBUG_LEVEL="$UNLYNX_DEBUG_LEVEL_ARG"
+
 RUN sed -i "/jboss.home/c\jboss.home=$JBOSS_HOME" build.properties && \
     sed -i "/medco.unlynx.groupfilepath/c\medco.unlynx.groupfilepath=$CONF_DIR/keys/$UNLYNX_GROUP_KEY_FILE" etc/spring/medcoapp/medco.properties && \
     sed -i "/medco.unlynx.entrypointidx/c\medco.unlynx.entrypointidx=$UNLYNX_ENTRYPOINT_IDX" etc/spring/medcoapp/medco.properties && \

@@ -7,6 +7,8 @@ services:
         - I2B2_DOMAIN_NAME_ARG=medcodeployment
         - UNLYNX_GROUP_KEY_FILE_ARG=srv1-3-5-group.toml
         - UNLYNX_ENTRYPOINT_IDX_ARG=0
+        - AXIS2_LOGLEVEL_ARG=INFO
+        - UNLYNX_DEBUG_LEVEL_ARG=1
     ports:
       - "8080"
       - "9990"
