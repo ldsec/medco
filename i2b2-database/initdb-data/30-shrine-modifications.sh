@@ -4,11 +4,11 @@ set -e
 # db lookups TODO: password hardcoded
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EOSQL
     insert into i2b2hive.ont_db_lookup (c_domain_id, c_project_path, c_owner_id, c_db_fullschema, c_db_datasource, c_db_servertype, c_db_nicename)
-    values ($I2B2_DOMAIN_NAME, 'SHRINE/', '@', 'shrine_ont', 'java:/OntologyShrineDS', 'POSTGRESQL', 'SHRINE')
+    values ('$I2B2_DOMAIN_NAME', 'SHRINE/', '@', 'shrine_ont', 'java:/OntologyShrineDS', 'POSTGRESQL', 'SHRINE')
     on conflict do nothing;
 
     insert into i2b2hive.crc_db_lookup (c_domain_id, c_project_path, c_owner_id, c_db_fullschema, c_db_datasource, c_db_servertype, c_db_nicename)
-    values ($I2B2_DOMAIN_NAME, '/SHRINE/', '@', 'i2b2demodata', 'java:/QueryToolDemoDS', 'POSTGRESQL', 'SHRINE')
+    values ('$I2B2_DOMAIN_NAME', '/SHRINE/', '@', 'i2b2demodata', 'java:/QueryToolDemoDS', 'POSTGRESQL', 'SHRINE')
     on conflict do nothing;
 
 EOSQL
