@@ -9,7 +9,7 @@ services:
         - UNLYNX_GROUP_KEY_FILE_ARG=exp-3nodes-icclusters/group.toml
         - UNLYNX_ENTRYPOINT_IDX_ARG=2
         - AXIS2_LOGLEVEL_ARG=INFO
-        - UNLYNX_DEBUG_LEVEL_ARG=1
+        - UNLYNX_DEBUG_LEVEL_ARG=5
     ports:
       - "8080:8080"
       - "9990:9990"
