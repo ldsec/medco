@@ -1,6 +1,0 @@
-# This file contains your private key.
-# Do not give it away lightly!
-Public = "94e1127088db600a22d132a7f6f81638f10bf1cc407c6d45c887e5b45b7d6daa"
-Private = "e2464106c158f140b3a63ff898edc7c0729966a1b5d3311f4a5cfa915111c004"
-Address = "tcp://10.90.38.12:2000"
-Description = "MedCo iccluster 1"

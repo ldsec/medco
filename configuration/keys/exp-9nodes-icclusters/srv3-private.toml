@@ -1,0 +1,6 @@
+# This file contains your private key.
+# Do not give it away lightly!
+Public = "355c9df113b6a266b8d30629f2f4846fe02d229806bf37b287b95b2db03577e1"
+Private = "0defb866b327369e1033813036099d5b6a41c03aa1e3212a24983b460029dd06"
+Address = "tcp://10.90.38.6:2000"
+Description = "Unlynx Server 3 - iccluster030.iccluster"

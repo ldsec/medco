@@ -1,0 +1,4 @@
+[[servers]]
+  Address = "tcp://10.90.38.11:2000"
+  Public = "KZ9OR3zdmWoMeQx96SWoKY1ls3y3WlEVYQR2om9R26o="
+  Description = "Unlynx Server 8 - iccluster035.iccluster"
