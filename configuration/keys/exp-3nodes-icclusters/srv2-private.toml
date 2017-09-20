@@ -2,5 +2,5 @@
 # Do not give it away lightly!
 Public = "2c5195464fe086f21e1b0205bff64014ab4cd9459c8d2ca9695c7460039d90c5"
 Private = "4ad551365ee8f3a2cebfdea9172e3d419eb7751fa061b8df1f127736d9a00a09"
-Address = "tcp://10.90.38.16:2000"
-Description = "Unlynx Server 2 - iccluster040.iccluster"
+Address = "tcp://10.90.38.5:2000"
+Description = "Unlynx Server 2 - iccluster029.iccluster"
