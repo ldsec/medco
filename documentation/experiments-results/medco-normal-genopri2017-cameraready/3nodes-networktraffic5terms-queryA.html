@@ -1,0 +1,555 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!-- saved from url=(0050)http://iccluster027.iccluster.epfl.ch:3000/#tabs-2 -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<link rel="alternate" type="application/rss+xml" title="ntop RSS Feed" href="http://www.ntop.org/blog/?feed=rss2">
+<title>Global Traffic Statistics</title>
+<meta http-equiv="REFRESH" content="120">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache">
+<!--[if lt IE 9]><script language="javascript" type="text/javascript" src="/jqplot/excanvas.min.js"></script><![endif]-->
+<script type="text/javascript" src="./3nodes-networktraffic5terms-queryA_files/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="./3nodes-networktraffic5terms-queryA_files/d3.js"></script>
+<script type="text/javascript" src="./3nodes-networktraffic5terms-queryA_files/sankey.js"></script>
+<script type="text/javascript" src="./3nodes-networktraffic5terms-queryA_files/jquery.jqplot.min.js"></script>
+<script type="text/javascript" src="./3nodes-networktraffic5terms-queryA_files/jqplot.pieRenderer.min.js"></script>
+<script type="text/javascript" src="./3nodes-networktraffic5terms-queryA_files/jqplot.barRenderer.min.js"></script>
+<script type="text/javascript" src="./3nodes-networktraffic5terms-queryA_files/jqplot.meterGaugeRenderer.min.js"></script>
+<script type="text/javascript" src="./3nodes-networktraffic5terms-queryA_files/jqplot.categoryAxisRenderer.min.js"></script>
+<script type="text/javascript" src="./3nodes-networktraffic5terms-queryA_files/jqplot.pointLabels.min.js"></script>
+<link rel="stylesheet" type="text/css" href="./3nodes-networktraffic5terms-queryA_files/jquery.jqplot.css">
+<link rel="stylesheet" type="text/css" href="./3nodes-networktraffic5terms-queryA_files/sankey.css">
+<script type="text/javascript" src="./3nodes-networktraffic5terms-queryA_files/reflection.js"></script>
+<script type="text/javascript" src="./3nodes-networktraffic5terms-queryA_files/functions.js"></script>
+<script type="text/javascript" src="./3nodes-networktraffic5terms-queryA_files/domLib.js"></script>
+<script type="text/javascript" src="./3nodes-networktraffic5terms-queryA_files/domTT.js"></script>
+<script type="text/javascript">var domTT_styleClass = 'niceTitle';</script>
+<link rel="stylesheet" href="./3nodes-networktraffic5terms-queryA_files/jquery-ui-1.8.16.custom.css">
+<script type="text/javascript" src="./3nodes-networktraffic5terms-queryA_files/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="./3nodes-networktraffic5terms-queryA_files/js"></script>
+<link rel="stylesheet" href="./3nodes-networktraffic5terms-queryA_files/style.css" type="text/css">
+<link rel="stylesheet" href="./3nodes-networktraffic5terms-queryA_files/theme.css" type="text/css">
+<script type="text/javascript" language="JavaScript" src="./3nodes-networktraffic5terms-queryA_files/autosuggest.js"></script>
+<link rel="stylesheet" href="./3nodes-networktraffic5terms-queryA_files/autosuggest.css" type="text/css" media="screen" charset="utf-8">
+<script type="text/javascript" language="JavaScript" src="./3nodes-networktraffic5terms-queryA_files/theme.js"></script>
+<script type="text/javascript" language="JavaScript" src="./3nodes-networktraffic5terms-queryA_files/JSCookMenu.js"></script>
+<script type="text/javascript" language="JavaScript"><!--
+var ntopMenu =
+[
+	[null,'About',null,null,null,
+		[null,'What is ntop?','/aboutNtop.html',null,null],
+		[null,'ntop blog','http://www.ntop.org/blog/',null,null],
+		[null,'Credits','/Credits.html',null,null],
+		[null,'Make a Donation', 'http://shop.ntop.org/',null,null],
+  [null,'ntop World',null,null,null,
+          [null,'ntop-based Solutions','http://www.ntop.org/solutions.html',null,null],
+          [null,'nMon.net Products','http://www.nmon.net/products.html',null,null],
+          ],
+  [null,'Online Documentation',null,null,null,
+		[null,'Man Page','/ntop.html',null,null],
+             ['<img src=/icon_python.png>','Python ntop Engine',null,null,null,
+		    [ null,'Python API','/docs/python/index.html', '_blank',null],
+		    [ null,'Tutorial','http://www.ntop.org/blog/?p=112', '_blank',null],
+             ],
+		['<img src="/help.png">','Help','/ntophelp.html',null,null],
+		[null,'FAQ','/faq.html',null,null],
+		['<img src="/Risk_high.gif">','Risk Flags','/help.html',null,null],
+     ],
+	  [null,'Show Configuration','/info.html',null,null],
+	  ['<img src="/bug.png">','Report a Problem','/ntopProblemReport.html',null,null],
+	],
+	[null,'Summary',null,null,null,
+		[null,'Traffic','/trafficStats.html',null,null],
+		[null,'Hosts','/hostsInfo.html',null,null],
+		[null,'Network Load','/thptStats.html',null,null],
+		[null,'Traffic Maps',null,null,null,
+		       [null,'Region Map','/python/GeoPacketVisualizer.py',null,null],
+		       [null,'Host Map','/hostMap.html',null,null],
+          ],
+		[null,'Network Flows','/NetFlows.html',null,null],
+		],
+  [null,'All Protocols',null,null,null,
+          [null,'Traffic','/sortDataProtos.html',null,null],
+          [null,'Throughput','/sortDataThpt.html',null,null],
+          [null,'Activity','/dataHostTraffic.html',null,null],
+	     [null,'Top Talkers',null,null,null,
+		       [null,'Last Hour', '/lastHourTopTalkers.html',null,null],
+		       [null,'Last Day',  '/lastDayTopTalkers.html',null,null],
+		       [null,'Historical','/historicalTalkers.html',null,null],
+          ],
+          ],
+	[null,'IP',null,null,null,
+		[null,'Summary',null,null,null,
+				[null,'Traffic','/sortDataIP.html',null,null],
+				[null,'Multicast','/multicastStats.html',null,null],
+				[null,'Internet Domain','/domainStats.html',null,null],
+				[null,'Networks','/domainStats.html?netmode=1',null,null],
+				[null,'ASs','/domainStats.html?netmode=2',null,null],
+				[null,'Host Communities','/hostCommunities.html',null,null],
+				[null,'Distribution','/ipProtoDistrib.html',null,null],
+		],
+		[null,'Traffic Directions',null,null,null,
+				[null,'Local to Local','/ipL2L.html',null,null],
+				[null,'Local to Remote','/ipL2R.html',null,null],
+				[null,'Remote to Local','/ipR2L.html',null,null],
+				[null,'Remote to Remote','/ipR2R.html',null,null],
+		],
+		[null,'Local',null,null,null,
+				[null,'Routers','/localRoutersList.html',null,null],
+				[null,'Ports Used','/ipProtoUsage.html',null,null],
+				[null,'Active Sessions','/activeSessions.html',null,null],
+				[null,'Host Fingerprint','/localHostsFingerprint.html',null,null],
+				[null,'Host Characterization','/localHostsCharacterization.html',null,null],
+				[null,'Network Traffic Map','/networkMap.html',null,null],
+		],
+	],
+	[null,'Utils',null,null,null,
+	[null,'RRD Alarm',null,null,null,
+                    [null,'Configure Thresholds','/python/rrdalarm/config.py',null,null],
+                    [null,'Check Now','/python/rrdalarm/start.py',null,null],
+     ],
+		[null,'Data Dump','/dump.html',null,null],
+		[null,'View Log','/viewLog.html',null,null],
+		],
+	[null,'Plugins',null,null,null,
+		[null,'NetFlow',null,null,null,
+				[null,'Activate','/showPlugins.html?NetFlow=1',null,null],
+				[null,'View/Configure','/plugins/NetFlow',null,null],
+				[null,'Describe','/showPlugins.html?NetFlow',null,null],
+				[null,'Statistics','/plugins/NetFlow/statistics.html',null,null],
+             ],
+		[null,'Round-Robin Database',null,null,null,
+				[null,'Deactivate','/showPlugins.html?rrdPlugin=0',null,null],
+				[null,'Configure','/plugins/rrdPlugin',null,null],
+				[null,'Describe','/showPlugins.html?rrdPlugin',null,null],
+				[null,'Statistics','/plugins/rrdPlugin/statistics.html',null,null],
+				['<img src="/graph.gif">','Arbitrary Graphs','/plugins/rrdPlugin/arbgraph.html',null,null],
+             ],
+		[null,'sFlow',null,null,null,
+				[null,'Activate','/showPlugins.html?sFlow=1',null,null],
+				[null,'View/Configure','/plugins/sFlow',null,null],
+				[null,'Describe','/showPlugins.html?sFlow',null,null],
+             ],
+		[null,'All','/showPlugins.html',null,null],
+		],
+	[null,'Admin',null,null,null,
+		['<img src="/lock.png">','Configure',null,null,null,
+			['<img src="/lock.png">','Startup Options','/configNtop.html',null,null],
+			['<img src="/lock.png">','Preferences','/editPrefs.html',null,null],
+			['<img src="/lock.png">','Packet Filter','/changeFilter.html',null,null],
+			['<img src="/lock.png">','Reset Stats','/resetStats.html',null,null],
+			['<img src="/lock.png">','Web Users','/showUsers.html',null,null],
+			['<img src="/lock.png">','Protect URLs','/showURLs.html',null,null],
+		],
+		['<img src="/lock.png">','Shutdown','/shutdown.html',null,null],
+	]
+];
+--></script>
+<script type="text/javascript" charset="UTF-8" src="./3nodes-networktraffic5terms-queryA_files/common.js"></script><script type="text/javascript" charset="UTF-8" src="./3nodes-networktraffic5terms-queryA_files/util.js"></script><script type="text/javascript" charset="UTF-8" src="./3nodes-networktraffic5terms-queryA_files/stats.js"></script></head><body link="blue" vlink="blue">
+
+<table border="0" width="100%" cellpadding="0" cellspacing="0">
+ <tbody><tr>
+  <td align="left">
+   <table border="0" width="100%" cellpadding="0" cellspacing="0">
+    <tbody><tr>
+     <td align="left"><div style="width: 103px; height: 75px;">
+      <a href="http://www.ntop.org/"><div class="" style="width: 103px; height: 75px;"><img src="./3nodes-networktraffic5terms-queryA_files/ntop_logo.png" class="reflected" border="0" style="vertical-align: bottom;"><canvas height="25" width="103" style="height: 25px; width: 103px;"></canvas></div></a>     </div></td><td></td>
+    </tr>
+   </tbody></table></td>
+<td align="right" class="leftmenuitem"><b>(C) 1998-2012 - <a class="mailto" href="mailto:deri@ntop.org" title="Send email to Luca Deri">Luca Deri</a></b>&nbsp;&nbsp;</td> </tr>
+ <tr>
+  <th class="leftmenuitem">
+   <noscript>Please enable JavaScript support in your browser</noscript>
+   <div id="ntopMenuID"><table summary="main menu" class="ThemeOfficeMenu" cellspacing="0"><tbody><tr><td class="ThemeOfficeMainItem" onmouseover="cmItemMouseOverOpenSub (this,1,&#39;cmSubMenuID1&#39;,0,0)" onmousedown="cmItemMouseDown (this,1,&#39;cmSubMenuID1&#39;,0,0)" onmouseout="cmItemMouseOut (this,1,&#39;cmSubMenuID1&#39;,0,0)" onmouseup="cmItemMouseUp (this,1,&#39;cmSubMenuID1&#39;,0,0)"><span class="ThemeOfficeMainFolderLeft">&nbsp;</span><span class="ThemeOfficeMainFolderText">About</span><span class="ThemeOfficeMainFolderRight">&nbsp;</span></td><td class="ThemeOfficeMainItem" onmouseover="cmItemMouseOverOpenSub (this,1,&#39;cmSubMenuID5&#39;,0,18)" onmousedown="cmItemMouseDown (this,1,&#39;cmSubMenuID5&#39;,0,18)" onmouseout="cmItemMouseOut (this,1,&#39;cmSubMenuID5&#39;,0,18)" onmouseup="cmItemMouseUp (this,1,&#39;cmSubMenuID5&#39;,0,18)"><span class="ThemeOfficeMainFolderLeft">&nbsp;</span><span class="ThemeOfficeMainFolderText">Summary</span><span class="ThemeOfficeMainFolderRight">&nbsp;</span></td><td class="ThemeOfficeMainItem" onmouseover="cmItemMouseOverOpenSub (this,1,&#39;cmSubMenuID7&#39;,0,26)" onmousedown="cmItemMouseDown (this,1,&#39;cmSubMenuID7&#39;,0,26)" onmouseout="cmItemMouseOut (this,1,&#39;cmSubMenuID7&#39;,0,26)" onmouseup="cmItemMouseUp (this,1,&#39;cmSubMenuID7&#39;,0,26)"><span class="ThemeOfficeMainFolderLeft">&nbsp;</span><span class="ThemeOfficeMainFolderText">All Protocols</span><span class="ThemeOfficeMainFolderRight">&nbsp;</span></td><td class="ThemeOfficeMainItem" onmouseover="cmItemMouseOverOpenSub (this,1,&#39;cmSubMenuID9&#39;,0,34)" onmousedown="cmItemMouseDown (this,1,&#39;cmSubMenuID9&#39;,0,34)" onmouseout="cmItemMouseOut (this,1,&#39;cmSubMenuID9&#39;,0,34)" onmouseup="cmItemMouseUp (this,1,&#39;cmSubMenuID9&#39;,0,34)"><span class="ThemeOfficeMainFolderLeft">&nbsp;</span><span class="ThemeOfficeMainFolderText">IP</span><span class="ThemeOfficeMainFolderRight">&nbsp;</span></td><td class="ThemeOfficeMainItem" onmouseover="cmItemMouseOverOpenSub (this,1,&#39;cmSubMenuID13&#39;,0,55)" onmousedown="cmItemMouseDown (this,1,&#39;cmSubMenuID13&#39;,0,55)" onmouseout="cmItemMouseOut (this,1,&#39;cmSubMenuID13&#39;,0,55)" onmouseup="cmItemMouseUp (this,1,&#39;cmSubMenuID13&#39;,0,55)"><span class="ThemeOfficeMainFolderLeft">&nbsp;</span><span class="ThemeOfficeMainFolderText">Utils</span><span class="ThemeOfficeMainFolderRight">&nbsp;</span></td><td class="ThemeOfficeMainItem" onmouseover="cmItemMouseOverOpenSub (this,1,&#39;cmSubMenuID15&#39;,0,61)" onmousedown="cmItemMouseDown (this,1,&#39;cmSubMenuID15&#39;,0,61)" onmouseout="cmItemMouseOut (this,1,&#39;cmSubMenuID15&#39;,0,61)" onmouseup="cmItemMouseUp (this,1,&#39;cmSubMenuID15&#39;,0,61)"><span class="ThemeOfficeMainFolderLeft">&nbsp;</span><span class="ThemeOfficeMainFolderText">Plugins</span><span class="ThemeOfficeMainFolderRight">&nbsp;</span></td><td class="ThemeOfficeMainItem" onmouseover="cmItemMouseOverOpenSub (this,1,&#39;cmSubMenuID19&#39;,0,78)" onmousedown="cmItemMouseDown (this,1,&#39;cmSubMenuID19&#39;,0,78)" onmouseout="cmItemMouseOut (this,1,&#39;cmSubMenuID19&#39;,0,78)" onmouseup="cmItemMouseUp (this,1,&#39;cmSubMenuID19&#39;,0,78)"><span class="ThemeOfficeMainFolderLeft">&nbsp;</span><span class="ThemeOfficeMainFolderText">Admin</span><span class="ThemeOfficeMainFolderRight">&nbsp;</span></td></tr></tbody></table><div class="ThemeOfficeSubMenu" id="cmSubMenuID1" style="z-index: 1000;position: absolute; top: 0px; left: 0px;"><table summary="sub menu" id="cmSubMenuID1Table" cellspacing="0" class="ThemeOfficeSubMenuTable"><tbody><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,1)" onmousedown="cmItemMouseDown (this,0,null,0,1)" onmouseout="cmItemMouseOut (this,0,null,0,1)" onmouseup="cmItemMouseUp (this,0,null,0,1)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">What is ntop?</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,2)" onmousedown="cmItemMouseDown (this,0,null,0,2)" onmouseout="cmItemMouseOut (this,0,null,0,2)" onmouseup="cmItemMouseUp (this,0,null,0,2)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">ntop blog</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,3)" onmousedown="cmItemMouseDown (this,0,null,0,3)" onmouseout="cmItemMouseOut (this,0,null,0,3)" onmouseup="cmItemMouseUp (this,0,null,0,3)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Credits</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,4)" onmousedown="cmItemMouseDown (this,0,null,0,4)" onmouseout="cmItemMouseOut (this,0,null,0,4)" onmouseup="cmItemMouseUp (this,0,null,0,4)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Make a Donation</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,&#39;cmSubMenuID2&#39;,0,5)" onmousedown="cmItemMouseDown (this,0,&#39;cmSubMenuID2&#39;,0,5)" onmouseout="cmItemMouseOut (this,0,&#39;cmSubMenuID2&#39;,0,5)" onmouseup="cmItemMouseUp (this,0,&#39;cmSubMenuID2&#39;,0,5)"><td class="ThemeOfficeMenuFolderLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuFolderText">ntop World</td><td class="ThemeOfficeMenuFolderRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/arrow.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,&#39;cmSubMenuID3&#39;,0,8)" onmousedown="cmItemMouseDown (this,0,&#39;cmSubMenuID3&#39;,0,8)" onmouseout="cmItemMouseOut (this,0,&#39;cmSubMenuID3&#39;,0,8)" onmouseup="cmItemMouseUp (this,0,&#39;cmSubMenuID3&#39;,0,8)"><td class="ThemeOfficeMenuFolderLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuFolderText">Online Documentation</td><td class="ThemeOfficeMenuFolderRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/arrow.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,16)" onmousedown="cmItemMouseDown (this,0,null,0,16)" onmouseout="cmItemMouseOut (this,0,null,0,16)" onmouseup="cmItemMouseUp (this,0,null,0,16)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Show Configuration</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,17)" onmousedown="cmItemMouseDown (this,0,null,0,17)" onmouseout="cmItemMouseOut (this,0,null,0,17)" onmouseup="cmItemMouseUp (this,0,null,0,17)"><td class="ThemeOfficeMenuItemLeft"><img src="./3nodes-networktraffic5terms-queryA_files/bug.png"></td><td class="ThemeOfficeMenuItemText">Report a Problem</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr></tbody></table></div><div class="ThemeOfficeSubMenu" id="cmSubMenuID2" style="z-index: 1005;position: absolute; top: 0px; left: 0px;"><table summary="sub menu" id="cmSubMenuID2Table" cellspacing="0" class="ThemeOfficeSubMenuTable"><tbody><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,6)" onmousedown="cmItemMouseDown (this,0,null,0,6)" onmouseout="cmItemMouseOut (this,0,null,0,6)" onmouseup="cmItemMouseUp (this,0,null,0,6)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">ntop-based Solutions</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,7)" onmousedown="cmItemMouseDown (this,0,null,0,7)" onmouseout="cmItemMouseOut (this,0,null,0,7)" onmouseup="cmItemMouseUp (this,0,null,0,7)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">nMon.net Products</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr></tbody></table></div><div class="ThemeOfficeSubMenu" id="cmSubMenuID3" style="z-index: 1005;position: absolute; top: 0px; left: 0px;"><table summary="sub menu" id="cmSubMenuID3Table" cellspacing="0" class="ThemeOfficeSubMenuTable"><tbody><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,9)" onmousedown="cmItemMouseDown (this,0,null,0,9)" onmouseout="cmItemMouseOut (this,0,null,0,9)" onmouseup="cmItemMouseUp (this,0,null,0,9)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Man Page</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,&#39;cmSubMenuID4&#39;,0,10)" onmousedown="cmItemMouseDown (this,0,&#39;cmSubMenuID4&#39;,0,10)" onmouseout="cmItemMouseOut (this,0,&#39;cmSubMenuID4&#39;,0,10)" onmouseup="cmItemMouseUp (this,0,&#39;cmSubMenuID4&#39;,0,10)"><td class="ThemeOfficeMenuFolderLeft"><img src="./3nodes-networktraffic5terms-queryA_files/icon_python.png"></td><td class="ThemeOfficeMenuFolderText">Python ntop Engine</td><td class="ThemeOfficeMenuFolderRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/arrow.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,13)" onmousedown="cmItemMouseDown (this,0,null,0,13)" onmouseout="cmItemMouseOut (this,0,null,0,13)" onmouseup="cmItemMouseUp (this,0,null,0,13)"><td class="ThemeOfficeMenuItemLeft"><img src="./3nodes-networktraffic5terms-queryA_files/help.png"></td><td class="ThemeOfficeMenuItemText">Help</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,14)" onmousedown="cmItemMouseDown (this,0,null,0,14)" onmouseout="cmItemMouseOut (this,0,null,0,14)" onmouseup="cmItemMouseUp (this,0,null,0,14)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">FAQ</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,15)" onmousedown="cmItemMouseDown (this,0,null,0,15)" onmouseout="cmItemMouseOut (this,0,null,0,15)" onmouseup="cmItemMouseUp (this,0,null,0,15)"><td class="ThemeOfficeMenuItemLeft"><img src="./3nodes-networktraffic5terms-queryA_files/Risk_high.gif"></td><td class="ThemeOfficeMenuItemText">Risk Flags</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr></tbody></table></div><div class="ThemeOfficeSubMenu" id="cmSubMenuID4" style="z-index: 1010;position: absolute; top: 0px; left: 0px;"><table summary="sub menu" id="cmSubMenuID4Table" cellspacing="0" class="ThemeOfficeSubMenuTable"><tbody><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,11)" onmousedown="cmItemMouseDown (this,0,null,0,11)" onmouseout="cmItemMouseOut (this,0,null,0,11)" onmouseup="cmItemMouseUp (this,0,null,0,11)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Python API</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,12)" onmousedown="cmItemMouseDown (this,0,null,0,12)" onmouseout="cmItemMouseOut (this,0,null,0,12)" onmouseup="cmItemMouseUp (this,0,null,0,12)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Tutorial</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr></tbody></table></div><div class="ThemeOfficeSubMenu" id="cmSubMenuID5" style="z-index: 1000;position: absolute; top: 0px; left: 0px;"><table summary="sub menu" id="cmSubMenuID5Table" cellspacing="0" class="ThemeOfficeSubMenuTable"><tbody><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,19)" onmousedown="cmItemMouseDown (this,0,null,0,19)" onmouseout="cmItemMouseOut (this,0,null,0,19)" onmouseup="cmItemMouseUp (this,0,null,0,19)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Traffic</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,20)" onmousedown="cmItemMouseDown (this,0,null,0,20)" onmouseout="cmItemMouseOut (this,0,null,0,20)" onmouseup="cmItemMouseUp (this,0,null,0,20)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Hosts</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,21)" onmousedown="cmItemMouseDown (this,0,null,0,21)" onmouseout="cmItemMouseOut (this,0,null,0,21)" onmouseup="cmItemMouseUp (this,0,null,0,21)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Network Load</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,&#39;cmSubMenuID6&#39;,0,22)" onmousedown="cmItemMouseDown (this,0,&#39;cmSubMenuID6&#39;,0,22)" onmouseout="cmItemMouseOut (this,0,&#39;cmSubMenuID6&#39;,0,22)" onmouseup="cmItemMouseUp (this,0,&#39;cmSubMenuID6&#39;,0,22)"><td class="ThemeOfficeMenuFolderLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuFolderText">Traffic Maps</td><td class="ThemeOfficeMenuFolderRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/arrow.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,25)" onmousedown="cmItemMouseDown (this,0,null,0,25)" onmouseout="cmItemMouseOut (this,0,null,0,25)" onmouseup="cmItemMouseUp (this,0,null,0,25)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Network Flows</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr></tbody></table></div><div class="ThemeOfficeSubMenu" id="cmSubMenuID6" style="z-index: 1005;position: absolute; top: 0px; left: 0px;"><table summary="sub menu" id="cmSubMenuID6Table" cellspacing="0" class="ThemeOfficeSubMenuTable"><tbody><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,23)" onmousedown="cmItemMouseDown (this,0,null,0,23)" onmouseout="cmItemMouseOut (this,0,null,0,23)" onmouseup="cmItemMouseUp (this,0,null,0,23)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Region Map</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,24)" onmousedown="cmItemMouseDown (this,0,null,0,24)" onmouseout="cmItemMouseOut (this,0,null,0,24)" onmouseup="cmItemMouseUp (this,0,null,0,24)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Host Map</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr></tbody></table></div><div class="ThemeOfficeSubMenu" id="cmSubMenuID7" style="z-index: 1000;position: absolute; top: 0px; left: 0px;"><table summary="sub menu" id="cmSubMenuID7Table" cellspacing="0" class="ThemeOfficeSubMenuTable"><tbody><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,27)" onmousedown="cmItemMouseDown (this,0,null,0,27)" onmouseout="cmItemMouseOut (this,0,null,0,27)" onmouseup="cmItemMouseUp (this,0,null,0,27)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Traffic</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,28)" onmousedown="cmItemMouseDown (this,0,null,0,28)" onmouseout="cmItemMouseOut (this,0,null,0,28)" onmouseup="cmItemMouseUp (this,0,null,0,28)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Throughput</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,29)" onmousedown="cmItemMouseDown (this,0,null,0,29)" onmouseout="cmItemMouseOut (this,0,null,0,29)" onmouseup="cmItemMouseUp (this,0,null,0,29)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Activity</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,&#39;cmSubMenuID8&#39;,0,30)" onmousedown="cmItemMouseDown (this,0,&#39;cmSubMenuID8&#39;,0,30)" onmouseout="cmItemMouseOut (this,0,&#39;cmSubMenuID8&#39;,0,30)" onmouseup="cmItemMouseUp (this,0,&#39;cmSubMenuID8&#39;,0,30)"><td class="ThemeOfficeMenuFolderLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuFolderText">Top Talkers</td><td class="ThemeOfficeMenuFolderRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/arrow.gif"></td></tr></tbody></table></div><div class="ThemeOfficeSubMenu" id="cmSubMenuID8" style="z-index: 1005;position: absolute; top: 0px; left: 0px;"><table summary="sub menu" id="cmSubMenuID8Table" cellspacing="0" class="ThemeOfficeSubMenuTable"><tbody><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,31)" onmousedown="cmItemMouseDown (this,0,null,0,31)" onmouseout="cmItemMouseOut (this,0,null,0,31)" onmouseup="cmItemMouseUp (this,0,null,0,31)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Last Hour</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,32)" onmousedown="cmItemMouseDown (this,0,null,0,32)" onmouseout="cmItemMouseOut (this,0,null,0,32)" onmouseup="cmItemMouseUp (this,0,null,0,32)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Last Day</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,33)" onmousedown="cmItemMouseDown (this,0,null,0,33)" onmouseout="cmItemMouseOut (this,0,null,0,33)" onmouseup="cmItemMouseUp (this,0,null,0,33)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Historical</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr></tbody></table></div><div class="ThemeOfficeSubMenu" id="cmSubMenuID9" style="z-index: 1000;position: absolute; top: 0px; left: 0px;"><table summary="sub menu" id="cmSubMenuID9Table" cellspacing="0" class="ThemeOfficeSubMenuTable"><tbody><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,&#39;cmSubMenuID10&#39;,0,35)" onmousedown="cmItemMouseDown (this,0,&#39;cmSubMenuID10&#39;,0,35)" onmouseout="cmItemMouseOut (this,0,&#39;cmSubMenuID10&#39;,0,35)" onmouseup="cmItemMouseUp (this,0,&#39;cmSubMenuID10&#39;,0,35)"><td class="ThemeOfficeMenuFolderLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuFolderText">Summary</td><td class="ThemeOfficeMenuFolderRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/arrow.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,&#39;cmSubMenuID11&#39;,0,43)" onmousedown="cmItemMouseDown (this,0,&#39;cmSubMenuID11&#39;,0,43)" onmouseout="cmItemMouseOut (this,0,&#39;cmSubMenuID11&#39;,0,43)" onmouseup="cmItemMouseUp (this,0,&#39;cmSubMenuID11&#39;,0,43)"><td class="ThemeOfficeMenuFolderLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuFolderText">Traffic Directions</td><td class="ThemeOfficeMenuFolderRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/arrow.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,&#39;cmSubMenuID12&#39;,0,48)" onmousedown="cmItemMouseDown (this,0,&#39;cmSubMenuID12&#39;,0,48)" onmouseout="cmItemMouseOut (this,0,&#39;cmSubMenuID12&#39;,0,48)" onmouseup="cmItemMouseUp (this,0,&#39;cmSubMenuID12&#39;,0,48)"><td class="ThemeOfficeMenuFolderLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuFolderText">Local</td><td class="ThemeOfficeMenuFolderRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/arrow.gif"></td></tr></tbody></table></div><div class="ThemeOfficeSubMenu" id="cmSubMenuID10" style="z-index: 1005;position: absolute; top: 0px; left: 0px;"><table summary="sub menu" id="cmSubMenuID10Table" cellspacing="0" class="ThemeOfficeSubMenuTable"><tbody><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,36)" onmousedown="cmItemMouseDown (this,0,null,0,36)" onmouseout="cmItemMouseOut (this,0,null,0,36)" onmouseup="cmItemMouseUp (this,0,null,0,36)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Traffic</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,37)" onmousedown="cmItemMouseDown (this,0,null,0,37)" onmouseout="cmItemMouseOut (this,0,null,0,37)" onmouseup="cmItemMouseUp (this,0,null,0,37)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Multicast</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,38)" onmousedown="cmItemMouseDown (this,0,null,0,38)" onmouseout="cmItemMouseOut (this,0,null,0,38)" onmouseup="cmItemMouseUp (this,0,null,0,38)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Internet Domain</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,39)" onmousedown="cmItemMouseDown (this,0,null,0,39)" onmouseout="cmItemMouseOut (this,0,null,0,39)" onmouseup="cmItemMouseUp (this,0,null,0,39)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Networks</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,40)" onmousedown="cmItemMouseDown (this,0,null,0,40)" onmouseout="cmItemMouseOut (this,0,null,0,40)" onmouseup="cmItemMouseUp (this,0,null,0,40)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">ASs</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,41)" onmousedown="cmItemMouseDown (this,0,null,0,41)" onmouseout="cmItemMouseOut (this,0,null,0,41)" onmouseup="cmItemMouseUp (this,0,null,0,41)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Host Communities</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,42)" onmousedown="cmItemMouseDown (this,0,null,0,42)" onmouseout="cmItemMouseOut (this,0,null,0,42)" onmouseup="cmItemMouseUp (this,0,null,0,42)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Distribution</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr></tbody></table></div><div class="ThemeOfficeSubMenu" id="cmSubMenuID11" style="z-index: 1005;position: absolute; top: 0px; left: 0px;"><table summary="sub menu" id="cmSubMenuID11Table" cellspacing="0" class="ThemeOfficeSubMenuTable"><tbody><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,44)" onmousedown="cmItemMouseDown (this,0,null,0,44)" onmouseout="cmItemMouseOut (this,0,null,0,44)" onmouseup="cmItemMouseUp (this,0,null,0,44)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Local to Local</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,45)" onmousedown="cmItemMouseDown (this,0,null,0,45)" onmouseout="cmItemMouseOut (this,0,null,0,45)" onmouseup="cmItemMouseUp (this,0,null,0,45)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Local to Remote</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,46)" onmousedown="cmItemMouseDown (this,0,null,0,46)" onmouseout="cmItemMouseOut (this,0,null,0,46)" onmouseup="cmItemMouseUp (this,0,null,0,46)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Remote to Local</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,47)" onmousedown="cmItemMouseDown (this,0,null,0,47)" onmouseout="cmItemMouseOut (this,0,null,0,47)" onmouseup="cmItemMouseUp (this,0,null,0,47)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Remote to Remote</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr></tbody></table></div><div class="ThemeOfficeSubMenu" id="cmSubMenuID12" style="z-index: 1005;position: absolute; top: 0px; left: 0px;"><table summary="sub menu" id="cmSubMenuID12Table" cellspacing="0" class="ThemeOfficeSubMenuTable"><tbody><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,49)" onmousedown="cmItemMouseDown (this,0,null,0,49)" onmouseout="cmItemMouseOut (this,0,null,0,49)" onmouseup="cmItemMouseUp (this,0,null,0,49)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Routers</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,50)" onmousedown="cmItemMouseDown (this,0,null,0,50)" onmouseout="cmItemMouseOut (this,0,null,0,50)" onmouseup="cmItemMouseUp (this,0,null,0,50)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Ports Used</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,51)" onmousedown="cmItemMouseDown (this,0,null,0,51)" onmouseout="cmItemMouseOut (this,0,null,0,51)" onmouseup="cmItemMouseUp (this,0,null,0,51)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Active Sessions</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,52)" onmousedown="cmItemMouseDown (this,0,null,0,52)" onmouseout="cmItemMouseOut (this,0,null,0,52)" onmouseup="cmItemMouseUp (this,0,null,0,52)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Host Fingerprint</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,53)" onmousedown="cmItemMouseDown (this,0,null,0,53)" onmouseout="cmItemMouseOut (this,0,null,0,53)" onmouseup="cmItemMouseUp (this,0,null,0,53)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Host Characterization</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,54)" onmousedown="cmItemMouseDown (this,0,null,0,54)" onmouseout="cmItemMouseOut (this,0,null,0,54)" onmouseup="cmItemMouseUp (this,0,null,0,54)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Network Traffic Map</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr></tbody></table></div><div class="ThemeOfficeSubMenu" id="cmSubMenuID13" style="z-index: 1000;position: absolute; top: 0px; left: 0px;"><table summary="sub menu" id="cmSubMenuID13Table" cellspacing="0" class="ThemeOfficeSubMenuTable"><tbody><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,&#39;cmSubMenuID14&#39;,0,56)" onmousedown="cmItemMouseDown (this,0,&#39;cmSubMenuID14&#39;,0,56)" onmouseout="cmItemMouseOut (this,0,&#39;cmSubMenuID14&#39;,0,56)" onmouseup="cmItemMouseUp (this,0,&#39;cmSubMenuID14&#39;,0,56)"><td class="ThemeOfficeMenuFolderLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuFolderText">RRD Alarm</td><td class="ThemeOfficeMenuFolderRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/arrow.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,59)" onmousedown="cmItemMouseDown (this,0,null,0,59)" onmouseout="cmItemMouseOut (this,0,null,0,59)" onmouseup="cmItemMouseUp (this,0,null,0,59)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Data Dump</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,60)" onmousedown="cmItemMouseDown (this,0,null,0,60)" onmouseout="cmItemMouseOut (this,0,null,0,60)" onmouseup="cmItemMouseUp (this,0,null,0,60)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">View Log</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr></tbody></table></div><div class="ThemeOfficeSubMenu" id="cmSubMenuID14" style="z-index: 1005;position: absolute; top: 0px; left: 0px;"><table summary="sub menu" id="cmSubMenuID14Table" cellspacing="0" class="ThemeOfficeSubMenuTable"><tbody><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,57)" onmousedown="cmItemMouseDown (this,0,null,0,57)" onmouseout="cmItemMouseOut (this,0,null,0,57)" onmouseup="cmItemMouseUp (this,0,null,0,57)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Configure Thresholds</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,58)" onmousedown="cmItemMouseDown (this,0,null,0,58)" onmouseout="cmItemMouseOut (this,0,null,0,58)" onmouseup="cmItemMouseUp (this,0,null,0,58)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Check Now</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr></tbody></table></div><div class="ThemeOfficeSubMenu" id="cmSubMenuID15" style="z-index: 1000;position: absolute; top: 0px; left: 0px;"><table summary="sub menu" id="cmSubMenuID15Table" cellspacing="0" class="ThemeOfficeSubMenuTable"><tbody><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,&#39;cmSubMenuID16&#39;,0,62)" onmousedown="cmItemMouseDown (this,0,&#39;cmSubMenuID16&#39;,0,62)" onmouseout="cmItemMouseOut (this,0,&#39;cmSubMenuID16&#39;,0,62)" onmouseup="cmItemMouseUp (this,0,&#39;cmSubMenuID16&#39;,0,62)"><td class="ThemeOfficeMenuFolderLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuFolderText">NetFlow</td><td class="ThemeOfficeMenuFolderRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/arrow.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,&#39;cmSubMenuID17&#39;,0,67)" onmousedown="cmItemMouseDown (this,0,&#39;cmSubMenuID17&#39;,0,67)" onmouseout="cmItemMouseOut (this,0,&#39;cmSubMenuID17&#39;,0,67)" onmouseup="cmItemMouseUp (this,0,&#39;cmSubMenuID17&#39;,0,67)"><td class="ThemeOfficeMenuFolderLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuFolderText">Round-Robin Database</td><td class="ThemeOfficeMenuFolderRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/arrow.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,&#39;cmSubMenuID18&#39;,0,73)" onmousedown="cmItemMouseDown (this,0,&#39;cmSubMenuID18&#39;,0,73)" onmouseout="cmItemMouseOut (this,0,&#39;cmSubMenuID18&#39;,0,73)" onmouseup="cmItemMouseUp (this,0,&#39;cmSubMenuID18&#39;,0,73)"><td class="ThemeOfficeMenuFolderLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuFolderText">sFlow</td><td class="ThemeOfficeMenuFolderRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/arrow.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,77)" onmousedown="cmItemMouseDown (this,0,null,0,77)" onmouseout="cmItemMouseOut (this,0,null,0,77)" onmouseup="cmItemMouseUp (this,0,null,0,77)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">All</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr></tbody></table></div><div class="ThemeOfficeSubMenu" id="cmSubMenuID16" style="z-index: 1005;position: absolute; top: 0px; left: 0px;"><table summary="sub menu" id="cmSubMenuID16Table" cellspacing="0" class="ThemeOfficeSubMenuTable"><tbody><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,63)" onmousedown="cmItemMouseDown (this,0,null,0,63)" onmouseout="cmItemMouseOut (this,0,null,0,63)" onmouseup="cmItemMouseUp (this,0,null,0,63)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Activate</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,64)" onmousedown="cmItemMouseDown (this,0,null,0,64)" onmouseout="cmItemMouseOut (this,0,null,0,64)" onmouseup="cmItemMouseUp (this,0,null,0,64)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">View/Configure</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,65)" onmousedown="cmItemMouseDown (this,0,null,0,65)" onmouseout="cmItemMouseOut (this,0,null,0,65)" onmouseup="cmItemMouseUp (this,0,null,0,65)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Describe</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,66)" onmousedown="cmItemMouseDown (this,0,null,0,66)" onmouseout="cmItemMouseOut (this,0,null,0,66)" onmouseup="cmItemMouseUp (this,0,null,0,66)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Statistics</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr></tbody></table></div><div class="ThemeOfficeSubMenu" id="cmSubMenuID17" style="z-index: 1005;position: absolute; top: 0px; left: 0px;"><table summary="sub menu" id="cmSubMenuID17Table" cellspacing="0" class="ThemeOfficeSubMenuTable"><tbody><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,68)" onmousedown="cmItemMouseDown (this,0,null,0,68)" onmouseout="cmItemMouseOut (this,0,null,0,68)" onmouseup="cmItemMouseUp (this,0,null,0,68)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Deactivate</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,69)" onmousedown="cmItemMouseDown (this,0,null,0,69)" onmouseout="cmItemMouseOut (this,0,null,0,69)" onmouseup="cmItemMouseUp (this,0,null,0,69)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Configure</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,70)" onmousedown="cmItemMouseDown (this,0,null,0,70)" onmouseout="cmItemMouseOut (this,0,null,0,70)" onmouseup="cmItemMouseUp (this,0,null,0,70)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Describe</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,71)" onmousedown="cmItemMouseDown (this,0,null,0,71)" onmouseout="cmItemMouseOut (this,0,null,0,71)" onmouseup="cmItemMouseUp (this,0,null,0,71)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Statistics</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,72)" onmousedown="cmItemMouseDown (this,0,null,0,72)" onmouseout="cmItemMouseOut (this,0,null,0,72)" onmouseup="cmItemMouseUp (this,0,null,0,72)"><td class="ThemeOfficeMenuItemLeft"><img src="./3nodes-networktraffic5terms-queryA_files/graph.gif"></td><td class="ThemeOfficeMenuItemText">Arbitrary Graphs</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr></tbody></table></div><div class="ThemeOfficeSubMenu" id="cmSubMenuID18" style="z-index: 1005;position: absolute; top: 0px; left: 0px;"><table summary="sub menu" id="cmSubMenuID18Table" cellspacing="0" class="ThemeOfficeSubMenuTable"><tbody><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,74)" onmousedown="cmItemMouseDown (this,0,null,0,74)" onmouseout="cmItemMouseOut (this,0,null,0,74)" onmouseup="cmItemMouseUp (this,0,null,0,74)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Activate</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,75)" onmousedown="cmItemMouseDown (this,0,null,0,75)" onmouseout="cmItemMouseOut (this,0,null,0,75)" onmouseup="cmItemMouseUp (this,0,null,0,75)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">View/Configure</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,76)" onmousedown="cmItemMouseDown (this,0,null,0,76)" onmouseout="cmItemMouseOut (this,0,null,0,76)" onmouseup="cmItemMouseUp (this,0,null,0,76)"><td class="ThemeOfficeMenuItemLeft"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/spacer.gif"></td><td class="ThemeOfficeMenuItemText">Describe</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr></tbody></table></div><div class="ThemeOfficeSubMenu" id="cmSubMenuID19" style="z-index: 1000;position: absolute; top: 0px; left: 0px;"><table summary="sub menu" id="cmSubMenuID19Table" cellspacing="0" class="ThemeOfficeSubMenuTable"><tbody><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,&#39;cmSubMenuID20&#39;,0,79)" onmousedown="cmItemMouseDown (this,0,&#39;cmSubMenuID20&#39;,0,79)" onmouseout="cmItemMouseOut (this,0,&#39;cmSubMenuID20&#39;,0,79)" onmouseup="cmItemMouseUp (this,0,&#39;cmSubMenuID20&#39;,0,79)"><td class="ThemeOfficeMenuFolderLeft"><img src="./3nodes-networktraffic5terms-queryA_files/lock.png"></td><td class="ThemeOfficeMenuFolderText">Configure</td><td class="ThemeOfficeMenuFolderRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/arrow.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,86)" onmousedown="cmItemMouseDown (this,0,null,0,86)" onmouseout="cmItemMouseOut (this,0,null,0,86)" onmouseup="cmItemMouseUp (this,0,null,0,86)"><td class="ThemeOfficeMenuItemLeft"><img src="./3nodes-networktraffic5terms-queryA_files/lock.png"></td><td class="ThemeOfficeMenuItemText">Shutdown</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr></tbody></table></div><div class="ThemeOfficeSubMenu" id="cmSubMenuID20" style="z-index: 1005;position: absolute; top: 0px; left: 0px;"><table summary="sub menu" id="cmSubMenuID20Table" cellspacing="0" class="ThemeOfficeSubMenuTable"><tbody><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,80)" onmousedown="cmItemMouseDown (this,0,null,0,80)" onmouseout="cmItemMouseOut (this,0,null,0,80)" onmouseup="cmItemMouseUp (this,0,null,0,80)"><td class="ThemeOfficeMenuItemLeft"><img src="./3nodes-networktraffic5terms-queryA_files/lock.png"></td><td class="ThemeOfficeMenuItemText">Startup Options</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,81)" onmousedown="cmItemMouseDown (this,0,null,0,81)" onmouseout="cmItemMouseOut (this,0,null,0,81)" onmouseup="cmItemMouseUp (this,0,null,0,81)"><td class="ThemeOfficeMenuItemLeft"><img src="./3nodes-networktraffic5terms-queryA_files/lock.png"></td><td class="ThemeOfficeMenuItemText">Preferences</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,82)" onmousedown="cmItemMouseDown (this,0,null,0,82)" onmouseout="cmItemMouseOut (this,0,null,0,82)" onmouseup="cmItemMouseUp (this,0,null,0,82)"><td class="ThemeOfficeMenuItemLeft"><img src="./3nodes-networktraffic5terms-queryA_files/lock.png"></td><td class="ThemeOfficeMenuItemText">Packet Filter</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,83)" onmousedown="cmItemMouseDown (this,0,null,0,83)" onmouseout="cmItemMouseOut (this,0,null,0,83)" onmouseup="cmItemMouseUp (this,0,null,0,83)"><td class="ThemeOfficeMenuItemLeft"><img src="./3nodes-networktraffic5terms-queryA_files/lock.png"></td><td class="ThemeOfficeMenuItemText">Reset Stats</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,84)" onmousedown="cmItemMouseDown (this,0,null,0,84)" onmouseout="cmItemMouseOut (this,0,null,0,84)" onmouseup="cmItemMouseUp (this,0,null,0,84)"><td class="ThemeOfficeMenuItemLeft"><img src="./3nodes-networktraffic5terms-queryA_files/lock.png"></td><td class="ThemeOfficeMenuItemText">Web Users</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr><tr class="ThemeOfficeMenuItem" onmouseover="cmItemMouseOverOpenSub (this,0,null,0,85)" onmousedown="cmItemMouseDown (this,0,null,0,85)" onmouseout="cmItemMouseOut (this,0,null,0,85)" onmouseup="cmItemMouseUp (this,0,null,0,85)"><td class="ThemeOfficeMenuItemLeft"><img src="./3nodes-networktraffic5terms-queryA_files/lock.png"></td><td class="ThemeOfficeMenuItemText">Protect URLs</td><td class="ThemeOfficeMenuItemRight"><img alt="" src="./3nodes-networktraffic5terms-queryA_files/blank.gif"></td></tr></tbody></table></div></div>
+<script type="text/javascript" language="JavaScript"><!--
+        cmDraw ('ntopMenuID', ntopMenu, 'hbr', cmThemeOffice, 'ThemeOffice');
+-->
+</script></th>
+  <td class="leftmenuitem" align="right"><div><form name="myform" method="get" action="http://iccluster027.iccluster.epfl.ch:3000/"><label><img border="0" src="./3nodes-networktraffic5terms-queryA_files/graph_zoom.gif">&nbsp;</label><input placeholder="Search ntop..." style="width: 150px" type="text" id="testinput" value="" autocomplete="off"></form></div></td>
+ </tr>
+</tbody></table>
+<p>&nbsp;</p>
+<script>
+   $(function() {
+	 $( "#tabs" ).tabs();
+     });
+
+</script>
+<center>
+<div id="tabs" style="width: 80%; ">
+    <ul>
+    <li><a href="http://iccluster027.iccluster.epfl.ch:3000/#tabs-1">Global Statistics</a></li>
+    <li><a href="http://iccluster027.iccluster.epfl.ch:3000/#tabs-2">br-0e8a1b7b1837 Report</a></li>
+    <li><a href="http://iccluster027.iccluster.epfl.ch:3000/#tabs-3">Protocol Distribution</a></li>
+    <li><a href="http://iccluster027.iccluster.epfl.ch:3000/#tabs-4">Application Protocols</a></li>
+    </ul>
+<div id="tabs-1">
+<center><table border="1" cellspacing="0" cellpadding="2">
+<tbody><tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="LEFT" bgcolor="#F3F3F3">Network Interface(s)</th><td align="RIGHT"><table border="1" cellspacing="0" cellpadding="2" width="100%">
+<tbody><tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;" bgcolor="#F3F3F3"><th bgcolor="#F3F3F3">Name</th><th bgcolor="#F3F3F3">Device</th><th bgcolor="#F3F3F3">Type</th><th bgcolor="#F3F3F3">Speed</th><th bgcolor="#F3F3F3">Sampling Rate</th><th bgcolor="#F3F3F3">MTU</th><th bgcolor="#F3F3F3">Header</th><th bgcolor="#F3F3F3">Address</th><th bgcolor="#F3F3F3">IPv6 Addresses</th></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;" align="CENTER"><td>br-0e8a1b7b1837 <a href="http://iccluster027.iccluster.epfl.ch:3000/editPrefs.html?key=device.name.br-0e8a1b7b1837"><img class="tooltip" alt="Change name" src="./3nodes-networktraffic5terms-queryA_files/edit.gif" border="0"></a></td><td align="CENTER">br-0e8a1b7b1837</td><td align="CENTER">Ethernet</td><td align="RIGHT" nowrap="">&nbsp;&nbsp;</td><td align="CENTER">0</td><td align="CENTER">1514</td><td align="CENTER">14</td><td align="CENTER">172.21.0.1</td><td align="LEFT">&nbsp;</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;" align="CENTER"><td>br-9b9b9b9454a5 <a href="http://iccluster027.iccluster.epfl.ch:3000/editPrefs.html?key=device.name.br-9b9b9b9454a5"><img class="tooltip" alt="Change name" src="./3nodes-networktraffic5terms-queryA_files/edit.gif" border="0"></a></td><td align="CENTER">br-9b9b9b9454a5</td><td align="CENTER">Ethernet</td><td align="RIGHT" nowrap="">&nbsp;&nbsp;</td><td align="CENTER">0</td><td align="CENTER">1514</td><td align="CENTER">14</td><td align="CENTER">172.19.0.1</td><td align="LEFT">&nbsp;</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;" align="CENTER"><td>br-d8d2705398ba <a href="http://iccluster027.iccluster.epfl.ch:3000/editPrefs.html?key=device.name.br-d8d2705398ba"><img class="tooltip" alt="Change name" src="./3nodes-networktraffic5terms-queryA_files/edit.gif" border="0"></a></td><td align="CENTER">br-d8d2705398ba</td><td align="CENTER">Ethernet</td><td align="RIGHT" nowrap="">&nbsp;&nbsp;</td><td align="CENTER">0</td><td align="CENTER">1514</td><td align="CENTER">14</td><td align="CENTER">172.20.0.1</td><td align="LEFT">&nbsp;</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;" align="CENTER"><td>br-ed6885b479f4 <a href="http://iccluster027.iccluster.epfl.ch:3000/editPrefs.html?key=device.name.br-ed6885b479f4"><img class="tooltip" alt="Change name" src="./3nodes-networktraffic5terms-queryA_files/edit.gif" border="0"></a></td><td align="CENTER">br-ed6885b479f4</td><td align="CENTER">Ethernet</td><td align="RIGHT" nowrap="">&nbsp;&nbsp;</td><td align="CENTER">0</td><td align="CENTER">1514</td><td align="CENTER">14</td><td align="CENTER">172.18.0.1</td><td align="LEFT">&nbsp;</td></tr>
+</tbody></table></td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="LEFT" bgcolor="#F3F3F3">Local Domain Name</th><td align="RIGHT">iccluster.epfl.ch&nbsp;</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="LEFT" bgcolor="#F3F3F3">Capturing Since</th><td align="RIGHT">Wed Sep 20 19:02:08 2017
+ [19 sec]</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="LEFT" bgcolor="#F3F3F3">Hosts</th><td align="RIGHT">[12 active <a href="http://iccluster027.iccluster.epfl.ch:3000/plugins/rrdPlugin?action=arbreq&amp;which=graph&amp;arbfile=activeHostSendersNum&amp;arbiface=br-0e8a1b7b1837&amp;start=1505923347&amp;end=1505926947&amp;counter=&amp;title=Active+End+Nodes&amp;mode=zoom"><img valign="top" class="tooltip" src="./3nodes-networktraffic5terms-queryA_files/graph.gif" border="0"></a>] [13 total <a href="http://iccluster027.iccluster.epfl.ch:3000/plugins/rrdPlugin?action=arbreq&amp;which=graph&amp;arbfile=knownHostsNum&amp;arbiface=br-0e8a1b7b1837&amp;start=1505923347&amp;end=1505926947&amp;counter=&amp;title=Total+Number+of+Hosts&amp;mode=zoom"><img valign="top" class="tooltip" src="./3nodes-networktraffic5terms-queryA_files/graph.gif" border="0"></a>]</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="LEFT" bgcolor="#F3F3F3">Active Sessions</th><td align="RIGHT">18 [Max: 18]</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;" bgcolor="white"><th align="CENTER" colspan="3" bgcolor="white"><div id="DevicesDistribution_8" style="width: 350px; height: 320px; margin: 0 auto"></div>
+
+
+<script type="text/javascript">
+var data = [
+			['br-0e8a1b7b1837',   100.0]];
+
+  $.jqplot('DevicesDistribution_8', [data], 
+			     { 
+			     seriesDefaults: {
+			       renderer: jQuery.jqplot.PieRenderer, 
+				   rendererOptions: {
+				 showDataLabels: true
+				     }
+			       }, 
+ grid: { 
+  gridLineColor: 'transparent', 
+      background: 'transparent', 
+      borderColor: 'transparent', 
+      borderWidth: '1', 
+      shadow: false 
+      }, 
+				 legend: { show:true, location: 'e' }
+			     }
+			     );
+  </script>
+
+</th></tr>
+</tbody></table></center>
+
+</div>
+
+
+<div id="tabs-2">
+<center><table border="1" cellspacing="0" cellpadding="2">
+<tbody><tr><th align="left" bgcolor="#F3F3F3">Packets</th><td>
+<table border="1" cellspacing="0" cellpadding="2" width="100%">
+<tbody><tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">Dropped&nbsp;(libpcap)</th><td align="right">0.0%</td><td align="right">0</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">Dropped&nbsp;(ntop)</th><td align="right">0.0%</td><td align="right">0</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">Total&nbsp;Received&nbsp;(ntop)</th><td colspan="2" align="right">1,492</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">Total Packets Processed</th><td colspan="2" align="right">1,484</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">Unicast</th><td align="right">100.0%</td><td align="right">1,484</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">Broadcast</th><td align="right">0.0%</td><td align="right">0</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">Multicast</th><td align="right">0.0%</td><td align="right">0</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;" bgcolor="white"><th align="CENTER" colspan="3" bgcolor="white"><div id="PacketsDistribution_9" style="width: 350px; height: 320px; margin: 0 auto"></div>
+
+
+<script type="text/javascript">
+var data = [
+			['Unicast',   100.0]];
+
+  $.jqplot('PacketsDistribution_9', [data], 
+			     { 
+			     seriesDefaults: {
+			       renderer: jQuery.jqplot.PieRenderer, 
+				   rendererOptions: {
+				 showDataLabels: true
+				     }
+			       }, 
+ grid: { 
+  gridLineColor: 'transparent', 
+      background: 'transparent', 
+      borderColor: 'transparent', 
+      borderWidth: '1', 
+      shadow: false 
+      }, 
+				 legend: { show:true, location: 'e' }
+			     }
+			     );
+  </script>
+
+</th></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">Shortest</th><td align="right" colspan="2">42 bytes</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">Average&nbsp;Size</th><td align="right" colspan="2">259 bytes</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">Longest</th><td align="right" colspan="2">6,256 bytes</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">Size&nbsp;&lt;=&nbsp;64&nbsp;bytes</th><td align="right">0.5%</td><td align="right">8</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">64&nbsp;&lt;&nbsp;Size&nbsp;&lt;=&nbsp;128&nbsp;bytes</th><td align="right">43.1%</td><td align="right">640</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">128&nbsp;&lt;&nbsp;Size&nbsp;&lt;=&nbsp;256&nbsp;bytes</th><td align="right">21.6%</td><td align="right">320</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">256&nbsp;&lt;&nbsp;Size&nbsp;&lt;=&nbsp;512&nbsp;bytes</th><td align="right">24.2%</td><td align="right">359</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">512&nbsp;&lt;&nbsp;Size&nbsp;&lt;=&nbsp;1024&nbsp;bytes</th><td align="right">7.7%</td><td align="right">115</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">1024&nbsp;&lt;&nbsp;Size&nbsp;&lt;=&nbsp;1518&nbsp;bytes</th><td align="right">2.0%</td><td align="right">29</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">Size&nbsp;&gt;&nbsp;1518&nbsp;bytes</th><td align="right">1.4%</td><td align="right">21</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;" bgcolor="white"><th align="CENTER" colspan="3" bgcolor="white"><div id="PacketSizeDistribution_10" style="width: 350px; height: 320px; margin: 0 auto"></div>
+
+
+<script type="text/javascript">
+var data = [
+			['&lt;= 64',   0.5],
+			['&lt;= 128',   43.1],
+			['&lt;= 256',   21.6],
+			['&lt;= 512',   24.2],
+			['&lt;= 1024',   7.7],
+			['&lt;= 1518',   2.0],
+			['&gt; 1518',   1.4]];
+
+  $.jqplot('PacketSizeDistribution_10', [data], 
+			     { 
+			     seriesDefaults: {
+			       renderer: jQuery.jqplot.PieRenderer, 
+				   rendererOptions: {
+				 showDataLabels: true
+				     }
+			       }, 
+ grid: { 
+  gridLineColor: 'transparent', 
+      background: 'transparent', 
+      borderColor: 'transparent', 
+      borderWidth: '1', 
+      shadow: false 
+      }, 
+				 legend: { show:true, location: 'e' }
+			     }
+			     );
+  </script>
+
+</th></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">Packets&nbsp;too&nbsp;long [&gt; 1514]</th><td align="right">1.4%</td><td align="right">21</td></tr>
+</tbody></table></td></tr><tr><th align="LEFT" bgcolor="#F3F3F3">Traffic</th><td>
+<table border="1" cellspacing="0" cellpadding="2" width="100%"><tbody><tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">Total</th><td align="right" colspan="2">428.0&nbsp;KBytes [1,484 Pkts]</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">IPv4 Traffic</th><td align="right" colspan="2">392.1&nbsp;KBytes [1,484 Pkts]</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">Fragmented IPv4 Traffic</th><td align="right" colspan="2">0 [0.0%]</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">Non IPv4 Traffic</th><td align="right" colspan="2">35.8&nbsp;KBytes</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;" bgcolor="white"><th align="CENTER" colspan="3" bgcolor="white"><div id="IPvsnonIP_11" style="width: 350px; height: 320px; margin: 0 auto"></div>
+
+
+<script type="text/javascript">
+var data = [
+			['IP',   91.0],
+			['Non IP',   9.0]];
+
+  $.jqplot('IPvsnonIP_11', [data], 
+			     { 
+			     seriesDefaults: {
+			       renderer: jQuery.jqplot.PieRenderer, 
+				   rendererOptions: {
+				 showDataLabels: true
+				     }
+			       }, 
+ grid: { 
+  gridLineColor: 'transparent', 
+      background: 'transparent', 
+      borderColor: 'transparent', 
+      borderWidth: '1', 
+      shadow: false 
+      }, 
+				 legend: { show:true, location: 'e' }
+			     }
+			     );
+  </script>
+
+</th></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">Average&nbsp;TTL</th><td align="right" colspan="2">48</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">TTL &lt;= 32</th><td align="right">0.0%</td><td align="right">0</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">32 &lt; TTL &lt;= 64</th><td align="right">100.0%</td><td align="right">1,484</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">64 &lt; TTL &lt;= 96</th><td align="right">0.0%</td><td align="right">0</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">96 &lt; TTL &lt;= 128</th><td align="right">0.0%</td><td align="right">0</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">128 &lt; TTL &lt;= 160</th><td align="right">0.0%</td><td align="right">0</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">160 &lt; TTL &lt;= 192</th><td align="right">0.0%</td><td align="right">0</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">192 &lt; TTL &lt;= 224</th><td align="right">0.0%</td><td align="right">0</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">224 &lt; TTL &lt;= 256</th><td align="right">0.0%</td><td align="right">0</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;" bgcolor="white"><th align="CENTER" colspan="3" bgcolor="white"><div id="TTLDistribution_12" style="width: 350px; height: 320px; margin: 0 auto"></div>
+
+
+<script type="text/javascript">
+var data = [
+			['33 - 64',   100.0]];
+
+  $.jqplot('TTLDistribution_12', [data], 
+			     { 
+			     seriesDefaults: {
+			       renderer: jQuery.jqplot.PieRenderer, 
+				   rendererOptions: {
+				 showDataLabels: true
+				     }
+			       }, 
+ grid: { 
+  gridLineColor: 'transparent', 
+      background: 'transparent', 
+      borderColor: 'transparent', 
+      borderWidth: '1', 
+      shadow: false 
+      }, 
+				 legend: { show:true, location: 'e' }
+			     }
+			     );
+  </script>
+
+</th></tr>
+</tbody></table></td></tr><tr><th align="LEFT" bgcolor="#F3F3F3">Remote Hosts Distance</th><td bgcolor="white" align="CENTER"><div id="HostsDistance_13" style="width: 350px; height: 320px; margin: 0 auto"></div>
+
+
+<script type="text/javascript">
+var data = [
+			['2 Hops',   2.0],
+			['6 Hops',   1.0]];
+
+  $.jqplot('HostsDistance_13', [data], 
+			     { 
+			     seriesDefaults: {
+			       renderer: jQuery.jqplot.PieRenderer, 
+				   rendererOptions: {
+				 showDataLabels: true
+				     }
+			       }, 
+ grid: { 
+  gridLineColor: 'transparent', 
+      background: 'transparent', 
+      borderColor: 'transparent', 
+      borderWidth: '1', 
+      shadow: false 
+      }, 
+				 legend: { show:true, location: 'e' }
+			     }
+			     );
+  </script>
+
+</td></tr>
+<tr><th align="LEFT" bgcolor="#F3F3F3">Network Load</th><td>
+<div id="netspeed" style="align: center; width: 180px; height: 120px; margin: 0 auto"></div>
+<script type="text/javascript">
+	  s1 = [
+31149.9];
+	  $.jqplot('netspeed',[s1],{
+	    seriesDefaults: {
+	      renderer: $.jqplot.MeterGaugeRenderer,
+		  rendererOptions: {
+            showTickLabels: false,
+		min: 0,
+		    max: 31149.9,
+		    intervals:[10279.5, 23362.4, 31149.9],
+		    intervalColors:['#66cc66', '#E7E658', '#cc6666']
+		    }
+	      }
+	    });
+</script>
+<table border="1" cellspacing="0" cellpadding="2" width="100%"><tbody><tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">Actual</th><td align="right">249.2&nbsp;Kbit/s</td><td align="right">105.6&nbsp;Pkt/s</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">Last Minute</th><td align="right">0.0&nbsp;bit/s</td><td align="right">0.0&nbsp;Pkt/s</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">Last 5 Minutes</th><td align="right">0.0&nbsp;bit/s</td><td align="right">0.0&nbsp;Pkt/s</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">Peak</th><td align="right">249.2&nbsp;Kbit/s</td><td align="right">105.6&nbsp;Pkt/s</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="left" bgcolor="#F3F3F3">Average</th><td align="right">175.3&nbsp;Kbit/s</td><td align="right">74.2&nbsp;Pkt/s</td></tr>
+</tbody></table></td></tr>
+<tr><th align="LEFT" bgcolor="#F3F3F3">Historical Data</th>
+<td align="right">[ <a href="http://iccluster027.iccluster.epfl.ch:3000/plugins/rrdPlugin?action=list&amp;key=interfaces/br-0e8a1b7b1837&amp;title=interface%20br-0e8a1b7b1837"><img class="tooltip" valign="top" border="0" src="./3nodes-networktraffic5terms-queryA_files/graph.gif" alt="View rrd charts of historical data for this interface"></a> ]</td></tr>
+</tbody></table></center>
+
+</div>
+
+
+<div id="tabs-3">
+<center>
+<p><table border="1" cellspacing="0" cellpadding="2"><tbody><tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;" bgcolor="#F3F3F3"><th width="150">L2/L3 Protocol</th><th width="50">Data</th><th width="250" colspan="2">Percentage</th></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th width="150" align="LEFT" bgcolor="#F3F3F3">IP</th><td width="50" align="RIGHT">392.1&nbsp;KBytes</td><td align="right" width="50">91.6%</td><td width="200"><table border="1" cellspacing="0" cellpadding="2" width="100%"><tbody><tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="LEFT" width="150" bgcolor="#F3F3F3">TCP</th><td align="RIGHT" width="50">392.1&nbsp;KBytes </td><td align="RIGHT" width="50">100%</td><td width="260" nowrap=""><img alt="100%" align="MIDDLE" src="./3nodes-networktraffic5terms-queryA_files/gauge.jpg" width="260" height="12"></td></tr>
+
+</tbody></table></td></tr><tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><td colspan="4" align="CENTER" bgcolor="white"><div id="ProtocolDistribution_14" style="width: 350px; height: 320px; margin: 0 auto"></div>
+
+
+<script type="text/javascript">
+var data = [
+			['TCP',   100.0]];
+
+  $.jqplot('ProtocolDistribution_14', [data], 
+			     { 
+			     seriesDefaults: {
+			       renderer: jQuery.jqplot.PieRenderer, 
+				   rendererOptions: {
+				 showDataLabels: true
+				     }
+			       }, 
+ grid: { 
+  gridLineColor: 'transparent', 
+      background: 'transparent', 
+      borderColor: 'transparent', 
+      borderWidth: '1', 
+      shadow: false 
+      }, 
+				 legend: { show:true, location: 'e' }
+			     }
+			     );
+  </script>
+
+</td></tr>
+
+</tbody></table>
+
+</p></center></div>
+<div id="tabs-4">
+<table border="1" cellspacing="0" cellpadding="2"><tbody><tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;" bgcolor="#F3F3F3"><th width="150">Application Protocol</th><th width="50">Data</th><th width="250" colspan="2">Percentage</th></tr>
+
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><td colspan="4" align="CENTER" bgcolor="white"><div id="ServiceDistribution_15" style="width: 350px; height: 320px; margin: 0 auto"></div>
+
+
+<script type="text/javascript">
+var data = [
+			['Unknown',   16.8],
+			['FTP',   3.1],
+			['HTTP',   1.7],
+			['PostgreSQL',   78.4]];
+
+  $.jqplot('ServiceDistribution_15', [data], 
+			     { 
+			     seriesDefaults: {
+			       renderer: jQuery.jqplot.PieRenderer, 
+				   rendererOptions: {
+				 showDataLabels: true
+				     }
+			       }, 
+ grid: { 
+  gridLineColor: 'transparent', 
+      background: 'transparent', 
+      borderColor: 'transparent', 
+      borderWidth: '1', 
+      shadow: false 
+      }, 
+				 legend: { show:true, location: 'e' }
+			     }
+			     );
+  </script>
+
+</td></tr>
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="LEFT" width="150" bgcolor="#F3F3F3">Unknown</th><td align="RIGHT" width="50">72.0&nbsp;KBytes </td><td align="RIGHT" width="50">16.8%</td><td width="260" nowrap="">&nbsp;<p><table border="0"><tbody><tr><td align="left"><img src="./3nodes-networktraffic5terms-queryA_files/rrdPlugin" border="0"></td><td><a href="http://iccluster027.iccluster.epfl.ch:3000/plugins/rrdPlugin?mode=zoom&amp;action=arbreq&amp;which=graph&amp;arbfile=IP_UnknownBytes&amp;arbiface=br-0e8a1b7b1837&amp;arbip=&amp;start=1505883747&amp;end=1505926947&amp;counter=&amp;title=">&nbsp;<img valign="top" class="tooltip" src="./3nodes-networktraffic5terms-queryA_files/graph_zoom.gif" border="0"></a></td></tr></tbody></table>
+</p></td></tr>
+
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="LEFT" width="150" bgcolor="#F3F3F3">FTP</th><td align="RIGHT" width="50">13.1&nbsp;KBytes </td><td align="RIGHT" width="50">3.1%</td><td width="260" nowrap="">&nbsp;<p><table border="0"><tbody><tr><td align="left"><img src="./3nodes-networktraffic5terms-queryA_files/rrdPlugin(1)" border="0"></td><td><a href="http://iccluster027.iccluster.epfl.ch:3000/plugins/rrdPlugin?mode=zoom&amp;action=arbreq&amp;which=graph&amp;arbfile=IP_FTPBytes&amp;arbiface=br-0e8a1b7b1837&amp;arbip=&amp;start=1505883747&amp;end=1505926947&amp;counter=&amp;title=">&nbsp;<img valign="top" class="tooltip" src="./3nodes-networktraffic5terms-queryA_files/graph_zoom.gif" border="0"></a></td></tr></tbody></table>
+</p></td></tr>
+
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="LEFT" width="150" bgcolor="#F3F3F3">HTTP</th><td align="RIGHT" width="50">7.4&nbsp;KBytes </td><td align="RIGHT" width="50">1.7%</td><td width="260" nowrap="">&nbsp;<p><table border="0"><tbody><tr><td align="left"><img src="./3nodes-networktraffic5terms-queryA_files/rrdPlugin(2)" border="0"></td><td><a href="http://iccluster027.iccluster.epfl.ch:3000/plugins/rrdPlugin?mode=zoom&amp;action=arbreq&amp;which=graph&amp;arbfile=IP_HTTPBytes&amp;arbiface=br-0e8a1b7b1837&amp;arbip=&amp;start=1505883747&amp;end=1505926947&amp;counter=&amp;title=">&nbsp;<img valign="top" class="tooltip" src="./3nodes-networktraffic5terms-queryA_files/graph_zoom.gif" border="0"></a></td></tr></tbody></table>
+</p></td></tr>
+
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;"><th align="LEFT" width="150" bgcolor="#F3F3F3">PostgreSQL</th><td align="RIGHT" width="50">335.4&nbsp;KBytes </td><td align="RIGHT" width="50">78.4%</td><td width="260" nowrap="">&nbsp;<p><table border="0"><tbody><tr><td align="left"><img src="./3nodes-networktraffic5terms-queryA_files/rrdPlugin(3)" border="0"></td><td><a href="http://iccluster027.iccluster.epfl.ch:3000/plugins/rrdPlugin?mode=zoom&amp;action=arbreq&amp;which=graph&amp;arbfile=IP_PostgreSQLBytes&amp;arbiface=br-0e8a1b7b1837&amp;arbip=&amp;start=1505883747&amp;end=1505926947&amp;counter=&amp;title=">&nbsp;<img valign="top" class="tooltip" src="./3nodes-networktraffic5terms-queryA_files/graph_zoom.gif" border="0"></a></td></tr></tbody></table>
+</p></td></tr>
+
+<tr onmouseover="this.bgColor = &#39;#EDF3FE&#39;" onmouseout="this.bgColor = &#39;#FFFFFF&#39;" bgcolor="#FFFFFF"><th bgcolor="#F3F3F3">Aggregated View</th><td colspan="4" align="center" bgcolor="white"><table border="0"><tbody><tr><td><img src="./3nodes-networktraffic5terms-queryA_files/rrdPlugin(4)" border="0"></td><td><a href="http://iccluster027.iccluster.epfl.ch:3000/plugins/rrdPlugin?mode=zoom&amp;action=graphSummary&amp;graphId=4&amp;key=interfaces/br-0e8a1b7b1837/&amp;start=1505883747&amp;end=1505926947"><img valign="middle" class="tooltip" src="./3nodes-networktraffic5terms-queryA_files/graph_zoom.gif" border="0"></a></td></tr></tbody></table></td></tr></tbody></table><p></p></div></div></center>
+
+
+
+
+<script type="text/javascript">var options = {script:"/findHost.json?",varname:"key",json:true,callback: function (obj) { document.myform.action =obj.info; document.myform.submit(); }};var as_json = new bsn.AutoSuggest('testinput', options);</script>
+<br>&nbsp;<br><div id="bottom"><div id="footer">&nbsp;<br>Report created on Wed Sep 20 19:02:27 2017
+ [ntop uptime: 19 sec]
+<br>
+Generated by ntop v.5.0.1 (64 bit)
+[x86_64-3.2.0-54-generic-linux-gnu]<br>© 1998-2012 by Luca Deri, built: Mar 30 2014 07:45:35.<br>
+<script type="text/javascript">function nicetitleDecorator(el) {
+var result = el.title;
+if(el.href){
+result += '<p>' + el.href + '</p>';
+	}
+return result;
+}
+domTT_replaceTitles(nicetitleDecorator);
+</script>
+Listening on [br-0e8a1b7b1837,br-9b9b9b9454a5,br-d8d2705398ba,br-ed6885b479f4]
+for all packets (i.e. without a filtering expression)
+<br>Web reports include all interfaces (merged)</div></div>
+
+
+‹</body></html>
