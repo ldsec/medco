@@ -1,0 +1,16 @@
+QUERY FIRST RUN / AVERAGES: 
+Overall time: 6684.666666666667 / 4552.4
+
+user information retrieval: 0.3333333333333333 / 0.03333333333333333
+Query parsing i2b2: 3.0 / 2.3333333333333335
+Query tagging: 141.66666666666666 / 118.5
+i2b2 query: 6116.666666666667 / 4040.633333333333
+Patient set retrieval: 113.33333333333333 / 64.16666666666667
+
+ddt request exec time: 13.0 / 14.7
+ddt request comm time: 52.333333333333336 / 54.43333333333333
+ddt request parsing time: 2.6666666666666665 / 3.6333333333333333
+agg req exec time: 7.333333333333333 / 6.7
+agg req parsing time: 0.0 / 0.0
+agg req agg time: 0.0 / 0.0
+agg req comm time: 406.0 / 476.6
