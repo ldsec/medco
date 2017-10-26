@@ -11,23 +11,19 @@ ENV SHRINE_VERSION="fork/1.22.8-medco" \
     ADMIN_PASSWORD="prigen2017" \
     DB_PASSWORD="pFjy3EjDVwLfT2rB9xkK"
 
-
 # system and tomcat prerequisites
 RUN apt-get -y update && \
     apt-get -y install git maven zip wget unzip openjdk-8-jdk-headless && \
     apt-get -y clean && \
     echo "<?xml version='1.0' encoding='utf-8'?><tomcat-users><role rolename=\"admin-gui\" /><user username=\"admin\"" \
         "password=\"$ADMIN_PASSWORD\" roles=\"admin-gui\" /></tomcat-users>" > "$CATALINA_HOME/conf/tomcat-users.xml" && \
-        echo 'export CATALINA_OPTS=" -Dakka.daemonic=on "' > "$CATALINA_HOME/bin/setenv.sh"
+    echo 'export CATALINA_OPTS=" -Dakka.daemonic=on "' > "$CATALINA_HOME/bin/setenv.sh" && \
+    echo '{ "allow_root": true }' > /root/.bowerrc
 
 # download and compile shrine wars
 WORKDIR "$SHRINE_SRC_DIR"
 RUN git clone https://c4science.ch/source/shrine-medco.git . && \
     git checkout $SHRINE_VERSION
-COPY patches/* .
-
-RUN git apply *.diff && \
-    echo '{ "allow_root": true }' > /root/.bowerrc
 
 # install
 # todo: reorganize properly this part (cache and build shrine parts)
