@@ -5,7 +5,6 @@ services:
       context: ../i2b2-server
       args:
         - I2B2_DOMAIN_NAME_ARG=medcodeployment
-        - UNLYNX_GROUP_KEY_FILE_ARG=srv1-3-5-group.toml
         - UNLYNX_ENTRYPOINT_IDX_ARG=0
         - AXIS2_LOGLEVEL_ARG=INFO
         - UNLYNX_DEBUG_LEVEL_ARG=1
@@ -15,7 +14,7 @@ services:
     networks:
       - medco-network
     volumes:
-      - ../configuration:/opt/configuration
+      - ../configuration-profiles/dev-3nodes-samehost:/opt/medco-configuration
 
   i2b2-database:
     build:
@@ -41,7 +40,7 @@ services:
     build:
       context: ../unlynx
       args:
-        - UNLYNX_KEY_FILE_ARG=srv1-private.toml
+        - UNLYNX_ENTRYPOINT_IDX_ARG=0
         - UNLYNX_DEBUG_LEVEL_ARG=1
     ports:
       - "2000"
@@ -49,7 +48,31 @@ services:
     networks:
       - medco-network
     volumes:
-      - ../configuration:/opt/configuration
+      - ../configuration-profiles/dev-3nodes-samehost:/opt/medco-configuration
+
+  shrine-server:
+    build:
+      context: ../shrine-server
+      args:
+        - I2B2_DOMAIN_NAME_ARG=medcodeployment
+        - SHRINE_NODE_NAME_ARG=172.16.205.10
+        - SHRINE_KEYSTORE_PRIVATE_KEY_ALIAS_ARG=172.16.205.10
+    ports:
+      - "6443"
+    networks:
+      - medco-network
+    volumes:
+      - ../configuration-profiles/dev-3nodes-samehost:/opt/medco-configuration
+
+  shrine-database:
+    build:
+      context: ../shrine-database
+      args:
+        - I2B2_DOMAIN_NAME_ARG=medcodeployment
+    ports:
+      - "3306"
+    networks:
+      - medco-network
 
 networks:
   medco-network:

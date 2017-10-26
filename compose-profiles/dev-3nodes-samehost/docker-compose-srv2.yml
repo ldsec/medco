@@ -6,7 +6,6 @@ services:
       service: i2b2-server
     build:
       args:
-        - UNLYNX_GROUP_KEY_FILE_ARG=dev-3nodes-samehost/group.toml
         - UNLYNX_ENTRYPOINT_IDX_ARG=2
         - AXIS2_LOGLEVEL_ARG=DEBUG
         - UNLYNX_DEBUG_LEVEL_ARG=5
@@ -49,7 +48,7 @@ services:
       service: unlynx
     build:
       args:
-        - UNLYNX_KEY_FILE_ARG=dev-3nodes-samehost/srv2-private.toml
+        - UNLYNX_ENTRYPOINT_IDX_ARG=2
         - UNLYNX_DEBUG_LEVEL_ARG=1
     ports:
       - "2006:2006"
@@ -63,6 +62,35 @@ services:
           - unlynx-srv2
         ipv4_address: 172.16.205.12
 
+  shrine-server-srv2:
+    extends:
+      file: ../docker-compose-common.yml
+      service: shrine-server
+    build:
+      args:
+        - SHRINE_NODE_NAME_ARG=shrine-server-srv2
+        - SHRINE_KEYSTORE_PRIVATE_KEY_ALIAS_ARG=shrine-server-srv2
+    ports:
+      - "6449:6443"
+    networks:
+      medco-network-srv2:
+        aliases:
+          - shrine-server
+      shrine-network:
+        aliases:
+          - shrine-server-srv2
+
+  shrine-database-srv2:
+    extends:
+      file: ../docker-compose-common.yml
+      service: shrine-database
+    ports:
+      - "3312:3306"
+    networks:
+      medco-network-srv2:
+        aliases:
+          - shrine-database
+
 networks:
   medco-network-srv2:
     driver: bridge
@@ -74,3 +102,7 @@ networks:
   cothority-network:
     external:
       name: dev3nodessamehost_cothority-network
+
+  shrine-network:
+    external:
+      name: dev3nodessamehost_shrine-network
