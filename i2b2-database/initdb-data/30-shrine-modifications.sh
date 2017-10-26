@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# db lookups TODO: password hardcoded
+# db lookups
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EOSQL
     insert into i2b2hive.ont_db_lookup (c_domain_id, c_project_path, c_owner_id, c_db_fullschema, c_db_datasource, c_db_servertype, c_db_nicename)
     values ('$I2B2_DOMAIN_NAME', 'SHRINE/', '@', 'shrine_ont', 'java:/OntologyShrineDS', 'POSTGRESQL', 'SHRINE')
@@ -16,10 +16,8 @@ EOSQL
 # add shrine user in pm TODO: password hardcoded (and encrypted with commented code)
 #cd "install/i2b2-1.7/i2b2"
 #javac ./I2b2PasswordCryptor.java
-#SHRINE_PW=$(java -classpath ./ I2b2PasswordCryptor demouser)
+#SHRINE_PW=$(java -classpath ./ I2b2PasswordCryptor $DB_PASSWORD)
 
-# TODO: password hardcoded, use compose secrets
-# TODO: check if the external address is OK (maybe pass by argument), port?
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EOSQL
     insert into i2b2pm.pm_user_data (user_id, full_name, password, status_cd)
     values ('shrine', 'shrine', '9117d59a69dc49807671a51f10ab7f', 'A');
@@ -82,7 +80,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EO
     grant all privileges on all functions in schema shrine_ont to i2b2metadata;
 EOSQL
 
-# add demo shrine ontology data TODO: password hardcoded; TODO: disabled
+# add demo shrine ontology data TODO: disabled
 #wget https://open.med.harvard.edu/svn/shrine-ontology/SHRINE_Demo_Downloads/trunk/ShrineDemo.sql
 #sed -i '1s/^/SET search_path TO shrine_ont;\n/' Shrine.sql
 #psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" < ShrineDemo.sql

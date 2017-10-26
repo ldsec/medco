@@ -25,13 +25,6 @@ RUN git clone https://github.com/i2b2/i2b2-webclient.git . && \
 RUN cp -R "$I2B2_WEB_DIR" "$LIGHTTPD_WEB_ROOT/i2b2-admin" && \
     cp -R "$I2B2_WEB_DIR" "$LIGHTTPD_WEB_ROOT/i2b2-client"
 
-# todo: change this
-# tmp for niccolo: download and install the medco-i2b2 webclient
-ENV MEDCO_I2B2_WEB_DIR="$LIGHTTPD_WEB_ROOT/medco-i2b2-client"
-WORKDIR "$MEDCO_I2B2_WEB_DIR"
-RUN git clone https://c4science.ch/diffusion/4897/i-b-webclient.git . && \
-    chmod -R 777 .
-
 # copy and apply settings
 COPY i2b2-web-writeconfig.sh .
 RUN chmod -R +x ./i2b2-web-writeconfig.sh && sleep 1 && /bin/bash -c ./i2b2-web-writeconfig.sh
@@ -46,6 +39,10 @@ RUN wget http://downloads.sourceforge.net/phppgadmin/phpPgAdmin-5.1.tar.gz?downl
     sed -i "s/ = 'PostgreSQL'/ = '$I2B2_DOMAIN_NAME PostgreSQL Server'/" phppgadmin/conf/config.inc.php && \
     sed -i "s/'extra_login_security'] = true/'extra_login_security'] = false/" phppgadmin/conf/config.inc.php && \
     sed -i "/\$cmd = \$exe/c\$cmd = \$exe;" phppgadmin/dbexport.php
+
+# todo: phpmyadmin https://files.phpmyadmin.net/phpMyAdmin/4.7.4/phpMyAdmin-4.7.4-all-languages.zip
+# RUN wget http://downloads.sourceforge.net/phppgadmin/phpPgAdmin-5.1.tar.gz?download && \
+# /phpMyAdmin-4.7.4-all-languages/
 
 # fix permissions + bug fix
 RUN chown -R www-data:www-data "$LIGHTTPD_WEB_ROOT" && \

@@ -130,7 +130,7 @@ grant all privileges on all functions in schema i2b2metadata to i2b2metadata;
 
 
 -- access rights
---create role medco_data login password 'demouser';
+--create role medco_data login password '$DB_PASSWORD';
 --grant all on schema medco_data to medco_data;
 --grant all privileges on all tables in schema medco_data to medco_data;
 

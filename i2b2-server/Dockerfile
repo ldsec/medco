@@ -11,17 +11,19 @@ ENV AXIS2_VERSION="1.7.1" \
     I2B2_SRC_DIR="/opt/i2b2-src" \
     I2B2_DOMAIN_NAME="$I2B2_DOMAIN_NAME_ARG" \
     I2B2_FR_FILES_DIR="/opt/FRC_files" \
-    MEDCO_SRC_DIR="/opt/medco-src" \
-    MEDCO_GIT_BRANCH="master" \
-    CONF_DIR="/opt/configuration"
+    MEDCO_CELL_SRC_DIR="/opt/medco-src" \
+    MEDCO_CELL_GIT_BRANCH="master" \
+    CONF_DIR="/opt/medco-configuration" \
+    ADMIN_PASSWORD="prigen2017" \
+    DB_PASSWORD="pFjy3EjDVwLfT2rB9xkK"
 
-# pre-requisites TODO: hardcoded password
+# pre-requisites
 USER root
-RUN $JBOSS_HOME/bin/add-user.sh admin prigen2017 --silent && \
+RUN $JBOSS_HOME/bin/add-user.sh admin $ADMIN_PASSWORD --silent && \
     sed -i 's/Xmx512m/Xmx2048m/g' $JBOSS_HOME/bin/standalone.conf && \
     yum update -y && yum -y install wget git ant && yum clean all && \
     mkdir "$I2B2_SRC_DIR" && chown -R jboss:jboss "$I2B2_SRC_DIR" && \
-    mkdir "$MEDCO_SRC_DIR" && chown -R jboss:jboss "$MEDCO_SRC_DIR"
+    mkdir "$MEDCO_CELL_SRC_DIR" && chown -R jboss:jboss "$MEDCO_CELL_SRC_DIR"
 
 # install axis 2
 USER jboss
@@ -32,8 +34,7 @@ RUN wget "http://archive.apache.org/dist/axis/axis2/java/core/$AXIS2_VERSION/axi
     unzip "axis2.war" -d "i2b2.war" && \
     rm "axis2.war" && \
     touch "i2b2.war.dodeploy" && \
-    sed -i "/^log4j.rootCategory=/c\log4j.rootCategory=$AXIS2_LOGLEVEL, CONSOLE" /opt/jboss/wildfly/standalone/deployments/i2b2.war/WEB-INF/classes/log4j.properties
-
+    sed -i "/^log4j.rootCategory=/c\log4j.rootCategory=$AXIS2_LOGLEVEL, CONSOLE" i2b2.war/WEB-INF/classes/log4j.properties
 
 # download, patch, compile and deploy i2b2
 WORKDIR "$I2B2_SRC_DIR"
@@ -105,23 +106,20 @@ RUN sed -i "/jboss.home/c\jboss.home=$JBOSS_HOME" build.properties && \
     sed -i "/im.ws.pm.url/c\im.ws.pm.url=http://localhost:8080/i2b2/services/PMService/getServices" etc/spring/im.properties && \
     ant -f master_build.xml clean build-all deploy
 
-ENV NOCACHE="f"
 # MedCo cell
 ## download
-WORKDIR "$MEDCO_SRC_DIR"
+WORKDIR "$MEDCO_CELL_SRC_DIR"
 RUN git clone https://c4science.ch/source/medco-i2b2-cell.git . && \
-    git checkout $MEDCO_GIT_BRANCH
+    git checkout $MEDCO_CELL_GIT_BRANCH
 
 ## install
-ARG UNLYNX_GROUP_KEY_FILE_ARG="group.toml"
 ARG UNLYNX_ENTRYPOINT_IDX_ARG="0"
 ARG UNLYNX_DEBUG_LEVEL_ARG="1"
-ENV UNLYNX_GROUP_KEY_FILE="$UNLYNX_GROUP_KEY_FILE_ARG" \
-    UNLYNX_ENTRYPOINT_IDX="$UNLYNX_ENTRYPOINT_IDX_ARG" \
+ENV UNLYNX_ENTRYPOINT_IDX="$UNLYNX_ENTRYPOINT_IDX_ARG" \
     UNLYNX_DEBUG_LEVEL="$UNLYNX_DEBUG_LEVEL_ARG"
 
 RUN sed -i "/jboss.home/c\jboss.home=$JBOSS_HOME" build.properties && \
-    sed -i "/medco.unlynx.groupfilepath/c\medco.unlynx.groupfilepath=$CONF_DIR/keys/$UNLYNX_GROUP_KEY_FILE" etc/spring/medcoapp/medco.properties && \
+    sed -i "/medco.unlynx.groupfilepath/c\medco.unlynx.groupfilepath=$CONF_DIR/group.toml" etc/spring/medcoapp/medco.properties && \
     sed -i "/medco.unlynx.entrypointidx/c\medco.unlynx.entrypointidx=$UNLYNX_ENTRYPOINT_IDX" etc/spring/medcoapp/medco.properties && \
     sed -i "/medco.unlynx.debuglevel/c\medco.unlynx.debuglevel=$UNLYNX_DEBUG_LEVEL" etc/spring/medcoapp/medco.properties && \
     ant -f build.xml clean all deploy
@@ -129,5 +127,4 @@ RUN sed -i "/jboss.home/c\jboss.home=$JBOSS_HOME" build.properties && \
 # run
 VOLUME $I2B2_FR_FILES_DIR $CONF_DIR
 EXPOSE 8080 9990
-ENTRYPOINT \
-    exec /opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0 -bmanagement 0.0.0.0
+ENTRYPOINT exec /opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0 -bmanagement 0.0.0.0

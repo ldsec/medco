@@ -5,7 +5,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EO
 -- ################### SHRINE ONT DB ###################
 
 -- user and schema
-    create user shrine_ont with password 'demouser';
+    create user shrine_ont with password '$DB_PASSWORD';
     create schema authorization shrine_ont;
 
 

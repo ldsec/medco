@@ -2,7 +2,6 @@
 set -e
 
 # meant to be called by Dockerfile of i2b2-server
-# env var used: I2B2_DOMAIN_NAME
 
 cat > edu.harvard.i2b2.pm/etc/jboss/pm-ds.xml <<EOL
 <?xml version="1.0" encoding="UTF-8"?>
@@ -14,7 +13,7 @@ cat > edu.harvard.i2b2.pm/etc/jboss/pm-ds.xml <<EOL
                 <driver>postgresql-9.2-1002.jdbc4.jar</driver>
                 <security>
                         <user-name>i2b2pm</user-name>
-                        <password>demouser</password>
+                        <password>$DB_PASSWORD</password>
                 </security>
                 <validation>
                         <validate-on-match>false</validate-on-match>
@@ -38,7 +37,7 @@ cat > edu.harvard.i2b2.ontology/etc/jboss/ont-ds.xml <<EOL
         <driver>postgresql-9.2-1002.jdbc4.jar</driver>
         <security>
             <user-name>i2b2metadata</user-name>
-            <password>demouser</password>
+            <password>$DB_PASSWORD</password>
         </security>
         <validation>
             <validate-on-match>false</validate-on-match>
@@ -55,7 +54,7 @@ cat > edu.harvard.i2b2.ontology/etc/jboss/ont-ds.xml <<EOL
         <driver>postgresql-9.2-1002.jdbc4.jar</driver>
         <security>
             <user-name>i2b2hive</user-name>
-            <password>demouser</password>
+            <password>$DB_PASSWORD</password>
         </security>
         <validation>
             <validate-on-match>false</validate-on-match>
@@ -74,7 +73,7 @@ cat > edu.harvard.i2b2.ontology/etc/jboss/ont-ds.xml <<EOL
             <driver>postgresql-9.2-1002.jdbc4.jar</driver>
             <security>
                     <user-name>shrine_ont</user-name>
-                    <password>demouser</password>
+                    <password>$DB_PASSWORD</password>
             </security>
             <validation>
                     <validate-on-match>false</validate-on-match>
@@ -100,7 +99,7 @@ cat > edu.harvard.i2b2.crc/etc/jboss/crc-ds.xml <<EOL
                 <driver>postgresql-9.2-1002.jdbc4.jar</driver>
                 <security>
                         <user-name>i2b2hive</user-name>
-                        <password>demouser</password>
+                        <password>$DB_PASSWORD</password>
                 </security>
                 <validation>
                         <validate-on-match>false</validate-on-match>
@@ -117,7 +116,7 @@ cat > edu.harvard.i2b2.crc/etc/jboss/crc-ds.xml <<EOL
                 <driver>postgresql-9.2-1002.jdbc4.jar</driver>
                 <security>
                         <user-name>i2b2demodata</user-name>
-                        <password>demouser</password>
+                        <password>$DB_PASSWORD</password>
                 </security>
                 <validation>
                         <validate-on-match>false</validate-on-match>
@@ -140,7 +139,7 @@ cat > edu.harvard.i2b2.workplace/etc/jboss/work-ds.xml <<EOL
             <driver>postgresql-9.2-1002.jdbc4.jar</driver>
             <security>
                     <user-name>i2b2hive</user-name>
-                    <password>demouser</password>
+                    <password>$DB_PASSWORD</password>
             </security>
             <validation>
                     <validate-on-match>false</validate-on-match>
@@ -157,7 +156,7 @@ cat > edu.harvard.i2b2.workplace/etc/jboss/work-ds.xml <<EOL
             <driver>postgresql-9.2-1002.jdbc4.jar</driver>
             <security>
                     <user-name>i2b2workdata</user-name>
-                    <password>demouser</password>
+                    <password>$DB_PASSWORD</password>
             </security>
             <validation>
                     <validate-on-match>false</validate-on-match>
@@ -180,7 +179,7 @@ cat > edu.harvard.i2b2.im/etc/jboss/im-ds.xml <<EOL
                 <driver>postgresql-9.2-1002.jdbc4.jar</driver>
                 <security>
                         <user-name>i2b2hive</user-name>
-                        <password>demouser</password>
+                        <password>$DB_PASSWORD</password>
                 </security>
                 <validation>
                         <validate-on-match>false</validate-on-match>
@@ -197,7 +196,7 @@ cat > edu.harvard.i2b2.im/etc/jboss/im-ds.xml <<EOL
                 <driver>postgresql-9.2-1002.jdbc4.jar</driver>
                 <security>
                         <user-name>i2b2imdata</user-name>
-                        <password>demouser</password>
+                        <password>$DB_PASSWORD</password>
                 </security>
                 <validation>
                         <validate-on-match>false</validate-on-match>
@@ -244,7 +243,7 @@ cat > edu.harvard.i2b2.crc/etc/spring/CRCLoaderApplicationContext.xml <<EOL
 		<property name="driverClassName" value="org.postgresql.Driver" />
 		<property name="url" value="jdbc:postgresql://i2b2-database:5432/$I2B2_DOMAIN_NAME" />
 		<property name="username" value="i2b2hive" />
-		<property name="password" value="demouser" />
+		<property name="password" value="$DB_PASSWORD" />
 	</bean>
 
 

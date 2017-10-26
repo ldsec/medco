@@ -1,15 +1,13 @@
 #!/bin/bash
 set -e
 
-# expected envvar: I2B2_DATA_DIR, I2B2_DOMAIN_NAME
-
 # ---------- CRC data ----------
 cd "$I2B2_DATA_DIR/edu.harvard.i2b2.data/Release_1-7/NewInstall/Crcdata"
 
 cat > db.properties <<EOL
 db.type=postgresql
 db.username=i2b2demodata
-db.password=demouser
+db.password=$DB_PASSWORD
 db.driver=org.postgresql.Driver
 db.url=jdbc:postgresql://localhost/$I2B2_DOMAIN_NAME?searchpath=i2b2demodata
 db.project=demo
@@ -26,7 +24,7 @@ cd "$I2B2_DATA_DIR/edu.harvard.i2b2.data/Release_1-7/NewInstall/Hivedata"
 cat > db.properties <<EOL
 db.type=postgresql
 db.username=i2b2hive
-db.password=demouser
+db.password=$DB_PASSWORD
 db.driver=org.postgresql.Driver
 db.url=jdbc:postgresql://localhost/$I2B2_DOMAIN_NAME?searchpath=i2b2hive
 EOL
@@ -41,7 +39,7 @@ cd "$I2B2_DATA_DIR/edu.harvard.i2b2.data/Release_1-7/NewInstall/Imdata"
 cat > db.properties <<EOL
 db.type=postgresql
 db.username=i2b2imdata
-db.password=demouser
+db.password=$DB_PASSWORD
 db.driver=org.postgresql.Driver
 db.url=jdbc:postgresql://localhost/$I2B2_DOMAIN_NAME?searchpath=i2b2imdata
 db.project=demo
@@ -57,7 +55,7 @@ cd "$I2B2_DATA_DIR/edu.harvard.i2b2.data/Release_1-7/NewInstall/Metadata"
 cat > db.properties <<EOL
 db.type=postgresql
 db.username=i2b2metadata
-db.password=demouser
+db.password=$DB_PASSWORD
 db.driver=org.postgresql.Driver
 db.url=jdbc:postgresql://localhost/$I2B2_DOMAIN_NAME?searchpath=i2b2metadata
 db.project=demo
@@ -73,7 +71,7 @@ cd "$I2B2_DATA_DIR/edu.harvard.i2b2.data/Release_1-7/NewInstall/Pmdata"
 cat > db.properties <<EOL
 db.type=postgresql
 db.username=i2b2pm
-db.password=demouser
+db.password=$DB_PASSWORD
 db.driver=org.postgresql.Driver
 db.url=jdbc:postgresql://localhost/$I2B2_DOMAIN_NAME?searchpath=i2b2pm
 EOL
@@ -89,7 +87,7 @@ cd "$I2B2_DATA_DIR/edu.harvard.i2b2.data/Release_1-7/NewInstall/Workdata"
 cat > db.properties <<EOL
 db.type=postgresql
 db.username=i2b2workdata
-db.password=demouser
+db.password=$DB_PASSWORD
 db.driver=org.postgresql.Driver
 db.url=jdbc:postgresql://localhost/$I2B2_DOMAIN_NAME?searchpath=i2b2workdata
 db.project=demo

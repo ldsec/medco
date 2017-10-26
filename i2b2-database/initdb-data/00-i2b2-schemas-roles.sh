@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e
 
-# TODO: password hardcoded to be modified (and passed by secrets of docker)
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
     CREATE DATABASE $I2B2_DOMAIN_NAME
 EOSQL
@@ -14,12 +13,12 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EO
     create schema i2b2pm;
     create schema i2b2workdata;
 
-    create role i2b2demodata login password 'demouser';
-    create role i2b2hive login password 'demouser';
-    create role i2b2imdata login password 'demouser';
-    create role i2b2metadata login password 'demouser';
-    create role i2b2pm login password 'demouser';
-    create role i2b2workdata login password 'demouser';
+    create role i2b2demodata login password '$DB_PASSWORD';
+    create role i2b2hive login password '$DB_PASSWORD';
+    create role i2b2imdata login password '$DB_PASSWORD';
+    create role i2b2metadata login password '$DB_PASSWORD';
+    create role i2b2pm login password '$DB_PASSWORD';
+    create role i2b2workdata login password '$DB_PASSWORD';
 
     grant all on schema i2b2demodata to i2b2demodata;
     grant all on schema i2b2hive to i2b2hive;
