@@ -16,7 +16,7 @@ shift
 
 # clean up previous entries
 mkdir -p "$CONF_FOLDER"
-rm -f "$CONF_FOLDER/shrine.keystore" "$CONF_FOLDER/shrine_downstream_nodes.conf"
+rm -f "$CONF_FOLDER/shrine.keystore" "$CONF_FOLDER/shrine_downstream_nodes.conf" "$CONF_FOLDER/shrine_alias_map.conf"
 
 while [ $# -gt 0 ]
 do
@@ -34,8 +34,9 @@ do
     #keytool -import -v -trustcacerts -alias "$NODE_IP" -file "$CONF_FOLDER/$NODE_IP.cer" -keystore "$CONF_FOLDER/shrine.keystore"  -keypass "$KEYSTORE_PW"  -storepass "$KEYSTORE_PW"
 
 
-    # add entry in the downstream nodes
+    # add entry in the downstream nodes and alias map
     echo "\"$NODE_DNS\" = \"https://$NODE_DNS:6443/shrine/rest/adapter/requests\"" >> "$CONF_FOLDER/shrine_downstream_nodes.conf"
+    echo "\"$NODE_DNS\" = \"$NODE_DNS\"" >> "$CONF_FOLDER/shrine_alias_map.conf"
 
     #todo: unlynx keys
 done

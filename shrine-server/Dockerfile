@@ -90,6 +90,7 @@ COPY conf/server.xml conf/context.xml "$CATALINA_HOME/conf/"
 COPY conf/i2b2_config_data.js "$CATALINA_HOME/webapps/shrine-client/"
 COPY conf/cell_config_data.js "$CATALINA_HOME/webapps/shrine-client/js-i2b2/cells/SHRINE/"
 RUN sed -i "/SHRINE_DOWNSTREAM_NODES_FILE_PATH/c\include \"$CONF_DIR/shrine_downstream_nodes.conf\"" "$CATALINA_HOME/lib/shrine.conf" && \
+    sed -i "/SHRINE_ALIAS_MAP_FILE_PATH/c\include \"$CONF_DIR/shrine_alias_map.conf\"" "$CATALINA_HOME/lib/shrine.conf" && \
 
     sed -i "s#SHRINE_KEYSTORE_FILE_PATH#$CONF_DIR/shrine.keystore#g" "$CATALINA_HOME/conf/server.xml" && \
     sed -i "s/SHRINE_KEYSTORE_PASSWORD/$ADMIN_PASSWORD/g" "$CATALINA_HOME/conf/server.xml" && \
