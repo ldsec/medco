@@ -20,13 +20,13 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EO
         C_DOMAIN_ID = '$I2B2_DOMAIN_NAME', C_PROJECT_PATH = '/MedCo/', C_DB_NICENAME = 'MedCo'
         WHERE C_DOMAIN_ID = 'i2b2demo';
     UPDATE i2b2hive.im_db_lookup SET
-        C_DOMAIN_ID = '$I2B2_DOMAIN_NAME', C_PROJECT_PATH = '/MedCo/'
+        C_DOMAIN_ID = '$I2B2_DOMAIN_NAME', C_PROJECT_PATH = 'MedCo/'
         WHERE C_DOMAIN_ID = 'i2b2demo';
     UPDATE i2b2hive.ont_db_lookup SET
-        C_DOMAIN_ID = '$I2B2_DOMAIN_NAME', C_PROJECT_PATH = '/MedCo/'
+        C_DOMAIN_ID = '$I2B2_DOMAIN_NAME', C_PROJECT_PATH = 'MedCo/'
         WHERE C_DOMAIN_ID = 'i2b2demo';
     UPDATE i2b2hive.work_db_lookup SET
-        C_DOMAIN_ID = '$I2B2_DOMAIN_NAME', C_PROJECT_PATH = '/MedCo/'
+        C_DOMAIN_ID = '$I2B2_DOMAIN_NAME', C_PROJECT_PATH = 'MedCo/'
         WHERE C_DOMAIN_ID = 'i2b2demo';
 EOSQL
 
