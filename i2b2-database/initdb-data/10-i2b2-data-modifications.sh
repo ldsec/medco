@@ -16,10 +16,18 @@ EOSQL
 
 # update hive data (DB lookups)
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EOSQL
-    update i2b2hive.crc_db_lookup SET C_DOMAIN_ID = '$I2B2_DOMAIN_NAME' WHERE C_DOMAIN_ID = 'i2b2demo';
-    UPDATE i2b2hive.im_db_lookup SET C_DOMAIN_ID = '$I2B2_DOMAIN_NAME' WHERE C_DOMAIN_ID = 'i2b2demo';
-    UPDATE i2b2hive.ont_db_lookup SET C_DOMAIN_ID = '$I2B2_DOMAIN_NAME' WHERE C_DOMAIN_ID = 'i2b2demo';
-    UPDATE i2b2hive.work_db_lookup SET C_DOMAIN_ID = '$I2B2_DOMAIN_NAME' WHERE C_DOMAIN_ID = 'i2b2demo';
+    update i2b2hive.crc_db_lookup SET
+        C_DOMAIN_ID = '$I2B2_DOMAIN_NAME', C_PROJECT_PATH = '/MedCo', C_DB_NICENAME = 'MedCo'
+        WHERE C_DOMAIN_ID = 'i2b2demo';
+    UPDATE i2b2hive.im_db_lookup SET
+        C_DOMAIN_ID = '$I2B2_DOMAIN_NAME', C_PROJECT_PATH = '/MedCo'
+        WHERE C_DOMAIN_ID = 'i2b2demo';
+    UPDATE i2b2hive.ont_db_lookup SET
+        C_DOMAIN_ID = '$I2B2_DOMAIN_NAME', C_PROJECT_PATH = '/MedCo'
+        WHERE C_DOMAIN_ID = 'i2b2demo';
+    UPDATE i2b2hive.work_db_lookup SET
+        C_DOMAIN_ID = '$I2B2_DOMAIN_NAME', C_PROJECT_PATH = '/MedCo'
+        WHERE C_DOMAIN_ID = 'i2b2demo';
 EOSQL
 
 
@@ -44,7 +52,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EO
     INSERT INTO i2b2pm.PM_USER_DATA (USER_ID, FULL_NAME, PASSWORD, STATUS_CD)
         VALUES('medcouser', 'MedCo User', 'f8eb764674b57b5710e3c1665464e29', 'A');
     insert into i2b2pm.pm_project_data (project_id, project_name, project_wiki, project_path, status_cd)
-        values ('MEDCO', 'MedCo', 'https://github.com/lca1/medco', '/MedCo', 'A');
+        values ('MedCo', 'MedCo', 'https://github.com/lca1/medco', '/MedCo', 'A');
 
     INSERT INTO i2b2pm.PM_CELL_DATA (CELL_ID, PROJECT_PATH, NAME, METHOD_CD, URL, CAN_OVERRIDE, STATUS_CD)
         VALUES('CRC', '/', 'Data Repository', 'REST', 'http://i2b2-server:8080/i2b2/services/QueryToolService/', 1, 'A');
@@ -58,32 +66,32 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EO
         VALUES('IM', '/', 'IM Cell', 'REST', 'http://i2b2-server:8080/i2b2/services/IMService/', 1, 'A');
 
     INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
-        VALUES('MEDCO', 'AGG_SERVICE_ACCOUNT', 'USER', 'A');
+        VALUES('MedCo', 'AGG_SERVICE_ACCOUNT', 'USER', 'A');
     INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
-        VALUES('MEDCO', 'AGG_SERVICE_ACCOUNT', 'MANAGER', 'A');
+        VALUES('MedCo', 'AGG_SERVICE_ACCOUNT', 'MANAGER', 'A');
     INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
-        VALUES('MEDCO', 'AGG_SERVICE_ACCOUNT', 'DATA_OBFSC', 'A');
+        VALUES('MedCo', 'AGG_SERVICE_ACCOUNT', 'DATA_OBFSC', 'A');
     INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
-        VALUES('MEDCO', 'AGG_SERVICE_ACCOUNT', 'DATA_AGG', 'A');
+        VALUES('MedCo', 'AGG_SERVICE_ACCOUNT', 'DATA_AGG', 'A');
     INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
-        VALUES('MEDCO', 'medcoadmin', 'MANAGER', 'A');
+        VALUES('MedCo', 'medcoadmin', 'MANAGER', 'A');
     INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
-        VALUES('MEDCO', 'medcoadmin', 'USER', 'A');
+        VALUES('MedCo', 'medcoadmin', 'USER', 'A');
     INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
-        VALUES('MEDCO', 'medcoadmin', 'DATA_OBFSC', 'A');
+        VALUES('MedCo', 'medcoadmin', 'DATA_OBFSC', 'A');
     INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
-        VALUES('MEDCO', 'medcouser', 'USER', 'A');
+        VALUES('MedCo', 'medcouser', 'USER', 'A');
     INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
-        VALUES('MEDCO', 'medcouser', 'DATA_DEID', 'A');
+        VALUES('MedCo', 'medcouser', 'DATA_DEID', 'A');
     INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
-        VALUES('MEDCO', 'medcouser', 'DATA_OBFSC', 'A');
+        VALUES('MedCo', 'medcouser', 'DATA_OBFSC', 'A');
     INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
-        VALUES('MEDCO', 'medcouser', 'DATA_AGG', 'A');
+        VALUES('MedCo', 'medcouser', 'DATA_AGG', 'A');
     INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
-        VALUES('MEDCO', 'medcouser', 'DATA_LDS', 'A');
+        VALUES('MedCo', 'medcouser', 'DATA_LDS', 'A');
     INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
-        VALUES('MEDCO', 'medcouser', 'EDITOR', 'A');
+        VALUES('MedCo', 'medcouser', 'EDITOR', 'A');
     INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
-        VALUES('MEDCO', 'medcouser', 'DATA_PROT', 'A');
+        VALUES('MedCo', 'medcouser', 'DATA_PROT', 'A');
 EOSQL
 
