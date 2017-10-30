@@ -41,10 +41,14 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EO
 
     insert into i2b2pm.pm_project_user_roles (project_id, user_id, user_role_cd, status_cd)
     values ('SHRINE', 'medcouser', 'USER', 'A');
-
     insert into i2b2pm.pm_project_user_roles (project_id, user_id, user_role_cd, status_cd)
     values ('SHRINE', 'medcouser', 'DATA_OBFSC', 'A');
 
+
+    INSERT INTO i2b2pm.pm_user_params(datatype_cd, user_id, param_name_cd, value, change_date, entry_date, status_cd) VALUES
+    ('T', 'AGG_SERVICE_ACCOUNT', 'qep', 'true', 'NOW()', 'NOW()', 'A');
+    INSERT INTO i2b2pm.pm_user_params(datatype_cd, user_id, param_name_cd, value, change_date, entry_date, status_cd) VALUES
+    ('T', 'medcoadmin', 'DataSteward', 'true', 'NOW()', 'NOW()', 'A');
 EOSQL
 
 # add demo shrine ontology structure
