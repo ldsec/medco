@@ -17,7 +17,7 @@ shift
 
 # clean up previous entries
 mkdir -p "$CONF_FOLDER"
-rm -f "$CONF_FOLDER"/*.keystore "$CONF_FOLDER"/*.conf "$CONF_FOLDER"/*.cer
+rm -f "$CONF_FOLDER"/*.keystore "$CONF_FOLDER"/shrine_downstream_nodes.conf "$CONF_FOLDER"/shrine_alias_map.conf "$CONF_FOLDER"/*.cer
 
 # generate private and keystore for each node
 NODE_IDX="-1"
@@ -50,15 +50,10 @@ for KEYSTORE in "$CONF_FOLDER"/*.keystore
 do
     for CERTIFICATE in "$CONF_FOLDER"/*.cer
     do
-        OTHER_NODE_DNS=$(basename "$CERTIFICATE" ".cer")
-        CURRENT_NODE_DNS=$(basename "$KEYSTORE" ".keystore")
-        if [ "$OTHER_NODE_DNS" != "$CURRENT_NODE_DNS" ]
+        NODE_DNS=$(basename "$CERTIFICATE" ".cer")
+        if [ "$NODE_DNS" != $(basename "$KEYSTORE" ".keystore") ]
         then
-            keytool -noprompt -import -v -trustcacerts -alias "$OTHER_NODE_DNS" -file "$CERTIFICATE" -keystore "$KEYSTORE"  -keypass "$KEYSTORE_PW"  -storepass "$KEYSTORE_PW"
-
-            # generate aliasMap and downstreamNodes
-            echo "\"$OTHER_NODE_DNS\" = \"https://$OTHER_NODE_DNS:6443/shrine/rest/adapter/requests\"" >> "$CONF_FOLDER/${CURRENT_NODE_DNS}_downstreamNodes.conf"
-            echo "\"$OTHER_NODE_DNS\" = \"$OTHER_NODE_DNS\"" >> "$CONF_FOLDER/${CURRENT_NODE_DNS}_aliasMap.conf"
+            keytool -noprompt -import -v -trustcacerts -alias "$NODE_DNS" -file "$CERTIFICATE" -keystore "$KEYSTORE"  -keypass "$KEYSTORE_PW"  -storepass "$KEYSTORE_PW"
         fi
     done
 
