@@ -121,23 +121,3 @@ EXPOSE 6060 6443
 VOLUME $CONF_DIR
 WORKDIR $CONF_DIR
 
-# todo: exernal script to generate keys for unlynx + shrine keystore
-#mkdir /opt/shrine
-#keytool -genkeypair -keysize 2048 -alias 192.168.56.11 -dname "CN=192.168.56.11, OU=PriGen VM Node 1, O=SHRINE Network, L=Lausanne, S=VD, C=CH" -ext "SAN=IP:192.168.56.11" -keyalg RSA -keypass prigen -storepass prigen -keystore /opt/shrine/shrine.keystore -validity 7300
-#keytool -list -v -keystore /opt/shrine/shrine.keystore -storepass prigen
-#keytool -export -alias 192.168.56.11 -storepass prigen -file /opt/shrine/192.168.56.11.cer -keystore /opt/shrine/shrine.keystore
-#alias: localnode
-
-#For SHRINE 1.22.8, we strongly recommend that the network configuration is a "Hub-and-spoke". For hub-and-spoke systems, we recommend four certificates in SHRINE's shrine.keystore on nodes:
-#The node's signing cert so that its QEP can sign queries.
-#The hub's public CA cert so that its adapter can verify other nodes' signatures.
-#The hub's public https cert so that the node will trust the hub as a server.
-#A cert for this node to use to serve https, referenced in the server.xml file. (Use a cert signed by a public cert authority to avoid a warning in users' browsers.)
-#See what certs are there and remove any extras. SHRINE will verify that the signing cert is signed by the hub's public cert. Also, check that you are not relying on an expired cert. See Generate a Certificate Signing Request .
-
-#todo: https://open.med.harvard.edu/wiki/pages/viewpage.action?pageId=23986702
-#QEP User
-#The Steward application requires set of user credentials that it will use to submit queries through to SHRINE. It is recommended that this be a dedicated user separate from any other account. Additionally, it will need to have the parameter "qep" defined (name: qep, value: true, type: text), which can be set in the Manage Users section of the i2b2 Admin Panel.
-#In shrine.conf, make sure there is a shrineSteward block in the queryEntryPoint section, and that the qepUserName and qepPassword properties match the user with the qep parameter.
-#Steward User
-#In Steward application deployments that require manual topic approval, a trusted user will have to be given permission to review proposed research topics and approve/reject them. To mark a user as such, add the "DataSteward" parameter (name: DataSteward, value: true, type: text) to that user in the Manage Users section of the i2b2 Admin Panel.
