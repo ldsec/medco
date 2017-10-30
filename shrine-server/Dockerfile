@@ -87,7 +87,7 @@ RUN git clone https://c4science.ch/source/shrine-medco.git . && \
     git checkout $SHRINE_VERSION && \
     mvn -e -pl shrine-webclient install -DskipTests && \
     rm -rf "$CATALINA_HOME/webapps/shrine-client" && \
-    cp -r "$SHRINE_SRC_DIR-web/shrine-webclient/src/main/html" "$CATALINA_HOME/webapps/shrine-client"
+    cp -r "$SHRINE_SRC_DIR-webclient/shrine-webclient/src/main/html" "$CATALINA_HOME/webapps/shrine-client"
 
 # configuration
 RUN wget "$SHRINE_ADAPTER_MAPPINGS_URL" -O "$CATALINA_HOME/lib/AdapterMappings.xml" && \
