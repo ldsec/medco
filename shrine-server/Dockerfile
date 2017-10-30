@@ -85,6 +85,8 @@ RUN cp  "$SHRINE_SRC_DIR/apps/steward-war/target/steward.war" \
 #RUN
 
 # configuration
+RUN wget "$SHRINE_ADAPTER_MAPPINGS_URL" -O "$CATALINA_HOME/lib/AdapterMappings.xml" && \
+    wget "$SHRINE_MYSQL_JAR_URL" -P "$CATALINA_HOME/lib/"
 COPY conf/shrine.conf "$CATALINA_HOME/lib/"
 COPY conf/server.xml conf/context.xml "$CATALINA_HOME/conf/"
 COPY conf/i2b2_config_data.js "$CATALINA_HOME/webapps/shrine-client/"
@@ -98,10 +100,7 @@ RUN sed -i "s#SHRINE_DOWNSTREAM_NODES_FILE_PATH#$CONF_DIR/shrine_downstream_node
     sed -i "s/SHRINE_DB_PASSWORD/$DB_PASSWORD/g" "$CATALINA_HOME/conf/context.xml" && \
 
     sed -i "s/SHRINE_WEBCLIENT_DOMAIN/$I2B2_DOMAIN_NAME/g" "$CATALINA_HOME/webapps/shrine-client/i2b2_config_data.js" && \
-    sed -i "s/SHRINE_WEBCLIENT_NAME/Domain $I2B2_DOMAIN_NAME/g" "$CATALINA_HOME/webapps/shrine-client/i2b2_config_data.js" && \
-
-    wget "$SHRINE_ADAPTER_MAPPINGS_URL" -O "$CATALINA_HOME/lib/AdapterMappings.xml" && \
-    wget "$SHRINE_MYSQL_JAR_URL" -P "$CATALINA_HOME/lib/"
+    sed -i "s/SHRINE_WEBCLIENT_NAME/Domain $I2B2_DOMAIN_NAME/g" "$CATALINA_HOME/webapps/shrine-client/i2b2_config_data.js"
 
 # configuration dependent on the arguments todo: log
 ARG SHRINE_DEBUG_LEVEL_ARG="?"
