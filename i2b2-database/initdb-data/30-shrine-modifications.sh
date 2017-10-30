@@ -6,11 +6,11 @@ set -e
 # db lookups
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EOSQL
     insert into i2b2hive.ont_db_lookup (c_domain_id, c_project_path, c_owner_id, c_db_fullschema, c_db_datasource, c_db_servertype, c_db_nicename)
-    values ('$I2B2_DOMAIN_NAME', '/MedCo/SHRINE/', '@', 'shrine_ont', 'java:/OntologyShrineDS', 'POSTGRESQL', 'MedCo-SHRINE')
+    values ('$I2B2_DOMAIN_NAME', '/MedCo-SHRINE/', '@', 'shrine_ont', 'java:/OntologyShrineDS', 'POSTGRESQL', 'MedCo-SHRINE')
     on conflict do nothing;
 
     insert into i2b2hive.crc_db_lookup (c_domain_id, c_project_path, c_owner_id, c_db_fullschema, c_db_datasource, c_db_servertype, c_db_nicename)
-    values ('$I2B2_DOMAIN_NAME', '/MedCo/SHRINE/', '@', 'i2b2demodata', 'java:/QueryToolDemoDS', 'POSTGRESQL', 'MedCo-SHRINE')
+    values ('$I2B2_DOMAIN_NAME', '/MedCo-SHRINE/', '@', 'i2b2demodata', 'java:/QueryToolDemoDS', 'POSTGRESQL', 'MedCo-SHRINE')
     on conflict do nothing;
 
 EOSQL
@@ -34,10 +34,10 @@ EOSQL
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EOSQL
 
     insert into i2b2pm.pm_cell_data (cell_id, project_path, name, method_cd, url, can_override, status_cd)
-    values ('CRC', '/MedCo/SHRINE/', 'MedCo-SHRINE Federated Query', 'REST', 'https://shrine-server:6443/shrine/rest/i2b2/', 1, 'A');
+    values ('CRC', '/MedCo-SHRINE/', 'MedCo-SHRINE Federated Query', 'REST', 'https://shrine-server:6443/shrine/rest/i2b2/', 1, 'A');
 
     insert into i2b2pm.pm_project_data (project_id, project_name, project_wiki, project_path, status_cd)
-    values ('SHRINE', 'MedCo-SHRINE', 'https://github.com/lca1/medco', '/MedCo/SHRINE/', 'A');
+    values ('MedCo-SHRINE', 'MedCo-SHRINE', 'https://github.com/lca1/medco', '/MedCo-SHRINE/', 'A');
 
     insert into i2b2pm.pm_project_user_roles (project_id, user_id, user_role_cd, status_cd)
     values ('SHRINE', 'medcouser', 'USER', 'A');
