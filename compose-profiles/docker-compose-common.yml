@@ -56,7 +56,7 @@ services:
       args:
         - I2B2_DOMAIN_NAME_ARG=medcodeployment
         - SHRINE_NODE_NAME_ARG=172.16.205.10
-        - SHRINE_KEYSTORE_PRIVATE_KEY_ALIAS_ARG=172.16.205.10
+        - SHRINE_KEYSTORE_NODE_ALIAS_ARG=172.16.205.10
     ports:
       - "6443"
     networks:

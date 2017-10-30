@@ -17,7 +17,7 @@ shift
 
 # clean up previous entries
 mkdir -p "$CONF_FOLDER"
-rm -f "$CONF_FOLDER"/*shrine.keystore "$CONF_FOLDER"/shrine_downstream_nodes.conf "$CONF_FOLDER"/shrine_alias_map.conf "$CONF_FOLDER"/*.cer
+rm -f "$CONF_FOLDER"/*.keystore "$CONF_FOLDER"/shrine_downstream_nodes.conf "$CONF_FOLDER"/shrine_alias_map.conf "$CONF_FOLDER"/*.cer
 
 # generate private and keystore for each node
 NODE_IDX="-1"
@@ -26,7 +26,7 @@ do
     NODE_DNS="$1"
     NODE_IP="$2"
     NODE_IDX=$((NODE_IDX+1))
-    KEYSTORE="$CONF_FOLDER/srv$NODE_IDX-shrine.keystore"
+    KEYSTORE="$CONF_FOLDER/$NODE_DNS.keystore"
     shift
     shift
 
@@ -42,17 +42,20 @@ do
     echo "\"$NODE_DNS\" = \"$NODE_DNS\"" >> "$CONF_FOLDER/shrine_alias_map.conf"
 
     #todo: unlynx keys
-    keytool -list -v -keystore "$KEYSTORE" -storepass "$KEYSTORE_PW"
 
 done
 
 # import certificates of network nodes into the keystores
-for KEYSTORE in "$CONF_FOLDER"/srv*-shrine.keystore
+for KEYSTORE in "$CONF_FOLDER"/*.keystore
 do
     for CERTIFICATE in "$CONF_FOLDER"/*.cer
     do
         NODE_DNS=$(basename "$CERTIFICATE" ".cer")
-        keytool -noprompt -import -v -trustcacerts -alias "$NODE_DNS" -file "$CERTIFICATE" -keystore "$KEYSTORE"  -keypass "$KEYSTORE_PW"  -storepass "$KEYSTORE_PW" || true
+        if [ "$NODE_DNS" != $(basename "$KEYSTORE" ".keystore") ]
+        then
+            keytool -noprompt -import -v -trustcacerts -alias "$NODE_DNS" -file "$CERTIFICATE" -keystore "$KEYSTORE"  -keypass "$KEYSTORE_PW"  -storepass "$KEYSTORE_PW"
+        fi
     done
-done
 
+    keytool -list -v -keystore "$KEYSTORE" -storepass "$KEYSTORE_PW"
+done

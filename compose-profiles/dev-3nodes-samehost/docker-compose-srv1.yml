@@ -69,7 +69,7 @@ services:
     build:
       args:
         - SHRINE_NODE_NAME_ARG=shrine-server-srv1
-        - SHRINE_KEYSTORE_PRIVATE_KEY_ALIAS_ARG=shrine-server-srv1
+        - SHRINE_KEYSTORE_NODE_ALIAS_ARG=shrine-server-srv1
     ports:
       - "6447:6443"
     networks:
