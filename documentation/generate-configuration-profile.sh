@@ -38,8 +38,7 @@ do
     keytool -export -alias "$NODE_DNS" -storepass "$KEYSTORE_PW" -file "$CONF_FOLDER/$NODE_DNS.cer" -keystore "$KEYSTORE"
 
     # add entry in the downstream nodes and alias map
-    echo "\"$NODE_DNS\" = \"https://$NODE_DNS:6443/shrine/rest/adapter/requests\"" >> "$CONF_FOLDER/shrine_downstream_nodes.conf"
-    echo "\"$NODE_DNS\" = \"$NODE_DNS\"" >> "$CONF_FOLDER/shrine_alias_map.conf"
+    echo "\"$NODE_DNS\" = \"$NODE_DNS\"" >> "$CONF_FOLDER/shrine_aliasMap.conf"
 
     #todo: unlynx keys
 
@@ -58,7 +57,6 @@ do
 
             # generate aliasMap and downstreamNodes
             echo "\"$OTHER_NODE_DNS\" = \"https://$OTHER_NODE_DNS:6443/shrine/rest/adapter/requests\"" >> "$CONF_FOLDER/${CURRENT_NODE_DNS}_downstreamNodes.conf"
-            echo "\"$OTHER_NODE_DNS\" = \"$OTHER_NODE_DNS\"" >> "$CONF_FOLDER/${CURRENT_NODE_DNS}_aliasMap.conf"
         fi
     done
 
