@@ -66,6 +66,7 @@ RUN sed -i "/jboss.home/c\jboss.home=$JBOSS_HOME" build.properties && \
     sed -i "/ontology.ws.pm.url/c\ontology.ws.pm.url=http://localhost:8080/i2b2/services/PMService/getServices" etc/spring/ontology.properties && \
     sed -i "/edu.harvard.i2b2.ontology.ws.fr.url/c\edu.harvard.i2b2.ontology.ws.fr.url=http://localhost:8080/i2b2/services/FRService/" etc/spring/ontology.properties && \
     sed -i "/edu.harvard.i2b2.ontology.ws.crc.url/c\edu.harvard.i2b2.ontology.ws.crc.url=http://localhost:8080/i2b2/services/QueryToolService" etc/spring/ontology.properties && \
+    sed -i "/edu.harvard.i2b2.ontology.pm.serviceaccount.password/c\edu.harvard.i2b2.ontology.pm.serviceaccount.password=$DB_PASSWORD" etc/spring/ontology.properties && \
     ant -f master_build.xml clean build-all deploy
 
 ## CRC cell
@@ -75,11 +76,13 @@ RUN sed -i "/jboss.home/c\jboss.home=$JBOSS_HOME" build.properties && \
     sed -i "/edu.harvard.i2b2.crc.loader.ws.fr.url/c\edu.harvard.i2b2.crc.loader.ws.fr.url=http://localhost:8080/i2b2/services/FRService/" etc/spring/edu.harvard.i2b2.crc.loader.properties && \
     sed -i "/edu.harvard.i2b2.crc.loader.ws.pm.url/c\edu.harvard.i2b2.crc.loader.ws.pm.url=http://localhost:8080/i2b2/services/PMService/getServices" etc/spring/edu.harvard.i2b2.crc.loader.properties && \
     sed -i "/edu.harvard.i2b2.crc.loader.ds.lookup.servertype/c\edu.harvard.i2b2.crc.loader.ds.lookup.servertype=PostgreSQL" etc/spring/edu.harvard.i2b2.crc.loader.properties && \
+
     sed -i "/queryprocessor.ws.pm.url/c\queryprocessor.ws.pm.url=http://localhost:8080/i2b2/services/PMService/getServices" etc/spring/crc.properties && \
     sed -i "/queryprocessor.ds.lookup.servertype/c\queryprocessor.ds.lookup.servertype=PostgreSQL" etc/spring/crc.properties && \
     sed -i "/queryprocessor.ws.ontology.url/c\queryprocessor.ws.ontology.url=http://localhost:8080/i2b2/services/OntologyService/getTermInfo" etc/spring/crc.properties && \
     sed -i "/edu.harvard.i2b2.crc.delegate.ontology.url/c\edu.harvard.i2b2.crc.delegate.ontology.url=http://localhost:8080/i2b2/services/OntologyService" etc/spring/crc.properties && \
     sed -i "/edu.harvard.i2b2.crc.lockout.setfinderquery.count/c\edu.harvard.i2b2.crc.lockout.setfinderquery.count=-1" etc/spring/crc.properties && \
+    sed -i "/edu.harvard.i2b2.crc.pm.serviceaccount.password/c\edu.harvard.i2b2.crc.pm.serviceaccount.password=$DB_PASSWORD" etc/spring/crc.properties && \
     ant -f master_build.xml clean build-all deploy
 
 ## WORK cell

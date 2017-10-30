@@ -1,39 +1,49 @@
 #!/bin/bash
 set -e
 
+### in scenario of adding medco to an existing i2b2 installation: this is the additional shrine stuff
+
 # db lookups
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EOSQL
     insert into i2b2hive.ont_db_lookup (c_domain_id, c_project_path, c_owner_id, c_db_fullschema, c_db_datasource, c_db_servertype, c_db_nicename)
-    values ('$I2B2_DOMAIN_NAME', 'SHRINE/', '@', 'shrine_ont', 'java:/OntologyShrineDS', 'POSTGRESQL', 'SHRINE')
+    values ('$I2B2_DOMAIN_NAME', '/MedCo/SHRINE', '@', 'shrine_ont', 'java:/OntologyShrineDS', 'POSTGRESQL', 'MedCo-SHRINE')
     on conflict do nothing;
 
     insert into i2b2hive.crc_db_lookup (c_domain_id, c_project_path, c_owner_id, c_db_fullschema, c_db_datasource, c_db_servertype, c_db_nicename)
-    values ('$I2B2_DOMAIN_NAME', '/SHRINE/', '@', 'i2b2demodata', 'java:/QueryToolDemoDS', 'POSTGRESQL', 'SHRINE')
+    values ('$I2B2_DOMAIN_NAME', '/MedCo/SHRINE', '@', 'i2b2demodata', 'java:/QueryToolDemoDS', 'POSTGRESQL', 'MedCo-SHRINE')
     on conflict do nothing;
 
 EOSQL
 
-# add shrine user in pm TODO: password hardcoded (and encrypted with commented code)
-#cd "install/i2b2-1.7/i2b2"
-#javac ./I2b2PasswordCryptor.java
-#SHRINE_PW=$(java -classpath ./ I2b2PasswordCryptor $DB_PASSWORD)
+####################################################################################
+######################### information about password hash ##########################
+####################################################################################
 
+### how to generate the hash (from shrine sources folder)
+# cd "install/i2b2-1.7/i2b2"
+# javac ./I2b2PasswordCryptor.java
+# SHRINE_PW=$(java -classpath ./ I2b2PasswordCryptor <thepassword>)
+
+### some encrypted versions:
+# demouser=             9117d59a69dc49807671a51f10ab7f
+# prigen2017=           f8eb764674b57b5710e3c1665464e29
+# pFjy3EjDVwLfT2rB9xkK= 7cb1ac9deab165535494d60da1d3d7e
+####################################################################################
+
+# pm data
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EOSQL
-    insert into i2b2pm.pm_user_data (user_id, full_name, password, status_cd)
-    values ('shrine', 'shrine', '9117d59a69dc49807671a51f10ab7f', 'A');
-
-    insert into i2b2pm.pm_project_data (project_id, project_name, project_wiki, project_path, status_cd)
-    values ('SHRINE', 'SHRINE', 'http://open.med.harvard.edu/display/SHRINE', '/SHRINE', 'A');
-
-    insert into i2b2pm.pm_project_user_roles (project_id, user_id, user_role_cd, status_cd)
-    values ('SHRINE', 'shrine', 'USER', 'A');
-
-    insert into i2b2pm.pm_project_user_roles (project_id, user_id, user_role_cd, status_cd)
-    values ('SHRINE', 'shrine', 'DATA_OBFSC', 'A');
 
     insert into i2b2pm.pm_cell_data (cell_id, project_path, name, method_cd, url, can_override, status_cd)
-    values ('CRC', '/SHRINE', 'SHRINE Federated Query', 'REST', 'https://shrine-server:6443/shrine/rest/i2b2/', 1, 'A');
+    values ('CRC', '/MedCo/SHRINE', 'MedCo-SHRINE Federated Query', 'REST', 'https://shrine-server:6443/shrine/rest/i2b2/', 1, 'A');
 
+    insert into i2b2pm.pm_project_data (project_id, project_name, project_wiki, project_path, status_cd)
+    values ('SHRINE', 'MedCo-SHRINE', 'https://github.com/lca1/medco', '/MedCo/SHRINE', 'A');
+
+    insert into i2b2pm.pm_project_user_roles (project_id, user_id, user_role_cd, status_cd)
+    values ('SHRINE', 'medcouser', 'USER', 'A');
+
+    insert into i2b2pm.pm_project_user_roles (project_id, user_id, user_role_cd, status_cd)
+    values ('SHRINE', 'medcouser', 'DATA_OBFSC', 'A');
 
 EOSQL
 
@@ -67,11 +77,6 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EO
         M_EXCLUSION_CD VARCHAR(900)
     );
 
-    INSERT into shrine_ont.TABLE_ACCESS
-        ( C_TABLE_CD, C_TABLE_NAME, C_PROTECTED_ACCESS, C_HLEVEL, C_NAME, C_FULLNAME, C_SYNONYM_CD, C_VISUALATTRIBUTES, C_TOOLTIP, C_FACTTABLECOLUMN, C_DIMTABLENAME, C_COLUMNNAME, C_COLUMNDATATYPE, C_DIMCODE, C_OPERATOR)
-        values ( 'SHRINE', 'SHRINE', 'N', 0, 'SHRINE Ontology', '\SHRINE\', 'N', 'CA', 'SHRINE Ontology', 'concept_cd', 'concept_dimension', 'concept_path', 'T', '\SHRINE\', 'LIKE')
-        on conflict do nothing;
-
     grant all privileges on all tables in schema shrine_ont to shrine_ont;
     grant all privileges on all sequences in schema shrine_ont to shrine_ont;
     grant all privileges on all functions in schema shrine_ont to shrine_ont;
@@ -80,7 +85,20 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EO
     grant all privileges on all functions in schema shrine_ont to i2b2metadata;
 EOSQL
 
+# add encrypted dummy flags for patient_dimension in crc schema
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EOSQL
+    ALTER TABLE i2b2demodata.patient_dimension ADD COLUMN enc_dummy_flag_cd character(88);
+    COMMENT ON COLUMN i2b2demodata.patient_dimension.enc_dummy_flag_cd IS 'base64-encoded encrypted dummy flag (0 or 1)';
+    INSERT INTO i2b2demodata.code_lookup VALUES ('patient_dimension', 'enc_dummy_flag_cd', 'CRC_COLUMN_DESCRIPTOR', 'Encrypted Dummy Flag', NULL, NULL, NULL, NULL, 'NOW()', NULL, 1);
+EOSQL
+
 # add demo shrine ontology data TODO: disabled
+#psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EOSQL
+#    INSERT into shrine_ont.TABLE_ACCESS
+#        ( C_TABLE_CD, C_TABLE_NAME, C_PROTECTED_ACCESS, C_HLEVEL, C_NAME, C_FULLNAME, C_SYNONYM_CD, C_VISUALATTRIBUTES, C_TOOLTIP, C_FACTTABLECOLUMN, C_DIMTABLENAME, C_COLUMNNAME, C_COLUMNDATATYPE, C_DIMCODE, C_OPERATOR)
+#        values ( 'SHRINE', 'SHRINE', 'N', 0, 'SHRINE Ontology', '\SHRINE\', 'N', 'CA', 'SHRINE Ontology', 'concept_cd', 'concept_dimension', 'concept_path', 'T', '\SHRINE\', 'LIKE')
+#        on conflict do nothing;
+#EOSQL
 #wget https://open.med.harvard.edu/svn/shrine-ontology/SHRINE_Demo_Downloads/trunk/ShrineDemo.sql
 #sed -i '1s/^/SET search_path TO shrine_ont;\n/' Shrine.sql
 #psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" < ShrineDemo.sql
