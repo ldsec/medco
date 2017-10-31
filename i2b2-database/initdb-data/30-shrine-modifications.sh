@@ -102,11 +102,11 @@ EOSQL
 # add i2b2 test query term for shrine (ontology + database)
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EOSQL
     INSERT INTO i2b2metadata.sensitive_tagged VALUES
-        (2, '\\medco\\tagged\\TESTKEY\\', '', 'N', 'LH ', NULL, 'TAG_ID:TESTKEY', NULL, 'concept_cd', 'concept_dimension',
-        'concept_path', 'T', 'LIKE', '\\medco\\tagged\\TESTKEY\\', NULL, NULL, 'NOW()', NULL, NULL, NULL, 'TAG_ID', '@',
+        (2, '\medco\tagged\TESTKEY\', '', 'N', 'LH ', NULL, 'TAG_ID:TESTKEY', NULL, 'concept_cd', 'concept_dimension',
+        'concept_path', 'T', 'LIKE', '\medco\tagged\TESTKEY\', NULL, NULL, 'NOW()', NULL, NULL, NULL, 'TAG_ID', '@',
         NULL, NULL, NULL, NULL);
     INSERT INTO i2b2demodata.concept_dimension VALUES
-        ('\\medco\\tagged\\TESTKEY\\', 'TAG_ID:TESTKEY', NULL, NULL, NULL, NULL, 'NOW()', NULL, NULL);
+        ('\medco\tagged\TESTKEY\', 'TAG_ID:TESTKEY', NULL, NULL, NULL, NULL, 'NOW()', NULL, NULL);
     INSERT INTO i2b2demodata.patient_mapping VALUES
         ('TESTPATIENT', 'TESTSITE', -1, NULL, 'MedCo', NULL, NULL, NULL, 'NOW()', NULL, 1);
     INSERT INTO i2b2demodata.patient_mapping VALUES
@@ -121,19 +121,34 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EO
     INSERT INTO i2b2demodata.visit_dimension VALUES
         (-1, -1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'NOW()', 'TESTSITE', 1);
     INSERT INTO i2b2demodata.provider_dimension VALUES
-        ('TESTSITE', '\\medco\\institutions\\TESTSITE\\', 'TESTSITE', NULL, NULL, NULL, 'NOW()', NULL, 1);
+        ('TESTSITE', '\medco\institutions\TESTSITE\', 'TESTSITE', NULL, NULL, NULL, 'NOW()', NULL, 1);
     INSERT INTO i2b2demodata.observation_fact VALUES
         (-1, -1, 'TAG_ID:TESTKEY', 'TESTSITE', 'NOW()', '@', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'TESTSITE',
         NULL, NULL, NULL, NULL, 'NOW()', NULL, 1, 1);
 EOSQL
 
-# add demo shrine ontology data TODO: disabled
-#psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EOSQL
-#    INSERT into shrine_ont.TABLE_ACCESS
-#        ( C_TABLE_CD, C_TABLE_NAME, C_PROTECTED_ACCESS, C_HLEVEL, C_NAME, C_FULLNAME, C_SYNONYM_CD, C_VISUALATTRIBUTES, C_TOOLTIP, C_FACTTABLECOLUMN, C_DIMTABLENAME, C_COLUMNNAME, C_COLUMNDATATYPE, C_DIMCODE, C_OPERATOR)
-#        values ( 'SHRINE', 'SHRINE', 'N', 0, 'SHRINE Ontology', '\SHRINE\', 'N', 'CA', 'SHRINE Ontology', 'concept_cd', 'concept_dimension', 'concept_path', 'T', '\SHRINE\', 'LIKE')
-#        on conflict do nothing;
-#EOSQL
+# original shrine ontology: only the version key
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EOSQL
+    INSERT into shrine_ont.TABLE_ACCESS
+        ( C_TABLE_CD, C_TABLE_NAME, C_PROTECTED_ACCESS, C_HLEVEL, C_NAME, C_FULLNAME, C_SYNONYM_CD, C_VISUALATTRIBUTES,
+        C_TOOLTIP, C_FACTTABLECOLUMN, C_DIMTABLENAME, C_COLUMNNAME, C_COLUMNDATATYPE, C_DIMCODE, C_OPERATOR) values
+        ( 'SHRINE', 'SHRINE', 'N', 0, 'SHRINE Ontology', '\SHRINE\', 'N', 'CH', 'SHRINE Ontology', 'concept_cd',
+        'concept_dimension', 'concept_path', 'T', '\SHRINE\', 'LIKE')
+        on conflict do nothing;
+    INSERT INTO shrine_ont.SHRINE (C_HLEVEL, C_FULLNAME, C_NAME, C_SYNONYM_CD, C_VISUALATTRIBUTES, C_TOTALNUM, C_BASECODE, C_METADATAXML,
+        C_FACTTABLECOLUMN, C_TABLENAME, C_COLUMNNAME, C_COLUMNDATATYPE, C_OPERATOR, C_DIMCODE, C_COMMENT, C_TOOLTIP,
+        UPDATE_DATE, DOWNLOAD_DATE, IMPORT_DATE, SOURCESYSTEM_CD, VALUETYPE_CD, M_APPLIED_PATH, M_EXCLUSION_CD ) VALUES
+        (1, '\SHRINE\ONTOLOGYVERSION\', 'ONTOLOGYVERSION', 'N', 'FH', NULL, NULL, '', 'concept_cd', 'concept_dimension',
+        'concept_path', 'T', 'LIKE', '\SHRINE\ONTOLOGYVERSION\', '', 'ONTOLOGYVERSION\', NULL, NULL, NULL, 'SHRINE', NULL,
+        '@', NULL );
+    INSERT INTO shrine_ont.SHRINE (C_HLEVEL, C_FULLNAME, C_NAME, C_SYNONYM_CD, C_VISUALATTRIBUTES, C_TOTALNUM, C_BASECODE, C_METADATAXML,
+        C_FACTTABLECOLUMN, C_TABLENAME, C_COLUMNNAME, C_COLUMNDATATYPE, C_OPERATOR, C_DIMCODE, C_COMMENT, C_TOOLTIP,
+        UPDATE_DATE, DOWNLOAD_DATE, IMPORT_DATE, SOURCESYSTEM_CD, VALUETYPE_CD, M_APPLIED_PATH, M_EXCLUSION_CD ) VALUES
+        (2, '\SHRINE\ONTOLOGYVERSION\MedCo-SHRINE_Ontology_Empty\', 'MedCo-SHRINE_Ontology_Empty', 'N', 'LH', NULL, NULL,
+        '', 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\SHRINE\ONTOLOGYVERSION\MedCo-SHRINE_Ontology_Empty\',
+        '', 'ONTOLOGYVERSION\MedCo-SHRINE_Ontology_Empty\', NULL, NULL, NULL, 'SHRINE', NULL, '@', NULL );
+EOSQL
+# full loading of shrine ontology disabled
 #wget https://open.med.harvard.edu/svn/shrine-ontology/SHRINE_Demo_Downloads/trunk/ShrineDemo.sql
 #sed -i '1s/^/SET search_path TO shrine_ont;\n/' Shrine.sql
 #psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" < ShrineDemo.sql
