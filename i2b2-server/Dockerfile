@@ -124,6 +124,7 @@ ENV UNLYNX_ENTRYPOINT_IDX="$UNLYNX_ENTRYPOINT_IDX_ARG" \
 
 RUN sed -i "/jboss.home/c\jboss.home=$JBOSS_HOME" build.properties && \
     sed -i "/medco.unlynx.groupfilepath/c\medco.unlynx.groupfilepath=$CONF_DIR/group.toml" etc/spring/medcoapp/medco.properties && \
+    sed -i "/medco.unlynx.binarypath/c\medco.unlynx.binarypath=$CONF_DIR/unlynxI2b2" etc/spring/medcoapp/medco.properties && \
     sed -i "/medco.unlynx.entrypointidx/c\medco.unlynx.entrypointidx=$UNLYNX_ENTRYPOINT_IDX" etc/spring/medcoapp/medco.properties && \
     sed -i "/medco.unlynx.debuglevel/c\medco.unlynx.debuglevel=$UNLYNX_DEBUG_LEVEL" etc/spring/medcoapp/medco.properties && \
     ant -f build.xml clean all deploy
