@@ -52,7 +52,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EO
     INSERT INTO i2b2pm.PM_USER_DATA (USER_ID, FULL_NAME, PASSWORD, STATUS_CD)
         VALUES('medcoi2b2user', 'MedCo I2b2 User', 'f8eb764674b57b5710e3c1665464e29', 'A');
     insert into i2b2pm.pm_project_data (project_id, project_name, project_wiki, project_path, status_cd)
-        values ('MedCo', 'MedCo', 'https://github.com/lca1/medco', '/MedCo/', 'A');
+        values ('MedCo', 'MedCo', 'https://github.com/lca1/medco', '/MedCo', 'A');
 
     INSERT INTO i2b2pm.PM_CELL_DATA (CELL_ID, PROJECT_PATH, NAME, METHOD_CD, URL, CAN_OVERRIDE, STATUS_CD)
         VALUES('CRC', '/', 'Data Repository', 'REST', 'http://i2b2-server:8080/i2b2/services/QueryToolService/', 1, 'A');

@@ -39,7 +39,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EO
     values ('CRC', '/MedCo-SHRINE', 'MedCo-SHRINE Federated Query', 'REST', 'https://shrine-server:6443/shrine/rest/i2b2/', 1, 'A');
 
     insert into i2b2pm.pm_project_data (project_id, project_name, project_wiki, project_path, status_cd)
-    values ('MedCo-SHRINE', 'MedCo-SHRINE', 'https://github.com/lca1/medco', '/MedCo-SHRINE/', 'A');
+    values ('MedCo-SHRINE', 'MedCo-SHRINE', 'https://github.com/lca1/medco', '/MedCo-SHRINE', 'A');
 
     INSERT INTO i2b2pm.PM_USER_DATA (USER_ID, FULL_NAME, PASSWORD, STATUS_CD)
         VALUES('medcoshrineuser', 'MedCo SHRINE User', 'f8eb764674b57b5710e3c1665464e29', 'A');

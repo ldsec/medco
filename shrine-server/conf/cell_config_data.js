@@ -9,6 +9,6 @@
                 description: "SHRINE Cell",
                 category: ["core","cell","shrine"],
                 newTopicURL: "/steward/client/index.html",
-                readApprovedURL:"https://shrine-server:6443/shrine/rest/i2b2/"
+                readApprovedURL:"https://shrine-server:6443/shrine/rest/i2b2/request"
         }
 }
