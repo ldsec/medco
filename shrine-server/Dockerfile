@@ -98,7 +98,7 @@ COPY conf/server.xml conf/context.xml "$CATALINA_HOME/conf/"
 COPY conf/i2b2_config_data.js "$CATALINA_HOME/webapps/shrine-client/"
 COPY conf/cell_config_data.js "$CATALINA_HOME/webapps/shrine-client/js-i2b2/cells/SHRINE/"
 RUN sed -i "s#SHRINE_DOWNSTREAM_NODES_FILE_PATH#$CONF_DIR/shrine_downstream_nodes.conf#g" "$CATALINA_HOME/lib/shrine.conf" && \
-    sed -i "s#SHRINE_ALIAS_MAP_FILE_PATH#$CONF_DIR/shrine_alias_map.conf#g" "$CATALINA_HOME/lib/shrine.conf" && \
+    #sed -i "s#SHRINE_ALIAS_MAP_FILE_PATH#$CONF_DIR/shrine_alias_map.conf#g" "$CATALINA_HOME/lib/shrine.conf" && \
 
     sed -i "s/SHRINE_KEYSTORE_PASSWORD/$ADMIN_PASSWORD/g" "$CATALINA_HOME/conf/server.xml" && \
 
@@ -114,7 +114,7 @@ ARG SHRINE_KEYSTORE_NODE_ALIAS_ARG="TODO"
 ENV SHRINE_DEBUG_LEVEL="$SHRINE_DEBUG_LEVEL_ARG" \
     SHRINE_NODE_NAME="$SHRINE_NODE_NAME_ARG" \
     SHRINE_KEYSTORE_NODE_ALIAS="$SHRINE_KEYSTORE_NODE_ALIAS_ARG"
-RUN sed -i "s/SHRINE_KEYSTORE_PRIVATE_KEY_ALIAS/$SHRINE_KEYSTORE_NODE_ALIAS/g" "$CATALINA_HOME/conf/server.xml" && \
+RUN sed -i "s/SHRINE_KEYSTORE_PRIVATE_KEY_ALIAS/$SHRINE_KEYSTORE_NODE_ALIAS-private/g" "$CATALINA_HOME/conf/server.xml" && \
     sed -i "s#SHRINE_KEYSTORE_FILE_PATH#$CONF_DIR/$SHRINE_KEYSTORE_NODE_ALIAS.keystore#g" "$CATALINA_HOME/conf/server.xml"
 
 
