@@ -111,6 +111,7 @@ RUN sed -i "/jboss.home/c\jboss.home=$JBOSS_HOME" build.properties && \
 
 # MedCo cell
 ## download
+ENV NOCACHE="1"
 WORKDIR "$MEDCO_CELL_SRC_DIR"
 RUN git clone https://c4science.ch/source/medco-i2b2-cell.git . && \
     git checkout $MEDCO_CELL_GIT_BRANCH

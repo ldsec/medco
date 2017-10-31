@@ -102,7 +102,7 @@ EOSQL
 # add i2b2 test query term for shrine (ontology + database)
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EOSQL
     INSERT INTO i2b2metadata.sensitive_tagged VALUES
-        (2, '\\medco\\tagged\\TESTKEY\\', '', 'N', 'LA ', NULL, 'TAG_ID:TESTKEY', NULL, 'concept_cd', 'concept_dimension',
+        (2, '\\medco\\tagged\\TESTKEY\\', '', 'N', 'LH ', NULL, 'TAG_ID:TESTKEY', NULL, 'concept_cd', 'concept_dimension',
         'concept_path', 'T', 'LIKE', '\\medco\\tagged\\TESTKEY\\', NULL, NULL, 'NOW()', NULL, NULL, NULL, 'TAG_ID', '@',
         NULL, NULL, NULL, NULL);
     INSERT INTO i2b2demodata.concept_dimension VALUES

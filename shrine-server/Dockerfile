@@ -19,6 +19,7 @@ RUN apt-get -y update && \
         "password=\"$ADMIN_PASSWORD\" roles=\"admin-gui\" /></tomcat-users>" > "$CATALINA_HOME/conf/tomcat-users.xml" && \
     echo 'export CATALINA_OPTS=" -Dakka.daemonic=on "' > "$CATALINA_HOME/bin/setenv.sh" && \
     echo '{ "allow_root": true }' > /root/.bowerrc
+    #todo: login doesnt work, use manager not admin
 
 # download and compile shrine wars
 WORKDIR "$SHRINE_SRC_DIR"
