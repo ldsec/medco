@@ -31,11 +31,11 @@ do
     shift
 
     # generate the node certificate in the keystore and export it
-    keytool -genkeypair -keysize 2048 -alias "$NODE_DNS" -validity 7300 \
+    keytool -genkeypair -keysize 2048 -alias "$NODE_DNS-private" -validity 7300 \
         -dname "CN=$NODE_DNS, OU=$NODE_DNS, O=SHRINE Network, L=Lausanne, S=VD, C=CH" -ext "SAN=IP:$NODE_IP" \
         -keyalg RSA -keypass "$KEYSTORE_PW" -storepass "$KEYSTORE_PW" -keystore "$KEYSTORE"
 
-    keytool -export -alias "$NODE_DNS" -storepass "$KEYSTORE_PW" -file "$CONF_FOLDER/$NODE_DNS.cer" -keystore "$KEYSTORE"
+    keytool -export -alias "$NODE_DNS-private" -storepass "$KEYSTORE_PW" -file "$CONF_FOLDER/$NODE_DNS.cer" -keystore "$KEYSTORE"
 
     # add entry in the downstream nodes and alias map
     echo "\"$NODE_DNS\" = \"https://$NODE_DNS:6443/shrine/rest/adapter/requests\"" >> "$CONF_FOLDER/shrine_downstream_nodes.conf"
@@ -51,10 +51,10 @@ do
     for CERTIFICATE in "$CONF_FOLDER"/*.cer
     do
         NODE_DNS=$(basename "$CERTIFICATE" ".cer")
-        if [ "$NODE_DNS" != $(basename "$KEYSTORE" ".keystore") ]
-        then
+        #if [ "$NODE_DNS" != $(basename "$KEYSTORE" ".keystore") ]
+        #then
             keytool -noprompt -import -v -trustcacerts -alias "$NODE_DNS" -file "$CERTIFICATE" -keystore "$KEYSTORE"  -keypass "$KEYSTORE_PW"  -storepass "$KEYSTORE_PW"
-        fi
+        #fi
     done
 
     keytool -list -v -keystore "$KEYSTORE" -storepass "$KEYSTORE_PW"
