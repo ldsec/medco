@@ -136,4 +136,6 @@ sed -i "s/\"http:\/\/localhost\"/\"http:\/\/i2b2-server:8080\"/" "$LIGHTTPD_WEB_
 sed -i "s/\"http:\/\/localhost\"/\"http:\/\/i2b2-server:8080\"/" "$LIGHTTPD_WEB_ROOT/i2b2-client/index.php"
 sed -i "s/\"http:\/\/127.0.0.1\"/\"http:\/\/i2b2-server:8080\"/" "$LIGHTTPD_WEB_ROOT/shrine-client/index.php"
 sed -i "s/\"http:\/\/localhost\"/\"https:\/\/shrine-server:6443\"/" "$LIGHTTPD_WEB_ROOT/shrine-client/index.php"
-sed -i "s#default.htm#\$index.html#g" "$LIGHTTPD_WEB_ROOT/shrine-client/index.php"
+sed -i "s#default.htm#index.html#g" "$LIGHTTPD_WEB_ROOT/shrine-client/index.php"
+sed -i '/CURLOPT_SSL_VERIFYPEER/i curl_setopt($proxyRequest, CURLOPT_SSL_VERIFYHOST, FALSE);' "$LIGHTTPD_WEB_ROOT/shrine-client/index.php"
+
