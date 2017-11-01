@@ -58,6 +58,7 @@ document.addEventListener('click', function(event) {
 <p><a href="/i2b2-admin">I2b2 admin</a></p>
 <p><a href="/i2b2-client">I2b2 client</a></p>
 <p><a href=":6443/shrine-client">SHRINE client (MedCo)</a></p>
+<p><a href="/shrine-client">SHRINE client (MedCo) BIS</a></p>
 <p><a href="/phppgadmin">PhpPgAdmin</a></p>
 <p><a href=":9990">WildFly Management</a></p>
 <p><a href=":8080/i2b2">I2b2 Axis Management</a></p>
@@ -67,6 +68,70 @@ document.addEventListener('click', function(event) {
 </html>
 EOL
 
+
+cat > "$LIGHTTPD_WEB_ROOT/shrine-client/i2b2_config_data.js" <<EOL
+{
+  urlProxy: "index.php",
+        urlFramework: "js-i2b2/",
+        loginTimeout: 15, // in seconds
+        username_label:"MedCo username:",
+        password_label:"MedCo password:",
+        lstDomains: [
+                {
+                    domain: "$I2B2_DOMAIN_NAME",
+                    name: "Domain $I2B2_DOMAIN_NAME",
+                    debug: true,
+                    allowAnalysis: true,
+                    urlCellPM: "http://i2b2-server:8080/i2b2/services/PMService/",
+                    isSHRINE: true
+                }
+        ]
+}
+EOL
+
+cat > "$LIGHTTPD_WEB_ROOT/shrine-client/js-i2b2/cells/SHRINE/cell_config_data.js" <<EOL
+{
+        files: [
+                "SHRINE_ctrl.js",
+                "i2b2_msgs.js"
+        ],
+        css: [],
+        config: {
+                name: "SHRINE Cell",
+                description: "SHRINE Cell",
+                category: ["core","cell","shrine"],
+                newTopicURL: "/steward/client/index.html",
+                readApprovedURL:"https://shrine-server:6443/shrine/rest/i2b2/request"
+        }
+}
+EOL
+
+#cat > "/etc/lighttpd/conf-enabled/10-ssl.conf" <<EOL
+#\$SERVER["socket"] == "0.0.0.0:443" {
+#	ssl.engine  = "enable"
+#	ssl.ca-file = "/etj/fullchain.pem"
+#	ssl.pemfile = "/etc/lejch/ssl.pem"
+
+	# strict configuration from https://cipherli.st/
+#	ssl.honor-cipher-order = "enable"
+#	ssl.cipher-list = "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH"
+#	ssl.use-compression = "disable"
+#	setenv.add-response-header = (
+#		"Strict-Transport-Security" => "max-age=15724800; includeSubdomains; preload",
+#		"X-Frame-Options" => "DENY",
+#		"X-Content-Type-Options" => "nosniff"
+#	)
+
+#	ssl.use-sslv2 = "disable"
+#	ssl.use-sslv3 = "disable"
+
+	# strict configuration from https://raymii.org/s/tutorials/Strong_SSL_Security_On_lighttpd.html
+#	ssl.dh-file = "/etc/ssl/certs/dhparam.pem"
+#	ssl.ec-curve = "secp384r1"
+#}
+#EOL
+
 # i2b2 client and admin whitelist URL
 sed -i "s/\"http:\/\/localhost\"/\"http:\/\/i2b2-server:8080\"/" "$LIGHTTPD_WEB_ROOT/i2b2-admin/index.php"
 sed -i "s/\"http:\/\/localhost\"/\"http:\/\/i2b2-server:8080\"/" "$LIGHTTPD_WEB_ROOT/i2b2-client/index.php"
+sed -i "s/\"http:\/\/localhost\"/\"https:\/\/shrine-server:6443\"/" "$LIGHTTPD_WEB_ROOT/shrine-client/index.php"
