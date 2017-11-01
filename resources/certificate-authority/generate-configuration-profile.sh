@@ -58,9 +58,9 @@ do
 
     # add entry in the downstream nodes and alias map
     echo "\"$NODE_DNS\" = \"https://$NODE_DNS:6443/shrine/rest/adapter/requests\"" >> "$CONF_FOLDER/shrine_downstream_nodes.conf"
-    echo "\"$NODE_DNS\" = \"$NODE_DNS\"" >> "$CONF_FOLDER/shrine_alias_map.conf"
 
     #todo: unlynx keys
+    #todo: cleanup
 
 done
 
