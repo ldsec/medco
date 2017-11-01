@@ -15,11 +15,10 @@ ENV SHRINE_VERSION="fork/1.22.8-medco" \
 RUN apt-get -y update && \
     apt-get -y install git maven zip wget unzip openjdk-8-jdk-headless && \
     apt-get -y clean && \
-    echo "<?xml version='1.0' encoding='utf-8'?><tomcat-users><role rolename=\"admin-gui\" /><user username=\"admin\"" \
-        "password=\"$ADMIN_PASSWORD\" roles=\"admin-gui\" /></tomcat-users>" > "$CATALINA_HOME/conf/tomcat-users.xml" && \
+    echo "<?xml version='1.0' encoding='utf-8'?><tomcat-users><role rolename=\"manager-gui\" /><user username=\"admin\"" \
+        "password=\"$ADMIN_PASSWORD\" roles=\"manager-gui\" /></tomcat-users>" > "$CATALINA_HOME/conf/tomcat-users.xml" && \
     echo 'export CATALINA_OPTS=" -Dakka.daemonic=on "' > "$CATALINA_HOME/bin/setenv.sh" && \
     echo '{ "allow_root": true }' > /root/.bowerrc
-    #todo: login doesnt work, use manager not admin
 
 # download and compile shrine wars
 WORKDIR "$SHRINE_SRC_DIR"
@@ -28,6 +27,7 @@ RUN git clone https://c4science.ch/source/shrine-medco.git . && \
 
 # install
 # todo: reorganize properly this part (cache and build shrine parts)
+# todo: cleanup file (+ remove from conf the .js files)
 
 # cache
 RUN mvn -e -pl commons/test-commons install -DskipTests
@@ -76,36 +76,38 @@ RUN mvn -e -pl shrine-webclient install -DskipTests
 RUN mvn -e install -Dmaven.test.skip=true
 RUN cp  "$SHRINE_SRC_DIR/apps/steward-war/target/steward.war" \
         "$SHRINE_SRC_DIR/apps/dashboard-war/target/shrine-dashboard.war" \
-        "$SHRINE_SRC_DIR/apps/proxy/target/shrine-proxy.war" \
+        #"$SHRINE_SRC_DIR/apps/proxy/target/shrine-proxy.war" \
         "$CATALINA_HOME/webapps/" && \
     cp  "$SHRINE_SRC_DIR/apps/war/target/shrine-cell.war" "$CATALINA_HOME/webapps/shrine.war" && \
-    cp  "$SHRINE_SRC_DIR/apps/meta-war/target/shrine-metadata.war" "$CATALINA_HOME/webapps/shrine-meta.war" && \
-    cp -r "$SHRINE_SRC_DIR/shrine-webclient/src/main/html" "$CATALINA_HOME/webapps/shrine-client"
+    cp  "$SHRINE_SRC_DIR/apps/meta-war/target/shrine-metadata.war" "$CATALINA_HOME/webapps/shrine-meta.war"
+    #&& \
+    #cp -r "$SHRINE_SRC_DIR/shrine-webclient/src/main/html" "$CATALINA_HOME/webapps/shrine-client"
 
 # shrine webclient
-WORKDIR "$SHRINE_SRC_DIR-webclient"
-RUN git clone https://c4science.ch/source/shrine-medco.git . && \
-    git checkout $SHRINE_VERSION && \
-    mvn -e -pl shrine-webclient install -DskipTests && \
-    rm -rf "$CATALINA_HOME/webapps/shrine-client" && \
-    cp -r "$SHRINE_SRC_DIR-webclient/shrine-webclient/src/main/html" "$CATALINA_HOME/webapps/shrine-client"
+#WORKDIR "$SHRINE_SRC_DIR-webclient"
+#RUN git clone https://c4science.ch/source/shrine-medco.git . && \
+#    git checkout $SHRINE_VERSION && \
+#    mvn -e -pl shrine-webclient install -DskipTests && \
+#    rm -rf "$CATALINA_HOME/webapps/shrine-client" && \
+#    cp -r "$SHRINE_SRC_DIR-webclient/shrine-webclient/src/main/html" "$CATALINA_HOME/webapps/shrine-client"
 
 # configuration
 RUN wget "$SHRINE_ADAPTER_MAPPINGS_URL" -O "$CATALINA_HOME/lib/AdapterMappings.xml" && \
     wget "$SHRINE_MYSQL_JAR_URL" -P "$CATALINA_HOME/lib/"
 COPY conf/shrine.conf "$CATALINA_HOME/lib/"
 COPY conf/server.xml conf/context.xml "$CATALINA_HOME/conf/"
-COPY conf/i2b2_config_data.js "$CATALINA_HOME/webapps/shrine-client/"
-COPY conf/cell_config_data.js "$CATALINA_HOME/webapps/shrine-client/js-i2b2/cells/SHRINE/"
+#COPY conf/i2b2_config_data.js "$CATALINA_HOME/webapps/shrine-client/"
+#COPY conf/cell_config_data.js "$CATALINA_HOME/webapps/shrine-client/js-i2b2/cells/SHRINE/"
 RUN sed -i "s#SHRINE_DOWNSTREAM_NODES_FILE_PATH#$CONF_DIR/shrine_downstream_nodes.conf#g" "$CATALINA_HOME/lib/shrine.conf" && \
     #sed -i "s#SHRINE_ALIAS_MAP_FILE_PATH#$CONF_DIR/shrine_alias_map.conf#g" "$CATALINA_HOME/lib/shrine.conf" && \
 
     sed -i "s/SHRINE_KEYSTORE_PASSWORD/$ADMIN_PASSWORD/g" "$CATALINA_HOME/conf/server.xml" && \
 
-    sed -i "s/SHRINE_DB_PASSWORD/$DB_PASSWORD/g" "$CATALINA_HOME/conf/context.xml" && \
+    sed -i "s/SHRINE_DB_PASSWORD/$DB_PASSWORD/g" "$CATALINA_HOME/conf/context.xml"
+    #&& \
 
-    sed -i "s/SHRINE_WEBCLIENT_DOMAIN/$I2B2_DOMAIN_NAME/g" "$CATALINA_HOME/webapps/shrine-client/i2b2_config_data.js" && \
-    sed -i "s/SHRINE_WEBCLIENT_NAME/Domain $I2B2_DOMAIN_NAME/g" "$CATALINA_HOME/webapps/shrine-client/i2b2_config_data.js"
+    #sed -i "s/SHRINE_WEBCLIENT_DOMAIN/$I2B2_DOMAIN_NAME/g" "$CATALINA_HOME/webapps/shrine-client/i2b2_config_data.js" && \
+    #sed -i "s/SHRINE_WEBCLIENT_NAME/Domain $I2B2_DOMAIN_NAME/g" "$CATALINA_HOME/webapps/shrine-client/i2b2_config_data.js"
 
 # configuration dependent on the arguments todo: log
 ARG SHRINE_DEBUG_LEVEL_ARG="?"
