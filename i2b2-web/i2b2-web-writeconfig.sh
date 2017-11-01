@@ -134,5 +134,6 @@ EOL
 # i2b2 client and admin whitelist URL
 sed -i "s/\"http:\/\/localhost\"/\"http:\/\/i2b2-server:8080\"/" "$LIGHTTPD_WEB_ROOT/i2b2-admin/index.php"
 sed -i "s/\"http:\/\/localhost\"/\"http:\/\/i2b2-server:8080\"/" "$LIGHTTPD_WEB_ROOT/i2b2-client/index.php"
+sed -i "s/\"http:\/\/127.0.0.1\"/\"http:\/\/i2b2-server:8080\"/" "$LIGHTTPD_WEB_ROOT/shrine-client/index.php"
 sed -i "s/\"http:\/\/localhost\"/\"https:\/\/shrine-server:6443\"/" "$LIGHTTPD_WEB_ROOT/shrine-client/index.php"
-sed -i "s#default.htm#$index.html#g" "$LIGHTTPD_WEB_ROOT/shrine-client/index.php"
+sed -i "s#default.htm#\$index.html#g" "$LIGHTTPD_WEB_ROOT/shrine-client/index.php"
