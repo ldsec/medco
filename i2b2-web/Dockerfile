@@ -29,7 +29,7 @@ WORKDIR "$SHRINE_SRC_DIR"
 RUN git clone https://c4science.ch/source/shrine-medco.git . && \
     git checkout $SHRINE_VERSION && \
     chmod -R 777 . && \
-    cp "$I2B2_WEB_DIR"/index.php "$SHRINE_SRC_DIR"/
+    cp "$I2B2_WEB_DIR"/index.php "$SHRINE_SRC_DIR"/shrine-webclient/src/main/html/
 
 # copy clients
 RUN cp -R "$I2B2_WEB_DIR" "$LIGHTTPD_WEB_ROOT/i2b2-admin" && \
