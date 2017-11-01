@@ -49,21 +49,37 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EO
     INSERT INTO i2b2pm.PM_USER_DATA (USER_ID, FULL_NAME, PASSWORD, STATUS_CD)
         VALUES('medcoservice', 'MedCo Service User', '7cb1ac9deab165535494d60da1d3d7e', 'A');
     INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
-        VALUES('@', 'medcoservice', 'USER', 'A');
+        VALUES('MedCo-SHRINE', 'medcoservice', 'USER', 'A');
     INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
-        VALUES('@', 'medcoservice', 'DATA_DEID', 'A');
+        VALUES('MedCo-SHRINE', 'medcoservice', 'DATA_DEID', 'A');
     INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
-        VALUES('@', 'medcoservice', 'DATA_OBFSC', 'A');
+        VALUES('MedCo-SHRINE', 'medcoservice', 'DATA_OBFSC', 'A');
     INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
-        VALUES('@', 'medcoservice', 'DATA_AGG', 'A');
+        VALUES('MedCo-SHRINE', 'medcoservice', 'DATA_AGG', 'A');
     INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
-        VALUES('@', 'medcoservice', 'DATA_LDS', 'A');
+        VALUES('MedCo-SHRINE', 'medcoservice', 'DATA_LDS', 'A');
     INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
-        VALUES('@', 'medcoservice', 'EDITOR', 'A');
+        VALUES('MedCo-SHRINE', 'medcoservice', 'EDITOR', 'A');
     INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
-        VALUES('@', 'medcoservice', 'DATA_PROT', 'A');
+        VALUES('MedCo-SHRINE', 'medcoservice', 'DATA_PROT', 'A');
     INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
-        VALUES('@', 'medcoservice', 'MANAGER', 'A');
+        VALUES('MedCo-SHRINE', 'medcoservice', 'MANAGER', 'A');
+    INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
+        VALUES('MedCo', 'medcoservice', 'USER', 'A');
+    INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
+        VALUES('MedCo', 'medcoservice', 'DATA_DEID', 'A');
+    INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
+        VALUES('MedCo', 'medcoservice', 'DATA_OBFSC', 'A');
+    INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
+        VALUES('MedCo', 'medcoservice', 'DATA_AGG', 'A');
+    INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
+        VALUES('MedCo', 'medcoservice', 'DATA_LDS', 'A');
+    INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
+        VALUES('MedCo', 'medcoservice', 'EDITOR', 'A');
+    INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
+        VALUES('MedCo', 'medcoservice', 'DATA_PROT', 'A');
+    INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
+        VALUES('MedCo', 'medcoservice', 'MANAGER', 'A');
 
     INSERT INTO i2b2pm.pm_user_params(datatype_cd, user_id, param_name_cd, value, change_date, entry_date, status_cd) VALUES
     ('T', 'medcoservice', 'qep', 'true', 'NOW()', 'NOW()', 'A');
