@@ -33,8 +33,6 @@ EOSQL
 # pm data
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EOSQL
 
-
-
     insert into i2b2pm.pm_cell_data (cell_id, project_path, name, method_cd, url, can_override, status_cd)
     values ('CRC', '/MedCo-SHRINE', 'MedCo-SHRINE Federated Query', 'REST', 'https://shrine-server:6443/shrine/rest/i2b2/', 1, 'A');
 
@@ -44,13 +42,31 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EO
     INSERT INTO i2b2pm.PM_USER_DATA (USER_ID, FULL_NAME, PASSWORD, STATUS_CD)
         VALUES('medcoshrineuser', 'MedCo SHRINE User', 'f8eb764674b57b5710e3c1665464e29', 'A');
     insert into i2b2pm.pm_project_user_roles (project_id, user_id, user_role_cd, status_cd)
-    values ('MedCo-SHRINE', 'medcoshrineuser', 'USER', 'A');
+        values ('MedCo-SHRINE', 'medcoshrineuser', 'USER', 'A');
     insert into i2b2pm.pm_project_user_roles (project_id, user_id, user_role_cd, status_cd)
-    values ('MedCo-SHRINE', 'medcoshrineuser', 'DATA_OBFSC', 'A');
+        values ('MedCo-SHRINE', 'medcoshrineuser', 'DATA_OBFSC', 'A');
 
+    INSERT INTO i2b2pm.PM_USER_DATA (USER_ID, FULL_NAME, PASSWORD, STATUS_CD)
+        VALUES('medcoservice', 'MedCo Service User', '7cb1ac9deab165535494d60da1d3d7e', 'A');
+    INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
+        VALUES('@', 'medcoservice', 'USER', 'A');
+    INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
+        VALUES('@', 'medcoservice', 'DATA_DEID', 'A');
+    INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
+        VALUES('@', 'medcoservice', 'DATA_OBFSC', 'A');
+    INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
+        VALUES('@', 'medcoservice', 'DATA_AGG', 'A');
+    INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
+        VALUES('@', 'medcoservice', 'DATA_LDS', 'A');
+    INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
+        VALUES('@', 'medcoservice', 'EDITOR', 'A');
+    INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
+        VALUES('@', 'medcoservice', 'DATA_PROT', 'A');
+    INSERT INTO i2b2pm.PM_PROJECT_USER_ROLES (PROJECT_ID, USER_ID, USER_ROLE_CD, STATUS_CD)
+        VALUES('@', 'medcoservice', 'MANAGER', 'A');
 
     INSERT INTO i2b2pm.pm_user_params(datatype_cd, user_id, param_name_cd, value, change_date, entry_date, status_cd) VALUES
-    ('T', 'AGG_SERVICE_ACCOUNT', 'qep', 'true', 'NOW()', 'NOW()', 'A');
+    ('T', 'medcoservice', 'qep', 'true', 'NOW()', 'NOW()', 'A');
     INSERT INTO i2b2pm.pm_user_params(datatype_cd, user_id, param_name_cd, value, change_date, entry_date, status_cd) VALUES
     ('T', 'medcoadmin', 'DataSteward', 'true', 'NOW()', 'NOW()', 'A');
 EOSQL
