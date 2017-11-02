@@ -7,7 +7,9 @@ ENV I2B2_VERSION="v1.7.08a" \
     SHRINE_SRC_DIR="/opt/shrine-src" \
     SHRINE_VERSION="fork/1.22.8-medco" \
     I2B2_DOMAIN_NAME="$I2B2_DOMAIN_NAME_ARG" \
-    LIGHTTPD_WEB_ROOT="/var/www/html"
+    LIGHTTPD_WEB_ROOT="/var/www/html" \
+    DB_PASSWORD="pFjy3EjDVwLfT2rB9xkK"
+
 
 # requirements
 RUN echo "deb http://httpredir.debian.org/debian jessie-backports main contrib non-free" >> /etc/apt/sources.list && \

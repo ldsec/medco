@@ -57,8 +57,7 @@ document.addEventListener('click', function(event) {
 
 <p><a href="/i2b2-admin">I2b2 admin</a></p>
 <p><a href="/i2b2-client">I2b2 client</a></p>
-<p><a href=":6443/shrine-client">SHRINE client (MedCo)</a></p>
-<p><a href="/shrine-client">SHRINE client (MedCo) BIS</a></p>
+<p><a href="/shrine-client">SHRINE client (MedCo)</a></p>
 <p><a href="/phppgadmin">PhpPgAdmin</a></p>
 <p><a href=":9990">WildFly Management</a></p>
 <p><a href=":8080/i2b2">I2b2 Axis Management</a></p>
@@ -131,11 +130,16 @@ EOL
 #}
 #EOL
 
-# i2b2 client and admin whitelist URL
+# webclients whitelist URLs
 sed -i "s/\"http:\/\/localhost\"/\"http:\/\/i2b2-server:8080\"/" "$LIGHTTPD_WEB_ROOT/i2b2-admin/index.php"
 sed -i "s/\"http:\/\/localhost\"/\"http:\/\/i2b2-server:8080\"/" "$LIGHTTPD_WEB_ROOT/i2b2-client/index.php"
 sed -i "s/\"http:\/\/127.0.0.1\"/\"http:\/\/i2b2-server:8080\"/" "$LIGHTTPD_WEB_ROOT/shrine-client/index.php"
 sed -i "s/\"http:\/\/localhost\"/\"https:\/\/shrine-server:6443\"/" "$LIGHTTPD_WEB_ROOT/shrine-client/index.php"
+
+# shrine webclient fixes for integration in php environment
 sed -i "s#default.htm#index.html#g" "$LIGHTTPD_WEB_ROOT/shrine-client/index.php"
 sed -i '/CURLOPT_SSL_VERIFYPEER/i curl_setopt($proxyRequest, CURLOPT_SSL_VERIFYHOST, FALSE);' "$LIGHTTPD_WEB_ROOT/shrine-client/index.php"
+sed -i "s#SHRINE_ONT_DB#$I2B2_DOMAIN_NAME#g" "$LIGHTTPD_WEB_ROOT/shrine-client/js-i2b2/cells/plugins/MedCo/php/sqlConnection.php"
+sed -i "s#SHRINE_ONT_USER#shrine_ont#g" "$LIGHTTPD_WEB_ROOT/shrine-client/js-i2b2/cells/plugins/MedCo/php/sqlConnection.php"
+sed -i "s#SHRINE_ONT_PW#$DB_PASSWORD#g" "$LIGHTTPD_WEB_ROOT/shrine-client/js-i2b2/cells/plugins/MedCo/php/sqlConnection.php"
 
