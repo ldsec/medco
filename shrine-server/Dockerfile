@@ -21,6 +21,7 @@ RUN apt-get -y update && \
     echo '{ "allow_root": true }' > /root/.bowerrc
 
 # download and compile shrine wars
+ENV NOCACHE="1"
 WORKDIR "$SHRINE_SRC_DIR"
 RUN git clone https://c4science.ch/source/shrine-medco.git . && \
     git checkout $SHRINE_VERSION

@@ -20,29 +20,6 @@ RUN echo "deb http://httpredir.debian.org/debian jessie-backports main contrib n
     lighttpd-enable-mod fastcgi-php
     #ssl
 
-# download i2b2 webclient
-WORKDIR "$I2B2_WEB_DIR"
-RUN git clone https://github.com/i2b2/i2b2-webclient.git . && \
-    git checkout tags/$I2B2_VERSION && \
-    chmod -R 777 .
-
-# download shrine webclient
-WORKDIR "$SHRINE_SRC_DIR"
-RUN git clone https://c4science.ch/source/shrine-medco.git . && \
-    git checkout $SHRINE_VERSION && \
-    cp "$I2B2_WEB_DIR"/index.php "$SHRINE_SRC_DIR"/shrine-webclient/src/main/html/ && \
-    chmod -R 777 .
-
-
-# copy clients
-RUN cp -R "$I2B2_WEB_DIR" "$LIGHTTPD_WEB_ROOT/i2b2-admin" && \
-    cp -R "$I2B2_WEB_DIR" "$LIGHTTPD_WEB_ROOT/i2b2-client" && \
-    cp -R "$SHRINE_SRC_DIR/shrine-webclient/src/main/html" "$LIGHTTPD_WEB_ROOT/shrine-client"
-
-# copy and apply settings
-COPY i2b2-web-writeconfig.sh .
-RUN chmod -R +x ./i2b2-web-writeconfig.sh && sleep 1 && /bin/bash -c ./i2b2-web-writeconfig.sh
-
 # phpPgAdmin
 WORKDIR "$LIGHTTPD_WEB_ROOT"
 RUN wget http://downloads.sourceforge.net/phppgadmin/phpPgAdmin-5.1.tar.gz?download && \
@@ -53,6 +30,29 @@ RUN wget http://downloads.sourceforge.net/phppgadmin/phpPgAdmin-5.1.tar.gz?downl
     sed -i "s/ = 'PostgreSQL'/ = '$I2B2_DOMAIN_NAME PostgreSQL Server'/" phppgadmin/conf/config.inc.php && \
     sed -i "s/'extra_login_security'] = true/'extra_login_security'] = false/" phppgadmin/conf/config.inc.php && \
     sed -i "/\$cmd = \$exe/c\$cmd = \$exe;" phppgadmin/dbexport.php
+
+# download i2b2 webclient
+WORKDIR "$I2B2_WEB_DIR"
+RUN git clone https://github.com/i2b2/i2b2-webclient.git . && \
+    git checkout tags/$I2B2_VERSION && \
+    chmod -R 777 .
+
+# download shrine webclient
+ENV NOCACHE="1"
+WORKDIR "$SHRINE_SRC_DIR"
+RUN git clone https://c4science.ch/source/shrine-medco.git . && \
+    git checkout $SHRINE_VERSION && \
+    cp "$I2B2_WEB_DIR"/index.php "$SHRINE_SRC_DIR"/shrine-webclient/src/main/html/ && \
+    chmod -R 777 .
+
+# copy clients
+RUN cp -R "$I2B2_WEB_DIR" "$LIGHTTPD_WEB_ROOT/i2b2-admin" && \
+    cp -R "$I2B2_WEB_DIR" "$LIGHTTPD_WEB_ROOT/i2b2-client" && \
+    cp -R "$SHRINE_SRC_DIR/shrine-webclient/src/main/html" "$LIGHTTPD_WEB_ROOT/shrine-client"
+
+# copy and apply settings
+COPY i2b2-web-writeconfig.sh .
+RUN chmod -R +x ./i2b2-web-writeconfig.sh && sleep 1 && /bin/bash -c ./i2b2-web-writeconfig.sh
 
 # todo: phpmyadmin https://files.phpmyadmin.net/phpMyAdmin/4.7.4/phpMyAdmin-4.7.4-all-languages.zip
 # RUN wget http://downloads.sourceforge.net/phppgadmin/phpPgAdmin-5.1.tar.gz?download && \
