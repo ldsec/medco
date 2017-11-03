@@ -37,6 +37,7 @@ RUN wget "http://archive.apache.org/dist/axis/axis2/java/core/$AXIS2_VERSION/axi
     sed -i "/^log4j.rootCategory=/c\log4j.rootCategory=$AXIS2_LOGLEVEL, CONSOLE" i2b2.war/WEB-INF/classes/log4j.properties
 
 # download, patch, compile and deploy i2b2
+ENV NOCACHE="3"
 WORKDIR "$I2B2_SRC_DIR"
 RUN git clone https://github.com/i2b2/i2b2-core-server.git . && \
     git checkout tags/$I2B2_VERSION
