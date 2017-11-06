@@ -6,7 +6,7 @@ services:
       service: i2b2-server
     build:
       args:
-        - UNLYNX_ENTRYPOINT_IDX_ARG=1
+        - NODE_IDX_ARG=1
         - AXIS2_LOGLEVEL_ARG=DEBUG
         - UNLYNX_DEBUG_LEVEL_ARG=5
     ports:
@@ -48,7 +48,7 @@ services:
       service: unlynx
     build:
       args:
-        - UNLYNX_ENTRYPOINT_IDX_ARG=1
+        - NODE_IDX_ARG=1
         - UNLYNX_DEBUG_LEVEL_ARG=1
     ports:
       - "2004:2004"
@@ -68,8 +68,7 @@ services:
       service: shrine-server
     build:
       args:
-        - SHRINE_NODE_NAME_ARG=shrine-server-srv1
-        - SHRINE_KEYSTORE_NODE_ALIAS_ARG=shrine-server-srv1
+        - NODE_IDX_ARG=1
     ports:
       - "6447:6443"
     networks:
