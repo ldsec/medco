@@ -5,7 +5,7 @@ services:
       context: ../i2b2-server
       args:
         - I2B2_DOMAIN_NAME_ARG=medcodeployment
-        - UNLYNX_ENTRYPOINT_IDX_ARG=0
+        - NODE_IDX_ARG=0
         - AXIS2_LOGLEVEL_ARG=INFO
         - UNLYNX_DEBUG_LEVEL_ARG=1
     ports:
@@ -40,7 +40,7 @@ services:
     build:
       context: ../unlynx
       args:
-        - UNLYNX_ENTRYPOINT_IDX_ARG=0
+        - NODE_IDX_ARG=0
         - UNLYNX_DEBUG_LEVEL_ARG=1
     ports:
       - "2000"
@@ -55,8 +55,7 @@ services:
       context: ../shrine-server
       args:
         - I2B2_DOMAIN_NAME_ARG=medcodeployment
-        - SHRINE_NODE_NAME_ARG=172.16.205.10
-        - SHRINE_KEYSTORE_NODE_ALIAS_ARG=172.16.205.10
+        - NODE_IDX_ARG=0
     ports:
       - "6443"
     networks:

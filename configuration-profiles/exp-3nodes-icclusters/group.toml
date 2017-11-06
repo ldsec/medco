@@ -1,0 +1,12 @@
+[[servers]]
+  Address = "tcp://10.90.36.54:2000"
+  Public = "5loqdN2/oXEhkrIEhwc0WCKYm9+c9zs10Y4TZgF6490="
+  Description = "Unlynx Server 0"
+[[servers]]
+  Address = "tcp://10.90.36.57:2000"
+  Public = "UE9/SKV6zw3PezdxzDiFXzG776pQRXT2+SyXog7k6Dc="
+  Description = "Unlynx Server 1"
+[[servers]]
+  Address = "tcp://10.90.36.58:2000"
+  Public = "LFGVRk/ghvIeGwIFv/ZAFKtM2UWcjSypaVx0YAOdkMU="
+  Description = "Unlynx Server 2"

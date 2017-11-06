@@ -6,15 +6,16 @@ services:
       service: i2b2-server
     build:
       args:
-        - UNLYNX_GROUP_KEY_FILE_ARG=exp-3nodes-icclusters/group.toml
-        - UNLYNX_ENTRYPOINT_IDX_ARG=1
+        - NODE_IDX_ARG=1
         - AXIS2_LOGLEVEL_ARG=INFO
         - UNLYNX_DEBUG_LEVEL_ARG=1
     ports:
       - "8080:8080"
       - "9990:9990"
+    volumes:
+      - ../configuration-profiles/exp-3nodes-samehost:/opt/medco-configuration
 
-  i2b2-database-datax1:
+  i2b2-database-datax100:
     extends:
       file: ../docker-compose-common.yml
       service: i2b2-database
@@ -38,11 +39,32 @@ services:
       service: unlynx
     build:
       args:
-        - UNLYNX_KEY_FILE_ARG=exp-3nodes-icclusters/srv1-private.toml
+        - NODE_IDX_ARG=1
         - UNLYNX_DEBUG_LEVEL_ARG=1
     ports:
       - "2000:2000"
       - "2001:2001"
+    volumes:
+      - ../configuration-profiles/exp-3nodes-samehost:/opt/medco-configuration
+
+  shrine-server:
+    extends:
+      file: ../docker-compose-common.yml
+      service: shrine-server
+    build:
+      args:
+        - NODE_IDX_ARG=1
+    ports:
+      - "6443:6443"
+    volumes:
+      - ../configuration-profiles/exp-3nodes-samehost:/opt/medco-configuration
+
+  shrine-database:
+    extends:
+      file: ../docker-compose-common.yml
+      service: shrine-database
+    ports:
+      - "3306:3306"
 
 networks:
   medco-network:

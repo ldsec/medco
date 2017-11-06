@@ -118,15 +118,15 @@ RUN git clone https://c4science.ch/source/medco-i2b2-cell.git . && \
     git checkout $MEDCO_CELL_GIT_BRANCH
 
 ## install
-ARG UNLYNX_ENTRYPOINT_IDX_ARG="0"
+ARG NODE_IDX_ARG="0"
 ARG UNLYNX_DEBUG_LEVEL_ARG="1"
-ENV UNLYNX_ENTRYPOINT_IDX="$UNLYNX_ENTRYPOINT_IDX_ARG" \
+ENV NODE_IDX="$NODE_IDX_ARG" \
     UNLYNX_DEBUG_LEVEL="$UNLYNX_DEBUG_LEVEL_ARG"
 
 RUN sed -i "/jboss.home/c\jboss.home=$JBOSS_HOME" build.properties && \
     sed -i "/medco.unlynx.groupfilepath/c\medco.unlynx.groupfilepath=$CONF_DIR/group.toml" etc/spring/medcoapp/medco.properties && \
     sed -i "/medco.unlynx.binarypath/c\medco.unlynx.binarypath=$CONF_DIR/unlynxI2b2" etc/spring/medcoapp/medco.properties && \
-    sed -i "/medco.unlynx.entrypointidx/c\medco.unlynx.entrypointidx=$UNLYNX_ENTRYPOINT_IDX" etc/spring/medcoapp/medco.properties && \
+    sed -i "/medco.unlynx.entrypointidx/c\medco.unlynx.entrypointidx=$NODE_IDX" etc/spring/medcoapp/medco.properties && \
     sed -i "/medco.unlynx.debuglevel/c\medco.unlynx.debuglevel=$UNLYNX_DEBUG_LEVEL" etc/spring/medcoapp/medco.properties && \
     ant -f build.xml clean all deploy
 
