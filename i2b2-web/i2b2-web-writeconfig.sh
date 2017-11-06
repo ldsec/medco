@@ -60,7 +60,10 @@ document.addEventListener('click', function(event) {
 <p><a href="/shrine-client">SHRINE client (MedCo)</a></p>
 <p><a href="/phppgadmin">PhpPgAdmin</a></p>
 <p><a href=":9990">WildFly Management</a></p>
-<p><a href=":8080/i2b2">I2b2 Axis Management</a></p>
+<p><a href=":8080/i2b2">I2b2 Axis2 Management</a></p>
+<p><a href=":6443/manager">Tomcat Management</a></p>
+<p><a href=":6443/shrine-dashboard">SHRINE Dashboard</a></p>
+<p><a href=":6443/steward">SHRINE Data Steward</a></p>
 </div>
 
 </body>
