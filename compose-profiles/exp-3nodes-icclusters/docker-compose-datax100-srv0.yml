@@ -13,7 +13,7 @@ services:
       - "8080:8080"
       - "9990:9990"
     volumes:
-      - ../configuration-profiles/exp-3nodes-icclusters:/opt/medco-configuration
+      - ../../configuration-profiles/exp-3nodes-icclusters:/opt/medco-configuration
 
   i2b2-database-datax100:
     extends:
@@ -45,7 +45,7 @@ services:
       - "2000:2000"
       - "2001:2001"
     volumes:
-      - ../configuration-profiles/exp-3nodes-icclusters:/opt/medco-configuration
+      - ../../configuration-profiles/exp-3nodes-icclusters:/opt/medco-configuration
 
   shrine-server:
     extends:
@@ -57,7 +57,7 @@ services:
     ports:
       - "6443:6443"
     volumes:
-      - ../configuration-profiles/exp-3nodes-icclusters:/opt/medco-configuration
+      - ../../configuration-profiles/exp-3nodes-icclusters:/opt/medco-configuration
 
   shrine-database:
     extends:
