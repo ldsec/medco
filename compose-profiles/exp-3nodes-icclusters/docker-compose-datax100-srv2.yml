@@ -58,7 +58,6 @@ services:
       - "6443:6443"
     volumes:
       - ../../configuration-profiles/exp-3nodes-icclusters:/opt/medco-configuration
-      - ../../configuration-profiles/exp-3nodes-icclusters:/opt/medco-configuration
 
   shrine-database:
     extends:
