@@ -17,8 +17,7 @@ RUN echo "deb http://httpredir.debian.org/debian jessie-backports main contrib n
     apt-get -y install lighttpd php5-cgi curl libcurl3 php5-common php5-cli php5-curl git php5-pgsql wget tar && \
     apt-get -y -t jessie-backports install postgresql-client && \
     apt-get -y clean && \
-    lighttpd-enable-mod fastcgi-php
-    #ssl
+    lighttpd-enable-mod fastcgi-php ssl
 
 # phpPgAdmin
 WORKDIR "$LIGHTTPD_WEB_ROOT"
@@ -38,7 +37,7 @@ RUN git clone https://github.com/i2b2/i2b2-webclient.git . && \
     chmod -R 777 .
 
 # download shrine webclient
-ENV NOCACHE="10"
+ENV NOCACHE="11"
 WORKDIR "$SHRINE_SRC_DIR"
 RUN git clone https://c4science.ch/source/shrine-medco.git . && \
     git checkout $SHRINE_VERSION && \
@@ -51,6 +50,8 @@ RUN cp -R "$I2B2_WEB_DIR" "$LIGHTTPD_WEB_ROOT/i2b2-admin" && \
     cp -R "$SHRINE_SRC_DIR/shrine-webclient/src/main/html" "$LIGHTTPD_WEB_ROOT/shrine-client"
 
 # copy and apply settings
+ARG NODE_IDX_ARG="0"
+ENV NODE_IDX="$NODE_IDX_ARG"
 COPY i2b2-web-writeconfig.sh .
 RUN chmod -R +x ./i2b2-web-writeconfig.sh && sleep 1 && /bin/bash -c ./i2b2-web-writeconfig.sh
 

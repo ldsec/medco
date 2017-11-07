@@ -108,30 +108,32 @@ cat > "$LIGHTTPD_WEB_ROOT/shrine-client/js-i2b2/cells/SHRINE/cell_config_data.js
 }
 EOL
 
-#cat > "/etc/lighttpd/conf-enabled/10-ssl.conf" <<EOL
-#\$SERVER["socket"] == "0.0.0.0:443" {
-#	ssl.engine  = "enable"
-#	ssl.ca-file = "/etj/fullchain.pem"
-#	ssl.pemfile = "/etc/lejch/ssl.pem"
+cat > "/etc/lighttpd/conf-enabled/10-ssl.conf" <<EOL
+\$SERVER["socket"] == "0.0.0.0:443" {
+	ssl.engine  = "enable"
+	ssl.ca-file = "$CONF_DIR/cacert.pem"
+	ssl.pemfile = "$CONF_DIR/srv$dd.pem"
+    #todo: names in configuration profiles make more explicit
 
+    # todo: enable + get ssl only
 	# strict configuration from https://cipherli.st/
-#	ssl.honor-cipher-order = "enable"
-#	ssl.cipher-list = "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH"
-#	ssl.use-compression = "disable"
-#	setenv.add-response-header = (
-#		"Strict-Transport-Security" => "max-age=15724800; includeSubdomains; preload",
-#		"X-Frame-Options" => "DENY",
-#		"X-Content-Type-Options" => "nosniff"
-#	)
+	#ssl.honor-cipher-order = "enable"
+	#ssl.cipher-list = "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH"
+	#ssl.use-compression = "disable"
+	#setenv.add-response-header = (
+	#	"Strict-Transport-Security" => "max-age=15724800; includeSubdomains; preload",
+	#	"X-Frame-Options" => "DENY",
+	#	"X-Content-Type-Options" => "nosniff"
+	#)
 
-#	ssl.use-sslv2 = "disable"
-#	ssl.use-sslv3 = "disable"
+	#ssl.use-sslv2 = "disable"
+	#ssl.use-sslv3 = "disable"
 
 	# strict configuration from https://raymii.org/s/tutorials/Strong_SSL_Security_On_lighttpd.html
-#	ssl.dh-file = "/etc/ssl/certs/dhparam.pem"
-#	ssl.ec-curve = "secp384r1"
-#}
-#EOL
+	#ssl.dh-file = "/etc/ssl/certs/dhparam.pem"
+	#ssl.ec-curve = "secp384r1"
+}
+EOL
 
 # webclients whitelist URLs
 sed -i "s/\"http:\/\/localhost\"/\"http:\/\/i2b2-server:8080\"/" "$LIGHTTPD_WEB_ROOT/i2b2-admin/index.php"

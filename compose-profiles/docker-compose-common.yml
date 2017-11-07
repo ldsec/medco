@@ -30,9 +30,11 @@ services:
     build:
       context: ../i2b2-web
       args:
+        - NODE_IDX_ARG=0
         - I2B2_DOMAIN_NAME_ARG=medcodeployment
     ports:
       - "80"
+      - "443"
     networks:
       - medco-network
 
