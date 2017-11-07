@@ -17,7 +17,8 @@ RUN echo "deb http://httpredir.debian.org/debian jessie-backports main contrib n
     apt-get -y install lighttpd php5-cgi curl libcurl3 php5-common php5-cli php5-curl git php5-pgsql wget tar && \
     apt-get -y -t jessie-backports install postgresql-client && \
     apt-get -y clean && \
-    lighttpd-enable-mod fastcgi-php ssl
+    lighttpd-enable-mod fastcgi-php
+    #ssl
 
 # phpPgAdmin
 WORKDIR "$LIGHTTPD_WEB_ROOT"
