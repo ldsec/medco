@@ -51,8 +51,8 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EO
     insert into shrine_ont.table_access (c_table_cd, c_table_name, c_protected_access, c_hlevel, c_fullname, c_name,
         c_synonym_cd, c_visualattributes, c_facttablecolumn, c_dimtablename,
         c_columnname, c_columndatatype, c_operator, c_dimcode, c_tooltip) VALUES
-        ('GENOMIC', 'GENOMIC', 'N', 2, '\medco\genomic\', 'MedCo Genomic Annotations',
-        'N', 'LA', 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\medco\genomic\', 'MedCo Genomic Annotations');
+        ('GENOMIC', 'GENOMIC', 'N', 1, '\medco\genomic\', 'MedCo Genomic Ontology',
+        'N', 'CA', 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\medco\genomic\', 'MedCo Genomic Ontology');
 
 
 -- schemes
@@ -193,11 +193,32 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EO
         ADD CONSTRAINT fullname_pk_22 PRIMARY KEY (c_fullname);
     ALTER TABLE ONLY shrine_ont.genomic
         ADD CONSTRAINT basecode_un_22 UNIQUE (c_basecode);
+
     insert into shrine_ont.genomic (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum,
         c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, update_date,
         download_date, import_date, valuetype_cd, m_applied_path) values
-        ('1', '\medco\genomic\', 'MedCo Genomic Annotations', 'N', 'LA', '0', 'concept_cd', 'concept_dimension', 'concept_path',
-        'T', 'LIKE', '\medco\genomic\', 'MedCo Genomic Annotations', '\medco\genomic\',
+        ('1', '\medco\genomic\', 'MedCo Genomic Ontology', 'N', 'CA', '0', 'concept_cd', 'concept_dimension', 'concept_path',
+        'T', 'LIKE', '\medco\genomic\', 'MedCo Genomic Ontology', '\medco\genomic\',
+        'NOW()', 'NOW()', 'NOW()', 'GEN', '@');
+
+    insert into shrine_ont.genomic (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum,
+        c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, update_date,
+        download_date, import_date, valuetype_cd, m_applied_path) values
+        ('2', '\medco\genomic\annotations_Hugo_Symbol\', 'Gene Name', 'N', 'LA', '0', 'concept_cd', 'concept_dimension', 'concept_path',
+        'T', 'LIKE', '\medco\genomic\annotations_Hugo_Symbol\', 'Gene Name', '\medco\genomic\annotations_Hugo_Symbol\',
+        'NOW()', 'NOW()', 'NOW()', 'GEN', '@');
+    insert into shrine_ont.genomic (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum,
+        c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, update_date,
+        download_date, import_date, valuetype_cd, m_applied_path) values
+        ('2', '\medco\genomic\annotations_Protein_position\', 'Protein Position', 'N', 'LA', '0', 'concept_cd', 'concept_dimension', 'concept_path',
+        'T', 'LIKE', '\medco\genomic\annotations_Protein_position\', 'Protein Position', '\medco\genomic\annotations_Protein_position\',
+        'NOW()', 'NOW()', 'NOW()', 'GEN', '@');
+
+    insert into shrine_ont.genomic (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum,
+        c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, update_date,
+        download_date, import_date, valuetype_cd, m_applied_path) values
+        ('2', '\medco\genomic\variant\', 'Variant Name', 'N', 'LA', '0', 'concept_cd', 'concept_dimension', 'concept_path',
+        'T', 'LIKE', '\medco\genomic\variant\', 'Variant Name', '\medco\genomic\variant\',
         'NOW()', 'NOW()', 'NOW()', 'GEN', '@');
 
 -- genomic annotations table
