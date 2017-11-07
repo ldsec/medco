@@ -37,6 +37,8 @@ services:
       - "443"
     networks:
       - medco-network
+    volumes:
+      - ../configuration-profiles/dev-3nodes-samehost:/opt/medco-configuration
 
   unlynx:
     build:

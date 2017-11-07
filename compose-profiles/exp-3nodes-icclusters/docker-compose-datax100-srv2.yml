@@ -36,6 +36,8 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    volumes:
+      - ../../configuration-profiles/exp-3nodes-icclusters:/opt/medco-configuration
 
   unlynx:
     extends:
