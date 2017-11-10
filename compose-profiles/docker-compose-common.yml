@@ -2,7 +2,7 @@ version: '2.2'
 services:
   i2b2-server:
     build:
-      context: ../i2b2-server
+      context: ../docker-images/i2b2-server
       args:
         - I2B2_DOMAIN_NAME_ARG=medcodeployment
         - NODE_IDX_ARG=0
@@ -18,7 +18,7 @@ services:
 
   i2b2-database:
     build:
-      context: ../i2b2-database
+      context: ../docker-images/i2b2-database
       args:
         - I2B2_DOMAIN_NAME_ARG=medcodeployment
     ports:
@@ -28,7 +28,7 @@ services:
 
   i2b2-web:
     build:
-      context: ../i2b2-web
+      context: ../docker-images/i2b2-web
       args:
         - NODE_IDX_ARG=0
         - I2B2_DOMAIN_NAME_ARG=medcodeployment
@@ -42,7 +42,7 @@ services:
 
   unlynx:
     build:
-      context: ../unlynx
+      context: ../docker-images/unlynx
       args:
         - NODE_IDX_ARG=0
         - UNLYNX_DEBUG_LEVEL_ARG=1
@@ -56,10 +56,11 @@ services:
 
   shrine-server:
     build:
-      context: ../shrine-server
+      context: ../docker-images/shrine-server
       args:
         - I2B2_DOMAIN_NAME_ARG=medcodeployment
         - NODE_IDX_ARG=0
+        - SHRINE_DEBUG_LEVEL_ARG="INFO"
     ports:
       - "6443"
     networks:
@@ -69,7 +70,7 @@ services:
 
   shrine-database:
     build:
-      context: ../shrine-database
+      context: ../docker-images/shrine-database
       args:
         - I2B2_DOMAIN_NAME_ARG=medcodeployment
     ports:

@@ -35,8 +35,12 @@ services:
     extends:
       file: ../docker-compose-common.yml
       service: i2b2-web
+    build:
+      args:
+        - NODE_IDX_ARG=2
     ports:
       - "86:80"
+      - "449:443"
     networks:
       medco-network-srv2:
         aliases:
