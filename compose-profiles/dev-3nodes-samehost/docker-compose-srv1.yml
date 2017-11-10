@@ -38,7 +38,7 @@ services:
     build:
       args:
         - NODE_IDX_ARG=1
-        - SHRINE_DEBUG_LEVEL_ARG=DEBUG
+        - SHRINE_DEBUG_LEVEL_ARG=FINE
     ports:
       - "84:80"
       - "447:443"
