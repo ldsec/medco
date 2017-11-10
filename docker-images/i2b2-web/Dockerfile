@@ -18,12 +18,10 @@ RUN echo "deb http://httpredir.debian.org/debian jessie-backports main contrib n
     apt-get -y -t jessie-backports install postgresql-client && \
     apt-get -y clean && \
     lighttpd-enable-mod fastcgi-php ssl && \
-    chmod -R 777 /opt && \
-    chgrp -R www-data /etc/lighttpd && \
-    chmod -R g+w /etc/lighttpd && \
+    chgrp -R www-data /opt /etc/lighttpd && \
+    chmod -R g+rwx /opt /etc/lighttpd && \
     chown -R www-data:www-data "$LIGHTTPD_WEB_ROOT" && \
-    chmod -R +r "$LIGHTTPD_WEB_ROOT" && \
-    chmod -R +x "$LIGHTTPD_WEB_ROOT" && \
+    chmod -R +rx "$LIGHTTPD_WEB_ROOT" && \
     install -d -o www-data -g www-data -m 0750 "/var/run/lighttpd"
 USER www-data
 
@@ -41,8 +39,7 @@ RUN wget http://downloads.sourceforge.net/phppgadmin/phpPgAdmin-5.1.tar.gz?downl
 # download i2b2 webclient
 WORKDIR "$I2B2_WEB_DIR"
 RUN git clone https://github.com/i2b2/i2b2-webclient.git . && \
-    git checkout tags/$I2B2_VERSION && \
-    chmod -R 777 .
+    git checkout tags/$I2B2_VERSION
 
 # download shrine webclient
 WORKDIR "$SHRINE_SRC_DIR"
