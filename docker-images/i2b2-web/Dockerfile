@@ -18,6 +18,7 @@ RUN echo "deb http://httpredir.debian.org/debian jessie-backports main contrib n
     apt-get -y -t jessie-backports install postgresql-client && \
     apt-get -y clean && \
     lighttpd-enable-mod fastcgi-php ssl && \
+    mkdir -p "$I2B2_WEB_DIR" "$SHRINE_SRC_DIR" && \
     chgrp -R www-data /opt /etc/lighttpd && \
     chmod -R g+rwx /opt /etc/lighttpd && \
     chown -R www-data:www-data "$LIGHTTPD_WEB_ROOT" && \
