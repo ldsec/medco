@@ -20,10 +20,14 @@ RUN echo "deb http://httpredir.debian.org/debian jessie-backports main contrib n
     lighttpd-enable-mod fastcgi-php ssl && \
     chmod -R 777 /opt && \
     chgrp -R www-data /etc/lighttpd && \
-    chmod -R g+w /etc/lighttpd
+    chmod -R g+w /etc/lighttpd && \
+    chown -R www-data:www-data "$LIGHTTPD_WEB_ROOT" && \
+    chmod -R +r "$LIGHTTPD_WEB_ROOT" && \
+    chmod -R +x "$LIGHTTPD_WEB_ROOT" && \
+    install -d -o www-data -g www-data -m 0750 "/var/run/lighttpd"
+USER www-data
 
 # phpPgAdmin
-USER www-data
 WORKDIR "$LIGHTTPD_WEB_ROOT"
 RUN wget http://downloads.sourceforge.net/phppgadmin/phpPgAdmin-5.1.tar.gz?download && \
     tar xvzf phpPgAdmin-5.1.tar.gz?download && \
@@ -63,12 +67,6 @@ RUN chmod +x ./i2b2-web-writeconfig.sh "$LIGHTTPD_WEB_ROOT"/shrine-webclient-upd
 # todo: phpmyadmin https://files.phpmyadmin.net/phpMyAdmin/4.7.4/phpMyAdmin-4.7.4-all-languages.zip
 # RUN wget http://downloads.sourceforge.net/phppgadmin/phpPgAdmin-5.1.tar.gz?download && \
 # /phpMyAdmin-4.7.4-all-languages/
-
-# fix permissions + bug fix
-RUN chown -R www-data:www-data "$LIGHTTPD_WEB_ROOT" && \
-    chmod -R +r "$LIGHTTPD_WEB_ROOT" && \
-    chmod -R +x "$LIGHTTPD_WEB_ROOT" && \
-    install -d -o www-data -g www-data -m 0750 "/var/run/lighttpd"
 
 # run
 EXPOSE 80
