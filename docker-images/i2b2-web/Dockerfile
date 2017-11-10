@@ -72,7 +72,6 @@ RUN chgrp www-data /opt/*.sh && \
     chmod g+rwx /opt/*.sh && \
     sleep 1 && \
     /bin/bash -c /opt/i2b2-web-writeconfig.sh
-USER www-data
 
 # run
 EXPOSE 80
