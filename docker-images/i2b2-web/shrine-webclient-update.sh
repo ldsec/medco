@@ -1,9 +1,6 @@
 #!/bin/bash
 set -e
 
-LIGHTTPD_WEB_ROOT="/var/www/html"
-SHRINE_SRC_DIR="/opt/shrine-src"
-
 cd "$SHRINE_SRC_DIR"
 git pull
 rm -R "$LIGHTTPD_WEB_ROOT/shrine-client"

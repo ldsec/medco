@@ -79,6 +79,11 @@ cat > "$LIGHTTPD_WEB_ROOT/shrine-webclient-update.php" <<EOL
     echo '<form><input type="submit" name="btnSubmit" value="Do it" /></form>';
 
     if (isset(\$_GET['btnSubmit']) or isset(\$_POST['btnSubmit'])) {
+        putenv("LIGHTTPD_WEB_ROOT=$LIGHTTPD_WEB_ROOT");
+        putenv("SHRINE_SRC_DIR=$SHRINE_SRC_DIR");
+        putenv("DB_PASSWORD=$DB_PASSWORD");
+        putenv("I2B2_DOMAIN_NAME=$I2B2_DOMAIN_NAME");
+
         \$message=shell_exec("/opt/shrine-webclient-update.sh 2>&1");
         echo '<p>';
         print_r(\$message);
