@@ -19,7 +19,6 @@ RUN echo "deb http://httpredir.debian.org/debian jessie-backports main contrib n
     apt-get -y clean && \
     lighttpd-enable-mod fastcgi-php ssl
 
-COPY i2b2-web-writeconfig.sh shrine-webclient-update.sh /opt/
 RUN mkdir -p "$I2B2_WEB_DIR" "$SHRINE_SRC_DIR" && \
     chgrp -R www-data /opt /etc/lighttpd && \
     chmod -R g+rwx /opt /etc/lighttpd && \
@@ -67,8 +66,12 @@ RUN cp -R "$I2B2_WEB_DIR" "$LIGHTTPD_WEB_ROOT/i2b2-admin" && \
 # copy and apply settings
 ARG NODE_IDX_ARG="0"
 ENV NODE_IDX="$NODE_IDX_ARG"
-
-RUN /bin/bash -c /opt/i2b2-web-writeconfig.sh
+USER root
+COPY i2b2-web-writeconfig.sh shrine-webclient-update.sh /opt/
+RUN chgrp www-data /opt/*.sh && \
+    chmod g+rwx /opt/*.sh && \
+    /bin/bash -c /opt/i2b2-web-writeconfig.sh
+USER www-data
 
 # run
 EXPOSE 80

@@ -26,7 +26,39 @@ RUN git clone https://c4science.ch/source/shrine-medco.git . && \
     git checkout $SHRINE_VERSION
 
 # compilation and installation
-RUN mvn -e install -Dmaven.test.skip=true
+RUN mvn -e -pl commons/test-commons install -DskipTests && \
+    mvn -e -N install -DskipTests && \
+    mvn -e -pl commons/util install -DskipTests && \
+    mvn -e -pl commons/config install -DskipTests && \
+    mvn -e -pl commons/data-commons install -DskipTests && \
+    mvn -e -pl commons/protocol-query install -DskipTests && \
+    mvn -e -pl commons/protocol install -DskipTests && \
+    mvn -e -pl tools install -DskipTests && \
+    mvn -e -pl tools/utility-commons install -DskipTests && \
+    mvn -e -pl apps/meta-app install -DskipTests && \
+    mvn -e -pl apps/meta-war install -DskipTests && \
+    mvn -e -pl commons/crypto install -DskipTests && \
+    mvn -e -pl commons/client install -DskipTests && \
+    mvn -e -pl tools/batch-querier install -DskipTests && \
+    mvn -e -pl commons/auth install -DskipTests && \
+    mvn -e -pl adapter/adapter-api install -DskipTests && \
+    mvn -e -pl apps/dashboard-app install -DskipTests && \
+    mvn -e -pl apps/dashboard-war install -DskipTests && \
+    mvn -e -pl commons/email install -DskipTests && \
+    mvn -e -pl apps/steward-app install -DskipTests && \
+    mvn -e -pl apps/steward-war install -DskipTests && \
+    mvn -e -pl apps/proxy install -DskipTests && \
+    mvn -e -pl hms-support install -DskipTests && \
+    mvn -e -pl hub/broadcaster-aggregator install -DskipTests && \
+    mvn -e -pl tools/monitor install -DskipTests && \
+    mvn -e -pl hub/broadcaster-service install -DskipTests && \
+    mvn -e -pl adapter/adapter-service install -DskipTests && \
+    mvn -e -pl commons/ont-support install -DskipTests && \
+    mvn -e -pl tools/mapping-automation install -DskipTests && \
+    mvn -e -pl install install -DskipTests && \
+    mvn -e -pl shrine-webclient install -DskipTests && \
+    mvn -e install -Dmaven.test.skip=true
+
 RUN cp  "$SHRINE_SRC_DIR/apps/steward-war/target/steward.war" \
         "$SHRINE_SRC_DIR/apps/dashboard-war/target/shrine-dashboard.war" \
         "$CATALINA_HOME/webapps/" && \
