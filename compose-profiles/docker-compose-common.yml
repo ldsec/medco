@@ -60,7 +60,7 @@ services:
       args:
         - I2B2_DOMAIN_NAME_ARG=medcodeployment
         - NODE_IDX_ARG=0
-        - SHRINE_DEBUG_LEVEL_ARG="INFO"
+        - SHRINE_DEBUG_LEVEL_ARG=INFO
     ports:
       - "6443"
     networks:
