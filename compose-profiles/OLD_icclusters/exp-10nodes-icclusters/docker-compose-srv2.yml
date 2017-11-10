@@ -2,12 +2,12 @@ version: '2.2'
 services:
   i2b2-server:
     extends:
-      file: ../docker-compose-common.yml
+      file: ../../docker-compose-common.yml
       service: i2b2-server
     build:
       args:
         - UNLYNX_GROUP_KEY_FILE_ARG=exp-10nodes-icclusters/group.toml
-        - UNLYNX_ENTRYPOINT_IDX_ARG=7
+        - UNLYNX_ENTRYPOINT_IDX_ARG=2
         - AXIS2_LOGLEVEL_ARG=INFO
         - UNLYNX_DEBUG_LEVEL_ARG=1
     ports:
@@ -16,7 +16,7 @@ services:
 
   i2b2-database:
     extends:
-      file: ../docker-compose-common.yml
+      file: ../../docker-compose-common.yml
       service: i2b2-database
     ports:
       - "5432:5432"
@@ -27,18 +27,18 @@ services:
 
   i2b2-web:
     extends:
-      file: ../docker-compose-common.yml
+      file: ../../docker-compose-common.yml
       service: i2b2-web
     ports:
       - "80:80"
 
   unlynx:
     extends:
-      file: ../docker-compose-common.yml
+      file: ../../docker-compose-common.yml
       service: unlynx
     build:
       args:
-        - UNLYNX_KEY_FILE_ARG=exp-10nodes-icclusters/srv7-private.toml
+        - UNLYNX_KEY_FILE_ARG=exp-10nodes-icclusters/srv2-private.toml
         - UNLYNX_DEBUG_LEVEL_ARG=1
     ports:
       - "2000:2000"
