@@ -184,7 +184,8 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EO
         '', 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\SHRINE\ONTOLOGYVERSION\MedCo-SHRINE_Ontology_Empty\',
         '', 'ONTOLOGYVERSION\MedCo-SHRINE_Ontology_Empty\', NULL, NULL, NULL, 'SHRINE', NULL, '@', NULL );
 EOSQL
-# full loading of shrine ontology disabled
+
+# todo: full loading of shrine ontology disabled
 #wget https://open.med.harvard.edu/svn/shrine-ontology/SHRINE_Demo_Downloads/trunk/ShrineDemo.sql
 #sed -i '1s/^/SET search_path TO shrine_ont;\n/' Shrine.sql
 #psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" < ShrineDemo.sql

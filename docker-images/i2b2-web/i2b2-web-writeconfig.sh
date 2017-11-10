@@ -70,6 +70,13 @@ document.addEventListener('click', function(event) {
 </html>
 EOL
 
+cat > "$LIGHTTPD_WEB_ROOT/shrine-webclient-update.php" <<EOL
+<?php
+      $message=shell_exec("./shrine-webclient-update.sh 2>&1");
+      print_r($message);
+    ?>
+EOL
+
 
 cat > "$LIGHTTPD_WEB_ROOT/shrine-client/i2b2_config_data.js" <<EOL
 {

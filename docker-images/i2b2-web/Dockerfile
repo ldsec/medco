@@ -37,12 +37,12 @@ RUN git clone https://github.com/i2b2/i2b2-webclient.git . && \
     chmod -R 777 .
 
 # download shrine webclient
-ENV NOCACHE="2"
 WORKDIR "$SHRINE_SRC_DIR"
+USER www-data
 RUN git clone https://c4science.ch/source/shrine-medco.git . && \
     git checkout $SHRINE_VERSION && \
-    cp "$I2B2_WEB_DIR"/index.php "$SHRINE_SRC_DIR"/shrine-webclient/src/main/html/ && \
-    chmod -R 777 .
+    cp "$I2B2_WEB_DIR"/index.php "$SHRINE_SRC_DIR"/shrine-webclient/src/main/html/
+USER root
 
 # copy clients
 RUN cp -R "$I2B2_WEB_DIR" "$LIGHTTPD_WEB_ROOT/i2b2-admin" && \
@@ -53,7 +53,10 @@ RUN cp -R "$I2B2_WEB_DIR" "$LIGHTTPD_WEB_ROOT/i2b2-admin" && \
 ARG NODE_IDX_ARG="0"
 ENV NODE_IDX="$NODE_IDX_ARG"
 COPY i2b2-web-writeconfig.sh .
-RUN chmod -R +x ./i2b2-web-writeconfig.sh && sleep 1 && /bin/bash -c ./i2b2-web-writeconfig.sh
+COPY shrine-webclient-update.sh "$LIGHTTPD_WEB_ROOT"/
+RUN chmod +x ./i2b2-web-writeconfig.sh "$LIGHTTPD_WEB_ROOT"/shrine-webclient-update.sh && \
+    sleep 1 && \
+    /bin/bash -c ./i2b2-web-writeconfig.sh
 
 # todo: phpmyadmin https://files.phpmyadmin.net/phpMyAdmin/4.7.4/phpMyAdmin-4.7.4-all-languages.zip
 # RUN wget http://downloads.sourceforge.net/phppgadmin/phpPgAdmin-5.1.tar.gz?download && \

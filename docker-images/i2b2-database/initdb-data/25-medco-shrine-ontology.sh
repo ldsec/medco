@@ -194,6 +194,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EO
     ALTER TABLE ONLY shrine_ont.genomic
         ADD CONSTRAINT basecode_un_22 UNIQUE (c_basecode);
 
+    -- todo: hard-coded genomic entries
     insert into shrine_ont.genomic (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum,
         c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, update_date,
         download_date, import_date, valuetype_cd, m_applied_path) values
