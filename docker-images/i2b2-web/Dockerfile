@@ -68,7 +68,7 @@ RUN cp -R "$I2B2_WEB_DIR" "$LIGHTTPD_WEB_ROOT/i2b2-admin" && \
 ARG NODE_IDX_ARG="0"
 ENV NODE_IDX="$NODE_IDX_ARG"
 
-RUN /bin/bash -c ./i2b2-web-writeconfig.sh
+RUN /bin/bash -c /opt/i2b2-web-writeconfig.sh
 
 # run
 EXPOSE 80
