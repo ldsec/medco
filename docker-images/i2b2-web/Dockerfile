@@ -70,6 +70,7 @@ USER root
 COPY i2b2-web-writeconfig.sh shrine-webclient-update.sh /opt/
 RUN chgrp www-data /opt/*.sh && \
     chmod g+rwx /opt/*.sh && \
+    sleep 1 && \
     /bin/bash -c /opt/i2b2-web-writeconfig.sh
 USER www-data
 
