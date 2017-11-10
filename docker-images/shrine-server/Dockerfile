@@ -26,7 +26,7 @@ RUN git clone https://c4science.ch/source/shrine-medco.git . && \
     git checkout $SHRINE_VERSION
 
 # compilation and installation
-RUN mvn -e install -DskipTests -Dmaven.test.skip=true
+RUN mvn -e install -Dmaven.test.skip=true
 RUN cp  "$SHRINE_SRC_DIR/apps/steward-war/target/steward.war" \
         "$SHRINE_SRC_DIR/apps/dashboard-war/target/shrine-dashboard.war" \
         "$CATALINA_HOME/webapps/" && \

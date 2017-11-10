@@ -17,9 +17,13 @@ RUN echo "deb http://httpredir.debian.org/debian jessie-backports main contrib n
     apt-get -y install lighttpd php5-cgi curl libcurl3 php5-common php5-cli php5-curl git php5-pgsql wget tar && \
     apt-get -y -t jessie-backports install postgresql-client && \
     apt-get -y clean && \
-    lighttpd-enable-mod fastcgi-php ssl
+    lighttpd-enable-mod fastcgi-php ssl && \
+    chmod -R 777 /opt && \
+    chgrp -R www-data /etc/lighttpd && \
+    chmod -R g+w /etc/lighttpd
 
 # phpPgAdmin
+USER www-data
 WORKDIR "$LIGHTTPD_WEB_ROOT"
 RUN wget http://downloads.sourceforge.net/phppgadmin/phpPgAdmin-5.1.tar.gz?download && \
     tar xvzf phpPgAdmin-5.1.tar.gz?download && \
@@ -38,12 +42,9 @@ RUN git clone https://github.com/i2b2/i2b2-webclient.git . && \
 
 # download shrine webclient
 WORKDIR "$SHRINE_SRC_DIR"
-RUN chmod -R 777 .
-USER www-data
 RUN git clone https://c4science.ch/source/shrine-medco.git . && \
     git checkout $SHRINE_VERSION && \
     cp "$I2B2_WEB_DIR"/index.php "$SHRINE_SRC_DIR"/shrine-webclient/src/main/html/
-USER root
 
 # copy clients
 RUN cp -R "$I2B2_WEB_DIR" "$LIGHTTPD_WEB_ROOT/i2b2-admin" && \
