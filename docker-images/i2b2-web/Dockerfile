@@ -44,7 +44,7 @@ RUN wget https://files.phpmyadmin.net/phpMyAdmin/4.7.5/phpMyAdmin-4.7.5-english.
     tar xvzf phpMyAdmin-4.7.5-english.tar.gz && \
     rm phpMyAdmin-4.7.5-english.tar.gz && \
     mv phpMyAdmin-4.7.5-english phpmyadmin && \
-    cp phpmyadmin/config.sample.inc.php phpmyadmin/config.inc.php
+    cp phpmyadmin/config.sample.inc.php phpmyadmin/config.inc.php && \
     sed -i "s#localhost#shrine-database#g" phpmyadmin/config.inc.php && \
     sed -i "s#\$cfg['blowfish_secret'] = '';#\$cfg['blowfish_secret'] = 'ac28vb01sfv0vcs1v96fv06fv0df62fv';#g" phpmyadmin/config.inc.php
 
@@ -68,9 +68,7 @@ RUN cp -R "$I2B2_WEB_DIR" "$LIGHTTPD_WEB_ROOT/i2b2-admin" && \
 ARG NODE_IDX_ARG="0"
 ENV NODE_IDX="$NODE_IDX_ARG"
 
-RUN chmod +x ./i2b2-web-writeconfig.sh "$LIGHTTPD_WEB_ROOT"/shrine-webclient-update.sh && \
-    sleep 1 && \
-    /bin/bash -c ./i2b2-web-writeconfig.sh
+RUN /bin/bash -c ./i2b2-web-writeconfig.sh
 
 # run
 EXPOSE 80

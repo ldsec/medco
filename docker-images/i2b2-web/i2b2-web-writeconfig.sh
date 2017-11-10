@@ -72,7 +72,7 @@ EOL
 
 cat > "$LIGHTTPD_WEB_ROOT/shrine-webclient-update.php" <<EOL
 <?php
-      $message=shell_exec("./shrine-webclient-update.sh 2>&1");
+      $message=shell_exec("/opt/shrine-webclient-update.sh 2>&1");
       print_r($message);
     ?>
 EOL
