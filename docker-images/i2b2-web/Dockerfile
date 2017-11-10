@@ -17,8 +17,10 @@ RUN echo "deb http://httpredir.debian.org/debian jessie-backports main contrib n
     apt-get -y install lighttpd php5-cgi curl libcurl3 php5-common php5-cli php5-curl git php5-pgsql php5-mysql wget tar && \
     apt-get -y -t jessie-backports install postgresql-client && \
     apt-get -y clean && \
-    lighttpd-enable-mod fastcgi-php ssl && \
-    mkdir -p "$I2B2_WEB_DIR" "$SHRINE_SRC_DIR" && \
+    lighttpd-enable-mod fastcgi-php ssl
+
+COPY i2b2-web-writeconfig.sh shrine-webclient-update.sh /opt/
+RUN mkdir -p "$I2B2_WEB_DIR" "$SHRINE_SRC_DIR" && \
     chgrp -R www-data /opt /etc/lighttpd && \
     chmod -R g+rwx /opt /etc/lighttpd && \
     chown -R www-data:www-data "$LIGHTTPD_WEB_ROOT" && \
@@ -65,12 +67,11 @@ RUN cp -R "$I2B2_WEB_DIR" "$LIGHTTPD_WEB_ROOT/i2b2-admin" && \
 # copy and apply settings
 ARG NODE_IDX_ARG="0"
 ENV NODE_IDX="$NODE_IDX_ARG"
-COPY i2b2-web-writeconfig.sh .
-COPY shrine-webclient-update.sh "$LIGHTTPD_WEB_ROOT"/
+
 RUN chmod +x ./i2b2-web-writeconfig.sh "$LIGHTTPD_WEB_ROOT"/shrine-webclient-update.sh && \
     sleep 1 && \
     /bin/bash -c ./i2b2-web-writeconfig.sh
-    
+
 # run
 EXPOSE 80
 CMD ["lighttpd", "-D", "-f", "/etc/lighttpd/lighttpd.conf"]
