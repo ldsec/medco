@@ -1,4 +1,4 @@
-FROM debian:jessie
+FROM debian:jessie-backports
 
 # variables
 ARG I2B2_DOMAIN_NAME_ARG="i2b2demo"
@@ -14,7 +14,7 @@ ENV I2B2_VERSION="v1.7.08a" \
 # requirements
 RUN echo "deb http://httpredir.debian.org/debian jessie-backports main contrib non-free" >> /etc/apt/sources.list && \
     apt-get -y update && \
-    apt-get -y install lighttpd php5-cgi curl libcurl3 php5-common php5-cli php5-curl git php5-pgsql wget tar && \
+    apt-get -y install lighttpd php5-cgi curl libcurl3 php5-common php5-cli php5-curl git php5-pgsql php5-mysql wget tar && \
     apt-get -y -t jessie-backports install postgresql-client && \
     apt-get -y clean && \
     lighttpd-enable-mod fastcgi-php ssl && \
@@ -36,6 +36,15 @@ RUN wget http://downloads.sourceforge.net/phppgadmin/phpPgAdmin-5.1.tar.gz?downl
     sed -i "s/ = 'PostgreSQL'/ = '$I2B2_DOMAIN_NAME PostgreSQL Server'/" phppgadmin/conf/config.inc.php && \
     sed -i "s/'extra_login_security'] = true/'extra_login_security'] = false/" phppgadmin/conf/config.inc.php && \
     sed -i "/\$cmd = \$exe/c\$cmd = \$exe;" phppgadmin/dbexport.php
+
+# phpMyAdmin
+RUN wget https://files.phpmyadmin.net/phpMyAdmin/4.7.5/phpMyAdmin-4.7.5-english.tar.gz && \
+    tar xvzf phpMyAdmin-4.7.5-english.tar.gz && \
+    rm phpMyAdmin-4.7.5-english.tar.gz && \
+    mv phpMyAdmin-4.7.5-english phpmyadmin && \
+    cp phpmyadmin/config.sample.inc.php phpmyadmin/config.inc.php
+    sed -i "s#localhost#shrine-database#g" phpmyadmin/config.inc.php && \
+    sed -i "s#\$cfg['blowfish_secret'] = '';#\$cfg['blowfish_secret'] = 'ac28vb01sfv0vcs1v96fv06fv0df62fv';#g" phpmyadmin/config.inc.php
 
 # download i2b2 webclient
 WORKDIR "$I2B2_WEB_DIR"
@@ -61,11 +70,7 @@ COPY shrine-webclient-update.sh "$LIGHTTPD_WEB_ROOT"/
 RUN chmod +x ./i2b2-web-writeconfig.sh "$LIGHTTPD_WEB_ROOT"/shrine-webclient-update.sh && \
     sleep 1 && \
     /bin/bash -c ./i2b2-web-writeconfig.sh
-
-# todo: phpmyadmin https://files.phpmyadmin.net/phpMyAdmin/4.7.4/phpMyAdmin-4.7.4-all-languages.zip
-# RUN wget http://downloads.sourceforge.net/phppgadmin/phpPgAdmin-5.1.tar.gz?download && \
-# /phpMyAdmin-4.7.4-all-languages/
-
+    
 # run
 EXPOSE 80
 CMD ["lighttpd", "-D", "-f", "/etc/lighttpd/lighttpd.conf"]
