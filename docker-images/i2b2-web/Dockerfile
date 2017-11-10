@@ -38,6 +38,7 @@ RUN git clone https://github.com/i2b2/i2b2-webclient.git . && \
 
 # download shrine webclient
 WORKDIR "$SHRINE_SRC_DIR"
+RUN chmod -R 777 .
 USER www-data
 RUN git clone https://c4science.ch/source/shrine-medco.git . && \
     git checkout $SHRINE_VERSION && \
