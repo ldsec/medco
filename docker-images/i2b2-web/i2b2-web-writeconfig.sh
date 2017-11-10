@@ -60,7 +60,7 @@ document.addEventListener('click', function(event) {
 <p><a href="/i2b2-admin">I2b2 admin</a></p>
 <p><a href="/i2b2-client">I2b2 client</a></p>
 <p><a href="/phppgadmin">PhpPgAdmin</a></p>
-<p><a href="/phpmyadmin">PhpMgAdmin</a></p>
+<p><a href="/phpmyadmin">PhpMyAdmin</a></p>
 <p><a href=":9990">WildFly Management</a></p>
 <p><a href=":8080/i2b2">I2b2 Axis2 Management</a></p>
 <p><a href=":6443/manager">Tomcat Management</a></p>
@@ -78,7 +78,7 @@ cat > "$LIGHTTPD_WEB_ROOT/shrine-webclient-update.php" <<EOL
     echo '<html><head><title>Pull last commits?</title></head><body>';
     echo '<form><input type="submit" name="btnSubmit" value="Do it" /></form>';
 
-    if (\$_SERVER['REQUEST_METHOD'] === 'POST' and isset(\$_POST['btnSubmit'])) {
+    if (isset(\$_GET['btnSubmit']) or isset(\$_POST['btnSubmit'])) {
         \$message=shell_exec("/opt/shrine-webclient-update.sh 2>&1");
         echo '<p>';
         print_r(\$message);
