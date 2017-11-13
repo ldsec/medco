@@ -83,6 +83,7 @@ cat > "$LIGHTTPD_WEB_ROOT/shrine-webclient-update.php" <<EOL
         putenv("SHRINE_SRC_DIR=$SHRINE_SRC_DIR");
         putenv("DB_PASSWORD=$DB_PASSWORD");
         putenv("I2B2_DOMAIN_NAME=$I2B2_DOMAIN_NAME");
+        putenv("NODE_IDX=$NODE_IDX");
 
         \$message=shell_exec("/opt/shrine-webclient-update.sh 2>&1");
         echo '<p>';
