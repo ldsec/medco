@@ -71,7 +71,7 @@ COPY i2b2-web-writeconfig.sh shrine-webclient-update.sh /opt/
 RUN chgrp www-data /opt/*.sh && \
     chmod g+rwx /opt/*.sh && \
     sleep 1 && \
-    su - "www-data" -s /bin/bash -c "/opt/i2b2-web-writeconfig.sh"
+    su "www-data" -p -s /bin/bash -c "/opt/i2b2-web-writeconfig.sh"
 
 # run
 EXPOSE 80
