@@ -20,7 +20,6 @@ import (
 // of the Github GUI, and its controls, layout and style are all implemented with
 // the Bootstrap CSS library. Go's native html templating is used.
 func main() {
-
 	// Unpack the compiled file resources into an in-memory virtual file system.
 	virtualFs := &assetfs.AssetFS{
 		Asset: Asset, AssetDir: AssetDir, AssetInfo: AssetInfo}
@@ -29,7 +28,6 @@ func main() {
 	// serve html pages.
 	// We need two html's one for the selectionPage (first screen) and another for the loadingPage (second screen)
 	guiHTMLTemplateSelection = extractAndParseHTMLTemplate("selectionPage.html", templateSelectionName)
-	guiHTMLTemplateLoading = extractAndParseHTMLTemplate("loadingPage.html", templateLoadingName)
 
 	// Route incoming web page requests for static URLs (like css files) to
 	// the standard library's file server.
@@ -37,12 +35,12 @@ func main() {
 
 	// Route incoming web page requests for the GUI home page to the dedicated
 	// handler.
-	http.HandleFunc("/medco-loader/selection-page", guiSelectionPageHandler)
-	http.HandleFunc("/medco-loader/loading-page", guiLoadingPageHandler)
+	http.HandleFunc("/medco-loader", guiSelectionPageHandler)
+	http.HandleFunc("/medco-loader/lala", lala)
 
 	fmt.Printf(
 		"To see the GUI, visit this URL with your Web Browser:\n\n %s\n\n",
-		"http://localhost:47066/medco-loader/selection_page")
+		"http://localhost:47066/medco-loader")
 
 	// Spin-up the standard library's http server on a hard-coded port.
 	http.ListenAndServe(":47066", nil)
@@ -91,13 +89,8 @@ func guiSelectionPageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func guiLoadingPageHandler(w http.ResponseWriter, r *http.Request) {
-	// Generate the html by plugging in data from the gui data model into the
-	// prepared html template.
-	err := guiHTMLTemplateLoading.ExecuteTemplate(w, templateLoadingName, nil)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+func lala(w http.ResponseWriter, r *http.Request) {
+	fmt.Print("sdasd")
 }
 
 // Provides an illustrative, hard-coded instance of a GuiDataModel.
@@ -127,7 +120,4 @@ func guiData() *GuiDataModel {
 
 // Makes the the GUI templates available at module-scope.
 var guiHTMLTemplateSelection *template.Template
-var guiHTMLTemplateLoading *template.Template
-
 var templateSelectionName = "selectionGUI"
-var templateLoadingName = "loadingGUI"
