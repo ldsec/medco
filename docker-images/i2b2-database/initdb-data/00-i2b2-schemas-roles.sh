@@ -1,37 +1,36 @@
 #!/bin/bash
 set -e
+# create schemas and database users for i2b2
 
+function initSchema {
+    DB_NAME="$1"
+    SCHEMA_NAME="$2"
+    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$DB_NAME" <<-EOSQL
+        create schema '$SCHEMA_NAME';
+        create role '$SCHEMA_NAME' login password '$DB_PASSWORD';
+        grant all on schema '$SCHEMA_NAME' to '$SCHEMA_NAME';
+        grant all privileges on all tables in schema '$SCHEMA_NAME' to '$SCHEMA_NAME';
+EOSQL
+}
+
+# create the databases
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
-    CREATE DATABASE $I2B2_DOMAIN_NAME
+        CREATE DATABASE '$I2B2_DEMO_DB_NAME';
+        CREATE DATABASE '$I2B2_MEDCO_DB_NAME';
 EOSQL
 
-psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DOMAIN_NAME" <<-EOSQL
-    create schema i2b2demodata;
-    create schema i2b2hive;
-    create schema i2b2imdata;
-    create schema i2b2metadata;
-    create schema i2b2pm;
-    create schema i2b2workdata;
+# init demo i2b2 database
+initSchema $I2B2_DEMO_DB_NAME i2b2demodata
+initSchema $I2B2_DEMO_DB_NAME i2b2imdata
+initSchema $I2B2_DEMO_DB_NAME i2b2metadata
+initSchema $I2B2_DEMO_DB_NAME i2b2workdata
+initSchema $I2B2_DEMO_DB_NAME i2b2pm
+initSchema $I2B2_DEMO_DB_NAME i2b2hive
 
-    create role i2b2demodata login password '$DB_PASSWORD';
-    create role i2b2hive login password '$DB_PASSWORD';
-    create role i2b2imdata login password '$DB_PASSWORD';
-    create role i2b2metadata login password '$DB_PASSWORD';
-    create role i2b2pm login password '$DB_PASSWORD';
-    create role i2b2workdata login password '$DB_PASSWORD';
-
-    grant all on schema i2b2demodata to i2b2demodata;
-    grant all on schema i2b2hive to i2b2hive;
-    grant all on schema i2b2imdata to i2b2imdata;
-    grant all on schema i2b2metadata to i2b2metadata;
-    grant all on schema i2b2pm to i2b2pm;
-    grant all on schema i2b2workdata to i2b2workdata;
-
-    grant all privileges on all tables in schema i2b2demodata to i2b2demodata;
-    grant all privileges on all tables in schema i2b2hive to i2b2hive;
-    grant all privileges on all tables in schema i2b2imdata to i2b2imdata;
-    grant all privileges on all tables in schema i2b2metadata to i2b2metadata;
-    grant all privileges on all tables in schema i2b2pm to i2b2pm;
-    grant all privileges on all tables in schema i2b2workdata to i2b2workdata;
-EOSQL
-
+# init medco i2b2 database
+initSchema $I2B2_MEDCO_DB_NAME i2b2demodata
+initSchema $I2B2_MEDCO_DB_NAME i2b2imdata
+initSchema $I2B2_MEDCO_DB_NAME i2b2metadata
+initSchema $I2B2_MEDCO_DB_NAME i2b2workdata
+initSchema $I2B2_MEDCO_DB_NAME shrine_ont
+initSchema $I2B2_MEDCO_DB_NAME genomic_annotations

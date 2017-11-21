@@ -1,12 +1,11 @@
 FROM tomcat:8.0-jre8
 
 # pre-existing variables: CATALINA_HOME
-ARG I2B2_DOMAIN_NAME_ARG="i2b2demo"
 ENV SHRINE_VERSION="fork/1.22.8-medco" \
     SHRINE_SRC_DIR="/opt/shrine-src" \
     SHRINE_ADAPTER_MAPPINGS_URL="https://open.med.harvard.edu/svn/shrine-ontology/SHRINE_Demo_Downloads/trunk/AdapterMappings_i2b2_DemoData.xml" \
     SHRINE_MYSQL_JAR_URL="http://central.maven.org/maven2/mysql/mysql-connector-java/5.1.40/mysql-connector-java-5.1.40.jar" \
-    I2B2_DOMAIN_NAME="$I2B2_DOMAIN_NAME_ARG" \
+    I2B2_DOMAIN_NAME="medcodeployment" \
     CONF_DIR="/opt/medco-configuration" \
     ADMIN_PASSWORD="prigen2017" \
     DB_PASSWORD="pFjy3EjDVwLfT2rB9xkK"
@@ -82,7 +81,7 @@ RUN wget "$SHRINE_MYSQL_JAR_URL" -P "$CATALINA_HOME/lib/" && \
     sed -i "s/SHRINE_KEYSTORE_PASSWORD/$ADMIN_PASSWORD/g" "$CATALINA_HOME/conf/server.xml" && \
     sed -i "s/SHRINE_DB_PASSWORD/$DB_PASSWORD/g" "$CATALINA_HOME/conf/context.xml"
 
-# configuration bis (dependent on the arguments) todo: tomcat/shrine logs level controlable
+# configuration bis (dependent on the arguments)
 ARG SHRINE_DEBUG_LEVEL_ARG="INFO"
 ARG NODE_IDX_ARG="0"
 ENV SHRINE_DEBUG_LEVEL="$SHRINE_DEBUG_LEVEL_ARG" \

@@ -1,12 +1,10 @@
 FROM mysql:5.5
 
 # env variablebles
-ARG I2B2_DOMAIN_NAME_ARG="i2b2demo"
 ENV ADMIN_PASSWORD="prigen2017" \
     DB_PASSWORD="pFjy3EjDVwLfT2rB9xkK" \
     SHRINE_VERSION="fork/1.22.8-medco" \
-    SHRINE_SRC_DIR="/opt/shrine-src" \
-    I2B2_DOMAIN_NAME="$I2B2_DOMAIN_NAME_ARG"
+    SHRINE_SRC_DIR="/opt/shrine-src"
 ENV MYSQL_ROOT_PASSWORD="$ADMIN_PASSWORD" \
     MYSQL_DATABASE="" \
     MYSQL_USER="" \

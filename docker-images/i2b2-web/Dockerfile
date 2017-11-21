@@ -1,12 +1,13 @@
 FROM debian:jessie-backports
 
 # variables
-ARG I2B2_DOMAIN_NAME_ARG="i2b2demo"
 ENV I2B2_VERSION="v1.7.08a" \
     I2B2_WEB_DIR="/opt/i2b2-webclient" \
     SHRINE_SRC_DIR="/opt/shrine-src" \
     SHRINE_VERSION="fork/1.22.8-medco" \
-    I2B2_DOMAIN_NAME="$I2B2_DOMAIN_NAME_ARG" \
+    I2B2_DOMAIN_NAME="medcodeployment" \
+    I2B2_DEMO_DB_NAME="i2b2demo" \
+    I2B2_MEDCO_DB_NAME="i2b2medco" \
     LIGHTTPD_WEB_ROOT="/var/www/html" \
     DB_PASSWORD="pFjy3EjDVwLfT2rB9xkK" \
     CONF_DIR="/opt/medco-configuration"

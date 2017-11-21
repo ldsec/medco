@@ -85,6 +85,7 @@ cat > "$LIGHTTPD_WEB_ROOT/shrine-webclient-update.php" <<EOL
         putenv("SHRINE_SRC_DIR=$SHRINE_SRC_DIR");
         putenv("DB_PASSWORD=$DB_PASSWORD");
         putenv("I2B2_DOMAIN_NAME=$I2B2_DOMAIN_NAME");
+        putenv("I2B2_MEDCO_DB_NAME=$I2B2_MEDCO_DB_NAME");
         putenv("NODE_IDX=$NODE_IDX");
         putenv("CONF_DIR=$CONF_DIR");
 
@@ -172,7 +173,7 @@ sed -i "s/\"http:\/\/localhost\"/\"https:\/\/shrine-server:6443\"/" "$LIGHTTPD_W
 # shrine webclient fixes for integration in php environment
 sed -i "s#default.htm#index.html#g" "$LIGHTTPD_WEB_ROOT/shrine-client/index.php"
 sed -i '/CURLOPT_SSL_VERIFYPEER/i curl_setopt($proxyRequest, CURLOPT_SSL_VERIFYHOST, FALSE);' "$LIGHTTPD_WEB_ROOT/shrine-client/index.php"
-sed -i "s#SHRINE_ONT_DB#$I2B2_DOMAIN_NAME#g" "$LIGHTTPD_WEB_ROOT/shrine-client/js-i2b2/cells/plugins/MedCo/php/sqlConnection.php"
-sed -i "s#SHRINE_ONT_USER#shrine_ont#g" "$LIGHTTPD_WEB_ROOT/shrine-client/js-i2b2/cells/plugins/MedCo/php/sqlConnection.php"
+sed -i "s#SHRINE_ONT_DB#$I2B2_MEDCO_DB_NAME#g" "$LIGHTTPD_WEB_ROOT/shrine-client/js-i2b2/cells/plugins/MedCo/php/sqlConnection.php"
+sed -i "s#SHRINE_ONT_USER#genomic_annotations#g" "$LIGHTTPD_WEB_ROOT/shrine-client/js-i2b2/cells/plugins/MedCo/php/sqlConnection.php"
 sed -i "s#SHRINE_ONT_PW#$DB_PASSWORD#g" "$LIGHTTPD_WEB_ROOT/shrine-client/js-i2b2/cells/plugins/MedCo/php/sqlConnection.php"
 

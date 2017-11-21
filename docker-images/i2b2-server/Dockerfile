@@ -2,14 +2,15 @@ FROM jboss/wildfly:10.0.0.Final
 # TODO: use the official image
 
 # variables, JBOSS_HOME, WILDFLY_VERSION exists and set
-ARG I2B2_DOMAIN_NAME_ARG="i2b2demo"
 ARG AXIS2_LOGLEVEL_ARG="INFO"
 
 ENV AXIS2_VERSION="1.7.1" \
     AXIS2_LOGLEVEL="$AXIS2_LOGLEVEL_ARG" \
     I2B2_VERSION="v1.7.08b.0002" \
     I2B2_SRC_DIR="/opt/i2b2-src" \
-    I2B2_DOMAIN_NAME="$I2B2_DOMAIN_NAME_ARG" \
+    I2B2_DOMAIN_NAME="medcodeployment" \
+    I2B2_DEMO_DB_NAME="i2b2demo" \
+    I2B2_MEDCO_DB_NAME="i2b2medco" \
     I2B2_FR_FILES_DIR="/opt/FRC_files" \
     MEDCO_CELL_SRC_DIR="/opt/medco-src" \
     MEDCO_CELL_GIT_BRANCH="master" \
@@ -37,7 +38,6 @@ RUN wget "http://archive.apache.org/dist/axis/axis2/java/core/$AXIS2_VERSION/axi
     sed -i "/^log4j.rootCategory=/c\log4j.rootCategory=$AXIS2_LOGLEVEL, CONSOLE" i2b2.war/WEB-INF/classes/log4j.properties
 
 # download, patch, compile and deploy i2b2
-ENV NOCACHE="3"
 WORKDIR "$I2B2_SRC_DIR"
 RUN git clone https://github.com/i2b2/i2b2-core-server.git . && \
     git checkout tags/$I2B2_VERSION
