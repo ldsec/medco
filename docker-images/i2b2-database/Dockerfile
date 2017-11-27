@@ -12,14 +12,16 @@ ENV I2B2_VERSION="v1.7.08.0001" \
     DB_PASSWORD="pFjy3EjDVwLfT2rB9xkK"
 
 # pre-requisites
-RUN apt-get -y update && apt-get -y install git ant default-jdk && apt-get -y clean
+RUN apt-get -y update && apt-get -y install git ant default-jdk wget && apt-get -y clean
 
 # download i2b2 demo data, apply patches, and download shrine demo ontology
 WORKDIR "$I2B2_DATA_DIR"
 RUN git clone https://github.com/i2b2/i2b2-data.git . && \
     git checkout tags/$I2B2_VERSION && \
-    chmod -R 777 . \
-    wget https://open.med.harvard.edu/svn/shrine-ontology/SHRINE_Demo_Downloads/trunk/ShrineDemo.sql -O "$SHRINE_DEMO_ONTOLOGY_SQL"
+    chmod -R 777 . && \
+    wget https://open.med.harvard.edu/svn/shrine-ontology/SHRINE_Demo_Downloads/trunk/ShrineDemo.sql -O "$SHRINE_DEMO_ONTOLOGY_SQL" && \
+    sed -i '1s/^/SET search_path TO shrine_ont;\n/' "$SHRINE_DEMO_ONTOLOGY_SQL"
+
 
 COPY patches/* ./
 RUN git apply *.diff

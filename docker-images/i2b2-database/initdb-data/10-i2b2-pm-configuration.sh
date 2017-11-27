@@ -30,16 +30,16 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_DEMO_DB_NAME" <<-E
     UPDATE i2b2hive.ont_db_lookup SET C_DOMAIN_ID = '$I2B2_DOMAIN_NAME' WHERE C_DOMAIN_ID = 'i2b2demo';
     UPDATE i2b2hive.work_db_lookup SET C_DOMAIN_ID = '$I2B2_DOMAIN_NAME' WHERE C_DOMAIN_ID = 'i2b2demo';
 
-    INSERT INTO CRC_DB_LOOKUP(c_domain_id, c_project_path, c_owner_id, c_db_fullschema, c_db_datasource, c_db_servertype,
+    INSERT INTO i2b2hive.CRC_DB_LOOKUP(c_domain_id, c_project_path, c_owner_id, c_db_fullschema, c_db_datasource, c_db_servertype,
         c_db_nicename, c_db_tooltip, c_comment, c_entry_date, c_change_date, c_status_cd)
         VALUES('$I2B2_DOMAIN_NAME', '/MedCo/', '@', 'i2b2demodata', 'java:/QueryToolMedCoDS', 'POSTGRESQL', 'MedCo', NULL, NULL, NULL, NULL, NULL);
-    INSERT INTO IM_DB_LOOKUP(c_domain_id, c_project_path, c_owner_id, c_db_fullschema, c_db_datasource, c_db_servertype,
+    INSERT INTO i2b2hive.IM_DB_LOOKUP(c_domain_id, c_project_path, c_owner_id, c_db_fullschema, c_db_datasource, c_db_servertype,
         c_db_nicename, c_db_tooltip, c_comment, c_entry_date, c_change_date, c_status_cd)
         VALUES('$I2B2_DOMAIN_NAME', 'MedCo/', '@', 'i2b2imdata', 'java:/IMMedCoDS', 'POSTGRESQL', 'IM', NULL, NULL, NULL, NULL, NULL);
-    INSERT INTO ONT_DB_LOOKUP(c_domain_id, c_project_path, c_owner_id, c_db_fullschema, c_db_datasource, c_db_servertype,
+    INSERT INTO i2b2hive.ONT_DB_LOOKUP(c_domain_id, c_project_path, c_owner_id, c_db_fullschema, c_db_datasource, c_db_servertype,
         c_db_nicename, c_db_tooltip, c_comment, c_entry_date, c_change_date, c_status_cd)
         VALUES('$I2B2_DOMAIN_NAME', 'MedCo/', '@', 'i2b2metadata', 'java:/OntologyMedCoDS', 'POSTGRESQL', 'Metadata', NULL, NULL, NULL, NULL, NULL);
-    INSERT INTO WORK_DB_LOOKUP(c_domain_id, c_project_path, c_owner_id, c_db_fullschema, c_db_datasource, c_db_servertype,
+    INSERT INTO i2b2hive.WORK_DB_LOOKUP(c_domain_id, c_project_path, c_owner_id, c_db_fullschema, c_db_datasource, c_db_servertype,
         c_db_nicename, c_db_tooltip, c_comment, c_entry_date, c_change_date, c_status_cd)
         VALUES('$I2B2_DOMAIN_NAME', 'MedCo/', '@', 'i2b2workdata', 'java:/WorkplaceMedCoDS', 'POSTGRESQL', 'Workplace', NULL, NULL, NULL, NULL, NULL);
 

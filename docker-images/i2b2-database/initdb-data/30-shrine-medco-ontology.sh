@@ -229,5 +229,4 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_MEDCO_DB_NAME" <<-
 EOSQL
 
 # load the shrine demo ontology data
-sed -i '1s/^/SET search_path TO shrine_ont;\n/' "$SHRINE_DEMO_ONTOLOGY_SQL"
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_MEDCO_DB_NAME" < "$SHRINE_DEMO_ONTOLOGY_SQL"

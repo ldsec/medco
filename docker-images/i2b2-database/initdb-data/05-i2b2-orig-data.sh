@@ -121,12 +121,15 @@ EOL
 
 
     # ---------- Data bug fixes ----------
-    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$DB_NAME" <<-EOSQL
-        update i2b2hive.crc_db_lookup set c_db_fullschema = 'i2b2demodata' where c_domain_id = 'i2b2demo';
-        update i2b2hive.im_db_lookup set c_db_fullschema = 'i2b2imdata' where c_domain_id = 'i2b2demo';
-        update i2b2hive.ont_db_lookup set c_db_fullschema = 'i2b2metadata' where c_domain_id = 'i2b2demo';
-        update i2b2hive.work_db_lookup set c_db_fullschema = 'i2b2workdata' where c_domain_id = 'i2b2demo';
+    if ! ${IS_ADDITIONAL_DB}
+    then
+        psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$DB_NAME" <<-EOSQL
+            update i2b2hive.crc_db_lookup set c_db_fullschema = 'i2b2demodata' where c_domain_id = 'i2b2demo';
+            update i2b2hive.im_db_lookup set c_db_fullschema = 'i2b2imdata' where c_domain_id = 'i2b2demo';
+            update i2b2hive.ont_db_lookup set c_db_fullschema = 'i2b2metadata' where c_domain_id = 'i2b2demo';
+            update i2b2hive.work_db_lookup set c_db_fullschema = 'i2b2workdata' where c_domain_id = 'i2b2demo';
 EOSQL
+    fi
 }
 
 loadI2b2Data $I2B2_DEMO_DB_NAME false

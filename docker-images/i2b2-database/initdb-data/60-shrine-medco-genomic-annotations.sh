@@ -39,7 +39,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_MEDCO_DB_NAME" <<-
     );
 
     -- permissions
-    ALTER TABLE genomic_annotations.genomic_annotations_new OWNER TO genomic_annotations;
+    ALTER TABLE genomic_annotations.genomic_annotations OWNER TO genomic_annotations;
     ALTER TABLE genomic_annotations.annotation_names OWNER TO genomic_annotations;
     ALTER TABLE genomic_annotations.gene_values OWNER TO genomic_annotations;
     grant all on schema genomic_annotations to genomic_annotations;

@@ -6,17 +6,25 @@ function initSchema {
     DB_NAME="$1"
     SCHEMA_NAME="$2"
     psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$DB_NAME" <<-EOSQL
-        create schema '$SCHEMA_NAME';
-        create role '$SCHEMA_NAME' login password '$DB_PASSWORD';
-        grant all on schema '$SCHEMA_NAME' to '$SCHEMA_NAME';
-        grant all privileges on all tables in schema '$SCHEMA_NAME' to '$SCHEMA_NAME';
+        DO
+        \$body\$
+        BEGIN
+           IF NOT EXISTS (SELECT FROM pg_catalog.pg_user WHERE  usename = '$SCHEMA_NAME') THEN
+                CREATE ROLE $SCHEMA_NAME LOGIN PASSWORD '$DB_PASSWORD';
+           END IF;
+        END
+        \$body\$;
+
+        create schema $SCHEMA_NAME;
+        grant all on schema $SCHEMA_NAME to $SCHEMA_NAME;
+        grant all privileges on all tables in schema $SCHEMA_NAME to $SCHEMA_NAME;
 EOSQL
 }
 
 # create the databases
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
-        CREATE DATABASE '$I2B2_DEMO_DB_NAME';
-        CREATE DATABASE '$I2B2_MEDCO_DB_NAME';
+        CREATE DATABASE $I2B2_DEMO_DB_NAME;
+        CREATE DATABASE $I2B2_MEDCO_DB_NAME;
 EOSQL
 
 # init demo i2b2 database
