@@ -1,0 +1,7 @@
+"0","\i2b2\","i2b2","N","FA ","\N","\N","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\","\N","i2b2","@","2007-03-20 00:00:00","2007-03-20 00:00:00","2007-03-20 00:00:00","KRISTEL","\N","\N","\N","\N"
+
+"1","\i2b2\Demographics\","Demographics","N","CA ","\N","\N","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\Demographics\","\N","Demographic","@","2007-04-10 00:00:00","2007-04-10 00:00:00","2007-04-10 00:00:00","DEMO","\N","\N","\N","\N"
+"2","\i2b2\Demographics\Gender\","Gender","N","FA ","\N","\N","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\Demographics\Gender\","\N","Demographic \ Gender","@","2007-04-10 00:00:00","2007-04-10 00:00:00","2007-04-10 00:00:00","DEMO","\N","\N","\N","\N"
+"3","\i2b2\Demographics\Gender\Female\","Female","N","LA ","\N","DEM|SEX:f","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\Demographics\Gender\Female\","\N","Demographic \ Gender \ Female","@","2007-04-10 00:00:00","2007-04-10 00:00:00","2007-04-10 00:00:00","DEMO","\N","\N","\N","\N"
+"3","\i2b2\Demographics\Gender\Male\","Male","N","LA ","\N","DEM|SEX:m","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\Demographics\Gender\Male\","\N","Demographic \ Gender \ Male","@","2007-04-10 00:00:00","2007-04-10 00:00:00","2007-04-10 00:00:00","DEMO","\N","\N","\N","\N"
+
