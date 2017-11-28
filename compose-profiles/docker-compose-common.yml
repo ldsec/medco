@@ -2,11 +2,9 @@ version: '2.2'
 services:
   i2b2-server:
     build:
-      context: ../i2b2-server
+      context: ../docker-images/i2b2-server
       args:
-        - I2B2_DOMAIN_NAME_ARG=medcodeployment
-        - UNLYNX_GROUP_KEY_FILE_ARG=srv1-3-5-group.toml
-        - UNLYNX_ENTRYPOINT_IDX_ARG=0
+        - NODE_IDX_ARG=0
         - AXIS2_LOGLEVEL_ARG=INFO
         - UNLYNX_DEBUG_LEVEL_ARG=1
     ports:
@@ -15,13 +13,11 @@ services:
     networks:
       - medco-network
     volumes:
-      - ../configuration:/opt/configuration
+      - ../configuration-profiles/dev-3nodes-samehost:/opt/medco-configuration
 
   i2b2-database:
     build:
-      context: ../i2b2-database
-      args:
-        - I2B2_DOMAIN_NAME_ARG=medcodeployment
+      context: ../docker-images/i2b2-database
     ports:
       - "5432"
     networks:
@@ -29,19 +25,22 @@ services:
 
   i2b2-web:
     build:
-      context: ../i2b2-web
+      context: ../docker-images/i2b2-web
       args:
-        - I2B2_DOMAIN_NAME_ARG=medcodeployment
+        - NODE_IDX_ARG=0
     ports:
       - "80"
+      - "443"
     networks:
       - medco-network
+    volumes:
+      - ../configuration-profiles/dev-3nodes-samehost:/opt/medco-configuration
 
   unlynx:
     build:
-      context: ../unlynx
+      context: ../docker-images/unlynx
       args:
-        - UNLYNX_KEY_FILE_ARG=srv1-private.toml
+        - NODE_IDX_ARG=0
         - UNLYNX_DEBUG_LEVEL_ARG=1
     ports:
       - "2000"
@@ -49,7 +48,28 @@ services:
     networks:
       - medco-network
     volumes:
-      - ../configuration:/opt/configuration
+      - ../configuration-profiles/dev-3nodes-samehost:/opt/medco-configuration
+
+  shrine-server:
+    build:
+      context: ../docker-images/shrine-server
+      args:
+        - NODE_IDX_ARG=0
+        - SHRINE_DEBUG_LEVEL_ARG=INFO
+    ports:
+      - "6443"
+    networks:
+      - medco-network
+    volumes:
+      - ../configuration-profiles/dev-3nodes-samehost:/opt/medco-configuration
+
+  shrine-database:
+    build:
+      context: ../docker-images/shrine-database
+    ports:
+      - "3306"
+    networks:
+      - medco-network
 
 networks:
   medco-network:

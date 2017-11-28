@@ -6,8 +6,7 @@ services:
       service: i2b2-server
     build:
       args:
-        - UNLYNX_GROUP_KEY_FILE_ARG=dev-3nodes-samehost/group.toml
-        - UNLYNX_ENTRYPOINT_IDX_ARG=0
+        - NODE_IDX_ARG=0
         - AXIS2_LOGLEVEL_ARG=DEBUG
         - UNLYNX_DEBUG_LEVEL_ARG=5
     ports:
@@ -36,8 +35,12 @@ services:
     extends:
       file: ../docker-compose-common.yml
       service: i2b2-web
+    build:
+      args:
+        - NODE_IDX_ARG=0
     ports:
       - "82:80"
+      - "445:443"
     networks:
       medco-network-srv0:
         aliases:
@@ -49,7 +52,7 @@ services:
       service: unlynx
     build:
       args:
-        - UNLYNX_KEY_FILE_ARG=dev-3nodes-samehost/srv0-private.toml
+        - NODE_IDX_ARG=0
         - UNLYNX_DEBUG_LEVEL_ARG=1
     ports:
       - "2002:2002"
@@ -62,6 +65,35 @@ services:
         aliases:
           - unlynx-srv0
         ipv4_address: 172.16.205.10
+
+  shrine-server-srv0:
+    extends:
+      file: ../docker-compose-common.yml
+      service: shrine-server
+    build:
+      args:
+        - NODE_IDX_ARG=0
+        - SHRINE_DEBUG_LEVEL_ARG=FINE
+    ports:
+      - "6445:6443"
+    networks:
+      medco-network-srv0:
+        aliases:
+          - shrine-server
+      shrine-network:
+        aliases:
+          - shrine-server-srv0
+
+  shrine-database-srv0:
+    extends:
+      file: ../docker-compose-common.yml
+      service: shrine-database
+    ports:
+      - "3308:3306"
+    networks:
+      medco-network-srv0:
+        aliases:
+          - shrine-database
 
 networks:
   medco-network-srv0:
@@ -76,3 +108,6 @@ networks:
       driver: default
       config:
         - subnet: 172.16.205.0/24
+
+  shrine-network:
+    driver: bridge

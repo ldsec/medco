@@ -1,6 +1,0 @@
-# This file contains your private key.
-# Do not give it away lightly!
-Public = "86280316e1f3bdb468c748cdbc1fa6661c72dff531fed0f475467d57fb052441"
-Private = "fd7344b832c29a03840d6fbd5c9f281bf708ff9cce4a9f349707aacae2db0509"
-Address = "tcp://10.90.38.10:2000"
-Description = "Unlynx Server 7 - iccluster034.iccluster"
