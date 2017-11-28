@@ -2,6 +2,7 @@
 set -e
 shopt -s nullglob
 
+# dependencies: openssl, keytool
 # usage: bash generate-configuration-profile.sh CONFIGURATION_FOLDER KEYSTORE_PASSWORD NODE_DNS_1 NODE_IP_1 NODE_DNS_2 NODE_IP_2 NODE_DNS_3 NODE_IP_3 ...
 if [ $# -lt 5 ]
 then
@@ -9,10 +10,11 @@ then
     exit
 fi
 
-# variables
-SCRIPT_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+echo "Dependencies check, script will abort if dependency if not found"
+which openssl keytool unlynxI2b2
 
-# arguments
+# variables & arguments
+SCRIPT_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 CONF_FOLDER="$1"
 KEYSTORE_PW="$2"
 shift
@@ -20,7 +22,11 @@ shift
 
 # clean up previous entries
 mkdir -p "$CONF_FOLDER"
-rm -f "$CONF_FOLDER"/*.keystore "$CONF_FOLDER"/shrine_downstream_nodes.conf "$CONF_FOLDER"/*.cer
+rm -f "$CONF_FOLDER"/*.keystore "$CONF_FOLDER"/shrine_downstream_nodes.conf "$CONF_FOLDER"/*.pem
+
+# set up common things
+"$SCRIPT_FOLDER"/CA.sh -newca
+cp "$SCRIPT_FOLDER"/CA/cacert.pem "$CONF_FOLDER"/
 
 # generate private and keystore for each node
 NODE_IDX="-1"
@@ -53,9 +59,7 @@ do
         IP.1 = $NODE_IP
         DNS.1 = $NODE_DNS
 EOL
-
     SSLEAY_CONFIG="-extfile $SCRIPT_FOLDER/openssl.ext.tmp.cnf" "$SCRIPT_FOLDER"/CA.sh -sign
-    rm "$SCRIPT_FOLDER/newreq.pem" "$SCRIPT_FOLDER/openssl.ext.tmp.cnf"
 
     # import CA certificate and own certificate signed by CA (chained to the private key)
     keytool -noprompt -import -v -alias shrine-hub-ca -file "$SCRIPT_FOLDER"/CA/cacert.pem -keystore "$KEYSTORE" -storepass "$KEYSTORE_PW"
@@ -66,13 +70,9 @@ EOL
     keytool -noprompt -importkeystore -srckeystore "$KEYSTORE" -srcalias "$KEYSTORE_PRIVATE_ALIAS" -destkeystore "$KEYSTORE".p12 \
         -deststoretype PKCS12 -srcstorepass "$KEYSTORE_PW" -deststorepass "$KEYSTORE_PW"
     openssl pkcs12 -in "$KEYSTORE".p12 -out "$CONF_FOLDER/srv$NODE_IDX.pem" -password pass:"$KEYSTORE_PW" -nodes
-    #cat "$SCRIPT_FOLDER"/newcert.pem "$CONF_FOLDER/srv$NODE_IDX-private.pem" > "$CONF_FOLDER/srv$NODE_IDX.pem"
-    rm "$KEYSTORE".p12 #"$CONF_1FOLDER/srv$NODE_IDX-private.pem"
 
-    #todo: remove inermediate files
-
-    #keytool -import -v -alias shrine-hub-https -file "$SCRIPT_FOLDER" -keystore $KEYSTORE_FILE -storepass $KEYSTORE_PASSWORD
-    #keytool -export -alias "$NODE_DNS-private" -storepass "$KEYSTORE_PW" -file "$CONF_FOLDER/$NODE_DNS.cer" -keystore "$KEYSTORE"
+    # cleanup
+    rm "$SCRIPT_FOLDER/newreq.pem" "$SCRIPT_FOLDER/openssl.ext.tmp.cnf" "$KEYSTORE".p12 "$SCRIPT_FOLDER"/newcert.pem #"$CONF_1FOLDER/srv$NODE_IDX-private.pem"
 
     # add entry in the downstream nodes and alias map
     echo "\"Hospital $NODE_IDX\" = \"https://$NODE_DNS:6443/shrine/rest/adapter/requests\"" >> "$CONF_FOLDER/shrine_downstream_nodes.conf"
