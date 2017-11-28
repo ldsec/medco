@@ -2,7 +2,7 @@ FROM golang:1.8
 
 # environment variables
 ENV UNLYNX_REPO="github.com/lca1/unlynx" \
-    UNLYNX_REPO_BRANCH="newI2B2" \
+    UNLYNX_REPO_BRANCH="master" \
     CONF_DIR="/opt/medco-configuration"
 
 # get maximum of dependencies and cache them
