@@ -41,3 +41,4 @@ _testmain.go
 .DS_Store
 
 .idea/
+data/
