@@ -4,9 +4,54 @@ import (
 	"time"
 	"github.com/lca1/unlynx/lib"
 	"gopkg.in/dedis/crypto.v0/abstract"
+	"gopkg.in/dedis/crypto.v0/base64"
 )
 
+// ListConceptsPaths list all the sensitive concepts (paths)
+var ListConceptsPaths []string
+
+
 // DATA TYPES
+
+// TableShrineOntology is the shrine_ontology table
+var TableShrineOntology []ShrineOntology
+
+// HeaderShrineOntology contains all the headers for the shrine table
+var HeaderShrineOntology []string
+
+// ShrineOntology is the table that contains all concept codes from the shrine ontology
+type ShrineOntology struct {
+	HLevel				string
+	Fullname			string
+	Name 				string
+	SynonymCD			string
+	VisualAttributes 	string
+	TotalNum			string
+	BaseCode			string
+	MetadataXML			string
+	FactTableColumn		string
+	Tablename			string
+	ColumnName			string
+	ColumnDataType      string
+	Operator            string
+	DimCode 			string
+	Comment 			string
+	Tooltip 			string
+	AdminColumns    	AdministrativeColumns
+	ValueTypeCD   		string
+	AppliedPath 		string
+	ExclusionCD 		string
+}
+
+// To CSV text writes the ShrineOntology object in a way that can be added to a .csv file - "","","", etc.
+func (so ShrineOntology) ToCSVText() string{
+	// i do not call the AdminColumns ToCSVText because some fields are empty (damn you shrine)
+	return "\"" + so.HLevel + "\"," + "\"" + so.Fullname + "\"," + "\"" + so.Name + "\"," + "\"" + so.SynonymCD + "\"," + "\"" + so.VisualAttributes + "\"," + "\"" + so.TotalNum + "\"," +
+		"\"" + so.BaseCode + "\"," + "\"" + so.MetadataXML + "\"," + "\"" + so.FactTableColumn + "\"," + "\"" + so.Tablename + "\"," + "\"" + so.ColumnDataType + "\"," + "\"" + so.Operator + "\"," +
+		"\"" + so.DimCode + "\"," + "\"" + so.Comment + "\"," + "\"" + so.Tooltip + "\"," + "\"" + so.AdminColumns.UpdateDate + "\"," + "\"" + so.AdminColumns.DownloadDate + "\"," + "\"" + so.AdminColumns.ImportDate + "\"," +
+		"\"" + so.AdminColumns.SourceSystemCD + "\"," + "\"" + so.ValueTypeCD + "\"," + "\"" + so.AppliedPath + "\"," + "\"" + so.ExclusionCD + "\""
+
+}
 
 // TableObservationFact is observation_fact table
 var TableObservationFact map[ObservationFactPK]ObservationFact
@@ -24,6 +69,7 @@ type ObservationFact struct{
 	ObservationBlob string
 	ConfidenceNum   float64
 	AdminColumns    AdministrativeColumns
+
 }
 
 // ObservationFactPK is the primary key of ObservationFact
@@ -53,13 +99,14 @@ func (ac AdministrativeColumns) ToCSVText() string{
 }
 
 // TablePatientDimension is patient_dimension table
-var TablePatientDimension map[PatientDimensionPK]PatientDimension
+var TablePatientDimension map[*PatientDimensionPK]PatientDimension
 
 // HeaderPatientDimension contains all the headers for the Patient_Dimension table
 var HeaderPatientDimension []string
 
 // PatientDimension table represents a patient in the database
 type PatientDimension struct {
+	PK 				*PatientDimensionPK
 	VitalStatusCD   string
 	BirthDate       string
 	DeathDate		string
@@ -73,10 +120,32 @@ type PatientDimensionPK struct {
 	PatientNum		string
 }
 
+// To CSV text writes the PatientDimensionPK object in a way that can be added to a .csv file - "","","", etc.
+func (pdk *PatientDimensionPK) ToCSVText() string{
+	return "\"" + pdk.PatientNum + "\""
+}
+
+// To CSV text writes the PatientDimension object in a way that can be added to a .csv file - "","","", etc.
+func (pd PatientDimension) ToCSVText() string{
+	b := pd.EncryptedFlag.ToBytes()
+	encodedEncryptedFlag := "\"" + base64.StdEncoding.EncodeToString(b) + "\""
+
+	return pd.PK.ToCSVText() + ",\"" + pd.VitalStatusCD + "\"," + "\"" + pd.BirthDate + "\"," + "\"" + pd.DeathDate + "\"," + OptionalFieldsMapToCSVText(pd.OptionalFields) + "," + pd.AdminColumns.ToCSVText() + "," + encodedEncryptedFlag
+}
+
 // OptionalFields table contains the optional fields
 type OptionalFields struct {
 	ValType	string
 	Value 	string
+}
+
+func OptionalFieldsMapToCSVText(of map[string]string) string{
+	ofString := ""
+	for i:=0; i<len(of); i++{
+		// +4 because there is on pk field and 3 mandatory fields
+		ofString += "\"" + of[HeaderPatientDimension[i+4]] + "\","
+	}
+	return ofString[:len(ofString)-1]
 }
 
 // TableConceptDimension is concept_dimension table
@@ -194,24 +263,63 @@ type Entry struct {
 }
 
 // SUPPORT FUNCTIONS
+func ShrineOntologyFromString(line []string) ShrineOntology {
+	size := len(line)
+
+	ac := AdministrativeColumns{
+		UpdateDate:     	line[size-7],
+		DownloadDate:		line[size-6],
+		ImportDate:      	line[size-5],
+		SourceSystemCD:		line[size-4],
+	}
+
+	so := ShrineOntology {
+		HLevel:				line[0],
+		Fullname:			line[1],
+		Name:				line[2],
+		SynonymCD: 			line[3],
+		VisualAttributes:	line[4],
+		TotalNum:			line[5],
+		BaseCode:			line[6],
+		MetadataXML: 		line[7],
+		FactTableColumn:    line[8],
+		Tablename:          line[9],
+		ColumnName:         line[10],
+		ColumnDataType: 	line[11],
+		Operator: 			line[12],
+		DimCode: 			line[13],
+		Comment: 			line[14],
+		Tooltip: 			line[15],
+		AdminColumns: 		ac,
+		ValueTypeCD:        line[20],
+		AppliedPath:        line[21],
+		ExclusionCD:        line[22],
+	}
+
+	return so
+}
+
+
 func ObservationFactFromString(line string) ObservationFact{
 	of := ObservationFact{}
 	return of
 }
 
-func PatientDimensionFromString(line []string, pk abstract.Point) PatientDimension{
-	pdk := PatientDimensionPK{
+func PatientDimensionFromString(line []string, pk abstract.Point) (*PatientDimensionPK, PatientDimension){
+	pdk := &PatientDimensionPK{
 		PatientNum: line[0],
 	}
 
 	pd := PatientDimension{
-		VitalStatusCD: line[1],
-		BirthDate:     line[2],
-		DeathDate:     line[3],
+		PK: 			pdk,
+		VitalStatusCD: 	line[1],
+		BirthDate:     	line[2],
+		DeathDate:     	line[3],
 	}
 
 	size := len(line)
 
+	// optional fields
 	of := make(map[string]string)
 
 	for i:=4; i<size-6; i++{
@@ -234,9 +342,7 @@ func PatientDimensionFromString(line []string, pk abstract.Point) PatientDimensi
 	pd.AdminColumns = ac
 	pd.EncryptedFlag = *ef
 
-	TablePatientDimension[pdk] = pd
-
-	return pd
+	return pdk, pd
 }
 
 func ConceptDimensionFromString(line string) ConceptDimension{

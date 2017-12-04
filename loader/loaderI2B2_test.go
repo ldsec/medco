@@ -6,6 +6,7 @@ import (
 	"gopkg.in/dedis/onet.v1/log"
 	"github.com/lca1/unlynx/lib"
 	"gopkg.in/dedis/crypto.v0/abstract"
+	"github.com/stretchr/testify/assert"
 )
 
 var publicKey abstract.Point
@@ -22,13 +23,20 @@ func TestConvertAdapterMappings(t *testing.T) {
 	loader.ListConceptsPaths = append(loader.ListConceptsPaths, `\\SHRINE\SHRINE\Demographics\Age\0-9 years old\`)
 	loader.ListConceptsPaths = append(loader.ListConceptsPaths, `\\SHRINE\SHRINE\Demographics\Age\0-9 years old\0 years old\`)
 
-	loader.ConvertAdapterMappings()
+	assert.Nil(t,loader.ConvertAdapterMappings())
 }
 
 func TestConvertPatientDimension(t *testing.T) {
 	log.SetDebugVisible(2)
 	setupEncryptEnv()
 
-	loader.ParsePatientDimension(publicKey)
-	loader.ConvertPatientDimension()
+	assert.Nil(t,loader.ParsePatientDimension(publicKey))
+	assert.Nil(t,loader.ConvertPatientDimension())
+}
+
+func TestConvertShrineOntology(t *testing.T) {
+	log.SetDebugVisible(2)
+
+	assert.Nil(t, loader.ParseShrineOntology())
+	assert.Nil(t, loader.ConvertShrineOntology())
 }
