@@ -8,23 +8,21 @@ import (
 	"io"
 	"encoding/csv"
 	"gopkg.in/dedis/crypto.v0/abstract"
-	"gopkg.in/dedis/crypto.v0/base64"
 	"strings"
 )
-
-// ListConceptsPaths list all the sensitive concepts (paths)
-var ListConceptsPaths []string
 
 // The different paths and handlers for all the file both for input and/or output
 var (
 	InputFilePaths = map[string]string{
 		"ADAPTER_MAPPINGS"	: "../data/original/AdapterMappings.xml",
 		"PATIENT_DIMENSION"	: "../data/original/patient_dimension.csv",
+		"SHRINE_ONTOLOGY"   : "../data/original/shrine.csv",
 	}
 
 	OutputFilePaths = map[string]string{
-		"ADAPTER_MAPPINGS": "../data/converted/AdapterMappings.xml",
+		"ADAPTER_MAPPINGS" 	: "../data/converted/AdapterMappings.xml",
 		"PATIENT_DIMENSION"	: "../data/converted/patient_dimension.csv",
+		"SHRINE_ONTOLOGY"   : "../data/converted/shrine.csv",
 	}
 )
 
@@ -126,6 +124,98 @@ func readCSV(filename string) ([][]string, error){
 	return lines, nil
 }
 
+// SHRINE.CSV converter (shrine ontology)
+// ParseShrineOntology reads and parses the shrine.csv.
+func ParseShrineOntology() error{
+	lines, err := readCSV("SHRINE_ONTOLOGY")
+	if err != nil {
+		log.Fatal("Error in readCSV()")
+		return err
+	}
+
+	TableShrineOntology = make([]ShrineOntology,0)
+	HeaderShrineOntology = make([]string,0)
+
+	/* structure of patient_dimension.csv (in order):
+
+	// MANDATORY FIELDS
+	"c_hlevel",
+	"c_fullname",
+	"c_name",
+	"c_synonym_cd",
+	"c_visualattributes",
+	"c_totalnum",
+	"c_basecode",
+	"c_metadataxml",
+	"c_facttablecolumn",
+	"c_tablename",
+	"c_columnname",
+	"c_columndatatype",
+	"c_operator",
+	"c_dimcode",
+	"c_comment",
+	"c_tooltip",
+
+	// ADMIN FIELDS
+	"update_date",
+	"download_date",
+	"import_date",
+	"sourcesystem_cd",
+
+	// MANDATORY FIELDS
+	"valuetype_cd",
+	"m_applied_path",
+	"m_exclusion_cd"
+
+	*/
+
+	for _, header := range lines[0] {
+		HeaderShrineOntology = append(HeaderShrineOntology,header)
+	}
+
+	//skip header
+	for _, line := range lines[1:] {
+		so := ShrineOntologyFromString(line)
+		TableShrineOntology = append(TableShrineOntology,so)
+	}
+
+	return nil
+}
+
+func ConvertShrineOntology() error {
+	csvOutputFile , err := os.Create(OutputFilePaths["SHRINE_ONTOLOGY"])
+	if err != nil {
+		log.Fatal("Error opening [shrine].csv")
+		return err
+	}
+	defer csvOutputFile.Close()
+
+	headerString := ""
+	for _,header := range HeaderShrineOntology {
+		headerString += "\"" + header + "\","
+	}
+	// remove the last ,
+	csvOutputFile.WriteString(headerString[:len(headerString)-1]+"\n")
+
+	prefix := "\\SHRINE\\ONTOLOGYVERSION\\"
+
+	for _,so := range TableShrineOntology {
+		// search the \SHRINE\ONTOLOGYVERSION\blabla and change the name to blabla_Converted
+		if strings.HasPrefix(so.Fullname, prefix) && len(so.Fullname) > len(prefix) {
+			newName := so.DimCode[len(prefix):] + "_Converted\\"
+			so.Fullname = newName
+			so.Name = newName
+			so.DimCode = newName
+			so.Tooltip = newName
+		}
+
+	}
+
+
+
+	return nil
+}
+
 
 // PATIENT_DIMENSION.CSV converter
 
@@ -137,7 +227,7 @@ func ParsePatientDimension(pk abstract.Point) error{
 		return err
 	}
 
-	TablePatientDimension = make(map[PatientDimensionPK]PatientDimension)
+	TablePatientDimension = make(map[*PatientDimensionPK]PatientDimension)
 	HeaderPatientDimension = make([]string,0)
 
 	/* structure of patient_dimension.csv (in order):
@@ -179,7 +269,8 @@ func ParsePatientDimension(pk abstract.Point) error{
 
 	//skip header
 	for _, line := range lines[1:] {
-		PatientDimensionFromString(line,pk)
+		pdk, pd := PatientDimensionFromString(line,pk)
+		TablePatientDimension[pdk] = pd
 	}
 
 	return nil
@@ -201,20 +292,8 @@ func ConvertPatientDimension() error {
 	// remove the last ,
 	csvOutputFile.WriteString(headerString[:len(headerString)-1]+"\n")
 
-	for pdk,pd := range TablePatientDimension {
-		lineString := "\"" + pdk.PatientNum + "\"," + "\"" + pd.VitalStatusCD + "\"," + "\"" + pd.BirthDate + "\"," + "\"" + pd.DeathDate + "\","
-
-		for i:=0; i<len(pd.OptionalFields); i++{
-			// +4 because there is on pk field and 3 mandatory fields
-			lineString += "\"" + pd.OptionalFields[HeaderPatientDimension[i+4]] + "\","
-		}
-
-		lineString += pd.AdminColumns.ToCSVText()
-
-		b := pd.EncryptedFlag.ToBytes()
-		lineString += ",\"" + base64.StdEncoding.EncodeToString(b) + "\""
-
-		csvOutputFile.WriteString(lineString+"\n")
+	for _,pd := range TablePatientDimension {
+		csvOutputFile.WriteString(pd.ToCSVText()+"\n")
 	}
 
 	return nil
