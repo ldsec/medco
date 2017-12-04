@@ -2,6 +2,8 @@ package loader
 
 import (
 	"time"
+	"github.com/lca1/unlynx/lib"
+	"gopkg.in/dedis/crypto.v0/abstract"
 )
 
 // DATA TYPES
@@ -37,29 +39,38 @@ type ObservationFactPK struct {
 
 // AdministrativeColumns are a set of columns that exist in every i2b2 table
 type AdministrativeColumns struct {
-	UpdateDate      time.Time
-	DownloadDate	time.Time
-	ImportDate      time.Time
+	UpdateDate      string
+	DownloadDate	string
+	ImportDate      string
 	SourceSystemCD	string
-	UploadID		int
-	TextSearchIndex int
+	UploadID		string
+	TextSearchIndex string
+}
+
+// To CSV text writes the AdministrativeColumns object in a way that can be added to a .csv file - "","","", etc.
+func (ac AdministrativeColumns) ToCSVText() string{
+	return "\"" + ac.UpdateDate + "\"," + "\"" + ac.DownloadDate + "\"," + "\"" + ac.ImportDate + "\"," + "\"" + ac.SourceSystemCD + "\"," + "\"" + ac.UploadID + "\"," + "\"" + ac.TextSearchIndex + "\""
 }
 
 // TablePatientDimension is patient_dimension table
 var TablePatientDimension map[PatientDimensionPK]PatientDimension
 
+// HeaderPatientDimension contains all the headers for the Patient_Dimension table
+var HeaderPatientDimension []string
+
 // PatientDimension table represents a patient in the database
 type PatientDimension struct {
 	VitalStatusCD   string
-	BirthDate       time.Time
-	DeathDate		time.Time
-	OptionalFields	map[string]OptionalFields
+	BirthDate       string
+	DeathDate		string
+	OptionalFields	map[string]string
 	AdminColumns    AdministrativeColumns
+	EncryptedFlag   lib.CipherText
 }
 
 // PatientDimensionPK is the primary key of the Patient_Dimension table
 type PatientDimensionPK struct {
-	PatientNum		int
+	PatientNum		string
 }
 
 // OptionalFields table contains the optional fields
@@ -188,8 +199,43 @@ func ObservationFactFromString(line string) ObservationFact{
 	return of
 }
 
-func PatientDimensionFromString(line string) PatientDimension{
-	pd := PatientDimension{}
+func PatientDimensionFromString(line []string, pk abstract.Point) PatientDimension{
+	pdk := PatientDimensionPK{
+		PatientNum: line[0],
+	}
+
+	pd := PatientDimension{
+		VitalStatusCD: line[1],
+		BirthDate:     line[2],
+		DeathDate:     line[3],
+	}
+
+	size := len(line)
+
+	of := make(map[string]string)
+
+	for i:=4; i<size-6; i++{
+		of[HeaderPatientDimension[i]] = line[i]
+	}
+
+	ac := AdministrativeColumns{
+		UpdateDate:     	line[size-6],
+		DownloadDate:		line[size-5],
+		ImportDate:      	line[size-4],
+		SourceSystemCD:		line[size-3],
+		UploadID:			line[size-2],
+		TextSearchIndex: 	line[size-1],
+	}
+
+	// TODO: right now we do not have fake patients
+	ef := lib.EncryptInt(pk,1)
+
+	pd.OptionalFields = of
+	pd.AdminColumns = ac
+	pd.EncryptedFlag = *ef
+
+	TablePatientDimension[pdk] = pd
+
 	return pd
 }
 
