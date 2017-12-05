@@ -34,6 +34,12 @@
                 <local_key>\\i2b2_DEMO\i2b2\Demographics\Gender\Male\</local_key>
             </value>
         </entry>
+        <entry>
+            <key>\\SHRINE\SHRINE\Demographics\Gender\Unknown\</key>
+            <value>
+                <local_key>\\i2b2_DEMO\i2b2\Demographics\Gender\Unknown\</local_key>
+            </value>
+        </entry>
 
 
         <entry>
