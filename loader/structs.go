@@ -5,22 +5,40 @@ import (
 	"github.com/lca1/unlynx/lib"
 	"gopkg.in/dedis/crypto.v0/abstract"
 	"gopkg.in/dedis/crypto.v0/base64"
+	"gopkg.in/dedis/onet.v1/log"
+	"strconv"
 )
 
-// ListConceptsPaths list all the sensitive concepts (paths)
-var ListConceptsPaths []string
+// HELPER STRUCTS
 
+// ListSensitiveConcepts list all the sensitive concepts (paths)
+var ListSensitiveConcepts []string
+
+// IDModifier used to assign IDs to the modifiers concepts
+var IDModifiers int64
+
+// IDConcepts used to assign IDs to the different concepts
+var IDConcepts  int64
 
 // DATA TYPES
 
-// TableShrineOntology is the shrine_ontology table
-var TableShrineOntology []ShrineOntology
+// TableShrineOntologyClear is the shrine_ontology table (it maps the concept path to a concept) with only the NON_SENSITIVE concepts (it INCLUDES MODIFIER NON-SENSITIVE concepts)
+var TableShrineOntologyClear map[string]*ShrineOntology
+
+// TableShrineOntologyClear is the shrine_ontology table (it maps the concept path to a concept) with only the SENSITIVE concepts (NO MODIFIER SENSITIVE concepts)
+var TableShrineOntologyEnc map[string]*ShrineOntology
+
+// TableShrineOntologyClear is the shrine_ontology table (it maps the concept path to a concept) with only the SENSITIVE concepts (it INCLUDES MODIFIER SENSITIVE concepts)
+var TableShrineOntologyModifierEnc map[string][]*ShrineOntology
 
 // HeaderShrineOntology contains all the headers for the shrine table
 var HeaderShrineOntology []string
 
 // ShrineOntology is the table that contains all concept codes from the shrine ontology
 type ShrineOntology struct {
+	NodeEncryptID       int64
+	ChildrenEncryptIDs  []int64
+
 	HLevel				string
 	Fullname			string
 	Name 				string
@@ -45,12 +63,43 @@ type ShrineOntology struct {
 
 // To CSV text writes the ShrineOntology object in a way that can be added to a .csv file - "","","", etc.
 func (so ShrineOntology) ToCSVText() string{
+	if so.NodeEncryptID != int64(-1) { // sensitive
+		metadata := ""
+
+		if so.VisualAttributes[:1]=="C" { 			// if concept_parent_node
+			metadata += "<?xml version=\"\"1.0\"\"?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>CONCEPT_PARENT_NODE</EncryptedType>"
+		} else if so.VisualAttributes[:1]=="F" { 	// else if concept_internal_node
+			metadata += "<?xml version=\"\"1.0\"\"?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>CONCEPT_INTERNAL_NODE</EncryptedType><NodeEncryptID>" + strconv.FormatInt(so.NodeEncryptID,10) + "</NodeEncryptId>"
+		} else if so.VisualAttributes[:1]=="L" { 	// else if concept_leaf
+			metadata += "<?xml version=\"\"1.0\"\"?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>CONCEPT_LEAF</EncryptedType><NodeEncryptID>" + strconv.FormatInt(so.NodeEncryptID,10) + "</NodeEncryptId>"
+		} else if so.VisualAttributes[:1]=="O" { 	// else if modifier_parent_node
+			metadata += "<?xml version=\"\"1.0\"\"?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>MODIFIER_PARENT_NODE</EncryptedType>"
+		} else if so.VisualAttributes[:1]=="D" { 	// else if modifier_internal_node
+			metadata += "<?xml version=\"\"1.0\"\"?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>MODIFIER_INTERNAL_NODE</EncryptedType><NodeEncryptID>" + strconv.FormatInt(so.NodeEncryptID,10) + "</NodeEncryptId>"
+		} else if so.VisualAttributes[:1]=="R" { 	// else if modifier_leaf
+			metadata += "<?xml version=\"\"1.0\"\"?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>MODIFIER_LEAF</EncryptedType><NodeEncryptID>" + strconv.FormatInt(so.NodeEncryptID,10) + "</NodeEncryptId>"
+		} else if so.VisualAttributes[:1]=="M" {
+			log.Fatal("Not supported go fuck yourself!")
+		} else {
+			log.Fatal("Wrong VisualAttribute")
+		}
+
+		if len(so.ChildrenEncryptIDs) > 0 {
+			metadata += "<ChildrenEncryptIDs>"
+			for _,childID := range so.ChildrenEncryptIDs {
+				metadata += "<ChildEncryptID>" + strconv.FormatInt(childID,10) + "</ChildEncryptID>"
+			}
+
+			metadata += "</ChildrenEncryptIDs>"
+		}
+		so.MetadataXML = metadata + "</ValueMetadata>"
+	}
+
 	// i do not call the AdminColumns ToCSVText because some fields are empty (damn you shrine)
 	return "\"" + so.HLevel + "\"," + "\"" + so.Fullname + "\"," + "\"" + so.Name + "\"," + "\"" + so.SynonymCD + "\"," + "\"" + so.VisualAttributes + "\"," + "\"" + so.TotalNum + "\"," +
 		"\"" + so.BaseCode + "\"," + "\"" + so.MetadataXML + "\"," + "\"" + so.FactTableColumn + "\"," + "\"" + so.Tablename + "\"," + "\"" + so.ColumnDataType + "\"," + "\"" + so.Operator + "\"," +
 		"\"" + so.DimCode + "\"," + "\"" + so.Comment + "\"," + "\"" + so.Tooltip + "\"," + "\"" + so.AdminColumns.UpdateDate + "\"," + "\"" + so.AdminColumns.DownloadDate + "\"," + "\"" + so.AdminColumns.ImportDate + "\"," +
 		"\"" + so.AdminColumns.SourceSystemCD + "\"," + "\"" + so.ValueTypeCD + "\"," + "\"" + so.AppliedPath + "\"," + "\"" + so.ExclusionCD + "\""
-
 }
 
 // TableObservationFact is observation_fact table
@@ -263,7 +312,7 @@ type Entry struct {
 }
 
 // SUPPORT FUNCTIONS
-func ShrineOntologyFromString(line []string) ShrineOntology {
+func ShrineOntologyFromString(line []string) *ShrineOntology {
 	size := len(line)
 
 	ac := AdministrativeColumns{
@@ -273,7 +322,9 @@ func ShrineOntologyFromString(line []string) ShrineOntology {
 		SourceSystemCD:		line[size-4],
 	}
 
-	so := ShrineOntology {
+	so := &ShrineOntology {
+		NodeEncryptID:      int64(-1), //signals that this shrine ontology element is not sensitive so no need for an encrypt ID
+		ChildrenEncryptIDs: nil,	   //same thing as before
 		HLevel:				line[0],
 		Fullname:			line[1],
 		Name:				line[2],
