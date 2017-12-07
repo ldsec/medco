@@ -1,12 +1,12 @@
 package loader_test
 
 import (
-	"testing"
 	"github.com/lca1/medco-loader/loader"
-	"gopkg.in/dedis/onet.v1/log"
 	"github.com/lca1/unlynx/lib"
-	"gopkg.in/dedis/crypto.v0/abstract"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/dedis/crypto.v0/abstract"
+	"gopkg.in/dedis/onet.v1/log"
+	"testing"
 )
 
 var publicKey abstract.Point
@@ -19,25 +19,25 @@ func setupEncryptEnv() {
 func TestConvertAdapterMappings(t *testing.T) {
 	log.SetDebugVisible(2)
 
-	loader.ListSensitiveConcepts = make([]string,0)
+	loader.ListSensitiveConcepts = make([]string, 0)
 	loader.ListSensitiveConcepts = append(loader.ListSensitiveConcepts, `\SHRINE\Demographics\Age\0-9 years old\`)
 	loader.ListSensitiveConcepts = append(loader.ListSensitiveConcepts, `\SHRINE\Demographics\Age\0-9 years old\0 years old\`)
 
-	assert.Nil(t,loader.ConvertAdapterMappings())
+	assert.Nil(t, loader.ConvertAdapterMappings())
 }
 
 func TestConvertPatientDimension(t *testing.T) {
 	log.SetDebugVisible(2)
 	setupEncryptEnv()
 
-	assert.Nil(t,loader.ParsePatientDimension(publicKey))
-	assert.Nil(t,loader.ConvertPatientDimension())
+	assert.Nil(t, loader.ParsePatientDimension(publicKey))
+	assert.Nil(t, loader.ConvertPatientDimension())
 }
 
 func TestConvertShrineOntology(t *testing.T) {
 	log.SetDebugVisible(2)
 
-	loader.ListSensitiveConcepts = make([]string,0)
+	loader.ListSensitiveConcepts = make([]string, 0)
 
 	// sensitive concepts
 	loader.ListSensitiveConcepts = append(loader.ListSensitiveConcepts, `\SHRINE\Diagnoses\`)
