@@ -6,6 +6,7 @@ import (
 	"gopkg.in/dedis/crypto.v0/base64"
 	"gopkg.in/dedis/onet.v1/log"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -345,7 +346,7 @@ func ShrineOntologyFromString(line []string) *ShrineOntology {
 		VisualAttributes:   line[4],
 		TotalNum:           line[5],
 		BaseCode:           line[6],
-		MetadataXML:        line[7],
+		MetadataXML:        strings.Replace(line[7], "\"", "\"\"", -1),
 		FactTableColumn:    line[8],
 		Tablename:          line[9],
 		ColumnName:         line[10],
@@ -379,18 +380,18 @@ func PatientDimensionFromString(line []string, pk abstract.Point) (*PatientDimen
 	size := len(line)
 
 	// optional fields
-	of := make([]OptionalFields,0)
+	of := make([]OptionalFields, 0)
 
 	for i := 4; i < size-5; i++ {
 		of = append(of, OptionalFields{ValType: HeaderPatientDimension[i], Value: line[i]})
 	}
 
 	ac := AdministrativeColumns{
-		UpdateDate:      line[size-5],
-		DownloadDate:    line[size-4],
-		ImportDate:      line[size-3],
-		SourceSystemCD:  line[size-2],
-		UploadID:        line[size-1],
+		UpdateDate:     line[size-5],
+		DownloadDate:   line[size-4],
+		ImportDate:     line[size-3],
+		SourceSystemCD: line[size-2],
+		UploadID:       line[size-1],
 	}
 
 	// TODO: right now we do not have fake patients
