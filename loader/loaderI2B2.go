@@ -46,16 +46,18 @@ func ConvertAdapterMappings() error {
 
 	b, _ := ioutil.ReadAll(xmlInputFile)
 
-	var am AdapterMappings
-
-	err = xml.Unmarshal(b, &am)
+	err = xml.Unmarshal(b,&am)
 	if err != nil {
 		log.Fatal("Error marshaling [AdapterMappings].xml")
 		return err
 	}
 
 	// filter out sensitive entries
-	numElementsDel := FilterSensitiveEntries(&am)
+	var amCopy AdapterMappings = am
+
+	log.LLvl1(len(amCopy.ListEntries))
+
+	numElementsDel := FilterSensitiveEntries(&amCopy)
 	log.Lvl2(numElementsDel, "entries deleted")
 
 	xmlOutputFile, err := os.Create(OutputFilePaths["ADAPTER_MAPPINGS"])
@@ -69,24 +71,23 @@ func ConvertAdapterMappings() error {
 
 	enc := xml.NewEncoder(xmlWriter)
 	enc.Indent("", "\t")
-	err = enc.Encode(am)
+	err = enc.Encode(amCopy)
 	if err != nil {
 		log.Fatal("Error writing converted [AdapterMappings].xml")
 		return err
 	}
+
 	return nil
 }
 
 // FilterSensitiveEntries filters out (removes) the <key>, <values> pair(s) that belong to sensitive concepts
 func FilterSensitiveEntries(am *AdapterMappings) int {
-	m := am.ListEntries
-
 	deleted := 0
-	for i := range m {
+	for i := range am.ListEntries {
 		j := i - deleted
 		// remove the table value from the key value like \\SHRINE or \\i2b2_DEMO
-		if containsArrayString(ListSensitiveConcepts, "\\"+strings.SplitN((m[j].Key)[2:], "\\", 2)[1]) {
-			m = m[:j+copy(m[j:], m[j+1:])]
+		if containsArrayString(ListSensitiveConcepts, "\\"+strings.SplitN((am.ListEntries[j].Key)[2:], "\\", 2)[1]) {
+			am.ListEntries = am.ListEntries[:j+copy(am.ListEntries[j:], am.ListEntries[j+1:])]
 			deleted++
 		}
 	}
