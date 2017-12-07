@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-// HELPER STRUCTS
+// ####----HELPER STRUCTS----####
 
 // ListSensitiveConcepts list all the sensitive concepts (paths)
 var ListSensitiveConcepts []string
@@ -20,7 +20,7 @@ var IDModifiers int64
 // IDConcepts used to assign IDs to the different concepts
 var IDConcepts int64
 
-// DATA TYPES
+// ####----DATA TYPES----####
 
 // TableShrineOntologyClear is the shrine_ontology table (it maps the concept path to a concept) with only the NON_SENSITIVE concepts (it INCLUDES MODIFIER NON-SENSITIVE concepts)
 var TableShrineOntologyClear map[string]*ShrineOntology
@@ -69,22 +69,23 @@ func (so ShrineOntology) ToCSVText() string {
 		if so.VisualAttributes[:1] == "C" { // if concept_parent_node
 			metadata += "<?xml version=\"\"1.0\"\"?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>CONCEPT_PARENT_NODE</EncryptedType>"
 		} else if so.VisualAttributes[:1] == "F" { // else if concept_internal_node
-			metadata += "<?xml version=\"\"1.0\"\"?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>CONCEPT_INTERNAL_NODE</EncryptedType><NodeEncryptID>" + strconv.FormatInt(so.NodeEncryptID, 10) + "</NodeEncryptId>"
+			metadata += "<?xml version=\"\"1.0\"\"?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>CONCEPT_INTERNAL_NODE</EncryptedType><NodeEncryptID>" + strconv.FormatInt(so.NodeEncryptID, 10) + "</NodeEncryptID>"
 		} else if so.VisualAttributes[:1] == "L" { // else if concept_leaf
-			metadata += "<?xml version=\"\"1.0\"\"?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>CONCEPT_LEAF</EncryptedType><NodeEncryptID>" + strconv.FormatInt(so.NodeEncryptID, 10) + "</NodeEncryptId>"
+			metadata += "<?xml version=\"\"1.0\"\"?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>CONCEPT_LEAF</EncryptedType><NodeEncryptID>" + strconv.FormatInt(so.NodeEncryptID, 10) + "</NodeEncryptID>"
 		} else if so.VisualAttributes[:1] == "O" { // else if modifier_parent_node
 			metadata += "<?xml version=\"\"1.0\"\"?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>MODIFIER_PARENT_NODE</EncryptedType>"
 		} else if so.VisualAttributes[:1] == "D" { // else if modifier_internal_node
-			metadata += "<?xml version=\"\"1.0\"\"?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>MODIFIER_INTERNAL_NODE</EncryptedType><NodeEncryptID>" + strconv.FormatInt(so.NodeEncryptID, 10) + "</NodeEncryptId>"
+			metadata += "<?xml version=\"\"1.0\"\"?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>MODIFIER_INTERNAL_NODE</EncryptedType><NodeEncryptID>" + strconv.FormatInt(so.NodeEncryptID, 10) + "</NodeEncryptID>"
 		} else if so.VisualAttributes[:1] == "R" { // else if modifier_leaf
-			metadata += "<?xml version=\"\"1.0\"\"?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>MODIFIER_LEAF</EncryptedType><NodeEncryptID>" + strconv.FormatInt(so.NodeEncryptID, 10) + "</NodeEncryptId>"
+			metadata += "<?xml version=\"\"1.0\"\"?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>MODIFIER_LEAF</EncryptedType><NodeEncryptID>" + strconv.FormatInt(so.NodeEncryptID, 10) + "</NodeEncryptID>"
 		} else if so.VisualAttributes[:1] == "M" {
 			log.Fatal("Not supported go fuck yourself!")
 		} else {
 			log.Fatal("Wrong VisualAttribute")
 		}
 
-		if len(so.ChildrenEncryptIDs) > 0 {
+		// only internal and parent nodes can have children ;)
+		if len(so.ChildrenEncryptIDs) > 0 && so.VisualAttributes[:1] != "L" && so.VisualAttributes[:1] != "R" {
 			metadata += "<ChildrenEncryptIDs>"
 			for _, childID := range so.ChildrenEncryptIDs {
 				metadata += "<ChildEncryptID>" + strconv.FormatInt(childID, 10) + "</ChildEncryptID>"
@@ -94,13 +95,14 @@ func (so ShrineOntology) ToCSVText() string {
 		}
 		so.MetadataXML = metadata + "</ValueMetadata>"
 	}
+	acString := "\"" + so.AdminColumns.UpdateDate + "\"," + "\"" + so.AdminColumns.DownloadDate + "\"," + "\"" + so.AdminColumns.ImportDate + "\"," + "\"" + so.AdminColumns.SourceSystemCD + "\""
 
-	// i do not call the AdminColumns ToCSVText because some fields are empty (damn you shrine)
 	return "\"" + so.HLevel + "\"," + "\"" + so.Fullname + "\"," + "\"" + so.Name + "\"," + "\"" + so.SynonymCD + "\"," + "\"" + so.VisualAttributes + "\"," + "\"" + so.TotalNum + "\"," +
-		"\"" + so.BaseCode + "\"," + "\"" + so.MetadataXML + "\"," + "\"" + so.FactTableColumn + "\"," + "\"" + so.Tablename + "\"," + "\"" + so.ColumnDataType + "\"," + "\"" + so.Operator + "\"," +
-		"\"" + so.DimCode + "\"," + "\"" + so.Comment + "\"," + "\"" + so.Tooltip + "\"," + "\"" + so.AdminColumns.UpdateDate + "\"," + "\"" + so.AdminColumns.DownloadDate + "\"," + "\"" + so.AdminColumns.ImportDate + "\"," +
-		"\"" + so.AdminColumns.SourceSystemCD + "\"," + "\"" + so.ValueTypeCD + "\"," + "\"" + so.AppliedPath + "\"," + "\"" + so.ExclusionCD + "\""
+		"\"" + so.BaseCode + "\"," + "\"" + so.MetadataXML + "\"," + "\"" + so.FactTableColumn + "\"," + "\"" + so.Tablename + "\"," + "\"" + so.ColumnName + "\"," + "\"" + so.ColumnDataType + "\"," + "\"" + so.Operator + "\"," +
+		"\"" + so.DimCode + "\"," + "\"" + so.Comment + "\"," + "\"" + so.Tooltip + "\"," + acString + "," + "\"" + so.ValueTypeCD + "\"," + "\"" + so.AppliedPath + "\"," + "\"" + so.ExclusionCD + "\""
 }
+
+//-------------------------------------//
 
 // TableObservationFact is observation_fact table
 var TableObservationFact map[ObservationFactPK]ObservationFact
@@ -141,10 +143,7 @@ type AdministrativeColumns struct {
 	TextSearchIndex string
 }
 
-// ToCSVText writes the AdministrativeColumns object in a way that can be added to a .csv file - "","","", etc.
-func (ac AdministrativeColumns) ToCSVText() string {
-	return "\"" + ac.UpdateDate + "\"," + "\"" + ac.DownloadDate + "\"," + "\"" + ac.ImportDate + "\"," + "\"" + ac.SourceSystemCD + "\"," + "\"" + ac.UploadID + "\"," + "\"" + ac.TextSearchIndex + "\""
-}
+//-------------------------------------//
 
 // TablePatientDimension is patient_dimension table
 var TablePatientDimension map[*PatientDimensionPK]PatientDimension
@@ -158,7 +157,7 @@ type PatientDimension struct {
 	VitalStatusCD  string
 	BirthDate      string
 	DeathDate      string
-	OptionalFields map[string]string
+	OptionalFields []OptionalFields
 	AdminColumns   AdministrativeColumns
 	EncryptedFlag  lib.CipherText
 }
@@ -168,17 +167,25 @@ type PatientDimensionPK struct {
 	PatientNum string
 }
 
-// ToCSVText writes the PatientDimensionPK object in a way that can be added to a .csv file - "","","", etc.
+// ToCSVText writes the PatientDimensionPK struct in a way that can be added to a .csv file - "","","", etc.
 func (pdk *PatientDimensionPK) ToCSVText() string {
 	return "\"" + pdk.PatientNum + "\""
 }
 
-// ToCSVText writes the PatientDimension object in a way that can be added to a .csv file - "","","", etc.
+// ToCSVText writes the PatientDimension struct in a way that can be added to a .csv file - "","","", etc.
 func (pd PatientDimension) ToCSVText() string {
 	b := pd.EncryptedFlag.ToBytes()
 	encodedEncryptedFlag := "\"" + base64.StdEncoding.EncodeToString(b) + "\""
 
-	return pd.PK.ToCSVText() + ",\"" + pd.VitalStatusCD + "\"," + "\"" + pd.BirthDate + "\"," + "\"" + pd.DeathDate + "\"," + optionalFieldsMapToCSVText(pd.OptionalFields) + "," + pd.AdminColumns.ToCSVText() + "," + encodedEncryptedFlag
+	of := pd.OptionalFields
+	ofString := ""
+	for i := 0; i < len(of); i++ {
+		// +4 because there is on pk field and 3 mandatory fields
+		ofString += "\"" + of[i].Value + "\","
+	}
+
+	acString := "\"" + pd.AdminColumns.UpdateDate + "\"," + "\"" + pd.AdminColumns.DownloadDate + "\"," + "\"" + pd.AdminColumns.ImportDate + "\"," + "\"" + pd.AdminColumns.SourceSystemCD + "\"," + "\"" + pd.AdminColumns.UploadID + "\""
+	return pd.PK.ToCSVText() + ",\"" + pd.VitalStatusCD + "\"," + "\"" + pd.BirthDate + "\"," + "\"" + pd.DeathDate + "\"," + ofString[:len(ofString)-1] + "," + acString + "," + encodedEncryptedFlag
 }
 
 // OptionalFields table contains the optional fields
@@ -187,14 +194,7 @@ type OptionalFields struct {
 	Value   string
 }
 
-func optionalFieldsMapToCSVText(of map[string]string) string {
-	ofString := ""
-	for i := 0; i < len(of); i++ {
-		// +4 because there is on pk field and 3 mandatory fields
-		ofString += "\"" + of[HeaderPatientDimension[i+4]] + "\","
-	}
-	return ofString[:len(ofString)-1]
-}
+//-------------------------------------//
 
 // TableConceptDimension is concept_dimension table
 var TableConceptDimension map[ConceptDimensionPK]ConceptDimension
@@ -211,6 +211,8 @@ type ConceptDimension struct {
 type ConceptDimensionPK struct {
 	ConceptPath string
 }
+
+//-------------------------------------//
 
 // TableVisitDimension is visit_dimension table
 var TableVisitDimension map[VisitDimensionPK]VisitDimension
@@ -230,6 +232,8 @@ type VisitDimensionPK struct {
 	PatientDimension *PatientDimension
 }
 
+//-------------------------------------//
+
 // TableProviderDimension is provider_dimension table
 var TableProviderDimension map[ProviderDimensionPK]ProviderDimension
 
@@ -246,6 +250,8 @@ type ProviderDimensionPK struct {
 	ProviderPath string
 }
 
+//-------------------------------------//
+
 // TableModifierDimension is modifier_dimension table
 var TableModifierDimension map[ModifierDimensionPK]ModifierDimension
 
@@ -261,6 +267,8 @@ type ModifierDimension struct {
 type ModifierDimensionPK struct {
 	ModifierPath string
 }
+
+//-------------------------------------//
 
 // TablePatientMapping is patient_mapping table
 var TablePatientMapping map[PatientMappingPK]PatientMapping
@@ -279,6 +287,8 @@ type PatientMappingPK struct {
 	PatientIDESource string
 }
 
+//-------------------------------------//
+
 // TableEncounterMapping is encounter_mapping table
 var TableEncounterMapping map[EncounterMappingPK]EncounterMapping
 
@@ -296,6 +306,8 @@ type EncounterMappingPK struct {
 	EncounterIDESource string
 	ProjectID          string
 }
+
+//-------------------------------------//
 
 // AdapterMappings is the xml pre-generated struct to parse the AdapterMappings.xml
 type AdapterMappings struct {
@@ -367,19 +379,18 @@ func PatientDimensionFromString(line []string, pk abstract.Point) (*PatientDimen
 	size := len(line)
 
 	// optional fields
-	of := make(map[string]string)
+	of := make([]OptionalFields,0)
 
-	for i := 4; i < size-6; i++ {
-		of[HeaderPatientDimension[i]] = line[i]
+	for i := 4; i < size-5; i++ {
+		of = append(of, OptionalFields{ValType: HeaderPatientDimension[i], Value: line[i]})
 	}
 
 	ac := AdministrativeColumns{
-		UpdateDate:      line[size-6],
-		DownloadDate:    line[size-5],
-		ImportDate:      line[size-4],
-		SourceSystemCD:  line[size-3],
-		UploadID:        line[size-2],
-		TextSearchIndex: line[size-1],
+		UpdateDate:      line[size-5],
+		DownloadDate:    line[size-4],
+		ImportDate:      line[size-3],
+		SourceSystemCD:  line[size-2],
+		UploadID:        line[size-1],
 	}
 
 	// TODO: right now we do not have fake patients
