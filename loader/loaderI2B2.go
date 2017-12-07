@@ -242,19 +242,19 @@ func ConvertShrineOntology() error {
 			so.DimCode = newName
 			so.Tooltip = newName
 		}
-		//csvOutputFile.WriteString(so.ToCSVText()+"\n")
+		csvOutputFile.WriteString(so.ToCSVText() + "\n")
 	}
 
 	// copy the sensitive concept codes to the new csv files (it does not include the modifier concepts)
 	for _, so := range TableShrineOntologyEnc {
-		log.LLvl1(so.Fullname, so.NodeEncryptID, so.ChildrenEncryptIDs, so.VisualAttributes)
+		//log.LLvl1(so.Fullname, so.NodeEncryptID, so.ChildrenEncryptIDs, so.VisualAttributes)
 		csvOutputFile.WriteString(so.ToCSVText() + "\n")
 	}
 
 	// copy the sensitive modifier concept codes to the new csv files
 	for _, soArr := range TableShrineOntologyModifierEnc {
 		for _, so := range soArr {
-			log.LLvl1(so.Fullname, so.NodeEncryptID, so.ChildrenEncryptIDs, so.VisualAttributes)
+			//log.LLvl1(so.Fullname, so.NodeEncryptID, so.ChildrenEncryptIDs, so.VisualAttributes)
 			csvOutputFile.WriteString(so.ToCSVText() + "\n")
 		}
 	}
