@@ -310,6 +310,9 @@ type EncounterMappingPK struct {
 
 //-------------------------------------//
 
+// AdapterMappings maps a shrine ontology sensitive concept or modifier concept to the local ontology (we need this to know which concepts from the local ontology are sensitive)
+var am AdapterMappings
+
 // AdapterMappings is the xml pre-generated struct to parse the AdapterMappings.xml
 type AdapterMappings struct {
 	Hostname    string  `xml:"hostname"`
