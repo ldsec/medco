@@ -86,7 +86,8 @@ func FilterSensitiveEntries(am *AdapterMappings) int{
 	deleted := 0
 	for i := range m {
 		j := i - deleted
-		if containsArrayString(ListConceptsPaths, m[j].Key){
+		// remove the table value from the key value like \\SHRINE or \\i2b2_DEMO
+		if containsArrayString(ListSensitiveConcepts, "\\"+strings.SplitN((m[j].Key)[2:],"\\",2)[1]){
 			m = m[:j+copy(m[j:], m[j+1:])]
 			deleted++
 		}
@@ -133,7 +134,12 @@ func ParseShrineOntology() error{
 		return err
 	}
 
-	TableShrineOntology = make([]ShrineOntology,0)
+	// initialize container structs and counters
+	IDModifiers = 0
+	IDConcepts = 0
+	TableShrineOntologyClear = make(map[string]*ShrineOntology)
+	TableShrineOntologyEnc = make(map[string]*ShrineOntology)
+	TableShrineOntologyModifierEnc = make(map[string][]*ShrineOntology)
 	HeaderShrineOntology = make([]string,0)
 
 	/* structure of patient_dimension.csv (in order):
@@ -176,7 +182,32 @@ func ParseShrineOntology() error{
 	//skip header
 	for _, line := range lines[1:] {
 		so := ShrineOntologyFromString(line)
-		TableShrineOntology = append(TableShrineOntology,so)
+
+		if containsArrayString(ListSensitiveConcepts,so.Fullname) { // if it is a sensitive concept
+			so.ChildrenEncryptIDs = make([]int64,0)
+
+			// if it is a modifier
+			if strings.ToLower(so.FactTableColumn) == "modifier_cd" {
+				// if value already present in the map
+				if val,ok := TableShrineOntologyModifierEnc[so.Fullname]; ok {
+					so.NodeEncryptID = val[0].NodeEncryptID
+					TableShrineOntologyModifierEnc[so.Fullname] = append(TableShrineOntologyModifierEnc[so.Fullname], so)
+				} else{
+					so.NodeEncryptID = IDModifiers
+					IDModifiers++
+					TableShrineOntologyModifierEnc[so.Fullname] = make([]*ShrineOntology,0)
+					TableShrineOntologyModifierEnc[so.Fullname] = append(TableShrineOntologyModifierEnc[so.Fullname], so)
+				}
+			} else if strings.ToLower(so.FactTableColumn) ==  "concept_cd" { // if it is a concept code
+				so.NodeEncryptID = IDConcepts
+				IDConcepts++
+				TableShrineOntologyEnc[so.Fullname] = so
+			} else {
+				log.Fatal("Incorrect code in the FactTable column:", strings.ToLower(so.FactTableColumn))
+			}
+		} else {
+			TableShrineOntologyClear[so.Fullname] = so
+		}
 	}
 
 	return nil
@@ -197,23 +228,77 @@ func ConvertShrineOntology() error {
 	// remove the last ,
 	csvOutputFile.WriteString(headerString[:len(headerString)-1]+"\n")
 
+	UpdateChildrenEncryptIDs() //updates the ChildrenEncryptIDs of the internal and parent nodes
+
+	// copy the non-sensitive concept codes to the new csv file and change the name of the ONTOLOGYVERSION to blabla_convert
 	prefix := "\\SHRINE\\ONTOLOGYVERSION\\"
 
-	for _,so := range TableShrineOntology {
+	for _,so := range TableShrineOntologyClear {
 		// search the \SHRINE\ONTOLOGYVERSION\blabla and change the name to blabla_Converted
 		if strings.HasPrefix(so.Fullname, prefix) && len(so.Fullname) > len(prefix) {
-			newName := so.DimCode[len(prefix):] + "_Converted\\"
+			newName := so.Fullname[:len(so.Fullname)-1] + "_Converted\\"
 			so.Fullname = newName
 			so.Name = newName
 			so.DimCode = newName
 			so.Tooltip = newName
 		}
-
+		//csvOutputFile.WriteString(so.ToCSVText()+"\n")
 	}
 
+	// copy the sensitive concept codes to the new csv files (it does not include the modifier concepts)
+	for _,so := range TableShrineOntologyEnc {
+		log.LLvl1(so.Fullname, so.NodeEncryptID,so.ChildrenEncryptIDs,so.VisualAttributes)
+		csvOutputFile.WriteString(so.ToCSVText()+"\n")
+	}
 
+	// copy the sensitive modifier concept codes to the new csv files
+	for _,soArr := range TableShrineOntologyModifierEnc {
+		for _,so := range soArr {
+			log.LLvl1(so.Fullname, so.NodeEncryptID,so.ChildrenEncryptIDs,so.VisualAttributes)
+			csvOutputFile.WriteString(so.ToCSVText()+"\n")
+		}
+	}
 
 	return nil
+}
+
+func UpdateChildrenEncryptIDs() {
+	for _,so := range TableShrineOntologyEnc {
+		path := so.Fullname[1:len(so.Fullname)-1] // remove the first and last \
+		pathContainer := strings.Split(path,"\\")
+
+		for len(pathContainer) > 0 {
+			// reduce a 'layer' at the time -  e.g. \\SHRINE\\Diagnosis\\Haematite\\Leg -> \\SHRINE\\Diagnosis\\Haematite
+			pathContainer = pathContainer[:len(pathContainer)-1]
+			conceptPath := strings.Join(pathContainer,"\\")
+
+			// if we remove the first and last \ in the beginning when comparing we need add them again
+			if val, ok := TableShrineOntologyEnc[ "\\" + conceptPath + "\\"]; ok {
+				val.ChildrenEncryptIDs = append(val.ChildrenEncryptIDs, so.NodeEncryptID)
+			}
+		}
+	}
+
+	for path,soArr := range TableShrineOntologyModifierEnc {
+		// remove the first and last \
+		path = path[1:len(path)-1]
+		pathContainer := strings.Split(path,"\\")
+
+		for len(pathContainer) > 0 {
+			// reduce a 'layer' at the time -  e.g. \\Admit Diagnosis\\Leg -> \\Admit Diagnosis
+			pathContainer = pathContainer[:len(pathContainer)-1]
+			conceptPath := strings.Join(pathContainer,"\\")
+
+			// if we remove the first and last \ in the beginning when comparing we need add them again
+			if val, ok := TableShrineOntologyModifierEnc[ "\\" + conceptPath + "\\"]; ok {
+				for _,el := range val{
+					// no matter the element in the array they all have the same NodeEncryptID
+					el.ChildrenEncryptIDs = append(el.ChildrenEncryptIDs, soArr[0].NodeEncryptID)
+				}
+			}
+
+		}
+	}
 }
 
 
