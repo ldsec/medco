@@ -105,6 +105,71 @@ func (so ShrineOntology) ToCSVText() string {
 
 //-------------------------------------//
 
+// TableLocalOntologyClear is the local ontology table (it maps the concept path to a concept) with only the NON_SENSITIVE concepts (it INCLUDES MODIFIER NON-SENSITIVE concepts)
+var TableLocalOntologyClear map[string]*ShrineOntology
+
+// TableLocalOntologyEnc is the local ontology table (it maps the concept path to a concept) with only the SENSITIVE concepts (NO MODIFIER SENSITIVE concepts)
+var TableLocalOntologyEnc map[string]*ShrineOntology
+
+// TableLocalOntologyModifierEnc is the local ontology table (it maps the concept path to a concept) with only the MODIFIER SENSITIVE concepts
+var TableLocalOntologyModifierEnc map[string][]*ShrineOntology
+
+// HeaderShrineOntology contains all the headers for the i2b2 table
+var HeaderLocalOntology []string
+
+// LocalOntology is the table that contains all concept codes from the local ontology (i2b2)
+type LocalOntology struct {
+	TagID 				int64
+
+	HLevel           	string
+	Fullname         	string
+	Name             	string
+	SynonymCD        	string
+	VisualAttributes 	string
+	TotalNum         	string
+	BaseCode         	string
+	MetadataXML      	string
+	FactTableColumn  	string
+	Tablename        	string
+	ColumnName       	string
+	ColumnDataType   	string
+	Operator         	string
+	DimCode          	string
+	Comment          	string
+	Tooltip          	string
+	AppliedPath      	string
+	AdminColumns     	AdministrativeColumns
+	ValueTypeCD      	string
+	ExclusionCD      	string
+	Path 				string
+	Symbol 				string
+
+	// this only exists in the sensitive tagged
+	PCoreBasecode 		string
+}
+
+// ToCSVText writes the LocalOntology object in a way that can be added to a .csv file - "","","", etc.
+func (lo LocalOntology) ToCSVText() string {
+	// sensitive concept
+	if lo.TagID != -1 {
+		lo.BaseCode = "TAG_ID:" + strconv.FormatInt(lo.TagID,10)
+	}
+	acString := "\"" + lo.AdminColumns.UpdateDate + "\"," + "\"" + lo.AdminColumns.DownloadDate + "\"," + "\"" + lo.AdminColumns.ImportDate + "\"," + "\"" + lo.AdminColumns.SourceSystemCD + "\""
+
+	loString := "\"" + lo.HLevel + "\"," + "\"" + lo.Fullname + "\"," + "\"" + lo.Name + "\"," + "\"" + lo.SynonymCD + "\"," + "\"" + lo.VisualAttributes + "\"," + "\"" + lo.TotalNum + "\"," +
+				"\"" + lo.BaseCode + "\"," + "\"" + lo.MetadataXML + "\"," + "\"" + lo.FactTableColumn + "\"," + "\"" + lo.Tablename + "\"," + "\"" + lo.ColumnName + "\"," + "\"" + lo.ColumnDataType + "\"," + "\"" + lo.Operator + "\"," +
+				"\"" + lo.DimCode + "\"," + "\"" + lo.Comment + "\"," + "\"" + lo.Tooltip + "\"," + "\"" + lo.AppliedPath + "\"," + acString + "," + "\"" + lo.ValueTypeCD + "\"," + "\"" + lo.ExclusionCD + "\"," +
+				"\"" + lo.Path + "\"," + "\"" + lo.Symbol + "\""
+
+	// sensitive concept (we are supposed to write this in the sensitive tagged table)
+	if lo.TagID != -1 {
+		loString += ",\"" + lo.PCoreBasecode + "\""
+	}
+	return loString
+}
+
+//-------------------------------------//
+
 // TableObservationFact is observation_fact table
 var TableObservationFact map[ObservationFactPK]ObservationFact
 
