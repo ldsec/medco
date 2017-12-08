@@ -99,7 +99,7 @@ func TestLocalOntology_ToCSVText(t *testing.T) {
 		Path: 			  "\\N",
 		Symbol: 		  "\\N",
 
-		PCoreBasecode:    "\\N",
+		PCoriBasecode: "\\N",
 	}
 
 	assert.Equal(t, lo.ToCSVText(), `"4","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","Parkdale","N","FA ","\N","\N","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","\N","Demographics \ Zip codes \ Arkansas \ Parkdale","@","2007-04-10 00:00:00","2007-04-10 00:00:00","2007-04-10 00:00:00","DEMO","\N","\N","\N","\N"`)
@@ -197,6 +197,54 @@ func TestShrineOntologyFromString(t *testing.T) {
 	assert.Nil(t, err, "Parsing error")
 
 	assert.Equal(t, *loader.ShrineOntologyFromString(lines[0]), so)
+}
+
+func TestLocalOntologyFromString(t *testing.T) {
+	csvString := `"4","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","Parkdale","N","FA ","\N","\N","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","\N","Demographics \ Zip codes \ Arkansas \ Parkdale","@","2007-04-10 00:00:00","2007-04-10 00:00:00","2007-04-10 00:00:00","DEMO","\N","\N","\N","\N"`
+
+	ac := loader.AdministrativeColumns{
+		UpdateDate:     "2007-04-10 00:00:00",
+		DownloadDate:   "2007-04-10 00:00:00",
+		ImportDate:     "2007-04-10 00:00:00",
+		SourceSystemCD: "DEMO",
+	}
+
+	lo := loader.LocalOntology{
+		TagID:      	  -1,
+
+		HLevel:           "4",
+		Fullname:         "\\i2b2\\Demographics\\Zip codes\\Arkansas\\Parkdale\\",
+		Name:             "Parkdale",
+		SynonymCD:        "N",
+		VisualAttributes: "FA ",
+		TotalNum:         "\\N",
+		BaseCode:         "\\N",
+		MetadataXML:      "\\N",
+		FactTableColumn:  "concept_cd",
+		Tablename:        "concept_dimension",
+		ColumnName:       "concept_path",
+		ColumnDataType:   "T",
+		Operator:         "LIKE",
+		DimCode:          "\\i2b2\\Demographics\\Zip codes\\Arkansas\\Parkdale\\",
+		Comment:          "\\N",
+		Tooltip:          "Demographics \\ Zip codes \\ Arkansas \\ Parkdale",
+		AppliedPath:	  "@",
+		AdminColumns:     ac,
+		ValueTypeCD:      "\\N",
+		ExclusionCD:      "\\N",
+		Path: 			  "\\N",
+		Symbol: 		  "\\N",
+
+		PCoriBasecode: "",
+	}
+
+	var csvFile = strings.NewReader(csvString)
+	r := csv.NewReader(csvFile)
+	lines, err := r.ReadAll()
+	assert.Nil(t, err, "Parsing error")
+
+	assert.Equal(t, *loader.LocalOntologyFromString(lines[0]), lo)
+
 }
 
 func TestPatientDimensionFromString(t *testing.T) {

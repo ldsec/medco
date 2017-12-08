@@ -105,15 +105,6 @@ func (so ShrineOntology) ToCSVText() string {
 
 //-------------------------------------//
 
-// TableLocalOntologyClear is the local ontology table (it maps the concept path to a concept) with only the NON_SENSITIVE concepts (it INCLUDES MODIFIER NON-SENSITIVE concepts)
-var TableLocalOntologyClear map[string]*ShrineOntology
-
-// TableLocalOntologyEnc is the local ontology table (it maps the concept path to a concept) with only the SENSITIVE concepts (NO MODIFIER SENSITIVE concepts)
-var TableLocalOntologyEnc map[string]*ShrineOntology
-
-// TableLocalOntologyModifierEnc is the local ontology table (it maps the concept path to a concept) with only the MODIFIER SENSITIVE concepts
-var TableLocalOntologyModifierEnc map[string][]*ShrineOntology
-
 // HeaderShrineOntology contains all the headers for the i2b2 table
 var HeaderLocalOntology []string
 
@@ -145,7 +136,7 @@ type LocalOntology struct {
 	Symbol 				string
 
 	// this only exists in the sensitive tagged
-	PCoreBasecode 		string
+	PCoriBasecode 		string
 }
 
 // ToCSVText writes the LocalOntology object in a way that can be added to a .csv file - "","","", etc.
@@ -163,7 +154,7 @@ func (lo LocalOntology) ToCSVText() string {
 
 	// sensitive concept (we are supposed to write this in the sensitive tagged table)
 	if lo.TagID != -1 {
-		loString += ",\"" + lo.PCoreBasecode + "\""
+		loString += ",\"" + lo.PCoriBasecode + "\""
 	}
 	return loString
 }
@@ -430,6 +421,49 @@ func ShrineOntologyFromString(line []string) *ShrineOntology {
 	}
 
 	return so
+}
+
+// ShrineOntologyFromString generates a LocalOntology struct from a parsed line of a .csv file
+func LocalOntologyFromString(line []string) *LocalOntology {
+
+	size := len(line)
+
+	ac := AdministrativeColumns{
+		UpdateDate:     line[size-8],
+		DownloadDate:   line[size-7],
+		ImportDate:     line[size-6],
+		SourceSystemCD: line[size-5],
+	}
+
+	so := &LocalOntology{
+		TagID:      		int64(-1), //signals that this local ontology element is not sensitive so no need for an Tag ID
+
+		HLevel:             line[0],
+		Fullname:           line[1],
+		Name:               line[2],
+		SynonymCD:          line[3],
+		VisualAttributes:   line[4],
+		TotalNum:           line[5],
+		BaseCode:           line[6],
+		MetadataXML:        strings.Replace(line[7], "\"", "\"\"", -1),
+		FactTableColumn:    line[8],
+		Tablename:          line[9],
+		ColumnName:         line[10],
+		ColumnDataType:     line[11],
+		Operator:           line[12],
+		DimCode:            line[13],
+		Comment:            line[14],
+		Tooltip:            line[15],
+		AppliedPath:        line[16],
+		AdminColumns:       ac,
+		ValueTypeCD:        line[21],
+		ExclusionCD:        line[22],
+		Path: 				line[23],
+		Symbol: 			line[24],
+	}
+
+	return so
+
 }
 
 // PatientDimensionFromString generates a ShrineOntology struct from a parsed line of a .csv file
