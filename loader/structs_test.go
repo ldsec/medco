@@ -64,6 +64,51 @@ func TestShrineOntology_ToCSVText(t *testing.T) {
 
 }
 
+func TestLocalOntology_ToCSVText(t *testing.T) {
+
+	ac := loader.AdministrativeColumns{
+		UpdateDate:     "2007-04-10 00:00:00",
+		DownloadDate:   "2007-04-10 00:00:00",
+		ImportDate:     "2007-04-10 00:00:00",
+		SourceSystemCD: "DEMO",
+	}
+
+	lo := loader.LocalOntology{
+		TagID:      	  -1,
+
+		HLevel:           "4",
+		Fullname:         "\\i2b2\\Demographics\\Zip codes\\Arkansas\\Parkdale\\",
+		Name:             "Parkdale",
+		SynonymCD:        "N",
+		VisualAttributes: "FA ",
+		TotalNum:         "\\N",
+		BaseCode:         "\\N",
+		MetadataXML:      "\\N",
+		FactTableColumn:  "concept_cd",
+		Tablename:        "concept_dimension",
+		ColumnName:       "concept_path",
+		ColumnDataType:   "T",
+		Operator:         "LIKE",
+		DimCode:          "\\i2b2\\Demographics\\Zip codes\\Arkansas\\Parkdale\\",
+		Comment:          "\\N",
+		Tooltip:          "Demographics \\ Zip codes \\ Arkansas \\ Parkdale",
+		AppliedPath:	  "@",
+		AdminColumns:     ac,
+		ValueTypeCD:      "\\N",
+		ExclusionCD:      "\\N",
+		Path: 			  "\\N",
+		Symbol: 		  "\\N",
+
+		PCoreBasecode:    "\\N",
+	}
+
+	assert.Equal(t, lo.ToCSVText(), `"4","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","Parkdale","N","FA ","\N","\N","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","\N","Demographics \ Zip codes \ Arkansas \ Parkdale","@","2007-04-10 00:00:00","2007-04-10 00:00:00","2007-04-10 00:00:00","DEMO","\N","\N","\N","\N"`)
+
+	lo.TagID = 1
+	assert.Equal(t, lo.ToCSVText(), `"4","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","Parkdale","N","FA ","\N","TAG_ID:1","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","\N","Demographics \ Zip codes \ Arkansas \ Parkdale","@","2007-04-10 00:00:00","2007-04-10 00:00:00","2007-04-10 00:00:00","DEMO","\N","\N","\N","\N","\N"`)
+
+}
+
 func TestPatientDimension_ToCSVText(t *testing.T) {
 
 	ac := loader.AdministrativeColumns{
