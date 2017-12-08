@@ -17,12 +17,15 @@ var (
 		"ADAPTER_MAPPINGS":  "../data/original/AdapterMappings.xml",
 		"PATIENT_DIMENSION": "../data/original/patient_dimension.csv",
 		"SHRINE_ONTOLOGY":   "../data/original/shrine.csv",
+		"LOCAL_ONTOLOGY":    "../data/original/i2b2.csv",
 	}
 
 	OutputFilePaths = map[string]string{
-		"ADAPTER_MAPPINGS":  "../data/converted/AdapterMappings.xml",
-		"PATIENT_DIMENSION": "../data/converted/patient_dimension.csv",
-		"SHRINE_ONTOLOGY":   "../data/converted/shrine.csv",
+		"ADAPTER_MAPPINGS":  		"../data/converted/AdapterMappings.xml",
+		"PATIENT_DIMENSION": 		"../data/converted/patient_dimension.csv",
+		"SHRINE_ONTOLOGY":   		"../data/converted/shrine.csv",
+		"LOCAL_ONTOLOGY_CLEAR":		"../data/converted/i2b2.csv",
+		"LOCAL_ONTOLOGY_SENSITIVE":	"../data/converted/i2b2.csv",
 	}
 )
 
@@ -301,6 +304,72 @@ func UpdateChildrenEncryptIDs() {
 
 		}
 	}
+}
+
+// I2B2.CSV converter (local ontology)
+
+// ParseLocalOntology reads and parses the i2b2.csv.
+func ParseLocalOntology() error {
+	lines, err := readCSV("LOCAL_ONTOLOGY")
+	if err != nil {
+		log.Fatal("Error in readCSV()")
+		return err
+	}
+
+	// initialize container structs and counters
+	IDModifiers = 0
+	IDConcepts = 0
+	HeaderLocalOntology = make([]string, 0)
+
+	/* structure of i2b2.csv (in order):
+
+	// MANDATORY FIELDS
+	"c_hlevel",
+	"c_fullname",
+	"c_name",
+	"c_synonym_cd",
+	"c_visualattributes",
+	"c_totalnum",
+	"c_basecode",
+	"c_metadataxml",
+	"c_facttablecolumn",
+	"c_tablename",
+	"c_columnname",
+	"c_columndatatype",
+	"c_operator",
+	"c_dimcode",
+	"c_comment",
+	"c_tooltip",
+	"m_applied_path",
+
+	// ADMIN FIELDS
+	"update_date",
+	"download_date",
+	"import_date",
+	"sourcesystem_cd",
+
+	// MANDATORY FIELDS
+	"valuetype_cd",
+	"m_exclusion_cd",
+	"c_path",
+	"c_symbol"
+	"pcori_basecode" (only exists in the sensitive tagged output csv file)
+	*/
+
+	for _, header := range lines[0] {
+		HeaderLocalOntology = append(HeaderLocalOntology, header)
+	}
+
+	// the pcori_basecode
+	HeaderPatientDimension = append(HeaderPatientDimension, "pcori_basecode")
+
+	//skip header
+	for _, line := range lines[1:] {
+		so := LocalOntologyFromString(line)
+		log.LLvl1(so)
+	}
+
+	return nil
 }
 
 // PATIENT_DIMENSION.CSV converter
