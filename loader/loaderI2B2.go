@@ -269,6 +269,10 @@ func ConvertShrineOntology() error {
 // UpdateChildrenEncryptIDs updates the parent and internal concept nodes with the IDs of their respective children
 func UpdateChildrenEncryptIDs() {
 	for _, so := range TableShrineOntologyEnc {
+
+		StripByLevel(so.Fullname, 1, false)
+
+
 		path := so.Fullname[1 : len(so.Fullname)-1] // remove the first and last \
 		pathContainer := strings.Split(path, "\\")
 
@@ -320,6 +324,7 @@ func ParseLocalOntology() error {
 	IDModifiers = 0
 	IDConcepts = 0
 	HeaderLocalOntology = make([]string, 0)
+	TableLocalOntologyClear = make(map[string]*LocalOntology)
 
 	/* structure of i2b2.csv (in order):
 
@@ -363,11 +368,79 @@ func ParseLocalOntology() error {
 	// the pcori_basecode
 	HeaderPatientDimension = append(HeaderPatientDimension, "pcori_basecode")
 
+	// this the identifier that represents the root of tree (by default it's i2b2) with HLevel = "0"
+	// TODO: search this dynamically
+	rootIdentifier := "\\i2b2\\"
+
 	//skip header
 	for _, line := range lines[1:] {
 		so := LocalOntologyFromString(line)
-		log.LLvl1(so)
+
+		pathConcept := strings.Trim(so.Fullname, rootIdentifier)
+
+		// the root so add it to the
+		if pathConcept == "" {
+			TableLocalOntologyClear[so.Fullname] = so
+		}
 	}
+
+	return nil
+}
+
+// FindLocalConceptAdapterMapping checks if a local concept is present in the adapter mappings and what its translation in shrine ontology terms
+func FindLocalConceptAdapterMapping(conceptPath string) (bool, string) {
+	for _,entry := range am.ListEntries {
+		for _,value := range entry.ListLocalKeys {
+			// remove the first / out of the two that exist //
+			// strip the path
+			if StripByLevel(value[1:], 1, true) == conceptPath {
+				return true, StripByLevel(entry.Key[1:], 1, true)
+			}
+		}
+	}
+	return false, ""
+}
+
+// StripFirstLevel strips the concept path based on /. The number represents the stripping level, in other words,
+// if number = 1 we strip the first element enclosed in /****/ and then on. Order means which side we start stripping: true (left-to-right),
+// false (right-to-left)
+func StripByLevel(conceptPath string, number int, order bool) string {
+	// remove the first and last \
+	conceptPath = conceptPath[1 : len(conceptPath)-1]
+	pathContainer := strings.Split(conceptPath, "\\")
+
+	if order {
+		for i:=0; i<number; i++ {
+			if len(pathContainer) == 0 {
+				break
+			}
+
+			// reduce a 'layer' at the time -  e.g. \\Admit Diagnosis\\Leg -> \\Leg
+			pathContainer = pathContainer[1:]
+		}
+	} else {
+		for i:=0; i<number; i++ {
+			if len(pathContainer) == 0 {
+				break
+			}
+
+			// reduce a 'layer' at the time -  e.g. \\Admit Diagnosis\\Leg -> \\Admit Diagnosis
+			pathContainer = pathContainer[:len(pathContainer)-1]
+		}
+	}
+	conceptPathFinal := strings.Join(pathContainer, "\\")
+
+	if conceptPathFinal == "" {
+		return conceptPathFinal
+	}
+
+	// if not empty we remove the first and last \ in the beginning when comparing we need add them again
+	return "\\" + conceptPathFinal + "\\"
+}
+
+// ConvertLocalOntology converts the old i2b2.csv file
+func ConvertLocalOntology() error {
+
 
 	return nil
 }

@@ -105,6 +105,9 @@ func (so ShrineOntology) ToCSVText() string {
 
 //-------------------------------------//
 
+// TableLocalOntologyClear is the local ontology table (it maps the concept path to a concept) with only the NON_SENSITIVE concepts (it INCLUDES MODIFIER NON-SENSITIVE concepts)
+var TableLocalOntologyClear map[string]*LocalOntology
+
 // HeaderShrineOntology contains all the headers for the i2b2 table
 var HeaderLocalOntology []string
 
