@@ -74,7 +74,7 @@ func TestLocalOntology_ToCSVText(t *testing.T) {
 	}
 
 	lo := loader.LocalOntology{
-		TagID:      	  -1,
+		TagID: -1,
 
 		HLevel:           "4",
 		Fullname:         "\\i2b2\\Demographics\\Zip codes\\Arkansas\\Parkdale\\",
@@ -92,12 +92,12 @@ func TestLocalOntology_ToCSVText(t *testing.T) {
 		DimCode:          "\\i2b2\\Demographics\\Zip codes\\Arkansas\\Parkdale\\",
 		Comment:          "\\N",
 		Tooltip:          "Demographics \\ Zip codes \\ Arkansas \\ Parkdale",
-		AppliedPath:	  "@",
+		AppliedPath:      "@",
 		AdminColumns:     ac,
 		ValueTypeCD:      "\\N",
 		ExclusionCD:      "\\N",
-		Path: 			  "\\N",
-		Symbol: 		  "\\N",
+		Path:             "\\N",
+		Symbol:           "\\N",
 
 		PCoriBasecode: "\\N",
 	}
@@ -210,7 +210,7 @@ func TestLocalOntologyFromString(t *testing.T) {
 	}
 
 	lo := loader.LocalOntology{
-		TagID:      	  -1,
+		TagID: -1,
 
 		HLevel:           "4",
 		Fullname:         "\\i2b2\\Demographics\\Zip codes\\Arkansas\\Parkdale\\",
@@ -228,12 +228,12 @@ func TestLocalOntologyFromString(t *testing.T) {
 		DimCode:          "\\i2b2\\Demographics\\Zip codes\\Arkansas\\Parkdale\\",
 		Comment:          "\\N",
 		Tooltip:          "Demographics \\ Zip codes \\ Arkansas \\ Parkdale",
-		AppliedPath:	  "@",
+		AppliedPath:      "@",
 		AdminColumns:     ac,
 		ValueTypeCD:      "\\N",
 		ExclusionCD:      "\\N",
-		Path: 			  "\\N",
-		Symbol: 		  "\\N",
+		Path:             "\\N",
+		Symbol:           "\\N",
 
 		PCoriBasecode: "",
 	}

@@ -108,52 +108,52 @@ func (so ShrineOntology) ToCSVText() string {
 // TableLocalOntologyClear is the local ontology table (it maps the concept path to a concept) with only the NON_SENSITIVE concepts (it INCLUDES MODIFIER NON-SENSITIVE concepts)
 var TableLocalOntologyClear map[string]*LocalOntology
 
-// HeaderShrineOntology contains all the headers for the i2b2 table
+// HeaderLocalOntology contains all the headers for the i2b2 table
 var HeaderLocalOntology []string
 
 // LocalOntology is the table that contains all concept codes from the local ontology (i2b2)
 type LocalOntology struct {
-	TagID 				int64
+	TagID int64
 
-	HLevel           	string
-	Fullname         	string
-	Name             	string
-	SynonymCD        	string
-	VisualAttributes 	string
-	TotalNum         	string
-	BaseCode         	string
-	MetadataXML      	string
-	FactTableColumn  	string
-	Tablename        	string
-	ColumnName       	string
-	ColumnDataType   	string
-	Operator         	string
-	DimCode          	string
-	Comment          	string
-	Tooltip          	string
-	AppliedPath      	string
-	AdminColumns     	AdministrativeColumns
-	ValueTypeCD      	string
-	ExclusionCD      	string
-	Path 				string
-	Symbol 				string
+	HLevel           string
+	Fullname         string
+	Name             string
+	SynonymCD        string
+	VisualAttributes string
+	TotalNum         string
+	BaseCode         string
+	MetadataXML      string
+	FactTableColumn  string
+	Tablename        string
+	ColumnName       string
+	ColumnDataType   string
+	Operator         string
+	DimCode          string
+	Comment          string
+	Tooltip          string
+	AppliedPath      string
+	AdminColumns     AdministrativeColumns
+	ValueTypeCD      string
+	ExclusionCD      string
+	Path             string
+	Symbol           string
 
 	// this only exists in the sensitive tagged
-	PCoriBasecode 		string
+	PCoriBasecode string
 }
 
 // ToCSVText writes the LocalOntology object in a way that can be added to a .csv file - "","","", etc.
 func (lo LocalOntology) ToCSVText() string {
 	// sensitive concept
 	if lo.TagID != -1 {
-		lo.BaseCode = "TAG_ID:" + strconv.FormatInt(lo.TagID,10)
+		lo.BaseCode = "TAG_ID:" + strconv.FormatInt(lo.TagID, 10)
 	}
 	acString := "\"" + lo.AdminColumns.UpdateDate + "\"," + "\"" + lo.AdminColumns.DownloadDate + "\"," + "\"" + lo.AdminColumns.ImportDate + "\"," + "\"" + lo.AdminColumns.SourceSystemCD + "\""
 
 	loString := "\"" + lo.HLevel + "\"," + "\"" + lo.Fullname + "\"," + "\"" + lo.Name + "\"," + "\"" + lo.SynonymCD + "\"," + "\"" + lo.VisualAttributes + "\"," + "\"" + lo.TotalNum + "\"," +
-				"\"" + lo.BaseCode + "\"," + "\"" + lo.MetadataXML + "\"," + "\"" + lo.FactTableColumn + "\"," + "\"" + lo.Tablename + "\"," + "\"" + lo.ColumnName + "\"," + "\"" + lo.ColumnDataType + "\"," + "\"" + lo.Operator + "\"," +
-				"\"" + lo.DimCode + "\"," + "\"" + lo.Comment + "\"," + "\"" + lo.Tooltip + "\"," + "\"" + lo.AppliedPath + "\"," + acString + "," + "\"" + lo.ValueTypeCD + "\"," + "\"" + lo.ExclusionCD + "\"," +
-				"\"" + lo.Path + "\"," + "\"" + lo.Symbol + "\""
+		"\"" + lo.BaseCode + "\"," + "\"" + lo.MetadataXML + "\"," + "\"" + lo.FactTableColumn + "\"," + "\"" + lo.Tablename + "\"," + "\"" + lo.ColumnName + "\"," + "\"" + lo.ColumnDataType + "\"," + "\"" + lo.Operator + "\"," +
+		"\"" + lo.DimCode + "\"," + "\"" + lo.Comment + "\"," + "\"" + lo.Tooltip + "\"," + "\"" + lo.AppliedPath + "\"," + acString + "," + "\"" + lo.ValueTypeCD + "\"," + "\"" + lo.ExclusionCD + "\"," +
+		"\"" + lo.Path + "\"," + "\"" + lo.Symbol + "\""
 
 	// sensitive concept (we are supposed to write this in the sensitive tagged table)
 	if lo.TagID != -1 {
@@ -426,7 +426,7 @@ func ShrineOntologyFromString(line []string) *ShrineOntology {
 	return so
 }
 
-// ShrineOntologyFromString generates a LocalOntology struct from a parsed line of a .csv file
+// LocalOntologyFromString generates a LocalOntology struct from a parsed line of a .csv file
 func LocalOntologyFromString(line []string) *LocalOntology {
 
 	size := len(line)
@@ -439,30 +439,30 @@ func LocalOntologyFromString(line []string) *LocalOntology {
 	}
 
 	so := &LocalOntology{
-		TagID:      		int64(-1), //signals that this local ontology element is not sensitive so no need for an Tag ID
+		TagID: int64(-1), //signals that this local ontology element is not sensitive so no need for an Tag ID
 
-		HLevel:             line[0],
-		Fullname:           line[1],
-		Name:               line[2],
-		SynonymCD:          line[3],
-		VisualAttributes:   line[4],
-		TotalNum:           line[5],
-		BaseCode:           line[6],
-		MetadataXML:        strings.Replace(line[7], "\"", "\"\"", -1),
-		FactTableColumn:    line[8],
-		Tablename:          line[9],
-		ColumnName:         line[10],
-		ColumnDataType:     line[11],
-		Operator:           line[12],
-		DimCode:            line[13],
-		Comment:            line[14],
-		Tooltip:            line[15],
-		AppliedPath:        line[16],
-		AdminColumns:       ac,
-		ValueTypeCD:        line[21],
-		ExclusionCD:        line[22],
-		Path: 				line[23],
-		Symbol: 			line[24],
+		HLevel:           line[0],
+		Fullname:         line[1],
+		Name:             line[2],
+		SynonymCD:        line[3],
+		VisualAttributes: line[4],
+		TotalNum:         line[5],
+		BaseCode:         line[6],
+		MetadataXML:      strings.Replace(line[7], "\"", "\"\"", -1),
+		FactTableColumn:  line[8],
+		Tablename:        line[9],
+		ColumnName:       line[10],
+		ColumnDataType:   line[11],
+		Operator:         line[12],
+		DimCode:          line[13],
+		Comment:          line[14],
+		Tooltip:          line[15],
+		AppliedPath:      line[16],
+		AdminColumns:     ac,
+		ValueTypeCD:      line[21],
+		ExclusionCD:      line[22],
+		Path:             line[23],
+		Symbol:           line[24],
 	}
 
 	return so
