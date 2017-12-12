@@ -21,11 +21,11 @@ var (
 	}
 
 	OutputFilePaths = map[string]string{
-		"ADAPTER_MAPPINGS":  		"../data/converted/AdapterMappings.xml",
-		"PATIENT_DIMENSION": 		"../data/converted/patient_dimension.csv",
-		"SHRINE_ONTOLOGY":   		"../data/converted/shrine.csv",
-		"LOCAL_ONTOLOGY_CLEAR":		"../data/converted/i2b2.csv",
-		"LOCAL_ONTOLOGY_SENSITIVE":	"../data/converted/i2b2.csv",
+		"ADAPTER_MAPPINGS":         "../data/converted/AdapterMappings.xml",
+		"PATIENT_DIMENSION":        "../data/converted/patient_dimension.csv",
+		"SHRINE_ONTOLOGY":          "../data/converted/shrine.csv",
+		"LOCAL_ONTOLOGY_CLEAR":     "../data/converted/i2b2.csv",
+		"LOCAL_ONTOLOGY_SENSITIVE": "../data/converted/i2b2.csv",
 	}
 )
 
@@ -49,14 +49,14 @@ func ConvertAdapterMappings() error {
 
 	b, _ := ioutil.ReadAll(xmlInputFile)
 
-	err = xml.Unmarshal(b,&am)
+	err = xml.Unmarshal(b, &am)
 	if err != nil {
 		log.Fatal("Error marshaling [AdapterMappings].xml")
 		return err
 	}
 
 	// filter out sensitive entries
-	var amCopy AdapterMappings = am
+	var amCopy = am
 
 	log.LLvl1(len(amCopy.ListEntries))
 
@@ -380,8 +380,8 @@ func ParseLocalOntology() error {
 
 // FindLocalConceptAdapterMapping checks if a local concept is present in the adapter mappings and what its translation in shrine ontology terms
 func FindLocalConceptAdapterMapping(conceptPath string) (bool, string) {
-	for _,entry := range am.ListEntries {
-		for _,value := range entry.ListLocalKeys {
+	for _, entry := range am.ListEntries {
+		for _, value := range entry.ListLocalKeys {
 			// remove the first / out of the two that exist //
 			// strip the path
 			if StripByLevel(value[1:], 1, true) == conceptPath {
@@ -392,7 +392,7 @@ func FindLocalConceptAdapterMapping(conceptPath string) (bool, string) {
 	return false, ""
 }
 
-// StripFirstLevel strips the concept path based on /. The number represents the stripping level, in other words,
+// StripByLevel strips the concept path based on /. The number represents the stripping level, in other words,
 // if number = 1 we strip the first element enclosed in /****/ and then on. Order means which side we start stripping: true (left-to-right),
 // false (right-to-left)
 func StripByLevel(conceptPath string, number int, order bool) string {
@@ -401,7 +401,7 @@ func StripByLevel(conceptPath string, number int, order bool) string {
 	pathContainer := strings.Split(conceptPath, "\\")
 
 	if order {
-		for i:=0; i<number; i++ {
+		for i := 0; i < number; i++ {
 			if len(pathContainer) == 0 {
 				break
 			}
@@ -410,7 +410,7 @@ func StripByLevel(conceptPath string, number int, order bool) string {
 			pathContainer = pathContainer[1:]
 		}
 	} else {
-		for i:=0; i<number; i++ {
+		for i := 0; i < number; i++ {
 			if len(pathContainer) == 0 {
 				break
 			}
@@ -431,7 +431,6 @@ func StripByLevel(conceptPath string, number int, order bool) string {
 
 // ConvertLocalOntology converts the old i2b2.csv file
 func ConvertLocalOntology() error {
-
 
 	return nil
 }

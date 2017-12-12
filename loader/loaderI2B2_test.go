@@ -99,8 +99,8 @@ func TestFindLocalConceptAdapterMapping(t *testing.T) {
 	conceptToFind := `\i2b2\Diagnoses\Neoplasms (140-239)\`
 
 	check, mapping := loader.FindLocalConceptAdapterMapping(conceptToFind)
-	assert.Equal(t,true, check)
-	assert.Equal(t,`\SHRINE\Diagnoses\Neoplasms (140-239.99)\`, mapping)
+	assert.Equal(t, true, check)
+	assert.Equal(t, `\SHRINE\Diagnoses\Neoplasms (140-239.99)\`, mapping)
 
 }
 
