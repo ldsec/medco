@@ -269,37 +269,28 @@ func ConvertShrineOntology() error {
 // UpdateChildrenEncryptIDs updates the parent and internal concept nodes with the IDs of their respective children
 func UpdateChildrenEncryptIDs() {
 	for _, so := range TableShrineOntologyEnc {
+		path := so.Fullname
+		for true {
+			path = StripByLevel(path, 1, false)
+			if path == "" {
+				break
+			}
 
-		StripByLevel(so.Fullname, 1, false)
-
-
-		path := so.Fullname[1 : len(so.Fullname)-1] // remove the first and last \
-		pathContainer := strings.Split(path, "\\")
-
-		for len(pathContainer) > 0 {
-			// reduce a 'layer' at the time -  e.g. \\SHRINE\\Diagnosis\\Haematite\\Leg -> \\SHRINE\\Diagnosis\\Haematite
-			pathContainer = pathContainer[:len(pathContainer)-1]
-			conceptPath := strings.Join(pathContainer, "\\")
-
-			// if we remove the first and last \ in the beginning when comparing we need add them again
-			if val, ok := TableShrineOntologyEnc["\\"+conceptPath+"\\"]; ok {
+			if val, ok := TableShrineOntologyEnc[path]; ok {
 				val.ChildrenEncryptIDs = append(val.ChildrenEncryptIDs, so.NodeEncryptID)
 			}
+
 		}
 	}
 
 	for path, soArr := range TableShrineOntologyModifierEnc {
-		// remove the first and last \
-		path = path[1 : len(path)-1]
-		pathContainer := strings.Split(path, "\\")
+		for true {
+			path = StripByLevel(path, 1, false)
+			if path == "" {
+				break
+			}
 
-		for len(pathContainer) > 0 {
-			// reduce a 'layer' at the time -  e.g. \\Admit Diagnosis\\Leg -> \\Admit Diagnosis
-			pathContainer = pathContainer[:len(pathContainer)-1]
-			conceptPath := strings.Join(pathContainer, "\\")
-
-			// if we remove the first and last \ in the beginning when comparing we need add them again
-			if val, ok := TableShrineOntologyModifierEnc["\\"+conceptPath+"\\"]; ok {
+			if val, ok := TableShrineOntologyModifierEnc[path]; ok {
 				for _, el := range val {
 					// no matter the element in the array they all have the same NodeEncryptID
 					el.ChildrenEncryptIDs = append(el.ChildrenEncryptIDs, soArr[0].NodeEncryptID)
