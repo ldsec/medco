@@ -19,15 +19,16 @@ func setupEncryptEnv() {
 func TestConvertAdapterMappings(t *testing.T) {
 	log.SetDebugVisible(2)
 
-	loader.ListSensitiveConcepts = make([]string, 0)
-	loader.ListSensitiveConcepts = append(loader.ListSensitiveConcepts, `\Admit Diagnosis\`)
-	loader.ListSensitiveConcepts = append(loader.ListSensitiveConcepts, `\Principal Diagnosis\`)
-	loader.ListSensitiveConcepts = append(loader.ListSensitiveConcepts, `\Secondary Diagnosis\`)
-	loader.ListSensitiveConcepts = append(loader.ListSensitiveConcepts, `\SHRINE\Diagnoses\Neoplasms (140-239.99)\`)
-	loader.ListSensitiveConcepts = append(loader.ListSensitiveConcepts, `\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\`)
-	loader.ListSensitiveConcepts = append(loader.ListSensitiveConcepts, `\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\`)
-	loader.ListSensitiveConcepts = append(loader.ListSensitiveConcepts, `\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`)
-	loader.ListSensitiveConcepts = append(loader.ListSensitiveConcepts, `\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.9) Benign neoplasm of bone and articular cartilage, site unspecified\`)
+	loader.ListSensitiveConceptsShrine = make(map[string]bool)
+	loader.ListSensitiveConceptsShrine[`\Admit Diagnosis\`] = true
+	loader.ListSensitiveConceptsShrine[`\Principal Diagnosis\`] = true
+	loader.ListSensitiveConceptsShrine[`\Secondary Diagnosis\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.9) Benign neoplasm of bone and articular cartilage, site unspecified\`] = true
 
 	assert.Nil(t, loader.ConvertAdapterMappings())
 }
@@ -43,20 +44,18 @@ func TestConvertPatientDimension(t *testing.T) {
 func TestConvertShrineOntology(t *testing.T) {
 	log.SetDebugVisible(2)
 
-	loader.ListSensitiveConcepts = make([]string, 0)
+	loader.ListSensitiveConceptsShrine = make(map[string]bool)
+	loader.ListSensitiveConceptsShrine[`\Admit Diagnosis\`] = true
+	loader.ListSensitiveConceptsShrine[`\Principal Diagnosis\`] = true
+	loader.ListSensitiveConceptsShrine[`\Secondary Diagnosis\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.9) Benign neoplasm of bone and articular cartilage, site unspecified\`] = true
 
-	// sensitive concepts
-	loader.ListSensitiveConcepts = append(loader.ListSensitiveConcepts, `\SHRINE\Diagnoses\`)
-	loader.ListSensitiveConcepts = append(loader.ListSensitiveConcepts, `\SHRINE\Diagnoses\Neoplasms (140-239.99)\`)
-	loader.ListSensitiveConcepts = append(loader.ListSensitiveConcepts, `\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\`)
-	loader.ListSensitiveConcepts = append(loader.ListSensitiveConcepts, `\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\`)
-	loader.ListSensitiveConcepts = append(loader.ListSensitiveConcepts, `\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`)
-	loader.ListSensitiveConcepts = append(loader.ListSensitiveConcepts, `\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.9) Benign neoplasm of bone and articular cartilage, site unspecified\`)
-
-	// sensitive concepts (modifiers)
-	loader.ListSensitiveConcepts = append(loader.ListSensitiveConcepts, `\Admit Diagnosis\`)
-	loader.ListSensitiveConcepts = append(loader.ListSensitiveConcepts, `\Principal Diagnosis\`)
-	loader.ListSensitiveConcepts = append(loader.ListSensitiveConcepts, `\Secondary Diagnosis\`)
+	assert.Nil(t, loader.ConvertAdapterMappings())
 
 	assert.Nil(t, loader.ParseShrineOntology())
 	assert.Nil(t, loader.ConvertShrineOntology())
@@ -93,33 +92,25 @@ func TestStripByLevel(t *testing.T) {
 	assert.Equal(t, "", result)
 }
 
-func TestFindLocalConceptAdapterMapping(t *testing.T) {
-	loader.ConvertAdapterMappings()
-
-	conceptToFind := `\i2b2\Diagnoses\Neoplasms (140-239)\`
-
-	check, mapping := loader.FindLocalConceptAdapterMapping(conceptToFind)
-	assert.Equal(t, true, check)
-	assert.Equal(t, `\SHRINE\Diagnoses\Neoplasms (140-239.99)\`, mapping)
-
-}
-
 func TestConvertLocalOntology(t *testing.T) {
 	log.SetDebugVisible(2)
 
-	loader.ListSensitiveConcepts = make([]string, 0)
+	loader.ListSensitiveConceptsShrine = make(map[string]bool)
+	loader.ListSensitiveConceptsShrine[`\Admit Diagnosis\`] = true
+	loader.ListSensitiveConceptsShrine[`\Principal Diagnosis\`] = true
+	loader.ListSensitiveConceptsShrine[`\Secondary Diagnosis\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.9) Benign neoplasm of bone and articular cartilage, site unspecified\`] = true
 
-	// sensitive concepts
-	loader.ListSensitiveConcepts = append(loader.ListSensitiveConcepts, `\SHRINE\Diagnoses\`)
-	loader.ListSensitiveConcepts = append(loader.ListSensitiveConcepts, `\SHRINE\Diagnoses\Neoplasms (140-239.99)\`)
-	loader.ListSensitiveConcepts = append(loader.ListSensitiveConcepts, `\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\`)
-	loader.ListSensitiveConcepts = append(loader.ListSensitiveConcepts, `\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\`)
-	loader.ListSensitiveConcepts = append(loader.ListSensitiveConcepts, `\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`)
-	loader.ListSensitiveConcepts = append(loader.ListSensitiveConcepts, `\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.9) Benign neoplasm of bone and articular cartilage, site unspecified\`)
+	assert.Nil(t, loader.ConvertAdapterMappings())
+	assert.Nil(t, loader.ParseShrineOntology())
+	assert.Nil(t, loader.ConvertShrineOntology())
 
-	// sensitive concepts (modifiers)
-	loader.ListSensitiveConcepts = append(loader.ListSensitiveConcepts, `\Admit Diagnosis\`)
-	loader.ListSensitiveConcepts = append(loader.ListSensitiveConcepts, `\Principal Diagnosis\`)
-	loader.ListSensitiveConcepts = append(loader.ListSensitiveConcepts, `\Secondary Diagnosis\`)
+
+
 
 }

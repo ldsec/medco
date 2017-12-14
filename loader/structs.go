@@ -12,8 +12,11 @@ import (
 
 // ####----HELPER STRUCTS----####
 
-// ListSensitiveConcepts list all the sensitive concepts (paths)
-var ListSensitiveConcepts []string
+// ListSensitiveConceptsShrine list all the sensitive concepts (paths) - SHRINE (the bool is for nothing)
+var ListSensitiveConceptsShrine map[string]bool
+
+// ListSensitiveConceptsLocal list all the sensitive concepts (paths) and the respective shrine equivalent - LOCAL (the bool is for nothing)
+var ListSensitiveConceptsLocal map[string][]string
 
 // IDModifiers used to assign IDs to the modifiers concepts
 var IDModifiers int64
@@ -107,6 +110,9 @@ func (so ShrineOntology) ToCSVText() string {
 
 // TableLocalOntologyClear is the local ontology table (it maps the concept path to a concept) with only the NON_SENSITIVE concepts (it INCLUDES MODIFIER NON-SENSITIVE concepts)
 var TableLocalOntologyClear map[string]*LocalOntology
+
+// TableLocalOntologyEnc is the local ontology table (it maps the concept path to a concept) with only the SENSITIVE concepts (it INCLUDES the MODIFIER SENSITIVE concepts)
+var TableLocalOntologyEnc map[string]*LocalOntology
 
 // HeaderLocalOntology contains all the headers for the i2b2 table
 var HeaderLocalOntology []string
@@ -368,9 +374,6 @@ type EncounterMappingPK struct {
 }
 
 //-------------------------------------//
-
-// AdapterMappings maps a shrine ontology sensitive concept or modifier concept to the local ontology (we need this to know which concepts from the local ontology are sensitive)
-var am AdapterMappings
 
 // AdapterMappings is the xml pre-generated struct to parse the AdapterMappings.xml
 type AdapterMappings struct {

@@ -49,18 +49,26 @@ func ConvertAdapterMappings() error {
 
 	b, _ := ioutil.ReadAll(xmlInputFile)
 
+	// AdapterMappings maps a shrine ontology sensitive concept or modifier concept to the local ontology (we need this to know which concepts from the local ontology are sensitive)
+	var am AdapterMappings
+
 	err = xml.Unmarshal(b, &am)
 	if err != nil {
 		log.Fatal("Error marshaling [AdapterMappings].xml")
 		return err
 	}
 
-	// filter out sensitive entries
-	var amCopy = am
+	// convert the data in temporary maps to make it easy to traverse
+	localToShrine := make(map[string][]string)
+	shrineToLocal := make(map[string][]string)
+	createTempMaps(am, localToShrine, shrineToLocal)
 
-	log.LLvl1(len(amCopy.ListEntries))
+	ListSensitiveConceptsLocal = make(map[string][]string)
 
-	numElementsDel := FilterSensitiveEntries(&amCopy)
+	// everything is fine so now we just place both the sensitive local and shrine concepts in RAM (in our global maps)
+	storeSensitiveLocalConcepts(am, localToShrine, shrineToLocal)
+
+	numElementsDel := filterSensitiveEntries(&am)
 	log.Lvl2(numElementsDel, "entries deleted")
 
 	xmlOutputFile, err := os.Create(OutputFilePaths["ADAPTER_MAPPINGS"])
@@ -74,7 +82,7 @@ func ConvertAdapterMappings() error {
 
 	enc := xml.NewEncoder(xmlWriter)
 	enc.Indent("", "\t")
-	err = enc.Encode(amCopy)
+	err = enc.Encode(am)
 	if err != nil {
 		log.Fatal("Error writing converted [AdapterMappings].xml")
 		return err
@@ -83,26 +91,94 @@ func ConvertAdapterMappings() error {
 	return nil
 }
 
-// FilterSensitiveEntries filters out (removes) the <key>, <values> pair(s) that belong to sensitive concepts
-func FilterSensitiveEntries(am *AdapterMappings) int {
+// createTempMaps simply converts the data into two different so that it's easier to traverse the data
+func createTempMaps(am AdapterMappings, localToShrine map[string][]string, shrineToLocal map[string][]string) {
+	for _,entry := range am.ListEntries {
+		shrineKey := StripByLevel(entry.Key[1:], 1, true)
+		arrValues := make([]string, 0)
+		for _,value := range entry.ListLocalKeys {
+			localKey := StripByLevel(value[1:], 1, true)
+			arrValues = append(arrValues, localKey)
+
+			// if the local concept is already mapped to another shrine concept
+			if _,ok := localToShrine[localKey]; ok {
+				localToShrine[localKey] = append(localToShrine[localKey], shrineKey)
+			} else {
+				aux := make([]string, 0)
+				aux = append(aux, shrineKey)
+				localToShrine[localKey] = aux
+			}
+		}
+		shrineToLocal[shrineKey] = arrValues
+	}
+}
+
+// storeSensitiveLocalConcepts stores the local sensitive concepts in a set that is kept in RAM during the entire loading (to make parsing the local ontology faster)
+func storeSensitiveLocalConcepts(am AdapterMappings, localToShrine map[string][]string, shrineToLocal map[string][]string) {
+	for shrineKey,val := range shrineToLocal {
+		if containsMapString(ListSensitiveConceptsShrine, shrineKey){
+			for _, localKey := range val {
+				appendSensitiveConcepts(localKey,shrineKey)
+				recursivelyUpdateConceptMaps(localKey, localToShrine, shrineToLocal)
+			}
+		}
+	}
+}
+
+// appendSensitiveConcepts simply appends a shrine concept to a local concept if it has not been added before
+func appendSensitiveConcepts(localKey string, shrineKey string){
+	// if local concept already added
+	if _,ok := ListSensitiveConceptsLocal[localKey]; ok {
+
+		exists := false
+		for _, el := range ListSensitiveConceptsLocal[localKey]{
+			if shrineKey == el {
+				exists = true
+			}
+		}
+		if !exists {
+			ListSensitiveConceptsLocal[localKey] = append(ListSensitiveConceptsLocal[localKey], shrineKey)
+		}
+	} else {
+		aux := make([]string, 0)
+		aux = append(aux, shrineKey)
+		ListSensitiveConceptsLocal[localKey] = aux
+	}
+}
+
+// recursivelyUpdateConceptMaps recursively checks if there is any shrine concept that maps to a sensitive local concept. If true all of its values (local concepts) should be set to sensitive... rinse/repeat
+func recursivelyUpdateConceptMaps(localKey string,  localToShrine map[string][]string, shrineToLocal map[string][]string){
+	for _, shrineKey := range localToShrine[localKey] {
+		// the local concept is sensitive but its shrine key is not
+		if !containsMapString(ListSensitiveConceptsShrine, shrineKey) {
+			ListSensitiveConceptsShrine[shrineKey] = true
+			for _, localKey := range shrineToLocal[shrineKey] {
+				appendSensitiveConcepts(localKey, shrineKey)
+				recursivelyUpdateConceptMaps(localKey, localToShrine, shrineToLocal)
+			}
+		}
+	}
+}
+
+// filterSensitiveEntries filters out (removes) the <key>, <values> pair(s) that belong to sensitive concepts
+func filterSensitiveEntries(am *AdapterMappings) int {
 	deleted := 0
 	for i := range am.ListEntries {
 		j := i - deleted
-		// remove the table value from the key value like \\SHRINE or \\i2b2_DEMO
-		if containsArrayString(ListSensitiveConcepts, "\\"+strings.SplitN((am.ListEntries[j].Key)[2:], "\\", 2)[1]) {
+		// remove the table value from the first key value like \\SHRINE
+		if containsMapString(ListSensitiveConceptsShrine, StripByLevel(am.ListEntries[j].Key[1:], 1, true)) {
 			am.ListEntries = am.ListEntries[:j+copy(am.ListEntries[j:], am.ListEntries[j+1:])]
 			deleted++
+
 		}
 	}
 
 	return deleted
 }
 
-func containsArrayString(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
+func containsMapString(m map[string]bool, e string) bool {
+	if _, ok := m[e]; ok {
+		return true
 	}
 	return false
 }
@@ -186,7 +262,7 @@ func ParseShrineOntology() error {
 	for _, line := range lines[1:] {
 		so := ShrineOntologyFromString(line)
 
-		if containsArrayString(ListSensitiveConcepts, so.Fullname) { // if it is a sensitive concept
+		if containsMapString(ListSensitiveConceptsShrine, so.Fullname) { // if it is a sensitive concept
 			so.ChildrenEncryptIDs = make([]int64, 0)
 
 			// if it is a modifier
@@ -316,6 +392,7 @@ func ParseLocalOntology() error {
 	IDConcepts = 0
 	HeaderLocalOntology = make([]string, 0)
 	TableLocalOntologyClear = make(map[string]*LocalOntology)
+	TableLocalOntologyEnc = make(map[string]*LocalOntology)
 
 	/* structure of i2b2.csv (in order):
 
@@ -359,37 +436,27 @@ func ParseLocalOntology() error {
 	// the pcori_basecode
 	HeaderPatientDimension = append(HeaderPatientDimension, "pcori_basecode")
 
-	// this the identifier that represents the root of tree (by default it's i2b2) with HLevel = "0"
-	// TODO: search this dynamically
-	rootIdentifier := "\\i2b2\\"
-
 	//skip header
 	for _, line := range lines[1:] {
 		so := LocalOntologyFromString(line)
 
-		pathConcept := strings.Trim(so.Fullname, rootIdentifier)
+		check, mapping := true,"asdsad"
 
-		// the root so add it to the
-		if pathConcept == "" {
+		// if we find a mapping to a Shrine Ontology term
+		if check && mapping != ""{
+			if containsMapString(ListSensitiveConceptsShrine, mapping) { // if it is a sensitive concept
+				log.LLvl1(so.Fullname, mapping)
+				TableLocalOntologyEnc[so.Fullname] = so // if a modifier already exists (it's repeated it simply gets overwritten)
+			} else {
+				TableLocalOntologyClear[so.Fullname] = so
+			}
+		} else {
+			// Concept does not have a translation in the Shrine Ontology (consider as not sensitive)
 			TableLocalOntologyClear[so.Fullname] = so
 		}
 	}
 
 	return nil
-}
-
-// FindLocalConceptAdapterMapping checks if a local concept is present in the adapter mappings and what its translation in shrine ontology terms
-func FindLocalConceptAdapterMapping(conceptPath string) (bool, string) {
-	for _, entry := range am.ListEntries {
-		for _, value := range entry.ListLocalKeys {
-			// remove the first / out of the two that exist //
-			// strip the path
-			if StripByLevel(value[1:], 1, true) == conceptPath {
-				return true, StripByLevel(entry.Key[1:], 1, true)
-			}
-		}
-	}
-	return false, ""
 }
 
 // StripByLevel strips the concept path based on /. The number represents the stripping level, in other words,
