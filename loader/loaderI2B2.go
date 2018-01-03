@@ -5,10 +5,15 @@ import (
 	"encoding/xml"
 	"gopkg.in/dedis/crypto.v0/abstract"
 	"gopkg.in/dedis/onet.v1/log"
+	"gopkg.in/dedis/onet.v1"
 	"io"
 	"io/ioutil"
 	"os"
 	"strings"
+	"github.com/lca1/unlynx/lib"
+	"github.com/lca1/unlynx/services/i2b2"
+	"time"
+	"strconv"
 )
 
 // The different paths and handlers for all the file both for input and/or output
@@ -25,9 +30,11 @@ var (
 		"PATIENT_DIMENSION":        "../data/converted/patient_dimension.csv",
 		"SHRINE_ONTOLOGY":          "../data/converted/shrine.csv",
 		"LOCAL_ONTOLOGY_CLEAR":     "../data/converted/i2b2.csv",
-		"LOCAL_ONTOLOGY_SENSITIVE": "../data/converted/i2b2.csv",
+		"LOCAL_ONTOLOGY_SENSITIVE": "../data/converted/sensitive_tagged.csv",
 	}
 )
+
+var Testing  bool // testing environment
 
 const (
 	// Header is a generic XML header suitable for use with the output of Marshal.
@@ -66,7 +73,7 @@ func ConvertAdapterMappings() error {
 	ListSensitiveConceptsLocal = make(map[string][]string)
 
 	// everything is fine so now we just place both the sensitive local and shrine concepts in RAM (in our global maps)
-	storeSensitiveLocalConcepts(am, localToShrine, shrineToLocal)
+	storeSensitiveLocalConcepts(localToShrine, shrineToLocal)
 
 	numElementsDel := filterSensitiveEntries(&am)
 	log.Lvl2(numElementsDel, "entries deleted")
@@ -93,15 +100,15 @@ func ConvertAdapterMappings() error {
 
 // createTempMaps simply converts the data into two different so that it's easier to traverse the data
 func createTempMaps(am AdapterMappings, localToShrine map[string][]string, shrineToLocal map[string][]string) {
-	for _,entry := range am.ListEntries {
+	for _, entry := range am.ListEntries {
 		shrineKey := StripByLevel(entry.Key[1:], 1, true)
 		arrValues := make([]string, 0)
-		for _,value := range entry.ListLocalKeys {
+		for _, value := range entry.ListLocalKeys {
 			localKey := StripByLevel(value[1:], 1, true)
 			arrValues = append(arrValues, localKey)
 
 			// if the local concept is already mapped to another shrine concept
-			if _,ok := localToShrine[localKey]; ok {
+			if _, ok := localToShrine[localKey]; ok {
 				localToShrine[localKey] = append(localToShrine[localKey], shrineKey)
 			} else {
 				aux := make([]string, 0)
@@ -114,11 +121,11 @@ func createTempMaps(am AdapterMappings, localToShrine map[string][]string, shrin
 }
 
 // storeSensitiveLocalConcepts stores the local sensitive concepts in a set that is kept in RAM during the entire loading (to make parsing the local ontology faster)
-func storeSensitiveLocalConcepts(am AdapterMappings, localToShrine map[string][]string, shrineToLocal map[string][]string) {
-	for shrineKey,val := range shrineToLocal {
-		if containsMapString(ListSensitiveConceptsShrine, shrineKey){
+func storeSensitiveLocalConcepts(localToShrine map[string][]string, shrineToLocal map[string][]string) {
+	for shrineKey, val := range shrineToLocal {
+		if containsMapString(ListSensitiveConceptsShrine, shrineKey) {
 			for _, localKey := range val {
-				appendSensitiveConcepts(localKey,shrineKey)
+				appendSensitiveConcepts(localKey, shrineKey)
 				recursivelyUpdateConceptMaps(localKey, localToShrine, shrineToLocal)
 			}
 		}
@@ -126,12 +133,12 @@ func storeSensitiveLocalConcepts(am AdapterMappings, localToShrine map[string][]
 }
 
 // appendSensitiveConcepts simply appends a shrine concept to a local concept if it has not been added before
-func appendSensitiveConcepts(localKey string, shrineKey string){
+func appendSensitiveConcepts(localKey string, shrineKey string) {
 	// if local concept already added
-	if _,ok := ListSensitiveConceptsLocal[localKey]; ok {
+	if _, ok := ListSensitiveConceptsLocal[localKey]; ok {
 
 		exists := false
-		for _, el := range ListSensitiveConceptsLocal[localKey]{
+		for _, el := range ListSensitiveConceptsLocal[localKey] {
 			if shrineKey == el {
 				exists = true
 			}
@@ -147,7 +154,7 @@ func appendSensitiveConcepts(localKey string, shrineKey string){
 }
 
 // recursivelyUpdateConceptMaps recursively checks if there is any shrine concept that maps to a sensitive local concept. If true all of its values (local concepts) should be set to sensitive... rinse/repeat
-func recursivelyUpdateConceptMaps(localKey string,  localToShrine map[string][]string, shrineToLocal map[string][]string){
+func recursivelyUpdateConceptMaps(localKey string, localToShrine map[string][]string, shrineToLocal map[string][]string) {
 	for _, shrineKey := range localToShrine[localKey] {
 		// the local concept is sensitive but its shrine key is not
 		if !containsMapString(ListSensitiveConceptsShrine, shrineKey) {
@@ -169,7 +176,6 @@ func filterSensitiveEntries(am *AdapterMappings) int {
 		if containsMapString(ListSensitiveConceptsShrine, StripByLevel(am.ListEntries[j].Key[1:], 1, true)) {
 			am.ListEntries = am.ListEntries[:j+copy(am.ListEntries[j:], am.ListEntries[j+1:])]
 			deleted++
-
 		}
 	}
 
@@ -380,7 +386,7 @@ func UpdateChildrenEncryptIDs() {
 // I2B2.CSV converter (local ontology)
 
 // ParseLocalOntology reads and parses the i2b2.csv.
-func ParseLocalOntology() error {
+func ParseLocalOntology(group *onet.Roster, entryPointIdx int) error {
 	lines, err := readCSV("LOCAL_ONTOLOGY")
 	if err != nil {
 		log.Fatal("Error in readCSV()")
@@ -393,6 +399,11 @@ func ParseLocalOntology() error {
 	HeaderLocalOntology = make([]string, 0)
 	TableLocalOntologyClear = make(map[string]*LocalOntology)
 	TableLocalOntologyEnc = make(map[string]*LocalOntology)
+	MapConceptIDtoTag = make(map[int64]lib.GroupingKey)
+	MapModifierIDtoTag = make(map[int64]lib.GroupingKey)
+
+	allSensitiveModifierIDs := make([]int64, 0)
+	allSensitiveConceptIDs := make([]int64, 0)
 
 	/* structure of i2b2.csv (in order):
 
@@ -438,25 +449,98 @@ func ParseLocalOntology() error {
 
 	//skip header
 	for _, line := range lines[1:] {
-		so := LocalOntologyFromString(line)
-
-		check, mapping := true,"asdsad"
+		lo := LocalOntologyFromString(line)
 
 		// if we find a mapping to a Shrine Ontology term
-		if check && mapping != ""{
-			if containsMapString(ListSensitiveConceptsShrine, mapping) { // if it is a sensitive concept
-				log.LLvl1(so.Fullname, mapping)
-				TableLocalOntologyEnc[so.Fullname] = so // if a modifier already exists (it's repeated it simply gets overwritten)
-			} else {
-				TableLocalOntologyClear[so.Fullname] = so
+		if _, ok := ListSensitiveConceptsLocal[lo.Fullname]; ok {
+			// add each shrine id (we need to replicate each concept if it matches to multiple shrine concepts)
+			for _,sk := range ListSensitiveConceptsLocal[lo.Fullname]{
+				if strings.ToLower(lo.FactTableColumn) == "modifier_cd" {
+					shrineID := TableShrineOntologyModifierEnc[sk][0].NodeEncryptID
+					// if the ID does not yet exist
+					if _, ok := MapModifierIDtoTag[shrineID]; !ok {
+						MapModifierIDtoTag[shrineID] = lib.GroupingKey(-1)
+						allSensitiveModifierIDs = append(allSensitiveModifierIDs, shrineID)
+					}
+				} else if strings.ToLower(lo.FactTableColumn) == "concept_cd" { // if it is a concept code
+					shrineID := TableShrineOntologyEnc[sk].NodeEncryptID
+					// if the ID does not yet exist
+					if _, ok := MapConceptIDtoTag[shrineID]; !ok {
+						MapConceptIDtoTag[shrineID] = lib.GroupingKey(-1)
+						allSensitiveConceptIDs = append(allSensitiveConceptIDs, shrineID)
+					}
+				} else {
+					log.Fatal("Incorrect code in the FactTable column:", strings.ToLower(lo.FactTableColumn))
+				}
 			}
 		} else {
 			// Concept does not have a translation in the Shrine Ontology (consider as not sensitive)
-			TableLocalOntologyClear[so.Fullname] = so
+			TableLocalOntologyClear[lo.Fullname] = lo
 		}
 	}
 
+	taggedModifierValues, err := EncryptAndTag(allSensitiveModifierIDs, group, entryPointIdx)
+	if err != nil {
+		return err
+	}
+
+	taggedConceptValues, err := EncryptAndTag(allSensitiveConceptIDs, group, entryPointIdx)
+	if err != nil {
+		return err
+	}
+
+	// 'populate' map (Modifier codes)
+	for i, id := range allSensitiveModifierIDs {
+		MapModifierIDtoTag[id] = taggedModifierValues[i]
+	}
+
+	// 'populate' map (Concept codes)
+	for i, id := range allSensitiveConceptIDs {
+		MapConceptIDtoTag[id] = taggedConceptValues[i]
+	}
+
+	log.LLvl1(MapConceptIDtoTag)
+
 	return nil
+}
+
+// EncryptAndTag encrypts the elements and tags them to allow for the future comparison
+func EncryptAndTag(list []int64, group *onet.Roster, entryPointIdx int) ([]lib.GroupingKey, error) {
+
+	// ENCRYPTION
+	start := time.Now()
+	listEncryptedElements := make(lib.CipherVector, len(list))
+
+	for i := int64(0); i < int64(len(list)); i++ {
+		listEncryptedElements[i] = *lib.EncryptInt(group.Aggregate, list[i])
+	}
+	log.LLvl1("Finished encrypting the sensitive data... (", time.Since(start), ")")
+
+	// TAGGING
+	start = time.Now()
+	client := serviceI2B2.NewUnLynxClient(group.List[entryPointIdx], strconv.Itoa(entryPointIdx))
+	_, result, tr, err := client.SendSurveyDDTRequestTerms(
+		group, // Roster
+		serviceI2B2.SurveyID("tagging_loading_phase"), // SurveyID
+		listEncryptedElements,                         // Encrypted query terms to tag
+		false, // compute proofs?
+		Testing,
+	)
+
+	if err != nil {
+		log.Fatal("Error during DDT")
+		return nil, err
+	}
+
+	totalTime := time.Since(start)
+
+	tr.DDTRequestTimeCommun = totalTime - tr.DDTRequestTimeExec
+
+	log.LLvl1("DDT took: exec -", tr.DDTRequestTimeExec, "commun -", tr.DDTRequestTimeCommun)
+
+	log.LLvl1("Finished tagging the sensitive data... (", totalTime, ")")
+
+	return result, nil
 }
 
 // StripByLevel strips the concept path based on /. The number represents the stripping level, in other words,
@@ -498,8 +582,48 @@ func StripByLevel(conceptPath string, number int, order bool) string {
 
 // ConvertLocalOntology converts the old i2b2.csv file
 func ConvertLocalOntology() error {
+	// two new files are generated: one to store the non-sensitive data and another to store the sensitive data
+	csvClearOutputFile, err := os.Create(OutputFilePaths["LOCAL_ONTOLOGY_CLEAR"])
+	if err != nil {
+		log.Fatal("Error opening [i2b2].csv")
+		return err
+	}
+	defer csvClearOutputFile.Close()
+
+	csvSensitiveOutputFile, err := os.Create(OutputFilePaths["LOCAL_ONTOLOGY_SENSITIVE"])
+	if err != nil {
+		log.Fatal("Error opening [sensitive_tagged].csv")
+		return err
+	}
+	defer csvSensitiveOutputFile.Close()
+
+	headerString := ""
+	for _, header := range HeaderLocalOntology {
+		headerString += "\"" + header + "\","
+	}
+	// remove the last ,
+	csvClearOutputFile.WriteString(headerString[:len(headerString)-1] + "\n")
+	csvSensitiveOutputFile.WriteString(headerString[:len(headerString)-1] + "\n")
+
+	// non-sensitive
+	for _, lo := range TableLocalOntologyClear {
+		csvClearOutputFile.WriteString(lo.ToCSVText() + "\n")
+	}
+
+	// sensitive modifiers
+	for _, tag := range MapModifierIDtoTag {
+		csvSensitiveOutputFile.WriteString( LocalOntologySensitiveModiferToCSVText(&tag, IDModifiers) + "\n")
+		IDModifiers++
+	}
+
+	// sensitive concepts
+	for _, tag := range MapConceptIDtoTag {
+		csvSensitiveOutputFile.WriteString( LocalOntologySensitiveConceptToCSVText(&tag, IDConcepts) + "\n")
+		IDConcepts++
+	}
 
 	return nil
+
 }
 
 // PATIENT_DIMENSION.CSV converter

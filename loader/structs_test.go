@@ -74,8 +74,6 @@ func TestLocalOntology_ToCSVText(t *testing.T) {
 	}
 
 	lo := loader.LocalOntology{
-		TagID: -1,
-
 		HLevel:           "4",
 		Fullname:         "\\i2b2\\Demographics\\Zip codes\\Arkansas\\Parkdale\\",
 		Name:             "Parkdale",
@@ -104,10 +102,12 @@ func TestLocalOntology_ToCSVText(t *testing.T) {
 
 	assert.Equal(t, lo.ToCSVText(), `"4","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","Parkdale","N","FA ","\N","\N","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","\N","Demographics \ Zip codes \ Arkansas \ Parkdale","@","2007-04-10 00:00:00","2007-04-10 00:00:00","2007-04-10 00:00:00","DEMO","\N","\N","\N","\N"`)
 
-	lo.TagID = 1
-	assert.Equal(t, lo.ToCSVText(), `"4","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","Parkdale","N","FA ","\N","TAG_ID:1","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","\N","Demographics \ Zip codes \ Arkansas \ Parkdale","@","2007-04-10 00:00:00","2007-04-10 00:00:00","2007-04-10 00:00:00","DEMO","\N","\N","\N","\N","\N"`)
+
+	tag := lib.GroupingKey("1")
+	assert.Equal(t, loader.LocalOntologySensitiveConceptToCSVText(&tag, 20), `"3", "\medco\tagged\concept\1\", "", "N", "LA ", "\N", "TAG_ID:20", "\N", "concept_cd", "concept_dimension", "concept_path", "T", "LIKE", "\medco\tagged\concept\1\", "\N", "\N", "NOW()", "\N", "\N", "\N", "TAG_ID", "@", "\N", "\N", "\N", "\N"`)
 
 }
+
 
 func TestPatientDimension_ToCSVText(t *testing.T) {
 
@@ -210,8 +210,6 @@ func TestLocalOntologyFromString(t *testing.T) {
 	}
 
 	lo := loader.LocalOntology{
-		TagID: -1,
-
 		HLevel:           "4",
 		Fullname:         "\\i2b2\\Demographics\\Zip codes\\Arkansas\\Parkdale\\",
 		Name:             "Parkdale",
