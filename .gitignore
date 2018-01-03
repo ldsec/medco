@@ -42,3 +42,4 @@ _testmain.go
 
 .idea/
 data/
+loader/*.toml

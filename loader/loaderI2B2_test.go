@@ -6,13 +6,58 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/dedis/crypto.v0/abstract"
 	"gopkg.in/dedis/onet.v1/log"
+	"gopkg.in/dedis/onet.v1"
+	"gopkg.in/dedis/onet.v1/app"
 	"testing"
+	"os"
 )
 
 var publicKey abstract.Point
 var secretKey abstract.Scalar
+var el 		  *onet.Roster
+var local     *onet.LocalTest
+
+func getRoster(groupFilePath string) (*onet.Roster, *onet.LocalTest, error) {
+
+	// empty string: make localtest
+	if len(groupFilePath) == 0 {
+		log.Info("Creating local test roster")
+
+		local := onet.NewLocalTest()
+		_, el, _ := local.GenTree(3, true)
+		return el, local, nil
+
+		// generate el with group file
+	} else {
+		log.Info("Creating roster from group file path")
+
+		f, err := os.Open(groupFilePath)
+		if err != nil {
+			log.Error("Error while opening group file", err)
+			return nil, nil, err
+		}
+		el, err := app.ReadGroupToml(f)
+		if err != nil {
+			log.Error("Error while reading group file", err)
+			return nil, nil, err
+		}
+		if len(el.List) <= 0 {
+			log.Error("Empty or invalid group file", err)
+			return nil, nil, err
+		}
+
+		return el, nil, nil
+	}
+}
 
 func setupEncryptEnv() {
+	elAux, localAux, err := getRoster("")
+	if err != nil {
+		log.Fatal("Something went wrong when creating a testing environment!")
+	}
+	el = elAux
+	local = localAux
+
 	secretKey, publicKey = lib.GenKey()
 }
 
@@ -39,6 +84,8 @@ func TestConvertPatientDimension(t *testing.T) {
 
 	assert.Nil(t, loader.ParsePatientDimension(publicKey))
 	assert.Nil(t, loader.ConvertPatientDimension())
+
+	local.CloseAll()
 }
 
 func TestConvertShrineOntology(t *testing.T) {
@@ -94,6 +141,8 @@ func TestStripByLevel(t *testing.T) {
 
 func TestConvertLocalOntology(t *testing.T) {
 	log.SetDebugVisible(2)
+	setupEncryptEnv()
+	loader.Testing = true
 
 	loader.ListSensitiveConceptsShrine = make(map[string]bool)
 	loader.ListSensitiveConceptsShrine[`\Admit Diagnosis\`] = true
@@ -107,10 +156,12 @@ func TestConvertLocalOntology(t *testing.T) {
 	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.9) Benign neoplasm of bone and articular cartilage, site unspecified\`] = true
 
 	assert.Nil(t, loader.ConvertAdapterMappings())
+
 	assert.Nil(t, loader.ParseShrineOntology())
 	assert.Nil(t, loader.ConvertShrineOntology())
 
+	assert.Nil(t, loader.ParseLocalOntology(el,0))
+	assert.Nil(t, loader.ConvertLocalOntology())
 
-
-
+	local.CloseAll()
 }
