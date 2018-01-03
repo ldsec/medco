@@ -18,11 +18,11 @@ var ListSensitiveConceptsShrine map[string]bool
 // ListSensitiveConceptsLocal list all the sensitive concepts (paths) and the respective shrine equivalent - LOCAL (the bool is for nothing)
 var ListSensitiveConceptsLocal map[string][]string
 
-// MapConceptIDtoTag maps an ID from a concept code to its respective tag
-var MapConceptIDtoTag map[int64]lib.GroupingKey
+// MapConceptIDtoTag maps a sensitive concept code to its respective tag
+var MapConceptIDtoTag map[string]lib.GroupingKey
 
-// MapModifierIDtoTag maps an ID from a modifier code to its respective tag
-var MapModifierIDtoTag map[int64]lib.GroupingKey
+// MapModifierIDtoTag maps a sensitive modifier code to its respective tag
+var MapModifierIDtoTag map[string]lib.GroupingKey
 
 // IDModifiers used to assign IDs to the modifiers concepts
 var IDModifiers int64

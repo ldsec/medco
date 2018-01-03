@@ -399,8 +399,11 @@ func ParseLocalOntology(group *onet.Roster, entryPointIdx int) error {
 	HeaderLocalOntology = make([]string, 0)
 	TableLocalOntologyClear = make(map[string]*LocalOntology)
 	TableLocalOntologyEnc = make(map[string]*LocalOntology)
-	MapConceptIDtoTag = make(map[int64]lib.GroupingKey)
-	MapModifierIDtoTag = make(map[int64]lib.GroupingKey)
+
+	MapConceptIDtoTag = make(map[string]lib.GroupingKey)
+	mapConceptIDtoTagKeys := make([]string, 0)
+	MapModifierIDtoTag = make(map[string]lib.GroupingKey)
+	mapModifierIDtoTagKeys := make([]string, 0)
 
 	allSensitiveModifierIDs := make([]int64, 0)
 	allSensitiveConceptIDs := make([]int64, 0)
@@ -458,15 +461,17 @@ func ParseLocalOntology(group *onet.Roster, entryPointIdx int) error {
 				if strings.ToLower(lo.FactTableColumn) == "modifier_cd" {
 					shrineID := TableShrineOntologyModifierEnc[sk][0].NodeEncryptID
 					// if the ID does not yet exist
-					if _, ok := MapModifierIDtoTag[shrineID]; !ok {
-						MapModifierIDtoTag[shrineID] = lib.GroupingKey(-1)
+					if _, ok := MapModifierIDtoTag[lo.Fullname]; !ok {
+						MapModifierIDtoTag[lo.Fullname] = lib.GroupingKey(-1)
+						mapModifierIDtoTagKeys = append(mapModifierIDtoTagKeys, lo.Fullname)
 						allSensitiveModifierIDs = append(allSensitiveModifierIDs, shrineID)
 					}
 				} else if strings.ToLower(lo.FactTableColumn) == "concept_cd" { // if it is a concept code
 					shrineID := TableShrineOntologyEnc[sk].NodeEncryptID
 					// if the ID does not yet exist
-					if _, ok := MapConceptIDtoTag[shrineID]; !ok {
-						MapConceptIDtoTag[shrineID] = lib.GroupingKey(-1)
+					if _, ok := MapConceptIDtoTag[lo.Fullname]; !ok {
+						MapConceptIDtoTag[lo.Fullname] = lib.GroupingKey(-1)
+						mapConceptIDtoTagKeys = append(mapConceptIDtoTagKeys, lo.Fullname)
 						allSensitiveConceptIDs = append(allSensitiveConceptIDs, shrineID)
 					}
 				} else {
@@ -490,16 +495,14 @@ func ParseLocalOntology(group *onet.Roster, entryPointIdx int) error {
 	}
 
 	// 'populate' map (Modifier codes)
-	for i, id := range allSensitiveModifierIDs {
+	for i, id := range mapModifierIDtoTagKeys {
 		MapModifierIDtoTag[id] = taggedModifierValues[i]
 	}
 
 	// 'populate' map (Concept codes)
-	for i, id := range allSensitiveConceptIDs {
+	for i, id := range mapConceptIDtoTagKeys {
 		MapConceptIDtoTag[id] = taggedConceptValues[i]
 	}
-
-	log.LLvl1(MapConceptIDtoTag)
 
 	return nil
 }
