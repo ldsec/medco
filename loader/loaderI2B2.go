@@ -19,11 +19,12 @@ import (
 // The different paths and handlers for all the file both for input and/or output
 var (
 	InputFilePaths = map[string]string{
-		"ADAPTER_MAPPINGS":  "../data/original/AdapterMappings.xml",
-		"SHRINE_ONTOLOGY":   "../data/original/shrine.csv",
-		"LOCAL_ONTOLOGY":    "../data/original/i2b2.csv",
-		"PATIENT_DIMENSION": "../data/original/patient_dimension.csv",
-		"CONCEPT_DIMENSION": "../data/original/concept_dimension.csv",
+		"ADAPTER_MAPPINGS":  	"../data/original/AdapterMappings.xml",
+		"SHRINE_ONTOLOGY":   	"../data/original/shrine.csv",
+		"LOCAL_ONTOLOGY":    	"../data/original/i2b2.csv",
+		"PATIENT_DIMENSION": 	"../data/original/patient_dimension.csv",
+		"CONCEPT_DIMENSION": 	"../data/original/concept_dimension.csv",
+		"MODIFIER_DIMENSION": 	"../data/original/modifier_dimension.csv",
 	}
 
 	OutputFilePaths = map[string]string{
@@ -33,6 +34,7 @@ var (
 		"LOCAL_ONTOLOGY_SENSITIVE": "../data/converted/sensitive_tagged.csv",
 		"PATIENT_DIMENSION":        "../data/converted/patient_dimension.csv",
 		"CONCEPT_DIMENSION": 		"../data/converted/concept_dimension.csv",
+		"MODIFIER_DIMENSION": 		"../data/converted/modifier_dimension.csv",
 	}
 )
 
@@ -778,7 +780,7 @@ func ParseConceptDimension() error {
 	return nil
 }
 
-// ConvertConceptDimension converts the old patient_dimension.csv file
+// ConvertConceptDimension converts the old concept_dimension.csv file
 func ConvertConceptDimension() error {
 	csvOutputFile, err := os.Create(OutputFilePaths["CONCEPT_DIMENSION"])
 	if err != nil {
@@ -801,10 +803,88 @@ func ConvertConceptDimension() error {
 		// if the concept is sensitive -> fetch its encrypted tag and tag_id
 		} else if _, ok := MapConceptCodeToTag[cd.PK.ConceptPath]; ok {
 			temp := MapConceptCodeToTag[cd.PK.ConceptPath].Tag
-			csvOutputFile.WriteString(ConceptDimensionSensitiveConceptToCSVText(&temp, MapConceptCodeToTag[cd.PK.ConceptPath].TagID) + "\n")
+			csvOutputFile.WriteString(ConceptDimensionSensitiveToCSVText(&temp, MapConceptCodeToTag[cd.PK.ConceptPath].TagID) + "\n")
 		// if the concept does not exist in the LocalOntology and none of his siblings is sensitive
 		} else if !HasSensitiveParents(cd.PK.ConceptPath){
 			csvOutputFile.WriteString(cd.ToCSVText() + "\n")
+		}
+	}
+
+	return nil
+}
+
+
+// MODIFIER_DIMENSION.CSV converter
+
+// ParseModifierDimension reads and parses the modifier_dimension.csv.
+func ParseModifierDimension() error {
+	lines, err := readCSV("MODIFIER_DIMENSION")
+	if err != nil {
+		log.Fatal("Error in readCSV()")
+		return err
+	}
+
+	TableModifierDimension = make(map[*ModifierDimensionPK]ModifierDimension)
+	HeaderModifierDimension = make([]string, 0)
+
+	/* structure of modifier_dimension.csv (in order):
+
+	// PK
+	"modifier_path",
+
+	// MANDATORY FIELDS
+	"modifier_cd",
+	"name_char",
+	"modifier_blob",
+
+	// ADMIN FIELDS
+	"update_date",
+	"download_date",
+	"import_date",
+	"sourcesystem_cd",
+	"upload_id"
+	*/
+
+	for _, header := range lines[0] {
+		HeaderModifierDimension = append(HeaderModifierDimension, header)
+	}
+
+	//skip header
+	for _, line := range lines[1:] {
+		mdk, md := ModifierDimensionFromString(line)
+		TableModifierDimension[mdk] = md
+	}
+
+	return nil
+}
+
+// ConvertModifierDimension converts the old modifier_dimension.csv file
+func ConvertModifierDimension() error {
+	csvOutputFile, err := os.Create(OutputFilePaths["MODIFIER_DIMENSION"])
+	if err != nil {
+		log.Fatal("Error opening [modifier_dimension].csv")
+		return err
+	}
+	defer csvOutputFile.Close()
+
+	headerString := ""
+	for _, header := range HeaderModifierDimension {
+		headerString += "\"" + header + "\","
+	}
+	// remove the last ,
+	csvOutputFile.WriteString(headerString[:len(headerString)-1] + "\n")
+
+	for _, md := range TableModifierDimension {
+		// if the modifier is non-sensitive -> keep it as it is
+		if _, ok := TableLocalOntologyClear[md.PK.ModifierPath]; ok {
+			csvOutputFile.WriteString(md.ToCSVText() + "\n")
+			// if the concept is sensitive -> fetch its encrypted tag and tag_id
+		} else if _, ok := MapModifierCodeToTag[md.PK.ModifierPath]; ok {
+			temp := MapModifierCodeToTag[md.PK.ModifierPath].Tag
+			csvOutputFile.WriteString(ModifierDimensionSensitiveToCSVText(&temp, MapModifierCodeToTag[md.PK.ModifierPath].TagID) + "\n")
+			// if the concept does not exist in the LocalOntology and none of his siblings is sensitive
+		} else if !HasSensitiveParents(md.PK.ModifierPath){
+			csvOutputFile.WriteString(md.ToCSVText() + "\n")
 		}
 	}
 

@@ -273,7 +273,7 @@ type OptionalFields struct {
 // TableConceptDimension is concept_dimension table
 var TableConceptDimension map[*ConceptDimensionPK]ConceptDimension
 
-// HeaderConceptDimension contains all the headers for the Concept_Dimension table
+// HeaderConceptDimension contains all the headers for the concept_dimension table
 var HeaderConceptDimension []string
 
 // ConceptDimension table contains one row for each concept
@@ -296,9 +296,42 @@ func (cd ConceptDimension) ToCSVText() string {
 	return  "\"" + cd.PK.ConceptPath + "\"," + "\"" + cd.ConceptCD + "\"," + "\"" + cd.NameChar + "\"," + "\"" + cd.ConceptBlob + "\"," + acString
 }
 
-// ConceptDimensionSensitiveConceptToCSVText writes the tagging information of a concept of the Concept_Dimension table in a way that can be added to a .csv file - "","","", etc.
-func ConceptDimensionSensitiveConceptToCSVText(tag *lib.GroupingKey, tagID int64) string {
+// ConceptDimensionSensitiveToCSVText writes the tagging information of a concept of the concept_dimension table in a way that can be added to a .csv file - "","","", etc.
+func ConceptDimensionSensitiveToCSVText(tag *lib.GroupingKey, tagID int64) string {
 	return `"\medco\tagged\concept\` + string(*tag) + `\", "TAG_ID:` + strconv.FormatInt(tagID, 10) + `", "\N", "\N", "\N", "\N", "NOW()", "\N", "\N"`
+}
+
+//-------------------------------------//
+
+// TableModifierDimension is modifier_dimension table
+var TableModifierDimension map[*ModifierDimensionPK]ModifierDimension
+
+// HeaderConceptDimension contains all the headers for the modifier_dimension table
+var HeaderModifierDimension []string
+
+// ModifierDimension table contains one row for each modifier
+type ModifierDimension struct {
+	PK			 *ModifierDimensionPK
+	ModifierCD   string
+	NameChar     string
+	ModifierBlob string
+	AdminColumns AdministrativeColumns
+}
+
+// ModifierDimensionPK is the primary key of the Modifier_Dimension table
+type ModifierDimensionPK struct {
+	ModifierPath string
+}
+
+// ToCSVText writes the ModifierDimension object in a way that can be added to a .csv file - "","","", etc.
+func (md ModifierDimension) ToCSVText() string {
+	acString := "\"" + md.AdminColumns.UpdateDate + "\"," + "\"" + md.AdminColumns.DownloadDate + "\"," + "\"" + md.AdminColumns.ImportDate + "\"," + "\"" + md.AdminColumns.SourceSystemCD + "\"," + "\"" + md.AdminColumns.UploadID + "\""
+	return  "\"" + md.PK.ModifierPath + "\"," + "\"" + md.ModifierCD + "\"," + "\"" + md.NameChar + "\"," + "\"" + md.ModifierBlob + "\"," + acString
+}
+
+// ModifierDimensionSensitiveToCSVText writes the tagging information of a concept of the modifier_dimension table in a way that can be added to a .csv file - "","","", etc.
+func ModifierDimensionSensitiveToCSVText(tag *lib.GroupingKey, tagID int64) string {
+	return `"\medco\tagged\modifier\` + string(*tag) + `\", "TAG_ID:` + strconv.FormatInt(tagID, 10) + `", "\N", "\N", "\N", "\N", "NOW()", "\N", "\N"`
 }
 
 //-------------------------------------//
@@ -337,24 +370,6 @@ type ProviderDimension struct {
 type ProviderDimensionPK struct {
 	ProviderID   string
 	ProviderPath string
-}
-
-//-------------------------------------//
-
-// TableModifierDimension is modifier_dimension table
-var TableModifierDimension map[ModifierDimensionPK]ModifierDimension
-
-// ModifierDimension table contains one row for each modifier
-type ModifierDimension struct {
-	ModifierCD   string
-	NameChar     string
-	ModifierBlob string
-	AdminColumns AdministrativeColumns
-}
-
-// ModifierDimensionPK is the primary key of the Modifier_Dimension table
-type ModifierDimensionPK struct {
-	ModifierPath string
 }
 
 //-------------------------------------//
@@ -558,4 +573,30 @@ func ConceptDimensionFromString(line []string) (*ConceptDimensionPK, ConceptDime
 	cd.AdminColumns = ac
 
 	return cdk, cd
+}
+
+// ModifierDimensionFromString generates a ModifierDimension struct from a parsed line of a .csv file
+func ModifierDimensionFromString(line []string) (*ModifierDimensionPK, ModifierDimension) {
+	mdk := &ModifierDimensionPK{
+		ModifierPath: line[0],
+	}
+
+	md := ModifierDimension{
+		PK:            	mdk,
+		ModifierCD: 	line[1],
+		NameChar:     	line[2],
+		ModifierBlob:   line[3],
+	}
+
+	ac := AdministrativeColumns{
+		UpdateDate:     line[4],
+		DownloadDate:   line[5],
+		ImportDate:     line[6],
+		SourceSystemCD: line[7],
+		UploadID:       line[8],
+	}
+
+	md.AdminColumns = ac
+
+	return mdk, md
 }
