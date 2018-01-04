@@ -10,6 +10,12 @@ import (
 	"testing"
 )
 
+
+// ----------------------------------------------------------------------------------------------------------- //
+// ---------------------------------------- TO STRING -------------------------------------------------------- //
+// ----------------------------------------------------------------------------------------------------------- //
+
+
 func TestShrineOntology_ToCSVText(t *testing.T) {
 
 	ac := loader.AdministrativeColumns{
@@ -152,8 +158,43 @@ func TestPatientDimension_ToCSVText(t *testing.T) {
 	encodedEncryptedFlag := "\"" + base64.StdEncoding.EncodeToString(b) + "\""
 
 	assert.Equal(t, pd.ToCSVText(), `"1000000001","D","1985-11-17 00:00:00","\N","F","24","english","black","married","roman catholic","02140","Zip codes\Massachusetts\Cambridge\02140\","Low","","2010-11-04 10:43:00","2010-08-18 09:50:00","2010-11-04 10:43:00","DEMO","\N",`+encodedEncryptedFlag)
-
 }
+
+func TestConceptDimension_ToCSVText(t *testing.T) {
+
+	csvString := `"\i2b2\Demographics\Age\>= 65 years old\100\","DEM|AGE:100"," 100 years old","","2010-09-28 11:15:00","2010-08-18 09:50:00","2010-09-28 11:40:00","DEMO","\N"`
+
+	ac := loader.AdministrativeColumns{
+		UpdateDate:     "2010-09-28 11:15:00",
+		DownloadDate:   "2010-08-18 09:50:00",
+		ImportDate:     "2010-09-28 11:40:00",
+		SourceSystemCD: "DEMO",
+		UploadID: 		"\\N",
+	}
+
+	cdk := &loader.ConceptDimensionPK{
+		ConceptPath: 	"\\i2b2\\Demographics\\Age\\>= 65 years old\\100\\",
+	}
+
+	cd := loader.ConceptDimension{
+		PK: 				cdk,
+		ConceptCD: 			"DEM|AGE:100",
+		NameChar: 			" 100 years old",
+		ConceptBlob:		"",
+		AdminColumns:     	ac,
+	}
+
+	assert.Equal(t, csvString, cd.ToCSVText())
+
+	tag := lib.GroupingKey("1")
+	assert.Equal(t, `"\medco\tagged\concept\1\", "TAG_ID:20", "\N", "\N", "\N", "\N", "NOW()", "\N", "\N"`, loader.ConceptDimensionSensitiveConceptToCSVText(&tag, 20))
+}
+
+
+// ------------------------------------------------------------------------------------------------------------- //
+// ---------------------------------------- FROM STRING -------------------------------------------------------- //
+// ------------------------------------------------------------------------------------------------------------- //
+
 
 func TestShrineOntologyFromString(t *testing.T) {
 	csvString := `"0","\SHRINE\","SHRINE","N","CA ","\N","\N","","concept_cd","concept_dimension","concept_path","T","LIKE","\SHRINE\","","\N","\N","\N","\N","SHRINE","\N","@","\N"`
@@ -242,7 +283,6 @@ func TestLocalOntologyFromString(t *testing.T) {
 	assert.Nil(t, err, "Parsing error")
 
 	assert.Equal(t, *loader.LocalOntologyFromString(lines[0]), lo)
-
 }
 
 func TestPatientDimensionFromString(t *testing.T) {
@@ -301,4 +341,38 @@ func TestPatientDimensionFromString(t *testing.T) {
 	pd.EncryptedFlag = lib.CipherText{}
 
 	assert.Equal(t, pdExpected, pd)
+}
+
+func TestConceptDimensionFromString(t *testing.T) {
+	csvString := `"\i2b2\Demographics\Age\>= 65 years old\100\","DEM|AGE:100"," 100 years old","","2010-09-28 11:15:00","2010-08-18 09:50:00","2010-09-28 11:40:00","DEMO","\N"`
+
+	ac := loader.AdministrativeColumns{
+		UpdateDate:     "2010-09-28 11:15:00",
+		DownloadDate:   "2010-08-18 09:50:00",
+		ImportDate:     "2010-09-28 11:40:00",
+		SourceSystemCD: "DEMO",
+		UploadID: 		"\\N",
+	}
+
+	cdk := &loader.ConceptDimensionPK{
+		ConceptPath: 	"\\i2b2\\Demographics\\Age\\>= 65 years old\\100\\",
+	}
+
+	cd := loader.ConceptDimension{
+		PK: 				cdk,
+		ConceptCD: 			"DEM|AGE:100",
+		NameChar: 			" 100 years old",
+		ConceptBlob:		"",
+		AdminColumns:     	ac,
+	}
+
+	var csvFile = strings.NewReader(csvString)
+	r := csv.NewReader(csvFile)
+	lines, err := r.ReadAll()
+	assert.Nil(t, err, "Parsing error")
+
+	cdkExpected, cdExpected := loader.ConceptDimensionFromString(lines[0])
+
+	assert.Equal(t, *cdkExpected, *cdk)
+	assert.Equal(t, cdExpected, cd)
 }

@@ -20,17 +20,19 @@ import (
 var (
 	InputFilePaths = map[string]string{
 		"ADAPTER_MAPPINGS":  "../data/original/AdapterMappings.xml",
-		"PATIENT_DIMENSION": "../data/original/patient_dimension.csv",
 		"SHRINE_ONTOLOGY":   "../data/original/shrine.csv",
 		"LOCAL_ONTOLOGY":    "../data/original/i2b2.csv",
+		"PATIENT_DIMENSION": "../data/original/patient_dimension.csv",
+		"CONCEPT_DIMENSION": "../data/original/concept_dimension.csv",
 	}
 
 	OutputFilePaths = map[string]string{
 		"ADAPTER_MAPPINGS":         "../data/converted/AdapterMappings.xml",
-		"PATIENT_DIMENSION":        "../data/converted/patient_dimension.csv",
 		"SHRINE_ONTOLOGY":          "../data/converted/shrine.csv",
 		"LOCAL_ONTOLOGY_CLEAR":     "../data/converted/i2b2.csv",
 		"LOCAL_ONTOLOGY_SENSITIVE": "../data/converted/sensitive_tagged.csv",
+		"PATIENT_DIMENSION":        "../data/converted/patient_dimension.csv",
+		"CONCEPT_DIMENSION": 		"../data/converted/concept_dimension.csv",
 	}
 )
 
@@ -398,11 +400,10 @@ func ParseLocalOntology(group *onet.Roster, entryPointIdx int) error {
 	IDConcepts = 0
 	HeaderLocalOntology = make([]string, 0)
 	TableLocalOntologyClear = make(map[string]*LocalOntology)
-	TableLocalOntologyEnc = make(map[string]*LocalOntology)
 
-	MapConceptIDtoTag = make(map[string]lib.GroupingKey)
+	MapConceptCodeToTag = make(map[string]TagAndID)
 	mapConceptIDtoTagKeys := make([]string, 0)
-	MapModifierIDtoTag = make(map[string]lib.GroupingKey)
+	MapModifierCodeToTag = make(map[string]TagAndID)
 	mapModifierIDtoTagKeys := make([]string, 0)
 
 	allSensitiveModifierIDs := make([]int64, 0)
@@ -461,16 +462,20 @@ func ParseLocalOntology(group *onet.Roster, entryPointIdx int) error {
 				if strings.ToLower(lo.FactTableColumn) == "modifier_cd" {
 					shrineID := TableShrineOntologyModifierEnc[sk][0].NodeEncryptID
 					// if the ID does not yet exist
-					if _, ok := MapModifierIDtoTag[lo.Fullname]; !ok {
-						MapModifierIDtoTag[lo.Fullname] = lib.GroupingKey(-1)
+					if _, ok := MapModifierCodeToTag[lo.Fullname]; !ok {
+						MapModifierCodeToTag[lo.Fullname] = TagAndID{Tag: lib.GroupingKey(-1), TagID: IDModifiers}
+						IDModifiers++
+
 						mapModifierIDtoTagKeys = append(mapModifierIDtoTagKeys, lo.Fullname)
 						allSensitiveModifierIDs = append(allSensitiveModifierIDs, shrineID)
 					}
 				} else if strings.ToLower(lo.FactTableColumn) == "concept_cd" { // if it is a concept code
 					shrineID := TableShrineOntologyEnc[sk].NodeEncryptID
 					// if the ID does not yet exist
-					if _, ok := MapConceptIDtoTag[lo.Fullname]; !ok {
-						MapConceptIDtoTag[lo.Fullname] = lib.GroupingKey(-1)
+					if _, ok := MapConceptCodeToTag[lo.Fullname]; !ok {
+						MapConceptCodeToTag[lo.Fullname] = TagAndID{Tag: lib.GroupingKey(-1), TagID: IDConcepts}
+						IDConcepts++
+
 						mapConceptIDtoTagKeys = append(mapConceptIDtoTagKeys, lo.Fullname)
 						allSensitiveConceptIDs = append(allSensitiveConceptIDs, shrineID)
 					}
@@ -478,7 +483,7 @@ func ParseLocalOntology(group *onet.Roster, entryPointIdx int) error {
 					log.Fatal("Incorrect code in the FactTable column:", strings.ToLower(lo.FactTableColumn))
 				}
 			}
-		} else {
+		} else if !HasSensitiveParents(lo.Fullname){
 			// Concept does not have a translation in the Shrine Ontology (consider as not sensitive)
 			TableLocalOntologyClear[lo.Fullname] = lo
 		}
@@ -496,15 +501,34 @@ func ParseLocalOntology(group *onet.Roster, entryPointIdx int) error {
 
 	// 'populate' map (Modifier codes)
 	for i, id := range mapModifierIDtoTagKeys {
-		MapModifierIDtoTag[id] = taggedModifierValues[i]
+		var tmp = MapModifierCodeToTag[id]
+		tmp.Tag = taggedModifierValues[i]
+		MapModifierCodeToTag[id] = tmp
 	}
 
 	// 'populate' map (Concept codes)
 	for i, id := range mapConceptIDtoTagKeys {
-		MapConceptIDtoTag[id] = taggedConceptValues[i]
+		var tmp = MapConceptCodeToTag[id]
+		tmp.Tag = taggedConceptValues[i]
+		MapConceptCodeToTag[id] = tmp
 	}
 
 	return nil
+}
+
+// HasSensitiveParents is a function that checks if a node whether in the LocalOntology or ConceptDimension has any siblings which are sensitive.
+func HasSensitiveParents(conceptPath string) bool {
+	temp := conceptPath
+
+	isSensitive := false
+	for temp != "" {
+		temp = StripByLevel(temp,1,false)
+		if _, ok := ListSensitiveConceptsLocal[temp]; ok {
+			isSensitive = true
+			break
+		}
+	}
+	return isSensitive
 }
 
 // EncryptAndTag encrypts the elements and tags them to allow for the future comparison
@@ -614,15 +638,13 @@ func ConvertLocalOntology() error {
 	}
 
 	// sensitive modifiers
-	for _, tag := range MapModifierIDtoTag {
-		csvSensitiveOutputFile.WriteString( LocalOntologySensitiveModiferToCSVText(&tag, IDModifiers) + "\n")
-		IDModifiers++
+	for _, el := range MapModifierCodeToTag {
+		csvSensitiveOutputFile.WriteString( LocalOntologySensitiveModiferToCSVText(&el.Tag, el.TagID) + "\n")
 	}
 
 	// sensitive concepts
-	for _, tag := range MapConceptIDtoTag {
-		csvSensitiveOutputFile.WriteString( LocalOntologySensitiveConceptToCSVText(&tag, IDConcepts) + "\n")
-		IDConcepts++
+	for _, el := range MapConceptCodeToTag {
+		csvSensitiveOutputFile.WriteString( LocalOntologySensitiveConceptToCSVText(&el.Tag, el.TagID) + "\n")
 	}
 
 	return nil
@@ -706,6 +728,84 @@ func ConvertPatientDimension() error {
 
 	for _, pd := range TablePatientDimension {
 		csvOutputFile.WriteString(pd.ToCSVText() + "\n")
+	}
+
+	return nil
+}
+
+
+// CONCEPT_DIMENSION.CSV converter
+
+// ParseConceptDimension reads and parses the concept_dimension.csv.
+func ParseConceptDimension() error {
+	lines, err := readCSV("CONCEPT_DIMENSION")
+	if err != nil {
+		log.Fatal("Error in readCSV()")
+		return err
+	}
+
+	TableConceptDimension = make(map[*ConceptDimensionPK]ConceptDimension)
+	HeaderConceptDimension = make([]string, 0)
+
+	/* structure of concept_dimension.csv (in order):
+
+	// PK
+	"concept_path",
+
+	// MANDATORY FIELDS
+	"concept_cd",
+	"name_char",
+	"concept_blob",
+
+	// ADMIN FIELDS
+	"update_date",
+	"download_date",
+	"import_date",
+	"sourcesystem_cd",
+	"upload_id"
+	*/
+
+	for _, header := range lines[0] {
+		HeaderConceptDimension = append(HeaderConceptDimension, header)
+	}
+
+	//skip header
+	for _, line := range lines[1:] {
+		cdk, cd := ConceptDimensionFromString(line)
+		TableConceptDimension[cdk] = cd
+	}
+
+	return nil
+}
+
+// ConvertConceptDimension converts the old patient_dimension.csv file
+func ConvertConceptDimension() error {
+	csvOutputFile, err := os.Create(OutputFilePaths["CONCEPT_DIMENSION"])
+	if err != nil {
+		log.Fatal("Error opening [concept_dimension].csv")
+		return err
+	}
+	defer csvOutputFile.Close()
+
+	headerString := ""
+	for _, header := range HeaderConceptDimension {
+		headerString += "\"" + header + "\","
+	}
+	// remove the last ,
+	csvOutputFile.WriteString(headerString[:len(headerString)-1] + "\n")
+
+	for _, cd := range TableConceptDimension {
+		// if the concept is non-sensitive -> keep it as it is
+		if _, ok := TableLocalOntologyClear[cd.PK.ConceptPath]; ok {
+			csvOutputFile.WriteString(cd.ToCSVText() + "\n")
+		// if the concept is sensitive -> fetch its encrypted tag and tag_id
+		} else if _, ok := MapConceptCodeToTag[cd.PK.ConceptPath]; ok {
+			temp := MapConceptCodeToTag[cd.PK.ConceptPath].Tag
+			csvOutputFile.WriteString(ConceptDimensionSensitiveConceptToCSVText(&temp, MapConceptCodeToTag[cd.PK.ConceptPath].TagID) + "\n")
+		// if the concept does not exist in the LocalOntology and none of his siblings is sensitive
+		} else if !HasSensitiveParents(cd.PK.ConceptPath){
+			csvOutputFile.WriteString(cd.ToCSVText() + "\n")
+		}
 	}
 
 	return nil

@@ -165,3 +165,34 @@ func TestConvertLocalOntology(t *testing.T) {
 
 	local.CloseAll()
 }
+
+func TestConvertConceptDimension(t *testing.T) {
+	log.SetDebugVisible(2)
+	setupEncryptEnv()
+	loader.Testing = true
+
+	loader.ListSensitiveConceptsShrine = make(map[string]bool)
+	loader.ListSensitiveConceptsShrine[`\Admit Diagnosis\`] = true
+	loader.ListSensitiveConceptsShrine[`\Principal Diagnosis\`] = true
+	loader.ListSensitiveConceptsShrine[`\Secondary Diagnosis\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.9) Benign neoplasm of bone and articular cartilage, site unspecified\`] = true
+
+	assert.Nil(t, loader.ConvertAdapterMappings())
+
+	assert.Nil(t, loader.ParseShrineOntology())
+	assert.Nil(t, loader.ConvertShrineOntology())
+
+	assert.Nil(t, loader.ParseLocalOntology(el,0))
+	assert.Nil(t, loader.ConvertLocalOntology())
+
+	assert.Nil(t, loader.ParseConceptDimension())
+	assert.Nil(t, loader.ConvertConceptDimension())
+
+	local.CloseAll()
+
+}
