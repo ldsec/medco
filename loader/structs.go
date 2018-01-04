@@ -18,12 +18,6 @@ var ListSensitiveConceptsShrine map[string]bool
 // ListSensitiveConceptsLocal list all the sensitive concepts (paths) and the respective shrine equivalent - LOCAL (the bool is for nothing)
 var ListSensitiveConceptsLocal map[string][]string
 
-// MapConceptIDtoTag maps a sensitive concept code to its respective tag
-var MapConceptIDtoTag map[string]lib.GroupingKey
-
-// MapModifierIDtoTag maps a sensitive modifier code to its respective tag
-var MapModifierIDtoTag map[string]lib.GroupingKey
-
 // IDModifiers used to assign IDs to the modifiers concepts
 var IDModifiers int64
 
@@ -117,8 +111,16 @@ func (so ShrineOntology) ToCSVText() string {
 // TableLocalOntologyClear is the local ontology table (it maps the concept path to a concept) with only the NON_SENSITIVE concepts (it INCLUDES MODIFIER NON-SENSITIVE concepts)
 var TableLocalOntologyClear map[string]*LocalOntology
 
-// TableLocalOntologyEnc is the local ontology table (it maps the concept path to a concept) with only the SENSITIVE concepts (it INCLUDES the MODIFIER SENSITIVE concepts)
-var TableLocalOntologyEnc map[string]*LocalOntology
+type TagAndID struct {
+	Tag 	lib.GroupingKey
+	TagID 	int64
+}
+
+// MapConceptCodeToTag maps a sensitive concept code to its respective tag and tag_id
+var MapConceptCodeToTag map[string]TagAndID
+
+// MapModifierCodeToTag maps a sensitive modifier code to its respective tag and tag_id
+var MapModifierCodeToTag map[string]TagAndID
 
 // HeaderLocalOntology contains all the headers for the i2b2 table
 var HeaderLocalOntology []string
@@ -269,10 +271,14 @@ type OptionalFields struct {
 //-------------------------------------//
 
 // TableConceptDimension is concept_dimension table
-var TableConceptDimension map[ConceptDimensionPK]ConceptDimension
+var TableConceptDimension map[*ConceptDimensionPK]ConceptDimension
+
+// HeaderConceptDimension contains all the headers for the Concept_Dimension table
+var HeaderConceptDimension []string
 
 // ConceptDimension table contains one row for each concept
 type ConceptDimension struct {
+	PK			 *ConceptDimensionPK
 	ConceptCD    string
 	NameChar     string
 	ConceptBlob  string
@@ -282,6 +288,17 @@ type ConceptDimension struct {
 // ConceptDimensionPK is the primary key of the Concept_Dimension table
 type ConceptDimensionPK struct {
 	ConceptPath string
+}
+
+// ToCSVText writes the ConceptDimension object in a way that can be added to a .csv file - "","","", etc.
+func (cd ConceptDimension) ToCSVText() string {
+	acString := "\"" + cd.AdminColumns.UpdateDate + "\"," + "\"" + cd.AdminColumns.DownloadDate + "\"," + "\"" + cd.AdminColumns.ImportDate + "\"," + "\"" + cd.AdminColumns.SourceSystemCD + "\"," + "\"" + cd.AdminColumns.UploadID + "\""
+	return  "\"" + cd.PK.ConceptPath + "\"," + "\"" + cd.ConceptCD + "\"," + "\"" + cd.NameChar + "\"," + "\"" + cd.ConceptBlob + "\"," + acString
+}
+
+// ConceptDimensionSensitiveConceptToCSVText writes the tagging information of a concept of the Concept_Dimension table in a way that can be added to a .csv file - "","","", etc.
+func ConceptDimensionSensitiveConceptToCSVText(tag *lib.GroupingKey, tagID int64) string {
+	return `"\medco\tagged\concept\` + string(*tag) + `\", "TAG_ID:` + strconv.FormatInt(tagID, 10) + `", "\N", "\N", "\N", "\N", "NOW()", "\N", "\N"`
 }
 
 //-------------------------------------//
@@ -476,7 +493,7 @@ func LocalOntologyFromString(line []string) *LocalOntology {
 
 }
 
-// PatientDimensionFromString generates a ShrineOntology struct from a parsed line of a .csv file
+// PatientDimensionFromString generates a PatientDimension struct from a parsed line of a .csv file
 func PatientDimensionFromString(line []string, pk abstract.Point) (*PatientDimensionPK, PatientDimension) {
 	pdk := &PatientDimensionPK{
 		PatientNum: line[0],
@@ -514,4 +531,31 @@ func PatientDimensionFromString(line []string, pk abstract.Point) (*PatientDimen
 	pd.EncryptedFlag = *ef
 
 	return pdk, pd
+}
+
+
+// ConceptDimensionFromString generates a ConceptDimension struct from a parsed line of a .csv file
+func ConceptDimensionFromString(line []string) (*ConceptDimensionPK, ConceptDimension) {
+	cdk := &ConceptDimensionPK{
+		ConceptPath: line[0],
+	}
+
+	cd := ConceptDimension{
+		PK:            	cdk,
+		ConceptCD: 		line[1],
+		NameChar:     	line[2],
+		ConceptBlob:    line[3],
+	}
+
+	ac := AdministrativeColumns{
+		UpdateDate:     line[4],
+		DownloadDate:   line[5],
+		ImportDate:     line[6],
+		SourceSystemCD: line[7],
+		UploadID:       line[8],
+	}
+
+	cd.AdminColumns = ac
+
+	return cdk, cd
 }
