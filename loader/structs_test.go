@@ -187,7 +187,37 @@ func TestConceptDimension_ToCSVText(t *testing.T) {
 	assert.Equal(t, csvString, cd.ToCSVText())
 
 	tag := lib.GroupingKey("1")
-	assert.Equal(t, `"\medco\tagged\concept\1\", "TAG_ID:20", "\N", "\N", "\N", "\N", "NOW()", "\N", "\N"`, loader.ConceptDimensionSensitiveConceptToCSVText(&tag, 20))
+	assert.Equal(t, `"\medco\tagged\concept\1\", "TAG_ID:20", "\N", "\N", "\N", "\N", "NOW()", "\N", "\N"`, loader.ConceptDimensionSensitiveToCSVText(&tag, 20))
+}
+
+func TestModifierDimension_ToCSVText(t *testing.T) {
+
+	csvString := `"\Admit Diagnosis\","0","Admit Diagnosis","","2011-04-14 00:55:00","\N","2011-04-14 00:55:00","DEMO","\N"`
+
+	ac := loader.AdministrativeColumns{
+		UpdateDate:     "2011-04-14 00:55:00",
+		DownloadDate:   "\\N",
+		ImportDate:     "2011-04-14 00:55:00",
+		SourceSystemCD: "DEMO",
+		UploadID: 		"\\N",
+	}
+
+	mdk := &loader.ModifierDimensionPK{
+		ModifierPath: 	"\\Admit Diagnosis\\",
+	}
+
+	md := loader.ModifierDimension{
+		PK: 				mdk,
+		ModifierCD: 		"0",
+		NameChar: 			"Admit Diagnosis",
+		ModifierBlob:		"",
+		AdminColumns:     	ac,
+	}
+
+	assert.Equal(t, csvString, md.ToCSVText())
+
+	tag := lib.GroupingKey("1")
+	assert.Equal(t, `"\medco\tagged\modifier\1\", "TAG_ID:20", "\N", "\N", "\N", "\N", "NOW()", "\N", "\N"`, loader.ModifierDimensionSensitiveToCSVText(&tag, 20))
 }
 
 
@@ -375,4 +405,38 @@ func TestConceptDimensionFromString(t *testing.T) {
 
 	assert.Equal(t, *cdkExpected, *cdk)
 	assert.Equal(t, cdExpected, cd)
+}
+
+func TestModifierDimensionFromString(t *testing.T) {
+	csvString := `"\Admit Diagnosis\","0","Admit Diagnosis","","2011-04-14 00:55:00","\N","2011-04-14 00:55:00","DEMO","\N"`
+
+	ac := loader.AdministrativeColumns{
+		UpdateDate:     "2011-04-14 00:55:00",
+		DownloadDate:   "\\N",
+		ImportDate:     "2011-04-14 00:55:00",
+		SourceSystemCD: "DEMO",
+		UploadID: 		"\\N",
+	}
+
+	mdk := &loader.ModifierDimensionPK{
+		ModifierPath: 	"\\Admit Diagnosis\\",
+	}
+
+	md := loader.ModifierDimension{
+		PK: 				mdk,
+		ModifierCD: 		"0",
+		NameChar: 			"Admit Diagnosis",
+		ModifierBlob:		"",
+		AdminColumns:     	ac,
+	}
+
+	var csvFile = strings.NewReader(csvString)
+	r := csv.NewReader(csvFile)
+	lines, err := r.ReadAll()
+	assert.Nil(t, err, "Parsing error")
+
+	mdkExpected, mdExpected := loader.ModifierDimensionFromString(lines[0])
+
+	assert.Equal(t, *mdkExpected, *mdk)
+	assert.Equal(t, mdExpected, md)
 }
