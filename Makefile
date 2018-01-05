@@ -23,14 +23,7 @@ test_lint:
 		fi \
 	}
 
-build_sources:
-	@echo Compile the html, css etc. files into a compilable Go source code
-	@{ \
-	    $$GOPATH/bin/go-bindata static/... templates/...; \
-	    go install; \
-	}
-
 test_go:
-	$$GOPATH/bin/medco-loader;
+	go test -v -race -p=1 ./...;
 
-local: test_fmt test_lint build_sources test_go
+local: test_fmt test_lint test_go

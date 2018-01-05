@@ -5,17 +5,17 @@ import (
 	"github.com/lca1/unlynx/lib"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/dedis/crypto.v0/abstract"
-	"gopkg.in/dedis/onet.v1/log"
 	"gopkg.in/dedis/onet.v1"
 	"gopkg.in/dedis/onet.v1/app"
-	"testing"
+	"gopkg.in/dedis/onet.v1/log"
 	"os"
+	"testing"
 )
 
 var publicKey abstract.Point
 var secretKey abstract.Scalar
-var el 		  *onet.Roster
-var local     *onet.LocalTest
+var el *onet.Roster
+var local *onet.LocalTest
 
 func getRoster(groupFilePath string) (*onet.Roster, *onet.LocalTest, error) {
 
@@ -160,7 +160,7 @@ func TestConvertLocalOntology(t *testing.T) {
 	assert.Nil(t, loader.ParseShrineOntology())
 	assert.Nil(t, loader.ConvertShrineOntology())
 
-	assert.Nil(t, loader.ParseLocalOntology(el,0))
+	assert.Nil(t, loader.ParseLocalOntology(el, 0))
 	assert.Nil(t, loader.ConvertLocalOntology())
 
 	local.CloseAll()
@@ -187,7 +187,7 @@ func TestConvertConceptDimension(t *testing.T) {
 	assert.Nil(t, loader.ParseShrineOntology())
 	assert.Nil(t, loader.ConvertShrineOntology())
 
-	assert.Nil(t, loader.ParseLocalOntology(el,0))
+	assert.Nil(t, loader.ParseLocalOntology(el, 0))
 	assert.Nil(t, loader.ConvertLocalOntology())
 
 	assert.Nil(t, loader.ParseConceptDimension())
@@ -218,7 +218,7 @@ func TestConvertModifierDimension(t *testing.T) {
 	assert.Nil(t, loader.ParseShrineOntology())
 	assert.Nil(t, loader.ConvertShrineOntology())
 
-	assert.Nil(t, loader.ParseLocalOntology(el,0))
+	assert.Nil(t, loader.ParseLocalOntology(el, 0))
 	assert.Nil(t, loader.ConvertLocalOntology())
 
 	assert.Nil(t, loader.ParseModifierDimension())
