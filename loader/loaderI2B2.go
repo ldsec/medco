@@ -228,7 +228,7 @@ func ParseShrineOntology() error {
 	IDModifiers = 0
 	IDConcepts = 0
 	TableShrineOntologyClear = make(map[string]*ShrineOntology)
-	TableShrineOntologyEnc = make(map[string]*ShrineOntology)
+	TableShrineOntologyConceptEnc = make(map[string]*ShrineOntology)
 	TableShrineOntologyModifierEnc = make(map[string][]*ShrineOntology)
 	HeaderShrineOntology = make([]string, 0)
 
@@ -289,9 +289,10 @@ func ParseShrineOntology() error {
 					TableShrineOntologyModifierEnc[so.Fullname] = append(TableShrineOntologyModifierEnc[so.Fullname], so)
 				}
 			} else if strings.ToLower(so.FactTableColumn) == "concept_cd" { // if it is a concept code
+				// concepts do not repeat on contrary to the modifiers
 				so.NodeEncryptID = IDConcepts
 				IDConcepts++
-				TableShrineOntologyEnc[so.Fullname] = so
+				TableShrineOntologyConceptEnc[so.Fullname] = so
 			} else {
 				log.Fatal("Incorrect code in the FactTable column:", strings.ToLower(so.FactTableColumn))
 			}
@@ -332,12 +333,13 @@ func ConvertShrineOntology() error {
 			so.Name = newName
 			so.DimCode = newName
 			so.Tooltip = newName
+			break
 		}
 		csvOutputFile.WriteString(so.ToCSVText() + "\n")
 	}
 
 	// copy the sensitive concept codes to the new csv files (it does not include the modifier concepts)
-	for _, so := range TableShrineOntologyEnc {
+	for _, so := range TableShrineOntologyConceptEnc {
 		//log.LLvl1(so.Fullname, so.NodeEncryptID, so.ChildrenEncryptIDs, so.VisualAttributes)
 		csvOutputFile.WriteString(so.ToCSVText() + "\n")
 	}
@@ -355,7 +357,7 @@ func ConvertShrineOntology() error {
 
 // UpdateChildrenEncryptIDs updates the parent and internal concept nodes with the IDs of their respective children
 func UpdateChildrenEncryptIDs() {
-	for _, so := range TableShrineOntologyEnc {
+	for _, so := range TableShrineOntologyConceptEnc {
 		path := so.Fullname
 		for true {
 			path = StripByLevel(path, 1, false)
@@ -363,7 +365,7 @@ func UpdateChildrenEncryptIDs() {
 				break
 			}
 
-			if val, ok := TableShrineOntologyEnc[path]; ok {
+			if val, ok := TableShrineOntologyConceptEnc[path]; ok {
 				val.ChildrenEncryptIDs = append(val.ChildrenEncryptIDs, so.NodeEncryptID)
 			}
 
@@ -473,7 +475,7 @@ func ParseLocalOntology(group *onet.Roster, entryPointIdx int) error {
 						allSensitiveModifierIDs = append(allSensitiveModifierIDs, shrineID)
 					}
 				} else if strings.ToLower(lo.FactTableColumn) == "concept_cd" { // if it is a concept code
-					shrineID := TableShrineOntologyEnc[sk].NodeEncryptID
+					shrineID := TableShrineOntologyConceptEnc[sk].NodeEncryptID
 					// if the ID does not yet exist
 					if _, ok := MapConceptCodeToTag[lo.Fullname]; !ok {
 						MapConceptCodeToTag[lo.Fullname] = TagAndID{Tag: lib.GroupingKey(-1), TagID: IDConcepts}

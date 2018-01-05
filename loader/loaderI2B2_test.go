@@ -164,6 +164,42 @@ func TestConvertPatientDimension(t *testing.T) {
 	local.CloseAll()
 }
 
+func TestUpdateChildrenEncryptIDs(t *testing.T) {
+	loader.TableShrineOntologyConceptEnc = make(map[string]*loader.ShrineOntology)
+	loader.TableShrineOntologyModifierEnc = make(map[string][]*loader.ShrineOntology)
+
+	so0 := loader.ShrineOntology{Fullname:"\\a\\", NodeEncryptID: 0}
+	so1 := loader.ShrineOntology{Fullname:"\\a\\b\\", NodeEncryptID: 1}
+	so2 := loader.ShrineOntology{Fullname:"\\a\\c\\", NodeEncryptID: 2}
+	so3 := loader.ShrineOntology{Fullname:"\\a\\c\\d", NodeEncryptID: 3}
+	so4 := loader.ShrineOntology{Fullname:"\\a\\c\\f", NodeEncryptID: 4}
+
+	loader.TableShrineOntologyConceptEnc["\\a\\"] = &so0
+	loader.TableShrineOntologyConceptEnc["\\a\\b\\"] = &so1
+	loader.TableShrineOntologyConceptEnc["\\a\\c\\"] = &so2
+	loader.TableShrineOntologyConceptEnc["\\a\\c\\d"] = &so3
+	loader.TableShrineOntologyConceptEnc["\\a\\c\\f"] = &so4
+
+	soM0 := loader.ShrineOntology{Fullname:"\\a\\", NodeEncryptID: 0}
+	soM1 := loader.ShrineOntology{Fullname:"\\a\\", NodeEncryptID: 0}
+	soM2 := loader.ShrineOntology{Fullname:"\\a\\b\\", NodeEncryptID: 1}
+	soM3 := loader.ShrineOntology{Fullname:"\\a\\b\\", NodeEncryptID: 1}
+
+	loader.TableShrineOntologyModifierEnc["\\a\\"] = []*loader.ShrineOntology{&soM0, &soM1}
+	loader.TableShrineOntologyModifierEnc["\\a\\b\\"] = []*loader.ShrineOntology{&soM2, &soM3}
+
+	loader.UpdateChildrenEncryptIDs()
+
+	assert.Equal(t, 4, len(loader.TableShrineOntologyConceptEnc["\\a\\"].ChildrenEncryptIDs))
+	assert.Equal(t, 0, len(loader.TableShrineOntologyConceptEnc["\\a\\b\\"].ChildrenEncryptIDs))
+	assert.Equal(t, 2, len(loader.TableShrineOntologyConceptEnc["\\a\\c\\"].ChildrenEncryptIDs))
+	assert.Equal(t, 0, len(loader.TableShrineOntologyConceptEnc["\\a\\c\\d"].ChildrenEncryptIDs))
+	assert.Equal(t, 0, len(loader.TableShrineOntologyConceptEnc["\\a\\c\\f"].ChildrenEncryptIDs))
+
+	assert.Equal(t, []int64{1}, loader.TableShrineOntologyModifierEnc["\\a\\"][0].ChildrenEncryptIDs)
+	assert.Equal(t, []int64{1}, loader.TableShrineOntologyModifierEnc["\\a\\"][1].ChildrenEncryptIDs)
+}
+
 func TestConvertShrineOntology(t *testing.T) {
 	log.SetDebugVisible(2)
 

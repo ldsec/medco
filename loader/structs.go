@@ -29,8 +29,8 @@ var IDConcepts int64
 // TableShrineOntologyClear is the shrine_ontology table (it maps the concept path to a concept) with only the NON_SENSITIVE concepts (it INCLUDES MODIFIER NON-SENSITIVE concepts)
 var TableShrineOntologyClear map[string]*ShrineOntology
 
-// TableShrineOntologyEnc is the shrine_ontology table (it maps the concept path to a concept) with only the SENSITIVE concepts (NO MODIFIER SENSITIVE concepts)
-var TableShrineOntologyEnc map[string]*ShrineOntology
+// TableShrineOntologyConceptEnc is the shrine_ontology table (it maps the concept path to a concept) with only the SENSITIVE concepts (NO MODIFIER SENSITIVE concepts)
+var TableShrineOntologyConceptEnc map[string]*ShrineOntology
 
 // TableShrineOntologyModifierEnc is the shrine_ontology table (it maps the concept path to a concept) with only the MODIFIER SENSITIVE concepts
 var TableShrineOntologyModifierEnc map[string][]*ShrineOntology
