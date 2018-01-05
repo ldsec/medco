@@ -61,6 +61,82 @@ func setupEncryptEnv() {
 	secretKey, publicKey = lib.GenKey()
 }
 
+func TestStoreSensitiveLocalConcepts(t *testing.T) {
+	// Test #1
+	loader.ListSensitiveConceptsShrine = make(map[string]bool)
+	loader.ListSensitiveConceptsShrine["a"] = true
+
+	loader.ListSensitiveConceptsLocal = make(map[string][]string)
+
+	localToShrine := make(map[string][]string)
+	shrineToLocal := make(map[string][]string)
+
+	shrineToLocal["a"] = []string{"1", "2"}
+	shrineToLocal["b"] = []string{"3"}
+	shrineToLocal["c"] = []string{"4"}
+
+	localToShrine["1"] = []string{"a"}
+	localToShrine["2"] = []string{"a"}
+	localToShrine["3"] = []string{"b"}
+	localToShrine["4"] = []string{"c"}
+
+	loader.StoreSensitiveLocalConcepts(localToShrine, shrineToLocal)
+
+	assert.Equal(t, 1, len(loader.ListSensitiveConceptsShrine))
+	assert.Equal(t, 2, len(loader.ListSensitiveConceptsLocal))
+
+
+	// Test #2
+	loader.ListSensitiveConceptsShrine = make(map[string]bool)
+	loader.ListSensitiveConceptsShrine["a"] = true
+
+	loader.ListSensitiveConceptsLocal = make(map[string][]string)
+
+	localToShrine = make(map[string][]string)
+	shrineToLocal = make(map[string][]string)
+
+	shrineToLocal["a"] = []string{"1", "2", "3"}
+	shrineToLocal["b"] = []string{"2"}
+	shrineToLocal["c"] = []string{"4"}
+
+	localToShrine["1"] = []string{"a"}
+	localToShrine["2"] = []string{"a", "b"}
+	localToShrine["3"] = []string{"a"}
+	localToShrine["4"] = []string{"c"}
+
+	loader.StoreSensitiveLocalConcepts(localToShrine, shrineToLocal)
+
+	assert.Equal(t, 2, len(loader.ListSensitiveConceptsShrine))
+	assert.Equal(t, 3, len(loader.ListSensitiveConceptsLocal))
+
+
+	// Test #3
+	loader.ListSensitiveConceptsShrine = make(map[string]bool)
+	loader.ListSensitiveConceptsShrine["a"] = true
+
+	loader.ListSensitiveConceptsLocal = make(map[string][]string)
+
+	localToShrine = make(map[string][]string)
+	shrineToLocal = make(map[string][]string)
+
+	shrineToLocal["a"] = []string{"1", "2", "3"}
+	shrineToLocal["b"] = []string{"2", "4"}
+	shrineToLocal["c"] = []string{"5", "4"}
+	shrineToLocal["d"] = []string{"6"}
+
+	localToShrine["1"] = []string{"a"}
+	localToShrine["2"] = []string{"a", "b"}
+	localToShrine["3"] = []string{"a"}
+	localToShrine["4"] = []string{"c", "b"}
+	localToShrine["5"] = []string{"c"}
+	localToShrine["6"] = []string{"d"}
+
+	loader.StoreSensitiveLocalConcepts(localToShrine, shrineToLocal)
+
+	assert.Equal(t, 3, len(loader.ListSensitiveConceptsShrine))
+	assert.Equal(t, 5, len(loader.ListSensitiveConceptsLocal))
+}
+
 func TestConvertAdapterMappings(t *testing.T) {
 	log.SetDebugVisible(2)
 
