@@ -78,7 +78,7 @@ func ConvertAdapterMappings() error {
 	ListSensitiveConceptsLocal = make(map[string][]string)
 
 	// everything is fine so now we just place both the sensitive local and shrine concepts in RAM (in our global maps)
-	storeSensitiveLocalConcepts(localToShrine, shrineToLocal)
+	StoreSensitiveLocalConcepts(localToShrine, shrineToLocal)
 
 	numElementsDel := filterSensitiveEntries(&am)
 	log.Lvl2(numElementsDel, "entries deleted")
@@ -106,6 +106,7 @@ func ConvertAdapterMappings() error {
 // createTempMaps simply converts the data into two different maps so that it's easier to traverse the data
 func createTempMaps(am AdapterMappings, localToShrine map[string][]string, shrineToLocal map[string][]string) {
 	for _, entry := range am.ListEntries {
+		// remove the first \ (in the adapter mappings file there are 2 '\\' in the beginning)
 		shrineKey := StripByLevel(entry.Key[1:], 1, true)
 		arrValues := make([]string, 0)
 		for _, value := range entry.ListLocalKeys {
@@ -125,8 +126,8 @@ func createTempMaps(am AdapterMappings, localToShrine map[string][]string, shrin
 	}
 }
 
-// storeSensitiveLocalConcepts stores the local sensitive concepts in a set that is kept in RAM during the entire loading (to make parsing the local ontology faster)
-func storeSensitiveLocalConcepts(localToShrine map[string][]string, shrineToLocal map[string][]string) {
+// StoreSensitiveLocalConcepts stores the local sensitive concepts in a set that is kept in RAM during the entire loading (to make parsing the local ontology faster)
+func StoreSensitiveLocalConcepts(localToShrine map[string][]string, shrineToLocal map[string][]string) {
 	for shrineKey, val := range shrineToLocal {
 		if containsMapString(ListSensitiveConceptsShrine, shrineKey) {
 			for _, localKey := range val {
@@ -137,11 +138,10 @@ func storeSensitiveLocalConcepts(localToShrine map[string][]string, shrineToLoca
 	}
 }
 
-// appendSensitiveConcepts simply appends a shrine concept to a local concept if it has not been added before
+// appendSensitiveConcepts simply appends/relates a shrine concept to a local concept if it has not been added before
 func appendSensitiveConcepts(localKey string, shrineKey string) {
 	// if local concept already added
 	if _, ok := ListSensitiveConceptsLocal[localKey]; ok {
-
 		exists := false
 		for _, el := range ListSensitiveConceptsLocal[localKey] {
 			if shrineKey == el {
