@@ -3,28 +3,28 @@ package loader
 import (
 	"encoding/csv"
 	"encoding/xml"
+	"github.com/lca1/unlynx/lib"
+	"github.com/lca1/unlynx/services/i2b2"
 	"gopkg.in/dedis/crypto.v0/abstract"
-	"gopkg.in/dedis/onet.v1/log"
 	"gopkg.in/dedis/onet.v1"
+	"gopkg.in/dedis/onet.v1/log"
 	"io"
 	"io/ioutil"
 	"os"
-	"strings"
-	"github.com/lca1/unlynx/lib"
-	"github.com/lca1/unlynx/services/i2b2"
-	"time"
 	"strconv"
+	"strings"
+	"time"
 )
 
 // The different paths and handlers for all the file both for input and/or output
 var (
 	InputFilePaths = map[string]string{
-		"ADAPTER_MAPPINGS":  	"../data/original/AdapterMappings.xml",
-		"SHRINE_ONTOLOGY":   	"../data/original/shrine.csv",
-		"LOCAL_ONTOLOGY":    	"../data/original/i2b2.csv",
-		"PATIENT_DIMENSION": 	"../data/original/patient_dimension.csv",
-		"CONCEPT_DIMENSION": 	"../data/original/concept_dimension.csv",
-		"MODIFIER_DIMENSION": 	"../data/original/modifier_dimension.csv",
+		"ADAPTER_MAPPINGS":   "../data/original/AdapterMappings.xml",
+		"SHRINE_ONTOLOGY":    "../data/original/shrine.csv",
+		"LOCAL_ONTOLOGY":     "../data/original/i2b2.csv",
+		"PATIENT_DIMENSION":  "../data/original/patient_dimension.csv",
+		"CONCEPT_DIMENSION":  "../data/original/concept_dimension.csv",
+		"MODIFIER_DIMENSION": "../data/original/modifier_dimension.csv",
 	}
 
 	OutputFilePaths = map[string]string{
@@ -33,12 +33,13 @@ var (
 		"LOCAL_ONTOLOGY_CLEAR":     "../data/converted/i2b2.csv",
 		"LOCAL_ONTOLOGY_SENSITIVE": "../data/converted/sensitive_tagged.csv",
 		"PATIENT_DIMENSION":        "../data/converted/patient_dimension.csv",
-		"CONCEPT_DIMENSION": 		"../data/converted/concept_dimension.csv",
-		"MODIFIER_DIMENSION": 		"../data/converted/modifier_dimension.csv",
+		"CONCEPT_DIMENSION":        "../data/converted/concept_dimension.csv",
+		"MODIFIER_DIMENSION":       "../data/converted/modifier_dimension.csv",
 	}
 )
 
-var Testing  bool // testing environment
+// Testing defines whether we should run the DDT on test environment (locally) or using real nodes
+var Testing bool // testing environment
 
 const (
 	// Header is a generic XML header suitable for use with the output of Marshal.
@@ -102,7 +103,7 @@ func ConvertAdapterMappings() error {
 	return nil
 }
 
-// createTempMaps simply converts the data into two different so that it's easier to traverse the data
+// createTempMaps simply converts the data into two different maps so that it's easier to traverse the data
 func createTempMaps(am AdapterMappings, localToShrine map[string][]string, shrineToLocal map[string][]string) {
 	for _, entry := range am.ListEntries {
 		shrineKey := StripByLevel(entry.Key[1:], 1, true)
@@ -460,7 +461,7 @@ func ParseLocalOntology(group *onet.Roster, entryPointIdx int) error {
 		// if we find a mapping to a Shrine Ontology term
 		if _, ok := ListSensitiveConceptsLocal[lo.Fullname]; ok {
 			// add each shrine id (we need to replicate each concept if it matches to multiple shrine concepts)
-			for _,sk := range ListSensitiveConceptsLocal[lo.Fullname]{
+			for _, sk := range ListSensitiveConceptsLocal[lo.Fullname] {
 				if strings.ToLower(lo.FactTableColumn) == "modifier_cd" {
 					shrineID := TableShrineOntologyModifierEnc[sk][0].NodeEncryptID
 					// if the ID does not yet exist
@@ -485,7 +486,7 @@ func ParseLocalOntology(group *onet.Roster, entryPointIdx int) error {
 					log.Fatal("Incorrect code in the FactTable column:", strings.ToLower(lo.FactTableColumn))
 				}
 			}
-		} else if !HasSensitiveParents(lo.Fullname){
+		} else if !HasSensitiveParents(lo.Fullname) {
 			// Concept does not have a translation in the Shrine Ontology (consider as not sensitive)
 			TableLocalOntologyClear[lo.Fullname] = lo
 		}
@@ -524,7 +525,7 @@ func HasSensitiveParents(conceptPath string) bool {
 
 	isSensitive := false
 	for temp != "" {
-		temp = StripByLevel(temp,1,false)
+		temp = StripByLevel(temp, 1, false)
 		if _, ok := ListSensitiveConceptsLocal[temp]; ok {
 			isSensitive = true
 			break
@@ -641,12 +642,12 @@ func ConvertLocalOntology() error {
 
 	// sensitive modifiers
 	for _, el := range MapModifierCodeToTag {
-		csvSensitiveOutputFile.WriteString( LocalOntologySensitiveModiferToCSVText(&el.Tag, el.TagID) + "\n")
+		csvSensitiveOutputFile.WriteString(LocalOntologySensitiveModiferToCSVText(&el.Tag, el.TagID) + "\n")
 	}
 
 	// sensitive concepts
 	for _, el := range MapConceptCodeToTag {
-		csvSensitiveOutputFile.WriteString( LocalOntologySensitiveConceptToCSVText(&el.Tag, el.TagID) + "\n")
+		csvSensitiveOutputFile.WriteString(LocalOntologySensitiveConceptToCSVText(&el.Tag, el.TagID) + "\n")
 	}
 
 	return nil
@@ -735,7 +736,6 @@ func ConvertPatientDimension() error {
 	return nil
 }
 
-
 // CONCEPT_DIMENSION.CSV converter
 
 // ParseConceptDimension reads and parses the concept_dimension.csv.
@@ -800,19 +800,18 @@ func ConvertConceptDimension() error {
 		// if the concept is non-sensitive -> keep it as it is
 		if _, ok := TableLocalOntologyClear[cd.PK.ConceptPath]; ok {
 			csvOutputFile.WriteString(cd.ToCSVText() + "\n")
-		// if the concept is sensitive -> fetch its encrypted tag and tag_id
+			// if the concept is sensitive -> fetch its encrypted tag and tag_id
 		} else if _, ok := MapConceptCodeToTag[cd.PK.ConceptPath]; ok {
 			temp := MapConceptCodeToTag[cd.PK.ConceptPath].Tag
 			csvOutputFile.WriteString(ConceptDimensionSensitiveToCSVText(&temp, MapConceptCodeToTag[cd.PK.ConceptPath].TagID) + "\n")
-		// if the concept does not exist in the LocalOntology and none of his siblings is sensitive
-		} else if !HasSensitiveParents(cd.PK.ConceptPath){
+			// if the concept does not exist in the LocalOntology and none of his siblings is sensitive
+		} else if !HasSensitiveParents(cd.PK.ConceptPath) {
 			csvOutputFile.WriteString(cd.ToCSVText() + "\n")
 		}
 	}
 
 	return nil
 }
-
 
 // MODIFIER_DIMENSION.CSV converter
 
@@ -883,7 +882,7 @@ func ConvertModifierDimension() error {
 			temp := MapModifierCodeToTag[md.PK.ModifierPath].Tag
 			csvOutputFile.WriteString(ModifierDimensionSensitiveToCSVText(&temp, MapModifierCodeToTag[md.PK.ModifierPath].TagID) + "\n")
 			// if the concept does not exist in the LocalOntology and none of his siblings is sensitive
-		} else if !HasSensitiveParents(md.PK.ModifierPath){
+		} else if !HasSensitiveParents(md.PK.ModifierPath) {
 			csvOutputFile.WriteString(md.ToCSVText() + "\n")
 		}
 	}

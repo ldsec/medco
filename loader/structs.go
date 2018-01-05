@@ -111,9 +111,10 @@ func (so ShrineOntology) ToCSVText() string {
 // TableLocalOntologyClear is the local ontology table (it maps the concept path to a concept) with only the NON_SENSITIVE concepts (it INCLUDES MODIFIER NON-SENSITIVE concepts)
 var TableLocalOntologyClear map[string]*LocalOntology
 
+// TagAndID is a struct that contains both Tag and TagID for a concept or modifier
 type TagAndID struct {
-	Tag 	lib.GroupingKey
-	TagID 	int64
+	Tag   lib.GroupingKey
+	TagID int64
 }
 
 // MapConceptCodeToTag maps a sensitive concept code to its respective tag and tag_id
@@ -158,7 +159,7 @@ type LocalOntology struct {
 func (lo LocalOntology) ToCSVText() string {
 	acString := "\"" + lo.AdminColumns.UpdateDate + "\"," + "\"" + lo.AdminColumns.DownloadDate + "\"," + "\"" + lo.AdminColumns.ImportDate + "\"," + "\"" + lo.AdminColumns.SourceSystemCD + "\""
 
-	return  "\"" + lo.HLevel + "\"," + "\"" + lo.Fullname + "\"," + "\"" + lo.Name + "\"," + "\"" + lo.SynonymCD + "\"," + "\"" + lo.VisualAttributes + "\"," + "\"" + lo.TotalNum + "\"," +
+	return "\"" + lo.HLevel + "\"," + "\"" + lo.Fullname + "\"," + "\"" + lo.Name + "\"," + "\"" + lo.SynonymCD + "\"," + "\"" + lo.VisualAttributes + "\"," + "\"" + lo.TotalNum + "\"," +
 		"\"" + lo.BaseCode + "\"," + "\"" + lo.MetadataXML + "\"," + "\"" + lo.FactTableColumn + "\"," + "\"" + lo.Tablename + "\"," + "\"" + lo.ColumnName + "\"," + "\"" + lo.ColumnDataType + "\"," + "\"" + lo.Operator + "\"," +
 		"\"" + lo.DimCode + "\"," + "\"" + lo.Comment + "\"," + "\"" + lo.Tooltip + "\"," + "\"" + lo.AppliedPath + "\"," + acString + "," + "\"" + lo.ValueTypeCD + "\"," + "\"" + lo.ExclusionCD + "\"," +
 		"\"" + lo.Path + "\"," + "\"" + lo.Symbol + "\""
@@ -278,7 +279,7 @@ var HeaderConceptDimension []string
 
 // ConceptDimension table contains one row for each concept
 type ConceptDimension struct {
-	PK			 *ConceptDimensionPK
+	PK           *ConceptDimensionPK
 	ConceptCD    string
 	NameChar     string
 	ConceptBlob  string
@@ -293,7 +294,7 @@ type ConceptDimensionPK struct {
 // ToCSVText writes the ConceptDimension object in a way that can be added to a .csv file - "","","", etc.
 func (cd ConceptDimension) ToCSVText() string {
 	acString := "\"" + cd.AdminColumns.UpdateDate + "\"," + "\"" + cd.AdminColumns.DownloadDate + "\"," + "\"" + cd.AdminColumns.ImportDate + "\"," + "\"" + cd.AdminColumns.SourceSystemCD + "\"," + "\"" + cd.AdminColumns.UploadID + "\""
-	return  "\"" + cd.PK.ConceptPath + "\"," + "\"" + cd.ConceptCD + "\"," + "\"" + cd.NameChar + "\"," + "\"" + cd.ConceptBlob + "\"," + acString
+	return "\"" + cd.PK.ConceptPath + "\"," + "\"" + cd.ConceptCD + "\"," + "\"" + cd.NameChar + "\"," + "\"" + cd.ConceptBlob + "\"," + acString
 }
 
 // ConceptDimensionSensitiveToCSVText writes the tagging information of a concept of the concept_dimension table in a way that can be added to a .csv file - "","","", etc.
@@ -306,12 +307,12 @@ func ConceptDimensionSensitiveToCSVText(tag *lib.GroupingKey, tagID int64) strin
 // TableModifierDimension is modifier_dimension table
 var TableModifierDimension map[*ModifierDimensionPK]ModifierDimension
 
-// HeaderConceptDimension contains all the headers for the modifier_dimension table
+// HeaderModifierDimension contains all the headers for the modifier_dimension table
 var HeaderModifierDimension []string
 
 // ModifierDimension table contains one row for each modifier
 type ModifierDimension struct {
-	PK			 *ModifierDimensionPK
+	PK           *ModifierDimensionPK
 	ModifierCD   string
 	NameChar     string
 	ModifierBlob string
@@ -326,7 +327,7 @@ type ModifierDimensionPK struct {
 // ToCSVText writes the ModifierDimension object in a way that can be added to a .csv file - "","","", etc.
 func (md ModifierDimension) ToCSVText() string {
 	acString := "\"" + md.AdminColumns.UpdateDate + "\"," + "\"" + md.AdminColumns.DownloadDate + "\"," + "\"" + md.AdminColumns.ImportDate + "\"," + "\"" + md.AdminColumns.SourceSystemCD + "\"," + "\"" + md.AdminColumns.UploadID + "\""
-	return  "\"" + md.PK.ModifierPath + "\"," + "\"" + md.ModifierCD + "\"," + "\"" + md.NameChar + "\"," + "\"" + md.ModifierBlob + "\"," + acString
+	return "\"" + md.PK.ModifierPath + "\"," + "\"" + md.ModifierCD + "\"," + "\"" + md.NameChar + "\"," + "\"" + md.ModifierBlob + "\"," + acString
 }
 
 // ModifierDimensionSensitiveToCSVText writes the tagging information of a concept of the modifier_dimension table in a way that can be added to a .csv file - "","","", etc.
@@ -548,7 +549,6 @@ func PatientDimensionFromString(line []string, pk abstract.Point) (*PatientDimen
 	return pdk, pd
 }
 
-
 // ConceptDimensionFromString generates a ConceptDimension struct from a parsed line of a .csv file
 func ConceptDimensionFromString(line []string) (*ConceptDimensionPK, ConceptDimension) {
 	cdk := &ConceptDimensionPK{
@@ -556,10 +556,10 @@ func ConceptDimensionFromString(line []string) (*ConceptDimensionPK, ConceptDime
 	}
 
 	cd := ConceptDimension{
-		PK:            	cdk,
-		ConceptCD: 		line[1],
-		NameChar:     	line[2],
-		ConceptBlob:    line[3],
+		PK:          cdk,
+		ConceptCD:   line[1],
+		NameChar:    line[2],
+		ConceptBlob: line[3],
 	}
 
 	ac := AdministrativeColumns{
@@ -582,10 +582,10 @@ func ModifierDimensionFromString(line []string) (*ModifierDimensionPK, ModifierD
 	}
 
 	md := ModifierDimension{
-		PK:            	mdk,
-		ModifierCD: 	line[1],
-		NameChar:     	line[2],
-		ModifierBlob:   line[3],
+		PK:           mdk,
+		ModifierCD:   line[1],
+		NameChar:     line[2],
+		ModifierBlob: line[3],
 	}
 
 	ac := AdministrativeColumns{

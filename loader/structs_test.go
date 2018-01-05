@@ -10,11 +10,9 @@ import (
 	"testing"
 )
 
-
 // ----------------------------------------------------------------------------------------------------------- //
 // ---------------------------------------- TO STRING -------------------------------------------------------- //
 // ----------------------------------------------------------------------------------------------------------- //
-
 
 func TestShrineOntology_ToCSVText(t *testing.T) {
 
@@ -108,12 +106,10 @@ func TestLocalOntology_ToCSVText(t *testing.T) {
 
 	assert.Equal(t, lo.ToCSVText(), `"4","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","Parkdale","N","FA ","\N","\N","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","\N","Demographics \ Zip codes \ Arkansas \ Parkdale","@","2007-04-10 00:00:00","2007-04-10 00:00:00","2007-04-10 00:00:00","DEMO","\N","\N","\N","\N"`)
 
-
 	tag := lib.GroupingKey("1")
 	assert.Equal(t, loader.LocalOntologySensitiveConceptToCSVText(&tag, 20), `"3", "\medco\tagged\concept\1\", "", "N", "LA ", "\N", "TAG_ID:20", "\N", "concept_cd", "concept_dimension", "concept_path", "T", "LIKE", "\medco\tagged\concept\1\", "\N", "\N", "NOW()", "\N", "\N", "\N", "TAG_ID", "@", "\N", "\N", "\N", "\N"`)
 
 }
-
 
 func TestPatientDimension_ToCSVText(t *testing.T) {
 
@@ -169,19 +165,19 @@ func TestConceptDimension_ToCSVText(t *testing.T) {
 		DownloadDate:   "2010-08-18 09:50:00",
 		ImportDate:     "2010-09-28 11:40:00",
 		SourceSystemCD: "DEMO",
-		UploadID: 		"\\N",
+		UploadID:       "\\N",
 	}
 
 	cdk := &loader.ConceptDimensionPK{
-		ConceptPath: 	"\\i2b2\\Demographics\\Age\\>= 65 years old\\100\\",
+		ConceptPath: "\\i2b2\\Demographics\\Age\\>= 65 years old\\100\\",
 	}
 
 	cd := loader.ConceptDimension{
-		PK: 				cdk,
-		ConceptCD: 			"DEM|AGE:100",
-		NameChar: 			" 100 years old",
-		ConceptBlob:		"",
-		AdminColumns:     	ac,
+		PK:           cdk,
+		ConceptCD:    "DEM|AGE:100",
+		NameChar:     " 100 years old",
+		ConceptBlob:  "",
+		AdminColumns: ac,
 	}
 
 	assert.Equal(t, csvString, cd.ToCSVText())
@@ -199,19 +195,19 @@ func TestModifierDimension_ToCSVText(t *testing.T) {
 		DownloadDate:   "\\N",
 		ImportDate:     "2011-04-14 00:55:00",
 		SourceSystemCD: "DEMO",
-		UploadID: 		"\\N",
+		UploadID:       "\\N",
 	}
 
 	mdk := &loader.ModifierDimensionPK{
-		ModifierPath: 	"\\Admit Diagnosis\\",
+		ModifierPath: "\\Admit Diagnosis\\",
 	}
 
 	md := loader.ModifierDimension{
-		PK: 				mdk,
-		ModifierCD: 		"0",
-		NameChar: 			"Admit Diagnosis",
-		ModifierBlob:		"",
-		AdminColumns:     	ac,
+		PK:           mdk,
+		ModifierCD:   "0",
+		NameChar:     "Admit Diagnosis",
+		ModifierBlob: "",
+		AdminColumns: ac,
 	}
 
 	assert.Equal(t, csvString, md.ToCSVText())
@@ -220,11 +216,9 @@ func TestModifierDimension_ToCSVText(t *testing.T) {
 	assert.Equal(t, `"\medco\tagged\modifier\1\", "TAG_ID:20", "\N", "\N", "\N", "\N", "NOW()", "\N", "\N"`, loader.ModifierDimensionSensitiveToCSVText(&tag, 20))
 }
 
-
 // ------------------------------------------------------------------------------------------------------------- //
 // ---------------------------------------- FROM STRING -------------------------------------------------------- //
 // ------------------------------------------------------------------------------------------------------------- //
-
 
 func TestShrineOntologyFromString(t *testing.T) {
 	csvString := `"0","\SHRINE\","SHRINE","N","CA ","\N","\N","","concept_cd","concept_dimension","concept_path","T","LIKE","\SHRINE\","","\N","\N","\N","\N","SHRINE","\N","@","\N"`
@@ -381,19 +375,19 @@ func TestConceptDimensionFromString(t *testing.T) {
 		DownloadDate:   "2010-08-18 09:50:00",
 		ImportDate:     "2010-09-28 11:40:00",
 		SourceSystemCD: "DEMO",
-		UploadID: 		"\\N",
+		UploadID:       "\\N",
 	}
 
 	cdk := &loader.ConceptDimensionPK{
-		ConceptPath: 	"\\i2b2\\Demographics\\Age\\>= 65 years old\\100\\",
+		ConceptPath: "\\i2b2\\Demographics\\Age\\>= 65 years old\\100\\",
 	}
 
 	cd := loader.ConceptDimension{
-		PK: 				cdk,
-		ConceptCD: 			"DEM|AGE:100",
-		NameChar: 			" 100 years old",
-		ConceptBlob:		"",
-		AdminColumns:     	ac,
+		PK:           cdk,
+		ConceptCD:    "DEM|AGE:100",
+		NameChar:     " 100 years old",
+		ConceptBlob:  "",
+		AdminColumns: ac,
 	}
 
 	var csvFile = strings.NewReader(csvString)
@@ -415,19 +409,19 @@ func TestModifierDimensionFromString(t *testing.T) {
 		DownloadDate:   "\\N",
 		ImportDate:     "2011-04-14 00:55:00",
 		SourceSystemCD: "DEMO",
-		UploadID: 		"\\N",
+		UploadID:       "\\N",
 	}
 
 	mdk := &loader.ModifierDimensionPK{
-		ModifierPath: 	"\\Admit Diagnosis\\",
+		ModifierPath: "\\Admit Diagnosis\\",
 	}
 
 	md := loader.ModifierDimension{
-		PK: 				mdk,
-		ModifierCD: 		"0",
-		NameChar: 			"Admit Diagnosis",
-		ModifierBlob:		"",
-		AdminColumns:     	ac,
+		PK:           mdk,
+		ModifierCD:   "0",
+		NameChar:     "Admit Diagnosis",
+		ModifierBlob: "",
+		AdminColumns: ac,
 	}
 
 	var csvFile = strings.NewReader(csvString)
