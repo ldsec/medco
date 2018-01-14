@@ -16,8 +16,9 @@ RUN go get -v -d gopkg.in/dedis/onet.v1/... && \
     go get -v -d github.com/lib/pq/...
 
 # fix: switch to specific revision to avoid "too big packet" error; todo: wait for better way to handle
-WORKDIR /go/src/gopkg.in/dedis/onet.v1
-RUN git checkout 8ffa6e26f9f7032618041070377f9fc3e72056ac
+#WORKDIR /go/src/gopkg.in/dedis/onet.v1
+#RUN git checkout 8ffa6e26f9f7032618041070377f9fc3e72056ac
+# todo: disable it, check if working
 
 # get sources and switch branch
 WORKDIR /go/src/$UNLYNX_REPO
