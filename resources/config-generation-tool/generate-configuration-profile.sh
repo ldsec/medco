@@ -2,33 +2,41 @@
 set -e
 shopt -s nullglob
 
-# dependencies: openssl, keytool
-# usage: bash generate-configuration-profile.sh CONFIGURATION_FOLDER KEYSTORE_PASSWORD NODE_DNS_1 NODE_IP_1 NODE_DNS_2 NODE_IP_2 NODE_DNS_3 NODE_IP_3 ...
+# dependencies: openssl, keytool (java), docker
+# usage: bash generate-configuration-profile.sh CONFIGURATION_PROFILE KEYSTORE_PASSWORD NODE_DNS_1 NODE_IP_1 NODE_DNS_2 NODE_IP_2 NODE_DNS_3 NODE_IP_3 ...
 if [ $# -lt 5 ]
 then
-    echo "Wrong number of arguments, usage: bash generate-configuration-profile.sh CONFIGURATION_FOLDER KEYSTORE_PASSWORD NODE_DNS_1 NODE_IP_1 NODE_DNS_2 NODE_IP_2 NODE_DNS_3 NODE_IP_3 ..."
+    echo "Wrong number of arguments, usage: bash generate-configuration-profile.sh CONFIGURATION_PROFILE KEYSTORE_PASSWORD NODE_DNS_1 NODE_IP_1 NODE_DNS_2 NODE_IP_2 NODE_DNS_3 NODE_IP_3 ..."
     exit
 fi
 
-echo "Dependencies check, script will abort if dependency if not found"
-which openssl keytool unlynxI2b2
+echo "### Dependencies check, script will abort if dependency if not found"
+which openssl keytool docker
 
 # variables & arguments
 SCRIPT_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-CONF_FOLDER="$1"
+CONF_PROFILE="$1"
+COMPOSE_FOLDER="$SCRIPT_FOLDER/../../compose-profiles/$CONF_PROFILE"
+CONF_FOLDER="$SCRIPT_FOLDER/../../configuration-profiles/$CONF_PROFILE"
 KEYSTORE_PW="$2"
 shift
 shift
 
 # clean up previous entries
 mkdir -p "$CONF_FOLDER"
-rm -f "$CONF_FOLDER"/*.keystore "$CONF_FOLDER"/shrine_downstream_nodes.conf "$CONF_FOLDER"/*.pem
+mkdir -p "$COMPOSE_FOLDER"
+rm -f "$CONF_FOLDER"/*.keystore "$CONF_FOLDER"/shrine_downstream_nodes.conf "$CONF_FOLDER"/*.pem "$CONF_FOLDER"/*.toml "$CONF_FOLDER"/unlynxMedCo
 
 # set up common things
+echo "### Setting up certificate authority"
 "$SCRIPT_FOLDER"/CA.sh -newca
 cp "$SCRIPT_FOLDER"/CA/cacert.pem "$CONF_FOLDER"/
 
-# generate private and keystore for each node
+echo "### Producing Unlynx binary with Docker"
+docker build -t lca1/unlynx:medco-deployment "$SCRIPT_FOLDER"/../../docker-images/unlynx/
+docker run -v "$CONF_FOLDER":/opt/medco-configuration --entrypoint sh lca1/unlynx:medco-deployment /copy-unlynx-binary.sh
+
+# generate configuration for each node
 NODE_IDX="-1"
 while [ $# -gt 0 ]
 do
@@ -41,13 +49,13 @@ do
     KEYSTORE="$CONF_FOLDER/srv$NODE_IDX.keystore"
     KEYSTORE_PRIVATE_ALIAS="srv$NODE_IDX-private"
 
-    # generate node java keystore pair of keys
+    echo "###$NODE_IDX### Generating java keystore pair of keys"
     keytool -genkeypair -keysize 2048 -alias "$KEYSTORE_PRIVATE_ALIAS" -validity 7300 \
         -dname "CN=$NODE_DNS, OU=LCA1, O=EPFL, L=Lausanne, S=VD, C=CH" \
         -ext "SAN=DNS:$NODE_DNS,IP:$NODE_IP" \
         -keyalg RSA -keypass "$KEYSTORE_PW" -storepass "$KEYSTORE_PW" -keystore "$KEYSTORE"
 
-    # generate certificate signature request and sigh it with CA
+    echo "###$NODE_IDX### Generating certificate signature request"
     keytool -certreq -alias "$KEYSTORE_PRIVATE_ALIAS" -keyalg RSA -file "$SCRIPT_FOLDER/newreq.pem" -keypass "$KEYSTORE_PW" \
         -storepass "$KEYSTORE_PW" -keystore "$KEYSTORE" -ext "SAN=DNS:$NODE_DNS,IP:$NODE_IP"
     cat > "$SCRIPT_FOLDER/openssl.ext.tmp.cnf" <<EOL
@@ -59,31 +67,40 @@ do
         IP.1 = $NODE_IP
         DNS.1 = $NODE_DNS
 EOL
+
+    echo "###$NODE_IDX### Signing it with the CA"
     SSLEAY_CONFIG="-extfile $SCRIPT_FOLDER/openssl.ext.tmp.cnf" "$SCRIPT_FOLDER"/CA.sh -sign
 
-    # import CA certificate and own certificate signed by CA (chained to the private key)
+    echo "###$NODE_IDX### Importing in keystore the CA certificate and own certificate signed by CA (chained to the private key)"
     keytool -noprompt -import -v -alias shrine-hub-ca -file "$SCRIPT_FOLDER"/CA/cacert.pem -keystore "$KEYSTORE" -storepass "$KEYSTORE_PW"
     keytool -noprompt -import -v -alias "$KEYSTORE_PRIVATE_ALIAS" -file "$SCRIPT_FOLDER"/newcert.pem -keystore "$KEYSTORE" -storepass "$KEYSTORE_PW" \
         -keypass "$KEYSTORE_PW" -trustcacerts
 
-    # lighttpd certificates
+    echo "###$NODE_IDX### Generating pem certificates (lighttpd)"
     keytool -noprompt -importkeystore -srckeystore "$KEYSTORE" -srcalias "$KEYSTORE_PRIVATE_ALIAS" -destkeystore "$KEYSTORE".p12 \
         -deststoretype PKCS12 -srcstorepass "$KEYSTORE_PW" -deststorepass "$KEYSTORE_PW"
     openssl pkcs12 -in "$KEYSTORE".p12 -out "$CONF_FOLDER/srv$NODE_IDX.pem" -password pass:"$KEYSTORE_PW" -nodes
 
-    # cleanup
-    rm "$SCRIPT_FOLDER/newreq.pem" "$SCRIPT_FOLDER/openssl.ext.tmp.cnf" "$KEYSTORE".p12 "$SCRIPT_FOLDER"/newcert.pem #"$CONF_1FOLDER/srv$NODE_IDX-private.pem"
-
-    # add entry in the downstream nodes and alias map
+    echo "###$NODE_IDX### Adding entry in the downstream nodes config file"
     echo "\"Hospital $NODE_IDX\" = \"https://$NODE_DNS:6443/shrine/rest/adapter/requests\"" >> "$CONF_FOLDER/shrine_downstream_nodes.conf"
 
-    #todo: unlynx keys
-    #todo: cleanup
+    echo "###$NODE_IDX### Generating unlynx keys"
+    "$CONF_FOLDER"/unlynxMedCo server setupNonInteractive --serverBinding "$NODE_IP:2000" --description "Unlynx Server $NODE_IDX" \
+        --privateTomlPath "$CONF_FOLDER/srv$NODE_IDX-private.toml" --publicTomlPath "$CONF_FOLDER/srv$NODE_IDX-public.toml"
 
-    keytool -list -v -keystore "$KEYSTORE" -storepass "$KEYSTORE_PW"
+    echo "###$NODE_IDX### Generating docker-compose file"
+    TARGET_COMPOSE_FILE="$COMPOSE_FOLDER/docker-compose-srv$NODE_IDX.yml"
+    cp "$SCRIPT_FOLDER/docker-compose-template.yml" "$TARGET_COMPOSE_FILE"
+    sed -i "s#_NODE_INDEX_#$NODE_IDX#g" "$TARGET_COMPOSE_FILE"
+    sed -i "s#_CONF_PROFILE_#$CONF_PROFILE#g" "$TARGET_COMPOSE_FILE"
+
+    echo "###$NODE_IDX### Cleaning up"
+    rm "$SCRIPT_FOLDER/newreq.pem" "$SCRIPT_FOLDER/openssl.ext.tmp.cnf" "$KEYSTORE".p12 "$SCRIPT_FOLDER"/newcert.pem #"$CONF_1FOLDER/srv$NODE_IDX-private.pem"
+
+    # keytool -list -v -keystore "$KEYSTORE" -storepass "$KEYSTORE_PW" # list content of keystore (disabled)
 done
 
-#CA generation
-#CATOP=/home/misbach/repositories/medco-deployment/configuration-profiles/dev-3nodes-samehost/CA/ /etc/pki/tls/misc/CA -newca
-#cartificate name: dev-3nodes-samehost
-# cp cacert.pem in conf folder // todo: delete at beginning + delete toml and do unlynx keys
+echo "### Generating group.toml file"
+cat "$CONF_FOLDER"/srv*-public.toml > "$CONF_FOLDER/group.toml"
+
+echo "### Configuration generated!"
