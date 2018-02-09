@@ -1,7 +1,7 @@
 FROM tomcat:8.0-jre8
 
 # pre-existing variables: CATALINA_HOME
-ENV SHRINE_VERSION="fork/1.22.8-medco" \
+ENV SHRINE_VERSION="tags/MedCo_v0.1" \
     SHRINE_SRC_DIR="/opt/shrine-src" \
     SHRINE_ADAPTER_MAPPINGS_URL="https://open.med.harvard.edu/svn/shrine-ontology/SHRINE_Demo_Downloads/trunk/AdapterMappings_i2b2_DemoData.xml" \
     SHRINE_MYSQL_JAR_URL="http://central.maven.org/maven2/mysql/mysql-connector-java/5.1.40/mysql-connector-java-5.1.40.jar" \
