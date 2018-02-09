@@ -14,8 +14,9 @@ ENV SHRINE_VERSION="fork/1.22.8-medco" \
 RUN apt-get -y update && \
     apt-get -y install git maven zip wget unzip openjdk-8-jdk-headless && \
     apt-get -y clean && \
-    echo "<?xml version='1.0' encoding='utf-8'?><tomcat-users><role rolename=\"manager-gui\" /><user username=\"admin\"" \
-        "password=\"$ADMIN_PASSWORD\" roles=\"manager-gui\" /></tomcat-users>" > "$CATALINA_HOME/conf/tomcat-users.xml" && \
+    echo "<?xml version='1.0' encoding='utf-8'?><tomcat-users><role rolename=\"manager-gui\" /><role rolename=\"admin-gui\" />" \
+        "<user username=\"admin\" password=\"$ADMIN_PASSWORD\" roles=\"manager-gui,admin-gui\" /></tomcat-users>" > \
+        "$CATALINA_HOME/conf/tomcat-users.xml" && \
     echo 'export CATALINA_OPTS=" -Dakka.daemonic=on "' > "$CATALINA_HOME/bin/setenv.sh" && \
     echo '{ "allow_root": true }' > /root/.bowerrc
 
@@ -64,7 +65,7 @@ RUN cp  "$SHRINE_SRC_DIR/apps/steward-war/target/steward.war" \
     cp  "$SHRINE_SRC_DIR/apps/war/target/shrine-cell.war" "$CATALINA_HOME/webapps/shrine.war" && \
     cp  "$SHRINE_SRC_DIR/apps/meta-war/target/shrine-metadata.war" "$CATALINA_HOME/webapps/shrine-meta.war"
 
-# webclient [disabled]
+# webclient [disabled: served by lighttpd]
 #RUN cp "$SHRINE_SRC_DIR/apps/proxy/target/shrine-proxy.war" "$CATALINA_HOME/webapps/" && \
 #    cp -r "$SHRINE_SRC_DIR/shrine-webclient/src/main/html" "$CATALINA_HOME/webapps/shrine-client"
 #COPY conf/i2b2_config_data.js "$CATALINA_HOME/webapps/shrine-client/"
@@ -78,6 +79,7 @@ COPY conf/server.xml conf/context.xml "$CATALINA_HOME/conf/"
 RUN wget "$SHRINE_MYSQL_JAR_URL" -P "$CATALINA_HOME/lib/" && \
     wget "$SHRINE_ADAPTER_MAPPINGS_URL" -O "$CATALINA_HOME/lib/AdapterMappings.xml" && \
     sed -i "s#SHRINE_DOWNSTREAM_NODES_FILE_PATH#$CONF_DIR/shrine_downstream_nodes.conf#g" "$CATALINA_HOME/lib/shrine.conf" && \
+    sed -i "s#SHRINE_CA_CERT_ALIASES_FILE_PATH#$CONF_DIR/shrine_ca_cert_aliases.conf#g" "$CATALINA_HOME/lib/shrine.conf" && \
     sed -i "s/SHRINE_KEYSTORE_PASSWORD/$ADMIN_PASSWORD/g" "$CATALINA_HOME/conf/server.xml" && \
     sed -i "s/SHRINE_DB_PASSWORD/$DB_PASSWORD/g" "$CATALINA_HOME/conf/context.xml"
 

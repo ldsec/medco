@@ -3,10 +3,10 @@ set -e
 shopt -s nullglob
 
 # dependencies: openssl, keytool (java), docker
-# usage: bash generate-configuration-profile.sh CONFIGURATION_PROFILE KEYSTORE_PASSWORD NODE_DNS_1 NODE_IP_1 NODE_DNS_2 NODE_IP_2 NODE_DNS_3 NODE_IP_3 ...
+# usage: bash generate-dev-configuration-profile.sh CONFIGURATION_PROFILE KEYSTORE_PASSWORD NODE_DNS_1 NODE_IP_1 NODE_DNS_2 NODE_IP_2 NODE_DNS_3 NODE_IP_3 ...
 if [ $# -lt 5 ]
 then
-    echo "Wrong number of arguments, usage: bash generate-configuration-profile.sh CONFIGURATION_PROFILE KEYSTORE_PASSWORD NODE_DNS_1 NODE_IP_1 NODE_DNS_2 NODE_IP_2 NODE_DNS_3 NODE_IP_3 ..."
+    echo "Wrong number of arguments, usage: bash generate-dev-configuration-profile.sh CONFIGURATION_PROFILE KEYSTORE_PASSWORD NODE_DNS_1 NODE_IP_1 NODE_DNS_2 NODE_IP_2 NODE_DNS_3 NODE_IP_3 ..."
     exit
 fi
 
@@ -23,14 +23,11 @@ shift
 shift
 
 # clean up previous entries
-mkdir -p "$CONF_FOLDER"
-mkdir -p "$COMPOSE_FOLDER"
-rm -f "$CONF_FOLDER"/*.keystore "$CONF_FOLDER"/shrine_downstream_nodes.conf "$CONF_FOLDER"/*.pem "$CONF_FOLDER"/*.toml "$CONF_FOLDER"/unlynxMedCo
-
-# set up common things
-echo "### Setting up certificate authority"
-"$SCRIPT_FOLDER"/CA.sh -newca
-cp "$SCRIPT_FOLDER"/CA/cacert.pem "$CONF_FOLDER"/
+mkdir -p "$CONF_FOLDER" "$COMPOSE_FOLDER"
+rm -f "$CONF_FOLDER"/*.keystore "$CONF_FOLDER"/shrine_ca_cert_aliases.conf "$CONF_FOLDER"/shrine_downstream_nodes.conf \
+    "$CONF_FOLDER"/*.pem "$CONF_FOLDER"/*.toml "$CONF_FOLDER"/unlynxMedCo
+rm -rf "$CONF_FOLDER"/srv*-CA
+echo -n "caCertAliases = [" >> "$CONF_FOLDER/shrine_ca_cert_aliases.conf"
 
 echo "### Producing Unlynx binary with Docker"
 docker build -t lca1/unlynx:medco-deployment "$SCRIPT_FOLDER"/../../docker-images/unlynx/
@@ -48,6 +45,11 @@ do
     NODE_IDX=$((NODE_IDX+1))
     KEYSTORE="$CONF_FOLDER/srv$NODE_IDX.keystore"
     KEYSTORE_PRIVATE_ALIAS="srv$NODE_IDX-private"
+
+    echo "### Setting up certificate authority and import it in keystore"
+    CATOP="$CONF_FOLDER/srv$NODE_IDX-CA" "$SCRIPT_FOLDER"/CA.sh -newca
+    echo -n "\"shrine-ca-srv$NODE_IDX\", " >> "$CONF_FOLDER/shrine_ca_cert_aliases.conf"
+    keytool -noprompt -import -v -alias "shrine-ca-srv$NODE_IDX" -file "$CONF_FOLDER/srv$NODE_IDX-CA/cacert.pem" -keystore "$KEYSTORE" -storepass "$KEYSTORE_PW"
 
     echo "###$NODE_IDX### Generating java keystore pair of keys"
     keytool -genkeypair -keysize 2048 -alias "$KEYSTORE_PRIVATE_ALIAS" -validity 7300 \
@@ -69,10 +71,9 @@ do
 EOL
 
     echo "###$NODE_IDX### Signing it with the CA"
-    SSLEAY_CONFIG="-extfile $SCRIPT_FOLDER/openssl.ext.tmp.cnf" "$SCRIPT_FOLDER"/CA.sh -sign
+    CATOP="$CONF_FOLDER/srv$NODE_IDX-CA" SSLEAY_CONFIG="-extfile $SCRIPT_FOLDER/openssl.ext.tmp.cnf" "$SCRIPT_FOLDER"/CA.sh -sign
 
-    echo "###$NODE_IDX### Importing in keystore the CA certificate and own certificate signed by CA (chained to the private key)"
-    keytool -noprompt -import -v -alias shrine-hub-ca -file "$SCRIPT_FOLDER"/CA/cacert.pem -keystore "$KEYSTORE" -storepass "$KEYSTORE_PW"
+    echo "###$NODE_IDX### Importing in keystore own certificate signed by CA (chained to the private key)"
     keytool -noprompt -import -v -alias "$KEYSTORE_PRIVATE_ALIAS" -file "$SCRIPT_FOLDER"/newcert.pem -keystore "$KEYSTORE" -storepass "$KEYSTORE_PW" \
         -keypass "$KEYSTORE_PW" -trustcacerts
 
@@ -95,12 +96,13 @@ EOL
     sed -i "s#_CONF_PROFILE_#$CONF_PROFILE#g" "$TARGET_COMPOSE_FILE"
 
     echo "###$NODE_IDX### Cleaning up"
-    rm "$SCRIPT_FOLDER/newreq.pem" "$SCRIPT_FOLDER/openssl.ext.tmp.cnf" "$KEYSTORE".p12 "$SCRIPT_FOLDER"/newcert.pem #"$CONF_1FOLDER/srv$NODE_IDX-private.pem"
+    rm "$SCRIPT_FOLDER/newreq.pem" "$SCRIPT_FOLDER/openssl.ext.tmp.cnf" "$KEYSTORE".p12 "$SCRIPT_FOLDER/newcert.pem"
 
     # keytool -list -v -keystore "$KEYSTORE" -storepass "$KEYSTORE_PW" # list content of keystore (disabled)
 done
 
-echo "### Generating group.toml file"
+echo "### Generating group.toml file and finalizing shrine config file"
 cat "$CONF_FOLDER"/srv*-public.toml > "$CONF_FOLDER/group.toml"
+echo "]" >> "$CONF_FOLDER/shrine_ca_cert_aliases.conf"
 
 echo "### Configuration generated!"
