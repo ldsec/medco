@@ -156,9 +156,9 @@ case $1 in
     exit $RET
     ;;
 -sign|-signreq)
-    $CA -policy policy_anything -out newcert.pem -infiles newreq.pem
+    $CA -policy policy_anything -out "$PARENT_DIR"/newcert.pem -infiles "$PARENT_DIR"/newreq.pem
     RET=$?
-    cat newcert.pem
+    cat "$PARENT_DIR"/newcert.pem
     echo "Signed certificate is in newcert.pem"
     ;;
 -signCA)
