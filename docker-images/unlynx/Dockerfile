@@ -1,8 +1,8 @@
-FROM golang:1.8
+FROM golang:1.9
 
 # environment variables
-ENV UNLYNX_REPO="github.com/lca1/unlynx" \
-    UNLYNX_REPO_BRANCH="medco-deployment" \
+ENV UNLYNX_REPO="github.com/lca1/medco" \
+    UNLYNX_REPO_BRANCH="master" \
     CONF_DIR="/opt/medco-configuration"
 
 # get maximum of dependencies and cache them
@@ -13,7 +13,8 @@ RUN go get -v -d gopkg.in/dedis/onet.v1/... && \
     go get -v -d github.com/btcsuite/goleveldb/... && \
     go get -v -d github.com/r0fls/gostats/... && \
     go get -v -d github.com/fanliao/go-concurrentMap/... && \
-    go get -v -d github.com/lib/pq/...
+    go get -v -d github.com/lib/pq/... && \
+    go get -v -d github.com/lca1/unlynx/...
 
 # get sources and switch branch
 WORKDIR /go/src/$UNLYNX_REPO
@@ -21,7 +22,7 @@ RUN git clone https://$UNLYNX_REPO.git . && \
     git checkout $UNLYNX_REPO_BRANCH
 
 # get remaining dependencies, compile and install unlynxMedCo binary, and make it available in the shared folder
-WORKDIR app/unlynxMedCo
+WORKDIR app
 RUN go get -v -d ./... && \
     go install -v ./...
 
