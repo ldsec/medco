@@ -1,7 +1,7 @@
 package loader_test
 
 import (
-	"github.com/lca1/unlynx/app/unlynxMedCo/loader"
+	"github.com/lca1/medco/app/loader"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

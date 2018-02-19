@@ -17,9 +17,9 @@ func keyGenerationFromApp(c *cli.Context) error {
 		return cli.NewExitError(err, 3)
 	}
 
-	secKey, pubKey := lib.GenKey()
-	secKeySer, err1 := lib.SerializeScalar(secKey)
-	pubKeySer, err2 := lib.SerializePoint(pubKey)
+	secKey, pubKey := libUnLynx.GenKey()
+	secKeySer, err1 := libUnLynx.SerializeScalar(secKey)
+	pubKeySer, err2 := libUnLynx.SerializePoint(pubKey)
 
 	if err1 != nil {
 		log.Error("Error while serializing.", err1)

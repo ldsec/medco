@@ -46,7 +46,7 @@ func encryptIntFromApp(c *cli.Context) error {
 	}
 
 	// encrypt
-	encryptedInt := lib.EncryptInt(el.Aggregate, toEncryptInt)
+	encryptedInt := libUnLynx.EncryptInt(el.Aggregate, toEncryptInt)
 
 	// test encryption for ETL
 	/*originalDatasetNbr := 250000

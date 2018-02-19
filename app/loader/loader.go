@@ -6,8 +6,8 @@ import (
 	"encoding/binary"
 	"encoding/csv"
 	"errors"
+	"github.com/lca1/medco/services"
 	"github.com/lca1/unlynx/lib"
-	"github.com/lca1/unlynx/services/unlynxMedCo"
 	"gopkg.in/dedis/crypto.v0/base64"
 	"gopkg.in/dedis/onet.v1"
 	"gopkg.in/dedis/onet.v1/log"
@@ -768,20 +768,20 @@ func GenerateRandomBytes(n int) ([]byte, error) {
 }
 
 // EncryptAndTag encrypts the query elements and tags them to allow for the comparison between elements
-func EncryptAndTag(list []int64, group *onet.Roster, entryPointIdx int) ([]lib.GroupingKey, error) {
+func EncryptAndTag(list []int64, group *onet.Roster, entryPointIdx int) ([]libUnLynx.GroupingKey, error) {
 
 	// ENCRYPTION
 	start := time.Now()
-	listEncryptedElements := make(lib.CipherVector, len(list))
+	listEncryptedElements := make(libUnLynx.CipherVector, len(list))
 
 	for i := int64(0); i < int64(len(list)); i++ {
-		listEncryptedElements[i] = *lib.EncryptInt(group.Aggregate, list[i])
+		listEncryptedElements[i] = *libUnLynx.EncryptInt(group.Aggregate, list[i])
 	}
 	log.LLvl1("Finished encrypting the sensitive data... (", time.Since(start), ")")
 
 	// TAGGING
 	start = time.Now()
-	client := serviceMedCo.NewUnLynxClient(group.List[entryPointIdx], strconv.Itoa(entryPointIdx))
+	client := serviceMedCo.NewMedCoClient(group.List[entryPointIdx], strconv.Itoa(entryPointIdx))
 	_, result, tr, err := client.SendSurveyDDTRequestTerms(
 		group, // Roster
 		serviceMedCo.SurveyID("tagging_loading_phase"), // SurveyID
@@ -797,16 +797,16 @@ func EncryptAndTag(list []int64, group *onet.Roster, entryPointIdx int) ([]lib.G
 
 	totalTime := time.Since(start)
 
-	tr.DDTRequestTimeCommun = totalTime - tr.DDTRequestTimeExec
+	tr.DDTRequestTimeCommunication = totalTime - tr.DDTRequestTimeExec
 
-	log.LLvl1("DDT took: exec -", tr.DDTRequestTimeExec, "commun -", tr.DDTRequestTimeCommun)
+	log.LLvl1("DDT took: exec -", tr.DDTRequestTimeExec, "commun -", tr.DDTRequestTimeCommunication)
 
 	log.LLvl1("Finished tagging the sensitive data... (", totalTime, ")")
 
 	return result, nil
 }
 
-func writeMetadataSensitiveTagged(list []lib.GroupingKey, keyForSensitiveIDs []ConceptPath) error {
+func writeMetadataSensitiveTagged(list []libUnLynx.GroupingKey, keyForSensitiveIDs []ConceptPath) error {
 
 	if len(list) != len(keyForSensitiveIDs) {
 		log.Fatal("The number of sensitive elements does not match the number of 'KeyForSensitiveID's.")
@@ -955,7 +955,7 @@ func writeDemodataPatientMapping(el string, id int64) error {
 // TODO: No dummy data. Basically all flags are
 func writeDemodataPatientDimension(group *onet.Roster, id int64) error {
 
-	encryptedFlag := lib.EncryptInt(group.Aggregate, 1)
+	encryptedFlag := libUnLynx.EncryptInt(group.Aggregate, 1)
 	b := encryptedFlag.ToBytes()
 
 	/*patientDimension := `INSERT INTO i2b2demodata.patient_dimension VALUES (` + strconv.FormatInt(id, 10) + `, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'NOW()', NULL, 1, '` + base64.StdEncoding.EncodeToString(b) + `');` + "\n"*/

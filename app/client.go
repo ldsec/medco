@@ -6,9 +6,10 @@ import (
 	"database/sql"
 	"encoding/xml"
 	"fmt"
-	"github.com/lca1/unlynx/app/unlynxMedCo/loader"
+	"github.com/lca1/medco/app/loader"
+	"github.com/lca1/medco/lib"
+	"github.com/lca1/medco/services"
 	"github.com/lca1/unlynx/lib"
-	"github.com/lca1/unlynx/services/unlynxMedCo"
 	_ "github.com/lib/pq"
 	"gopkg.in/dedis/crypto.v0/abstract"
 	"gopkg.in/dedis/onet.v1"
@@ -188,9 +189,9 @@ func readRequestXMLFrom(input io.Reader) ([]byte, error) {
 //----------------------------------------------------------------------------------------------------------------------
 
 // unmarshal the DDTRequest XML
-func parserDDTRequestXML(input []byte) (*lib.XMLMedCoDTTRequest, error) {
+func parserDDTRequestXML(input []byte) (*libMedCo.XMLMedCoDTTRequest, error) {
 	// unmarshal xml (assumes bytes are UTF-8 encoded)
-	parsedXML := lib.XMLMedCoDTTRequest{}
+	parsedXML := libMedCo.XMLMedCoDTTRequest{}
 
 	errXML := xml.Unmarshal(input, &parsedXML)
 	if errXML != nil {
@@ -225,7 +226,7 @@ func unlynxDDTRequest(input []byte, output io.Writer, el *onet.Roster, entryPoin
 	// launch query
 	start = time.Now()
 
-	client := serviceMedCo.NewUnLynxClient(el.List[entryPointIdx], strconv.Itoa(entryPointIdx))
+	client := serviceMedCo.NewMedCoClient(el.List[entryPointIdx], strconv.Itoa(entryPointIdx))
 	_, result, tr, err := client.SendSurveyDDTRequestTerms(
 		el, // Roster
 		serviceMedCo.SurveyID(id), // SurveyID
@@ -247,9 +248,9 @@ func unlynxDDTRequest(input []byte, output io.Writer, el *onet.Roster, entryPoin
 		log.Error("The number of tags", len(result), "does not match the number of terms", len(encQueryTerms), ".", err)
 	}
 
-	tr.DDTRequestTimeCommun = totalTime - tr.DDTRequestTimeExec
-	tr.DDTparsingTime = parsingTime
-	tr.DDTRequestTimeExec += tr.DDTparsingTime
+	tr.DDTRequestTimeCommunication = totalTime - tr.DDTRequestTimeExec
+	tr.DDTParsingTime = parsingTime
+	tr.DDTRequestTimeExec += tr.DDTParsingTime
 
 	err = writeDDTResponseXML(output, xmlQuery, result, &tr, nil)
 	if err != nil {
@@ -261,7 +262,7 @@ func unlynxDDTRequest(input []byte, output io.Writer, el *onet.Roster, entryPoin
 }
 
 // output result xml on a writer (if result_err != nil, the error is sent)
-func writeDDTResponseXML(output io.Writer, xmlQuery *lib.XMLMedCoDTTRequest, result []lib.GroupingKey, tr *serviceMedCo.TimeResults, err error) error {
+func writeDDTResponseXML(output io.Writer, xmlQuery *libMedCo.XMLMedCoDTTRequest, result []libUnLynx.GroupingKey, tr *serviceMedCo.TimeResults, err error) error {
 
 	/*
 		<unlynx_ddt_response>
@@ -287,8 +288,8 @@ func writeDDTResponseXML(output io.Writer, xmlQuery *lib.XMLMedCoDTTRequest, res
 		resultString = `<unlynx_ddt_response>
 					<id>` + (*xmlQuery).QueryID + `</id>
 					<times unit="ms">{"DDTRequest execution time":` + strconv.FormatInt(int64(tr.DDTRequestTimeExec.Nanoseconds()/1000000.0), 10) +
-			`,"DDTRequest communication time":` + strconv.FormatInt(int64(tr.DDTRequestTimeCommun.Nanoseconds()/1000000.0), 10) +
-			`,"DDTRequest parsing time":` + strconv.FormatInt(int64(tr.DDTparsingTime.Nanoseconds()/1000000.0), 10) +
+			`,"DDTRequest communication time":` + strconv.FormatInt(int64(tr.DDTRequestTimeCommunication.Nanoseconds()/1000000.0), 10) +
+			`,"DDTRequest parsing time":` + strconv.FormatInt(int64(tr.DDTParsingTime.Nanoseconds()/1000000.0), 10) +
 			`}</times>
 					<tagged_values>` + resultTags + `</tagged_values>
 					<error></error>
@@ -322,9 +323,9 @@ func writeDDTResponseXML(output io.Writer, xmlQuery *lib.XMLMedCoDTTRequest, res
 //----------------------------------------------------------------------------------------------------------------------
 
 // unmarshal the AggRequest XML
-func parseAggRequestXML(input []byte) (*lib.XMLMedCoAggRequest, error) {
+func parseAggRequestXML(input []byte) (*libMedCo.XMLMedCoAggRequest, error) {
 	// unmarshal xml (assumes bytes are UTF-8 encoded)
-	parsedXML := lib.XMLMedCoAggRequest{}
+	parsedXML := libMedCo.XMLMedCoAggRequest{}
 	errXML := xml.Unmarshal(input, &parsedXML)
 	if errXML != nil {
 		log.Error("Error while unmarshalling AggRequest xml.", errXML)
@@ -364,14 +365,14 @@ func unlynxAggRequest(input []byte, output io.Writer, el *onet.Roster, entryPoin
 	// launch query
 	start = time.Now()
 
-	cPK, err := lib.DeserializePoint(xmlQuery.ClientPubKey)
+	cPK, err := libUnLynx.DeserializePoint(xmlQuery.ClientPubKey)
 	if err != nil {
 		log.Error("Error decoding client public key.", err)
 		writeAggResponseXML(output, nil, nil, nil, err)
 		return err
 	}
 
-	client := serviceMedCo.NewUnLynxClient(el.List[entryPointIdx], strconv.Itoa(entryPointIdx))
+	client := serviceMedCo.NewMedCoClient(el.List[entryPointIdx], strconv.Itoa(entryPointIdx))
 	_, result, tr, err := client.SendSurveyAggRequest(
 		el, // Roster
 		serviceMedCo.SurveyID(id), // SurveyID
@@ -388,7 +389,7 @@ func unlynxAggRequest(input []byte, output io.Writer, el *onet.Roster, entryPoin
 		return err
 	}
 
-	tr.AggRequestTimeCommun = totalTime - tr.DDTRequestTimeExec
+	tr.AggRequestTimeCommunication = totalTime - tr.DDTRequestTimeExec
 	tr.LocalAggregationTime = aggregationTime
 	tr.AggParsingTime = parsingTime
 	tr.AggRequestTimeExec += tr.AggParsingTime + tr.LocalAggregationTime
@@ -403,10 +404,10 @@ func unlynxAggRequest(input []byte, output io.Writer, el *onet.Roster, entryPoin
 }
 
 // LocalAggregate locally aggregates the encrypted dummy flags
-func LocalAggregate(encDummyFlags lib.CipherVector, pubKey abstract.Point) *lib.CipherText {
+func LocalAggregate(encDummyFlags libUnLynx.CipherVector, pubKey abstract.Point) *libUnLynx.CipherText {
 	// there are no results
 	if len(encDummyFlags) == 0 {
-		return lib.EncryptInt(pubKey, int64(0))
+		return libUnLynx.EncryptInt(pubKey, int64(0))
 	}
 
 	result := &encDummyFlags[0]
@@ -418,7 +419,7 @@ func LocalAggregate(encDummyFlags lib.CipherVector, pubKey abstract.Point) *lib.
 }
 
 // output result xml on a writer (if result_err != nil, the error is sent)
-func writeAggResponseXML(output io.Writer, xmlQuery *lib.XMLMedCoAggRequest, aggregate *lib.CipherText, tr *serviceMedCo.TimeResults, err error) error {
+func writeAggResponseXML(output io.Writer, xmlQuery *libMedCo.XMLMedCoAggRequest, aggregate *libUnLynx.CipherText, tr *serviceMedCo.TimeResults, err error) error {
 
 	/*
 		<unlynx_agg_response>
@@ -434,7 +435,7 @@ func writeAggResponseXML(output io.Writer, xmlQuery *lib.XMLMedCoAggRequest, agg
 		resultString = `<unlynx_agg_response>
 					<id>` + (*xmlQuery).QueryID + `</id>
 					<times unit="ms">{"AggRequest execution time":` + strconv.FormatInt(int64(tr.AggRequestTimeExec.Nanoseconds()/1000000.0), 10) +
-			`,"AggRequest communication time":` + strconv.FormatInt(int64(tr.AggRequestTimeCommun.Nanoseconds()/1000000.0), 10) +
+			`,"AggRequest communication time":` + strconv.FormatInt(int64(tr.AggRequestTimeCommunication.Nanoseconds()/1000000.0), 10) +
 			`,"AggRequest parsing time":` + strconv.FormatInt(int64(tr.AggParsingTime.Nanoseconds()/1000000.0), 10) +
 			`,"AggRequest aggregation time":` + strconv.FormatInt(int64(tr.LocalAggregationTime.Nanoseconds()/1000000.0), 10) +
 			`}</times>

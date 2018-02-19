@@ -14,7 +14,7 @@ func decryptIntFromApp(c *cli.Context) error {
 
 	// cli arguments
 	secKeySerialized := c.String("key")
-	secKey, err := lib.DeserializeScalar(secKeySerialized)
+	secKey, err := libUnLynx.DeserializeScalar(secKeySerialized)
 	if err != nil {
 		log.Error(err)
 		return cli.NewExitError(err, 4)
@@ -28,10 +28,10 @@ func decryptIntFromApp(c *cli.Context) error {
 
 	// value to decrypt
 	toDecryptSerialized := c.Args().Get(0)
-	toDecrypt := lib.NewCipherTextFromBase64(toDecryptSerialized)
+	toDecrypt := libUnLynx.NewCipherTextFromBase64(toDecryptSerialized)
 
 	// decryption
-	decVal := lib.DecryptInt(secKey, *toDecrypt)
+	decVal := libUnLynx.DecryptInt(secKey, *toDecrypt)
 
 	// output in xml format on stdout
 	resultString := "<decrypted>" + strconv.FormatInt(decVal, 10) + "</decrypted>\n"
