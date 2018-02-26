@@ -7,7 +7,6 @@ import (
 	"gopkg.in/dedis/onet.v1/log"
 	"strconv"
 	"strings"
-	"time"
 )
 
 // ####----HELPER STRUCTS----####
@@ -113,15 +112,21 @@ var TableLocalOntologyClear map[string]*LocalOntology
 
 // TagAndID is a struct that contains both Tag and TagID for a concept or modifier
 type TagAndID struct {
-	Tag   lib.GroupingKey
+	Tag   libUnLynx.GroupingKey
 	TagID int64
 }
 
-// MapConceptCodeToTag maps a sensitive concept code to its respective tag and tag_id
-var MapConceptCodeToTag map[string]TagAndID
+// CodeID is a struct that contains both concept code and concept path
+type CodeID struct {
+	Path string
+	Code string
+}
 
-// MapModifierCodeToTag maps a sensitive modifier code to its respective tag and tag_id
-var MapModifierCodeToTag map[string]TagAndID
+// MapConceptPathToTag maps a sensitive concept path to its respective tag and tag_id
+var MapConceptPathToTag map[string]TagAndID
+
+// MapModifierPathToTag maps a sensitive modifier path to its respective tag and tag_id
+var MapModifierPathToTag map[string]TagAndID
 
 // HeaderLocalOntology contains all the headers for the i2b2 table
 var HeaderLocalOntology []string
@@ -166,13 +171,13 @@ func (lo LocalOntology) ToCSVText() string {
 }
 
 // LocalOntologySensitiveConceptToCSVText writes the tagging information of a concept of the local ontology in a way that can be added to a .csv file - "","","", etc.
-func LocalOntologySensitiveConceptToCSVText(tag *lib.GroupingKey, tagID int64) string {
+func LocalOntologySensitiveConceptToCSVText(tag *libUnLynx.GroupingKey, tagID int64) string {
 	return `"3", "\medco\tagged\concept\` + string(*tag) + `\", "", "N", "LA ", "\N", "TAG_ID:` + strconv.FormatInt(tagID, 10) + `", "\N", "concept_cd", "concept_dimension", "concept_path", "T", "LIKE", "\medco\tagged\concept\` + string(*tag) +
 		`\", "\N", "\N", "NOW()", "\N", "\N", "\N", "TAG_ID", "@", "\N", "\N", "\N", "\N"`
 }
 
-// LocalOntologySensitiveModiferToCSVText writes the tagging information of a modifier of the local ontology in a way that can be added to a .csv file - "","","", etc.
-func LocalOntologySensitiveModiferToCSVText(tag *lib.GroupingKey, tagID int64) string {
+// LocalOntologySensitiveModifierToCSVText writes the tagging information of a modifier of the local ontology in a way that can be added to a .csv file - "","","", etc.
+func LocalOntologySensitiveModifierToCSVText(tag *libUnLynx.GroupingKey, tagID int64) string {
 	return `"3", "\medco\tagged\modifier\` + string(*tag) + `\", "", "N", "LA ", "\N", "TAG_ID:` + strconv.FormatInt(tagID, 10) + `", "\N", "MODIFIER_CD", "MODIFIER_DIMENSION", "MODIFIER_PATH", "T", "LIKE", "\medco\tagged\modifier\` + string(*tag) +
 		`\", "\N", "\N", "NOW()", "\N", "\N", "\N", "TAG_ID", "@", "\N", "\N", "\N", "\N"`
 }
@@ -180,32 +185,36 @@ func LocalOntologySensitiveModiferToCSVText(tag *lib.GroupingKey, tagID int64) s
 //-------------------------------------//
 
 // TableObservationFact is observation_fact table
-var TableObservationFact map[ObservationFactPK]ObservationFact
+var TableObservationFact map[*ObservationFactPK]ObservationFact
+
+// HeaderObservationFact contains all the headers for the observation_fact table
+var HeaderObservationFact []string
 
 // ObservationFact is the fact table of the CRC-I2B2 start schema
 type ObservationFact struct {
+	PK              *ObservationFactPK
 	ValTypeCD       string
 	TValChar        string
-	NValNum         float64
+	NValNum         string
 	ValueFlagCD     string
-	QuantityNum     float64
+	QuantityNum     string
 	UnitsCD         string
-	EndDate         time.Time
+	EndDate         string
 	LocationCD      string
 	ObservationBlob string
-	ConfidenceNum   float64
+	ConfidenceNum   string
 	AdminColumns    AdministrativeColumns
 }
 
 // ObservationFactPK is the primary key of ObservationFact
 type ObservationFactPK struct {
-	Encounter   *VisitDimension
-	Patient     *PatientDimension
-	Concept     *ConceptDimension
-	Provider    *ProviderDimension
-	StartDate   time.Time
-	Modifier    *ModifierDimension
-	InstanceNum int
+	EncounterNum string
+	PatientNum   string
+	ConceptCD    string
+	ProviderID   string
+	StartDate    string
+	ModifierCD   string
+	InstanceNum  string
 }
 
 // AdministrativeColumns are a set of columns that exist in every i2b2 table
@@ -216,6 +225,15 @@ type AdministrativeColumns struct {
 	SourceSystemCD  string
 	UploadID        string
 	TextSearchIndex string
+}
+
+// ToCSVText writes the ObservationFact object in a way that can be added to a .csv file - "","","", etc.
+func (lo ObservationFact) ToCSVText() string {
+	acString := "\"" + lo.AdminColumns.UpdateDate + "\"," + "\"" + lo.AdminColumns.DownloadDate + "\"," + "\"" + lo.AdminColumns.ImportDate + "\"," + "\"" + lo.AdminColumns.SourceSystemCD + "\"," + "\"" + lo.AdminColumns.UploadID + "\"," + "\"" + lo.AdminColumns.TextSearchIndex + "\""
+
+	return "\"" + lo.PK.EncounterNum + "\"," + "\"" + lo.PK.PatientNum + "\"," + "\"" + lo.PK.ConceptCD + "\"," + "\"" + lo.PK.ProviderID + "\"," + "\"" + lo.PK.StartDate + "\"," + "\"" + lo.PK.ModifierCD + "\"," +
+		"\"" + lo.PK.InstanceNum + "\"," + "\"" + lo.ValTypeCD + "\"," + "\"" + lo.TValChar + "\"," + "\"" + lo.NValNum + "\"," + "\"" + lo.ValueFlagCD + "\"," + "\"" + lo.QuantityNum + "\"," + "\"" + lo.UnitsCD + "\"," +
+		"\"" + lo.EndDate + "\"," + "\"" + lo.LocationCD + "\"," + "\"" + lo.ObservationBlob + "\"," + "\"" + lo.ConfidenceNum + "\"," + acString
 }
 
 //-------------------------------------//
@@ -234,7 +252,7 @@ type PatientDimension struct {
 	DeathDate      string
 	OptionalFields []OptionalFields
 	AdminColumns   AdministrativeColumns
-	EncryptedFlag  lib.CipherText
+	EncryptedFlag  libUnLynx.CipherText
 }
 
 // PatientDimensionPK is the primary key of the Patient_Dimension table
@@ -277,6 +295,9 @@ var TableConceptDimension map[*ConceptDimensionPK]ConceptDimension
 // HeaderConceptDimension contains all the headers for the concept_dimension table
 var HeaderConceptDimension []string
 
+// MapConceptCodeToTag maps the concept code (in the concept dimension) to the tag ID value (for the sensitive terms)
+var MapConceptCodeToTag map[string]int64
+
 // ConceptDimension table contains one row for each concept
 type ConceptDimension struct {
 	PK           *ConceptDimensionPK
@@ -298,7 +319,7 @@ func (cd ConceptDimension) ToCSVText() string {
 }
 
 // ConceptDimensionSensitiveToCSVText writes the tagging information of a concept of the concept_dimension table in a way that can be added to a .csv file - "","","", etc.
-func ConceptDimensionSensitiveToCSVText(tag *lib.GroupingKey, tagID int64) string {
+func ConceptDimensionSensitiveToCSVText(tag *libUnLynx.GroupingKey, tagID int64) string {
 	return `"\medco\tagged\concept\` + string(*tag) + `\", "TAG_ID:` + strconv.FormatInt(tagID, 10) + `", "\N", "\N", "\N", "\N", "NOW()", "\N", "\N"`
 }
 
@@ -309,6 +330,9 @@ var TableModifierDimension map[*ModifierDimensionPK]ModifierDimension
 
 // HeaderModifierDimension contains all the headers for the modifier_dimension table
 var HeaderModifierDimension []string
+
+// MapModifierCodeToTag maps the modifier code (in the concept dimension) to the tag ID value (for the sensitive terms)
+var MapModifierCodeToTag map[string]int64
 
 // ModifierDimension table contains one row for each modifier
 type ModifierDimension struct {
@@ -331,88 +355,14 @@ func (md ModifierDimension) ToCSVText() string {
 }
 
 // ModifierDimensionSensitiveToCSVText writes the tagging information of a concept of the modifier_dimension table in a way that can be added to a .csv file - "","","", etc.
-func ModifierDimensionSensitiveToCSVText(tag *lib.GroupingKey, tagID int64) string {
+func ModifierDimensionSensitiveToCSVText(tag *libUnLynx.GroupingKey, tagID int64) string {
 	return `"\medco\tagged\modifier\` + string(*tag) + `\", "TAG_ID:` + strconv.FormatInt(tagID, 10) + `", "\N", "\N", "\N", "\N", "NOW()", "\N", "\N"`
 }
 
 //-------------------------------------//
 
-// TableVisitDimension is visit_dimension table
-var TableVisitDimension map[VisitDimensionPK]VisitDimension
-
-// VisitDimension table represents the sessions where observations were made
-type VisitDimension struct {
-	ActiveStatusCD string
-	StartDate      time.Time
-	EndDate        time.Time
-	OptionalFields map[string]OptionalFields
-	AdminColumns   AdministrativeColumns
-}
-
-// VisitDimensionPK is the primary key of the Visit_Dimension table
-type VisitDimensionPK struct {
-	EncounterNum     int
-	PatientDimension *PatientDimension
-}
-
-//-------------------------------------//
-
-// TableProviderDimension is provider_dimension table
-var TableProviderDimension map[ProviderDimensionPK]ProviderDimension
-
-// ProviderDimension table represents a physician or provider at an institution
-type ProviderDimension struct {
-	NameChar     string
-	ProviderBlob string
-	AdminColumns AdministrativeColumns
-}
-
-// ProviderDimensionPK is the primary key of the Provider_Dimension table
-type ProviderDimensionPK struct {
-	ProviderID   string
-	ProviderPath string
-}
-
-//-------------------------------------//
-
-// TablePatientMapping is patient_mapping table
-var TablePatientMapping map[PatientMappingPK]PatientMapping
-
-// PatientMapping table maps the i2b2 patient_num to an encrypted number
-type PatientMapping struct {
-	Patient          *PatientDimension
-	PatientIDEStatus string
-	ProjectID        string
-	AdminColumns     AdministrativeColumns
-}
-
-// PatientMappingPK is the primary key of the Patient_Mapping table
-type PatientMappingPK struct {
-	PatientIDE       string
-	PatientIDESource string
-}
-
-//-------------------------------------//
-
-// TableEncounterMapping is encounter_mapping table
-var TableEncounterMapping map[EncounterMappingPK]EncounterMapping
-
-// EncounterMapping table maps i2b2 encounter_num to an encrypted number
-type EncounterMapping struct {
-	Encounter          *VisitDimension
-	PatientIDE         PatientMapping
-	EncounterIDEStatus string
-	AdminColumns       AdministrativeColumns
-}
-
-// EncounterMappingPK is the primary key of the Encounter_Mapping table
-type EncounterMappingPK struct {
-	EncounterIDE       string
-	EncounterIDESource string
-	ProjectID          string
-}
-
-//-------------------------------------//
+// Am maps a shrine ontology sensitive concept or modifier concept to the local ontology (we need this to know which concepts from the local ontology are sensitive)
+var Am AdapterMappings
 
 // AdapterMappings is the xml pre-generated struct to parse the AdapterMappings.xml
 type AdapterMappings struct {
@@ -540,7 +490,7 @@ func PatientDimensionFromString(line []string, pk abstract.Point) (*PatientDimen
 	}
 
 	// TODO: right now we do not have fake patients
-	ef := lib.EncryptInt(pk, 1)
+	ef := libUnLynx.EncryptInt(pk, 1)
 
 	pd.OptionalFields = of
 	pd.AdminColumns = ac
@@ -599,4 +549,44 @@ func ModifierDimensionFromString(line []string) (*ModifierDimensionPK, ModifierD
 	md.AdminColumns = ac
 
 	return mdk, md
+}
+
+// ObservationFactFromString generates a ObservationFact struct from a parsed line of a .csv file
+func ObservationFactFromString(line []string) (*ObservationFactPK, ObservationFact) {
+	ofk := &ObservationFactPK{
+		EncounterNum: line[0],
+		PatientNum:   line[1],
+		ConceptCD:    line[2],
+		ProviderID:   line[3],
+		StartDate:    line[4],
+		ModifierCD:   line[5],
+		InstanceNum:  line[6],
+	}
+
+	of := ObservationFact{
+		PK:              ofk,
+		ValTypeCD:       line[7],
+		TValChar:        line[8],
+		NValNum:         line[9],
+		ValueFlagCD:     line[10],
+		QuantityNum:     line[11],
+		UnitsCD:         line[12],
+		EndDate:         line[13],
+		LocationCD:      line[14],
+		ObservationBlob: line[15],
+		ConfidenceNum:   line[16],
+	}
+
+	ac := AdministrativeColumns{
+		UpdateDate:      line[17],
+		DownloadDate:    line[18],
+		ImportDate:      line[19],
+		SourceSystemCD:  line[20],
+		UploadID:        line[21],
+		TextSearchIndex: line[22],
+	}
+
+	of.AdminColumns = ac
+
+	return ofk, of
 }

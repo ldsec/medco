@@ -58,7 +58,7 @@ func setupEncryptEnv() {
 	el = elAux
 	local = localAux
 
-	secretKey, publicKey = lib.GenKey()
+	secretKey, publicKey = libUnLynx.GenKey()
 }
 
 func TestStoreSensitiveLocalConcepts(t *testing.T) {
@@ -85,7 +85,6 @@ func TestStoreSensitiveLocalConcepts(t *testing.T) {
 	assert.Equal(t, 1, len(loader.ListSensitiveConceptsShrine))
 	assert.Equal(t, 2, len(loader.ListSensitiveConceptsLocal))
 
-
 	// Test #2
 	loader.ListSensitiveConceptsShrine = make(map[string]bool)
 	loader.ListSensitiveConceptsShrine["a"] = true
@@ -108,7 +107,6 @@ func TestStoreSensitiveLocalConcepts(t *testing.T) {
 
 	assert.Equal(t, 2, len(loader.ListSensitiveConceptsShrine))
 	assert.Equal(t, 3, len(loader.ListSensitiveConceptsLocal))
-
 
 	// Test #3
 	loader.ListSensitiveConceptsShrine = make(map[string]bool)
@@ -151,6 +149,7 @@ func TestConvertAdapterMappings(t *testing.T) {
 	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`] = true
 	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.9) Benign neoplasm of bone and articular cartilage, site unspecified\`] = true
 
+	assert.Nil(t, loader.ParseAdapterMappings())
 	assert.Nil(t, loader.ConvertAdapterMappings())
 }
 
@@ -168,11 +167,11 @@ func TestUpdateChildrenEncryptIDs(t *testing.T) {
 	loader.TableShrineOntologyConceptEnc = make(map[string]*loader.ShrineOntology)
 	loader.TableShrineOntologyModifierEnc = make(map[string][]*loader.ShrineOntology)
 
-	so0 := loader.ShrineOntology{Fullname:"\\a\\", NodeEncryptID: 0}
-	so1 := loader.ShrineOntology{Fullname:"\\a\\b\\", NodeEncryptID: 1}
-	so2 := loader.ShrineOntology{Fullname:"\\a\\c\\", NodeEncryptID: 2}
-	so3 := loader.ShrineOntology{Fullname:"\\a\\c\\d", NodeEncryptID: 3}
-	so4 := loader.ShrineOntology{Fullname:"\\a\\c\\f", NodeEncryptID: 4}
+	so0 := loader.ShrineOntology{Fullname: "\\a\\", NodeEncryptID: 0}
+	so1 := loader.ShrineOntology{Fullname: "\\a\\b\\", NodeEncryptID: 1}
+	so2 := loader.ShrineOntology{Fullname: "\\a\\c\\", NodeEncryptID: 2}
+	so3 := loader.ShrineOntology{Fullname: "\\a\\c\\d", NodeEncryptID: 3}
+	so4 := loader.ShrineOntology{Fullname: "\\a\\c\\f", NodeEncryptID: 4}
 
 	loader.TableShrineOntologyConceptEnc["\\a\\"] = &so0
 	loader.TableShrineOntologyConceptEnc["\\a\\b\\"] = &so1
@@ -180,10 +179,10 @@ func TestUpdateChildrenEncryptIDs(t *testing.T) {
 	loader.TableShrineOntologyConceptEnc["\\a\\c\\d"] = &so3
 	loader.TableShrineOntologyConceptEnc["\\a\\c\\f"] = &so4
 
-	soM0 := loader.ShrineOntology{Fullname:"\\a\\", NodeEncryptID: 0}
-	soM1 := loader.ShrineOntology{Fullname:"\\a\\", NodeEncryptID: 0}
-	soM2 := loader.ShrineOntology{Fullname:"\\a\\b\\", NodeEncryptID: 1}
-	soM3 := loader.ShrineOntology{Fullname:"\\a\\b\\", NodeEncryptID: 1}
+	soM0 := loader.ShrineOntology{Fullname: "\\a\\", NodeEncryptID: 0}
+	soM1 := loader.ShrineOntology{Fullname: "\\a\\", NodeEncryptID: 0}
+	soM2 := loader.ShrineOntology{Fullname: "\\a\\b\\", NodeEncryptID: 1}
+	soM3 := loader.ShrineOntology{Fullname: "\\a\\b\\", NodeEncryptID: 1}
 
 	loader.TableShrineOntologyModifierEnc["\\a\\"] = []*loader.ShrineOntology{&soM0, &soM1}
 	loader.TableShrineOntologyModifierEnc["\\a\\b\\"] = []*loader.ShrineOntology{&soM2, &soM3}
@@ -214,6 +213,7 @@ func TestConvertShrineOntology(t *testing.T) {
 	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`] = true
 	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.9) Benign neoplasm of bone and articular cartilage, site unspecified\`] = true
 
+	assert.Nil(t, loader.ParseAdapterMappings())
 	assert.Nil(t, loader.ConvertAdapterMappings())
 
 	assert.Nil(t, loader.ParseShrineOntology())
@@ -267,6 +267,7 @@ func TestConvertLocalOntology(t *testing.T) {
 	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`] = true
 	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.9) Benign neoplasm of bone and articular cartilage, site unspecified\`] = true
 
+	assert.Nil(t, loader.ParseAdapterMappings())
 	assert.Nil(t, loader.ConvertAdapterMappings())
 
 	assert.Nil(t, loader.ParseShrineOntology())
@@ -294,6 +295,7 @@ func TestConvertConceptDimension(t *testing.T) {
 	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`] = true
 	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.9) Benign neoplasm of bone and articular cartilage, site unspecified\`] = true
 
+	assert.Nil(t, loader.ParseAdapterMappings())
 	assert.Nil(t, loader.ConvertAdapterMappings())
 
 	assert.Nil(t, loader.ParseShrineOntology())
@@ -325,6 +327,7 @@ func TestConvertModifierDimension(t *testing.T) {
 	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`] = true
 	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.9) Benign neoplasm of bone and articular cartilage, site unspecified\`] = true
 
+	assert.Nil(t, loader.ParseAdapterMappings())
 	assert.Nil(t, loader.ConvertAdapterMappings())
 
 	assert.Nil(t, loader.ParseShrineOntology())
@@ -338,4 +341,41 @@ func TestConvertModifierDimension(t *testing.T) {
 
 	local.CloseAll()
 
+}
+
+func TestConvertObservationFact(t *testing.T) {
+	log.SetDebugVisible(2)
+	setupEncryptEnv()
+	loader.Testing = true
+
+	loader.ListSensitiveConceptsShrine = make(map[string]bool)
+	loader.ListSensitiveConceptsShrine[`\Admit Diagnosis\`] = true
+	loader.ListSensitiveConceptsShrine[`\Principal Diagnosis\`] = true
+	loader.ListSensitiveConceptsShrine[`\Secondary Diagnosis\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`] = true
+	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.9) Benign neoplasm of bone and articular cartilage, site unspecified\`] = true
+
+	assert.Nil(t, loader.ParseAdapterMappings())
+	assert.Nil(t, loader.ConvertAdapterMappings())
+
+	assert.Nil(t, loader.ParseShrineOntology())
+	assert.Nil(t, loader.ConvertShrineOntology())
+
+	assert.Nil(t, loader.ParseLocalOntology(el, 0))
+	assert.Nil(t, loader.ConvertLocalOntology())
+
+	assert.Nil(t, loader.ParseConceptDimension())
+	assert.Nil(t, loader.ConvertConceptDimension())
+
+	assert.Nil(t, loader.ParseModifierDimension())
+	assert.Nil(t, loader.ConvertModifierDimension())
+
+	assert.Nil(t, loader.ParseObservationFact())
+	assert.Nil(t, loader.ConvertObservationFact())
+
+	local.CloseAll()
 }
