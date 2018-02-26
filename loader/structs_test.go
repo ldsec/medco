@@ -106,7 +106,7 @@ func TestLocalOntology_ToCSVText(t *testing.T) {
 
 	assert.Equal(t, lo.ToCSVText(), `"4","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","Parkdale","N","FA ","\N","\N","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","\N","Demographics \ Zip codes \ Arkansas \ Parkdale","@","2007-04-10 00:00:00","2007-04-10 00:00:00","2007-04-10 00:00:00","DEMO","\N","\N","\N","\N"`)
 
-	tag := lib.GroupingKey("1")
+	tag := libUnLynx.GroupingKey("1")
 	assert.Equal(t, loader.LocalOntologySensitiveConceptToCSVText(&tag, 20), `"3", "\medco\tagged\concept\1\", "", "N", "LA ", "\N", "TAG_ID:20", "\N", "concept_cd", "concept_dimension", "concept_path", "T", "LIKE", "\medco\tagged\concept\1\", "\N", "\N", "NOW()", "\N", "\N", "\N", "TAG_ID", "@", "\N", "\N", "\N", "\N"`)
 
 }
@@ -137,8 +137,8 @@ func TestPatientDimension_ToCSVText(t *testing.T) {
 	op = append(op, loader.OptionalFields{ValType: "income_cd", Value: "Low"})
 	op = append(op, loader.OptionalFields{ValType: "patient_blob", Value: ""})
 
-	_, pubKey := lib.GenKey()
-	enc := lib.EncryptInt(pubKey, int64(2))
+	_, pubKey := libUnLynx.GenKey()
+	enc := libUnLynx.EncryptInt(pubKey, int64(2))
 
 	pd := loader.PatientDimension{
 		PK:             pdk,
@@ -182,7 +182,7 @@ func TestConceptDimension_ToCSVText(t *testing.T) {
 
 	assert.Equal(t, csvString, cd.ToCSVText())
 
-	tag := lib.GroupingKey("1")
+	tag := libUnLynx.GroupingKey("1")
 	assert.Equal(t, `"\medco\tagged\concept\1\", "TAG_ID:20", "\N", "\N", "\N", "\N", "NOW()", "\N", "\N"`, loader.ConceptDimensionSensitiveToCSVText(&tag, 20))
 }
 
@@ -212,8 +212,49 @@ func TestModifierDimension_ToCSVText(t *testing.T) {
 
 	assert.Equal(t, csvString, md.ToCSVText())
 
-	tag := lib.GroupingKey("1")
+	tag := libUnLynx.GroupingKey("1")
 	assert.Equal(t, `"\medco\tagged\modifier\1\", "TAG_ID:20", "\N", "\N", "\N", "\N", "NOW()", "\N", "\N"`, loader.ModifierDimensionSensitiveToCSVText(&tag, 20))
+}
+
+func TestObservationFact_ToCSVText(t *testing.T) {
+
+	csvString := `"482232","1000000060","Affy:221610_s_at","LCS-I2B2:D000109064","2009-01-16 00:00:00","@","1","N","E","79.30000","","\N","","2009-01-16 00:00:00","@","","\N","2010-09-28 11:15:00","2010-08-18 09:50:00","2010-09-28 11:40:00","DEMO","\N","1"`
+
+	ac := loader.AdministrativeColumns{
+		UpdateDate:      "2010-09-28 11:15:00",
+		DownloadDate:    "2010-08-18 09:50:00",
+		ImportDate:      "2010-09-28 11:40:00",
+		SourceSystemCD:  "DEMO",
+		UploadID:        "\\N",
+		TextSearchIndex: "1",
+	}
+
+	ofk := &loader.ObservationFactPK{
+		EncounterNum: "482232",
+		PatientNum:   "1000000060",
+		ConceptCD:    "Affy:221610_s_at",
+		ProviderID:   "LCS-I2B2:D000109064",
+		StartDate:    "2009-01-16 00:00:00",
+		ModifierCD:   "@",
+		InstanceNum:  "1",
+	}
+
+	of := loader.ObservationFact{
+		PK:              ofk,
+		ValTypeCD:       "N",
+		TValChar:        "E",
+		NValNum:         "79.30000",
+		ValueFlagCD:     "",
+		QuantityNum:     "\\N",
+		UnitsCD:         "",
+		EndDate:         "2009-01-16 00:00:00",
+		LocationCD:      "@",
+		ObservationBlob: "",
+		ConfidenceNum:   "\\N",
+		AdminColumns:    ac,
+	}
+
+	assert.Equal(t, csvString, of.ToCSVText())
 }
 
 // ------------------------------------------------------------------------------------------------------------- //
@@ -337,8 +378,8 @@ func TestPatientDimensionFromString(t *testing.T) {
 	op = append(op, loader.OptionalFields{ValType: "income_cd", Value: "Low"})
 	op = append(op, loader.OptionalFields{ValType: "patient_blob", Value: ""})
 
-	_, pubKey := lib.GenKey()
-	enc := lib.EncryptInt(pubKey, int64(2))
+	_, pubKey := libUnLynx.GenKey()
+	enc := libUnLynx.EncryptInt(pubKey, int64(2))
 
 	pd := loader.PatientDimension{
 		PK:             pdk,
@@ -361,8 +402,8 @@ func TestPatientDimensionFromString(t *testing.T) {
 	assert.Equal(t, *pdkExpected, *pdk)
 
 	// place them nil because encryption is randomized
-	pdExpected.EncryptedFlag = lib.CipherText{}
-	pd.EncryptedFlag = lib.CipherText{}
+	pdExpected.EncryptedFlag = libUnLynx.CipherText{}
+	pd.EncryptedFlag = libUnLynx.CipherText{}
 
 	assert.Equal(t, pdExpected, pd)
 }
@@ -433,4 +474,52 @@ func TestModifierDimensionFromString(t *testing.T) {
 
 	assert.Equal(t, *mdkExpected, *mdk)
 	assert.Equal(t, mdExpected, md)
+}
+
+func TestObservationFactFromString(t *testing.T) {
+	csvString := `"482232","1000000060","Affy:221610_s_at","LCS-I2B2:D000109064","2009-01-16 00:00:00","@","1","N","E","79.30000","","\N","","2009-01-16 00:00:00","@","","\N","2010-09-28 11:15:00","2010-08-18 09:50:00","2010-09-28 11:40:00","DEMO","\N","1"
+`
+	ac := loader.AdministrativeColumns{
+		UpdateDate:      "2010-09-28 11:15:00",
+		DownloadDate:    "2010-08-18 09:50:00",
+		ImportDate:      "2010-09-28 11:40:00",
+		SourceSystemCD:  "DEMO",
+		UploadID:        "\\N",
+		TextSearchIndex: "1",
+	}
+
+	ofk := &loader.ObservationFactPK{
+		EncounterNum: "482232",
+		PatientNum:   "1000000060",
+		ConceptCD:    "Affy:221610_s_at",
+		ProviderID:   "LCS-I2B2:D000109064",
+		StartDate:    "2009-01-16 00:00:00",
+		ModifierCD:   "@",
+		InstanceNum:  "1",
+	}
+
+	of := loader.ObservationFact{
+		PK:              ofk,
+		ValTypeCD:       "N",
+		TValChar:        "E",
+		NValNum:         "79.30000",
+		ValueFlagCD:     "",
+		QuantityNum:     "\\N",
+		UnitsCD:         "",
+		EndDate:         "2009-01-16 00:00:00",
+		LocationCD:      "@",
+		ObservationBlob: "",
+		ConfidenceNum:   "\\N",
+		AdminColumns:    ac,
+	}
+
+	var csvFile = strings.NewReader(csvString)
+	r := csv.NewReader(csvFile)
+	lines, err := r.ReadAll()
+	assert.Nil(t, err, "Parsing error")
+
+	ofkExpected, ofExpected := loader.ObservationFactFromString(lines[0])
+
+	assert.Equal(t, *ofkExpected, *ofk)
+	assert.Equal(t, ofExpected, of)
 }

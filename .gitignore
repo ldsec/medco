@@ -41,5 +41,6 @@ _testmain.go
 .DS_Store
 
 .idea/
-data/
+data/converted/*.xml
+data/converted/*.csv
 loader/*.toml
