@@ -768,24 +768,24 @@ func GenerateRandomBytes(n int) ([]byte, error) {
 }
 
 // EncryptAndTag encrypts the query elements and tags them to allow for the comparison between elements
-func EncryptAndTag(list []int64, group *onet.Roster, entryPointIdx int) ([]libUnLynx.GroupingKey, error) {
+func EncryptAndTag(list []int64, group *onet.Roster, entryPointIdx int) ([]libunlynx.GroupingKey, error) {
 
 	// ENCRYPTION
 	start := time.Now()
-	listEncryptedElements := make(libUnLynx.CipherVector, len(list))
+	listEncryptedElements := make(libunlynx.CipherVector, len(list))
 
 	for i := int64(0); i < int64(len(list)); i++ {
-		listEncryptedElements[i] = *libUnLynx.EncryptInt(group.Aggregate, list[i])
+		listEncryptedElements[i] = *libunlynx.EncryptInt(group.Aggregate, list[i])
 	}
 	log.LLvl1("Finished encrypting the sensitive data... (", time.Since(start), ")")
 
 	// TAGGING
 	start = time.Now()
-	client := serviceMedCo.NewMedCoClient(group.List[entryPointIdx], strconv.Itoa(entryPointIdx))
+	client := servicesmedco.NewMedCoClient(group.List[entryPointIdx], strconv.Itoa(entryPointIdx))
 	_, result, tr, err := client.SendSurveyDDTRequestTerms(
 		group, // Roster
-		serviceMedCo.SurveyID("tagging_loading_phase"), // SurveyID
-		listEncryptedElements,                          // Encrypted query terms to tag
+		servicesmedco.SurveyID("tagging_loading_phase"), // SurveyID
+		listEncryptedElements,                           // Encrypted query terms to tag
 		false, // compute proofs?
 		Testing,
 	)
@@ -806,7 +806,7 @@ func EncryptAndTag(list []int64, group *onet.Roster, entryPointIdx int) ([]libUn
 	return result, nil
 }
 
-func writeMetadataSensitiveTagged(list []libUnLynx.GroupingKey, keyForSensitiveIDs []ConceptPath) error {
+func writeMetadataSensitiveTagged(list []libunlynx.GroupingKey, keyForSensitiveIDs []ConceptPath) error {
 
 	if len(list) != len(keyForSensitiveIDs) {
 		log.Fatal("The number of sensitive elements does not match the number of 'KeyForSensitiveID's.")
@@ -955,7 +955,7 @@ func writeDemodataPatientMapping(el string, id int64) error {
 // TODO: No dummy data. Basically all flags are
 func writeDemodataPatientDimension(group *onet.Roster, id int64) error {
 
-	encryptedFlag := libUnLynx.EncryptInt(group.Aggregate, 1)
+	encryptedFlag := libunlynx.EncryptInt(group.Aggregate, 1)
 	b := encryptedFlag.ToBytes()
 
 	/*patientDimension := `INSERT INTO i2b2demodata.patient_dimension VALUES (` + strconv.FormatInt(id, 10) + `, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'NOW()', NULL, 1, '` + base64.StdEncoding.EncodeToString(b) + `');` + "\n"*/

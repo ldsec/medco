@@ -1,4 +1,4 @@
-package libMedCo_test
+package libmedco_test
 
 import (
 	"encoding/xml"
@@ -17,7 +17,7 @@ func TestDDTRequestXML(t *testing.T) {
 			</enc_values>
 		      </unlynx_ddt_request>`
 
-	parsedXML := libMedCo.XMLMedCoDTTRequest{}
+	parsedXML := libmedco.XMLMedCoDTTRequest{}
 	err := xml.Unmarshal([]byte(xmlString), &parsedXML)
 
 	assert.Equal(t, err, nil)
@@ -39,7 +39,7 @@ func TestAggRequestXML(t *testing.T) {
     			</enc_dummy_flags>
 		      </unlynx_agg_request>`
 
-	parsedXML := libMedCo.XMLMedCoAggRequest{}
+	parsedXML := libmedco.XMLMedCoAggRequest{}
 	err := xml.Unmarshal([]byte(xmlString), &parsedXML)
 
 	assert.Equal(t, err, nil)
@@ -63,7 +63,7 @@ func TestDDTResponseXML(t *testing.T) {
 		    	 <error></error>
 		      </unlynx_ddt_response>`
 
-	parsedXML := libMedCo.XMLMedCoDTTResponse{}
+	parsedXML := libmedco.XMLMedCoDTTResponse{}
 	err := xml.Unmarshal([]byte(xmlString), &parsedXML)
 
 	assert.Equal(t, err, nil)
@@ -85,7 +85,7 @@ func TestAggResponseXML(t *testing.T) {
     			 <error></error>
 		      </unlynx_agg_response>`
 
-	parsedXML := libMedCo.XMLMedCoAggResponse{}
+	parsedXML := libmedco.XMLMedCoAggResponse{}
 	err := xml.Unmarshal([]byte(xmlString), &parsedXML)
 
 	assert.Equal(t, err, nil)

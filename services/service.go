@@ -1,4 +1,4 @@
-package serviceMedCo
+package servicesmedco
 
 import (
 	"github.com/BurntSushi/toml"
@@ -45,7 +45,7 @@ type SurveyDDTRequest struct {
 	Proofs   bool
 	Testing  bool
 
-	Terms libUnLynx.CipherVector // query terms
+	Terms libunlynx.CipherVector // query terms
 
 	// message handling
 	IntraMessage  bool
@@ -59,9 +59,9 @@ type SurveyAggRequest struct {
 	Proofs       bool
 	ClientPubKey abstract.Point // we need this for the key switching
 
-	Aggregate          []libUnLynx.CipherText       // aggregated final result. It is an array because we the root node adds the results from the other nodes here
-	AggregateShuffled  []libUnLynx.ProcessResponse  // aggregated final results after they are shuffled
-	AggregateKSwitched []libUnLynx.FilteredResponse // the final results after the key switching
+	Aggregate          []libunlynx.CipherText       // aggregated final result. It is an array because we the root node adds the results from the other nodes here
+	AggregateShuffled  []libunlynx.ProcessResponse  // aggregated final results after they are shuffled
+	AggregateKSwitched []libunlynx.FilteredResponse // the final results after the key switching
 
 	// message handling
 	IntraMessage  bool
@@ -135,13 +135,13 @@ func init() {
 
 // ResultDDT will contain final results of the DDT of the query terms.
 type ResultDDT struct {
-	Result []libUnLynx.GroupingKey
+	Result []libunlynx.GroupingKey
 	TR     TimeResults // contains all the time measurements
 }
 
 // ResultAgg will contain final aggregate result to sent to the client.
 type ResultAgg struct {
-	Result libUnLynx.CipherText
+	Result libunlynx.CipherText
 	TR     TimeResults // contains all the time measurements
 }
 
@@ -231,7 +231,7 @@ func (s *Service) HandleSurveyDDTRequestTerms(sdq *SurveyDDTRequest) (network.Me
 
 		// signal the other nodes that they need to prepare to execute a DDT (no need to send the terms
 		// we only need the message source so that they know which node requested the DDT and fetch the secret accordingly)
-		err := libUnLynx.SendISMOthers(s.ServiceProcessor, &sdq.Roster,
+		err := libunlynx.SendISMOthers(s.ServiceProcessor, &sdq.Roster,
 			&SurveyDDTRequest{
 				SurveyID:      sdq.SurveyID,
 				Roster:        sdq.Roster,
@@ -261,7 +261,7 @@ func (s *Service) HandleSurveyDDTRequestTerms(sdq *SurveyDDTRequest) (network.Me
 		start := time.Now()
 
 		// convert the result to of the tagging for something close to the XML response of i2b2 (array of tagged terms)
-		listTaggedTerms := make([]libUnLynx.GroupingKey, 0)
+		listTaggedTerms := make([]libunlynx.GroupingKey, 0)
 
 		for _, el := range deterministicTaggingResult {
 			listTaggedTerms = append(listTaggedTerms, el.DetTagWhere[0])
@@ -335,7 +335,7 @@ func (s *Service) HandleSurveyAggRequest(sar *SurveyAggRequest) (network.Message
 			})
 
 		// send signal to unlock the other nodes
-		err := libUnLynx.SendISMOthers(s.ServiceProcessor, &sar.Roster, &SurveyAggGenerated{SurveyID: sar.SurveyID})
+		err := libunlynx.SendISMOthers(s.ServiceProcessor, &sar.Roster, &SurveyAggGenerated{SurveyID: sar.SurveyID})
 		if err != nil {
 			log.Error("broadcasting error ", err)
 		}
@@ -372,7 +372,7 @@ func (s *Service) HandleSurveyAggRequest(sar *SurveyAggRequest) (network.Message
 			// signal the other nodes that they need to prepare to execute a key switching
 			// basically after shuffling the results the root server needs to send them back
 			// to the remaining nodes for key switching
-			err = libUnLynx.SendISMOthers(s.ServiceProcessor, &sar.Roster, sar)
+			err = libunlynx.SendISMOthers(s.ServiceProcessor, &sar.Roster, sar)
 			if err != nil {
 				log.Error("broadcasting error ", err)
 			}
@@ -491,24 +491,24 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance, conf *onet.GenericConfi
 	var err error
 
 	switch tn.ProtocolName() {
-	case protocolsUnLynx.DeterministicTaggingProtocolName:
+	case protocolsunlynx.DeterministicTaggingProtocolName:
 		target := SurveyID(string(conf.Data))
 		survey := castToSurveyTag(s.MapSurveyTag.Get(string(target)))
-		pi, err = protocolsUnLynx.NewDeterministicTaggingProtocol(tn)
+		pi, err = protocolsunlynx.NewDeterministicTaggingProtocol(tn)
 		if err != nil {
 			return nil, err
 		}
-		hashCreation := pi.(*protocolsUnLynx.DeterministicTaggingProtocol)
+		hashCreation := pi.(*protocolsunlynx.DeterministicTaggingProtocol)
 
 		var serverIDMap *network.ServerIdentity
 
 		if tn.IsRoot() {
-			dataToDDT := make([]libUnLynx.ProcessResponse, 0)
+			dataToDDT := make([]libunlynx.ProcessResponse, 0)
 
 			for _, el := range survey.Request.Terms {
-				term := make(libUnLynx.CipherVector, 0)
+				term := make(libunlynx.CipherVector, 0)
 				term = append(term, el)
-				dataToDDT = append(dataToDDT, libUnLynx.ProcessResponse{WhereEnc: term})
+				dataToDDT = append(dataToDDT, libunlynx.ProcessResponse{WhereEnc: term})
 			}
 
 			hashCreation.TargetOfSwitch = &dataToDDT
@@ -538,16 +538,16 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance, conf *onet.GenericConfi
 
 		s.Mutex.Unlock()
 
-	case protocolsUnLynx.ShufflingProtocolName:
+	case protocolsunlynx.ShufflingProtocolName:
 		target := SurveyID(string(conf.Data))
 		survey := castToSurveyAgg(s.MapSurveyAgg.Get(string(target)))
 
-		pi, err := protocolsUnLynx.NewShufflingProtocol(tn)
+		pi, err := protocolsunlynx.NewShufflingProtocol(tn)
 		if err != nil {
 			return nil, err
 		}
 
-		shuffle := pi.(*protocolsUnLynx.ShufflingProtocol)
+		shuffle := pi.(*protocolsunlynx.ShufflingProtocol)
 
 		shuffle.Proofs = survey.Request.Proofs
 		shuffle.Precomputed = nil
@@ -556,37 +556,37 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance, conf *onet.GenericConfi
 			target := SurveyID(string(conf.Data))
 			survey := castToSurveyAgg(s.MapSurveyAgg.Get(string(target)))
 
-			dataToShuffle := make([]libUnLynx.ProcessResponse, 0)
+			dataToShuffle := make([]libunlynx.ProcessResponse, 0)
 
 			for _, el := range survey.Request.Aggregate {
-				aggregate := make(libUnLynx.CipherVector, 0)
+				aggregate := make(libunlynx.CipherVector, 0)
 				aggregate = append(aggregate, el)
-				dataToShuffle = append(dataToShuffle, libUnLynx.ProcessResponse{WhereEnc: aggregate})
+				dataToShuffle = append(dataToShuffle, libunlynx.ProcessResponse{WhereEnc: aggregate})
 			}
 
 			shuffle.TargetOfShuffle = &dataToShuffle
 		}
 		return pi, nil
-	case protocolsUnLynx.KeySwitchingProtocolName:
+	case protocolsunlynx.KeySwitchingProtocolName:
 		target := SurveyID(string(conf.Data))
 		survey := castToSurveyAgg(s.MapSurveyAgg.Get(string(target)))
 
-		pi, err = protocolsUnLynx.NewKeySwitchingProtocol(tn)
+		pi, err = protocolsunlynx.NewKeySwitchingProtocol(tn)
 		if err != nil {
 			return nil, err
 		}
 
-		keySwitch := pi.(*protocolsUnLynx.KeySwitchingProtocol)
+		keySwitch := pi.(*protocolsunlynx.KeySwitchingProtocol)
 		keySwitch.Proofs = survey.Request.Proofs
 
 		if tn.IsRoot() {
 			target := SurveyID(string(conf.Data))
 			survey := castToSurveyAgg(s.MapSurveyAgg.Get(string(target)))
 
-			var dataToSwitch []libUnLynx.FilteredResponse
+			var dataToSwitch []libunlynx.FilteredResponse
 
 			for _, el := range survey.Request.AggregateShuffled {
-				dataToSwitch = append(dataToSwitch, libUnLynx.FilteredResponse{AggregatingAttributes: el.WhereEnc})
+				dataToSwitch = append(dataToSwitch, libunlynx.FilteredResponse{AggregatingAttributes: el.WhereEnc})
 			}
 
 			keySwitch.TargetOfSwitch = &dataToSwitch
@@ -621,9 +621,9 @@ func (s *Service) StartProtocol(name string, targetSurvey SurveyID, roster *onet
 //______________________________________________________________________________________________________________________
 
 // TaggingPhase performs the private grouping on the currently collected data.
-func (s *Service) TaggingPhase(targetSurvey SurveyID, roster *onet.Roster) ([]libUnLynx.ProcessResponseDet, error) {
+func (s *Service) TaggingPhase(targetSurvey SurveyID, roster *onet.Roster) ([]libunlynx.ProcessResponseDet, error) {
 	start := time.Now()
-	pi, err := s.StartProtocol(protocolsUnLynx.DeterministicTaggingProtocolName, targetSurvey, roster)
+	pi, err := s.StartProtocol(protocolsunlynx.DeterministicTaggingProtocolName, targetSurvey, roster)
 	if err != nil {
 		return nil, err
 	}
@@ -632,10 +632,10 @@ func (s *Service) TaggingPhase(targetSurvey SurveyID, roster *onet.Roster) ([]li
 	survey.TR.DDTRequestTimeExec += time.Since(start)
 	s.MapSurveyTag.Put((string)(survey.SurveyID), survey)
 
-	deterministicTaggingResult := <-pi.(*protocolsUnLynx.DeterministicTaggingProtocol).FeedbackChannel
+	deterministicTaggingResult := <-pi.(*protocolsunlynx.DeterministicTaggingProtocol).FeedbackChannel
 
 	survey = castToSurveyTag(s.MapSurveyTag.Get(string(targetSurvey)))
-	survey.TR.DDTRequestTimeExec += pi.(*protocolsUnLynx.DeterministicTaggingProtocol).ExecTime
+	survey.TR.DDTRequestTimeExec += pi.(*protocolsunlynx.DeterministicTaggingProtocol).ExecTime
 	survey.TR.DDTRequestTimeCommunication = time.Since(start) - survey.TR.DDTRequestTimeExec
 	s.MapSurveyTag.Put((string)(survey.SurveyID), survey)
 
@@ -643,17 +643,17 @@ func (s *Service) TaggingPhase(targetSurvey SurveyID, roster *onet.Roster) ([]li
 }
 
 // ShufflingPhase performs the shuffling aggregated results from each of the nodes
-func (s *Service) ShufflingPhase(targetSurvey SurveyID, roster *onet.Roster) ([]libUnLynx.ProcessResponse, error) {
+func (s *Service) ShufflingPhase(targetSurvey SurveyID, roster *onet.Roster) ([]libunlynx.ProcessResponse, error) {
 	start := time.Now()
-	pi, err := s.StartProtocol(protocolsUnLynx.ShufflingProtocolName, targetSurvey, roster)
+	pi, err := s.StartProtocol(protocolsunlynx.ShufflingProtocolName, targetSurvey, roster)
 	if err != nil {
 		return nil, err
 	}
 	shufflingTimeExec := time.Since(start)
 
-	shufflingResult := <-pi.(*protocolsUnLynx.ShufflingProtocol).FeedbackChannel
+	shufflingResult := <-pi.(*protocolsunlynx.ShufflingProtocol).FeedbackChannel
 
-	shufflingTimeExec += pi.(*protocolsUnLynx.ShufflingProtocol).ExecTime
+	shufflingTimeExec += pi.(*protocolsunlynx.ShufflingProtocol).ExecTime
 	shufflingTimeCommun := time.Since(start) - shufflingTimeExec
 
 	if shufflingTimeCommun < 0 {
@@ -669,16 +669,16 @@ func (s *Service) ShufflingPhase(targetSurvey SurveyID, roster *onet.Roster) ([]
 }
 
 // KeySwitchingPhase performs the switch to the querier key on the currently aggregated data.
-func (s *Service) KeySwitchingPhase(targetSurvey SurveyID, roster *onet.Roster) ([]libUnLynx.FilteredResponse, error) {
+func (s *Service) KeySwitchingPhase(targetSurvey SurveyID, roster *onet.Roster) ([]libunlynx.FilteredResponse, error) {
 	start := time.Now()
-	pi, err := s.StartProtocol(protocolsUnLynx.KeySwitchingProtocolName, targetSurvey, roster)
+	pi, err := s.StartProtocol(protocolsunlynx.KeySwitchingProtocolName, targetSurvey, roster)
 	if err != nil {
 		return nil, err
 	}
-	keySwitchedAggregatedResponses := <-pi.(*protocolsUnLynx.KeySwitchingProtocol).FeedbackChannel
+	keySwitchedAggregatedResponses := <-pi.(*protocolsunlynx.KeySwitchingProtocol).FeedbackChannel
 
 	// *(nbr of servers) because this protocol happens sequentially
-	keySTimeExec := pi.(*protocolsUnLynx.KeySwitchingProtocol).ExecTime * time.Duration(len(roster.List))
+	keySTimeExec := pi.(*protocolsunlynx.KeySwitchingProtocol).ExecTime * time.Duration(len(roster.List))
 	keySTimeCommun := time.Since(start) - keySTimeExec
 
 	if keySTimeCommun < 0 {

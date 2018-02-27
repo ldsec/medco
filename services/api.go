@@ -1,4 +1,4 @@
-package serviceMedCo
+package servicesmedco
 
 import (
 	"github.com/lca1/unlynx/lib"
@@ -37,7 +37,7 @@ func NewMedCoClient(entryPoint *network.ServerIdentity, clientID string) *API {
 //______________________________________________________________________________________________________________________
 
 // SendSurveyDDTRequestTerms sends the encrypted query terms and DDT tags those terms (the array of terms is ordered).
-func (c *API) SendSurveyDDTRequestTerms(entities *onet.Roster, surveyID SurveyID, terms libUnLynx.CipherVector, proofs bool, testing bool) (*SurveyID, []libUnLynx.GroupingKey, TimeResults, error) {
+func (c *API) SendSurveyDDTRequestTerms(entities *onet.Roster, surveyID SurveyID, terms libunlynx.CipherVector, proofs bool, testing bool) (*SurveyID, []libunlynx.GroupingKey, TimeResults, error) {
 	log.Lvl1("Client", c.ClientID, "is creating a DDT survey with ID:", surveyID)
 
 	rndUUID, _ := uuid.NewV4()
@@ -62,10 +62,10 @@ func (c *API) SendSurveyDDTRequestTerms(entities *onet.Roster, surveyID SurveyID
 }
 
 // SendSurveyAggRequest sends the encrypted aggregate local results at each node and expects a shuffling and a key switching of these data.
-func (c *API) SendSurveyAggRequest(entities *onet.Roster, surveyID SurveyID, cPK abstract.Point, aggregate libUnLynx.CipherText, proofs bool) (*SurveyID, libUnLynx.CipherText, TimeResults, error) {
+func (c *API) SendSurveyAggRequest(entities *onet.Roster, surveyID SurveyID, cPK abstract.Point, aggregate libunlynx.CipherText, proofs bool) (*SurveyID, libunlynx.CipherText, TimeResults, error) {
 	log.Lvl1("Client", c.ClientID, "is creating a Agg survey with ID:", surveyID)
 
-	listAggregate := make([]libUnLynx.CipherText, 0)
+	listAggregate := make([]libunlynx.CipherText, 0)
 	listAggregate = append(listAggregate, aggregate)
 
 	sar := SurveyAggRequest{
@@ -75,7 +75,7 @@ func (c *API) SendSurveyAggRequest(entities *onet.Roster, surveyID SurveyID, cPK
 		ClientPubKey: cPK,
 
 		Aggregate:         listAggregate,
-		AggregateShuffled: make([]libUnLynx.ProcessResponse, 0),
+		AggregateShuffled: make([]libunlynx.ProcessResponse, 0),
 
 		IntraMessage: false,
 	}

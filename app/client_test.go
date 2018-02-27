@@ -32,7 +32,7 @@ func testRemoteSetup() {
 	log.LLvl1("***************************************************************************************************")
 	os.Remove("pre_compute_multiplications.gob")
 
-	clientSecKey, clientPubKey = libUnLynx.GenKey()
+	clientSecKey, clientPubKey = libunlynx.GenKey()
 
 	// generate el with group file
 	f, err := os.Open("test/group.toml")
@@ -57,7 +57,7 @@ func testLocalSetup() {
 	log.LLvl1("***************************************************************************************************")
 	os.Remove("pre_compute_multiplications.gob")
 
-	clientSecKey, clientPubKey = libUnLynx.GenKey()
+	clientSecKey, clientPubKey = libunlynx.GenKey()
 
 	local = onet.NewLocalTest()
 	_, el, _ = local.GenTree(3, true)
@@ -87,7 +87,7 @@ func getXMLReaderDDTRequest(t *testing.T, variant int) io.Reader {
 	encDDTTermsXML := ""
 
 	for i := 0; i < nbrTerms; i++ {
-		val := (*libUnLynx.EncryptInt(el.Aggregate, int64(i))).Serialize()
+		val := (*libunlynx.EncryptInt(el.Aggregate, int64(i))).Serialize()
 		encDDTTermsSlice = append(encDDTTermsSlice, val)
 		encDDTTermsXML += "<enc_value>" + val + "</enc_value>"
 	}
@@ -123,7 +123,7 @@ func getXMLReaderDDTRequestV2(t *testing.T, variant int) io.Reader {
 	encDDTTermsXML := ""
 
 	for i := 0; i < nbrTerms; i++ {
-		val := (*libUnLynx.EncryptInt(el.Aggregate, int64(i))).Serialize()
+		val := (*libunlynx.EncryptInt(el.Aggregate, int64(i))).Serialize()
 		encDDTTermsSlice = append(encDDTTermsSlice, val)
 		encDDTTermsXML += "<enc_value>" + val + "</enc_value>"
 	}
@@ -155,7 +155,7 @@ func getXMLReaderAggRequest(t *testing.T, nbrFlags int) io.Reader {
 	*/
 
 	// client public key serialization
-	clientPubKeyB64, err := libUnLynx.SerializeElement(clientPubKey)
+	clientPubKeyB64, err := libunlynx.SerializeElement(clientPubKey)
 	assert.True(t, err == nil)
 
 	// enc query terms (encrypted with client public key)
@@ -163,7 +163,7 @@ func getXMLReaderAggRequest(t *testing.T, nbrFlags int) io.Reader {
 	encFlagsXML := ""
 
 	for i := 0; i < nbrFlags; i++ {
-		val := (*libUnLynx.EncryptInt(el.Aggregate, int64(1))).Serialize()
+		val := (*libunlynx.EncryptInt(el.Aggregate, int64(1))).Serialize()
 		encFlagsSlice = append(encFlagsSlice, val)
 		encFlagsXML += "<enc_dummy_flag>" + val + "</enc_dummy_flag>"
 	}
@@ -197,7 +197,7 @@ func getXMLReaderAggRequestV2(t *testing.T, nbrFlags int) io.Reader {
 	*/
 
 	// client public key serialization
-	clientPubKeyB64, err := libUnLynx.SerializeElement(clientPubKey)
+	clientPubKeyB64, err := libunlynx.SerializeElement(clientPubKey)
 	assert.True(t, err == nil)
 
 	// enc query terms (encrypted with client public key)
@@ -205,7 +205,7 @@ func getXMLReaderAggRequestV2(t *testing.T, nbrFlags int) io.Reader {
 	encFlagsXML := ""
 
 	for i := 0; i < nbrFlags; i++ {
-		val := (*libUnLynx.EncryptInt(el.Aggregate, int64(1))).Serialize()
+		val := (*libunlynx.EncryptInt(el.Aggregate, int64(1))).Serialize()
 		encFlagsSlice = append(encFlagsSlice, val)
 		encFlagsXML += "<enc_dummy_flag>" + val + "</enc_dummy_flag>"
 	}
@@ -224,8 +224,8 @@ func getXMLReaderAggRequestV2(t *testing.T, nbrFlags int) io.Reader {
 	return strings.NewReader(stringBuf.String())
 }
 
-func parseDTTResponse(t *testing.T, xmlString string) libMedCo.XMLMedCoDTTResponse {
-	parsedXML := libMedCo.XMLMedCoDTTResponse{}
+func parseDTTResponse(t *testing.T, xmlString string) libmedco.XMLMedCoDTTResponse {
+	parsedXML := libmedco.XMLMedCoDTTResponse{}
 
 	err := xml.Unmarshal([]byte(xmlString), &parsedXML)
 	assert.Equal(t, err, nil)
@@ -233,8 +233,8 @@ func parseDTTResponse(t *testing.T, xmlString string) libMedCo.XMLMedCoDTTRespon
 	return parsedXML
 }
 
-func parseAggResponse(t *testing.T, xmlString string) libMedCo.XMLMedCoAggResponse {
-	parsedXML := libMedCo.XMLMedCoAggResponse{}
+func parseAggResponse(t *testing.T, xmlString string) libmedco.XMLMedCoAggResponse {
+	parsedXML := libmedco.XMLMedCoAggResponse{}
 	err := xml.Unmarshal([]byte(xmlString), &parsedXML)
 	assert.Equal(t, err, nil)
 
@@ -247,7 +247,7 @@ func TestMedcoDDTRequest(t *testing.T) {
 	testLocalSetup()
 
 	// Start queriers (3 nodes)
-	wg := libUnLynx.StartParallelize(2)
+	wg := libunlynx.StartParallelize(2)
 	var writer, writer1, writer2 bytes.Buffer
 
 	go func() {
@@ -268,10 +268,10 @@ func TestMedcoDDTRequest(t *testing.T) {
 	assert.True(t, err == nil)
 	err = unlynxDDTRequest(input, &writer, el, 0, false, true)
 	assert.True(t, err == nil)
-	libUnLynx.EndParallelize(wg)
+	libunlynx.EndParallelize(wg)
 
 	// Check results
-	finalResponses := make([]libMedCo.XMLMedCoDTTResponse, 0)
+	finalResponses := make([]libmedco.XMLMedCoDTTResponse, 0)
 
 	finalResponses = append(finalResponses, parseDTTResponse(t, writer.String()))
 	finalResponses = append(finalResponses, parseDTTResponse(t, writer1.String()))
@@ -297,7 +297,7 @@ func TestMedCoDDTRequestV2(t *testing.T) {
 	testLocalSetup()
 
 	// Start queriers (3 nodes)
-	wg := libUnLynx.StartParallelize(2)
+	wg := libunlynx.StartParallelize(2)
 	var writer, writer1, writer2 bytes.Buffer
 
 	go func() {
@@ -318,10 +318,10 @@ func TestMedCoDDTRequestV2(t *testing.T) {
 	assert.True(t, err == nil)
 	err = unlynxDDTRequest(input, &writer, el, 0, false, true)
 	assert.True(t, err == nil)
-	libUnLynx.EndParallelize(wg)
+	libunlynx.EndParallelize(wg)
 
 	// Check results
-	finalResponses := make([]libMedCo.XMLMedCoDTTResponse, 0)
+	finalResponses := make([]libmedco.XMLMedCoDTTResponse, 0)
 
 	finalResponses = append(finalResponses, parseDTTResponse(t, writer.String()))
 	finalResponses = append(finalResponses, parseDTTResponse(t, writer1.String()))
@@ -346,7 +346,7 @@ func TestMedCoDDTRequestRemote(t *testing.T) {
 	testRemoteSetup()
 
 	// start queries
-	wg := libUnLynx.StartParallelize(2)
+	wg := libunlynx.StartParallelize(2)
 	var writer, writer1, writer2 bytes.Buffer
 
 	go func() {
@@ -367,10 +367,10 @@ func TestMedCoDDTRequestRemote(t *testing.T) {
 	assert.True(t, err == nil)
 	err = unlynxDDTRequest(input, &writer, el, 0, false, true)
 	assert.True(t, err == nil)
-	libUnLynx.EndParallelize(wg)
+	libunlynx.EndParallelize(wg)
 
 	// Check results
-	finalResponses := make([]libMedCo.XMLMedCoDTTResponse, 0)
+	finalResponses := make([]libmedco.XMLMedCoDTTResponse, 0)
 
 	finalResponses = append(finalResponses, parseDTTResponse(t, writer.String()))
 	finalResponses = append(finalResponses, parseDTTResponse(t, writer1.String()))
@@ -393,20 +393,20 @@ func TestMedCoDDTRequestRemote(t *testing.T) {
 
 // AGG TEST FUNCTIONS
 func TestLocalAggregate(t *testing.T) {
-	secKey, pubKey := libUnLynx.GenKey()
+	secKey, pubKey := libunlynx.GenKey()
 
 	sizeVector := 10
 	realResult := int64(0)
 
-	listEncElements := make(libUnLynx.CipherVector, 0)
+	listEncElements := make(libunlynx.CipherVector, 0)
 	for i := 0; i < sizeVector; i++ {
-		listEncElements = append(listEncElements, *libUnLynx.EncryptInt(pubKey, int64(1)))
+		listEncElements = append(listEncElements, *libunlynx.EncryptInt(pubKey, int64(1)))
 		realResult += int64(1)
 	}
 
 	result := LocalAggregate(listEncElements, pubKey)
 
-	resultDec := libUnLynx.DecryptInt(secKey, *result)
+	resultDec := libunlynx.DecryptInt(secKey, *result)
 
 	assert.Equal(t, realResult, resultDec)
 }
@@ -415,7 +415,7 @@ func TestMedcoAggRequest(t *testing.T) {
 	testLocalSetup()
 
 	// Start queriers (3 nodes)
-	wg := libUnLynx.StartParallelize(2)
+	wg := libunlynx.StartParallelize(2)
 	var writer, writer1, writer2 bytes.Buffer
 
 	go func() {
@@ -436,10 +436,10 @@ func TestMedcoAggRequest(t *testing.T) {
 	assert.True(t, err == nil)
 	err = unlynxAggRequest(input, &writer, el, 0, false)
 	assert.True(t, err == nil)
-	libUnLynx.EndParallelize(wg)
+	libunlynx.EndParallelize(wg)
 
 	// Check results
-	finalResponses := make([]libMedCo.XMLMedCoAggResponse, 0)
+	finalResponses := make([]libmedco.XMLMedCoAggResponse, 0)
 
 	finalResponses = append(finalResponses, parseAggResponse(t, writer.String()))
 	finalResponses = append(finalResponses, parseAggResponse(t, writer1.String()))
@@ -448,11 +448,11 @@ func TestMedcoAggRequest(t *testing.T) {
 	expectedResponses := [3]int64{20, 30, 50}
 	for i, response := range finalResponses {
 		assert.True(t, response.Error == "")
-		aux := libUnLynx.CipherText{}
+		aux := libunlynx.CipherText{}
 		err := aux.Deserialize(finalResponses[i].AggregateV)
 		assert.Nil(t, err)
 
-		assert.Contains(t, expectedResponses, libUnLynx.DecryptInt(clientSecKey, aux), "Aggregation result does not match")
+		assert.Contains(t, expectedResponses, libunlynx.DecryptInt(clientSecKey, aux), "Aggregation result does not match")
 	}
 
 	testLocalTeardown()
@@ -462,7 +462,7 @@ func TestMedCoAggRequestV2(t *testing.T) {
 	testLocalSetup()
 
 	// Start queriers (3 nodes)
-	wg := libUnLynx.StartParallelize(2)
+	wg := libunlynx.StartParallelize(2)
 	var writer, writer1, writer2 bytes.Buffer
 
 	go func() {
@@ -483,10 +483,10 @@ func TestMedCoAggRequestV2(t *testing.T) {
 	assert.True(t, err == nil)
 	err = unlynxAggRequest(input, &writer, el, 0, false)
 	assert.True(t, err == nil)
-	libUnLynx.EndParallelize(wg)
+	libunlynx.EndParallelize(wg)
 
 	// Check results
-	finalResponses := make([]libMedCo.XMLMedCoAggResponse, 0)
+	finalResponses := make([]libmedco.XMLMedCoAggResponse, 0)
 
 	finalResponses = append(finalResponses, parseAggResponse(t, writer.String()))
 	finalResponses = append(finalResponses, parseAggResponse(t, writer1.String()))
@@ -495,11 +495,11 @@ func TestMedCoAggRequestV2(t *testing.T) {
 	expectedResponses := [3]int64{100, 7, 4}
 	for i, response := range finalResponses {
 		assert.True(t, response.Error == "")
-		aux := libUnLynx.CipherText{}
+		aux := libunlynx.CipherText{}
 		err := aux.Deserialize(finalResponses[i].AggregateV)
 		assert.Nil(t, err)
 
-		assert.Contains(t, expectedResponses, libUnLynx.DecryptInt(clientSecKey, aux), "Aggregation result does not match")
+		assert.Contains(t, expectedResponses, libunlynx.DecryptInt(clientSecKey, aux), "Aggregation result does not match")
 	}
 
 	testLocalTeardown()
@@ -510,7 +510,7 @@ func TestMedCoAggRequestRemote(t *testing.T) {
 	testRemoteSetup()
 
 	// start queries
-	wg := libUnLynx.StartParallelize(2)
+	wg := libunlynx.StartParallelize(2)
 	var writer, writer1, writer2 bytes.Buffer
 
 	go func() {
@@ -531,10 +531,10 @@ func TestMedCoAggRequestRemote(t *testing.T) {
 	assert.True(t, err == nil)
 	err = unlynxAggRequest(input, &writer, el, 0, false)
 	assert.True(t, err == nil)
-	libUnLynx.EndParallelize(wg)
+	libunlynx.EndParallelize(wg)
 
 	// Check results
-	finalResponses := make([]libMedCo.XMLMedCoAggResponse, 0)
+	finalResponses := make([]libmedco.XMLMedCoAggResponse, 0)
 
 	finalResponses = append(finalResponses, parseAggResponse(t, writer.String()))
 	finalResponses = append(finalResponses, parseAggResponse(t, writer1.String()))
@@ -543,10 +543,10 @@ func TestMedCoAggRequestRemote(t *testing.T) {
 	expectedResponses := [3]int64{3, 47, 31}
 	for i, response := range finalResponses {
 		assert.True(t, response.Error == "")
-		aux := libUnLynx.CipherText{}
+		aux := libunlynx.CipherText{}
 		err := aux.Deserialize(finalResponses[i].AggregateV)
 		assert.Nil(t, err)
 
-		assert.Contains(t, expectedResponses, libUnLynx.DecryptInt(clientSecKey, aux), "Aggregation result does not match")
+		assert.Contains(t, expectedResponses, libunlynx.DecryptInt(clientSecKey, aux), "Aggregation result does not match")
 	}
 }

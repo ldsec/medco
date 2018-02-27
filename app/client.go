@@ -189,9 +189,9 @@ func readRequestXMLFrom(input io.Reader) ([]byte, error) {
 //----------------------------------------------------------------------------------------------------------------------
 
 // unmarshal the DDTRequest XML
-func parserDDTRequestXML(input []byte) (*libMedCo.XMLMedCoDTTRequest, error) {
+func parserDDTRequestXML(input []byte) (*libmedco.XMLMedCoDTTRequest, error) {
 	// unmarshal xml (assumes bytes are UTF-8 encoded)
-	parsedXML := libMedCo.XMLMedCoDTTRequest{}
+	parsedXML := libmedco.XMLMedCoDTTRequest{}
 
 	errXML := xml.Unmarshal(input, &parsedXML)
 	if errXML != nil {
@@ -226,13 +226,13 @@ func unlynxDDTRequest(input []byte, output io.Writer, el *onet.Roster, entryPoin
 	// launch query
 	start = time.Now()
 
-	client := serviceMedCo.NewMedCoClient(el.List[entryPointIdx], strconv.Itoa(entryPointIdx))
+	client := servicesmedco.NewMedCoClient(el.List[entryPointIdx], strconv.Itoa(entryPointIdx))
 	_, result, tr, err := client.SendSurveyDDTRequestTerms(
 		el, // Roster
-		serviceMedCo.SurveyID(id), // SurveyID
-		encQueryTerms,             // Encrypted query terms to tag
-		proofs,                    // compute proofs?
-		testing,                   // it's for testing
+		servicesmedco.SurveyID(id), // SurveyID
+		encQueryTerms,              // Encrypted query terms to tag
+		proofs,                     // compute proofs?
+		testing,                    // it's for testing
 	)
 
 	totalTime := time.Since(start)
@@ -262,7 +262,7 @@ func unlynxDDTRequest(input []byte, output io.Writer, el *onet.Roster, entryPoin
 }
 
 // output result xml on a writer (if result_err != nil, the error is sent)
-func writeDDTResponseXML(output io.Writer, xmlQuery *libMedCo.XMLMedCoDTTRequest, result []libUnLynx.GroupingKey, tr *serviceMedCo.TimeResults, err error) error {
+func writeDDTResponseXML(output io.Writer, xmlQuery *libmedco.XMLMedCoDTTRequest, result []libunlynx.GroupingKey, tr *servicesmedco.TimeResults, err error) error {
 
 	/*
 		<unlynx_ddt_response>
@@ -323,9 +323,9 @@ func writeDDTResponseXML(output io.Writer, xmlQuery *libMedCo.XMLMedCoDTTRequest
 //----------------------------------------------------------------------------------------------------------------------
 
 // unmarshal the AggRequest XML
-func parseAggRequestXML(input []byte) (*libMedCo.XMLMedCoAggRequest, error) {
+func parseAggRequestXML(input []byte) (*libmedco.XMLMedCoAggRequest, error) {
 	// unmarshal xml (assumes bytes are UTF-8 encoded)
-	parsedXML := libMedCo.XMLMedCoAggRequest{}
+	parsedXML := libmedco.XMLMedCoAggRequest{}
 	errXML := xml.Unmarshal(input, &parsedXML)
 	if errXML != nil {
 		log.Error("Error while unmarshalling AggRequest xml.", errXML)
@@ -365,17 +365,17 @@ func unlynxAggRequest(input []byte, output io.Writer, el *onet.Roster, entryPoin
 	// launch query
 	start = time.Now()
 
-	cPK, err := libUnLynx.DeserializePoint(xmlQuery.ClientPubKey)
+	cPK, err := libunlynx.DeserializePoint(xmlQuery.ClientPubKey)
 	if err != nil {
 		log.Error("Error decoding client public key.", err)
 		writeAggResponseXML(output, nil, nil, nil, err)
 		return err
 	}
 
-	client := serviceMedCo.NewMedCoClient(el.List[entryPointIdx], strconv.Itoa(entryPointIdx))
+	client := servicesmedco.NewMedCoClient(el.List[entryPointIdx], strconv.Itoa(entryPointIdx))
 	_, result, tr, err := client.SendSurveyAggRequest(
 		el, // Roster
-		serviceMedCo.SurveyID(id), // SurveyID
+		servicesmedco.SurveyID(id), // SurveyID
 		cPK,        // client public key
 		*aggregate, // Encrypted local aggregation result
 		proofs,     // compute proofs?
@@ -404,10 +404,10 @@ func unlynxAggRequest(input []byte, output io.Writer, el *onet.Roster, entryPoin
 }
 
 // LocalAggregate locally aggregates the encrypted dummy flags
-func LocalAggregate(encDummyFlags libUnLynx.CipherVector, pubKey abstract.Point) *libUnLynx.CipherText {
+func LocalAggregate(encDummyFlags libunlynx.CipherVector, pubKey abstract.Point) *libunlynx.CipherText {
 	// there are no results
 	if len(encDummyFlags) == 0 {
-		return libUnLynx.EncryptInt(pubKey, int64(0))
+		return libunlynx.EncryptInt(pubKey, int64(0))
 	}
 
 	result := &encDummyFlags[0]
@@ -419,7 +419,7 @@ func LocalAggregate(encDummyFlags libUnLynx.CipherVector, pubKey abstract.Point)
 }
 
 // output result xml on a writer (if result_err != nil, the error is sent)
-func writeAggResponseXML(output io.Writer, xmlQuery *libMedCo.XMLMedCoAggRequest, aggregate *libUnLynx.CipherText, tr *serviceMedCo.TimeResults, err error) error {
+func writeAggResponseXML(output io.Writer, xmlQuery *libmedco.XMLMedCoAggRequest, aggregate *libunlynx.CipherText, tr *servicesmedco.TimeResults, err error) error {
 
 	/*
 		<unlynx_agg_response>

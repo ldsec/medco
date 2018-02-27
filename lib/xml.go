@@ -1,5 +1,5 @@
-// Package libMedCo contains medco_structs which contains structures and methods built on basic structures defined in crypto
-package libMedCo
+// Package libmedco contains medco_structs which contains structures and methods built on basic structures defined in crypto
+package libmedco
 
 import (
 	"encoding/xml"
@@ -29,13 +29,13 @@ type XMLMedCoDTTRequest struct {
 }
 
 // DDTRequestToUnlynxFormat parses and decodes the base64-encoded values in the XML, returns a slice of encrypted query terms ready to be inputed in UnLynx
-func (xml *XMLMedCoDTTRequest) DDTRequestToUnlynxFormat() (libUnLynx.CipherVector, string, error) {
+func (xml *XMLMedCoDTTRequest) DDTRequestToUnlynxFormat() (libunlynx.CipherVector, string, error) {
 
 	// iterate over the query paremeters
-	encQueryTerms := make(libUnLynx.CipherVector, 0)
+	encQueryTerms := make(libunlynx.CipherVector, 0)
 
 	for _, term := range xml.XMLEncQueryTerms {
-		aux := libUnLynx.CipherText{}
+		aux := libunlynx.CipherText{}
 
 		err := aux.Deserialize(term)
 		if err != nil {
@@ -70,13 +70,13 @@ type XMLMedCoAggRequest struct {
 }
 
 // AggRequestToUnlynxFormat parses and decodes the base64-encoded values in the XML, returns a slice of encrypted values to be aggregated by UnLynx
-func (xml *XMLMedCoAggRequest) AggRequestToUnlynxFormat() (libUnLynx.CipherVector, string, error) {
+func (xml *XMLMedCoAggRequest) AggRequestToUnlynxFormat() (libunlynx.CipherVector, string, error) {
 
 	// iterate over the encrypted flag values
-	encDummyFlags := make(libUnLynx.CipherVector, 0)
+	encDummyFlags := make(libunlynx.CipherVector, 0)
 
 	for _, encFlag := range xml.XMLEncDummyFlags {
-		aux := libUnLynx.CipherText{}
+		aux := libunlynx.CipherText{}
 
 		err := aux.Deserialize(encFlag)
 		if err != nil {
