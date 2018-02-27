@@ -112,7 +112,7 @@ var TableLocalOntologyClear map[string]*LocalOntology
 
 // TagAndID is a struct that contains both Tag and TagID for a concept or modifier
 type TagAndID struct {
-	Tag   libUnLynx.GroupingKey
+	Tag   libunlynx.GroupingKey
 	TagID int64
 }
 
@@ -171,13 +171,13 @@ func (lo LocalOntology) ToCSVText() string {
 }
 
 // LocalOntologySensitiveConceptToCSVText writes the tagging information of a concept of the local ontology in a way that can be added to a .csv file - "","","", etc.
-func LocalOntologySensitiveConceptToCSVText(tag *libUnLynx.GroupingKey, tagID int64) string {
+func LocalOntologySensitiveConceptToCSVText(tag *libunlynx.GroupingKey, tagID int64) string {
 	return `"3", "\medco\tagged\concept\` + string(*tag) + `\", "", "N", "LA ", "\N", "TAG_ID:` + strconv.FormatInt(tagID, 10) + `", "\N", "concept_cd", "concept_dimension", "concept_path", "T", "LIKE", "\medco\tagged\concept\` + string(*tag) +
 		`\", "\N", "\N", "NOW()", "\N", "\N", "\N", "TAG_ID", "@", "\N", "\N", "\N", "\N"`
 }
 
 // LocalOntologySensitiveModifierToCSVText writes the tagging information of a modifier of the local ontology in a way that can be added to a .csv file - "","","", etc.
-func LocalOntologySensitiveModifierToCSVText(tag *libUnLynx.GroupingKey, tagID int64) string {
+func LocalOntologySensitiveModifierToCSVText(tag *libunlynx.GroupingKey, tagID int64) string {
 	return `"3", "\medco\tagged\modifier\` + string(*tag) + `\", "", "N", "LA ", "\N", "TAG_ID:` + strconv.FormatInt(tagID, 10) + `", "\N", "MODIFIER_CD", "MODIFIER_DIMENSION", "MODIFIER_PATH", "T", "LIKE", "\medco\tagged\modifier\` + string(*tag) +
 		`\", "\N", "\N", "NOW()", "\N", "\N", "\N", "TAG_ID", "@", "\N", "\N", "\N", "\N"`
 }
@@ -252,7 +252,7 @@ type PatientDimension struct {
 	DeathDate      string
 	OptionalFields []OptionalFields
 	AdminColumns   AdministrativeColumns
-	EncryptedFlag  libUnLynx.CipherText
+	EncryptedFlag  libunlynx.CipherText
 }
 
 // PatientDimensionPK is the primary key of the Patient_Dimension table
@@ -319,7 +319,7 @@ func (cd ConceptDimension) ToCSVText() string {
 }
 
 // ConceptDimensionSensitiveToCSVText writes the tagging information of a concept of the concept_dimension table in a way that can be added to a .csv file - "","","", etc.
-func ConceptDimensionSensitiveToCSVText(tag *libUnLynx.GroupingKey, tagID int64) string {
+func ConceptDimensionSensitiveToCSVText(tag *libunlynx.GroupingKey, tagID int64) string {
 	return `"\medco\tagged\concept\` + string(*tag) + `\", "TAG_ID:` + strconv.FormatInt(tagID, 10) + `", "\N", "\N", "\N", "\N", "NOW()", "\N", "\N"`
 }
 
@@ -355,7 +355,7 @@ func (md ModifierDimension) ToCSVText() string {
 }
 
 // ModifierDimensionSensitiveToCSVText writes the tagging information of a concept of the modifier_dimension table in a way that can be added to a .csv file - "","","", etc.
-func ModifierDimensionSensitiveToCSVText(tag *libUnLynx.GroupingKey, tagID int64) string {
+func ModifierDimensionSensitiveToCSVText(tag *libunlynx.GroupingKey, tagID int64) string {
 	return `"\medco\tagged\modifier\` + string(*tag) + `\", "TAG_ID:` + strconv.FormatInt(tagID, 10) + `", "\N", "\N", "\N", "\N", "NOW()", "\N", "\N"`
 }
 
@@ -490,7 +490,7 @@ func PatientDimensionFromString(line []string, pk abstract.Point) (*PatientDimen
 	}
 
 	// TODO: right now we do not have fake patients
-	ef := libUnLynx.EncryptInt(pk, 1)
+	ef := libunlynx.EncryptInt(pk, 1)
 
 	pd.OptionalFields = of
 	pd.AdminColumns = ac
