@@ -556,10 +556,10 @@ func EncryptAndTag(list []int64, group *onet.Roster, entryPointIdx int) ([]libun
 	start = time.Now()
 	client := servicesmedco.NewMedCoClient(group.List[entryPointIdx], strconv.Itoa(entryPointIdx))
 	_, result, tr, err := client.SendSurveyDDTRequestTerms(
-		group,                                           // Roster
+		group, // Roster
 		servicesmedco.SurveyID("tagging_loading_phase"), // SurveyID
 		listEncryptedElements,                           // Encrypted query terms to tag
-		false,                                           // compute proofs?
+		false, // compute proofs?
 		Testing,
 	)
 
