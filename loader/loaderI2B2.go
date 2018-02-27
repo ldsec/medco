@@ -472,7 +472,7 @@ func ParseLocalOntology(group *onet.Roster, entryPointIdx int) error {
 					shrineID := TableShrineOntologyModifierEnc[sk][0].NodeEncryptID
 					// if the ID does not yet exist
 					if _, ok := MapModifierPathToTag[lo.Fullname]; !ok {
-						MapModifierPathToTag[lo.Fullname] = TagAndID{Tag: libUnLynx.GroupingKey(-1), TagID: IDModifiers}
+						MapModifierPathToTag[lo.Fullname] = TagAndID{Tag: libunlynx.GroupingKey(-1), TagID: IDModifiers}
 						IDModifiers++
 
 						mapModifierIDtoTagKeys = append(mapModifierIDtoTagKeys, lo.Fullname)
@@ -482,7 +482,7 @@ func ParseLocalOntology(group *onet.Roster, entryPointIdx int) error {
 					shrineID := TableShrineOntologyConceptEnc[sk].NodeEncryptID
 					// if the ID does not yet exist
 					if _, ok := MapConceptPathToTag[lo.Fullname]; !ok {
-						MapConceptPathToTag[lo.Fullname] = TagAndID{Tag: libUnLynx.GroupingKey(-1), TagID: IDConcepts}
+						MapConceptPathToTag[lo.Fullname] = TagAndID{Tag: libunlynx.GroupingKey(-1), TagID: IDConcepts}
 						IDConcepts++
 
 						mapConceptIDtoTagKeys = append(mapConceptIDtoTagKeys, lo.Fullname)
@@ -541,25 +541,25 @@ func HasSensitiveParents(conceptPath string) (string, bool) {
 }
 
 // EncryptAndTag encrypts the elements and tags them to allow for the future comparison
-func EncryptAndTag(list []int64, group *onet.Roster, entryPointIdx int) ([]libUnLynx.GroupingKey, error) {
+func EncryptAndTag(list []int64, group *onet.Roster, entryPointIdx int) ([]libunlynx.GroupingKey, error) {
 
 	// ENCRYPTION
 	start := time.Now()
-	listEncryptedElements := make(libUnLynx.CipherVector, len(list))
+	listEncryptedElements := make(libunlynx.CipherVector, len(list))
 
 	for i := int64(0); i < int64(len(list)); i++ {
-		listEncryptedElements[i] = *libUnLynx.EncryptInt(group.Aggregate, list[i])
+		listEncryptedElements[i] = *libunlynx.EncryptInt(group.Aggregate, list[i])
 	}
 	log.LLvl1("Finished encrypting the sensitive data... (", time.Since(start), ")")
 
 	// TAGGING
 	start = time.Now()
-	client := serviceMedCo.NewMedCoClient(group.List[entryPointIdx], strconv.Itoa(entryPointIdx))
+	client := servicesmedco.NewMedCoClient(group.List[entryPointIdx], strconv.Itoa(entryPointIdx))
 	_, result, tr, err := client.SendSurveyDDTRequestTerms(
-		group, // Roster
-		serviceMedCo.SurveyID("tagging_loading_phase"), // SurveyID
-		listEncryptedElements,                          // Encrypted query terms to tag
-		false, // compute proofs?
+		group,                                           // Roster
+		servicesmedco.SurveyID("tagging_loading_phase"), // SurveyID
+		listEncryptedElements,                           // Encrypted query terms to tag
+		false,                                           // compute proofs?
 		Testing,
 	)
 

@@ -106,7 +106,7 @@ func TestLocalOntology_ToCSVText(t *testing.T) {
 
 	assert.Equal(t, lo.ToCSVText(), `"4","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","Parkdale","N","FA ","\N","\N","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","\N","Demographics \ Zip codes \ Arkansas \ Parkdale","@","2007-04-10 00:00:00","2007-04-10 00:00:00","2007-04-10 00:00:00","DEMO","\N","\N","\N","\N"`)
 
-	tag := libUnLynx.GroupingKey("1")
+	tag := libunlynx.GroupingKey("1")
 	assert.Equal(t, loader.LocalOntologySensitiveConceptToCSVText(&tag, 20), `"3", "\medco\tagged\concept\1\", "", "N", "LA ", "\N", "TAG_ID:20", "\N", "concept_cd", "concept_dimension", "concept_path", "T", "LIKE", "\medco\tagged\concept\1\", "\N", "\N", "NOW()", "\N", "\N", "\N", "TAG_ID", "@", "\N", "\N", "\N", "\N"`)
 
 }
@@ -137,8 +137,8 @@ func TestPatientDimension_ToCSVText(t *testing.T) {
 	op = append(op, loader.OptionalFields{ValType: "income_cd", Value: "Low"})
 	op = append(op, loader.OptionalFields{ValType: "patient_blob", Value: ""})
 
-	_, pubKey := libUnLynx.GenKey()
-	enc := libUnLynx.EncryptInt(pubKey, int64(2))
+	_, pubKey := libunlynx.GenKey()
+	enc := libunlynx.EncryptInt(pubKey, int64(2))
 
 	pd := loader.PatientDimension{
 		PK:             pdk,
@@ -182,7 +182,7 @@ func TestConceptDimension_ToCSVText(t *testing.T) {
 
 	assert.Equal(t, csvString, cd.ToCSVText())
 
-	tag := libUnLynx.GroupingKey("1")
+	tag := libunlynx.GroupingKey("1")
 	assert.Equal(t, `"\medco\tagged\concept\1\", "TAG_ID:20", "\N", "\N", "\N", "\N", "NOW()", "\N", "\N"`, loader.ConceptDimensionSensitiveToCSVText(&tag, 20))
 }
 
@@ -212,7 +212,7 @@ func TestModifierDimension_ToCSVText(t *testing.T) {
 
 	assert.Equal(t, csvString, md.ToCSVText())
 
-	tag := libUnLynx.GroupingKey("1")
+	tag := libunlynx.GroupingKey("1")
 	assert.Equal(t, `"\medco\tagged\modifier\1\", "TAG_ID:20", "\N", "\N", "\N", "\N", "NOW()", "\N", "\N"`, loader.ModifierDimensionSensitiveToCSVText(&tag, 20))
 }
 
@@ -378,8 +378,8 @@ func TestPatientDimensionFromString(t *testing.T) {
 	op = append(op, loader.OptionalFields{ValType: "income_cd", Value: "Low"})
 	op = append(op, loader.OptionalFields{ValType: "patient_blob", Value: ""})
 
-	_, pubKey := libUnLynx.GenKey()
-	enc := libUnLynx.EncryptInt(pubKey, int64(2))
+	_, pubKey := libunlynx.GenKey()
+	enc := libunlynx.EncryptInt(pubKey, int64(2))
 
 	pd := loader.PatientDimension{
 		PK:             pdk,
@@ -402,8 +402,8 @@ func TestPatientDimensionFromString(t *testing.T) {
 	assert.Equal(t, *pdkExpected, *pdk)
 
 	// place them nil because encryption is randomized
-	pdExpected.EncryptedFlag = libUnLynx.CipherText{}
-	pd.EncryptedFlag = libUnLynx.CipherText{}
+	pdExpected.EncryptedFlag = libunlynx.CipherText{}
+	pd.EncryptedFlag = libunlynx.CipherText{}
 
 	assert.Equal(t, pdExpected, pd)
 }

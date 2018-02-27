@@ -58,7 +58,7 @@ func setupEncryptEnv() {
 	el = elAux
 	local = localAux
 
-	secretKey, publicKey = libUnLynx.GenKey()
+	secretKey, publicKey = libunlynx.GenKey()
 }
 
 func TestStoreSensitiveLocalConcepts(t *testing.T) {
