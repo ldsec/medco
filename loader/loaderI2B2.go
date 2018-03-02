@@ -3,11 +3,11 @@ package loader
 import (
 	"encoding/csv"
 	"encoding/xml"
+	"github.com/dedis/kyber"
+	"github.com/dedis/onet"
+	"github.com/dedis/onet/log"
 	"github.com/lca1/medco/services"
 	"github.com/lca1/unlynx/lib"
-	"gopkg.in/dedis/crypto.v0/abstract"
-	"gopkg.in/dedis/onet.v1"
-	"gopkg.in/dedis/onet.v1/log"
 	"io"
 	"io/ioutil"
 	"os"
@@ -663,7 +663,7 @@ func ConvertLocalOntology() error {
 // PATIENT_DIMENSION.CSV converter
 
 // ParsePatientDimension reads and parses the patient_dimension.csv. This also means adding the encrypted flag.
-func ParsePatientDimension(pk abstract.Point) error {
+func ParsePatientDimension(pk kyber.Point) error {
 	lines, err := readCSV("PATIENT_DIMENSION")
 	if err != nil {
 		log.Fatal("Error in readCSV()")
