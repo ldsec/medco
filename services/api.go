@@ -1,13 +1,13 @@
 package servicesmedco
 
 import (
+	"github.com/dedis/kyber"
+	"github.com/dedis/kyber/util/key"
+	"github.com/dedis/onet"
+	"github.com/dedis/onet/log"
+	"github.com/dedis/onet/network"
 	"github.com/lca1/unlynx/lib"
 	"github.com/satori/go.uuid"
-	"gopkg.in/dedis/crypto.v0/abstract"
-	"gopkg.in/dedis/crypto.v0/config"
-	"gopkg.in/dedis/onet.v1"
-	"gopkg.in/dedis/onet.v1/log"
-	"gopkg.in/dedis/onet.v1/network"
 )
 
 // API represents a client with the server to which he is connected and its public/private key pair.
@@ -15,20 +15,19 @@ type API struct {
 	*onet.Client
 	ClientID   string
 	entryPoint *network.ServerIdentity
-	public     abstract.Point
-	private    abstract.Scalar
+	public     kyber.Point
+	private    kyber.Scalar
 }
 
 // NewMedCoClient constructor of a client.
 func NewMedCoClient(entryPoint *network.ServerIdentity, clientID string) *API {
-	keys := config.NewKeyPair(network.Suite)
-
+	keys := key.NewKeyPair(libunlynx.SuiTe)
 	newClient := &API{
-		Client:     onet.NewClient(Name),
+		Client:     onet.NewClient(libunlynx.SuiTe, Name),
 		ClientID:   clientID,
 		entryPoint: entryPoint,
 		public:     keys.Public,
-		private:    keys.Secret,
+		private:    keys.Private,
 	}
 	return newClient
 }
@@ -62,7 +61,7 @@ func (c *API) SendSurveyDDTRequestTerms(entities *onet.Roster, surveyID SurveyID
 }
 
 // SendSurveyAggRequest sends the encrypted aggregate local results at each node and expects a shuffling and a key switching of these data.
-func (c *API) SendSurveyAggRequest(entities *onet.Roster, surveyID SurveyID, cPK abstract.Point, aggregate libunlynx.CipherText, proofs bool) (*SurveyID, libunlynx.CipherText, TimeResults, error) {
+func (c *API) SendSurveyAggRequest(entities *onet.Roster, surveyID SurveyID, cPK kyber.Point, aggregate libunlynx.CipherText, proofs bool) (*SurveyID, libunlynx.CipherText, TimeResults, error) {
 	log.Lvl1("Client", c.ClientID, "is creating a Agg survey with ID:", surveyID)
 
 	listAggregate := make([]libunlynx.CipherText, 0)

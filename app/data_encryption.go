@@ -2,9 +2,9 @@ package main
 
 import (
 	"errors"
+	"github.com/dedis/onet/app"
+	"github.com/dedis/onet/log"
 	"github.com/lca1/unlynx/lib"
-	"gopkg.in/dedis/onet.v1/app"
-	"gopkg.in/dedis/onet.v1/log"
 	"gopkg.in/urfave/cli.v1"
 	"io"
 	"os"
@@ -17,7 +17,7 @@ func encryptIntFromApp(c *cli.Context) error {
 	groupFilePath := c.String("file")
 
 	if c.NArg() != 1 {
-		err := errors.New("Wrong number of arguments (only 1 allowed, except for the flags)")
+		err := errors.New("wrong number of arguments (only 1 allowed, except for the flags)")
 		log.Error(err)
 		return cli.NewExitError(err, 3)
 	}
@@ -35,18 +35,18 @@ func encryptIntFromApp(c *cli.Context) error {
 		log.Error("Error while opening group file", err)
 		return cli.NewExitError(err, 1)
 	}
-	el, err := app.ReadGroupToml(f)
+	el, err := app.ReadGroupDescToml(f)
 	if err != nil {
 		log.Error("Error while reading group file", err)
 		return cli.NewExitError(err, 1)
 	}
-	if len(el.List) <= 0 {
+	if len(el.Roster.List) <= 0 {
 		log.Error("Empty or invalid group file", err)
 		return cli.NewExitError(err, 1)
 	}
 
 	// encrypt
-	encryptedInt := libunlynx.EncryptInt(el.Aggregate, toEncryptInt)
+	encryptedInt := libunlynx.EncryptInt(el.Roster.Aggregate, toEncryptInt)
 
 	// test encryption for ETL
 	/*originalDatasetNbr := 250000

@@ -2,15 +2,16 @@ package main
 
 import (
 	"errors"
-	"gopkg.in/dedis/crypto.v0/config"
-	"gopkg.in/dedis/onet.v1/app"
-	"gopkg.in/dedis/onet.v1/crypto"
-	"gopkg.in/dedis/onet.v1/log"
-	"gopkg.in/dedis/onet.v1/network"
+	"github.com/dedis/kyber/util/encoding"
+	"github.com/dedis/kyber/util/key"
+	"github.com/dedis/onet/app"
+	"github.com/dedis/onet/log"
+	"github.com/dedis/onet/network"
+	"github.com/lca1/unlynx/lib"
 	"gopkg.in/urfave/cli.v1"
 )
 
-// NonInteractiveSetup is used to setup the cothority node for unlynx in a non-interactive (and without error checks) way
+// NonInteractiveSetup is used to setup the cothority node for unlynx in a non-interactive way (and without error checks)
 func NonInteractiveSetup(c *cli.Context) error {
 
 	// cli arguments
@@ -20,17 +21,18 @@ func NonInteractiveSetup(c *cli.Context) error {
 	publicTomlPath := c.String("publicTomlPath")
 
 	if serverBindingStr == "" || description == "" || privateTomlPath == "" || publicTomlPath == "" {
-		err := errors.New("Arguments not OK")
+		err := errors.New("arguments not OK")
 		log.Error(err)
 		return cli.NewExitError(err, 3)
 	}
 
-	kp := config.NewKeyPair(network.Suite)
-	privStr, _ := crypto.ScalarToStringHex(network.Suite, kp.Secret)
-	pubStr, _ := crypto.PointToStringHex(network.Suite, kp.Public)
-	public, _ := crypto.StringHexToPoint(network.Suite, pubStr)
-	serverBinding := network.NewTCPAddress(serverBindingStr)
+	kp := key.NewKeyPair(libunlynx.SuiTe)
 
+	privStr, _ := encoding.ScalarToStringHex(libunlynx.SuiTe, kp.Private)
+	pubStr, _ := encoding.PointToStringHex(libunlynx.SuiTe, kp.Public)
+	public, _ := encoding.StringHexToPoint(libunlynx.SuiTe, pubStr)
+
+	serverBinding := network.NewTLSAddress(serverBindingStr)
 	conf := &app.CothorityConfig{
 		Public:      pubStr,
 		Private:     privStr,
@@ -38,7 +40,7 @@ func NonInteractiveSetup(c *cli.Context) error {
 		Description: description,
 	}
 
-	server := app.NewServerToml(network.Suite, public, serverBinding, conf.Description)
+	server := app.NewServerToml(libunlynx.SuiTe, public, serverBinding, conf.Description)
 	group := app.NewGroupToml(server)
 
 	conf.Save(privateTomlPath)

@@ -2,7 +2,7 @@ package loader
 
 import (
 	"errors"
-	"gopkg.in/dedis/onet.v1/log"
+	"github.com/dedis/onet/log"
 	"regexp"
 	"strconv"
 )

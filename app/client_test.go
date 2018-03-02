@@ -3,13 +3,14 @@ package main
 import (
 	"bytes"
 	"encoding/xml"
+	"github.com/dedis/kyber"
+	"github.com/dedis/kyber/util/key"
+	"github.com/dedis/onet"
+	"github.com/dedis/onet/app"
+	"github.com/dedis/onet/log"
 	"github.com/lca1/medco/lib"
 	"github.com/lca1/unlynx/lib"
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/dedis/crypto.v0/abstract"
-	"gopkg.in/dedis/onet.v1"
-	"gopkg.in/dedis/onet.v1/app"
-	"gopkg.in/dedis/onet.v1/log"
 	"io"
 	"os"
 	"strconv"
@@ -17,8 +18,8 @@ import (
 	"testing"
 )
 
-var clientSecKey abstract.Scalar
-var clientPubKey abstract.Point
+var clientSecKey kyber.Scalar
+var clientPubKey kyber.Point
 var local *onet.LocalTest
 var el *onet.Roster
 
@@ -32,7 +33,9 @@ func testRemoteSetup() {
 	log.LLvl1("***************************************************************************************************")
 	os.Remove("pre_compute_multiplications.gob")
 
-	clientSecKey, clientPubKey = libunlynx.GenKey()
+	keys := key.NewKeyPair(libunlynx.SuiTe)
+	clientSecKey = keys.Private
+	clientPubKey = keys.Public
 
 	// generate el with group file
 	f, err := os.Open("test/group.toml")
@@ -40,11 +43,13 @@ func testRemoteSetup() {
 		log.Error("Error while opening group file", err)
 		os.Exit(1)
 	}
-	el, err = app.ReadGroupToml(f)
+	grp, err := app.ReadGroupDescToml(f)
 	if err != nil {
 		log.Error("Error while reading group file", err)
 		os.Exit(1)
 	}
+	el = grp.Roster
+
 	if len(el.List) <= 0 {
 		log.Error("Empty or invalid group file", err)
 		os.Exit(1)
@@ -59,7 +64,7 @@ func testLocalSetup() {
 
 	clientSecKey, clientPubKey = libunlynx.GenKey()
 
-	local = onet.NewLocalTest()
+	local = onet.NewLocalTest(libunlynx.SuiTe)
 	_, el, _ = local.GenTree(3, true)
 }
 

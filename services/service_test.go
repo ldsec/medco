@@ -1,13 +1,13 @@
 package servicesmedco_test
 
 import (
+	"github.com/dedis/kyber"
+	"github.com/dedis/onet"
+	"github.com/dedis/onet/log"
+	"github.com/dedis/onet/network"
 	"github.com/lca1/medco/services"
 	"github.com/lca1/unlynx/lib"
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/dedis/crypto.v0/abstract"
-	"gopkg.in/dedis/onet.v1"
-	"gopkg.in/dedis/onet.v1/log"
-	"gopkg.in/dedis/onet.v1/network"
 	"strconv"
 	"testing"
 )
@@ -15,7 +15,7 @@ import (
 func getParam(nbHosts int) (*onet.Roster, *onet.LocalTest) {
 
 	log.SetDebugVisible(1)
-	local := onet.NewLocalTest()
+	local := onet.NewLocalTest(libunlynx.SuiTe)
 	// generate 3 hosts, they don't connect, they process messages, and they
 	// don't register the tree or entity list
 	_, el, _ := local.GenTree(nbHosts, true)
@@ -33,7 +33,7 @@ func getClients(nbHosts int, el *onet.Roster) []*servicesmedco.API {
 	return clients
 }
 
-func getQueryParams(nbQp int, encKey abstract.Point) libunlynx.CipherVector {
+func getQueryParams(nbQp int, encKey kyber.Point) libunlynx.CipherVector {
 	listQueryParameters := make(libunlynx.CipherVector, 0)
 
 	for i := 0; i < nbQp; i++ {

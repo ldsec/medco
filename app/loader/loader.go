@@ -3,14 +3,14 @@ package loader
 import (
 	"bytes"
 	"crypto/rand"
+	"encoding/base64"
 	"encoding/binary"
 	"encoding/csv"
 	"errors"
+	"github.com/dedis/onet"
+	"github.com/dedis/onet/log"
 	"github.com/lca1/medco/services"
 	"github.com/lca1/unlynx/lib"
-	"gopkg.in/dedis/crypto.v0/base64"
-	"gopkg.in/dedis/onet.v1"
-	"gopkg.in/dedis/onet.v1/log"
 	"io"
 	"os"
 	"os/exec"
@@ -707,7 +707,7 @@ func generateGenomicID(indexGenVariant map[string]int, record []string) (int64, 
 
 	// if the ref and alt are too big ignore them (for now....)
 	if len(record[indexGenVariant["Reference_Allele"]]) > 6 || len(record[indexGenVariant["Tumor_Seq_Allele1"]]) > 6 {
-		return int64(-1), errors.New("Reference and/or Alternate base size is bigger than the maximum allowed")
+		return int64(-1), errors.New("reference and/or Alternate base size is bigger than the maximum allowed")
 	}
 
 	// generate id

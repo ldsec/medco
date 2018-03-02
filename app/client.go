@@ -6,15 +6,15 @@ import (
 	"database/sql"
 	"encoding/xml"
 	"fmt"
+	"github.com/dedis/kyber"
+	"github.com/dedis/onet"
+	"github.com/dedis/onet/app"
+	"github.com/dedis/onet/log"
 	"github.com/lca1/medco/app/loader"
 	"github.com/lca1/medco/lib"
 	"github.com/lca1/medco/services"
 	"github.com/lca1/unlynx/lib"
 	_ "github.com/lib/pq"
-	"gopkg.in/dedis/crypto.v0/abstract"
-	"gopkg.in/dedis/onet.v1"
-	"gopkg.in/dedis/onet.v1/app"
-	"gopkg.in/dedis/onet.v1/log"
 	"gopkg.in/urfave/cli.v1"
 	"io"
 	"io/ioutil"
@@ -66,12 +66,12 @@ func loadData(c *cli.Context) error {
 		log.Error("Error while opening group file", err)
 		return cli.NewExitError(err, 1)
 	}
-	el, err := app.ReadGroupToml(f)
+	el, err := app.ReadGroupDescToml(f)
 	if err != nil {
 		log.Error("Error while reading group file", err)
 		return cli.NewExitError(err, 1)
 	}
-	if len(el.List) <= 0 {
+	if len(el.Roster.List) <= 0 {
 		log.Error("Empty or invalid group file", err)
 		return cli.NewExitError(err, 1)
 	}
@@ -119,7 +119,7 @@ func loadData(c *cli.Context) error {
 		}
 	}
 
-	loader.LoadClient(el, entryPointIdx, fOntClinical, fOntGenomic, fClinical, fGenomic, listSensitive, databaseS, false)
+	loader.LoadClient(el.Roster, entryPointIdx, fOntClinical, fOntGenomic, fClinical, fGenomic, listSensitive, databaseS, false)
 
 	return nil
 }
@@ -140,12 +140,12 @@ func unlynxRequestFromApp(c *cli.Context) error {
 		log.Error("Error while opening group file", err)
 		return cli.NewExitError(err, 1)
 	}
-	el, err := app.ReadGroupToml(f)
+	el, err := app.ReadGroupDescToml(f)
 	if err != nil {
 		log.Error("Error while reading group file", err)
 		return cli.NewExitError(err, 1)
 	}
-	if len(el.List) <= 0 {
+	if len(el.Roster.List) <= 0 {
 		log.Error("Empty or invalid group file", err)
 		return cli.NewExitError(err, 1)
 	}
@@ -156,9 +156,9 @@ func unlynxRequestFromApp(c *cli.Context) error {
 		return cli.NewExitError(err, 2)
 	}
 
-	errDDT := unlynxDDTRequest(data, os.Stdout, el, entryPointIdx, proofs, false)
+	errDDT := unlynxDDTRequest(data, os.Stdout, el.Roster, entryPointIdx, proofs, false)
 	if errDDT != nil {
-		errAgg := unlynxAggRequest(data, os.Stdout, el, entryPointIdx, proofs)
+		errAgg := unlynxAggRequest(data, os.Stdout, el.Roster, entryPointIdx, proofs)
 
 		if errAgg != nil {
 			log.Error("Error while requesting something...", err)
@@ -404,7 +404,7 @@ func unlynxAggRequest(input []byte, output io.Writer, el *onet.Roster, entryPoin
 }
 
 // LocalAggregate locally aggregates the encrypted dummy flags
-func LocalAggregate(encDummyFlags libunlynx.CipherVector, pubKey abstract.Point) *libunlynx.CipherText {
+func LocalAggregate(encDummyFlags libunlynx.CipherVector, pubKey kyber.Point) *libunlynx.CipherText {
 	// there are no results
 	if len(encDummyFlags) == 0 {
 		return libunlynx.EncryptInt(pubKey, int64(0))

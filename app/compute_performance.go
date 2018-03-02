@@ -2,9 +2,9 @@ package main
 
 import (
 	"errors"
+	"github.com/dedis/onet/app"
+	"github.com/dedis/onet/log"
 	"github.com/lca1/medco/app/loader"
-	"gopkg.in/dedis/onet.v1/app"
-	"gopkg.in/dedis/onet.v1/log"
 	"gopkg.in/urfave/cli.v1"
 	"os"
 	"strconv"
@@ -24,12 +24,12 @@ func computePerfFromApp(c *cli.Context) error {
 		log.Error("Error while opening group file", err)
 		return cli.NewExitError(err, 1)
 	}
-	el, err := app.ReadGroupToml(f)
+	el, err := app.ReadGroupDescToml(f)
 	if err != nil {
 		log.Error("Error while reading group file", err)
 		return cli.NewExitError(err, 1)
 	}
-	if len(el.List) <= 0 {
+	if len(el.Roster.List) <= 0 {
 		log.Error("Empty or invalid group file", err)
 		return cli.NewExitError(err, 1)
 	}
@@ -59,7 +59,7 @@ func computePerfFromApp(c *cli.Context) error {
 		}
 
 		start := time.Now()
-		loader.EncryptAndTag(testValues, el, entryPointIdx)
+		loader.EncryptAndTag(testValues, el.Roster, entryPointIdx)
 		log.LLvl1("Encrypt and tag for ", nbElements, "... (", time.Since(start), ")")
 
 	}

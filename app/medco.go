@@ -3,9 +3,10 @@ package main
 import (
 	"os"
 
-	"gopkg.in/dedis/onet.v1/app"
-	"gopkg.in/dedis/onet.v1/log"
-	"gopkg.in/dedis/onet.v1/network"
+	"github.com/dedis/onet/app"
+	"github.com/dedis/onet/log"
+	"github.com/dedis/onet/network"
+	"github.com/lca1/unlynx/lib"
 	"gopkg.in/urfave/cli.v1"
 )
 
@@ -112,7 +113,7 @@ Return system error codes signification
 2: error in the XML query parsing or during query
 */
 func main() {
-	// increase maximum in onet.v1.tcp.go to allow for big packets (for now is the max value for uint32)
+	// increase maximum in onet.tcp.go to allow for big packets (for now is the max value for uint32)
 	network.MaxPacketSize = network.Size(^uint32(0))
 
 	cliApp := cli.NewApp()
@@ -246,7 +247,6 @@ func main() {
 	serverFlags := []cli.Flag{
 		cli.StringFlag{
 			Name:  optionConfig + ", " + optionConfigShort,
-			Value: app.GetDefaultConfigFile(BinaryName),
 			Usage: "Configuration file of the server",
 		},
 	}
@@ -351,7 +351,7 @@ func main() {
 						if c.GlobalIsSet("debug") {
 							log.Fatal("[-] Debug option cannot be used for the 'setup' command")
 						}
-						app.InteractiveConfig(BinaryName)
+						app.InteractiveConfig(libunlynx.SuiTe, BinaryName)
 						return nil
 					},
 				},

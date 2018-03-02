@@ -1,17 +1,17 @@
 package servicesmedco
 
 import (
+	"encoding/base64"
 	"github.com/BurntSushi/toml"
 	"github.com/btcsuite/goleveldb/leveldb/errors"
+	"github.com/dedis/kyber"
+	"github.com/dedis/kyber/util/random"
+	"github.com/dedis/onet"
+	"github.com/dedis/onet/log"
+	"github.com/dedis/onet/network"
 	"github.com/fanliao/go-concurrentMap"
 	"github.com/lca1/unlynx/lib"
 	"github.com/lca1/unlynx/protocols"
-	"gopkg.in/dedis/crypto.v0/abstract"
-	"gopkg.in/dedis/crypto.v0/base64"
-	"gopkg.in/dedis/crypto.v0/random"
-	"gopkg.in/dedis/onet.v1"
-	"gopkg.in/dedis/onet.v1/log"
-	"gopkg.in/dedis/onet.v1/network"
 	"os"
 	"sync"
 	"time"
@@ -57,7 +57,7 @@ type SurveyAggRequest struct {
 	SurveyID     SurveyID
 	Roster       onet.Roster
 	Proofs       bool
-	ClientPubKey abstract.Point // we need this for the key switching
+	ClientPubKey kyber.Point // we need this for the key switching
 
 	Aggregate          []libunlynx.CipherText       // aggregated final result. It is an array because we the root node adds the results from the other nodes here
 	AggregateShuffled  []libunlynx.ProcessResponse  // aggregated final results after they are shuffled
@@ -155,7 +155,7 @@ type Service struct {
 }
 
 // NewService constructor which registers the needed messages.
-func NewService(c *onet.Context) onet.Service {
+func NewService(c *onet.Context) (onet.Service, error) {
 
 	newUnLynxInstance := &Service{
 		ServiceProcessor: onet.NewServiceProcessor(c),
@@ -177,7 +177,7 @@ func NewService(c *onet.Context) onet.Service {
 	c.RegisterProcessor(newUnLynxInstance, msgTypes.msgSurveyAggRequest)
 	c.RegisterProcessor(newUnLynxInstance, msgTypes.msgSurveyAggGenerated)
 
-	return newUnLynxInstance
+	return newUnLynxInstance, nil
 }
 
 // Process implements the processor interface and is used to recognize messages broadcasted between servers
@@ -203,13 +203,13 @@ func (s *Service) Process(msg *network.Envelope) {
 //______________________________________________________________________________________________________________________
 
 // HandleSurveyTagGenerated handles triggers the SurveyDDTChannel
-func (s *Service) HandleSurveyTagGenerated(recq *SurveyTagGenerated) (network.Message, onet.ClientError) {
+func (s *Service) HandleSurveyTagGenerated(recq *SurveyTagGenerated) (network.Message, error) {
 	castToSurveyTag(s.MapSurveyTag.Get((string)(recq.SurveyID))).SurveyChannel <- 1
 	return nil, nil
 }
 
 // HandleSurveyDDTRequestTerms handles the reception of the query terms to be deterministically tagged
-func (s *Service) HandleSurveyDDTRequestTerms(sdq *SurveyDDTRequest) (network.Message, onet.ClientError) {
+func (s *Service) HandleSurveyDDTRequestTerms(sdq *SurveyDDTRequest) (network.Message, error) {
 
 	// if this server is the one receiving the request from the client
 	if !sdq.IntraMessage {
@@ -255,7 +255,7 @@ func (s *Service) HandleSurveyDDTRequestTerms(sdq *SurveyDDTRequest) (network.Me
 
 		if err != nil {
 			log.Error("DDT error", err)
-			return nil, onet.NewClientError(err)
+			return nil, err
 		}
 
 		start := time.Now()
@@ -295,7 +295,7 @@ func (s *Service) HandleSurveyDDTRequestTerms(sdq *SurveyDDTRequest) (network.Me
 }
 
 // HandleSurveyAggGenerated handles triggers the SurveyDDTChannel
-func (s *Service) HandleSurveyAggGenerated(recq *SurveyAggGenerated) (network.Message, onet.ClientError) {
+func (s *Service) HandleSurveyAggGenerated(recq *SurveyAggGenerated) (network.Message, error) {
 	var el interface{}
 	el = nil
 	for el == nil {
@@ -312,7 +312,7 @@ func (s *Service) HandleSurveyAggGenerated(recq *SurveyAggGenerated) (network.Me
 }
 
 // HandleSurveyAggRequest handles the reception of the aggregate local result to be shared/shuffled/switched
-func (s *Service) HandleSurveyAggRequest(sar *SurveyAggRequest) (network.Message, onet.ClientError) {
+func (s *Service) HandleSurveyAggRequest(sar *SurveyAggRequest) (network.Message, error) {
 	var root bool
 	if s.ServerIdentity().String() == sar.Roster.List[0].String() {
 		root = true
@@ -355,7 +355,7 @@ func (s *Service) HandleSurveyAggRequest(sar *SurveyAggRequest) (network.Message
 
 			if err != nil {
 				log.Error("shuffling error", err)
-				return nil, onet.NewClientError(err)
+				return nil, err
 			}
 
 			survey.Request.AggregateShuffled = shufflingResult
@@ -382,7 +382,7 @@ func (s *Service) HandleSurveyAggRequest(sar *SurveyAggRequest) (network.Message
 
 			if err != nil {
 				log.Error("key switching error", err)
-				return nil, onet.NewClientError(err)
+				return nil, err
 			}
 
 			// get server index
@@ -465,7 +465,7 @@ func (s *Service) HandleSurveyAggRequest(sar *SurveyAggRequest) (network.Message
 
 		if err != nil {
 			log.Error("key switching error", err)
-			return nil, onet.NewClientError(err)
+			return nil, err
 		}
 
 		s.Mutex.Lock()
@@ -520,7 +520,7 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance, conf *onet.GenericConfi
 
 		s.Mutex.Lock()
 
-		var aux abstract.Scalar
+		var aux kyber.Scalar
 		if survey.Request.Testing {
 			aux, err = CheckDDTSecrets(DDTSecretsPath+"_"+s.ServerIdentity().Address.Host()+":"+s.ServerIdentity().Address.Port()+".toml", serverIDMap.Address)
 			if err != nil || aux == nil {
@@ -709,7 +709,7 @@ type privateTOML struct {
 	Secrets     []secretDDT
 }
 
-func createTOMLSecrets(path string, id network.Address) (abstract.Scalar, error) {
+func createTOMLSecrets(path string, id network.Address) (kyber.Scalar, error) {
 	var fileHandle *os.File
 	var err error
 	defer fileHandle.Close()
@@ -718,7 +718,7 @@ func createTOMLSecrets(path string, id network.Address) (abstract.Scalar, error)
 
 	encoder := toml.NewEncoder(fileHandle)
 
-	secret := network.Suite.Scalar().Pick(random.Stream)
+	secret := libunlynx.SuiTe.Scalar().Pick(random.New())
 	b, err := secret.MarshalBinary()
 
 	if err != nil {
@@ -754,7 +754,7 @@ func addTOMLSecret(path string, content privateTOML) error {
 }
 
 // CheckDDTSecrets checks for the existence of the DDT secrets on the private_*.toml (we need to ensure that we use the same secrets always)
-func CheckDDTSecrets(path string, id network.Address) (abstract.Scalar, error) {
+func CheckDDTSecrets(path string, id network.Address) (kyber.Scalar, error) {
 	var err error
 
 	if _, err = os.Stat(path); os.IsNotExist(err) {
@@ -768,7 +768,7 @@ func CheckDDTSecrets(path string, id network.Address) (abstract.Scalar, error) {
 
 	for _, el := range contents.Secrets {
 		if el.ServerID == id.String() {
-			secret := network.Suite.Scalar()
+			secret := libunlynx.SuiTe.Scalar()
 
 			b, err := base64.StdEncoding.DecodeString(el.Secret)
 			if err != nil {
@@ -785,7 +785,7 @@ func CheckDDTSecrets(path string, id network.Address) (abstract.Scalar, error) {
 	}
 
 	// no secret for this 'source' server
-	secret := network.Suite.Scalar().Pick(random.Stream)
+	secret := libunlynx.SuiTe.Scalar().Pick(random.New())
 	b, err := secret.MarshalBinary()
 
 	if err != nil {
