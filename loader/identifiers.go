@@ -2,7 +2,7 @@ package loader
 
 import (
 	"errors"
-	"gopkg.in/dedis/onet.v1/log"
+	"github.com/dedis/onet/log"
 	"regexp"
 	"strconv"
 )
@@ -85,7 +85,7 @@ func AlleleMaping(allele string) (int64, error) {
 	case "C":
 		return int64(3), nil
 	default:
-		return int64(-1), errors.New("Wrong allele format")
+		return int64(-1), errors.New("wrong allele format")
 	}
 }
 
@@ -186,7 +186,7 @@ func PushBitsFromRight(origBits int64, nbBits int, bitsToPush int64) int64 {
 	mask := GetMask(nbBits)
 
 	// get final value
-	newBits |= (mask & bitsToPush)
+	newBits |= mask & bitsToPush
 	return newBits
 }
 

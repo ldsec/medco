@@ -1,10 +1,10 @@
 package loader
 
 import (
+	"encoding/base64"
+	"github.com/dedis/kyber"
+	"github.com/dedis/onet/log"
 	"github.com/lca1/unlynx/lib"
-	"gopkg.in/dedis/crypto.v0/abstract"
-	"gopkg.in/dedis/crypto.v0/base64"
-	"gopkg.in/dedis/onet.v1/log"
 	"strconv"
 	"strings"
 )
@@ -460,7 +460,7 @@ func LocalOntologyFromString(line []string) *LocalOntology {
 }
 
 // PatientDimensionFromString generates a PatientDimension struct from a parsed line of a .csv file
-func PatientDimensionFromString(line []string, pk abstract.Point) (*PatientDimensionPK, PatientDimension) {
+func PatientDimensionFromString(line []string, pk kyber.Point) (*PatientDimensionPK, PatientDimension) {
 	pdk := &PatientDimensionPK{
 		PatientNum: line[0],
 	}

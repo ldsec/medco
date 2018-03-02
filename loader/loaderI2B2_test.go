@@ -1,19 +1,19 @@
 package loader_test
 
 import (
+	"github.com/dedis/kyber"
+	"github.com/dedis/onet"
+	"github.com/dedis/onet/app"
+	"github.com/dedis/onet/log"
 	"github.com/lca1/medco-loader/loader"
 	"github.com/lca1/unlynx/lib"
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/dedis/crypto.v0/abstract"
-	"gopkg.in/dedis/onet.v1"
-	"gopkg.in/dedis/onet.v1/app"
-	"gopkg.in/dedis/onet.v1/log"
 	"os"
 	"testing"
 )
 
-var publicKey abstract.Point
-var secretKey abstract.Scalar
+var publicKey kyber.Point
+var secretKey kyber.Scalar
 var el *onet.Roster
 var local *onet.LocalTest
 
@@ -23,7 +23,7 @@ func getRoster(groupFilePath string) (*onet.Roster, *onet.LocalTest, error) {
 	if len(groupFilePath) == 0 {
 		log.Info("Creating local test roster")
 
-		local := onet.NewLocalTest()
+		local := onet.NewLocalTest(libunlynx.SuiTe)
 		_, el, _ := local.GenTree(3, true)
 		return el, local, nil
 
@@ -36,17 +36,17 @@ func getRoster(groupFilePath string) (*onet.Roster, *onet.LocalTest, error) {
 			log.Error("Error while opening group file", err)
 			return nil, nil, err
 		}
-		el, err := app.ReadGroupToml(f)
+		el, err := app.ReadGroupDescToml(f)
 		if err != nil {
 			log.Error("Error while reading group file", err)
 			return nil, nil, err
 		}
-		if len(el.List) <= 0 {
+		if len(el.Roster.List) <= 0 {
 			log.Error("Empty or invalid group file", err)
 			return nil, nil, err
 		}
 
-		return el, nil, nil
+		return el.Roster, nil, nil
 	}
 }
 
