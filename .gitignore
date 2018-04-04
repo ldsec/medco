@@ -44,3 +44,6 @@ _testmain.go
 
 services/*.toml
 app/*.toml
+app/loader/files/
+!app/loader/files/doc.go
+app/loader/files/tcga_cbio/
