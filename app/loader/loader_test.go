@@ -12,10 +12,10 @@ import (
 )
 
 const (
-	clinicalOntology = "files/data_clinical_skcm_broad.csv"
-	genomicOntology  = "files/data_mutations_extended_skcm_broad.csv"
-	clinicalFile     = "files/data_clinical_skcm_broad_part1.csv"
-	genomicFile      = "files/data_mutations_extended_skcm_broad_part1.csv"
+	clinicalOntology = "files/tcga_cbio/clinical_data.csv"
+	genomicOntology  = "files/tcga_cbio/mutation_data.csv"
+	clinicalFile     = "files/tcga_cbio/clinical_data.csv"
+	genomicFile      = "files/tcga_cbio/mutation_data.csv"
 )
 
 func getRoster(groupFilePath string) (*onet.Roster, *onet.LocalTest, error) {
@@ -77,8 +77,19 @@ func generateFiles(t *testing.T, el *onet.Roster, entryPointIdx int) {
 	}
 
 	listSensitive := make([]string, 0)
-	listSensitive = append(listSensitive, "PRIMARY_TUMOR_LOCALIZATION_TYPE")
+	listSensitive = append(listSensitive, "AJCC_PATHOLOGIC_TUMOR_STAGE")
+	listSensitive = append(listSensitive, "CANCER_TYPE")
 	listSensitive = append(listSensitive, "CANCER_TYPE_DETAILED")
+	listSensitive = append(listSensitive, "CLIN_M_STAGE")
+	listSensitive = append(listSensitive, "HISTOLOGICAL_DIAGNOSIS")
+	listSensitive = append(listSensitive, "ICD_O_3_HISTOLOGY")
+	listSensitive = append(listSensitive, "ICD_O_3_SITE")
+	listSensitive = append(listSensitive, "SAMPLE_TYPE")
+	listSensitive = append(listSensitive, "TISSUE_SOURCE_SITE")
+	listSensitive = append(listSensitive, "TUMOR_TISSUE_SITE")
+	listSensitive = append(listSensitive, "VITAL_STATUS")
+	listSensitive = append(listSensitive, "ICD_O_3_SITE")
+
 
 	err = loader.GenerateOntologyFiles(el, entryPointIdx, fOntologyClinical, fOntologyGenomic, listSensitive)
 	assert.True(t, err == nil, err)
@@ -98,7 +109,6 @@ func generateFiles(t *testing.T, el *onet.Roster, entryPointIdx int) {
 }
 
 func TestGenerateFilesLocalTest(t *testing.T) {
-	t.Skip()
 	el, local, err := getRoster("")
 	assert.True(t, err == nil, err)
 	generateFiles(t, el, 0)
@@ -108,7 +118,8 @@ func TestGenerateFilesLocalTest(t *testing.T) {
 func TestGenerateFilesGroupFile(t *testing.T) {
 	t.Skip()
 	// todo: fix hardcoded path
-	el, _, err := getRoster("/Users/jagomes/Documents/EPFL/MedCo/i2b2/medco-deployment/configuration/keys/dev-3nodes-samehost/group.toml")
+	// increase maximum in onet.tcp.go to allow for big packets (for now is the max value for uint32)
+	el, _, err := getRoster("/Users/jagomes/Documents/EPFL/MedCo/medco-deployment/configuration-profiles/dev-3nodes-samehost/group.toml")
 	assert.True(t, err == nil, err)
 	generateFiles(t, el, 0)
 }

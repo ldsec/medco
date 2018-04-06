@@ -59,6 +59,32 @@ var (
 		"files/I2B2DEMODATA_OBSERVATION_FACT.csv"}
 )
 
+/* GenomicDic: defines the translation between the genomic fields that are present in the different datafiles and their
+			   actual 'meaning'
+*/
+var (
+	GenomicDic = map[string]string{
+		"Tumor_Sample_Barcode": "ID",
+		"Chromosome":   "CHR",
+		"Start_Position": "SP",
+		"Reference_Allele": "RA",
+		"Tumor_Seq_Allele1": "TSA1",
+		"PATIENT_ID": "ID",
+		"CHR": "CHR",
+		"START_POSITION": "SP",
+		"REFERENCE_ALLELE": "RA",
+		"TUMOR_SEQ_ALLELE1": "TSA1",
+	}
+)
+
+/* NumElMap: defines an approximate size of the map (it avoids rehashing and speeds up the execution)
+   NumThreads: defines the amount of go subroutines to use when parelellizing the encryption
+*/
+var (
+	NumElMap = int64(5e6)
+	NumThreads = int(20)
+)
+
 // PatientVisitLink contains the link between the patient and the visit/encounter (patient ID and sample ID)
 type PatientVisitLink struct {
 	PatientID   int64
@@ -272,9 +298,8 @@ func LoadDataFiles() error {
 
 // GenerateOntologyFiles generates the .csv files that 'belong' to the whole ontology (metadata & shrine)
 func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic *os.File, listSensitive []string) error {
-
 	keyForSensitiveIDs := make([]ConceptPath, 0) // stores the concept path for the corresponding EncID(s) and the genomic IDs
-	allSensitiveIDs := make([]int64, 0)          // stores the EncID(s) and the genomic IDs
+	allSensitiveIDs := make(map[int64]struct{}, NumElMap) // stores the EncID(s) and the genomic IDs (is a set)
 
 	encID := int64(1)   // clinical sensitive IDs
 	clearID := int64(1) // clinical non-sensitive IDs
@@ -338,9 +363,8 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 								return err
 							}
 							// we don't generate the MetadataOntologyLeafEnc because we will do this afterwards (so that we only perform 1 DDT with all sensitive elements)
-
 							keyForSensitiveIDs = append(keyForSensitiveIDs, ConceptPath{Field: headerClinical[j], Record: record[i]})
-							allSensitiveIDs = append(allSensitiveIDs, encID)
+							allSensitiveIDs[encID] = struct{}{}
 							OntValues[ConceptPath{Field: headerClinical[j], Record: record[i]}] = ConceptID{Identifier: "E", Value: encID}
 							encID++
 						}
@@ -369,7 +393,7 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 
 	fOntClinical.Close()
 
-	log.LLvl1("Finished parsing the clinical ontology...")
+	log.LLvl1("Finished parsing the clinical ontology... (", len(allSensitiveIDs),")")
 
 	// load genomic
 	reader = csv.NewReader(fOntGenomic)
@@ -379,14 +403,22 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 	headerGenomic := make([]string, 0)
 	// this arrays stores the indexes of the fields we need to use to generate a genomic id
 	indexGenVariant := make(map[string]int)
+	progress := int64(0)
 	for {
 		// read just one record, but we could ReadAll() as well
 		record, err := reader.Read()
+		progress++
+
 		// end-of-file is fitted into err
 		if err == io.EOF {
 			break
 		} else if err != nil {
 			return err
+		}
+
+		// for every 100,000 rows parsed print a message
+		if progress % 100000 == 0{
+			log.LLvl1("Continuing parsing the genomic ontology... (", progress,")")
 		}
 
 		// if it is not a commented line
@@ -395,24 +427,26 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 			// the HEADER
 			if first == true {
 				for i, el := range record {
-					if el == "Tumor_Sample_Barcode" || el == "Chromosome" || el == "Start_Position" || el == "Reference_Allele" || el == "Tumor_Seq_Allele1" {
-						indexGenVariant[el] = i
+					// the fields we need to generate the genomic id
+					if val, ok := GenomicDic[el]; ok {
+						indexGenVariant[val] = i
 					}
 					headerGenomic = append(headerGenomic, el)
 
 				}
 				first = false
 			} else {
+				// the number of genomic ids does not match the number of distinct mutation because if the RA is too big we discard the mutation
 				genomicID, err := generateGenomicID(indexGenVariant, record)
 
 				// if genomic id already exist we don't need to add it to the shrine_ont.genomic_annotations
-				if err == nil && containsArrayInt64(allSensitiveIDs, genomicID) == false {
+				if _, ok := allSensitiveIDs[genomicID]; ok == false && err == nil {
 					if err := writeShrineOntologyGenomicAnnotations(genomicID, headerGenomic, indexGenVariant, record); err != nil {
 						return err
 					}
 
 					keyForSensitiveIDs = append(keyForSensitiveIDs, ConceptPath{Field: strconv.FormatInt(genomicID, 10), Record: ""})
-					allSensitiveIDs = append(allSensitiveIDs, genomicID)
+					allSensitiveIDs[genomicID] = struct{}{}
 				}
 			}
 
@@ -422,11 +456,15 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 
 	fOntGenomic.Close()
 
-	log.LLvl1("Finished parsing the genomic ontology...")
+	log.LLvl1("Finished parsing the genomic ontology... (", len(allSensitiveIDs),")")
 
+	// convert the map of sensitive IDs to a slice (this is what the DDT service/protocol gets)
+	temp := make([]int64, 0)
+	for k := range allSensitiveIDs {
+		temp = append(temp, k)
+	}
 	// write the tagged values
-
-	taggedValues, err := EncryptAndTag(allSensitiveIDs, group, entryPointIdx)
+	taggedValues, err := EncryptAndTag(temp, group, entryPointIdx)
 	if err != nil {
 		return err
 	}
@@ -585,8 +623,8 @@ func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 			// the HEADER
 			if first == true {
 				for i, el := range record {
-					if el == "Tumor_Sample_Barcode" || el == "Chromosome" || el == "Start_Position" || el == "Reference_Allele" || el == "Tumor_Seq_Allele1" {
-						indexGenVariant[el] = i
+					if val, ok := GenomicDic[el]; ok {
+						indexGenVariant[val] = i
 					}
 					headerGenomic = append(headerGenomic, el)
 
@@ -608,8 +646,8 @@ func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 						}
 
 						if err := writeDemodataObservationFactEnc(OntValues[ConceptPath{Field: strconv.FormatInt(genomicID, 10), Record: ""}].Value,
-							patientVisitMap[record[indexGenVariant["Tumor_Sample_Barcode"]]].PatientID,
-							patientVisitMap[record[indexGenVariant["Tumor_Sample_Barcode"]]].EncounterID); err != nil {
+							patientVisitMap[record[indexGenVariant["ID"]]].PatientID,
+							patientVisitMap[record[indexGenVariant["ID"]]].EncounterID); err != nil {
 							return err
 						}
 					} else {
@@ -706,17 +744,17 @@ func writeShrineOntologyLeafClear(field, el string, id int64) error {
 func generateGenomicID(indexGenVariant map[string]int, record []string) (int64, error) {
 
 	// if the ref and alt are too big ignore them (for now....)
-	if len(record[indexGenVariant["Reference_Allele"]]) > 6 || len(record[indexGenVariant["Tumor_Seq_Allele1"]]) > 6 {
+	if len(record[indexGenVariant["RA"]]) > 6 || len(record[indexGenVariant["TSA1"]]) > 6 {
 		return int64(-1), errors.New("reference and/or Alternate base size is bigger than the maximum allowed")
 	}
 
 	// generate id
-	aux, err := strconv.ParseInt(record[indexGenVariant["Start_Position"]], 10, 64)
+	aux, err := strconv.ParseInt(record[indexGenVariant["SP"]], 10, 64)
 	if err != nil {
 		return int64(-1), err
 	}
 
-	id, err := GetVariantID(record[indexGenVariant["Chromosome"]], aux, record[indexGenVariant["Reference_Allele"]], record[indexGenVariant["Tumor_Seq_Allele1"]])
+	id, err := GetVariantID(record[indexGenVariant["CHR"]], aux, record[indexGenVariant["RA"]], record[indexGenVariant["TSA1"]])
 	if err != nil {
 		return int64(-1), err
 	}
@@ -726,12 +764,10 @@ func generateGenomicID(indexGenVariant map[string]int, record []string) (int64, 
 }
 
 func writeShrineOntologyGenomicAnnotations(id int64, fields []string, indexGenVariant map[string]int, record []string) error {
-
 	otherFields := ""
 	for i, el := range record {
 		if _, ok := indexGenVariant[el]; ok == false {
 			//otherFields += fields[i] + ":" + strings.Replace(el, "'", "''", -1) + ", "
-
 			otherFields += "\"\"" + fields[i] + "\"\":\"\"" + el + "\"\", "
 		}
 	}
@@ -774,9 +810,27 @@ func EncryptAndTag(list []int64, group *onet.Roster, entryPointIdx int) ([]libun
 	start := time.Now()
 	listEncryptedElements := make(libunlynx.CipherVector, len(list))
 
-	for i := int64(0); i < int64(len(list)); i++ {
-		listEncryptedElements[i] = *libunlynx.EncryptInt(group.Aggregate, list[i])
+	// parallelize the encryption (we need this because this is so slow)
+	blockSize := int64(len(list))/int64(NumThreads)
+
+	wg := libunlynx.StartParallelize(NumThreads)
+	for i := 0; i < NumThreads; i++ {
+		blockEnd := int64(i)*blockSize+blockSize
+		// the last goroutine gets the remaining content of the array
+		if i == NumThreads-1 {
+			blockEnd = int64(len(list))
+		}
+
+		go func(init int64, length int64){
+			defer wg.Done()
+			for j := init; j < length; j++ {
+				listEncryptedElements[j] = *libunlynx.EncryptInt(group.Aggregate, list[j])
+			}
+			log.LLvl1("Encrypted (", length - init, ")elements")
+		}(int64(i) * blockSize, blockEnd)
 	}
+	libunlynx.EndParallelize(wg)
+
 	log.LLvl1("Finished encrypting the sensitive data... (", time.Since(start), ")")
 
 	// TAGGING
@@ -791,7 +845,7 @@ func EncryptAndTag(list []int64, group *onet.Roster, entryPointIdx int) ([]libun
 	)
 
 	if err != nil {
-		log.Fatal("Error during DDT")
+		log.Fatal("Error during DDT:", err)
 		return nil, err
 	}
 

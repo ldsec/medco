@@ -38,12 +38,12 @@ const (
 const (
 	/*
 	 Valid values for the chromosome id:
-	 Number from 1 to 23 inclusive, or
-	 X, Y, or M
+	 Number from 1 to 23 inclusive (and 24 because XY gets mapped to this number sometimes), or
+	 X, Y, M or MT (these last two are actually the same
 
-	 -> Range from 1 to 26 inclusive, 2^5 = 32 ==> 5 bits storage
+	 -> Range from 1 to 28 inclusive, 2^5 = 32 ==> 5 bits storage
 	*/
-	ChromosomeIDRegex = "^([XYM]|[1-9]|(1[0-9])|(2[0-3]))$"
+	ChromosomeIDRegex = "^([XYM]|MT|[1-9]|(1[0-9])|(2[0-4]))$"
 
 	/*
 	 Valid values for the alleles.
@@ -52,14 +52,14 @@ const (
 
 	 The maximum number of bases supported is  6 -> 12bits and an additional 3 bits are used to encode the length.
 	*/
-	AllelesRegex = "^([ATCG]{1,6}|-)$"
+	AllelesRegex = "^([ATCG]{1,6}|-|NA)$"
 )
 
 // Mapping to encode non-numeric chromosome ids.
 const (
-	ChromosomeXintID = int64(24)
-	ChromosomeYintID = int64(25)
-	ChromosomeMintID = int64(26)
+	ChromosomeXintID = int64(25)
+	ChromosomeYintID = int64(26)
+	ChromosomeMintID = int64(27)
 )
 
 // TypeFlagGenomicVariant encodes the type of id.
@@ -109,11 +109,13 @@ func checkRegex(input, expression, errorMessage string) error {
 // GetVariantID encodes a genomic variant ID to be encrypted, according to the specifications.
 func GetVariantID(chromosomeID string, startPosition int64, refAlleles, altAlleles string) (int64, error) {
 
+
 	// validate input
 	if checkRegex(chromosomeID, ChromosomeIDRegex, "Invalid Chromosome ID") != nil ||
 		checkRegex(refAlleles, AllelesRegex, "Invalid reference allele") != nil || checkRegex(altAlleles, AllelesRegex, "Invalid alternate allele") != nil ||
 		startPosition < PositionMin || startPosition > PositionMax || TypeFlagBitSize+ChrBitSize+PosBitSize+2*(AllelesBaseLengthBitSize+AllelesBitSize) != IDBitSize {
-
+		log.LLvl1(refAlleles)
+		log.LLvl1(chromosomeID)
 		return int64(-1), errors.New("Invalid input: chr=" + chromosomeID + ", pos=" + strconv.FormatInt(startPosition, 10) + ", ref=" + refAlleles + ", alt=" + altAlleles)
 	}
 
@@ -131,6 +133,9 @@ func GetVariantID(chromosomeID string, startPosition int64, refAlleles, altAllel
 		case "M":
 			chromosomeIntID = ChromosomeMintID
 			break
+		case "MT":
+			chromosomeIntID = ChromosomeMintID
+			break
 		default:
 			log.Fatal("Invalid Chromosome ID")
 			return int64(-1), err
@@ -138,11 +143,11 @@ func GetVariantID(chromosomeID string, startPosition int64, refAlleles, altAllel
 	}
 
 	// alleles
-	if refAlleles == "-" {
+	if refAlleles == "-" || refAlleles == "NA" {
 		refAlleles = ""
 	}
 
-	if altAlleles == "-" {
+	if altAlleles == "-" || altAlleles == "NA" {
 		altAlleles = ""
 	}
 
