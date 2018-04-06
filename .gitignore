@@ -46,4 +46,4 @@ services/*.toml
 app/*.toml
 app/loader/*.toml
 app/loader/files/
-!app/loader/files/tcga_cbio/dataManipulator.py
+app/loader/scripts/*.txt
