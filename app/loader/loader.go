@@ -362,8 +362,15 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 				j := 0
 				for _, i := range toTraverseIndex {
 
-					if record[i] == "" {
+					// uncomment if you want to include the <empty> fields as part of the ontology
+					/*if record[i] == "" || record[i] == "NA" {
 						record[i] = "<empty>"
+					}*/
+
+					// skip empty fields
+					if record[i] == "" || record[i] == "NA" {
+						j++
+						continue
 					}
 
 					// sensitive
@@ -485,9 +492,9 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 
 // GenerateDataFiles generates the .csv files that 'belong' to the dataset (demodata)
 func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
-	// patient_id collumn index
+	// patient_id column index
 	pidIndex := 0
-	// encounter_id (sample_id) collumn index
+	// encounter_id (sample_id) column index
 	eidIndex := 0
 	// patient_id counter
 	pid := int64(1)
@@ -572,8 +579,15 @@ func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 				j := 0
 				for _, i := range toTraverseIndex {
 
-					if record[i] == "" {
+					// uncomment if you want to include the <empty> fields as part of the ontology
+					/*if record[i] == "" || record[i] == "NA" {
 						record[i] = "<empty>"
+					}*/
+
+					// skip empty fields
+					if record[i] == "" || record[i] == "NA" {
+						j++
+						continue
 					}
 
 					// check if it exists in the ontology
