@@ -81,21 +81,20 @@ func generateFiles(t *testing.T, el *onet.Roster, entryPointIdx int) {
 		loader.FileHandlers = append(loader.FileHandlers, fp)
 	}
 
-	listSensitive := make([]string, 0)
-	listSensitive = append(listSensitive, "AJCC_PATHOLOGIC_TUMOR_STAGE")
-	listSensitive = append(listSensitive, "CANCER_TYPE")
-	listSensitive = append(listSensitive, "CANCER_TYPE_DETAILED")
-	listSensitive = append(listSensitive, "CLIN_M_STAGE")
-	listSensitive = append(listSensitive, "HISTOLOGICAL_DIAGNOSIS")
-	listSensitive = append(listSensitive, "ICD_O_3_HISTOLOGY")
-	listSensitive = append(listSensitive, "ICD_O_3_SITE")
-	listSensitive = append(listSensitive, "SAMPLE_TYPE")
-	listSensitive = append(listSensitive, "TISSUE_SOURCE_SITE")
-	listSensitive = append(listSensitive, "TUMOR_TISSUE_SITE")
-	listSensitive = append(listSensitive, "VITAL_STATUS")
+	mapSensitive := make(map[string]struct{}, 11) // DO NOT FORGET!! to modify the '11' value depending on the number of sensitive attributes
+	mapSensitive["AJCC_PATHOLOGIC_TUMOR_STAGE"] = struct {}{}
+	mapSensitive["CANCER_TYPE"] = struct {}{}
+	mapSensitive["CANCER_TYPE_DETAILED"] = struct {}{}
+	mapSensitive["HISTOLOGICAL_DIAGNOSIS"] = struct {}{}
+	mapSensitive["ICD_O_3_HISTOLOGY"] = struct {}{}
+	mapSensitive["ICD_O_3_SITE"] = struct {}{}
+	mapSensitive["SAMPLE_TYPE"] = struct {}{}
+	mapSensitive["TISSUE_SOURCE_SITE"] = struct {}{}
+	mapSensitive["TUMOR_TISSUE_SITE"] = struct {}{}
+	mapSensitive["VITAL_STATUS"] = struct {}{}
+	mapSensitive["CLIN_M_STAGE"] = struct {}{}
 
-
-	err = loader.GenerateOntologyFiles(el, entryPointIdx, fOntologyClinical, fOntologyGenomic, listSensitive)
+	err = loader.GenerateOntologyFiles(el, entryPointIdx, fOntologyClinical, fOntologyGenomic, mapSensitive)
 	assert.True(t, err == nil, err)
 
 	err = loader.GenerateDataFiles(el, fClinical, fGenomic)

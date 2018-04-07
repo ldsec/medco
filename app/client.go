@@ -105,6 +105,12 @@ func loadData(c *cli.Context) error {
 		return cli.NewExitError(err, 1)
 	}
 
+	// convert listSensitive to map set to allow for faster search
+	mapSensitive := make(map[string]struct{}, len(listSensitive))
+	for _, attSensitive := range listSensitive {
+		mapSensitive[attSensitive] = struct {}{}
+	}
+
 	if replaySize < 1 {
 		log.Error("Wrong file size value (1>)", err)
 		return cli.NewExitError(err, 1)
@@ -119,7 +125,7 @@ func loadData(c *cli.Context) error {
 		}
 	}
 
-	loader.LoadClient(el.Roster, entryPointIdx, fOntClinical, fOntGenomic, fClinical, fGenomic, listSensitive, databaseS, false)
+	loader.LoadClient(el.Roster, entryPointIdx, fOntClinical, fOntGenomic, fClinical, fGenomic, mapSensitive, databaseS, false)
 
 	return nil
 }

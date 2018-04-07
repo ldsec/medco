@@ -187,7 +187,7 @@ func ReplayDataset(filename string, x int) error {
 }
 
 // LoadClient initiates the loading process
-func LoadClient(el *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic, fClinical, fGenomic *os.File, listSensitive []string, databaseS DBSettings, testing bool) error {
+func LoadClient(el *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic, fClinical, fGenomic *os.File, mapSensitive map[string]struct{}, databaseS DBSettings, testing bool) error {
 	start := time.Now()
 
 	// init global variables
@@ -211,7 +211,7 @@ func LoadClient(el *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic, f
 		FileHandlers = append(FileHandlers, fp)
 	}
 
-	err := GenerateOntologyFiles(el, entryPointIdx, fOntClinical, fOntGenomic, listSensitive)
+	err := GenerateOntologyFiles(el, entryPointIdx, fOntClinical, fOntGenomic, mapSensitive)
 	if err != nil {
 		log.Fatal("Error while generating the ontology .csv files", err)
 		return err
@@ -306,7 +306,7 @@ func LoadDataFiles() error {
 }
 
 // GenerateOntologyFiles generates the .csv files that 'belong' to the whole ontology (metadata & shrine)
-func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic *os.File, listSensitive []string) error {
+func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic *os.File, mapSensitive map[string]struct{}) error {
 	keyForSensitiveIDs := make([]ConceptPath, 0) // stores the concept path for the corresponding EncID(s) and the genomic IDs
 	allSensitiveIDs := make(map[int64]struct{}, NumElMap) // stores the EncID(s) and the genomic IDs (is a set)
 	toTraverseIndex := make([]int,0) // the indexes of the columns that matter
@@ -338,7 +338,8 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 					// skip SampleID and PatientID and other similar fields
 					if _, ok := ToIgnore[rec]; !ok {
 						// sensitive
-						if containsArrayString(listSensitive, rec) == true || (len(listSensitive) == 1 && listSensitive[0] == "all") {
+						_, all := mapSensitive["all"]
+						if _, ok := mapSensitive[rec]; ok || (len(mapSensitive) == 1 && all){
 							if err := writeShrineOntologyEnc(rec); err != nil {
 								return err
 							}
@@ -374,7 +375,8 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 					}
 
 					// sensitive
-					if containsArrayString(listSensitive, headerClinical[j]) == true || (len(listSensitive) == 1 && listSensitive[0] == "all") {
+					_, all := mapSensitive["all"]
+					if _, ok := mapSensitive[headerClinical[j]]; ok || (len(mapSensitive) == 1 && all){
 						// if concept path does not exist
 						if _, ok := OntValues[ConceptPath{Field: headerClinical[j], Record: record[i]}]; ok == false {
 							if err := writeShrineOntologyLeafEnc(headerClinical[j], record[i], encID); err != nil {
@@ -1171,15 +1173,6 @@ func writeDemodataObservationFactEnc(el int64, idV, idP int64) error {
 
 	return nil
 
-}
-
-func containsArrayString(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
 }
 
 // SanitizeHeader gets and header name and transforms it in the form Xxx Yyy Zzz
