@@ -26,8 +26,8 @@ def save(df_cli_new, df_mut_new):
 
         if opt == "y":
             filename = raw_input("Specify filename:")
-            df_cli_new.to_csv(out_folder + filename+"_clinical_data.csv", sep='\t', encoding='utf-8')
-            df_mut_new.to_csv(out_folder + filename+"_mutation_data.csv", sep='\t', encoding='utf-8')
+            df_cli_new.to_csv(out_folder + filename+"_clinical_data.csv", sep='\t', encoding='utf-8', index=False)
+            df_mut_new.to_csv(out_folder + filename+"_mutation_data.csv", sep='\t', encoding='utf-8', index=False)
             return
 
         if opt == "n":

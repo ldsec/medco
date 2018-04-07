@@ -12,10 +12,10 @@ import (
 )
 
 const (
-	clinicalOntology = "files/tcga_cbio/clinical_data.csv"
-	genomicOntology  = "files/tcga_cbio/mutation_data.csv"
-	clinicalFile     = "files/tcga_cbio/clinical_data.csv"
-	genomicFile      = "files/tcga_cbio/mutation_data.csv"
+	clinicalOntology = "files/tcga_cbio/manipulations/1_clinical_data.csv"
+	genomicOntology  = "files/tcga_cbio/manipulations/1_mutation_data.csv"
+	clinicalFile     = "files/tcga_cbio/manipulations/1_clinical_data.csv"
+	genomicFile      = "files/tcga_cbio/manipulations/1_mutation_data.csv"
 )
 
 func getRoster(groupFilePath string) (*onet.Roster, *onet.LocalTest, error) {
@@ -106,6 +106,20 @@ func generateFiles(t *testing.T, el *onet.Roster, entryPointIdx int) {
 
 	fOntologyClinical.Close()
 	fOntologyGenomic.Close()
+}
+
+func TestSanitizeHeader(t *testing.T) {
+	ex := "AJCC_PATHOLOGIC_TUMOR_STAGE"
+	res := loader.SanitizeHeader(ex)
+	assert.Equal(t, "Ajcc Pathologic Tumor Stage", res)
+
+	ex = "CANCER_TYPE"
+	res = loader.SanitizeHeader(ex)
+	assert.Equal(t, "Cancer Type", res)
+
+	ex = "CANCER_TYPE_DETAILED"
+	res = loader.SanitizeHeader(ex)
+	assert.Equal(t, "Cancer Type Detailed", res)
 }
 
 func TestGenerateFilesLocalTest(t *testing.T) {
