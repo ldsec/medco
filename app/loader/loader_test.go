@@ -12,10 +12,15 @@ import (
 )
 
 const (
-	clinicalOntology = "files/tcga_cbio/manipulations/1_clinical_data.csv"
+	/*clinicalOntology = "files/tcga_cbio/manipulations/1_clinical_data.csv"
 	genomicOntology  = "files/tcga_cbio/manipulations/1_mutation_data.csv"
 	clinicalFile     = "files/tcga_cbio/manipulations/1_clinical_data.csv"
-	genomicFile      = "files/tcga_cbio/manipulations/1_mutation_data.csv"
+	genomicFile      = "files/tcga_cbio/manipulations/1_mutation_data.csv"*/
+
+	clinicalOntology = "files/tcga_cbio/clinical_data.csv"
+	genomicOntology  = "files/tcga_cbio/mutation_data.csv"
+	clinicalFile     = "files/tcga_cbio/clinical_data.csv"
+	genomicFile      = "files/tcga_cbio/mutation_data.csv"
 )
 
 func getRoster(groupFilePath string) (*onet.Roster, *onet.LocalTest, error) {
@@ -88,7 +93,6 @@ func generateFiles(t *testing.T, el *onet.Roster, entryPointIdx int) {
 	listSensitive = append(listSensitive, "TISSUE_SOURCE_SITE")
 	listSensitive = append(listSensitive, "TUMOR_TISSUE_SITE")
 	listSensitive = append(listSensitive, "VITAL_STATUS")
-	listSensitive = append(listSensitive, "ICD_O_3_SITE")
 
 
 	err = loader.GenerateOntologyFiles(el, entryPointIdx, fOntologyClinical, fOntologyGenomic, listSensitive)

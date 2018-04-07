@@ -356,7 +356,7 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 					}
 				}
 				first = false
-
+			// the RECORDS
 			} else {
 
 				j := 0
@@ -379,7 +379,7 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 							OntValues[ConceptPath{Field: headerClinical[j], Record: record[i]}] = ConceptID{Identifier: "E", Value: encID}
 							encID++
 						}
-
+					// non-sensitive
 					} else {
 						// if concept path does not exist
 						if _, ok := OntValues[ConceptPath{Field: headerClinical[j], Record: record[i]}]; ok == false {
@@ -486,9 +486,9 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 // GenerateDataFiles generates the .csv files that 'belong' to the dataset (demodata)
 func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 	// patient_id collumn index
-	pid_index := 0
+	pidIndex := 0
 	// encounter_id (sample_id) collumn index
-	eid_index := 0
+	eidIndex := 0
 	// patient_id counter
 	pid := int64(1)
 	// encounter_id counter
@@ -533,41 +533,41 @@ func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 						toTraverseIndex = append(toTraverseIndex, i)
 					} else {
 						if _, ok := ToIgnore["PATIENT_ID"]; ok {
-							pid_index = i
+							pidIndex = i
 						} else if _, ok := ToIgnore["SAMPLE_ID"]; ok {
-							eid_index = i
+							eidIndex = i
 						}
 					}
 				}
 				first = false
 			} else {
 				// patient not yet exists
-				if _, ok := patientMapping[record[pid_index]]; ok == false {
+				if _, ok := patientMapping[record[pidIndex]]; ok == false {
 
-					patientMapping[record[pid_index]] = pid
+					patientMapping[record[pidIndex]] = pid
 
-					if err := writeDemodataPatientMapping(record[pid_index], patientMapping[record[pid_index]]); err != nil {
+					if err := writeDemodataPatientMapping(record[pidIndex], patientMapping[record[pidIndex]]); err != nil {
 						return err
 					}
-					if err := writeDemodataPatientDimension(group, patientMapping[record[pid_index]]); err != nil {
+					if err := writeDemodataPatientDimension(group, patientMapping[record[pidIndex]]); err != nil {
 						return err
 					}
 
 					pid++
 				}
 
-				visitMapping[record[eid_index]] = eid
+				visitMapping[record[eidIndex]] = eid
 
-				if err := writeDemodataEncounterMapping(record[eid_index], record[pid_index], visitMapping[record[eid_index]]); err != nil {
+				if err := writeDemodataEncounterMapping(record[eidIndex], record[pidIndex], visitMapping[record[eidIndex]]); err != nil {
 					return err
 				}
-				if err := writeDemodataVisitDimension(visitMapping[record[eid_index]], patientMapping[record[pid_index]]); err != nil {
+				if err := writeDemodataVisitDimension(visitMapping[record[eidIndex]], patientMapping[record[pidIndex]]); err != nil {
 					return err
 				}
 
 				eid++
 
-				patientVisitMap[record[eid_index]] = PatientVisitLink{PatientID: patientMapping[record[pid_index]], EncounterID: visitMapping[record[eid_index]]}
+				patientVisitMap[record[eidIndex]] = PatientVisitLink{PatientID: patientMapping[record[pidIndex]], EncounterID: visitMapping[record[eidIndex]]}
 
 				j := 0
 				for _, i := range toTraverseIndex {
@@ -589,8 +589,8 @@ func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 							}
 
 							if err := writeDemodataObservationFactEnc(OntValues[ConceptPath{Field: headerClinical[j], Record: record[i]}].Value,
-								patientMapping[record[pid_index]],
-								visitMapping[record[eid_index]]); err != nil {
+								patientMapping[record[pidIndex]],
+								visitMapping[record[eidIndex]]); err != nil {
 								return err
 							}
 
@@ -604,8 +604,8 @@ func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 							}
 
 							if err := writeDemodataObservationFactClear(OntValues[ConceptPath{Field: headerClinical[j], Record: record[i]}].Value,
-								patientMapping[record[pid_index]],
-								visitMapping[record[eid_index]]); err != nil {
+								patientMapping[record[pidIndex]],
+								visitMapping[record[eidIndex]]); err != nil {
 								return err
 							}
 						}
