@@ -3,7 +3,7 @@ FROM tomcat:8.0-jre8
 # pre-existing variables: CATALINA_HOME
 ENV SHRINE_VERSION="tags/MedCo_v0.1" \
 SHRINE_SRC_DIR="/opt/shrine-src" \
-SHRINE_ADAPTER_MAPPINGS_URL="https://open.med.harvard.edu/svn/shrine-ontology/SHRINE_Demo_Downloads/trunk/AdapterMappings_i2b2_DemoData.xml" \
+SHRINE_ADAPTER_MAPPINGS_URL="https://documents.epfl.ch/users/m/mi/misbach/www/AdapterMappings.xml" \
 SHRINE_MYSQL_JAR_URL="http://central.maven.org/maven2/mysql/mysql-connector-java/5.1.40/mysql-connector-java-5.1.40.jar" \
 I2B2_DOMAIN_NAME="medcodeployment" \
 CONF_DIR="/opt/medco-configuration" \
@@ -96,4 +96,3 @@ RUN sed -i "s/SHRINE_KEYSTORE_PRIVATE_KEY_ALIAS/srv$NODE_IDX-private/g" "$CATALI
 EXPOSE 6060 6443
 VOLUME $CONF_DIR
 WORKDIR $CONF_DIR
-
