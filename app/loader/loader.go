@@ -609,7 +609,7 @@ func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 								visitMapping[record[eidIndex]]); err != nil {
 								return err
 							}
-
+						// non-sensitive
 						} else {
 							// if concept path does not exist
 							if _, ok := ontValuesSmallCopy[ConceptPath{Field: headerClinical[j], Record: record[i]}]; ok == false {

@@ -109,7 +109,6 @@ func checkRegex(input, expression, errorMessage string) error {
 // GetVariantID encodes a genomic variant ID to be encrypted, according to the specifications.
 func GetVariantID(chromosomeID string, startPosition int64, refAlleles, altAlleles string) (int64, error) {
 
-
 	// validate input
 	if checkRegex(chromosomeID, ChromosomeIDRegex, "Invalid Chromosome ID") != nil ||
 		checkRegex(refAlleles, AllelesRegex, "Invalid reference allele") != nil || checkRegex(altAlleles, AllelesRegex, "Invalid alternate allele") != nil ||
