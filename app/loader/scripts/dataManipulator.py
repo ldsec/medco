@@ -44,8 +44,8 @@ def random():
             print("That's not an int!")
             continue
 
-        total_patients = np.array(df_cli["PATIENT_ID"])
-        list_patients = np.random.choice(total_patients, num)
+        total_patients = df_cli["PATIENT_ID"].unique()
+        list_patients = np.random.choice(total_patients, num, replace=False)
 
         df_cli_new = df_cli.loc[df_cli["PATIENT_ID"].isin(list_patients)]
         df_mut_new = df_mut.loc[df_mut["PATIENT_ID"].isin(list_patients)]
