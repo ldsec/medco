@@ -13,15 +13,15 @@ import (
 )
 
 const (
-	clinicalOntology = "files/tcga_cbio/manipulations/8_clinical_data.csv"
-	genomicOntology  = "files/tcga_cbio/manipulations/8_mutation_data.csv"
-	clinicalFile     = "files/tcga_cbio/manipulations/8_clinical_data.csv"
-	genomicFile      = "files/tcga_cbio/manipulations/8_mutation_data.csv"
+	//clinicalOntology = "files/tcga_cbio/manipulations/8_clinical_data.csv"
+	//genomicOntology  = "files/tcga_cbio/manipulations/8_mutation_data.csv"
+	//clinicalFile     = "files/tcga_cbio/manipulations/8_clinical_data.csv"
+	//genomicFile      = "files/tcga_cbio/manipulations/8_mutation_data.csv"
 
-	/*clinicalOntology = "files/tcga_cbio/clinical_data.csv"
+	clinicalOntology = "files/tcga_cbio/clinical_data.csv"
 	genomicOntology  = "files/tcga_cbio/mutation_data.csv"
 	clinicalFile     = "files/tcga_cbio/clinical_data.csv"
-	genomicFile      = "files/tcga_cbio/mutation_data.csv"*/
+	genomicFile      = "files/tcga_cbio/mutation_data.csv"
 )
 
 func getRoster(groupFilePath string) (*onet.Roster, *onet.LocalTest, error) {
@@ -134,18 +134,16 @@ func TestGenerateFilesLocalTest(t *testing.T) {
 }
 
 func TestGenerateFilesGroupFile(t *testing.T) {
-	//t.Skip()
+	t.Skip()
 	// todo: fix hardcoded path
 	// increase maximum in onet.tcp.go to allow for big packets (for now is the max value for uint32)
-	//el, _, err := getRoster("/Users/jagomes/Documents/EPFL/MedCo/medco-deployment/configuration-profiles/dev-3nodes-samehost/group.toml")
-
-	el, _, err := getRoster("files/group.toml")
+	el, _, err := getRoster("/Users/jagomes/Documents/EPFL/MedCo/medco-deployment/configuration-profiles/dev-3nodes-samehost/group.toml")
 
 	b,_ := el.Aggregate.MarshalBinary()
+	log.LLvl1("Aggregate Key:", base64.StdEncoding.EncodeToString(b))
 
-	log.LLvl1("AGREGGATE", base64.StdEncoding.EncodeToString(b))
 	assert.True(t, err == nil, err)
-	//generateFiles(t, el, 0)
+	generateFiles(t, el, 0)
 }
 
 func TestReplayDataset(t *testing.T) {
