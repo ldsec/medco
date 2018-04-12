@@ -1,7 +1,7 @@
 # This file contains your private key.
 # Do not give it away lightly!
 Suite = ""
-Public = "32be8594465ef5ef5543cfdbe593d28c814b4b9dc87d34971324c3b560e186d8"
-Private = "e71ed79b5e968782200fc14f965bd43d8cc83f75352eee4bfa740ec8190feb0c"
+Public = "cabcc4f1fd19161015ad653c7805ee5d9213a35d6d4fb1aec8f1acd4c5e8df3a"
+Private = "9f28ac3dd1a8619c070b0648ccc0c5551b4d4e303235f21440eb3c7c0d389b08"
 Address = "tls://10.90.38.7:2000"
 Description = "Unlynx Server 1"
