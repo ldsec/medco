@@ -27,11 +27,14 @@ mkdir -p "$CONF_FOLDER" "$COMPOSE_FOLDER"
 rm -f "$CONF_FOLDER"/*.keystore "$CONF_FOLDER"/shrine_ca_cert_aliases.conf "$CONF_FOLDER"/shrine_downstream_nodes.conf \
     "$CONF_FOLDER"/*.pem "$CONF_FOLDER"/*.toml "$CONF_FOLDER"/unlynxMedCo
 rm -rf "$CONF_FOLDER"/srv*-CA
-echo -n "caCertAliases = [" >> "$CONF_FOLDER/shrine_ca_cert_aliases.conf"
 
 echo "### Producing Unlynx binary with Docker"
 docker build -t lca1/unlynx:medco-deployment "$SCRIPT_FOLDER"/../../docker-images/unlynx/
 docker run -v "$CONF_FOLDER":/opt/medco-configuration --entrypoint sh lca1/unlynx:medco-deployment /copy-unlynx-binary.sh
+
+echo "caCertAliases = [\"shrine-ca\"]" > "$CONF_FOLDER/shrine_ca_cert_aliases.conf"
+echo "### Producing CA"
+CATOP="$CONF_FOLDER/CA" "$SCRIPT_FOLDER"/CA.sh -newca
 
 # generate configuration for each node
 NODE_IDX="-1"
@@ -47,9 +50,7 @@ do
     KEYSTORE_PRIVATE_ALIAS="srv$NODE_IDX-private"
 
     echo "### Setting up certificate authority and import it in keystore"
-    CATOP="$CONF_FOLDER/srv$NODE_IDX-CA" "$SCRIPT_FOLDER"/CA.sh -newca
-    echo -n "\"shrine-ca-srv$NODE_IDX\", " >> "$CONF_FOLDER/shrine_ca_cert_aliases.conf"
-    keytool -noprompt -import -v -alias "shrine-ca-srv$NODE_IDX" -file "$CONF_FOLDER/srv$NODE_IDX-CA/cacert.pem" -keystore "$KEYSTORE" -storepass "$KEYSTORE_PW"
+    keytool -noprompt -import -v -alias "shrine-ca" -file "$CONF_FOLDER/CA/cacert.pem" -keystore "$KEYSTORE" -storepass "$KEYSTORE_PW"
 
     echo "###$NODE_IDX### Generating java keystore pair of keys"
     keytool -genkeypair -keysize 2048 -alias "$KEYSTORE_PRIVATE_ALIAS" -validity 7300 \
@@ -71,7 +72,7 @@ do
 EOL
 
     echo "###$NODE_IDX### Signing it with the CA"
-    CATOP="$CONF_FOLDER/srv$NODE_IDX-CA" SSLEAY_CONFIG="-extfile $SCRIPT_FOLDER/openssl.ext.tmp.cnf" "$SCRIPT_FOLDER"/CA.sh -sign
+    CATOP="$CONF_FOLDER/CA" SSLEAY_CONFIG="-extfile $SCRIPT_FOLDER/openssl.ext.tmp.cnf" "$SCRIPT_FOLDER"/CA.sh -sign
 
     echo "###$NODE_IDX### Importing in keystore own certificate signed by CA (chained to the private key)"
     keytool -noprompt -import -v -alias "$KEYSTORE_PRIVATE_ALIAS" -file "$SCRIPT_FOLDER"/newcert.pem -keystore "$KEYSTORE" -storepass "$KEYSTORE_PW" \
@@ -103,6 +104,5 @@ done
 
 echo "### Generating group.toml file and finalizing shrine config file"
 cat "$CONF_FOLDER"/srv*-public.toml > "$CONF_FOLDER/group.toml"
-echo "]" >> "$CONF_FOLDER/shrine_ca_cert_aliases.conf"
 
 echo "### Configuration generated!"
