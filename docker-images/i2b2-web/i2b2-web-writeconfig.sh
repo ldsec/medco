@@ -140,7 +140,7 @@ EOL
 cat > "/etc/lighttpd/conf-enabled/10-ssl.conf" <<EOL
 \$SERVER["socket"] == "0.0.0.0:443" {
 	ssl.engine  = "enable"
-	ssl.ca-file = "$CONF_DIR/srv$NODE_IDX-CA/cacert.pem"
+	ssl.ca-file = "$CONF_DIR/CA/cacert.pem"
 	ssl.pemfile = "$CONF_DIR/srv$NODE_IDX.pem"
     # todo: names in configuration profiles make more explicit
 
