@@ -108,7 +108,7 @@ func loadData(c *cli.Context) error {
 	// convert listSensitive to map set to allow for faster search
 	mapSensitive := make(map[string]struct{}, len(listSensitive))
 	for _, attSensitive := range listSensitive {
-		mapSensitive[attSensitive] = struct {}{}
+		mapSensitive[attSensitive] = struct{}{}
 	}
 
 	if replaySize < 1 {

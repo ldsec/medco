@@ -59,7 +59,8 @@ func computePerfFromApp(c *cli.Context) error {
 		}
 
 		start := time.Now()
-		loader.EncryptAndTag(testValues, el.Roster, entryPointIdx)
+		listEncryptedElements := loader.EncryptElements(testValues, el.Roster)
+		loader.TagElements(listEncryptedElements, el.Roster, entryPointIdx)
 		log.LLvl1("Encrypt and tag for ", nbElements, "... (", time.Since(start), ")")
 
 	}

@@ -60,29 +60,39 @@ var (
 )
 
 /*
-ToIgnore: 	defines the columns to be ignored (mostly the sample and patient IDs) and their relative position
-GenomicDic: defines the translation between the genomic fields that are present in the different datafiles and their
-			'actual meaning'
+ToIgnore: 			defines the columns to be ignored (mostly the sample and patient IDs) and their relative position
+GenomicDic: 		defines the translation between the genomic fields that are present in the different datafiles and their
+					'actual meaning'
+AnnotationsToQuery: defines the annotations to be queried (to speed up the query)
 */
 var (
-	ToIgnore = map[string]int {
-		"PATIENT_ID": 0,
+	ToIgnore = map[string]int{
+		"PATIENT_ID":  0,
 		"P_STABLE_ID": 0,
-		"SAMPLE_ID": 0,
+		"SAMPLE_ID":   0,
 		"S_STABLE_ID": 0,
 	}
 
 	GenomicDic = map[string]string{
 		"Tumor_Sample_Barcode": "ID",
-		"Chromosome":   "CHR",
-		"Start_Position": "SP",
-		"Reference_Allele": "RA",
-		"Tumor_Seq_Allele1": "TSA1",
-		"PATIENT_ID": "ID",
-		"CHR": "CHR",
-		"START_POSITION": "SP",
-		"REFERENCE_ALLELE": "RA",
-		"TUMOR_SEQ_ALLELE1": "TSA1",
+		"Chromosome":           "CHR",
+		"Start_Position":       "SP",
+		"Reference_Allele":     "RA",
+		"Tumor_Seq_Allele1":    "TSA1",
+		"Tumor_Seq_Allele2":    "TSA2",
+		"PATIENT_ID":           "ID",
+		"CHR":                  "CHR",
+		"START_POSITION":       "SP",
+		"REFERENCE_ALLELE":     "RA",
+		"TUMOR_SEQ_ALLELE1":    "TSA1",
+		"TUMOR_SEQ_ALLELE2":    "TSA2",
+	}
+
+	AnnotationsToQuery = map[string]struct{}{
+		"HUGO_GENE_SYMBOL":  struct{}{},
+		"Hugo_Symbol":       struct{}{},
+		"PROTEIN_CHANGE":    struct{}{},
+		"MA:protein.change": struct{}{},
 	}
 )
 
@@ -90,7 +100,7 @@ var (
    NumThreads: defines the amount of go subroutines to use when parelellizing the encryption
 */
 var (
-	NumElMap = int64(5e6)
+	NumElMap   = int64(5e6)
 	NumThreads = int(20)
 )
 
@@ -307,9 +317,9 @@ func LoadDataFiles() error {
 
 // GenerateOntologyFiles generates the .csv files that 'belong' to the whole ontology (metadata & shrine)
 func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic *os.File, mapSensitive map[string]struct{}) error {
-	keyForSensitiveIDs := make([]ConceptPath, 0) // stores the concept path for the corresponding EncID(s) and the genomic IDs
+	keyForSensitiveIDs := make([]ConceptPath, 0)          // stores the concept path for the corresponding EncID(s) and the genomic IDs
 	allSensitiveIDs := make(map[int64]struct{}, NumElMap) // stores the EncID(s) and the genomic IDs (is a set)
-	toTraverseIndex := make([]int,0) // the indexes of the columns that matter
+	toTraverseIndex := make([]int, 0)                     // the indexes of the columns that matter
 
 	encID := int64(1)   // clinical sensitive IDs
 	clearID := int64(1) // clinical non-sensitive IDs
@@ -334,12 +344,12 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 		if len(record) > 0 && string(record[0]) != "" && string(record[0][0:1]) != "#" {
 			// the HEADER
 			if first == true {
-				for i,rec := range record {
+				for i, rec := range record {
 					// skip SampleID and PatientID and other similar fields
 					if _, ok := ToIgnore[rec]; !ok {
 						// sensitive
 						_, all := mapSensitive["all"]
-						if _, ok := mapSensitive[rec]; ok || (len(mapSensitive) == 1 && all){
+						if _, ok := mapSensitive[rec]; ok || (len(mapSensitive) == 1 && all) {
 							if err := writeShrineOntologyEnc(rec); err != nil {
 								return err
 							}
@@ -357,7 +367,7 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 					}
 				}
 				first = false
-			// the RECORDS
+				// the RECORDS
 			} else {
 
 				j := 0
@@ -376,7 +386,7 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 
 					// sensitive
 					_, all := mapSensitive["all"]
-					if _, ok := mapSensitive[headerClinical[j]]; ok || (len(mapSensitive) == 1 && all){
+					if _, ok := mapSensitive[headerClinical[j]]; ok || (len(mapSensitive) == 1 && all) {
 						// if concept path does not exist
 						if _, ok := OntValues[ConceptPath{Field: headerClinical[j], Record: record[i]}]; ok == false {
 							if err := writeShrineOntologyLeafEnc(headerClinical[j], record[i], encID); err != nil {
@@ -388,7 +398,7 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 							OntValues[ConceptPath{Field: headerClinical[j], Record: record[i]}] = ConceptID{Identifier: "E", Value: encID}
 							encID++
 						}
-					// non-sensitive
+						// non-sensitive
 					} else {
 						// if concept path does not exist
 						if _, ok := OntValues[ConceptPath{Field: headerClinical[j], Record: record[i]}]; ok == false {
@@ -413,7 +423,7 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 
 	fOntClinical.Close()
 
-	log.LLvl1("Finished parsing the clinical ontology... (", len(allSensitiveIDs),")")
+	log.LLvl1("Finished parsing the clinical ontology... (", len(allSensitiveIDs), ")")
 
 	// load genomic
 	reader = csv.NewReader(fOntGenomic)
@@ -423,6 +433,8 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 	headerGenomic := make([]string, 0)
 	// this arrays stores the indexes of the fields we need to use to generate a genomic id
 	indexGenVariant := make(map[string]int)
+	annotations := make([]string, 0)
+
 	progress := int64(0)
 	for {
 		// read just one record, but we could ReadAll() as well
@@ -437,8 +449,8 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 		}
 
 		// for every 100,000 rows parsed print a message
-		if progress % 100000 == 0{
-			log.LLvl1("Continuing parsing the genomic ontology... (", progress,")")
+		if progress%100000 == 0 {
+			log.LLvl1("Continuing parsing the genomic ontology... (", progress, ")")
 		}
 
 		// if it is not a commented line
@@ -461,10 +473,7 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 
 				// if genomic id already exist we don't need to add it to the shrine_ont.genomic_annotations
 				if _, ok := allSensitiveIDs[genomicID]; ok == false && err == nil {
-					if err := writeShrineOntologyGenomicAnnotations(genomicID, headerGenomic, indexGenVariant, record); err != nil {
-						return err
-					}
-
+					annotations = append(annotations, generateShrineOntologyGenomicAnnotation(headerGenomic, record))
 					keyForSensitiveIDs = append(keyForSensitiveIDs, ConceptPath{Field: strconv.FormatInt(genomicID, 10), Record: ""})
 					allSensitiveIDs[genomicID] = struct{}{}
 				}
@@ -476,15 +485,21 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 
 	fOntGenomic.Close()
 
-	log.LLvl1("Finished parsing the genomic ontology... (", len(allSensitiveIDs),")")
+	log.LLvl1("Finished parsing the genomic ontology... (", len(allSensitiveIDs), ")")
 
 	// convert the map of sensitive IDs to a slice (this is what the DDT service/protocol gets)
 	temp := make([]int64, 0)
 	for k := range allSensitiveIDs {
 		temp = append(temp, k)
 	}
+
+	listEncryptedElements := EncryptElements(temp, group)
+	if err := writeShrineOntologyGenomicAnnotations(listEncryptedElements, annotations); err != nil {
+		return err
+	}
+
 	// write the tagged values
-	taggedValues, err := EncryptAndTag(temp, group, entryPointIdx)
+	taggedValues, err := TagElements(listEncryptedElements, group, entryPointIdx)
 	if err != nil {
 		return err
 	}
@@ -507,7 +522,7 @@ func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 	patientVisitMap := make(map[string]PatientVisitLink) // maps between the Sample ID (Tumor_barcode) and a combination of patient and encounter IDs
 	visitMapping := make(map[string]int64)               // map a sample ID to a numeric ID
 	patientMapping := make(map[string]int64)             // map a patient ID to a numeric ID
-	toTraverseIndex := make([]int,0) 					 // the indexes of the columns that matter
+	toTraverseIndex := make([]int, 0)                    // the indexes of the columns that matter
 
 	if err := writeDemodataProviderDimension(); err != nil {
 		return err
@@ -535,7 +550,7 @@ func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 			// the HEADER
 			if first == true {
 
-				for i,rec := range record {
+				for i, rec := range record {
 					// skip SampleID and PatientID and other similar fields
 					if _, ok := ToIgnore[rec]; !ok {
 						headerClinical = append(headerClinical, record[i])
@@ -609,7 +624,7 @@ func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 								visitMapping[record[eidIndex]]); err != nil {
 								return err
 							}
-						// non-sensitive
+							// non-sensitive
 						} else {
 							// if concept path does not exist
 							if _, ok := ontValuesSmallCopy[ConceptPath{Field: headerClinical[j], Record: record[i]}]; ok == false {
@@ -809,29 +824,80 @@ func generateGenomicID(indexGenVariant map[string]int, record []string) (int64, 
 
 }
 
-func writeShrineOntologyGenomicAnnotations(id int64, fields []string, indexGenVariant map[string]int, record []string) error {
+func generateShrineOntologyGenomicAnnotation(fields []string, record []string) string {
+	// genomic info
+	chr, sp, ra, tsa1, tsa2 := "?", "?", "?", "?", "?"
+
+	// annotations that are to be queried
+	queryFields := ""
+	// annotations that are NOT to be queried (at least in a fast way)
 	otherFields := ""
+
 	for i, el := range record {
-		if _, ok := indexGenVariant[el]; ok == false {
+		// if element is CHR, SP, RA, TSA1
+		if val, ok := GenomicDic[fields[i]]; ok == true {
+			if val == "CHR" && el != "" {
+				chr = el
+			} else if val == "SP" && el != "" {
+				sp = el
+			} else if val == "RA" && el != "" && el != "-" {
+				ra = el
+			} else if val == "TSA1" && el != "" && el != "-" {
+				tsa1 = el
+			} else if val == "TSA2" && el != "" && el != "-" {
+				tsa2 = el
+			}
+			// if element is selected to be queried
+		} else if _, ok := AnnotationsToQuery[fields[i]]; ok == true {
+			queryFields += `"` + el + `", `
+			// if element is not to be ignored
+		} else if _, ok := ToIgnore[fields[i]]; ok == false {
 			field := SanitizeHeader(fields[i])
-			//otherFields += fields[i] + ":" + strings.Replace(el, "'", "''", -1) + ", "
-			otherFields += "\"\"" + field + "\"\":\"\"" + el + "\"\", "
+			otherFields += field + "=" + el + ";"
 		}
 	}
-	// remove the last ", "
+	// remove the last ", " and "; "
+	queryFields = queryFields[:len(queryFields)-2]
 	otherFields = otherFields[:len(otherFields)-2]
 
-	/*annotation := `INSERT INTO shrine_ont.genomic_annotations VALUES ('` + strconv.FormatInt(id, 10) + `', '{ ` + otherFields + `}');` + "\n"*/
-
-	annotation := `"` + strconv.FormatInt(id, 10) + `","{` + otherFields + `}"` + "\n"
-
-	_, err := FileHandlers[2].WriteString(annotation)
-
-	if err != nil {
-		log.Fatal("Error in the writeShrineOntologyGenomicAnnotations():", err)
-		return err
+	// tsa1  tsa2
+	// nil   nil     Unknown
+	// A     nil     Unknown
+	// nil   B       Unknown
+	// A     B       Heterozygous
+	// A     A       Homozygous
+	zigosity := ""
+	alt := ""
+	if tsa1 == "?" && tsa2 == "?" {
+		zigosity = "Unknown"
+		alt = "?"
+	} else if tsa1 == tsa2 {
+		zigosity = "Homozygous"
+		alt = tsa1
+	} else {
+		zigosity = "Heterozygous"
+		if tsa1 == "?" {
+			alt = tsa2
+		} else {
+			alt = tsa1
+		}
 	}
 
+	annotation := `"` + chr + `:` + sp + `:` + ra + `>` + alt + `",` + queryFields + `,"` + zigosity + `;` + otherFields + `"` + "\n"
+	return annotation
+}
+
+func writeShrineOntologyGenomicAnnotations(listEncryptedElements *libunlynx.CipherVector, annotations []string) error {
+	for i, annotation := range annotations {
+		ciphertextStr := (*listEncryptedElements)[i].Serialize()
+		_, err := FileHandlers[2].WriteString(`"` + ciphertextStr + `",` + annotation)
+
+		if err != nil {
+			log.Fatal("Error in the writeShrineOntologyGenomicAnnotations():", err)
+			return err
+		}
+
+	}
 	return nil
 }
 
@@ -850,43 +916,48 @@ func GenerateRandomBytes(n int) ([]byte, error) {
 	return b, nil
 }
 
-// EncryptAndTag encrypts the query elements and tags them to allow for the comparison between elements
-func EncryptAndTag(list []int64, group *onet.Roster, entryPointIdx int) ([]libunlynx.GroupingKey, error) {
-
+// EncryptElements encrypts the genomic ids
+func EncryptElements(list []int64, group *onet.Roster) *libunlynx.CipherVector {
 	// ENCRYPTION
 	start := time.Now()
 	listEncryptedElements := make(libunlynx.CipherVector, len(list))
 
 	// parallelize the encryption (we need this because this is so slow)
-	blockSize := int64(len(list))/int64(NumThreads)
+	blockSize := int64(len(list)) / int64(NumThreads)
 
 	wg := libunlynx.StartParallelize(NumThreads)
 	for i := 0; i < NumThreads; i++ {
-		blockEnd := int64(i)*blockSize+blockSize
+		blockEnd := int64(i)*blockSize + blockSize
 		// the last goroutine gets the remaining content of the array
 		if i == NumThreads-1 {
 			blockEnd = int64(len(list))
 		}
 
-		go func(init int64, length int64){
+		go func(init int64, length int64) {
 			defer wg.Done()
 			for j := init; j < length; j++ {
 				listEncryptedElements[j] = *libunlynx.EncryptInt(group.Aggregate, list[j])
 			}
-			log.LLvl1("Encrypted (", length - init, ")elements")
-		}(int64(i) * blockSize, blockEnd)
+			log.LLvl1("Encrypted (", length-init, ")elements")
+		}(int64(i)*blockSize, blockEnd)
 	}
 	libunlynx.EndParallelize(wg)
 
 	log.LLvl1("Finished encrypting the sensitive data... (", time.Since(start), ")")
 
+	return &listEncryptedElements
+
+}
+
+// TagElements tags the genomic ids to allow for the comparison
+func TagElements(listEncryptedElements *libunlynx.CipherVector, group *onet.Roster, entryPointIdx int) ([]libunlynx.GroupingKey, error) {
 	// TAGGING
-	start = time.Now()
+	start := time.Now()
 	client := servicesmedco.NewMedCoClient(group.List[entryPointIdx], strconv.Itoa(entryPointIdx))
 	_, result, tr, err := client.SendSurveyDDTRequestTerms(
 		group, // Roster
 		servicesmedco.SurveyID("tagging_loading_phase"), // SurveyID
-		listEncryptedElements,                           // Encrypted query terms to tag
+		*listEncryptedElements,                          // Encrypted query terms to tag
 		false, // compute proofs?
 		Testing,
 	)
@@ -1176,14 +1247,14 @@ func writeDemodataObservationFactEnc(el int64, idV, idP int64) error {
 }
 
 // SanitizeHeader gets and header name and transforms it in the form Xxx Yyy Zzz
-func SanitizeHeader(header string) string{
-	tokens := strings.Split(header,"_")
-	for i,token := range tokens {
+func SanitizeHeader(header string) string {
+	tokens := strings.Split(header, "_")
+	for i, token := range tokens {
 		tokens[i] = strings.Title(strings.ToLower(token))
 	}
 
 	res := ""
-	for _,token := range tokens {
+	for _, token := range tokens {
 		res += token + " "
 	}
 

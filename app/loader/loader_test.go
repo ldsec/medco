@@ -1,6 +1,7 @@
 package loader_test
 
 import (
+	"encoding/base64"
 	"github.com/dedis/onet"
 	"github.com/dedis/onet/app"
 	"github.com/dedis/onet/log"
@@ -9,19 +10,18 @@ import (
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
-	"encoding/base64"
 )
 
 const (
-	//clinicalOntology = "files/tcga_cbio/manipulations/8_clinical_data.csv"
-	//genomicOntology  = "files/tcga_cbio/manipulations/8_mutation_data.csv"
-	//clinicalFile     = "files/tcga_cbio/manipulations/8_clinical_data.csv"
-	//genomicFile      = "files/tcga_cbio/manipulations/8_mutation_data.csv"
+	clinicalOntology = "files/tcga_cbio/manipulations/8_clinical_data.csv"
+	genomicOntology  = "files/tcga_cbio/manipulations/8_mutation_data.csv"
+	clinicalFile     = "files/tcga_cbio/manipulations/8_clinical_data.csv"
+	genomicFile      = "files/tcga_cbio/manipulations/8_mutation_data.csv"
 
-	clinicalOntology = "files/tcga_cbio/clinical_data.csv"
-	genomicOntology  = "files/tcga_cbio/mutation_data.csv"
-	clinicalFile     = "files/tcga_cbio/clinical_data.csv"
-	genomicFile      = "files/tcga_cbio/mutation_data.csv"
+	//clinicalOntology = "files/tcga_cbio/clinical_data.csv"
+	//genomicOntology  = "files/tcga_cbio/mutation_data.csv"
+	//clinicalFile     = "files/tcga_cbio/clinical_data.csv"
+	//genomicFile      = "files/tcga_cbio/mutation_data.csv"
 )
 
 func getRoster(groupFilePath string) (*onet.Roster, *onet.LocalTest, error) {
@@ -83,17 +83,17 @@ func generateFiles(t *testing.T, el *onet.Roster, entryPointIdx int) {
 	}
 
 	mapSensitive := make(map[string]struct{}, 11) // DO NOT FORGET!! to modify the '11' value depending on the number of sensitive attributes
-	mapSensitive["AJCC_PATHOLOGIC_TUMOR_STAGE"] = struct {}{}
-	mapSensitive["CANCER_TYPE"] = struct {}{}
-	mapSensitive["CANCER_TYPE_DETAILED"] = struct {}{}
-	mapSensitive["HISTOLOGICAL_DIAGNOSIS"] = struct {}{}
-	mapSensitive["ICD_O_3_HISTOLOGY"] = struct {}{}
-	mapSensitive["ICD_O_3_SITE"] = struct {}{}
-	mapSensitive["SAMPLE_TYPE"] = struct {}{}
-	mapSensitive["TISSUE_SOURCE_SITE"] = struct {}{}
-	mapSensitive["TUMOR_TISSUE_SITE"] = struct {}{}
-	mapSensitive["VITAL_STATUS"] = struct {}{}
-	mapSensitive["CLIN_M_STAGE"] = struct {}{}
+	mapSensitive["AJCC_PATHOLOGIC_TUMOR_STAGE"] = struct{}{}
+	mapSensitive["CANCER_TYPE"] = struct{}{}
+	mapSensitive["CANCER_TYPE_DETAILED"] = struct{}{}
+	mapSensitive["HISTOLOGICAL_DIAGNOSIS"] = struct{}{}
+	mapSensitive["ICD_O_3_HISTOLOGY"] = struct{}{}
+	mapSensitive["ICD_O_3_SITE"] = struct{}{}
+	mapSensitive["SAMPLE_TYPE"] = struct{}{}
+	mapSensitive["TISSUE_SOURCE_SITE"] = struct{}{}
+	mapSensitive["TUMOR_TISSUE_SITE"] = struct{}{}
+	mapSensitive["VITAL_STATUS"] = struct{}{}
+	mapSensitive["CLIN_M_STAGE"] = struct{}{}
 
 	err = loader.GenerateOntologyFiles(el, entryPointIdx, fOntologyClinical, fOntologyGenomic, mapSensitive)
 	assert.True(t, err == nil, err)
@@ -127,10 +127,22 @@ func TestSanitizeHeader(t *testing.T) {
 }
 
 func TestGenerateFilesLocalTest(t *testing.T) {
+	t.Skip()
 	el, local, err := getRoster("")
 	assert.True(t, err == nil, err)
 	generateFiles(t, el, 0)
 	local.CloseAll()
+}
+
+func TestGeneratePubKey(t *testing.T) {
+	t.Skip()
+	el, _, err := getRoster("files/group.toml")
+	assert.True(t, err == nil, err)
+
+	b, err := el.Aggregate.MarshalBinary()
+	assert.True(t, err == nil, err)
+
+	log.LLvl1("Aggregate Key:", base64.StdEncoding.EncodeToString(b))
 }
 
 func TestGenerateFilesGroupFile(t *testing.T) {
@@ -138,9 +150,6 @@ func TestGenerateFilesGroupFile(t *testing.T) {
 	// todo: fix hardcoded path
 	// increase maximum in onet.tcp.go to allow for big packets (for now is the max value for uint32)
 	el, _, err := getRoster("/Users/jagomes/Documents/EPFL/MedCo/medco-deployment/configuration-profiles/dev-3nodes-samehost/group.toml")
-
-	b,_ := el.Aggregate.MarshalBinary()
-	log.LLvl1("Aggregate Key:", base64.StdEncoding.EncodeToString(b))
 
 	assert.True(t, err == nil, err)
 	generateFiles(t, el, 0)
