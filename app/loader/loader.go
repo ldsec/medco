@@ -871,16 +871,18 @@ func generateShrineOntologyGenomicAnnotation(fields []string, record []string) s
 	if tsa1 == "?" && tsa2 == "?" {
 		zigosity = "Unknown"
 		alt = "?"
+	} else if tsa1 == "?" && tsa2 != "?" {
+		zigosity = "Unknown"
+		alt = tsa2
+	} else if tsa1 != "?" && tsa2 == "?" {
+		zigosity = "Unknown"
+		alt = tsa1
 	} else if tsa1 == tsa2 {
 		zigosity = "Homozygous"
 		alt = tsa1
 	} else {
 		zigosity = "Heterozygous"
-		if tsa1 == "?" {
-			alt = tsa2
-		} else {
-			alt = tsa1
-		}
+		alt = tsa1
 	}
 
 	annotation := `"` + chr + `:` + sp + `:` + ra + `>` + alt + `",` + queryFields + `,"` + zigosity + `;` + otherFields + `"` + "\n"
