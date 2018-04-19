@@ -105,6 +105,12 @@ var (
 	NumThreads = int(20)
 )
 
+// This contains both concept path and annotation which will be linked to a certain sensitive ID
+type SensitiveIDValue struct {
+	CP ConceptPath
+	Annotation string
+}
+
 // ConceptPath defines the end of the concept path tree and we use it in a map so that we do not repeat concepts
 type ConceptPath struct {
 	Field  string
@@ -312,9 +318,14 @@ func LoadDataFiles() error {
 
 // GenerateOntologyFiles generates the .csv files that 'belong' to the whole ontology (metadata & shrine)
 func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic *os.File, mapSensitive map[string]struct{}) error {
-	keyForSensitiveIDs := make([]ConceptPath, 0)          // stores the concept path for the corresponding EncID(s) and the genomic IDs
-	allSensitiveIDs := make(map[int64]struct{}, NumElMap) // stores the EncID(s) and the genomic IDs (is a set)
-	toTraverseIndex := make([]int, 0)                     // the indexes of the columns that matter
+	writeShrineOntologyClearHeader()
+	writeShrineOntologyEncHeader()
+	writeMetadataOntologyClearHeader()
+	writeMetadataSensitiveTaggedHeader()
+
+
+	allSensitiveIDs := make(map[int64]SensitiveIDValue, NumElMap) 	// maps the EncID(s) to the concept path
+	toTraverseIndex := make([]int, 0)                     		// the indexes of the columns that matter
 
 	encID := int64(1)   // clinical sensitive IDs
 	clearID := int64(1) // clinical non-sensitive IDs
@@ -388,8 +399,7 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 								return err
 							}
 							// we don't generate the MetadataOntologyLeafEnc because we will do this afterwards (so that we only perform 1 DDT with all sensitive elements)
-							keyForSensitiveIDs = append(keyForSensitiveIDs, ConceptPath{Field: headerClinical[j], Record: record[i]})
-							allSensitiveIDs[encID] = struct{}{}
+							allSensitiveIDs[encID] = SensitiveIDValue{CP: ConceptPath{Field: headerClinical[j], Record: record[i]}, Annotation: ""}
 							OntValues[ConceptPath{Field: headerClinical[j], Record: record[i]}] = ConceptID{Identifier: "E", Value: encID}
 							encID++
 						}
@@ -428,7 +438,6 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 	headerGenomic := make([]string, 0)
 	// this arrays stores the indexes of the fields we need to use to generate a genomic id
 	indexGenVariant := make(map[string]int)
-	annotations := make([]string, 0)
 
 	progress := int64(0)
 	for {
@@ -468,9 +477,7 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 
 				// if genomic id already exist we don't need to add it to the shrine_ont.genomic_annotations
 				if _, ok := allSensitiveIDs[genomicID]; ok == false && err == nil {
-					annotations = append(annotations, generateShrineOntologyGenomicAnnotation(headerGenomic, record))
-					keyForSensitiveIDs = append(keyForSensitiveIDs, ConceptPath{Field: strconv.FormatInt(genomicID, 10), Record: ""})
-					allSensitiveIDs[genomicID] = struct{}{}
+					allSensitiveIDs[genomicID] = SensitiveIDValue{CP: ConceptPath{Field: strconv.FormatInt(genomicID, 10), Record: ""}, Annotation: generateShrineOntologyGenomicAnnotation(headerGenomic, record)}
 				}
 			}
 
@@ -483,14 +490,17 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 	log.LLvl1("Finished parsing the genomic ontology... (", len(allSensitiveIDs), ")")
 
 	// convert the map of sensitive IDs to a slice (this is what the DDT service/protocol gets)
-	temp := make([]int64, 0)
-	for k := range allSensitiveIDs {
-		temp = append(temp, k)
+	listSensitiveIDs := make([]int64, 0)
+	annotations := make([]string, 0)
+	keyForSensitiveIDs := make([]ConceptPath, 0)
+	for k, v := range allSensitiveIDs {
+		listSensitiveIDs = append(listSensitiveIDs, k)
+		annotations = append(annotations, v.Annotation)
+		keyForSensitiveIDs = append(keyForSensitiveIDs, v.CP)
 	}
 
-	log.LLvl1(temp)
-
-	listEncryptedElements := EncryptElements(temp, group)
+	// encrypt sensitive ids
+	listEncryptedElements := EncryptElements(listSensitiveIDs, group)
 	if err := writeShrineOntologyGenomicAnnotations(listEncryptedElements, annotations); err != nil {
 		return err
 	}
@@ -732,6 +742,19 @@ func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 	return nil
 }
 
+func writeShrineOntologyEncHeader() error {
+	clinicalSensitive := `"2","\medco\clinical\sensitive\","MedCo Clinical Sensitive Ontology","N","CA","0",,,"concept_cd","concept_dimension","concept_path","T","LIKE","\medco\clinical\sensitive\","MedCo Clinical Sensitive Ontology","\medco\clinical\sensitive\","NOW()","NOW()","NOW()",,"ENC_ID","@",,,,` + "\n"
+
+	_, err := FileHandlers[0].WriteString(clinicalSensitive)
+
+	if err != nil {
+		log.Fatal("Error in the writeShrineOntologyEnc():", err)
+		return err
+	}
+
+	return nil
+}
+
 func writeShrineOntologyEnc(el string) error {
 	el = SanitizeHeader(el)
 
@@ -764,6 +787,19 @@ func writeShrineOntologyLeafEnc(field, el string, id int64) error {
 
 	if err != nil {
 		log.Fatal("Error in the writeShrineOntologyLeafEnc():", err)
+		return err
+	}
+
+	return nil
+}
+
+func writeShrineOntologyClearHeader() error {
+	clinical := `"2","\medco\clinical\nonsensitive\","MedCo Clinical Non-Sensitive Ontology","N","CA","0",,,"concept_cd","concept_dimension","concept_path","T","LIKE","\medco\clinical\nonsensitive\","MedCo Clinical Non-Sensitive Ontology","\medco\clinical\nonsensitive\","NOW()","NOW()","NOW()",,"CLEAR","@",,,,`
+
+	_, err := FileHandlers[1].WriteString(clinical)
+
+	if err != nil {
+		log.Fatal("Error in the writeShrineOntologyClear():", err)
 		return err
 	}
 
@@ -863,7 +899,7 @@ func generateShrineOntologyGenomicAnnotation(fields []string, record []string) s
 		}
 	}
 	// remove the last ", " and "; "
-	queryFields = queryFields[:len(queryFields)-2]
+	queryFields = queryFields[:len(queryFields)-1]
 	otherFields = otherFields[:len(otherFields)-2]
 
 	// tsa1  tsa2
@@ -985,6 +1021,19 @@ func TagElements(listEncryptedElements *libunlynx.CipherVector, group *onet.Rost
 	return result, nil
 }
 
+func writeMetadataSensitiveTaggedHeader() error {
+	sensitive := `"1","\medco\tagged\","MedCo Sensitive Tagged Ontology","N","CA","0",,,"concept_cd","concept_dimension","concept_path","T","LIKE","\medco\tagged\","MedCo Sensitive Tagged Ontology","\medco\tagged\","NOW()","NOW()","NOW()",,"TAG_ID","@",,,,` + "\n"
+
+	_, err := FileHandlers[3].WriteString(sensitive)
+
+	if err != nil {
+		log.Fatal("Error in the writeMetadataSensitiveTagged():", err)
+		return err
+	}
+
+	return nil
+}
+
 func writeMetadataSensitiveTagged(list []libunlynx.GroupingKey, keyForSensitiveIDs []ConceptPath) error {
 
 	if len(list) != len(keyForSensitiveIDs) {
@@ -1031,6 +1080,19 @@ func writeMetadataSensitiveTagged(list []libunlynx.GroupingKey, keyForSensitiveI
 
 		OntValues[keyForSensitiveIDs[i]] = ConceptID{Identifier: string(el), Value: int64(tagID)}
 	}
+	return nil
+}
+
+func writeMetadataOntologyClearHeader() error {
+	clinical := `"2","\medco\clinical\nonsensitive\","MedCo Clinical Non-Sensitive Ontology","N","CA","0",,,"concept_cd","concept_dimension","concept_path","T","LIKE","\medco\clinical\nonsensitive\","MedCo Clinical Non-Sensitive Ontology","\medco\clinical\nonsensitive\","NOW()","NOW()","NOW()",,"CLEAR","@",,,,` + "\n"
+
+	_, err := FileHandlers[4].WriteString(clinical)
+
+	if err != nil {
+		log.Fatal("Error in the writeMetadataOntologyClear():", err)
+		return err
+	}
+
 	return nil
 }
 
