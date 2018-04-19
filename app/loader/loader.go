@@ -651,6 +651,47 @@ func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 		}
 	}
 
+	/* check if it exists in the ontology
+					if _, ok := OntValues[ConceptPath{Field: headerClinical[j], Record: record[i]}]; ok == true {
+						// sensitive
+						if OntValues[ConceptPath{Field: headerClinical[j], Record: record[i]}].Identifier != "C" {
+							// if concept path does not exist
+							if _, ok := ontValuesSmallCopy[ConceptPath{Field: headerClinical[j], Record: record[i]}]; ok == false {
+								if err := writeDemodataConceptDimensionTaggedConcepts(headerClinical[j], record[i]); err != nil {
+									return err
+								}
+								ontValuesSmallCopy[ConceptPath{Field: headerClinical[j], Record: record[i]}] = true
+							}
+
+							if err := writeDemodataObservationFactEnc(OntValues[ConceptPath{Field: headerClinical[j], Record: record[i]}].Value,
+								patientMapping[record[1]],
+								visitMapping[record[0]]); err != nil {
+								return err
+							}
+
+						} else {
+							// if concept path does not exist
+							if _, ok := ontValuesSmallCopy[ConceptPath{Field: headerClinical[j], Record: record[i]}]; ok == false {
+								if err := writeDemodataConceptDimensionCleartextConcepts(headerClinical[j], record[i]); err != nil {
+									return err
+								}
+								ontValuesSmallCopy[ConceptPath{Field: headerClinical[j], Record: record[i]}] = true
+							}
+
+							if err := writeDemodataObservationFactClear(OntValues[ConceptPath{Field: headerClinical[j], Record: record[i]}].Value,
+								patientMapping[record[1]],
+								visitMapping[record[0]]); err != nil {
+								return err
+							}
+						}
+					} else {
+						log.Fatal("There are elements in the dataset that do not belong to the existing ontology")
+						return err
+					}
+	}*/
+
+
+
 	fClinical.Close()
 
 	log.LLvl1("Finished parsing the clinical dataset...")
@@ -1068,11 +1109,9 @@ func writeMetadataOntologyLeafClear(field, el string, id int64) error {
 }
 
 func writeDemodataConceptDimensionCleartextConcepts(field, el string) error {
-	field = SanitizeHeader(field)
-
 	/*cleartextConcepts := `INSERT INTO i2b2demodata.concept_dimension VALUES ('\medco\clinical\nonsensitive\` + field + `\` + record + `\', 'CLEAR:` + strconv.FormatInt(OntValues[ConceptPath{Field: field, Record: record}].Value, 10) + `', '` + record + `', NULL, NULL, NULL, 'NOW()', NULL, NULL);` + "\n"*/
 
-	cleartextConcepts := `"\medco\clinical\nonsensitive\` + field + `\` + el + `\","CLEAR:` + strconv.FormatInt(OntValues[ConceptPath{Field: field, Record: el}].Value, 10) + `","` + el + `",,,,"NOW()",,` + "\n"
+	cleartextConcepts := `"\medco\clinical\nonsensitive\` + SanitizeHeader(field) + `\` + el + `\","CLEAR:` + strconv.FormatInt(OntValues[ConceptPath{Field: field, Record: el}].Value, 10) + `","` + el + `",,,,"NOW()",,` + "\n"
 
 	_, err := FileHandlers[5].WriteString(cleartextConcepts)
 
