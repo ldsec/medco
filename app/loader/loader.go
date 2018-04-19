@@ -60,21 +60,21 @@ var (
 )
 
 /*
-ToIgnore: 			defines the columns to be ignored (mostly the sample and patient IDs) and their relative position
-GenomicDic: 		defines the translation between the genomic fields that are present in the different datafiles and their
-					'actual meaning'
+ToIgnore: 			defines the columns to be ignored (mostly the sample and patient IDs)
+TranslationDic: 	defines the translation between the fields that are present in the different datafiles and their
+					'actual meaning' code-wise
 AnnotationsToQuery: defines the annotations to be queried (to speed up the query)
 */
 var (
-	ToIgnore = map[string]int{
-		"PATIENT_ID":  0,
-		"P_STABLE_ID": 0,
-		"SAMPLE_ID":   0,
-		"S_STABLE_ID": 0,
+	ToIgnore = map[string]struct{}{
+		"PATIENT_ID":  struct{}{},
+		"P_STABLE_ID": struct{}{},
+		"SAMPLE_ID":   struct{}{},
+		"S_STABLE_ID": struct{}{},
 	}
 
-	GenomicDic = map[string]string{
-		"Tumor_Sample_Barcode": "ID",
+	TranslationDic = map[string]string{
+		"Tumor_Sample_Barcode": "SAMPLE_ID",
 		"Chromosome":           "CHR",
 		"Start_Position":       "SP",
 		"Reference_Allele":     "RA",
@@ -105,18 +105,6 @@ var (
 	NumThreads = int(20)
 )
 
-// PatientVisitLinkKey contains the key for the map that links patient and visit(encounter) to the correspondent shrine ids (in patient_mapping and visit_mapping)
-type PatientVisitLinkKey struct {
-	PatientID 	string
-	SampleID	string
-}
-
-// PatientVisitLink contains the link between the patient and the visit/encounter (patient ID and sample ID)
-type PatientVisitLink struct {
-	PatientID   int64
-	EncounterID int64
-}
-
 // ConceptPath defines the end of the concept path tree and we use it in a map so that we do not repeat concepts
 type ConceptPath struct {
 	Field  string
@@ -131,9 +119,9 @@ type ConceptID struct {
 
 // Support global variables
 var (
-	Testing         bool // testing environment
+	Testing         bool 					  // testing environment
 	FileHandlers    []*os.File
-	OntValues       map[ConceptPath]ConceptID // stores the concepth path and the correspondent ID
+	OntValues       map[ConceptPath]ConceptID // stores the concept path and the correspondent ID
 	TextSearchIndex int64                     // needed for the observation_fact table (counter)
 )
 
@@ -467,7 +455,7 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 			if first == true {
 				for i, el := range record {
 					// the fields we need to generate the genomic id
-					if val, ok := GenomicDic[el]; ok {
+					if val, ok := TranslationDic[el]; ok {
 						indexGenVariant[val] = i
 					}
 					headerGenomic = append(headerGenomic, el)
@@ -499,6 +487,8 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 	for k := range allSensitiveIDs {
 		temp = append(temp, k)
 	}
+
+	log.LLvl1(temp)
 
 	listEncryptedElements := EncryptElements(temp, group)
 	if err := writeShrineOntologyGenomicAnnotations(listEncryptedElements, annotations); err != nil {
@@ -563,9 +553,9 @@ func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 						toTraverseIndex = append(toTraverseIndex, i)
 					} else {
 						// if no keep track of the index of the patient_id and encounter_id (sample_id)
-						if GenomicDic[rec] == "PATIENT_ID" {
+						if TranslationDic[rec] == "PATIENT_ID" {
 							pidIndex = i
-						} else if GenomicDic[rec] == "SAMPLE_ID"{
+						} else if TranslationDic[rec] == "SAMPLE_ID"{
 							eidIndex = i
 						}
 					}
@@ -688,14 +678,14 @@ func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 			// the HEADER
 			if first == true {
 				for i, el := range record {
-					if val, ok := GenomicDic[el]; ok {
+					if val, ok := TranslationDic[el]; ok {
 						indexGenVariant[val] = i
 					}
 
 					// if no keep track of the index of the patient_id and encounter_id (sample_id)
-					if GenomicDic[el] == "PATIENT_ID" {
+					if TranslationDic[el] == "PATIENT_ID" {
 						pidIndex = i
-					} else if GenomicDic[el] == "SAMPLE_ID"{
+					} else if TranslationDic[el] == "SAMPLE_ID"{
 						eidIndex = i
 					}
 
@@ -851,7 +841,7 @@ func generateShrineOntologyGenomicAnnotation(fields []string, record []string) s
 
 	for i, el := range record {
 		// if element is CHR, SP, RA, TSA1
-		if val, ok := GenomicDic[fields[i]]; ok == true {
+		if val, ok := TranslationDic[fields[i]]; ok == true {
 			if val == "CHR" && el != "" {
 				chr = el
 			} else if val == "SP" && el != "" {
@@ -865,7 +855,7 @@ func generateShrineOntologyGenomicAnnotation(fields []string, record []string) s
 			}
 			// if element is selected to be queried
 		} else if _, ok := AnnotationsToQuery[fields[i]]; ok == true {
-			queryFields += `"` + el + `", `
+			queryFields += `"` + el + `",`
 			// if element is not to be ignored
 		} else if _, ok := ToIgnore[fields[i]]; ok == false {
 			field := SanitizeHeader(fields[i])
