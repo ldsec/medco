@@ -80,7 +80,8 @@ var (
 		"Reference_Allele":     "RA",
 		"Tumor_Seq_Allele1":    "TSA1",
 		"Tumor_Seq_Allele2":    "TSA2",
-		"PATIENT_ID":           "ID",
+		"PATIENT_ID":           "PATIENT_ID",
+		"SAMPLE_ID":            "SAMPLE_ID",
 		"CHR":                  "CHR",
 		"START_POSITION":       "SP",
 		"REFERENCE_ALLELE":     "RA",
@@ -103,6 +104,12 @@ var (
 	NumElMap   = int64(5e6)
 	NumThreads = int(20)
 )
+
+// PatientVisitLinkKey contains the key for the map that links patient and visit(encounter) to the correspondent shrine ids (in patient_mapping and visit_mapping)
+type PatientVisitLinkKey struct {
+	PatientID 	string
+	SampleID	string
+}
 
 // PatientVisitLink contains the link between the patient and the visit/encounter (patient ID and sample ID)
 type PatientVisitLink struct {
@@ -519,7 +526,6 @@ func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 	eid := int64(1)
 
 	ontValuesSmallCopy := make(map[ConceptPath]bool)     // reduced set of ontology data to ensure that no repeated elements are added to the concept dimension table
-	patientVisitMap := make(map[string]PatientVisitLink) // maps between the Sample ID (Tumor_barcode) and a combination of patient and encounter IDs
 	visitMapping := make(map[string]int64)               // map a sample ID to a numeric ID
 	patientMapping := make(map[string]int64)             // map a patient ID to a numeric ID
 	toTraverseIndex := make([]int, 0)                    // the indexes of the columns that matter
@@ -556,9 +562,10 @@ func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 						headerClinical = append(headerClinical, record[i])
 						toTraverseIndex = append(toTraverseIndex, i)
 					} else {
-						if _, ok := ToIgnore["PATIENT_ID"]; ok {
+						// if no keep track of the index of the patient_id and encounter_id (sample_id)
+						if GenomicDic[rec] == "PATIENT_ID" {
 							pidIndex = i
-						} else if _, ok := ToIgnore["SAMPLE_ID"]; ok {
+						} else if GenomicDic[rec] == "SAMPLE_ID"{
 							eidIndex = i
 						}
 					}
@@ -567,7 +574,6 @@ func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 			} else {
 				// patient not yet exists
 				if _, ok := patientMapping[record[pidIndex]]; ok == false {
-
 					patientMapping[record[pidIndex]] = pid
 
 					if err := writeDemodataPatientMapping(record[pidIndex], patientMapping[record[pidIndex]]); err != nil {
@@ -580,18 +586,21 @@ func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 					pid++
 				}
 
-				visitMapping[record[eidIndex]] = eid
+				// sample not yet exists
+				if _, ok := visitMapping[record[eidIndex]]; ok == false {
+					visitMapping[record[eidIndex]] = eid
 
-				if err := writeDemodataEncounterMapping(record[eidIndex], record[pidIndex], visitMapping[record[eidIndex]]); err != nil {
-					return err
+					if err := writeDemodataEncounterMapping(record[eidIndex], record[pidIndex], visitMapping[record[eidIndex]]); err != nil {
+						return err
+					}
+					if err := writeDemodataVisitDimension(visitMapping[record[eidIndex]], patientMapping[record[pidIndex]]); err != nil {
+						return err
+					}
+
+					eid++
 				}
-				if err := writeDemodataVisitDimension(visitMapping[record[eidIndex]], patientMapping[record[pidIndex]]); err != nil {
-					return err
-				}
 
-				eid++
 
-				patientVisitMap[record[eidIndex]] = PatientVisitLink{PatientID: patientMapping[record[pidIndex]], EncounterID: visitMapping[record[eidIndex]]}
 
 				j := 0
 				for _, i := range toTraverseIndex {
@@ -650,48 +659,6 @@ func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 			}
 		}
 	}
-
-	/* check if it exists in the ontology
-					if _, ok := OntValues[ConceptPath{Field: headerClinical[j], Record: record[i]}]; ok == true {
-						// sensitive
-						if OntValues[ConceptPath{Field: headerClinical[j], Record: record[i]}].Identifier != "C" {
-							// if concept path does not exist
-							if _, ok := ontValuesSmallCopy[ConceptPath{Field: headerClinical[j], Record: record[i]}]; ok == false {
-								if err := writeDemodataConceptDimensionTaggedConcepts(headerClinical[j], record[i]); err != nil {
-									return err
-								}
-								ontValuesSmallCopy[ConceptPath{Field: headerClinical[j], Record: record[i]}] = true
-							}
-
-							if err := writeDemodataObservationFactEnc(OntValues[ConceptPath{Field: headerClinical[j], Record: record[i]}].Value,
-								patientMapping[record[1]],
-								visitMapping[record[0]]); err != nil {
-								return err
-							}
-
-						} else {
-							// if concept path does not exist
-							if _, ok := ontValuesSmallCopy[ConceptPath{Field: headerClinical[j], Record: record[i]}]; ok == false {
-								if err := writeDemodataConceptDimensionCleartextConcepts(headerClinical[j], record[i]); err != nil {
-									return err
-								}
-								ontValuesSmallCopy[ConceptPath{Field: headerClinical[j], Record: record[i]}] = true
-							}
-
-							if err := writeDemodataObservationFactClear(OntValues[ConceptPath{Field: headerClinical[j], Record: record[i]}].Value,
-								patientMapping[record[1]],
-								visitMapping[record[0]]); err != nil {
-								return err
-							}
-						}
-					} else {
-						log.Fatal("There are elements in the dataset that do not belong to the existing ontology")
-						return err
-					}
-	}*/
-
-
-
 	fClinical.Close()
 
 	log.LLvl1("Finished parsing the clinical dataset...")
@@ -724,6 +691,14 @@ func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 					if val, ok := GenomicDic[el]; ok {
 						indexGenVariant[val] = i
 					}
+
+					// if no keep track of the index of the patient_id and encounter_id (sample_id)
+					if GenomicDic[el] == "PATIENT_ID" {
+						pidIndex = i
+					} else if GenomicDic[el] == "SAMPLE_ID"{
+						eidIndex = i
+					}
+
 					headerGenomic = append(headerGenomic, el)
 
 				}
@@ -744,8 +719,8 @@ func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 						}
 
 						if err := writeDemodataObservationFactEnc(OntValues[ConceptPath{Field: strconv.FormatInt(genomicID, 10), Record: ""}].Value,
-							patientVisitMap[record[indexGenVariant["ID"]]].PatientID,
-							patientVisitMap[record[indexGenVariant["ID"]]].EncounterID); err != nil {
+							patientMapping[record[pidIndex]],
+							visitMapping[record[eidIndex]]); err != nil {
 							return err
 						}
 					} else {
@@ -967,7 +942,6 @@ func EncryptElements(list []int64, group *onet.Roster) *libunlynx.CipherVector {
 
 	// parallelize the encryption (we need this because this is so slow)
 	blockSize := int64(len(list)) / int64(NumThreads)
-
 	wg := libunlynx.StartParallelize(NumThreads)
 	for i := 0; i < NumThreads; i++ {
 		blockEnd := int64(i)*blockSize + blockSize
@@ -1247,7 +1221,7 @@ func writeDemodataProviderDimension() error {
 	return nil
 }
 
-func writeDemodataObservationFactClear(el, idV, idP int64) error {
+func writeDemodataObservationFactClear(el, idP, idV int64) error {
 
 	/*clear := `INSERT INTO i2b2demodata.observation_fact VALUES (` + strconv.FormatInt(idP, 10) + `, ` + strconv.FormatInt(idV, 10), 10) + `,
 	'CLEAR:` + strconv.FormatInt(el, 10) + `', 'chuv', 'NOW()', '@', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
@@ -1267,7 +1241,7 @@ func writeDemodataObservationFactClear(el, idV, idP int64) error {
 	return nil
 }
 
-func writeDemodataObservationFactEnc(el int64, idV, idP int64) error {
+func writeDemodataObservationFactEnc(el int64, idP, idV int64) error {
 
 	/*encrypted := `INSERT INTO i2b2demodata.observation_fact VALUES (` + strconv.FormatInt(idP, 10) + `, ` + strconv.FormatInt(idV, 10) + `, 'TAG_ID:` + strconv.FormatInt(el, 10) + `',
 	'chuv', 'NOW()', '@', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'chuv', NULL, NULL, NULL, NULL, 'NOW()', NULL, 1, ` + strconv.FormatInt(TextSearchIndex, 10) + `);` + "\n"*/
