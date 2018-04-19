@@ -794,7 +794,7 @@ func writeShrineOntologyLeafEnc(field, el string, id int64) error {
 }
 
 func writeShrineOntologyClearHeader() error {
-	clinical := `"2","\medco\clinical\nonsensitive\","MedCo Clinical Non-Sensitive Ontology","N","CA","0",,,"concept_cd","concept_dimension","concept_path","T","LIKE","\medco\clinical\nonsensitive\","MedCo Clinical Non-Sensitive Ontology","\medco\clinical\nonsensitive\","NOW()","NOW()","NOW()",,"CLEAR","@",,,,`
+	clinical := `"2","\medco\clinical\nonsensitive\","MedCo Clinical Non-Sensitive Ontology","N","CA","0",,,"concept_cd","concept_dimension","concept_path","T","LIKE","\medco\clinical\nonsensitive\","MedCo Clinical Non-Sensitive Ontology","\medco\clinical\nonsensitive\","NOW()","NOW()","NOW()",,"CLEAR","@",,,,` + "\n"
 
 	_, err := FileHandlers[1].WriteString(clinical)
 

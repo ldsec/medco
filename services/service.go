@@ -214,7 +214,6 @@ func (s *Service) HandleSurveyDDTRequestTerms(sdq *SurveyDDTRequest) (network.Me
 	// if this server is the one receiving the request from the client
 	if !sdq.IntraMessage {
 		log.Lvl1(s.ServerIdentity().String(), " received a SurveyDDTRequestTerms:", sdq.SurveyID)
-		log.LLvl1("UNLYNX ENCRYPTED ELEMENTS: ", sdq.Terms)
 
 		if len(sdq.Terms) == 0 {
 			log.Lvl1(s.ServerIdentity(), " for survey", sdq.SurveyID, "has no data to det tag")
@@ -274,8 +273,6 @@ func (s *Service) HandleSurveyDDTRequestTerms(sdq *SurveyDDTRequest) (network.Me
 		tr := survey.TR
 
 		s.MapSurveyTag.Remove((string)(sdq.SurveyID))
-
-		log.LLvl1("UNLYNX TAGGED ELEMENTS: ", listTaggedTerms)
 
 		return &ResultDDT{Result: listTaggedTerms, TR: tr}, nil
 	}
