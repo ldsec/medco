@@ -399,7 +399,7 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 								return err
 							}
 							// we don't generate the MetadataOntologyLeafEnc because we will do this afterwards (so that we only perform 1 DDT with all sensitive elements)
-							allSensitiveIDs[encID] = SensitiveIDValue{CP: ConceptPath{Field: headerClinical[j], Record: record[i]}, Annotation: ""}
+							allSensitiveIDs[encID] = SensitiveIDValue{CP: ConceptPath{Field: headerClinical[j], Record: record[i]}, Annotation: "NA"}
 							OntValues[ConceptPath{Field: headerClinical[j], Record: record[i]}] = ConceptID{Identifier: "E", Value: encID}
 							encID++
 						}
@@ -933,14 +933,15 @@ func generateShrineOntologyGenomicAnnotation(fields []string, record []string) s
 
 func writeShrineOntologyGenomicAnnotations(listEncryptedElements *libunlynx.CipherVector, annotations []string) error {
 	for i, annotation := range annotations {
-		ciphertextStr := (*listEncryptedElements)[i].Serialize()
-		_, err := FileHandlers[2].WriteString(`"` + ciphertextStr + `",` + annotation)
+		if annotation != "NA" && annotation != "" {
+			ciphertextStr := (*listEncryptedElements)[i].Serialize()
+			_, err := FileHandlers[2].WriteString(`"` + ciphertextStr + `",` + annotation)
 
-		if err != nil {
-			log.Fatal("Error in the writeShrineOntologyGenomicAnnotations():", err)
-			return err
+			if err != nil {
+				log.Fatal("Error in the writeShrineOntologyGenomicAnnotations():", err)
+				return err
+			}
 		}
-
 	}
 	return nil
 }
