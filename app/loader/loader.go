@@ -97,6 +97,9 @@ var (
 	}
 )
 
+// measures the total time for parsing the clinical and genomic files
+var parsingTime time.Duration
+
 /* NumElMap: defines an approximate size of the map (it avoids rehashing and speeds up the execution)
    NumThreads: defines the amount of go subroutines to use when parelellizing the encryption
 */
@@ -206,6 +209,7 @@ func LoadClient(el *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic, f
 	OntValues = make(map[ConceptPath]ConceptID)
 	Testing = testing
 	TextSearchIndex = int64(1) // needed for the observation_fact table (counter)
+	parsingTime = time.Duration(0)
 
 	// create files directory
 	mkdirErr := os.MkdirAll("files/", os.ModeDir)
@@ -239,6 +243,8 @@ func LoadClient(el *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic, f
 	fClinical.Close()
 	fGenomic.Close()
 
+	startLoading := time.Now()
+
 	err = GenerateLoadingScript(databaseS)
 	if err != nil {
 		log.Fatal("Error while generating the loading .sh file", err)
@@ -262,9 +268,11 @@ func LoadClient(el *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic, f
 	OntValues = make(map[ConceptPath]ConceptID)
 	FileHandlers = make([]*os.File, 0)
 
-	loadTime := time.Since(start)
-
+	loadTime := time.Since(startLoading)
 	log.LLvl1("The loading took:", loadTime)
+
+	etlTime := time.Since(start)
+	log.LLvl1("The ETL took:", etlTime)
 
 	return nil
 }
@@ -297,6 +305,7 @@ func GenerateLoadingScript(databaseS DBSettings) error {
 	}
 
 	fp.Close()
+
 	return nil
 }
 
@@ -318,6 +327,8 @@ func LoadDataFiles() error {
 
 // GenerateOntologyFiles generates the .csv files that 'belong' to the whole ontology (metadata & shrine)
 func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic *os.File, mapSensitive map[string]struct{}) error {
+	startParsing := time.Now()
+
 	writeShrineOntologyClearHeader()
 	writeShrineOntologyEncHeader()
 	writeMetadataOntologyClearHeader()
@@ -499,6 +510,8 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 		keyForSensitiveIDs = append(keyForSensitiveIDs, v.CP)
 	}
 
+	parsingTime += time.Since(startParsing)
+
 	// encrypt sensitive ids
 	listEncryptedElements := EncryptElements(listSensitiveIDs, group)
 	if err := writeShrineOntologyGenomicAnnotations(listEncryptedElements, annotations); err != nil {
@@ -511,11 +524,17 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 		return err
 	}
 
-	return writeMetadataSensitiveTagged(taggedValues, keyForSensitiveIDs)
+	startParsing = time.Now()
+	err = writeMetadataSensitiveTagged(taggedValues, keyForSensitiveIDs)
+	parsingTime += time.Since(startParsing)
+
+	return err
 }
 
 // GenerateDataFiles generates the .csv files that 'belong' to the dataset (demodata)
 func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
+	startParsing := time.Now()
+
 	// patient_id column index
 	pidIndex := 0
 	// encounter_id (sample_id) column index
@@ -735,9 +754,11 @@ func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 
 	fGenomic.Close()
 
+	parsingTime += time.Since(startParsing)
 	log.LLvl1("Finished parsing the genomic dataset...")
+	log.LLvl1("Parsing all files took (", parsingTime, ")")
 
-	log.LLvl1("The End.")
+	log.LLvl1("The End. Only loading left...")
 
 	return nil
 }
