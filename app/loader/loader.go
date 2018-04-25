@@ -290,7 +290,7 @@ func GenerateLoadingScript(databaseS DBSettings) error {
 	loading += "BEGIN;\n"
 	for i := 0; i < len(Tablenames); i++ {
 		tokens := strings.Split(FilePaths[i], "/")
-		loading += `\copy ` + Tablenames[i] + ` FROM 'files/` + tokens[1] + `' ESCAPE '"' DELIMITER ',' CSV;` + "\n
+		loading += `\copy ` + Tablenames[i] + ` FROM 'files/` + tokens[1] + `' ESCAPE '"' DELIMITER ',' CSV;` + "\n"
 	}
 	loading += "COMMIT;\n"
 	loading += "EOSQL"
