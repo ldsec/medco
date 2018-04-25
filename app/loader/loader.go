@@ -290,11 +290,7 @@ func GenerateLoadingScript(databaseS DBSettings) error {
 	loading += "BEGIN;\n"
 	for i := 0; i < len(Tablenames); i++ {
 		tokens := strings.Split(FilePaths[i], "/")
-
-		// todo: loading of table shrine_ont.genomic_annotations disabled to accomodate the new format designed by niccolo, loading with this format should be implemented
-		if Tablenames[i] != "shrine_ont.genomic_annotations" {
-			loading += `\copy ` + Tablenames[i] + ` FROM 'files/` + tokens[1] + `' ESCAPE '"' DELIMITER ',' CSV;` + "\n"
-		}
+		loading += `\copy ` + Tablenames[i] + ` FROM 'files/` + tokens[1] + `' ESCAPE '"' DELIMITER ',' CSV;` + "\n
 	}
 	loading += "COMMIT;\n"
 	loading += "EOSQL"
