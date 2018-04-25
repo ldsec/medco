@@ -1,0 +1,521 @@
+# data x1
+## server 0
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-3nodes-icclusters/group.toml --entryPointIdx 0 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY_TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part1_encodingOK.txt --genomic ./data_mutations_extended_skcm_broad_clear_i2b2_part1_encodingOK.txt --dbHost localhost --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m28.382887834s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.390343417s commun - 38.510416885s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 45.900760302s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 5m50.623543339s
+
+## server 1
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-3nodes-icclusters/group.toml --entryPointIdx 1 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY_TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part2_encodingOK.txt --genomic ./data_mutations_extended_skcm_broad_clear_i2b2_part2_encodingOK.txt --dbHost iccluster039.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m29.144624402s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.276820459s commun - 30.927494457s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 38.204314916s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 5m40.980252827s
+
+## server 2
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-3nodes-icclusters/group.toml --entryPointIdx 2 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY_TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part3_encodingOK.txt --genomic ./data_mutations_extended_skcm_broad_clear_i2b2_part3_encodingOK.txt --dbHost iccluster040.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m28.622667233s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.300771816s commun - 29.832977826s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 37.133749642s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 5m31.659424813s
+
+
+# data x2
+## server 0
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-3nodes-icclusters/group.toml --entryPointIdx 0 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY_TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part1_encodingOK.txt --genomic ./data_mutations_extended_skcm_broad_clear_i2b2_part1_encodingOK.txt --dbHost localhost --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017 --replay 2
+1!: (                    loader.ReplayDataset:  90) - Replaying dataset 2 times...
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m28.925180721s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.331675266s commun - 32.769334326s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 40.101009592s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 6m5.181937171s
+
+
+## server 1
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-3nodes-icclusters/group.toml --entryPointIdx 1 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY_TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part2_encodingOK.txt --genomic ./data_mutations_extended_skcm_broad_clear_i2b2_part2_encodingOK.txt --dbHost iccluster039.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017 --replay 2
+1!: (                    loader.ReplayDataset:  90) - Replaying dataset 2 times...
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m28.305102233s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.979110489s commun - 41.157959859s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 49.137070348s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 6m4.96855636s
+
+
+## server 2
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-3nodes-icclusters/group.toml --entryPointIdx 2 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY_TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part3_encodingOK.txt --genomic ./data_mutations_extended_skcm_broad_clear_i2b2_part3_encodingOK.txt --dbHost iccluster040.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017 --replay 2
+1!: (                    loader.ReplayDataset:  90) - Replaying dataset 2 times...
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m28.797807156s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.188079367s commun - 31.328525536s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 38.516604903s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 5m42.522523105s
+
+
+# data x4
+## server 0
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-3nodes-icclusters/group.toml --entryPointIdx 0 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY_TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part1_encodingOK.txt --genomic ./data_mutations_extended_skcm_broad_clear_i2b2_part1_encodingOK.txt --dbHost localhost --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017 --replay 4
+1!: (                    loader.ReplayDataset:  90) - Replaying dataset 4 times...
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m28.334446453s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.685758356s commun - 40.08031027s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 47.766068626s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 6m50.870652901s
+
+## server 1
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-3nodes-icclusters/group.toml --entryPointIdx 1 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY_TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part2_encodingOK.txt --genomic ./data_mutations_extended_skcm_broad_clear_i2b2_part2_encodingOK.txt --dbHost iccluster039.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017 --replay 4
+1!: (                    loader.ReplayDataset:  90) - Replaying dataset 4 times...
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m28.640185955s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.597927968s commun - 40.454760932s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 48.0526889s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 6m33.57718109s
+
+## server 2
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-3nodes-icclusters/group.toml --entryPointIdx 2 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY_TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part3_encodingOK.txt --genomic ./data_mutations_extended_skcm_broad_clear_i2b2_part3_encodingOK.txt --dbHost iccluster040.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017 --replay 4
+1!: (                    loader.ReplayDataset:  90) - Replaying dataset 4 times...
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m28.384653629s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.239128988s commun - 41.334722217s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 48.573851205s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 6m8.28202964s
+
+
+# data ~1/3 of data each node for 10
+## server 0
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-10nodes-icclusters/group.toml --entryPointIdx 0 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY_TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part2_encodingOK.txt --genomic ./data_mutations_extended_skcm_broad_clear_i2b2_part2_encodingOK.txt --dbHost iccluster027.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m27.793463372s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.482444201s commun - 1m45.986365518s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 1m53.468809719s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 6m51.382336736s
+
+## server 1
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-10nodes-icclusters/group.toml --entryPointIdx 1 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY
+_TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part2_encodingOK.txt --genomic ./data_mutations_e
+xtended_skcm_broad_clear_i2b2_part2_encodingOK.txt --dbHost iccluster028.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m28.919997206s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.53728645s commun - 1m41.078485825s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 1m48.615772275s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 6m50.023011973s
+
+## server 2
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-10nodes-icclusters/group.toml --entryPointIdx 2 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY
+_TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part2_encodingOK.txt --genomic ./data_mutations_e
+xtended_skcm_broad_clear_i2b2_part2_encodingOK.txt --dbHost iccluster029.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m28.784596539s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.260309997s commun - 2m0.541953494s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 2m7.802263491s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 7m10.104754797s
+
+## server 3
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-10nodes-icclusters/group.toml --entryPointIdx 3 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY
+_TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part2_encodingOK.txt --genomic ./data_mutations_e
+xtended_skcm_broad_clear_i2b2_part2_encodingOK.txt --dbHost iccluster030.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m28.340973766s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.199598852s commun - 1m39.045803346s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 1m46.245402198s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 6m45.045410825s
+
+## server 4
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-10nodes-icclusters/group.toml --entryPointIdx 4 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY
+_TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part2_encodingOK.txt --genomic ./data_mutations_e
+xtended_skcm_broad_clear_i2b2_part2_encodingOK.txt --dbHost iccluster031.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m28.654022703s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.610315985s commun - 1m31.781111323s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 1m39.391427308s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 6m42.720750479s
+
+## server 5
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-10nodes-icclusters/group.toml --entryPointIdx 5 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY
+_TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part2_encodingOK.txt --genomic ./data_mutations_e
+xtended_skcm_broad_clear_i2b2_part2_encodingOK.txt --dbHost iccluster032.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m28.334794951s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.219922788s commun - 1m29.596373378s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 1m36.816296166s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 6m36.821183344s
+
+## server 6
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-10nodes-icclusters/group.toml --entryPointIdx 6 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY
+_TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part2_encodingOK.txt --genomic ./data_mutations_e
+xtended_skcm_broad_clear_i2b2_part2_encodingOK.txt --dbHost iccluster033.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m28.845762985s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.26149769s commun - 1m42.458236821s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 1m49.719734511s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 6m51.667106651s
+
+## server 7
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-10nodes-icclusters/group.toml --entryPointIdx 7 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY
+_TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part2_encodingOK.txt --genomic ./data_mutations_e
+xtended_skcm_broad_clear_i2b2_part2_encodingOK.txt --dbHost iccluster034.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m28.703702858s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.375357062s commun - 1m30.856594424s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 1m38.231951486s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 6m39.573443697s
+
+## server 8
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-10nodes-icclusters/group.toml --entryPointIdx 8 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY
+_TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part2_encodingOK.txt --genomic ./data_mutations_e
+xtended_skcm_broad_clear_i2b2_part2_encodingOK.txt --dbHost iccluster035.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m28.518007991s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.310203517s commun - 1m28.466250384s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 1m35.776453901s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 6m38.64440882s
+
+## server 9
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-10nodes-icclusters/group.toml --entryPointIdx 9 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY
+_TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part2_encodingOK.txt --genomic ./data_mutations_e
+xtended_skcm_broad_clear_i2b2_part2_encodingOK.txt --dbHost iccluster037.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m30.468126634s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.295883596s commun - 1m35.027271393s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 1m42.323154989s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 6m44.824473077s
+
+# data ~1/3 of data each node for 9
+## server 0
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-9nodes-icclusters/group.toml --entryPointIdx 0 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY_
+TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part2_encodingOK.txt --genomic ./data_mutations_ex
+tended_skcm_broad_clear_i2b2_part2_encodingOK.txt --dbHost iccluster027.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m28.579604505s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.514329636s commun - 1m49.199194804s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 1m56.71352444s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 6m58.243835636s
+
+## server 1
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-9nodes-icclusters/group.toml --entryPointIdx 1 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY_
+TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part2_encodingOK.txt --genomic ./data_mutations_ex
+tended_skcm_broad_clear_i2b2_part2_encodingOK.txt --dbHost iccluster028.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m30.253990381s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.454149766s commun - 1m29.89119854s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 1m37.345348306s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 6m39.059025654s
+
+## server 2
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-9nodes-icclusters/group.toml --entryPointIdx 2 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY_
+TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part2_encodingOK.txt --genomic ./data_mutations_ex
+tended_skcm_broad_clear_i2b2_part2_encodingOK.txt --dbHost iccluster029.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m28.70105191s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.23353676s commun - 1m22.438486572s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 1m29.672023332s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 6m32.177647047s
+
+## server 3
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-9nodes-icclusters/group.toml --entryPointIdx 3 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY_
+TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part2_encodingOK.txt --genomic ./data_mutations_ex
+tended_skcm_broad_clear_i2b2_part2_encodingOK.txt --dbHost iccluster030.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m28.634523528s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.267750286s commun - 1m23.80702839s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 1m31.074778676s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 6m32.412493179s
+
+## server 4
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-9nodes-icclusters/group.toml --entryPointIdx 4 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY_
+TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part2_encodingOK.txt --genomic ./data_mutations_ex
+tended_skcm_broad_clear_i2b2_part2_encodingOK.txt --dbHost iccluster031.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m32.869470612s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.209925673s commun - 1m24.985974057s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 1m32.19589973s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 6m35.597630928s
+
+## server 5
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-9nodes-icclusters/group.toml --entryPointIdx 5 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY_
+TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part2_encodingOK.txt --genomic ./data_mutations_ex
+tended_skcm_broad_clear_i2b2_part2_encodingOK.txt --dbHost iccluster032.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m29.511672137s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.267494536s commun - 1m24.501953433s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 1m31.769447969s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 6m34.200643565s
+
+## server 6
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-9nodes-icclusters/group.toml --entryPointIdx 6 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY_
+TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part2_encodingOK.txt --genomic ./data_mutations_ex
+tended_skcm_broad_clear_i2b2_part2_encodingOK.txt --dbHost iccluster033.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m28.870752666s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.253190735s commun - 1m21.482870109s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 1m28.736060844s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 6m30.178353756s
+
+## server 7
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-9nodes-icclusters/group.toml --entryPointIdx 7 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY_
+TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part2_encodingOK.txt --genomic ./data_mutations_ex
+tended_skcm_broad_clear_i2b2_part2_encodingOK.txt --dbHost iccluster034.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m28.389419607s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.294454491s commun - 1m25.169588914s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 1m32.464043405s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 6m34.340787438s
+
+## server 8
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-9nodes-icclusters/group.toml --entryPointIdx 8 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY_
+TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part2_encodingOK.txt --genomic ./data_mutations_ex
+tended_skcm_broad_clear_i2b2_part2_encodingOK.txt --dbHost iccluster035.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m28.591251456s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.369659117s commun - 1m19.2810764s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 1m26.650735517s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 6m28.637072064s
+
+
+# data ~1/3 of data each node for 6
+## server 0
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-6nodes-icclusters/group.toml --entryPointIdx 0 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY_
+TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part2_encodingOK.txt --genomic ./data_mutations_ex
+tended_skcm_broad_clear_i2b2_part2_encodingOK.txt --dbHost iccluster027.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m28.528200728s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 8.000989518s commun - 1m10.338491188s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 1m18.339480706s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 6m21.232836111s
+
+## server 1
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-6nodes-icclusters/group.toml --entryPointIdx 1 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY_
+TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part2_encodingOK.txt --genomic ./data_mutations_ex
+tended_skcm_broad_clear_i2b2_part2_encodingOK.txt --dbHost iccluster028.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m29.148387073s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.246335039s commun - 1m6.971690358s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 1m14.218025397s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 6m16.231614187s
+
+## server 2
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-6nodes-icclusters/group.toml --entryPointIdx 2 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY_
+TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part2_encodingOK.txt --genomic ./data_mutations_ex
+tended_skcm_broad_clear_i2b2_part2_encodingOK.txt --dbHost iccluster029.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m28.611080549s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.223865495s commun - 1m5.168130496s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 1m12.391995991s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 6m13.213773035s
+
+## server 3
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-6nodes-icclusters/group.toml --entryPointIdx 3 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY_
+TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part2_encodingOK.txt --genomic ./data_mutations_ex
+tended_skcm_broad_clear_i2b2_part2_encodingOK.txt --dbHost iccluster030.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m27.775122185s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.290855602s commun - 56.118995313s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 1m3.409850915s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 6m3.569022246s
+
+## server 4
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-6nodes-icclusters/group.toml --entryPointIdx 4 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY_
+TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part2_encodingOK.txt --genomic ./data_mutations_ex
+tended_skcm_broad_clear_i2b2_part2_encodingOK.txt --dbHost iccluster031.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m29.246604947s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.31924824s commun - 56.126672634s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 1m3.445920874s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 6m5.634550816s
+
+## server 5
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-6nodes-icclusters/group.toml --entryPointIdx 5 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY_
+TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part2_encodingOK.txt --genomic ./data_mutations_ex
+tended_skcm_broad_clear_i2b2_part2_encodingOK.txt --dbHost iccluster032.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m28.091488857s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.292894835s commun - 54.041114197s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 1m1.334009032s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 6m1.970733978s
+
+
+# data for network size experiment
+## server 0
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-3nodes-icclusters/group.toml --entryPointIdx 0 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY_
+TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part1_encodingOK.txt --genomic ./data_mutations_ex
+tended_skcm_broad_clear_i2b2_part1_encodingOK.txt --dbHost iccluster027.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m28.349708988s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.521386645s commun - 38.402200224s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 45.923586869s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 5m50.905427161s
+
+## server 1
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-3nodes-icclusters/group.toml --entryPointIdx 1 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY_
+TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part2_encodingOK.txt --genomic ./data_mutations_ex
+tended_skcm_broad_clear_i2b2_part2_encodingOK.txt --dbHost iccluster028.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m28.576718146s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.270949583s commun - 33.58083366s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 40.851783243s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 5m43.344409019s
+
+## server 2
+./medco-deployment/configuration/unlynxI2b2 loader --file medco-deployment/configuration/keys/exp-3nodes-icclusters/group.toml --entryPointIdx 2 --ont_clinical ./data_clinical_skcm_broad.csv --sensitive PRIMARY_
+TUMOR_LOCALIZATION_TYPE --sensitive CANCER_TYPE_DETAILED --ont_genomic ./data_mutations_extended_skcm_broad.csv --clinical ./data_clinical_skcm_broad_clear_i2b2_part3_encodingOK.txt --genomic ./data_mutations_ex
+tended_skcm_broad_clear_i2b2_part3_encodingOK.txt --dbHost iccluster029.iccluster.epfl.ch --dbPort 5432 --dbName medcodeployment --dbUser postgres --dbPassword prigen2017
+1!: (            loader.GenerateOntologyFiles: 363) - Finished parsing the clinical ontology...
+1!: (            loader.GenerateOntologyFiles: 416) - Finished parsing the genomic ontology...
+1!: (                    loader.encryptAndTag: 774) - Finished encrypting the sensitive data... ( 2m29.250825253s )
+1!: (                    loader.encryptAndTag: 796) - DDT took: exec - 7.214661788s commun - 32.359903351s
+1!: (                    loader.encryptAndTag: 798) - Finished tagging the sensitive data... ( 39.574565139s )
+1!: (                loader.GenerateDataFiles: 556) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 622) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 624) - The End.
+1!: (                       loader.LoadClient: 215) - The loading took: 5m33.39678832s
+
+
+
+

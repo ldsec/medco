@@ -1,0 +1,193 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" http://www.w3.org/TR/html4/loose.dtd"> <HTML>
+<HEAD>
+<link rel="alternate" type="application/rss+xml" title="ntop RSS Feed" href="http://www.ntop.org/blog/?feed=rss2" />
+<TITLE>Error 404</TITLE>
+<META HTTP-EQUIV=Pragma CONTENT=no-cache>
+<META HTTP-EQUIV=Cache-Control CONTENT=no-cache>
+<!--[if lt IE 9]><script language="javascript" type="text/javascript" src="/jqplot/excanvas.min.js"></script><![endif]-->
+<script type="text/javascript" src="/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="/d3.js"></script>
+<script type="text/javascript" src="/sankey.js"></script>
+<script type="text/javascript" src="/jqplot/jquery.jqplot.min.js"></script>
+<script type="text/javascript" src="/jqplot/plugins/jqplot.pieRenderer.min.js"></script>
+<script type="text/javascript" src="/jqplot/plugins/jqplot.barRenderer.min.js"></script>
+<script type="text/javascript" src="/jqplot/plugins/jqplot.meterGaugeRenderer.min.js"></script>
+<script type="text/javascript" src="/jqplot/plugins/jqplot.categoryAxisRenderer.min.js"></script>
+<script type="text/javascript" src="/jqplot/plugins/jqplot.pointLabels.min.js"></script>
+<link rel="stylesheet" type="text/css" href="/jqplot/jquery.jqplot.css" />
+<link rel="stylesheet" type="text/css" href="/sankey.css" />
+<script type="text/javascript" src="/reflection.js"></script>
+<script TYPE="text/javascript" src="/functions.js"></script>
+<script type="text/javascript" src="/domLib.js"></script>
+<script type="text/javascript" src="/domTT.js"></script>
+<script type="text/javascript">var domTT_styleClass = 'niceTitle';</script>
+<link rel="stylesheet" href="jquery-ui-1.8.16.custom.css">
+<script type="text/javascript" src="/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+<LINK REL=stylesheet HREF="/style.css" type="text/css">
+<link rel="stylesheet" href="/theme.css" TYPE="text/css">
+<script type="text/javascript" language="JavaScript" src="/autosuggest.js"></script>
+<link rel="stylesheet" href="/autosuggest.css" type="text/css" media="screen" charset="utf-8" />
+<script type="text/javascript" language="JavaScript" src="/theme.js"></script>
+<script type="text/javascript" language="JavaScript" SRC="/JSCookMenu.js"></script>
+<script type="text/javascript" language="JavaScript"><!--
+var ntopMenu =
+[
+	[null,'About',null,null,null,
+		[null,'What is ntop?','/aboutNtop.html',null,null],
+		[null,'ntop blog','http://www.ntop.org/blog/',null,null],
+		[null,'Credits','/Credits.html',null,null],
+		[null,'Make a Donation', 'http://shop.ntop.org/',null,null],
+  [null,'ntop World',null,null,null,
+          [null,'ntop-based Solutions','http://www.ntop.org/solutions.html',null,null],
+          [null,'nMon.net Products','http://www.nmon.net/products.html',null,null],
+          ],
+  [null,'Online Documentation',null,null,null,
+		[null,'Man Page','/ntop.html',null,null],
+             ['<img src=/icon_python.png>','Python ntop Engine',null,null,null,
+		    [ null,'Python API','/docs/python/index.html', '_blank',null],
+		    [ null,'Tutorial','http://www.ntop.org/blog/?p=112', '_blank',null],
+             ],
+		['<img src="/help.png">','Help','/ntophelp.html',null,null],
+		[null,'FAQ','/faq.html',null,null],
+		['<img src="/Risk_high.gif">','Risk Flags','/help.html',null,null],
+     ],
+	  [null,'Show Configuration','/info.html',null,null],
+	  ['<img src="/bug.png">','Report a Problem','/ntopProblemReport.html',null,null],
+	],
+	[null,'Summary',null,null,null,
+		[null,'Traffic','/trafficStats.html',null,null],
+		[null,'Hosts','/hostsInfo.html',null,null],
+		[null,'Network Load','/thptStats.html',null,null],
+		[null,'Traffic Maps',null,null,null,
+		       [null,'Region Map','/python/GeoPacketVisualizer.py',null,null],
+		       [null,'Host Map','/hostMap.html',null,null],
+          ],
+		[null,'Network Flows','/NetFlows.html',null,null],
+		],
+  [null,'All Protocols',null,null,null,
+          [null,'Traffic','/sortDataProtos.html',null,null],
+          [null,'Throughput','/sortDataThpt.html',null,null],
+          [null,'Activity','/dataHostTraffic.html',null,null],
+	     [null,'Top Talkers',null,null,null,
+		       [null,'Last Hour', '/lastHourTopTalkers.html',null,null],
+		       [null,'Last Day',  '/lastDayTopTalkers.html',null,null],
+		       [null,'Historical','/historicalTalkers.html',null,null],
+          ],
+          ],
+	[null,'IP',null,null,null,
+		[null,'Summary',null,null,null,
+				[null,'Traffic','/sortDataIP.html',null,null],
+				[null,'Multicast','/multicastStats.html',null,null],
+				[null,'Internet Domain','/domainStats.html',null,null],
+				[null,'Networks','/domainStats.html?netmode=1',null,null],
+				[null,'ASs','/domainStats.html?netmode=2',null,null],
+				[null,'Host Communities','/hostCommunities.html',null,null],
+				[null,'Distribution','/ipProtoDistrib.html',null,null],
+		],
+		[null,'Traffic Directions',null,null,null,
+				[null,'Local to Local','/ipL2L.html',null,null],
+				[null,'Local to Remote','/ipL2R.html',null,null],
+				[null,'Remote to Local','/ipR2L.html',null,null],
+				[null,'Remote to Remote','/ipR2R.html',null,null],
+		],
+		[null,'Local',null,null,null,
+				[null,'Routers','/localRoutersList.html',null,null],
+				[null,'Ports Used','/ipProtoUsage.html',null,null],
+				[null,'Active Sessions','/activeSessions.html',null,null],
+				[null,'Host Fingerprint','/localHostsFingerprint.html',null,null],
+				[null,'Host Characterization','/localHostsCharacterization.html',null,null],
+				[null,'Network Traffic Map','/networkMap.html',null,null],
+		],
+	],
+	[null,'Utils',null,null,null,
+	[null,'RRD Alarm',null,null,null,
+                    [null,'Configure Thresholds','/python/rrdalarm/config.py',null,null],
+                    [null,'Check Now','/python/rrdalarm/start.py',null,null],
+     ],
+		[null,'Data Dump','/dump.html',null,null],
+		[null,'View Log','/viewLog.html',null,null],
+		],
+	[null,'Plugins',null,null,null,
+		[null,'NetFlow',null,null,null,
+				[null,'Activate','/showPlugins.html?NetFlow=1',null,null],
+				[null,'View/Configure','/plugins/NetFlow',null,null],
+				[null,'Describe','/showPlugins.html?NetFlow',null,null],
+				[null,'Statistics','/plugins/NetFlow/statistics.html',null,null],
+             ],
+		[null,'Round-Robin Database',null,null,null,
+				[null,'Deactivate','/showPlugins.html?rrdPlugin=0',null,null],
+				[null,'Configure','/plugins/rrdPlugin',null,null],
+				[null,'Describe','/showPlugins.html?rrdPlugin',null,null],
+				[null,'Statistics','/plugins/rrdPlugin/statistics.html',null,null],
+				['<img src="/graph.gif">','Arbitrary Graphs','/plugins/rrdPlugin/arbgraph.html',null,null],
+             ],
+		[null,'sFlow',null,null,null,
+				[null,'Activate','/showPlugins.html?sFlow=1',null,null],
+				[null,'View/Configure','/plugins/sFlow',null,null],
+				[null,'Describe','/showPlugins.html?sFlow',null,null],
+             ],
+		[null,'All','/showPlugins.html',null,null],
+		],
+	[null,'Admin',null,null,null,
+		['<img src="/lock.png">','Configure',null,null,null,
+			['<img src="/lock.png">','Startup Options','/configNtop.html',null,null],
+			['<img src="/lock.png">','Preferences','/editPrefs.html',null,null],
+			['<img src="/lock.png">','Packet Filter','/changeFilter.html',null,null],
+			['<img src="/lock.png">','Reset Stats','/resetStats.html',null,null],
+			['<img src="/lock.png">','Web Users','/showUsers.html',null,null],
+			['<img src="/lock.png">','Protect URLs','/showURLs.html',null,null],
+		],
+		['<img src="/lock.png">','Shutdown','/shutdown.html',null,null],
+	]
+];
+--></script>
+</head><body link="blue" vlink="blue">
+
+<table border="0" width="100%" cellpadding="0" cellspacing="0">
+ <tr>
+  <td align="left">
+   <table border="0" width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+     <td align="left"><div style="width: 103px; height: 75px;">
+      <A HREF=http://www.ntop.org><img src="/ntop_logo.png" class="reflect" border=0></A>     </div></td><td></td>
+    </tr>
+   </table></td>
+<td align=right class="leftmenuitem"><b>(C) 1998-2012 - <a class=mailto href="mailto:&#100;&#101;&#114;&#105;&#064;&#110;&#116;&#111;&#112;&#046;&#111;&#114;&#103;" title="Send email to Luca Deri">Luca Deri</a></b>&nbsp;&nbsp;</td> </tr>
+ <tr>
+  <th class="leftmenuitem">
+   <noscript>Please enable JavaScript support in your browser</noscript>
+   <div id="ntopMenuID">Please enable make sure that the ntop html/ directory is properly installed</div>
+<script type="text/javascript" language="JavaScript"><!--
+        cmDraw ('ntopMenuID', ntopMenu, 'hbr', cmThemeOffice, 'ThemeOffice');
+-->
+</script></th>
+  <td class="leftmenuitem" align="right"><div><form name=myform method=get action=""><label><img border=0 src=/graph_zoom.gif>&nbsp;</label><input placeholder="Search ntop..." style="width: 150px" type="text" id="testinput" value="" /></form></div></td>
+ </tr>
+</table>
+<p>&nbsp;</p>
+<H1>Error 404</H1>
+The server cannot find the requested page (page expired or ntop configuration ?).
+<P>Received request:<BR><BLOCKQUOTE><TT>&quot;GET /jquery-ui-1.8.16.custom.css HTTP/1.1&quot;</TT></BLOCKQUOTE><p align="center"><img class=tooltip alt="Warning" src="/warning.gif"></p>
+<p align="center"><font color="#FF0000" size="+1"><b>ntop</b> does not currently have any information about host jquery-ui-1.8.16.custo [ <A class=external HREF="https://apps.db.ripe.net/search/query.html?searchtext=jquery-ui-1.8.16.custo&searchSubmit=search#resultsAnchor">Whois</A> ]</TD></TR>
+.</font></p><p>&nbsp;</p><p>This is most likely because the host information has been purged as inactive.  You may wish to consider the -c | --sticky-hosts option, although that option may substantially increase memory requirements.</p>
+<script type="text/javascript">var options = {script:"/findHost.json?",varname:"key",json:true,callback: function (obj) { document.myform.action =obj.info; document.myform.submit(); }};var as_json = new bsn.AutoSuggest('testinput', options);</script>
+<br>&nbsp;<br><div id="bottom"><div id="footer">&nbsp;<br>Report created on Wed Sep 20 19:03:14 2017
+ [ntop uptime: 1:06]
+<br>
+Generated by ntop v.5.0.1 (64 bit)
+[x86_64-3.2.0-54-generic-linux-gnu]<br>&copy; 1998-2012 by Luca Deri, built: Mar 30 2014 07:45:35.<br>
+<script type="text/javascript">function nicetitleDecorator(el) {
+var result = el.title;
+if(el.href){
+result += '<p>' + el.href + '</p>';
+	}
+return result;
+}
+domTT_replaceTitles(nicetitleDecorator);
+</script>
+Listening on [br-0e8a1b7b1837,br-9b9b9b9454a5,br-d8d2705398ba,br-ed6885b479f4]
+for all packets (i.e. without a filtering expression)
+<br>Web reports include all interfaces (merged)</div></div>
+</body>
+</html>
