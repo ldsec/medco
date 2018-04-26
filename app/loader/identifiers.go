@@ -47,12 +47,12 @@ const (
 
 	/*
 	 Valid values for the alleles.
-	 Either nothing ("-") or a certain number of bases ({A, T, G, C}).
+	 Either nothing ("-", "", "NA") or a certain number of bases ({A, T, G, C}).
 	 Each [A, T, G, C] base is encoded on 2 bits.
 
 	 The maximum number of bases supported is  6 -> 12bits and an additional 3 bits are used to encode the length.
 	*/
-	AllelesRegex = "^([ATCG]{1,6}|-|NA)$"
+	AllelesRegex = "^$|([ATCG]{1,6}|-|NA)$"
 )
 
 // Mapping to encode non-numeric chromosome ids.

@@ -30,12 +30,13 @@ type DBSettings struct {
 
 // The different paths and handlers for all the .sql files
 var (
-	Tablenames = [...]string{"shrine_ont.clinical_sensitive",
+	TablenamesOntology = [...]string{"shrine_ont.clinical_sensitive",
 		"shrine_ont.clinical_non_sensitive",
 		"genomic_annotations.genomic_annotations",
 		"i2b2metadata.sensitive_tagged",
-		"i2b2metadata.non_sensitive_clear",
-		"i2b2demodata.concept_dimension",
+		"i2b2metadata.non_sensitive_clear"}
+
+	TablenamesData = [...]string{"i2b2demodata.concept_dimension",
 		"i2b2demodata.patient_mapping",
 		"i2b2demodata.patient_dimension",
 		"i2b2demodata.encounter_mapping",
@@ -43,7 +44,8 @@ var (
 		"i2b2demodata.provider_dimension",
 		"i2b2demodata.observation_fact"}
 
-	FileBashPath = "26-load-data.sh"
+	FileBashPath = [...]string{"25-load-ontology.sh",
+		"26-load-data.sh"}
 
 	FilePaths = [...]string{"files/SHRINE_ONT_CLINICAL_SENSITIVE.csv",
 		"files/SHRINE_ONT_CLINICAL_NON_SENSITIVE.csv",
@@ -96,9 +98,6 @@ var (
 		"MA:protein.change": struct{}{},
 	}
 )
-
-// measures the total time for parsing the clinical and genomic files
-var parsingTime time.Duration
 
 /* NumElMap: defines an approximate size of the map (it avoids rehashing and speeds up the execution)
    NumThreads: defines the amount of go subroutines to use when parelellizing the encryption
@@ -209,7 +208,6 @@ func LoadClient(el *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic, f
 	OntValues = make(map[ConceptPath]ConceptID)
 	Testing = testing
 	TextSearchIndex = int64(1) // needed for the observation_fact table (counter)
-	parsingTime = time.Duration(0)
 
 	// create files directory
 	mkdirErr := os.MkdirAll("files/", os.ModeDir)
@@ -243,22 +241,42 @@ func LoadClient(el *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic, f
 	fClinical.Close()
 	fGenomic.Close()
 
-	startLoading := time.Now()
+	startLoadingOntology := time.Now()
 
-	err = GenerateLoadingScript(databaseS)
+	err = GenerateLoadingOntologyScript(databaseS)
 	if err != nil {
-		log.Fatal("Error while generating the loading .sh file", err)
+		log.Fatal("Error while generating the loading ontology .sh file", err)
 		return err
 	}
 
-	fOntClinical.Close()
-	fOntGenomic.Close()
+	err = LoadOntologyFiles()
+	if err != nil {
+		log.Fatal("Error while loading ontology .sql file", err)
+		return err
+	}
+
+	loadTime := time.Since(startLoadingOntology)
+	log.LLvl1("Loading ontology took:", loadTime)
+
+	startLoadingData := time.Now()
+
+	err = GenerateLoadingDataScript(databaseS)
+	if err != nil {
+		log.Fatal("Error while generating the loading dataset .sh file", err)
+		return err
+	}
 
 	err = LoadDataFiles()
 	if err != nil {
-		log.Fatal("Error while loading .sql file", err)
+		log.Fatal("Error while loading dataset .sql file", err)
 		return err
 	}
+
+	loadTime = time.Since(startLoadingData)
+	log.LLvl1("Loading dataset took:", loadTime)
+
+	fOntClinical.Close()
+	fOntGenomic.Close()
 
 	for _, fp := range FileHandlers {
 		fp.Close()
@@ -268,18 +286,15 @@ func LoadClient(el *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic, f
 	OntValues = make(map[ConceptPath]ConceptID)
 	FileHandlers = make([]*os.File, 0)
 
-	loadTime := time.Since(startLoading)
-	log.LLvl1("The loading took:", loadTime)
-
 	etlTime := time.Since(start)
 	log.LLvl1("The ETL took:", etlTime)
 
 	return nil
 }
 
-// GenerateLoadingScript creates a load .sql script
-func GenerateLoadingScript(databaseS DBSettings) error {
-	fp, err := os.Create(FileBashPath)
+// GenerateLoadingDataScript creates a load ontology .sql script
+func GenerateLoadingOntologyScript(databaseS DBSettings) error {
+	fp, err := os.Create(FileBashPath[0])
 	if err != nil {
 		return err
 	}
@@ -288,9 +303,38 @@ func GenerateLoadingScript(databaseS DBSettings) error {
 		`" -U "` + databaseS.DBuser + `" -p ` + strconv.FormatInt(int64(databaseS.DBport), 10) + ` -d "` + databaseS.DBname + `" <<-EOSQL` + "\n"
 
 	loading += "BEGIN;\n"
-	for i := 0; i < len(Tablenames); i++ {
+	for i := 0; i < len(TablenamesOntology); i++ {
 		tokens := strings.Split(FilePaths[i], "/")
-		loading += `\copy ` + Tablenames[i] + ` FROM 'files/` + tokens[1] + `' ESCAPE '"' DELIMITER ',' CSV;` + "\n"
+		loading += `\copy ` + TablenamesOntology[i] + ` FROM 'files/` + tokens[1] + `' ESCAPE '"' DELIMITER ',' CSV;` + "\n"
+	}
+	loading += "COMMIT;\n"
+	loading += "EOSQL"
+
+	_, err = fp.WriteString(loading)
+	if err != nil {
+		return err
+	}
+
+	fp.Close()
+
+	return nil
+
+}
+
+// GenerateLoadingDataScript creates a load dataset .sql script
+func GenerateLoadingDataScript(databaseS DBSettings) error {
+	fp, err := os.Create(FileBashPath[1])
+	if err != nil {
+		return err
+	}
+
+	loading := `#!/usr/bin/env bash` + "\n" + "\n" + `PGPASSWORD=` + databaseS.DBpassword + ` psql -v ON_ERROR_STOP=1 -h "` + databaseS.DBhost +
+		`" -U "` + databaseS.DBuser + `" -p ` + strconv.FormatInt(int64(databaseS.DBport), 10) + ` -d "` + databaseS.DBname + `" <<-EOSQL` + "\n"
+
+	loading += "BEGIN;\n"
+	for i := 0; i < len(TablenamesData); i++ {
+		tokens := strings.Split(FilePaths[i], "/")
+		loading += `\copy ` + TablenamesData[i] + ` FROM 'files/` + tokens[1] + `' ESCAPE '"' DELIMITER ',' CSV;` + "\n"
 	}
 	loading += "COMMIT;\n"
 	loading += "EOSQL"
@@ -305,10 +349,26 @@ func GenerateLoadingScript(databaseS DBSettings) error {
 	return nil
 }
 
-// LoadDataFiles executes the loading script
+// LoadOntologyFiles executes the loading script for the ontology
+func LoadOntologyFiles() error {
+	// Display just the stderr if an error occurs
+	cmd := exec.Command("/bin/sh", FileBashPath[0])
+	stderr := &bytes.Buffer{} // make sure to import bytes
+	cmd.Stderr = stderr
+	err := cmd.Run()
+	if err != nil {
+		log.LLvl1("Error when running command.  Error log:", stderr.String())
+		log.LLvl1("Got command status:", err.Error())
+		return err
+	}
+
+	return nil
+}
+
+// LoadDataFiles executes the loading script for the dataset
 func LoadDataFiles() error {
 	// Display just the stderr if an error occurs
-	cmd := exec.Command("/bin/sh", FileBashPath)
+	cmd := exec.Command("/bin/sh", FileBashPath[1])
 	stderr := &bytes.Buffer{} // make sure to import bytes
 	cmd.Stderr = stderr
 	err := cmd.Run()
@@ -323,6 +383,7 @@ func LoadDataFiles() error {
 
 // GenerateOntologyFiles generates the .csv files that 'belong' to the whole ontology (metadata & shrine)
 func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic *os.File, mapSensitive map[string]struct{}) error {
+	parsingTime := time.Duration(0)
 	startParsing := time.Now()
 
 	writeShrineOntologyClearHeader()
@@ -524,11 +585,14 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 	err = writeMetadataSensitiveTagged(taggedValues, keyForSensitiveIDs)
 	parsingTime += time.Since(startParsing)
 
+	log.LLvl1("Parsing all ontology files took (", parsingTime, ")")
+
 	return err
 }
 
 // GenerateDataFiles generates the .csv files that 'belong' to the dataset (demodata)
 func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
+	parsingTime := time.Duration(0)
 	startParsing := time.Now()
 
 	// patient_id column index
@@ -752,7 +816,7 @@ func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 
 	parsingTime += time.Since(startParsing)
 	log.LLvl1("Finished parsing the genomic dataset...")
-	log.LLvl1("Parsing all files took (", parsingTime, ")")
+	log.LLvl1("Parsing all dataset files took (", parsingTime, ")")
 
 	log.LLvl1("The End. Only loading left...")
 

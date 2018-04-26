@@ -13,10 +13,10 @@ import (
 )
 
 const (
-	clinicalOntology = "files/tcga_cbio/manipulations/8_clinical_data.csv"
-	genomicOntology  = "files/tcga_cbio/manipulations/8_mutation_data.csv"
-	clinicalFile     = "files/tcga_cbio/manipulations/8_clinical_data.csv"
-	genomicFile      = "files/tcga_cbio/manipulations/8_mutation_data.csv"
+	clinicalOntology = "files/tcga_cbio/manipulations/80_node0_clinical_data.csv"
+	genomicOntology  = "files/tcga_cbio/manipulations/80_node0_mutation_data.csv"
+	clinicalFile     = "files/tcga_cbio/manipulations/80_node0_clinical_data.csv"
+	genomicFile      = "files/tcga_cbio/manipulations/80_node0_mutation_data.csv"
 
 	//clinicalOntology = "files/tcga_cbio/clinical_data.csv"
 	//genomicOntology  = "files/tcga_cbio/mutation_data.csv"
@@ -162,7 +162,7 @@ func TestReplayDataset(t *testing.T) {
 
 func TestGenerateLoadingScript(t *testing.T) {
 	t.Skip()
-	err := loader.GenerateLoadingScript(loader.DBSettings{DBhost: "localhost", DBport: 5434, DBname: "medcodeployment", DBuser: "postgres", DBpassword: "prigen2017"})
+	err := loader.GenerateLoadingDataScript(loader.DBSettings{DBhost: "localhost", DBport: 5434, DBname: "medcodeployment", DBuser: "postgres", DBpassword: "prigen2017"})
 	assert.True(t, err == nil)
 }
 
