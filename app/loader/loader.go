@@ -36,6 +36,7 @@ var (
 		"i2b2metadata.sensitive_tagged",
 		"i2b2metadata.non_sensitive_clear"}
 
+
 	TablenamesData = [...]string{"i2b2demodata.concept_dimension",
 		"i2b2demodata.patient_mapping",
 		"i2b2demodata.patient_dimension",
@@ -47,12 +48,13 @@ var (
 	FileBashPath = [...]string{"25-load-ontology.sh",
 		"26-load-data.sh"}
 
-	FilePaths = [...]string{"files/SHRINE_ONT_CLINICAL_SENSITIVE.csv",
+	FilePathsOntology = [...]string{"files/SHRINE_ONT_CLINICAL_SENSITIVE.csv",
 		"files/SHRINE_ONT_CLINICAL_NON_SENSITIVE.csv",
 		"files/SHRINE_ONT_GENOMIC_ANNOTATIONS.csv",
 		"files/I2B2METADATA_SENSITIVE_TAGGED.csv",
-		"files/I2B2METADATA_NON_SENSITIVE_CLEAR.csv",
-		"files/I2B2DEMODATA_CONCEPT_DIMENSION.csv",
+		"files/I2B2METADATA_NON_SENSITIVE_CLEAR.csv"}
+
+	FilePathsData = [...]string{"files/I2B2DEMODATA_CONCEPT_DIMENSION.csv",
 		"files/I2B2DEMODATA_PATIENT_MAPPING.csv",
 		"files/I2B2DEMODATA_PATIENT_DIMENSION.csv",
 		"files/I2B2DEMODATA_ENCOUNTER_MAPPING.csv",
@@ -215,7 +217,16 @@ func LoadClient(el *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic, f
 		log.Fatal("Cannot create directory.")
 	}
 
-	for _, f := range FilePaths {
+	for _, f := range FilePathsOntology {
+		fp, err := os.Create(f)
+		if err != nil {
+			log.Fatal("Error while opening", f)
+			return err
+		}
+		FileHandlers = append(FileHandlers, fp)
+	}
+
+	for _, f := range FilePathsData {
 		fp, err := os.Create(f)
 		if err != nil {
 			log.Fatal("Error while opening", f)
@@ -304,7 +315,7 @@ func GenerateLoadingOntologyScript(databaseS DBSettings) error {
 
 	loading += "BEGIN;\n"
 	for i := 0; i < len(TablenamesOntology); i++ {
-		tokens := strings.Split(FilePaths[i], "/")
+		tokens := strings.Split(FilePathsOntology[i], "/")
 		loading += `\copy ` + TablenamesOntology[i] + ` FROM 'files/` + tokens[1] + `' ESCAPE '"' DELIMITER ',' CSV;` + "\n"
 	}
 	loading += "COMMIT;\n"
@@ -333,7 +344,7 @@ func GenerateLoadingDataScript(databaseS DBSettings) error {
 
 	loading += "BEGIN;\n"
 	for i := 0; i < len(TablenamesData); i++ {
-		tokens := strings.Split(FilePaths[i], "/")
+		tokens := strings.Split(FilePathsData[i], "/")
 		loading += `\copy ` + TablenamesData[i] + ` FROM 'files/` + tokens[1] + `' ESCAPE '"' DELIMITER ',' CSV;` + "\n"
 	}
 	loading += "COMMIT;\n"

@@ -76,7 +76,13 @@ func generateFiles(t *testing.T, el *onet.Roster, entryPointIdx int) {
 	loader.OntValues = make(map[loader.ConceptPath]loader.ConceptID)
 	loader.TextSearchIndex = int64(1)
 
-	for _, f := range loader.FilePaths {
+	for _, f := range loader.FilePathsOntology {
+		fp, err := os.Create(f)
+		assert.True(t, err == nil, err)
+		loader.FileHandlers = append(loader.FileHandlers, fp)
+	}
+
+	for _, f := range loader.FilePathsData {
 		fp, err := os.Create(f)
 		assert.True(t, err == nil, err)
 		loader.FileHandlers = append(loader.FileHandlers, fp)
@@ -161,7 +167,6 @@ func TestReplayDataset(t *testing.T) {
 }
 
 func TestGenerateLoadingScript(t *testing.T) {
-	t.Skip()
 	err := loader.GenerateLoadingDataScript(loader.DBSettings{DBhost: "localhost", DBport: 5434, DBname: "medcodeployment", DBuser: "postgres", DBpassword: "prigen2017"})
 	assert.True(t, err == nil)
 }
