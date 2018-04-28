@@ -1,0 +1,8 @@
+# This file contains your private key.
+# Do not give it away lightly!
+Suite = ""
+Public = "8f077cfeb2cdc9f99e130b2a211a765a84716e40d2a5fb5992d651b1fd8f9e54"
+Private = "cf029f88c800c850d18e7eb488acb09274ec5c9596a9c5d06a30cdea9b6d5a01"
+Address = "tls://10.90.40.24:2000"
+ListenAddress = ""
+Description = "Unlynx Server 8"
