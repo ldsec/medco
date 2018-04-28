@@ -53,12 +53,12 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_MEDCO_DB_NAME" <<-
     );
     ALTER TABLE ONLY i2b2metadata.non_sensitive_clear ADD CONSTRAINT fullname_pk_10 PRIMARY KEY (c_fullname);
     ALTER TABLE ONLY i2b2metadata.non_sensitive_clear ADD CONSTRAINT basecode_un_10 UNIQUE (c_basecode);
-    insert into i2b2metadata.non_sensitive_clear (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum,
-    c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, update_date,
-    download_date, import_date, valuetype_cd, m_applied_path) values
-    ('2', '\medco\clinical\nonsensitive\', 'MedCo Clinical Non-Sensitive Ontology', 'N', 'CA', '0', 'concept_cd', 'concept_dimension', 'concept_path',
-    'T', 'LIKE', '\medco\clinical\nonsensitive\', 'MedCo Clinical Non-Sensitive Ontology', '\medco\clinical\nonsensitive\',
-    'NOW()', 'NOW()', 'NOW()', 'CLEAR', '@');
+    --insert into i2b2metadata.non_sensitive_clear (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum,
+    --c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, update_date,
+    --download_date, import_date, valuetype_cd, m_applied_path) values
+    --('2', '\medco\clinical\nonsensitive\', 'MedCo Clinical Non-Sensitive Ontology', 'N', 'CA', '0', 'concept_cd', 'concept_dimension', 'concept_path',
+    --'T', 'LIKE', '\medco\clinical\nonsensitive\', 'MedCo Clinical Non-Sensitive Ontology', '\medco\clinical\nonsensitive\',
+    --'NOW()', 'NOW()', 'NOW()', 'CLEAR', '@');
 
 
     -- tagged sensitive ontology
@@ -92,11 +92,11 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_MEDCO_DB_NAME" <<-
     );
     ALTER TABLE ONLY i2b2metadata.sensitive_tagged ADD CONSTRAINT fullname_pk_11 PRIMARY KEY (c_fullname);
     ALTER TABLE ONLY i2b2metadata.sensitive_tagged ADD CONSTRAINT basecode_un_11 UNIQUE (c_basecode);
-    insert into i2b2metadata.sensitive_tagged (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum,
-    c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, update_date,
-    download_date, import_date, valuetype_cd, m_applied_path) values
-    ('1', '\medco\tagged\', 'MedCo Sensitive Tagged Ontology', 'N', 'CA', '0', 'concept_cd', 'concept_dimension', 'concept_path',
-    'T', 'LIKE', '\medco\tagged\', 'MedCo Sensitive Tagged Ontology', '\medco\tagged\', 'NOW()', 'NOW()', 'NOW()', 'TAG_ID', '@');
+    --insert into i2b2metadata.sensitive_tagged (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum,
+    --c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, update_date,
+    --download_date, import_date, valuetype_cd, m_applied_path) values
+    --('1', '\medco\tagged\', 'MedCo Sensitive Tagged Ontology', 'N', 'CA', '0', 'concept_cd', 'concept_dimension', 'concept_path',
+    --'T', 'LIKE', '\medco\tagged\', 'MedCo Sensitive Tagged Ontology', '\medco\tagged\', 'NOW()', 'NOW()', 'NOW()', 'TAG_ID', '@');
 
 
     -- permissions

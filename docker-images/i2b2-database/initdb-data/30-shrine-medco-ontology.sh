@@ -121,12 +121,12 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_MEDCO_DB_NAME" <<-
     );
     ALTER TABLE ONLY shrine_ont.clinical_sensitive ADD CONSTRAINT fullname_pk_20 PRIMARY KEY (c_fullname);
     ALTER TABLE ONLY shrine_ont.clinical_sensitive ADD CONSTRAINT basecode_un_20 UNIQUE (c_basecode);
-    insert into shrine_ont.clinical_sensitive (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum,
-        c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, update_date,
-        download_date, import_date, valuetype_cd, m_applied_path) values
-        ('2', '\medco\clinical\sensitive\', 'MedCo Clinical Sensitive Ontology', 'N', 'CA', '0', 'concept_cd', 'concept_dimension', 'concept_path',
-        'T', 'LIKE', '\medco\clinical\sensitive\', 'MedCo Clinical Sensitive Ontology', '\medco\clinical\sensitive\',
-        'NOW()', 'NOW()', 'NOW()', 'ENC_ID', '@');
+    --insert into shrine_ont.clinical_sensitive (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum,
+    --    c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, update_date,
+    --    download_date, import_date, valuetype_cd, m_applied_path) values
+    --    ('2', '\medco\clinical\sensitive\', 'MedCo Clinical Sensitive Ontology', 'N', 'CA', '0', 'concept_cd', 'concept_dimension', 'concept_path',
+    --    'T', 'LIKE', '\medco\clinical\sensitive\', 'MedCo Clinical Sensitive Ontology', '\medco\clinical\sensitive\',
+    --    'NOW()', 'NOW()', 'NOW()', 'ENC_ID', '@');
 
     -- clinical non-sensitive ontology
     CREATE TABLE shrine_ont.clinical_non_sensitive(
@@ -159,12 +159,12 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_MEDCO_DB_NAME" <<-
     );
     ALTER TABLE ONLY shrine_ont.clinical_non_sensitive ADD CONSTRAINT fullname_pk_21 PRIMARY KEY (c_fullname);
     ALTER TABLE ONLY shrine_ont.clinical_non_sensitive ADD CONSTRAINT basecode_un_21 UNIQUE (c_basecode);
-    insert into shrine_ont.clinical_non_sensitive (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum,
-        c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, update_date,
-        download_date, import_date, valuetype_cd, m_applied_path) values
-        ('2', '\medco\clinical\nonsensitive\', 'MedCo Clinical Non-Sensitive Ontology', 'N', 'CA', '0', 'concept_cd', 'concept_dimension', 'concept_path',
-        'T', 'LIKE', '\medco\clinical\nonsensitive\', 'MedCo Clinical Non-Sensitive Ontology', '\medco\clinical\nonsensitive\',
-        'NOW()', 'NOW()', 'NOW()', 'CLEAR', '@');
+    --insert into shrine_ont.clinical_non_sensitive (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum,
+    --    c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, update_date,
+    --    download_date, import_date, valuetype_cd, m_applied_path) values
+    --    ('2', '\medco\clinical\nonsensitive\', 'MedCo Clinical Non-Sensitive Ontology', 'N', 'CA', '0', 'concept_cd', 'concept_dimension', 'concept_path',
+    --    'T', 'LIKE', '\medco\clinical\nonsensitive\', 'MedCo Clinical Non-Sensitive Ontology', '\medco\clinical\nonsensitive\',
+    --    'NOW()', 'NOW()', 'NOW()', 'CLEAR', '@');
 
     -- genomic ontology
     CREATE TABLE shrine_ont.genomic(
