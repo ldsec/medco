@@ -1,0 +1,82 @@
+version: '2.2'
+services:
+  i2b2-server:
+    extends:
+      file: ../docker-compose-common.yml
+      service: i2b2-server
+    build:
+      args:
+        - NODE_IDX_ARG=4
+    ports:
+      - "8084:8080"
+      - "9994:9990"
+    volumes:
+      - ../../configuration-profiles/exp-6nodes-icclusters-1CA:/opt/medco-configuration
+    networks:
+      - medco-network-srv4
+
+  i2b2-database:
+    extends:
+      file: ../docker-compose-common.yml
+      service: i2b2-database
+    ports:
+      - "5436:5432"
+    networks:
+      - medco-network-srv4
+
+  i2b2-web:
+    extends:
+      file: ../docker-compose-common.yml
+      service: i2b2-web
+    build:
+      args:
+        - NODE_IDX_ARG=4
+    ports:
+      - "84:80"
+      - "447:443"
+    volumes:
+      - ../../configuration-profiles/exp-6nodes-icclusters-1CA:/opt/medco-configuration
+    networks:
+      - medco-network-srv4
+
+  unlynx:
+    extends:
+      file: ../docker-compose-common.yml
+      service: unlynx
+    build:
+      args:
+        - NODE_IDX_ARG=4
+    ports:
+      - "2004:2000"
+      - "2005:2001"
+    volumes:
+      - ../../configuration-profiles/exp-6nodes-icclusters-1CA:/opt/medco-configuration
+    networks:
+      - medco-network-srv4
+
+  shrine-server:
+    extends:
+      file: ../docker-compose-common.yml
+      service: shrine-server
+    build:
+      args:
+        - NODE_IDX_ARG=4
+    ports:
+      - "6447:6443"
+    volumes:
+      - ../../configuration-profiles/exp-6nodes-icclusters-1CA:/opt/medco-configuration
+    networks:
+      - medco-network-srv4
+
+  shrine-database:
+    extends:
+      file: ../docker-compose-common.yml
+      service: shrine-database
+    ports:
+      - "3310:3306"
+    networks:
+      - medco-network-srv4
+
+networks:
+  medco-network-srv4:
+    driver: bridge

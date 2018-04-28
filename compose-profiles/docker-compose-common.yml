@@ -10,8 +10,8 @@ services:
     ports:
       - "8080"
       - "9990"
-    networks:
-      - medco-network
+#    networks:
+#      - medco-network
     volumes:
       - ../configuration-profiles/dev-3nodes-samehost:/opt/medco-configuration
 
@@ -20,8 +20,8 @@ services:
       context: ../docker-images/i2b2-database
     ports:
       - "5432"
-    networks:
-      - medco-network
+#    networks:
+#      - medco-network
 
   i2b2-web:
     build:
@@ -31,8 +31,8 @@ services:
     ports:
       - "80"
       - "443"
-    networks:
-      - medco-network
+#    networks:
+#      - medco-network
     volumes:
       - ../configuration-profiles/dev-3nodes-samehost:/opt/medco-configuration
 
@@ -45,8 +45,8 @@ services:
     ports:
       - "2000"
       - "2001"
-    networks:
-      - medco-network
+#    networks:
+#      - medco-network
     volumes:
       - ../configuration-profiles/dev-3nodes-samehost:/opt/medco-configuration
 
@@ -58,8 +58,8 @@ services:
         - SHRINE_DEBUG_LEVEL_ARG=INFO
     ports:
       - "6443"
-    networks:
-      - medco-network
+#    networks:
+#      - medco-network
     volumes:
       - ../configuration-profiles/dev-3nodes-samehost:/opt/medco-configuration
 
@@ -68,9 +68,9 @@ services:
       context: ../docker-images/shrine-database
     ports:
       - "3306"
-    networks:
-      - medco-network
+#    networks:
+#      - medco-network
 
-networks:
-  medco-network:
-    driver: bridge
+#networks:
+#  medco-network:
+#    driver: bridge
