@@ -26,10 +26,11 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$I2B2_MEDCO_DB_NAME" <<-
 
     -- genomic tables
     create table genomic_annotations.genomic_annotations(
-        variant_id character varying(255) NOT NULL PRIMARY KEY,
+        variant_id character varying(255) NOT NULL,
         variant_name character varying(255) NOT NULL,
-        annotations text NOT NULL,
-        t_depth numeric NOT NULL
+        protein_change character varying(255) NOT NULL,
+        hugo_gene_symbol character varying(255) NOT NULL,
+        annotations text NOT NULL
     );
     create table genomic_annotations.annotation_names(
         annotation_name character varying(255) NOT NULL PRIMARY KEY
