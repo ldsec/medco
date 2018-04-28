@@ -1,6 +1,6 @@
 version: '2.2'
 services:
-  i2b2-server:
+  i2b2-server-srv5:
     extends:
       file: ../docker-compose-common.yml
       service: i2b2-server
@@ -13,18 +13,22 @@ services:
     volumes:
       - ../../configuration-profiles/exp-6nodes-icclusters-1CA:/opt/medco-configuration
     networks:
-      - medco-network-srv5
+      medco-network-srv5:
+        aliases:
+          - i2b2-server
 
-  i2b2-database:
+  i2b2-database-srv5:
     extends:
       file: ../docker-compose-common.yml
       service: i2b2-database
     ports:
       - "5436:5432"
     networks:
-      - medco-network-srv5
+      medco-network-srv5:
+        aliases:
+          - i2b2-database
 
-  i2b2-web:
+  i2b2-web-srv5:
     extends:
       file: ../docker-compose-common.yml
       service: i2b2-web
@@ -37,9 +41,11 @@ services:
     volumes:
       - ../../configuration-profiles/exp-6nodes-icclusters-1CA:/opt/medco-configuration
     networks:
-      - medco-network-srv5
+      medco-network-srv5:
+        aliases:
+          - i2b2-web
 
-  unlynx:
+  unlynx-srv5:
     extends:
       file: ../docker-compose-common.yml
       service: unlynx
@@ -52,9 +58,11 @@ services:
     volumes:
       - ../../configuration-profiles/exp-6nodes-icclusters-1CA:/opt/medco-configuration
     networks:
-      - medco-network-srv5
+      medco-network-srv5:
+        aliases:
+          - unlynx
 
-  shrine-server:
+  shrine-server-srv5:
     extends:
       file: ../docker-compose-common.yml
       service: shrine-server
@@ -66,16 +74,20 @@ services:
     volumes:
       - ../../configuration-profiles/exp-6nodes-icclusters-1CA:/opt/medco-configuration
     networks:
-      - medco-network-srv5
+      medco-network-srv5:
+        aliases:
+          - shrine-server
 
-  shrine-database:
+  shrine-database-srv5:
     extends:
       file: ../docker-compose-common.yml
       service: shrine-database
     ports:
       - "3310:3306"
     networks:
-      - medco-network-srv5
+      medco-network-srv5:
+        aliases:
+          - shrine-database
 
 networks:
   medco-network-srv5:
