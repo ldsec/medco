@@ -53,8 +53,8 @@ services:
       args:
         - NODE_IDX_ARG=3
     ports:
-      - "2004:2000"
-      - "2005:2001"
+      - "2004:2004"
+      - "2005:2005"
     volumes:
       - ../../configuration-profiles/exp-6nodes-icclusters-1CA:/opt/medco-configuration
     networks:
