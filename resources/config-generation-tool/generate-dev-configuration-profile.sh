@@ -35,6 +35,7 @@ docker run -v "$CONF_FOLDER":/opt/medco-configuration --entrypoint sh lca1/unlyn
 echo "caCertAliases = [\"shrine-ca\"]" > "$CONF_FOLDER/shrine_ca_cert_aliases.conf"
 echo "### Producing CA"
 CATOP="$CONF_FOLDER/CA" "$SCRIPT_FOLDER"/CA.sh -newca
+echo "unique_subject = no" > "$CONF_FOLDER/CA/index.txt.attr"
 
 # generate configuration for each node
 NODE_IDX="-1"
