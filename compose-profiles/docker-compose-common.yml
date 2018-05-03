@@ -44,7 +44,7 @@ services:
         - UNLYNX_DEBUG_LEVEL_ARG=1
     ports:
       - "2000"
-     - "2001"
+      - "2001"
     networks:
       - medco-network
     volumes:
