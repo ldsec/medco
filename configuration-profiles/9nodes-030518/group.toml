@@ -1,0 +1,45 @@
+[[servers]]
+  Address = "tls://10.90.39.7:2000"
+  Suite = "Ed25519"
+  Public = "9bde113a1278d5744785151bc763c25da6bc76af5e7c91aa6db829ccdceec4b9"
+  Description = "Unlynx Server 0"
+[[servers]]
+  Address = "tls://10.90.39.21:2000"
+  Suite = "Ed25519"
+  Public = "02b22cd7fe3c50b1a6d028d2f6e6bfc21e2ac4bb2a64d9120bc9f36de6c5b423"
+  Description = "Unlynx Server 1"
+[[servers]]
+  Address = "tls://10.90.39.23:2000"
+  Suite = "Ed25519"
+  Public = "6bffc1e73fd1dc0db8c9548e2f14e812fc55146438ce6c74a325b1024330a0ad"
+  Description = "Unlynx Server 2"
+[[servers]]
+  Address = "tls://10.90.40.7:2000"
+  Suite = "Ed25519"
+  Public = "2806790fcd61779f4c376417578e914f1b4a56ee3bfa1aab8c3d1752154e9b78"
+  Description = "Unlynx Server 3"
+[[servers]]
+  Address = "tls://10.90.40.19:2000"
+  Suite = "Ed25519"
+  Public = "9277e85ab217861dc5da88a0da3e3c709234abb5b65f56b9335a1ba0aeeec718"
+  Description = "Unlynx Server 4"
+[[servers]]
+  Address = "tls://10.90.36.32:2000"
+  Suite = "Ed25519"
+  Public = "7398ff8290fd3088720005824ecfbb6be7cddd524fa52e32ba598caf2417edaa"
+  Description = "Unlynx Server 5"
+[[servers]]
+  Address = "tls://10.90.36.33:2000"
+  Suite = "Ed25519"
+  Public = "262763689af962cc12d3408ca84fb2f518291d8a5f2a27e2855092b6e215fb05"
+  Description = "Unlynx Server 6"
+[[servers]]
+  Address = "tls://10.90.36.34:2000"
+  Suite = "Ed25519"
+  Public = "e407e2d8846318331d5f75627e2bff5c68f6c5da900ed3c5a434b1f63bf91d2b"
+  Description = "Unlynx Server 7"
+[[servers]]
+  Address = "tls://10.90.36.35:2000"
+  Suite = "Ed25519"
+  Public = "36dd0433c4da0a34e0e470482e706a8491d7ebd63b41f2673970b0f7a87f259e"
+  Description = "Unlynx Server 8"

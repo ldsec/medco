@@ -1,0 +1,10 @@
+# This file contains your private key.
+# Do not give it away lightly!
+Suite = ""
+Public = "bd35b1498a327eecce732139ac7fedcb3c61a3c6dfd328dbf71679e0178a768e"
+Private = "9fcb6725309d964ba2338600d28a6a05b3192d368a97aec45dff45be0b946e05"
+Address = "tls://10.90.36.33:2000"
+ListenAddress = ""
+Description = "Unlynx Server 6"
+WebSocketTLSCertificate = ""
+WebSocketTLSCertificateKey = ""

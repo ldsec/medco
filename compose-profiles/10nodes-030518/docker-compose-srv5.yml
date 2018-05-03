@@ -1,0 +1,71 @@
+version: '2.2'
+services:
+  i2b2-server:
+    extends:
+      file: ../docker-compose-common.yml
+      service: i2b2-server
+    build:
+      args:
+        - NODE_IDX_ARG=5
+    ports:
+      - "8080:8080"
+      - "9990:9990"
+    volumes:
+      - ../../configuration-profiles/10nodes-030518:/opt/medco-configuration
+
+
+  i2b2-database:
+    extends:
+      file: ../docker-compose-common.yml
+      service: i2b2-database
+    ports:
+      - "5432:5432"
+
+  i2b2-web:
+    extends:
+      file: ../docker-compose-common.yml
+      service: i2b2-web
+    build:
+      args:
+        - NODE_IDX_ARG=5
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../../configuration-profiles/10nodes-030518:/opt/medco-configuration
+
+  unlynx:
+    extends:
+      file: ../docker-compose-common.yml
+      service: unlynx
+    build:
+      args:
+        - NODE_IDX_ARG=5
+    ports:
+      - "2000:2000"
+      - "2001:2001"
+    volumes:
+      - ../../configuration-profiles/10nodes-030518:/opt/medco-configuration
+
+  shrine-server:
+    extends:
+      file: ../docker-compose-common.yml
+      service: shrine-server
+    build:
+      args:
+        - NODE_IDX_ARG=5
+    ports:
+      - "6443:6443"
+    volumes:
+      - ../../configuration-profiles/10nodes-030518:/opt/medco-configuration
+
+  shrine-database:
+    extends:
+      file: ../docker-compose-common.yml
+      service: shrine-database
+    ports:
+      - "3306:3306"
+
+networks:
+  medco-network:
+    driver: bridge
