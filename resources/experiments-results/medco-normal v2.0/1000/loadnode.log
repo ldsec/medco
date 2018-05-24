@@ -1,0 +1,134 @@
+1!: (            loader.GenerateOntologyFiles: 510) - Finished parsing the clinical ontology... ( 227 )
+1!: (            loader.GenerateOntologyFiles: 510) - Finished parsing the clinical ontology... ( 227 )
+1!: (            loader.GenerateOntologyFiles: 510) - Finished parsing the clinical ontology... ( 227 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 100000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 200000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 300000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 400000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 500000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 600000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 700000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 800000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 900000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 1000000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 1100000 )
+1!: (            loader.GenerateOntologyFiles: 569) - Finished parsing the genomic ontology... ( 1006405 )
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50325 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (                  loader.EncryptElements: 1082) - Finished encrypting the sensitive data... ( 37.96501933s )
+1!: (                      loader.TagElements: 1110) - DDT took: exec - 32.938468025s commun - 2m11.862774661s
+1!: (                      loader.TagElements: 1112) - Finished tagging the sensitive data... ( 2m44.801242686s )
+1!: (            loader.GenerateOntologyFiles: 599) - Parsing all ontology files took ( 2m1.90170208s )
+1!: (                loader.GenerateDataFiles: 754) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 829) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 830) - Parsing all dataset files took ( 22.56279686s )
+1!: (                loader.GenerateDataFiles: 832) - The End. Only loading left...
+1!: (                       loader.LoadClient: 270) - Loading ontology took: 1m4.387266099s
+1!: (                       loader.LoadClient: 287) - Loading dataset took: 10.891708118s
+1!: (                       loader.LoadClient: 301) - The ETL took: 7m26.272626513s
+1!: (            loader.GenerateOntologyFiles: 510) - Finished parsing the clinical ontology... ( 227 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 100000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 200000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 300000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 400000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 500000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 600000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 700000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 800000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 900000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 1000000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 1100000 )
+1!: (            loader.GenerateOntologyFiles: 569) - Finished parsing the genomic ontology... ( 1006405 )
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50325 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (                  loader.EncryptElements: 1082) - Finished encrypting the sensitive data... ( 37.463447832s )
+1!: (                      loader.TagElements: 1110) - DDT took: exec - 32.947811252s commun - 2m10.453001733s
+1!: (                      loader.TagElements: 1112) - Finished tagging the sensitive data... ( 2m43.400812985s )
+1!: (            loader.GenerateOntologyFiles: 599) - Parsing all ontology files took ( 1m59.768624877s )
+1!: (                loader.GenerateDataFiles: 754) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 829) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 830) - Parsing all dataset files took ( 20.890224051s )
+1!: (                loader.GenerateDataFiles: 832) - The End. Only loading left...
+1!: (                       loader.LoadClient: 270) - Loading ontology took: 1m1.462317125s
+1!: (                       loader.LoadClient: 287) - Loading dataset took: 9.409356274s
+1!: (                       loader.LoadClient: 301) - The ETL took: 7m16.466667704s
+1!: (            loader.GenerateOntologyFiles: 510) - Finished parsing the clinical ontology... ( 227 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 100000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 200000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 300000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 400000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 500000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 600000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 700000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 800000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 900000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 1000000 )
+1!: (            loader.GenerateOntologyFiles: 536) - Continuing parsing the genomic ontology... ( 1100000 )
+1!: (            loader.GenerateOntologyFiles: 569) - Finished parsing the genomic ontology... ( 1006405 )
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50325 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (            loader.EncryptElements.func1: 1077) - Encrypted ( 50320 )elements
+1!: (                  loader.EncryptElements: 1082) - Finished encrypting the sensitive data... ( 38.758808962s )
+1!: (                      loader.TagElements: 1110) - DDT took: exec - 32.179353845s commun - 2m27.609923602s
+1!: (                      loader.TagElements: 1112) - Finished tagging the sensitive data... ( 2m59.789277447s )
+1!: (            loader.GenerateOntologyFiles: 599) - Parsing all ontology files took ( 2m1.210300214s )
+1!: (                loader.GenerateDataFiles: 754) - Finished parsing the clinical dataset...
+1!: (                loader.GenerateDataFiles: 829) - Finished parsing the genomic dataset...
+1!: (                loader.GenerateDataFiles: 830) - Parsing all dataset files took ( 20.481308489s )
+1!: (                loader.GenerateDataFiles: 832) - The End. Only loading left...
+1!: (                       loader.LoadClient: 270) - Loading ontology took: 1m4.610973634s
+1!: (                       loader.LoadClient: 287) - Loading dataset took: 9.557083909s
+1!: (                       loader.LoadClient: 301) - The ETL took: 7m39.830169105s
