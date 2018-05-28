@@ -74,7 +74,7 @@ func (c *API) SendSurveyAggRequest(entities *onet.Roster, surveyID SurveyID, cPK
 		ClientPubKey: cPK,
 
 		Aggregate:         listAggregate,
-		AggregateShuffled: make([]libunlynx.ProcessResponse, 0),
+		AggregateShuffled: make(libunlynx.CipherVector, 0),
 
 		IntraMessage: false,
 	}

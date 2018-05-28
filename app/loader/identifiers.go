@@ -113,7 +113,7 @@ func GetVariantID(chromosomeID string, startPosition int64, refAlleles, altAllel
 	if checkRegex(chromosomeID, ChromosomeIDRegex, "Invalid Chromosome ID") != nil ||
 		checkRegex(refAlleles, AllelesRegex, "Invalid reference allele") != nil || checkRegex(altAlleles, AllelesRegex, "Invalid alternate allele") != nil ||
 		startPosition < PositionMin || startPosition > PositionMax || TypeFlagBitSize+ChrBitSize+PosBitSize+2*(AllelesBaseLengthBitSize+AllelesBitSize) != IDBitSize {
-			return int64(-1), errors.New("Invalid input: chr=" + chromosomeID + ", pos=" + strconv.FormatInt(startPosition, 10) + ", ref=" + refAlleles + ", alt=" + altAlleles)
+		return int64(-1), errors.New("Invalid input: chr=" + chromosomeID + ", pos=" + strconv.FormatInt(startPosition, 10) + ", ref=" + refAlleles + ", alt=" + altAlleles)
 	}
 
 	// interpret chromosome id (content validated by regex)

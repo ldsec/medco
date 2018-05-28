@@ -12,7 +12,7 @@ import (
 
 const (
 	// BinaryName is the name of the binary
-	BinaryName = "unlynxMedCo"
+	BinaryName = "medco"
 
 	// Version of the binary
 	Version = "1.00"

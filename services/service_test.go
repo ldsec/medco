@@ -9,16 +9,17 @@ import (
 	"github.com/lca1/unlynx/lib"
 	"github.com/stretchr/testify/assert"
 	"strconv"
+	"sync"
 	"testing"
 )
 
-func getParam(nbHosts int) (*onet.Roster, *onet.LocalTest) {
+func getParam(nbServers int) (*onet.Roster, *onet.LocalTest) {
 
 	log.SetDebugVisible(1)
 	local := onet.NewLocalTest(libunlynx.SuiTe)
 	// generate 3 hosts, they don't connect, they process messages, and they
 	// don't register the tree or entity list
-	_, el, _ := local.GenTree(nbHosts, true)
+	_, el, _ := local.GenTree(nbServers, true)
 
 	// get query parameters
 	return el, local
@@ -27,7 +28,7 @@ func getParam(nbHosts int) (*onet.Roster, *onet.LocalTest) {
 func getClients(nbHosts int, el *onet.Roster) []*servicesmedco.API {
 	clients := make([]*servicesmedco.API, nbHosts)
 	for i := 0; i < nbHosts; i++ {
-		clients[i] = servicesmedco.NewMedCoClient(el.List[i], strconv.Itoa(i))
+		clients[i] = servicesmedco.NewMedCoClient(el.List[i%len(el.List)], strconv.Itoa(i))
 	}
 
 	return clients
@@ -44,174 +45,127 @@ func getQueryParams(nbQp int, encKey kyber.Point) libunlynx.CipherVector {
 }
 
 func TestServiceDDT(t *testing.T) {
-	el, local := getParam(3)
-	clients := getClients(3, el)
-	// test the query DDT with 100 query terms
+	// test with 10 servers
+	el, local := getParam(10)
+	// test with 10 concurrent clients
+	clients := getClients(10, el)
+	// the first two threads execute the same operation (repetition) to check that in the end it yields the same result
+	clients[1] = clients[0]
+	// test the query DDT with 500 query terms
 	nbQp := 100
 	qt := getQueryParams(nbQp, el.Aggregate)
 	defer local.CloseAll()
 
 	proofs := false
 
-	var resultNode1, resultNode1Repeated, resultNode2, resultNode3 []libunlynx.GroupingKey
+	results := make(map[string][]libunlynx.GroupingKey)
 
-	wg := libunlynx.StartParallelize(len(el.List))
+	wg := libunlynx.StartParallelize(len(clients))
+	var mutex = sync.Mutex{}
+	for i, client := range clients {
+		go func(i int, client *servicesmedco.API) {
+			defer wg.Done()
 
-	servicesmedco.NewMedCoClient(el.List[0], strconv.Itoa(0))
+			_, res, _, err := client.SendSurveyDDTRequestTerms(el, servicesmedco.SurveyID("testDDTSurvey_"+client.ClientID), qt, proofs, true)
+			mutex.Lock()
+			results["testDDTSurvey_"+client.ClientID] = res
+			mutex.Unlock()
 
-	// the first two threads execute the same operation (repetition) to check that in the end it yields the same result
-	go func() {
-		defer wg.Done()
-
-		var err error
-		_, resultNode1, _, err = clients[0].SendSurveyDDTRequestTerms(el, servicesmedco.SurveyID("testDDTSurvey_node1"), qt, proofs, true)
-
-		if err != nil {
-			t.Fatal("Client", clients[0], " service did not start: ", err)
-		}
-	}()
-	go func() {
-		defer wg.Done()
-
-		var err error
-		_, resultNode1Repeated, _, err = clients[0].SendSurveyDDTRequestTerms(el, servicesmedco.SurveyID("testDDTSurvey_node1_repeated"), qt, proofs, true)
-
-		if err != nil {
-			t.Fatal("Client", clients[0], " service did not start: ", err)
-		}
-	}()
-	go func() {
-		defer wg.Done()
-
-		var err error
-		_, resultNode2, _, err = clients[1].SendSurveyDDTRequestTerms(el, servicesmedco.SurveyID("testDDTSurvey_node2"), qt, proofs, true)
-
-		if err != nil {
-			t.Fatal("Client", clients[1], " service did not start: ", err)
-		}
-	}()
-
-	var err error
-	_, resultNode3, _, err = clients[2].SendSurveyDDTRequestTerms(el, servicesmedco.SurveyID("testDDTSurvey_node3"), qt, proofs, true)
-
-	if err != nil {
-		t.Fatal("Client", clients[2], " service did not start: ", err)
+			if err != nil {
+				t.Fatal("Client", client.ClientID, " service did not start: ", err)
+			}
+		}(i, client)
 	}
-
 	libunlynx.EndParallelize(wg)
 
-	assert.Equal(t, len(resultNode1), len(qt))
-	assert.Equal(t, len(resultNode2), len(qt))
-	assert.Equal(t, len(resultNode3), len(qt))
-
-	assert.Equal(t, resultNode1, resultNode1Repeated)
-
+	for _, result := range results {
+		assert.Equal(t, len(qt), len(result))
+	}
+	assert.Equal(t, results["testDDTSurvey_"+clients[0].ClientID], results["testDDTSurvey_"+clients[1].ClientID])
 }
 
 func TestServiceAgg(t *testing.T) {
-	el, local := getParam(3)
-	clients1 := getClients(3, el)
-	clients2 := getClients(3, el)
+	// test with 10 servers
+	el, local := getParam(10)
+	// test with 10 concurrent clients
+	nbHosts := 10
+	clients1 := getClients(nbHosts, el)
+	//clients2 := getClients(nbHosts, el)
 	defer local.CloseAll()
 
 	proofs := false
 
-	secKey1, pubKey1 := libunlynx.GenKey()
-	secKey2, pubKey2 := libunlynx.GenKey()
-	secKey3, pubKey3 := libunlynx.GenKey()
+	secKeys := make([]kyber.Scalar, 0)
+	pubKeys := make([]kyber.Point, 0)
+	aggregates1 := make([]libunlynx.CipherText, 0)
+	aggregates2 := make([]libunlynx.CipherText, 0)
 
-	aggregate1 := libunlynx.EncryptInt(el.Aggregate, int64(2))
-	aggregate2 := libunlynx.EncryptInt(el.Aggregate, int64(1))
-	aggregate3 := libunlynx.EncryptInt(el.Aggregate, int64(3))
+	results1 := make([]libunlynx.CipherText, nbHosts)
+	//results2 := make([]libunlynx.CipherText, nbHosts)
 
-	aggregate4 := libunlynx.EncryptInt(el.Aggregate, int64(4))
-	aggregate5 := libunlynx.EncryptInt(el.Aggregate, int64(5))
-	aggregate6 := libunlynx.EncryptInt(el.Aggregate, int64(6))
+	for i := 0; i < nbHosts; i++ {
+		sK, pK := libunlynx.GenKey()
+		secKeys = append(secKeys, sK)
+		pubKeys = append(pubKeys, pK)
 
-	var resultNode1, resultNode2, resultNode3, resultNode4, resultNode5, resultNode6 libunlynx.CipherText
+		aggregates1 = append(aggregates1, *libunlynx.EncryptInt(el.Aggregate, int64(i)))
+		aggregates2 = append(aggregates2, *libunlynx.EncryptInt(el.Aggregate, int64(i)))
+	}
 
-	wg := libunlynx.StartParallelize(len(el.List) * 2)
+	wg := libunlynx.StartParallelize(nbHosts)
+	var mutex = sync.Mutex{}
+	for i, client := range clients1 {
+		go func(i int, client *servicesmedco.API) {
+			defer wg.Done()
 
-	// the first two threads execute the same operation (repetition) to check that in the end it yields the same result
-	// surveyID should be the same
-	go func() {
-		defer wg.Done()
+			_, res, _, err := client.SendSurveyAggRequest(el, servicesmedco.SurveyID("testAggSurvey1"), pubKeys[i], aggregates1[i], proofs)
+			mutex.Lock()
+			results1[i] = res
+			mutex.Unlock()
 
-		var err error
-		_, resultNode1, _, err = clients1[0].SendSurveyAggRequest(el, servicesmedco.SurveyID("testAggSurvey1"), pubKey1, *aggregate1, proofs)
+			if err != nil {
+				t.Fatal("Client", client.ClientID, " service did not start: ", err)
+			}
+		}(i, client)
 
-		if err != nil {
-			t.Fatal("Client", clients1[0], " service did not start: ", err)
-		}
-	}()
-	go func() {
-		defer wg.Done()
+	}
 
-		var err error
-		_, resultNode2, _, err = clients1[1].SendSurveyAggRequest(el, servicesmedco.SurveyID("testAggSurvey1"), pubKey2, *aggregate2, proofs)
+	/*for i,client := range clients2 {
+		go func(i int, client *servicesmedco.API) {
+			defer wg.Done()
 
-		if err != nil {
-			t.Fatal("Client", clients1[1], " service did not start: ", err)
-		}
-	}()
-	go func() {
-		defer wg.Done()
+			_, res, _, err := client.SendSurveyAggRequest(el, servicesmedco.SurveyID("testAggSurvey2"), pubKeys[i], aggregates2[i], proofs)
+			mutex.Lock()
+			results2[i]=res
+			mutex.Unlock()
 
-		var err error
-		_, resultNode3, _, err = clients1[2].SendSurveyAggRequest(el, servicesmedco.SurveyID("testAggSurvey1"), pubKey3, *aggregate3, proofs)
+			if err != nil {
+				t.Fatal("Client", client.ClientID, " service did not start: ", err)
+			}
+		}(i, client)
 
-		if err != nil {
-			t.Fatal("Client", clients1[2], " service did not start: ", err)
-		}
-	}()
-
-	go func() {
-		defer wg.Done()
-
-		var err error
-		_, resultNode4, _, err = clients2[0].SendSurveyAggRequest(el, servicesmedco.SurveyID("testAggSurvey2"), pubKey1, *aggregate4, proofs)
-
-		if err != nil {
-			t.Fatal("Client", clients2[0], " service did not start: ", err)
-		}
-	}()
-	go func() {
-		defer wg.Done()
-
-		var err error
-		_, resultNode5, _, err = clients2[1].SendSurveyAggRequest(el, servicesmedco.SurveyID("testAggSurvey2"), pubKey2, *aggregate5, proofs)
-
-		if err != nil {
-			t.Fatal("Client", clients2[1], " service did not start: ", err)
-		}
-	}()
-	go func() {
-		defer wg.Done()
-
-		var err error
-		_, resultNode6, _, err = clients2[2].SendSurveyAggRequest(el, servicesmedco.SurveyID("testAggSurvey2"), pubKey3, *aggregate6, proofs)
-
-		if err != nil {
-			t.Fatal("Client", clients2[2], " service did not start: ", err)
-		}
-	}()
+	}*/
 
 	libunlynx.EndParallelize(wg)
 
 	// Check result
 	listResults1 := make([]int64, 0)
-	listResults1 = append(listResults1, libunlynx.DecryptInt(secKey1, resultNode1), libunlynx.DecryptInt(secKey2, resultNode2), libunlynx.DecryptInt(secKey3, resultNode3))
+	for i, res := range results1 {
+		listResults1 = append(listResults1, libunlynx.DecryptInt(secKeys[i], res))
+	}
 
-	assert.Contains(t, listResults1, int64(2))
+	assert.Contains(t, listResults1, int64(0))
 	assert.Contains(t, listResults1, int64(1))
-	assert.Contains(t, listResults1, int64(3))
+	assert.Contains(t, listResults1, int64(2))
 
-	listResults2 := make([]int64, 0)
-	listResults2 = append(listResults2, libunlynx.DecryptInt(secKey1, resultNode4), libunlynx.DecryptInt(secKey2, resultNode5), libunlynx.DecryptInt(secKey3, resultNode6))
+	/*listResults2:= make([]int64, 0)
+	for i,res := range results2 {
+		listResults2 = append(listResults2, libunlynx.DecryptInt(secKeys[i], res))
+	}
 
-	assert.Contains(t, listResults2, int64(4))
-	assert.Contains(t, listResults2, int64(5))
-	assert.Contains(t, listResults2, int64(6))
+	assert.Contains(t, listResults2, int64(0))
+	assert.Contains(t, listResults2, int64(1))
+	assert.Contains(t, listResults2, int64(2))*/
 
 }
 

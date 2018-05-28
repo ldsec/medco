@@ -36,7 +36,6 @@ var (
 		"i2b2metadata.sensitive_tagged",
 		"i2b2metadata.non_sensitive_clear"}
 
-
 	TablenamesData = [...]string{"i2b2demodata.concept_dimension",
 		"i2b2demodata.patient_mapping",
 		"i2b2demodata.patient_dimension",
@@ -109,9 +108,9 @@ var (
 	NumThreads = int(20)
 )
 
-// This contains both concept path and annotation which will be linked to a certain sensitive ID
+// SensitiveIDValue contains both concept path and annotation which will be linked to a certain sensitive ID
 type SensitiveIDValue struct {
-	CP ConceptPath
+	CP         ConceptPath
 	Annotation string
 }
 
@@ -129,7 +128,7 @@ type ConceptID struct {
 
 // Support global variables
 var (
-	Testing         bool 					  // testing environment
+	Testing         bool // testing environment
 	FileHandlers    []*os.File
 	OntValues       map[ConceptPath]ConceptID // stores the concept path and the correspondent ID
 	TextSearchIndex int64                     // needed for the observation_fact table (counter)
@@ -303,7 +302,7 @@ func LoadClient(el *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic, f
 	return nil
 }
 
-// GenerateLoadingDataScript creates a load ontology .sql script
+// GenerateLoadingOntologyScript creates a load ontology .sql script
 func GenerateLoadingOntologyScript(databaseS DBSettings) error {
 	fp, err := os.Create(FileBashPath[0])
 	if err != nil {
@@ -402,9 +401,8 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 	writeMetadataOntologyClearHeader()
 	writeMetadataSensitiveTaggedHeader()
 
-
-	allSensitiveIDs := make(map[int64]SensitiveIDValue, NumElMap) 	// maps the EncID(s) to the concept path
-	toTraverseIndex := make([]int, 0)                     		// the indexes of the columns that matter
+	allSensitiveIDs := make(map[int64]SensitiveIDValue, NumElMap) // maps the EncID(s) to the concept path
+	toTraverseIndex := make([]int, 0)                             // the indexes of the columns that matter
 
 	encID := int64(1)   // clinical sensitive IDs
 	clearID := int64(1) // clinical non-sensitive IDs
@@ -615,10 +613,10 @@ func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 	// encounter_id counter
 	eid := int64(1)
 
-	ontValuesSmallCopy := make(map[ConceptPath]bool)     // reduced set of ontology data to ensure that no repeated elements are added to the concept dimension table
-	visitMapping := make(map[string]int64)               // map a sample ID to a numeric ID
-	patientMapping := make(map[string]int64)             // map a patient ID to a numeric ID
-	toTraverseIndex := make([]int, 0)                    // the indexes of the columns that matter
+	ontValuesSmallCopy := make(map[ConceptPath]bool) // reduced set of ontology data to ensure that no repeated elements are added to the concept dimension table
+	visitMapping := make(map[string]int64)           // map a sample ID to a numeric ID
+	patientMapping := make(map[string]int64)         // map a patient ID to a numeric ID
+	toTraverseIndex := make([]int, 0)                // the indexes of the columns that matter
 
 	if err := writeDemodataProviderDimension(); err != nil {
 		return err
@@ -655,7 +653,7 @@ func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 						// if no keep track of the index of the patient_id and encounter_id (sample_id)
 						if TranslationDic[rec] == "PATIENT_ID" {
 							pidIndex = i
-						} else if TranslationDic[rec] == "SAMPLE_ID"{
+						} else if TranslationDic[rec] == "SAMPLE_ID" {
 							eidIndex = i
 						}
 					}
@@ -689,8 +687,6 @@ func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 
 					eid++
 				}
-
-
 
 				j := 0
 				for _, i := range toTraverseIndex {
@@ -785,7 +781,7 @@ func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 					// if no keep track of the index of the patient_id and encounter_id (sample_id)
 					if TranslationDic[el] == "PATIENT_ID" {
 						pidIndex = i
-					} else if TranslationDic[el] == "SAMPLE_ID"{
+					} else if TranslationDic[el] == "SAMPLE_ID" {
 						eidIndex = i
 					}
 
