@@ -1,4 +1,4 @@
-FROM golang:latest
+FROM golang:1.10.2
 
 # environment variables
 ENV UNLYNX_REPO="github.com/lca1/medco" \
@@ -28,17 +28,8 @@ RUN go get -v -d ./... && \
 
 # add script that copies the binary in the configuration folder
 COPY copy-unlynx-binary.sh /
+RUN chmod +x /copy-unlynx-binary.sh
 
-# conf and run
-ARG NODE_IDX_ARG="0"
-ARG UNLYNX_DEBUG_LEVEL_ARG="1"
-ENV NODE_IDX="$NODE_IDX_ARG" \
-    UNLYNX_BIN_EXPORT_PATH="$CONF_DIR/medco" \
-    UNLYNX_DEBUG_LEVEL="$UNLYNX_DEBUG_LEVEL_ARG"
-ENV UNLYNX_KEY_FILE_PATH="$CONF_DIR/srv$NODE_IDX-private.toml" \
-    UNLYNX_DDT_SECRETS_FILE_PATH="$CONF_DIR/srv$NODE_IDX-ddtsecrets.toml"
+ENV BIN_EXPORT_PATH="$CONF_DIR/unlynx"
 
-EXPOSE 2000 2001
-VOLUME "$CONF_DIR"
-WORKDIR "$CONF_DIR"
-ENTRYPOINT ["sh", "-c", "sh /copy-unlynx-binary.sh && $UNLYNX_BIN_EXPORT_PATH -d $UNLYNX_DEBUG_LEVEL server -c $UNLYNX_KEY_FILE_PATH"]
+ENTRYPOINT ["sh", "-c", "/copy-unlynx-binary.sh"]

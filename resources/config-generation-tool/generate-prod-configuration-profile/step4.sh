@@ -36,7 +36,7 @@ docker build -t lca1/unlynx:medco-deployment "$SCRIPT_FOLDER"/../../docker-image
 docker run -v "$CONF_FOLDER":/opt/medco-configuration --entrypoint sh lca1/unlynx:medco-deployment /copy-unlynx-binary.sh
 
 echo "### Generating unlynx keys"
-"$CONF_FOLDER"/unlynxMedCo server setupNonInteractive --serverBinding "$NODE_IP:2000" --description "Unlynx Server $NODE_IDX" \
+"$CONF_FOLDER"/medco server setupNonInteractive --serverBinding "$NODE_IP:2000" --description "Unlynx Server $NODE_IDX" \
     --privateTomlPath "$CONF_FOLDER/srv$NODE_IDX-private.toml" --publicTomlPath "$CONF_FOLDER/srv$NODE_IDX-public.toml"
 
 echo "### Packaging files to share"

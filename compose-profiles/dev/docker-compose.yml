@@ -1,0 +1,16 @@
+version: '3.6'
+services:
+
+  dev-i2b2-server:
+    build:
+      context: ../../docker-images/dev/i2b2-server
+    volumes:
+      - ../../configuration-profiles/dev:/opt/medco-configuration
+    container_name: dev-i2b2-server
+
+  dev-unlynx:
+    build:
+      context: ../../docker-images/dev/unlynx
+    volumes:
+      - ../../configuration-profiles/dev:/opt/medco-configuration
+    container_name: dev-unlynx
