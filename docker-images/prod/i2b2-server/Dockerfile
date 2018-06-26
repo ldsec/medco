@@ -1,6 +1,10 @@
 FROM jboss/wildfly:12.0.0.Final
 
+ARG NODE_IDX_ARG
+ARG UNLYNX_DEBUG_LEVEL_ARG
+
 ENV CONF_DIR="/opt/medco-configuration" \
+	BUILD_DIR="/opt/build-dir" \
 	MEDCO_CELL_SRC_DIR="/opt/medco-src" \
     MEDCO_CELL_GIT_BRANCH="master"
 
@@ -18,11 +22,11 @@ ENV NODE_IDX="$NODE_IDX_ARG" \
 
 RUN sed -i "/jboss.home/c\jboss.home=$JBOSS_HOME" build.properties && \
     sed -i "/medco.unlynx.groupfilepath/c\medco.unlynx.groupfilepath=$CONF_DIR/group.toml" etc/spring/medcoapp/medco.properties && \
-    sed -i "/medco.unlynx.binarypath/c\medco.unlynx.binarypath=$CONF_DIR/medco" etc/spring/medcoapp/medco.properties && \
+    sed -i "/medco.unlynx.binarypath/c\medco.unlynx.binarypath=$BUILD_DIR/medco" etc/spring/medcoapp/medco.properties && \
     sed -i "/medco.unlynx.entrypointidx/c\medco.unlynx.entrypointidx=$NODE_IDX" etc/spring/medcoapp/medco.properties && \
     sed -i "/medco.unlynx.debuglevel/c\medco.unlynx.debuglevel=$UNLYNX_DEBUG_LEVEL" etc/spring/medcoapp/medco.properties && \
     ant -f build.xml clean all deploy
 
+# copy the build files from the build volume to the correct folder
 COPY copy-i2b2-server-binary-prod.sh /root
-RUN chmod +x /root/copy-i2b2-server-binary-prod.sh
-ENTRYPOINT ["sh", "-c", "/root/copy-i2b2-server-binary-prod.sh && ls $JBOSS_HOME/standalone/deployments && /opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0 -bmanagement 0.0.0.0"]
+ENTRYPOINT ["sh", "-c", "/root/copy-i2b2-server-binary-prod.sh && /opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0 -bmanagement 0.0.0.0"]

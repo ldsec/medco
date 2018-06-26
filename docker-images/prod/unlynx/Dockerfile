@@ -3,11 +3,13 @@ FROM golang:1.10.2
 # environment variables
 ARG NODE_IDX_ARG
 ARG UNLYNX_DEBUG_LEVEL_ARG
-ENV CONF_DIR="/opt/medco-configuration"
-ENV NODE_IDX="$NODE_IDX_ARG" \
-    UNLYNX_BIN_EXPORT_PATH="$CONF_DIR/unlynx" \
-    UNLYNX_DEBUG_LEVEL="$UNLYNX_DEBUG_LEVEL_ARG"
-ENV UNLYNX_KEY_FILE_PATH="$CONF_DIR/srv$NODE_IDX-private.toml" \
+
+ENV CONF_DIR="/opt/medco-configuration" \
+	BUILD_DIR="/opt/build-dir" \
+	NODE_IDX="$NODE_IDX_ARG"
+ENV UNLYNX_BIN_EXPORT_PATH="$BUILD_DIR/unlynx" \
+    UNLYNX_DEBUG_LEVEL="$UNLYNX_DEBUG_LEVEL_ARG" \
+    UNLYNX_KEY_FILE_PATH="$CONF_DIR/srv$NODE_IDX-private.toml" \
     UNLYNX_DDT_SECRETS_FILE_PATH="$CONF_DIR/srv$NODE_IDX-ddtsecrets.toml"
 
 WORKDIR "$CONF_DIR"

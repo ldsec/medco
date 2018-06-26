@@ -4,13 +4,28 @@ services:
   i2b2-server:
     build:
       context: ../../docker-images/prod/i2b2-server
-    ports:
-      - "8080"
-      - "9990"
+      args:
+        - UNLYNX_DEBUG_LEVEL_ARG=1
     networks:
       - medco-network
     volumes:
-      - ../../configuration-profiles/dev:/opt/medco-configuration
+      - ../../configuration-profiles/dev:/opt/build-dir
+
+  i2b2-database:
+    build:
+      context: ../../docker-images/prod/i2b2-database
+    ports:
+      - "5432"
+    networks:
+      - medco-network
+
+  i2b2-web:
+    build:
+      context: ../../docker-images/prod/i2b2-web
+    networks:
+      - medco-network
+    volumes:
+      - ../../configuration-profiles/dev:/opt/build-dir
 
   unlynx:
     build:
@@ -20,5 +35,21 @@ services:
     networks:
       - medco-network
     volumes:
-      - ../../configuration-profiles/dev:/opt/medco-configuration
+      - ../../configuration-profiles/dev:/opt/build-dir
+
+  shrine-server:
+    build:
+      context: ../../docker-images/prod/shrine-server
+      args:
+        - SHRINE_DEBUG_LEVEL_ARG=INFO
+    networks:
+      - medco-network
+    volumes:
+      - ../../configuration-profiles/dev:/opt/build-dir
+
+  shrine-database:
+    build:
+      context: ../../docker-images/prod/shrine-database
+    networks:
+      - medco-network
 

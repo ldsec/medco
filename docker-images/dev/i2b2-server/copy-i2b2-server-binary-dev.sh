@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-# copy pm cell deployment data
-cp -a -R $JBOSS_HOME/standalone/deployments $CONF_DIR/i2b2-server/
-
-# copy i2b2-server binary in the configuration folder (environment variables are available)
-cp -a /opt/jboss/wildfly/bin/standalone.sh $CONF_DIR/i2b2-server/
+rm -rf $BUILD_DIR/i2b2-server/
+mkdir $BUILD_DIR/i2b2-server/
+# copy pm cell deployment data to shared volume
+cp -a -R $JBOSS_HOME/standalone $BUILD_DIR/i2b2-server/
+cp -a /opt/jboss/wildfly/bin/standalone.sh $BUILD_DIR/i2b2-server/

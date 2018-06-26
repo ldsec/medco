@@ -3,7 +3,9 @@ FROM golang:1.10.2
 # environment variables
 ENV UNLYNX_REPO="github.com/lca1/medco" \
     UNLYNX_REPO_BRANCH="master" \
-    CONF_DIR="/opt/medco-configuration"
+    BUILD_DIR="/opt/build-dir"
+
+ENV BIN_EXPORT_PATH="$BUILD_DIR/unlynx"
 
 # get maximum of dependencies and cache them
 RUN go get -v -d gopkg.in/dedis/onet.v1/... && \
@@ -26,10 +28,7 @@ WORKDIR app
 RUN go get -v -d ./... && \
     go install -v ./...
 
-# add script that copies the binary in the configuration folder
-COPY copy-unlynx-binary.sh /
-RUN chmod +x /copy-unlynx-binary.sh
+COPY copy-unlynx-binary-dev.sh /
+RUN chmod +x /copy-unlynx-binary-dev.sh
 
-ENV BIN_EXPORT_PATH="$CONF_DIR/unlynx"
-
-ENTRYPOINT ["sh", "-c", "/copy-unlynx-binary.sh"]
+ENTRYPOINT ["sh", "-c", "/copy-unlynx-binary-dev.sh"]

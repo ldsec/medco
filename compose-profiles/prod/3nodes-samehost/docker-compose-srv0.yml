@@ -8,10 +8,11 @@ services:
     build:
       args:
         - NODE_IDX_ARG=0
-        - UNLYNX_DEBUG_LEVEL_ARG=1
     ports:
       - "8082:8080"
       - "9992:9990"
+    volumes:
+      - ../../../configuration-profiles/prod/3nodes-samehost:/opt/medco-configuration
     networks:
       medco-network-srv0:
         aliases:
@@ -20,6 +21,36 @@ services:
         aliases:
           - i2b2-server-srv0
     container_name: prod-i2b2-server-srv0
+
+  prod-i2b2-database-srv0:
+    extends:
+      file: ../docker-compose-common.yml
+      service: i2b2-database
+    ports:
+      - "5434:5432"
+    networks:
+      medco-network-srv0:
+        aliases:
+          - i2b2-database
+    container_name: prod-i2b2-database-srv0
+
+  prod-i2b2-web-srv0:
+    extends:
+      file: ../docker-compose-common.yml
+      service: i2b2-web
+    build:
+      args:
+        - NODE_IDX_ARG=0
+    ports:
+      - "82:80"
+      - "445:443"
+    volumes:
+      - ../../../configuration-profiles/prod/3nodes-samehost:/opt/medco-configuration
+    networks:
+      medco-network-srv0:
+        aliases:
+          - i2b2-web
+    container_name: prod-i2b2-web-srv0
   
   prod-unlynx-srv0:
     extends:
@@ -31,6 +62,8 @@ services:
     ports:
       - "2002:2002"
       - "2003:2003"
+    volumes:
+      - ../../../configuration-profiles/prod/3nodes-samehost:/opt/medco-configuration
     networks:
       medco-network-srv0:
         aliases:
@@ -40,6 +73,36 @@ services:
           - unlynx-srv0
         ipv4_address: 172.16.205.10
     container_name: prod-unlynx-srv0
+
+  prod-shrine-server-srv0:
+    extends:
+      file: ../docker-compose-common.yml
+      service: shrine-server
+    build:
+      args:
+        - NODE_IDX_ARG=0
+    ports:
+      - "6445:6443"
+    networks:
+      medco-network-srv0:
+        aliases:
+          - shrine-server
+      shrine-network:
+        aliases:
+          - shrine-server-srv0
+    container_name: prod-shrine-server-srv0
+
+  prod-shrine-database-srv0:
+    extends:
+      file: ../docker-compose-common.yml
+      service: shrine-database
+    ports:
+      - "3308:3306"
+    networks:
+      medco-network-srv0:
+        aliases:
+          - shrine-database
+    container_name: prod-shrine-database-srv0
 
 networks:
   medco-network-srv0:
@@ -54,3 +117,6 @@ networks:
       driver: default
       config:
         - subnet: 172.16.205.0/24
+
+  shrine-network:
+    driver: bridge
