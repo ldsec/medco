@@ -12,9 +12,7 @@ services:
       - "8080:8080"
       - "9990:9990"
     volumes:
-      - ../../../configuration-profiles/3nodes-iccluster:/opt/medco-configuration
-    networks:
-      - medco-network
+      - ../../../configuration-profiles/prod/3nodes-iccluster:/opt/medco-configuration
     container_name: prod-i2b2-server
 
   prod-i2b2-database:
@@ -23,8 +21,6 @@ services:
       service: i2b2-database
     ports:
       - "5432:5432"
-    networks:
-      - medco-network
     container_name: prod-i2b2-database
 
   prod-i2b2-web:
@@ -39,8 +35,6 @@ services:
       - "443:443"
     volumes:
       - ../../../configuration-profiles/prod/3nodes-iccluster:/opt/medco-configuration
-    networks:
-      - medco-network
     container_name: prod-i2b2-web
   
   prod-unlynx:
@@ -55,8 +49,6 @@ services:
       - "2001:2001"
     volumes:
       - ../../../configuration-profiles/prod/3nodes-iccluster:/opt/medco-configuration
-    networks:
-      - medco-network
     container_name: prod-unlynx
 
   prod-shrine-server:
@@ -68,8 +60,6 @@ services:
         - NODE_IDX_ARG=1
     ports:
       - "6443:6443"
-    networks:
-      - medco-network
     container_name: prod-shrine-server
 
   prod-shrine-database:
@@ -78,8 +68,6 @@ services:
       service: shrine-database
     ports:
       - "3306:3306"
-    networks:
-      - medco-network
     container_name: prod-shrine-database
 
 networks:
