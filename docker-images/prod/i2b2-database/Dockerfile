@@ -21,6 +21,7 @@ RUN git clone https://github.com/i2b2/i2b2-data.git . && \
     chmod -R 777 . && \
     wget https://documents.epfl.ch/users/m/mi/misbach/www/ShrineDemo.sql -O "$SHRINE_DEMO_ONTOLOGY_SQL" && \
     sed -i '1s/^/SET search_path TO shrine_ont;\n/' "$SHRINE_DEMO_ONTOLOGY_SQL"
+
 # hack postgresql docker image to allow transmart loading (allow TCP/IP connections during init phase)
 RUN sed -i "s/listen_addresses=''/listen_addresses='*'/g" /usr/local/bin/docker-entrypoint.sh
 

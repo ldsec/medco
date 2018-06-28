@@ -24,6 +24,5 @@ USER root
 COPY i2b2-web-writeconfig.sh shrine-webclient-update.sh /opt/
 # copy the build files from the build volume to the correct folder
 COPY copy-i2b2-web-binary-prod.sh /root
-COPY entrypoint.sh /root
 
-ENTRYPOINT ["sh", "-c", "/root/entrypoint.sh"]
+ENTRYPOINT ["sh", "-c", "/root/copy-i2b2-web-binary-prod.sh"]

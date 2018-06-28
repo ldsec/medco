@@ -14,8 +14,6 @@ services:
   i2b2-database:
     build:
       context: ../../docker-images/prod/i2b2-database
-    ports:
-      - "5432"
     networks:
       - medco-network
 
@@ -41,7 +39,7 @@ services:
     build:
       context: ../../docker-images/prod/shrine-server
       args:
-        - SHRINE_DEBUG_LEVEL_ARG=INFO
+        - SHRINE_DEBUG_LEVEL_ARG=FINE
     networks:
       - medco-network
     volumes:

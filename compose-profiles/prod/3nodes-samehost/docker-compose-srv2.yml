@@ -27,7 +27,7 @@ services:
       file: ../docker-compose-common.yml
       service: i2b2-database
     ports:
-      - "5434:5432"
+      - "5438:5432"
     networks:
       medco-network-srv2:
         aliases:
@@ -71,7 +71,7 @@ services:
       cothority-network:
         aliases:
           - unlynx-srv2
-        ipv4_address: 172.16.205.10
+        ipv4_address: 172.16.205.12
     container_name: prod-unlynx-srv2
 
   prod-shrine-server-srv2:
@@ -82,7 +82,7 @@ services:
       args:
         - NODE_IDX_ARG=2
     ports:
-      - "6445:6443"
+      - "6449:6443"
     networks:
       medco-network-srv2:
         aliases:
@@ -110,12 +110,12 @@ networks:
 
   medco-network:
     external:
-      name: dev3nodessamehost_medco-network
+      name: medco-network-external
 
   cothority-network:
     external:
-      name: dev3nodessamehost_cothority-network
+      name: cothority-network-external
 
   shrine-network:
     external:
-      name: dev3nodessamehost_shrine-network
+      name: shrine-network-external

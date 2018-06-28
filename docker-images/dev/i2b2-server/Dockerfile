@@ -1,4 +1,4 @@
-FROM jboss/wildfly:12.0.0.Final
+FROM jboss/wildfly:13.0.0.Final
 
 # Note that variables, JBOSS_HOME, WILDFLY_VERSION already exist from previous image
 
@@ -9,10 +9,9 @@ ENV AXIS2_VERSION="1.7.8" \
     I2B2_DOMAIN_NAME="medcodeployment" \
     I2B2_DEMO_DB_NAME="i2b2demo" \
     I2B2_MEDCO_DB_NAME="i2b2medco" \
-    I2B2_FR_FILES_DIR="/opt/FRC_files" \
-    BUILD_DIR="/opt/build-dir" \
     ADMIN_PASSWORD="prigen2017" \
-    DB_PASSWORD="pFjy3EjDVwLfT2rB9xkK"
+    DB_PASSWORD="pFjy3EjDVwLfT2rB9xkK" \
+    BUILD_DIR="/opt/build-dir"
 
 # pre-requisites
 USER root
@@ -93,9 +92,6 @@ RUN sed -i "/jboss.home/c\jboss.home=$JBOSS_HOME" build.properties && \
     sed -i "/edu.harvard.i2b2.fr.applicationdir/c\edu.harvard.i2b2.fr.applicationdir=$JBOSS_HOME/standalone/configuration/frapp" etc/spring/fr_application_directory.properties && \
     sed -i "/edu.harvard.i2b2.fr.ws.pm.url/c\edu.harvard.i2b2.fr.ws.pm.url=http://localhost:8080/i2b2/services/PMService/getServices" etc/spring/edu.harvard.i2b2.fr.properties && \
     ant -f master_build.xml clean build-all deploy
-USER root
-RUN mkdir "$I2B2_FR_FILES_DIR" && chown -R jboss:jboss "$I2B2_FR_FILES_DIR"
-USER jboss
 
 ## IM cell
 WORKDIR "$I2B2_SRC_DIR/edu.harvard.i2b2.im"

@@ -109,9 +109,11 @@ networks:
     driver: bridge
 
   medco-network:
+    name: medco-network-external
     driver: bridge
 
   cothority-network:
+    name: cothority-network-external
     driver: bridge
     ipam:
       driver: default
@@ -119,4 +121,5 @@ networks:
         - subnet: 172.16.205.0/24
 
   shrine-network:
+    name: shrine-network-external
     driver: bridge

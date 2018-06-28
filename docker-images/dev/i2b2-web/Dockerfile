@@ -37,10 +37,10 @@ RUN wget http://downloads.sourceforge.net/phppgadmin/phpPgAdmin-5.1.tar.gz?downl
     sed -i "/\$cmd = \$exe/c\$cmd = \$exe;" phppgadmin/dbexport.php
 
 # phpMyAdmin
-RUN wget https://files.phpmyadmin.net/phpMyAdmin/4.7.5/phpMyAdmin-4.7.5-english.tar.gz && \
-    tar xvzf phpMyAdmin-4.7.5-english.tar.gz && \
-    rm phpMyAdmin-4.7.5-english.tar.gz && \
-    mv phpMyAdmin-4.7.5-english phpmyadmin && \
+RUN wget https://files.phpmyadmin.net/phpMyAdmin/4.8.2/phpMyAdmin-4.8.2-english.tar.gz && \
+    tar xvzf phpMyAdmin-4.8.2-english.tar.gz && \
+    rm phpMyAdmin-4.8.2-english.tar.gz && \
+    mv phpMyAdmin-4.8.2-english phpmyadmin && \
     cp phpmyadmin/config.sample.inc.php phpmyadmin/config.inc.php && \
     sed -i "s#localhost#shrine-database#g" phpmyadmin/config.inc.php && \
     sed -i "s#\$cfg['blowfish_secret'] = '';#\$cfg['blowfish_secret'] = 'ac28vb01sfv0vcs1v96fv06fv0df62fv';#g" phpmyadmin/config.inc.php
@@ -63,6 +63,4 @@ RUN cp -R "$I2B2_WEB_DIR" "$LIGHTTPD_WEB_ROOT/i2b2-admin" && \
 
 USER root
 COPY copy-i2b2-web-binary-dev.sh /
-RUN chmod +x /copy-i2b2-web-binary-dev.sh
-
 ENTRYPOINT ["sh", "-c", "/copy-i2b2-web-binary-dev.sh"]

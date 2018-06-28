@@ -1,11 +1,11 @@
-FROM golang:1.10.2
+FROM golang:1.10.3
 
 # environment variables
 ENV UNLYNX_REPO="github.com/lca1/medco" \
     UNLYNX_REPO_BRANCH="master" \
     BUILD_DIR="/opt/build-dir"
 
-ENV BIN_EXPORT_PATH="$BUILD_DIR/unlynx"
+ENV UNLYNX_BIN_EXPORT_PATH="$BUILD_DIR/unlynx"
 
 # get maximum of dependencies and cache them
 RUN go get -v -d gopkg.in/dedis/onet.v1/... && \
@@ -29,6 +29,4 @@ RUN go get -v -d ./... && \
     go install -v ./...
 
 COPY copy-unlynx-binary-dev.sh /
-RUN chmod +x /copy-unlynx-binary-dev.sh
-
 ENTRYPOINT ["sh", "-c", "/copy-unlynx-binary-dev.sh"]

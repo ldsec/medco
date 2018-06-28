@@ -71,7 +71,7 @@ services:
       cothority-network:
         aliases:
           - unlynx-srv1
-        ipv4_address: 172.16.205.10
+        ipv4_address: 172.16.205.11
     container_name: prod-unlynx-srv1
 
   prod-shrine-server-srv1:
@@ -110,12 +110,12 @@ networks:
 
   medco-network:
     external:
-      name: dev3nodessamehost_medco-network
+      name: medco-network-external
 
   cothority-network:
     external:
-      name: dev3nodessamehost_cothority-network
+      name: cothority-network-external
 
   shrine-network:
     external:
-      name: dev3nodessamehost_shrine-network
+      name: shrine-network-external

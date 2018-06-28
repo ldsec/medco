@@ -1,0 +1,7 @@
+        basicConstraints=CA:FALSE
+        subjectAltName=@alt_names
+        subjectKeyIdentifier = hash
+
+        [ alt_names ]
+        IP.1 = 10.90.38.8
+        DNS.1 = iccluster032.iccluster.epfl.ch
