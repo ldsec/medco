@@ -25,7 +25,7 @@ services:
       - "5432:5432"
     networks:
       - medco-network
-    container_name: prod-i2b2-database-srv0
+    container_name: prod-i2b2-database
 
   prod-i2b2-web:
     extends:

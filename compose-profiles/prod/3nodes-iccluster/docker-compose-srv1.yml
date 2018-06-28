@@ -7,7 +7,7 @@ services:
       service: i2b2-server
     build:
       args:
-        - NODE_IDX_ARG=0
+        - NODE_IDX_ARG=1
     ports:
       - "8080:8080"
       - "9990:9990"
@@ -33,7 +33,7 @@ services:
       service: i2b2-web
     build:
       args:
-        - NODE_IDX_ARG=0
+        - NODE_IDX_ARG=1
     ports:
       - "80:80"
       - "443:443"
@@ -49,7 +49,7 @@ services:
       service: unlynx
     build:
       args:
-        - NODE_IDX_ARG=0
+        - NODE_IDX_ARG=1
     ports:
       - "2000:2000"
       - "2001:2001"
@@ -65,7 +65,7 @@ services:
       service: shrine-server
     build:
       args:
-        - NODE_IDX_ARG=0
+        - NODE_IDX_ARG=1
     ports:
       - "6443:6443"
     networks:
