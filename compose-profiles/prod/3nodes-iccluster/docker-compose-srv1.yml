@@ -38,7 +38,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ../../../configuration-profiles/prod/3nodes-samehost:/opt/medco-configuration
+      - ../../../configuration-profiles/prod/3nodes-iccluster:/opt/medco-configuration
     networks:
       - medco-network
     container_name: prod-i2b2-web
@@ -54,7 +54,7 @@ services:
       - "2000:2000"
       - "2001:2001"
     volumes:
-      - ../../../configuration-profiles/prod/3nodes-samehost:/opt/medco-configuration
+      - ../../../configuration-profiles/prod/3nodes-iccluster:/opt/medco-configuration
     networks:
       - medco-network
     container_name: prod-unlynx
