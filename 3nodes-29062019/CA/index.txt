@@ -1,0 +1,4 @@
+V	210628113724Z		E48037CFED4DED8E	unknown	/C=VD/ST=Lausanne/O=EPFL/OU=LCA1/CN=MedCo
+V	190629113727Z		E48037CFED4DED8F	unknown	/C=CH/ST=VD/L=Lausanne/O=EPFL/OU=LCA1/CN=iccluster032.iccluster.epfl.ch
+V	190629113733Z		E48037CFED4DED90	unknown	/C=CH/ST=VD/L=Lausanne/O=EPFL/OU=LCA1/CN=iccluster034.iccluster.epfl.ch
+V	190629113740Z		E48037CFED4DED91	unknown	/C=CH/ST=VD/L=Lausanne/O=EPFL/OU=LCA1/CN=iccluster032.iccluster.epfl.ch
