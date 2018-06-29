@@ -51,3 +51,6 @@ services:
     networks:
       - medco-network
 
+networks:
+  medco-network:
+    driver: bridge

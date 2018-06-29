@@ -71,7 +71,3 @@ services:
     ports:
       - "3306:3306"
     container_name: prod-shrine-database
-
-networks:
-  medco-network:
-    driver: bridge
