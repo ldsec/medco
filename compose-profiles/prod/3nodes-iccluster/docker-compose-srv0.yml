@@ -60,6 +60,8 @@ services:
         - NODE_IDX_ARG=0
     ports:
       - "6443:6443"
+    volumes:
+      - ../../../configuration-profiles/prod/3nodes-iccluster:/opt/medco-configuration
     container_name: prod-shrine-server
 
   prod-shrine-database:
