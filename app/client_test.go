@@ -160,7 +160,7 @@ func getXMLReaderAggRequest(t *testing.T, nbrFlags int) io.Reader {
 	*/
 
 	// client public key serialization
-	clientPubKeyB64, err := libunlynx.SerializeElement(clientPubKey)
+	clientPubKeyB64, err := libunlynx.SerializePoint(clientPubKey)
 	assert.True(t, err == nil)
 
 	// enc query terms (encrypted with client public key)
@@ -202,7 +202,7 @@ func getXMLReaderAggRequestV2(t *testing.T, nbrFlags int) io.Reader {
 	*/
 
 	// client public key serialization
-	clientPubKeyB64, err := libunlynx.SerializeElement(clientPubKey)
+	clientPubKeyB64, err := libunlynx.SerializePoint(clientPubKey)
 	assert.True(t, err == nil)
 
 	// enc query terms (encrypted with client public key)
