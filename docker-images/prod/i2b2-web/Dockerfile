@@ -3,9 +3,10 @@ FROM debian:jessie-backports
 ARG NODE_IDX_ARG
 
 ENV SHRINE_SRC_DIR="/opt/shrine-src" \
-    I2B2_DOMAIN_NAME="medcodeployment" \
-    I2B2_MEDCO_DB_NAME="i2b2medco" \
     LIGHTTPD_WEB_ROOT="/var/www/html" \
+    I2B2_DOMAIN_NAME="medcodeployment" \
+    I2B2_DEMO_DB_NAME="i2b2demo" \
+    I2B2_MEDCO_DB_NAME="i2b2medco" \
     DB_PASSWORD="pFjy3EjDVwLfT2rB9xkK" \
     CONF_DIR="/opt/medco-configuration" \
     BUILD_DIR="/opt/build-dir" \
