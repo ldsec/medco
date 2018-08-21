@@ -2,14 +2,26 @@ FROM debian:jessie-backports
 
 ARG NODE_IDX_ARG
 
-ENV SHRINE_SRC_DIR="/opt/shrine-src" \
+ENV I2B2_VERSION="v1.7.08a" \
+    I2B2_WEB_DIR="/opt/i2b2-webclient" \
+    SHRINE_SRC_DIR="/opt/shrine-src" \
+    SHRINE_VERSION="fork/1.22.8-medco" \
     I2B2_DOMAIN_NAME="medcodeployment" \
+    I2B2_DEMO_DB_NAME="i2b2demo" \
     I2B2_MEDCO_DB_NAME="i2b2medco" \
     LIGHTTPD_WEB_ROOT="/var/www/html" \
     DB_PASSWORD="pFjy3EjDVwLfT2rB9xkK" \
     CONF_DIR="/opt/medco-configuration" \
     BUILD_DIR="/opt/build-dir" \
-    NODE_IDX="$NODE_IDX_ARG"
+
+#ENV SHRINE_SRC_DIR="/opt/shrine-src" \
+#    I2B2_DOMAIN_NAME="medcodeployment" \
+#    I2B2_MEDCO_DB_NAME="i2b2medco" \
+#    LIGHTTPD_WEB_ROOT="/var/www/html" \
+#    DB_PASSWORD="pFjy3EjDVwLfT2rB9xkK" \
+#    CONF_DIR="/opt/medco-configuration" \
+#    BUILD_DIR="/opt/build-dir" \
+#    NODE_IDX="$NODE_IDX_ARG"
 
 # requirements
 RUN echo "deb http://httpredir.debian.org/debian jessie-backports main contrib non-free" >> /etc/apt/sources.list && \
@@ -75,6 +87,6 @@ RUN cp -R "$I2B2_WEB_DIR" "$LIGHTTPD_WEB_ROOT/i2b2-admin" && \
 USER root
 COPY i2b2-web-writeconfig.sh shrine-webclient-update.sh /opt/
 # copy the build files from the build volume to the correct folder
-#COPY copy-i2b2-web-binary-prod.sh /root
+COPY copy-i2b2-web-binary-prod.sh /root
 
 ENTRYPOINT ["sh", "-c", "/root/copy-i2b2-web-binary-prod.sh"]
