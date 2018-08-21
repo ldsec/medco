@@ -8,9 +8,10 @@ ENV I2B2_VERSION="v1.7.08a" \
     I2B2_DOMAIN_NAME="medcodeployment" \
     I2B2_DEMO_DB_NAME="i2b2demo" \
     I2B2_MEDCO_DB_NAME="i2b2medco" \
-    DB_PASSWORD="pFjy3EjDVwLfT2rB9xkK" \
     LIGHTTPD_WEB_ROOT="/var/www/html" \
-    BUILD_DIR="/opt/build-dir"
+    DB_PASSWORD="pFjy3EjDVwLfT2rB9xkK" \
+    BUILD_DIR="/opt/build-dir" \
+    CONF_DIR="/opt/medco-configuration"
 
 # requirements
 RUN echo "deb http://httpredir.debian.org/debian jessie-backports main contrib non-free" >> /etc/apt/sources.list && \
