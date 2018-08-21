@@ -1,7 +1,6 @@
 FROM debian:jessie-backports
 
-#ARG NODE_IDX_ARG
-
+# variables
 ENV I2B2_VERSION="v1.7.08a" \
     I2B2_WEB_DIR="/opt/i2b2-webclient" \
     SHRINE_SRC_DIR="/opt/shrine-src" \
@@ -11,18 +10,7 @@ ENV I2B2_VERSION="v1.7.08a" \
     I2B2_MEDCO_DB_NAME="i2b2medco" \
     LIGHTTPD_WEB_ROOT="/var/www/html" \
     DB_PASSWORD="pFjy3EjDVwLfT2rB9xkK" \
-    CONF_DIR="/opt/medco-configuration" \
-    BUILD_DIR="/opt/build-dir"
-
-#ENV SHRINE_SRC_DIR="/opt/shrine-src" \
-#    I2B2_DOMAIN_NAME="medcodeployment" \
-#    I2B2_MEDCO_DB_NAME="i2b2medco" \
-#    LIGHTTPD_WEB_ROOT="/var/www/html" \
-#    DB_PASSWORD="pFjy3EjDVwLfT2rB9xkK" \
-#    CONF_DIR="/opt/medco-configuration" \
-#    BUILD_DIR="/opt/build-dir" \
-#    NODE_IDX="$NODE_IDX_ARG"
-
+    CONF_DIR="/opt/medco-configuration"
 
 # requirements
 RUN echo "deb http://httpredir.debian.org/debian jessie-backports main contrib non-free" >> /etc/apt/sources.list && \
@@ -52,10 +40,10 @@ RUN wget http://downloads.sourceforge.net/phppgadmin/phpPgAdmin-5.1.tar.gz?downl
     sed -i "/\$cmd = \$exe/c\$cmd = \$exe;" phppgadmin/dbexport.php
 
 # phpMyAdmin
-RUN wget https://files.phpmyadmin.net/phpMyAdmin/4.8.2/phpMyAdmin-4.8.2-english.tar.gz && \
-    tar xvzf phpMyAdmin-4.8.2-english.tar.gz && \
-    rm phpMyAdmin-4.8.2-english.tar.gz && \
-    mv phpMyAdmin-4.8.2-english phpmyadmin && \
+RUN wget https://files.phpmyadmin.net/phpMyAdmin/4.7.5/phpMyAdmin-4.7.5-english.tar.gz && \
+    tar xvzf phpMyAdmin-4.7.5-english.tar.gz && \
+    rm phpMyAdmin-4.7.5-english.tar.gz && \
+    mv phpMyAdmin-4.7.5-english phpmyadmin && \
     cp phpmyadmin/config.sample.inc.php phpmyadmin/config.inc.php && \
     sed -i "s#localhost#shrine-database#g" phpmyadmin/config.inc.php && \
     sed -i "s#\$cfg['blowfish_secret'] = '';#\$cfg['blowfish_secret'] = 'ac28vb01sfv0vcs1v96fv06fv0df62fv';#g" phpmyadmin/config.inc.php
@@ -86,16 +74,6 @@ RUN chgrp www-data /opt/*.sh && \
     sleep 1 && \
     su "www-data" -p -s /bin/bash -c "/opt/i2b2-web-writeconfig.sh"
 
-# copy settings
-#USER root
-#COPY i2b2-web-writeconfig.sh shrine-webclient-update.sh /opt/
-# copy the build files from the build volume to the correct folder
-#RUN chgrp www-data /opt/*.sh && \
-#    chmod g+rwx /opt/*.sh && \
-#    sleep 1 && \
-#    su "www-data" -p -s /bin/bash -c "/opt/i2b2-web-writeconfig.sh"
-#COPY copy-i2b2-web-binary-prod.sh /root
-
-#ENTRYPOINT ["sh", "-c", "/root/copy-i2b2-web-binary-prod.sh"]
+# run
 EXPOSE 80
 CMD ["lighttpd", "-D", "-f", "/etc/lighttpd/lighttpd.conf"]

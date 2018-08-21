@@ -22,6 +22,8 @@ services:
   i2b2-web:
     build:
       context: ../../docker-images/prod/i2b2-web
+      args:
+        - NODE_IDX_ARG=0
     ports:
       - "80"
       - "443"
