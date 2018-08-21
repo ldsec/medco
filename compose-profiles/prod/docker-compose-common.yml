@@ -14,12 +14,17 @@ services:
   i2b2-database:
     build:
       context: ../../docker-images/prod/i2b2-database
+    ports:
+      - "5432"
     networks:
       - medco-network
 
   i2b2-web:
     build:
       context: ../../docker-images/prod/i2b2-web
+    ports:
+      - "80"
+      - "443"
     networks:
       - medco-network
     volumes:

@@ -97,4 +97,5 @@ RUN chgrp www-data /opt/*.sh && \
 #COPY copy-i2b2-web-binary-prod.sh /root
 
 #ENTRYPOINT ["sh", "-c", "/root/copy-i2b2-web-binary-prod.sh"]
+EXPOSE 80
 CMD ["lighttpd", "-D", "-f", "/etc/lighttpd/lighttpd.conf"]
