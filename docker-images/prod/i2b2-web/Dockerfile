@@ -12,7 +12,7 @@ ENV I2B2_VERSION="v1.7.08a" \
     LIGHTTPD_WEB_ROOT="/var/www/html" \
     DB_PASSWORD="pFjy3EjDVwLfT2rB9xkK" \
     CONF_DIR="/opt/medco-configuration" \
-    BUILD_DIR="/opt/build-dir" \
+    BUILD_DIR="/opt/build-dir"
 
 #ENV SHRINE_SRC_DIR="/opt/shrine-src" \
 #    I2B2_DOMAIN_NAME="medcodeployment" \
