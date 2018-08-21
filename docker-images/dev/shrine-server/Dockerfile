@@ -66,14 +66,6 @@ RUN cp  "$SHRINE_SRC_DIR/apps/steward-war/target/steward.war" \
     cp  "$SHRINE_SRC_DIR/apps/war/target/shrine-cell.war" "$CATALINA_HOME/webapps/shrine.war" && \
     cp  "$SHRINE_SRC_DIR/apps/meta-war/target/shrine-metadata.war" "$CATALINA_HOME/webapps/shrine-meta.war"
 
-# webclient [disabled: served by lighttpd]
-#RUN cp "$SHRINE_SRC_DIR/apps/proxy/target/shrine-proxy.war" "$CATALINA_HOME/webapps/" && \
-#    cp -r "$SHRINE_SRC_DIR/shrine-webclient/src/main/html" "$CATALINA_HOME/webapps/shrine-client"
-#COPY conf/i2b2_config_data.js "$CATALINA_HOME/webapps/shrine-client/"
-#COPY conf/cell_config_data.js "$CATALINA_HOME/webapps/shrine-client/js-i2b2/cells/SHRINE/"
-#RUN sed -i "s/SHRINE_WEBCLIENT_DOMAIN/$I2B2_DOMAIN_NAME/g" "$CATALINA_HOME/webapps/shrine-client/i2b2_config_data.js" && \
-#    sed -i "s/SHRINE_WEBCLIENT_NAME/Domain $I2B2_DOMAIN_NAME/g" "$CATALINA_HOME/webapps/shrine-client/i2b2_config_data.js"
-
 # configuration
 COPY conf/shrine.conf "$CATALINA_HOME/lib/"
 COPY conf/server.xml conf/context.xml "$CATALINA_HOME/conf/"

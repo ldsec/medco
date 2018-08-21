@@ -1,7 +1,10 @@
 # This file contains your private key.
 # Do not give it away lightly!
 Suite = ""
-Public = "913a5a062c9d6281e40fcd1e9b04132c3b68240cfadf8a7c7324c610ebc216a3"
-Private = "54a6fb51ea0a6f55564879ed400f65bc23ca042eb2ac2de3af5ce222c3bc6d0b"
-Address = "tls://10.90.38.6:2000"
+Public = "2d6b30f027b77d7641a422568147e8e8bc582a1e8f0bcff01a6743d6880f5dba"
+Private = "0a29e377db6b4a652d816a82b7a6ad4c97cc75e663d284d870cb1b762530c90e"
+Address = "tls://10.90.39.7:2000"
+ListenAddress = ""
 Description = "Unlynx Server 0"
+WebSocketTLSCertificate = ""
+WebSocketTLSCertificateKey = ""

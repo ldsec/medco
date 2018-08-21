@@ -1,8 +1,0 @@
-# This file contains your private key.
-# Do not give it away lightly!
-Suite = ""
-Public = "cabcc4f1fd19161015ad653c7805ee5d9213a35d6d4fb1aec8f1acd4c5e8df3a"
-Private = "9f28ac3dd1a8619c070b0648ccc0c5551b4d4e303235f21440eb3c7c0d389b08"
-Address = "tls://10.90.40.9:2000"
-ListenAddress = ""
-Description = "Unlynx Server 1"

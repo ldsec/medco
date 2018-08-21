@@ -100,5 +100,6 @@ RUN sed -i "/jboss.home/c\jboss.home=$JBOSS_HOME" build.properties && \
     sed -i "/im.ws.pm.url/c\im.ws.pm.url=http://localhost:8080/i2b2/services/PMService/getServices" etc/spring/im.properties && \
     ant -f master_build.xml clean build-all deploy
 
+USER root
 COPY copy-i2b2-server-binary-dev.sh /
 ENTRYPOINT ["sh", "-c", "/copy-i2b2-server-binary-dev.sh"]

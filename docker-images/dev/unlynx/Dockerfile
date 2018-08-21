@@ -8,8 +8,8 @@ ENV UNLYNX_REPO="github.com/lca1/medco" \
 ENV UNLYNX_BIN_EXPORT_PATH="$BUILD_DIR/unlynx"
 
 # get maximum of dependencies and cache them
-RUN go get -v -d gopkg.in/dedis/onet.v1/... && \
-    go get -v -d gopkg.in/dedis/crypto.v0/... && \
+RUN go get -v -d github.com/dedis/onet/... && \
+    go get -v -d github.com/dedis/kyber/... && \
     go get -v -d gopkg.in/urfave/cli.v1/... && \
     go get -v -d github.com/Knetic/govaluate/... && \
     go get -v -d github.com/btcsuite/goleveldb/... && \

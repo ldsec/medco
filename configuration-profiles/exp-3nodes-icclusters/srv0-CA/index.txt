@@ -1,2 +1,0 @@
-V	210411124954Z		A5AA039F0FF6B25C	unknown	/C=xx/ST=x/O=x/OU=x/CN=x
-V	190412125010Z		A5AA039F0FF6B25D	unknown	/C=CH/ST=VD/L=Lausanne/O=EPFL/OU=LCA1/CN=iccluster030.iccluster.epfl.ch

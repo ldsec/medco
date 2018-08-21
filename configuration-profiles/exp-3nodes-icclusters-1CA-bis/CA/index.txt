@@ -1,4 +1,0 @@
-V	210427121225Z		F975A542A9B026A0	unknown	/C=xx/ST=x/O=x/OU=x/CN=x/emailAddress=x
-V	190428121230Z		F975A542A9B026A1	unknown	/C=CH/ST=VD/L=Lausanne/O=EPFL/OU=LCA1/CN=iccluster096.iccluster.epfl.ch
-V	190428121239Z		F975A542A9B026A2	unknown	/C=CH/ST=VD/L=Lausanne/O=EPFL/OU=LCA1/CN=iccluster097.iccluster.epfl.ch
-V	190428121247Z		F975A542A9B026A3	unknown	/C=CH/ST=VD/L=Lausanne/O=EPFL/OU=LCA1/CN=iccluster098.iccluster.epfl.ch

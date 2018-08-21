@@ -1,4 +1,0 @@
-V	210416163200Z		90FB3937B0BA8D9B	unknown	/C=xx/ST=x/O=x/OU=x/CN=x
-V	190417163204Z		90FB3937B0BA8D9C	unknown	/C=CH/ST=VD/L=Lausanne/O=EPFL/OU=LCA1/CN=iccluster082.iccluster.epfl.ch
-V	190417163212Z		90FB3937B0BA8D9D	unknown	/C=CH/ST=VD/L=Lausanne/O=EPFL/OU=LCA1/CN=iccluster083.iccluster.epfl.ch
-V	190417163220Z		90FB3937B0BA8D9E	unknown	/C=CH/ST=VD/L=Lausanne/O=EPFL/OU=LCA1/CN=iccluster084.iccluster.epfl.ch

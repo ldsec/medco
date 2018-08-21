@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 apt-get -y update
-apt-get -y install git apt-transport-https ca-certificates curl software-properties-common screen
+apt-get -y install git apt-transport-https ca-certificates curl software-properties-common screen default-jre
 
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 
@@ -15,12 +15,12 @@ add-apt-repository \
 add-apt-repository "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main"
 
 apt-get -y update
-apt-get -y install docker-ce postgresql-client-9.6
+apt-get -y install docker-ce postgresql-client-10
 
 docker run hello-world
 
-curl -L https://github.com/docker/compose/releases/download/1.14.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
+curl -L https://github.com/docker/compose/releases/download/1.22.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
 
 chmod +x /usr/local/bin/docker-compose
 
-#git clone https://c4science.ch/source/medco-deployment.git
+git clone https://github.com/lca1/medco-deployment.git

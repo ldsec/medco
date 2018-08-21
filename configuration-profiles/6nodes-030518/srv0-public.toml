@@ -1,5 +1,0 @@
-[[servers]]
-  Address = "tls://10.90.39.7:2000"
-  Suite = "Ed25519"
-  Public = "783835fa4aae83ff27a2226ce9563f802212d4bb89f764137c420b09620e2ed7"
-  Description = "Unlynx Server 0"

@@ -1,7 +1,0 @@
-V	210502091456Z		DE282415DBDEC4D9	unknown	/C=xx/ST=x/O=x/OU=x/CN=x
-V	190503091459Z		DE282415DBDEC4DA	unknown	/C=CH/ST=VD/L=Lausanne/O=EPFL/OU=LCA1/CN=iccluster056.iccluster.epfl.ch
-V	190503091506Z		DE282415DBDEC4DB	unknown	/C=CH/ST=VD/L=Lausanne/O=EPFL/OU=LCA1/CN=iccluster070.iccluster.epfl.ch
-V	190503091514Z		DE282415DBDEC4DC	unknown	/C=CH/ST=VD/L=Lausanne/O=EPFL/OU=LCA1/CN=iccluster072.iccluster.epfl.ch
-V	190503091521Z		DE282415DBDEC4DD	unknown	/C=CH/ST=VD/L=Lausanne/O=EPFL/OU=LCA1/CN=iccluster081.iccluster.epfl.ch
-V	190503091528Z		DE282415DBDEC4DE	unknown	/C=CH/ST=VD/L=Lausanne/O=EPFL/OU=LCA1/CN=iccluster093.iccluster.epfl.ch
-V	190503091535Z		DE282415DBDEC4DF	unknown	/C=CH/ST=VD/L=Lausanne/O=EPFL/OU=LCA1/CN=iccluster102.iccluster.epfl.ch
