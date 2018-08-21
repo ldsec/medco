@@ -23,13 +23,6 @@ ENV I2B2_VERSION="v1.7.08a" \
 #    BUILD_DIR="/opt/build-dir" \
 #    NODE_IDX="$NODE_IDX_ARG"
 
-# requirements
-RUN echo "deb http://httpredir.debian.org/debian jessie-backports main contrib non-free" >> /etc/apt/sources.list && \
-    apt-get -y update && \
-    apt-get -y install lighttpd php5-cgi curl libcurl3 php5-common php5-cli php5-curl git php5-pgsql php5-mysql wget tar && \
-    apt-get -y -t jessie-backports install postgresql-client && \
-    apt-get -y clean && \
-    lighttpd-enable-mod fastcgi-php ssl
 
 # requirements
 RUN echo "deb http://httpredir.debian.org/debian jessie-backports main contrib non-free" >> /etc/apt/sources.list && \
@@ -83,14 +76,24 @@ RUN cp -R "$I2B2_WEB_DIR" "$LIGHTTPD_WEB_ROOT/i2b2-admin" && \
     cp -R "$I2B2_WEB_DIR" "$LIGHTTPD_WEB_ROOT/i2b2-client" && \
     cp -R "$SHRINE_SRC_DIR/shrine-webclient/src/main/html" "$LIGHTTPD_WEB_ROOT/shrine-client"
 
-# copy settings
+# copy and apply settings
+ARG NODE_IDX_ARG="0"
+ENV NODE_IDX="$NODE_IDX_ARG"
 USER root
 COPY i2b2-web-writeconfig.sh shrine-webclient-update.sh /opt/
-# copy the build files from the build volume to the correct folder
 RUN chgrp www-data /opt/*.sh && \
     chmod g+rwx /opt/*.sh && \
     sleep 1 && \
     su "www-data" -p -s /bin/bash -c "/opt/i2b2-web-writeconfig.sh"
+
+# copy settings
+#USER root
+#COPY i2b2-web-writeconfig.sh shrine-webclient-update.sh /opt/
+# copy the build files from the build volume to the correct folder
+#RUN chgrp www-data /opt/*.sh && \
+#    chmod g+rwx /opt/*.sh && \
+#    sleep 1 && \
+#    su "www-data" -p -s /bin/bash -c "/opt/i2b2-web-writeconfig.sh"
 #COPY copy-i2b2-web-binary-prod.sh /root
 
 ENTRYPOINT ["sh", "-c", "/root/copy-i2b2-web-binary-prod.sh"]
