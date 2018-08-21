@@ -1,6 +1,6 @@
 FROM debian:jessie-backports
 
-ARG NODE_IDX_ARG
+#ARG NODE_IDX_ARG
 
 ENV I2B2_VERSION="v1.7.08a" \
     I2B2_WEB_DIR="/opt/i2b2-webclient" \
