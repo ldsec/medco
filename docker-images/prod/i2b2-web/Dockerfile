@@ -94,6 +94,6 @@ RUN chgrp www-data /opt/*.sh && \
 #    chmod g+rwx /opt/*.sh && \
 #    sleep 1 && \
 #    su "www-data" -p -s /bin/bash -c "/opt/i2b2-web-writeconfig.sh"
-#COPY copy-i2b2-web-binary-prod.sh /root
+COPY copy-i2b2-web-binary-prod.sh /root
 
 ENTRYPOINT ["sh", "-c", "/root/copy-i2b2-web-binary-prod.sh"]
