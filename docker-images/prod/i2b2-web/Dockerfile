@@ -87,6 +87,10 @@ RUN cp -R "$I2B2_WEB_DIR" "$LIGHTTPD_WEB_ROOT/i2b2-admin" && \
 USER root
 COPY i2b2-web-writeconfig.sh shrine-webclient-update.sh /opt/
 # copy the build files from the build volume to the correct folder
-COPY copy-i2b2-web-binary-prod.sh /root
+RUN chgrp www-data /opt/*.sh && \
+    chmod g+rwx /opt/*.sh && \
+    sleep 1 && \
+    su "www-data" -p -s /bin/bash -c "/opt/i2b2-web-writeconfig.sh"
+#COPY copy-i2b2-web-binary-prod.sh /root
 
 ENTRYPOINT ["sh", "-c", "/root/copy-i2b2-web-binary-prod.sh"]
