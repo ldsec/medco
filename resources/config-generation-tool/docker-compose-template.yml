@@ -1,5 +1,6 @@
-version: '2.2'
+version: '2.4'
 services:
+  
   i2b2-server:
     extends:
       file: ../docker-compose-common.yml
@@ -11,8 +12,8 @@ services:
       - "8080:8080"
       - "9990:9990"
     volumes:
-      - ../../configuration-profiles/_CONF_PROFILE_:/opt/medco-configuration
-
+      - ../../../configuration-profiles/prod/_CONF_PROFILE_:/opt/medco-configuration
+    container_name: prod-i2b2-server
 
   i2b2-database:
     extends:
@@ -20,6 +21,7 @@ services:
       service: i2b2-database
     ports:
       - "5432:5432"
+    container_name: prod-i2b2-database
 
   i2b2-web:
     extends:
@@ -32,7 +34,8 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ../../configuration-profiles/_CONF_PROFILE_:/opt/medco-configuration
+      - ../../../configuration-profiles/prod/_CONF_PROFILE_:/opt/medco-configuration
+    container_name: prod-i2b2-web
 
   unlynx:
     extends:
@@ -45,7 +48,8 @@ services:
       - "2000:2000"
       - "2001:2001"
     volumes:
-      - ../../configuration-profiles/_CONF_PROFILE_:/opt/medco-configuration
+      - ../../../configuration-profiles/prod/_CONF_PROFILE_:/opt/medco-configuration
+    container_name: prod-unlynx
 
   shrine-server:
     extends:
@@ -57,7 +61,8 @@ services:
     ports:
       - "6443:6443"
     volumes:
-      - ../../configuration-profiles/_CONF_PROFILE_:/opt/medco-configuration
+      - ../../../configuration-profiles/prod/_CONF_PROFILE_:/opt/medco-configuration
+    container_name: prod-shrine-server
 
   shrine-database:
     extends:
@@ -65,6 +70,7 @@ services:
       service: shrine-database
     ports:
       - "3306:3306"
+    container_name: prod-shrine-database
 
 networks:
   medco-network:

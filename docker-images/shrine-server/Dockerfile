@@ -1,4 +1,4 @@
-FROM tomcat:8.0-jre8
+FROM tomcat:9.0-jre8
 
 # pre-existing variables: CATALINA_HOME
 ENV SHRINE_VERSION="fork/1.22.8-medco" \
