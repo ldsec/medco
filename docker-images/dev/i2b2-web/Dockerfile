@@ -7,8 +7,7 @@ ENV I2B2_VERSION="v1.7.08a" \
     SHRINE_VERSION="fork/1.22.8-medco" \
     I2B2_DOMAIN_NAME="medcodeployment" \
     LIGHTTPD_WEB_ROOT="/var/www/html" \
-    BUILD_DIR="/opt/build-dir" \
-    CONF_DIR="/opt/medco-configuration"
+    BUILD_DIR="/opt/build-dir"
 
 # requirements
 RUN echo "deb http://httpredir.debian.org/debian jessie-backports main contrib non-free" >> /etc/apt/sources.list && \
