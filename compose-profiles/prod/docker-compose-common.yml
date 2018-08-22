@@ -29,8 +29,8 @@ services:
       - "443"
     networks:
       - medco-network
-    #volumes:
-    #  - ../../configuration-profiles/dev:/opt/build-dir
+    volumes:
+      - ../../configuration-profiles/dev:/opt/build-dir
 
   unlynx:
     build:
