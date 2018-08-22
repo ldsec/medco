@@ -12,7 +12,7 @@ import (
 
 const (
 	// BinaryName is the name of the binary
-	BinaryName = "medco"
+	BinaryName = "unlynx"
 
 	// Version of the binary
 	Version = "1.00"
@@ -270,6 +270,14 @@ func main() {
 		},
 	}
 
+	getAggregateKeyFlags := []cli.Flag{
+		cli.StringFlag{
+			Name:  optionGroupFile + ", " + optionGroupFileShort,
+			Value: DefaultGroupFile,
+			Usage: "Unlynx group definition file",
+		},
+	}
+
 	cliApp.Commands = []cli.Command{
 		// BEGIN CLIENT: DATA ENCRYPTION ----------
 		{
@@ -361,6 +369,13 @@ func main() {
 					Usage:   "Setup server configuration (non-interactive)",
 					Action:  NonInteractiveSetup,
 					Flags:   nonInteractiveSetupFlags,
+				},
+				{
+					Name:    "getAggregateKey",
+					Aliases: []string{"gak"},
+					Usage:   "Get Aggregate Key from group.toml",
+					Action:  getAggregateKey,
+					Flags:   getAggregateKeyFlags,
 				},
 			},
 		},
