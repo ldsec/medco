@@ -4,10 +4,20 @@ ARG SHRINE_DEBUG_LEVEL_ARG
 ARG NODE_IDX_ARG
 
 # pre-existing variables: CATALINA_HOME
-ENV CONF_DIR="/opt/medco-configuration" \
-	BUILD_DIR="/opt/build-dir" \
-	SHRINE_DEBUG_LEVEL="$SHRINE_DEBUG_LEVEL_ARG" \
-    NODE_IDX="$NODE_IDX_ARG"
+#ENV CONF_DIR="/opt/medco-configuration" \
+#	BUILD_DIR="/opt/build-dir" \
+#	SHRINE_DEBUG_LEVEL="$SHRINE_DEBUG_LEVEL_ARG" \
+#    NODE_IDX="$NODE_IDX_ARG"
+
+# pre-existing variables: CATALINA_HOME
+ENV SHRINE_VERSION="fork/1.22.8-medco" \
+SHRINE_SRC_DIR="/opt/shrine-src" \
+SHRINE_ADAPTER_MAPPINGS_URL="https://documents.epfl.ch/users/m/mi/misbach/www/AdapterMappings.xml" \
+SHRINE_MYSQL_JAR_URL="http://central.maven.org/maven2/mysql/mysql-connector-java/5.1.40/mysql-connector-java-5.1.40.jar" \
+I2B2_DOMAIN_NAME="medcodeployment" \
+CONF_DIR="/opt/medco-configuration" \
+ADMIN_PASSWORD="prigen2017" \
+DB_PASSWORD="pFjy3EjDVwLfT2rB9xkK"
 
 # system and tomcat prerequisites
 RUN apt-get -y update && \
