@@ -14,7 +14,7 @@ ENV SHRINE_SRC_DIR="/opt/shrine-src" \
 # requirements
 RUN echo "deb http://httpredir.debian.org/debian jessie-backports main contrib non-free" >> /etc/apt/sources.list && \
     apt-get -y update && \
-    apt-get -y install lighttpd php5-cgi curl libcurl3 php5-common php5-cli php5-curl git php5-pgsql php5-mysql wget tar && \
+    apt-get -y install lighttpd php5-cgi curl libcurl3 php5-common php5-cli php5-curl php5-pgsql php5-mysql && \
     apt-get -y -t jessie-backports install postgresql-client && \
     apt-get -y clean && \
     lighttpd-enable-mod fastcgi-php ssl

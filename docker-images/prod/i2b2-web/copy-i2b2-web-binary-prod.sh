@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# copy pm cell deployment data to shared volume
+# copy build deployment data from shared volume
 cp -a -R $BUILD_DIR/i2b2-web/html/* $LIGHTTPD_WEB_ROOT
 
 chgrp -R www-data /opt /etc/lighttpd
