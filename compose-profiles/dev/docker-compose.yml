@@ -1,28 +1,28 @@
 version: '3.6'
 services:
 
-  dev-i2b2-server:
+  i2b2-server:
     build:
       context: ../../docker-images/dev/i2b2-server
     volumes:
       - ../../configuration-profiles/dev:/opt/build-dir
     container_name: dev-i2b2-server
 
-  dev-i2b2-web:
+  i2b2-web:
     build:
       context: ../../docker-images/dev/i2b2-web
     volumes:
       - ../../configuration-profiles/dev:/opt/build-dir
     container_name: dev-i2b2-web
 
-  dev-unlynx:
+  unlynx:
     build:
       context: ../../docker-images/dev/unlynx
     volumes:
       - ../../configuration-profiles/dev:/opt/build-dir
     container_name: dev-unlynx
 
-  dev-shrine-server:
+  shrine-server:
     build:
       context: ../../docker-images/dev/shrine-server
     volumes:
