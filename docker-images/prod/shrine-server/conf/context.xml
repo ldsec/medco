@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Context swallowOutput="true">
+    <WatchedResource>WEB-INF/web.xml</WatchedResource>
+    <Resource name="jdbc/problemDB" auth="Container" type="javax.sql.DataSource"
+              maxActive="100" maxIdle="30" maxWait="10000"
+              username="shrine" password="SHRINE_DB_PASSWORD" driverClassName="com.mysql.jdbc.Driver"
+              url="jdbc:mysql://shrine-database:3306/shrine_query_history"
+              testOnBorrow="true" validationQuery="SELECT 1"/>
+
+    <Resource name="jdbc/shrineDB" auth="Container" type="javax.sql.DataSource"
+               maxActive="100" maxIdle="30" maxWait="10000"
+               username="shrine" password="SHRINE_DB_PASSWORD" driverClassName="com.mysql.jdbc.Driver"
+               url="jdbc:mysql://shrine-database:3306/shrine_query_history"
+               testOnBorrow="true" validationQuery="SELECT 1"/>
+
+    <Resource name="jdbc/adapterAuditDB" auth="Container" type="javax.sql.DataSource"
+              maxActive="100" maxIdle="30" maxWait="10000"
+              username="shrine" password="SHRINE_DB_PASSWORD" driverClassName="com.mysql.jdbc.Driver"
+              url="jdbc:mysql://shrine-database:3306/adapterAuditDB"
+              testOnBorrow="true" validationQuery="SELECT 1"/>
+
+    <Resource name="jdbc/qepAuditDB" auth="Container" type="javax.sql.DataSource"
+              maxActive="100" maxIdle="30" maxWait="10000"
+              username="shrine" password="SHRINE_DB_PASSWORD" driverClassName="com.mysql.jdbc.Driver"
+              url="jdbc:mysql://shrine-database:3306/qepAuditDB"
+              testOnBorrow="true" validationQuery="SELECT 1"/>
+
+    <Resource name="jdbc/stewardDB" auth="Container" type="javax.sql.DataSource"
+              maxActive="100" maxIdle="30" maxWait="10000"
+              username="shrine" password="SHRINE_DB_PASSWORD" driverClassName="com.mysql.jdbc.Driver"
+              url="jdbc:mysql://shrine-database:3306/stewardDB"
+              testOnBorrow="true" validationQuery="SELECT 1"/>
+</Context>
