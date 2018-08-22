@@ -6,6 +6,7 @@ ARG NODE_IDX_ARG
 # pre-existing variables: CATALINA_HOME
 ENV CONF_DIR="/opt/medco-configuration" \
 	BUILD_DIR="/opt/build-dir" \
+	SHRINE_SRC_DIR="/opt/shrine-src" \
 	SHRINE_DEBUG_LEVEL="$SHRINE_DEBUG_LEVEL_ARG" \
     NODE_IDX="$NODE_IDX_ARG"
 
