@@ -18,6 +18,7 @@ SCRIPT_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 CONF_PROFILE="$1"
 COMPOSE_FOLDER="$SCRIPT_FOLDER/../../compose-profiles/prod/$CONF_PROFILE"
 CONF_FOLDER="$SCRIPT_FOLDER/../../configuration-profiles/prod/$CONF_PROFILE"
+BUILD_FOLDER="$SCRIPT_FOLDER/../../configuration-profiles/dev"
 KEYSTORE_PW="$2"
 shift
 shift
@@ -30,7 +31,7 @@ rm -rf "$CONF_FOLDER"/srv*-CA
 
 echo "### Producing Unlynx binary with Docker"
 docker build -t lca1/unlynx:medco-deployment "$SCRIPT_FOLDER"/../../docker-images/dev/unlynx/
-docker run -v "$CONF_FOLDER":/opt/medco-configuration --entrypoint sh lca1/unlynx:medco-deployment /copy-unlynx-binary-dev.sh
+docker run -v "$BUILD_FOLDER":/opt/medco-configuration --entrypoint sh lca1/unlynx:medco-deployment /copy-unlynx-binary-dev.sh
 
 echo "caCertAliases = [\"shrine-ca\"]" > "$CONF_FOLDER/shrine_ca_cert_aliases.conf"
 echo "### Producing CA"
