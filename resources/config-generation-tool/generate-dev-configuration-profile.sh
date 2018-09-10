@@ -31,7 +31,7 @@ rm -rf "$CONF_FOLDER"/srv*-CA
 
 echo "### Producing Unlynx binary with Docker"
 docker build -t lca1/unlynx:medco-deployment "$SCRIPT_FOLDER"/../../docker-images/dev/unlynx/
-docker run -v "$BUILD_FOLDER":/opt/medco-configuration "$BUILD_FOLDER":/opt/build-dir --entrypoint sh lca1/unlynx:medco-deployment /copy-unlynx-binary-dev.sh
+docker run -v "$CONF_FOLDER":/opt/medco-configuration -v "$BUILD_FOLDER":/opt/build-dir --entrypoint sh lca1/unlynx:medco-deployment /copy-unlynx-binary-dev.sh
 
 echo "caCertAliases = [\"shrine-ca\"]" > "$CONF_FOLDER/shrine_ca_cert_aliases.conf"
 echo "### Producing CA"
