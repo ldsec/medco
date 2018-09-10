@@ -87,7 +87,7 @@ EOL
     echo "\"Hospital $NODE_IDX\" = \"https://$NODE_DNS:6443/shrine/rest/adapter/requests\"" >> "$CONF_FOLDER/shrine_downstream_nodes.conf"
 
     echo "###$NODE_IDX### Generating unlynx keys"
-    "$CONF_FOLDER"/unlynxMedCo server setupNonInteractive --serverBinding "$NODE_IP:2000" --description "Unlynx Server $NODE_IDX" \
+    "$CONF_FOLDER"/medco server setupNonInteractive --serverBinding "$NODE_IP:2000" --description "Unlynx Server $NODE_IDX" \
         --privateTomlPath "$CONF_FOLDER/srv$NODE_IDX-private.toml" --publicTomlPath "$CONF_FOLDER/srv$NODE_IDX-public.toml"
 
     echo "###$NODE_IDX### Generating docker-compose file"
