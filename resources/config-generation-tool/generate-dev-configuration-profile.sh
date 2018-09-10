@@ -16,9 +16,8 @@ which openssl keytool docker
 # variables & arguments
 SCRIPT_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 CONF_PROFILE="$1"
-COMPOSE_FOLDER="$SCRIPT_FOLDER/../../compose-profiles/prod/$CONF_PROFILE"
-CONF_FOLDER="$SCRIPT_FOLDER/../../configuration-profiles/prod/$CONF_PROFILE"
-BUILD_FOLDER="$SCRIPT_FOLDER/../../configuration-profiles/dev"
+COMPOSE_FOLDER="$SCRIPT_FOLDER/../../compose-profiles/$CONF_PROFILE"
+CONF_FOLDER="$SCRIPT_FOLDER/../../configuration-profiles/$CONF_PROFILE"
 KEYSTORE_PW="$2"
 shift
 shift
@@ -26,12 +25,12 @@ shift
 # clean up previous entries
 mkdir -p "$CONF_FOLDER" "$COMPOSE_FOLDER"
 rm -f "$CONF_FOLDER"/*.keystore "$CONF_FOLDER"/shrine_ca_cert_aliases.conf "$CONF_FOLDER"/shrine_downstream_nodes.conf \
-    "$CONF_FOLDER"/*.pem "$CONF_FOLDER"/*.toml "$CONF_FOLDER"/unlynx
+    "$CONF_FOLDER"/*.pem "$CONF_FOLDER"/*.toml "$CONF_FOLDER"/unlynxMedCo
 rm -rf "$CONF_FOLDER"/srv*-CA
 
 echo "### Producing Unlynx binary with Docker"
-docker build -t lca1/unlynx:medco-deployment "$SCRIPT_FOLDER"/../../docker-images/dev/unlynx/
-docker run -v "$CONF_FOLDER":/opt/medco-configuration -v "$BUILD_FOLDER":/opt/build-dir --entrypoint sh lca1/unlynx:medco-deployment /copy-unlynx-binary-dev.sh
+docker build -t lca1/unlynx:medco-deployment "$SCRIPT_FOLDER"/../../docker-images/unlynx/
+docker run -v "$CONF_FOLDER":/opt/medco-configuration --entrypoint sh lca1/unlynx:medco-deployment /copy-unlynx-binary.sh
 
 echo "caCertAliases = [\"shrine-ca\"]" > "$CONF_FOLDER/shrine_ca_cert_aliases.conf"
 echo "### Producing CA"
@@ -67,7 +66,6 @@ do
         basicConstraints=CA:FALSE
         subjectAltName=@alt_names
         subjectKeyIdentifier = hash
-
         [ alt_names ]
         IP.1 = $NODE_IP
         DNS.1 = $NODE_DNS
@@ -89,7 +87,7 @@ EOL
     echo "\"Hospital $NODE_IDX\" = \"https://$NODE_DNS:6443/shrine/rest/adapter/requests\"" >> "$CONF_FOLDER/shrine_downstream_nodes.conf"
 
     echo "###$NODE_IDX### Generating unlynx keys"
-    "$BUILD_FOLDER"/unlynx server setupNonInteractive --serverBinding "$NODE_IP:2000" --description "Unlynx Server $NODE_IDX" \
+    "$CONF_FOLDER"/unlynxMedCo server setupNonInteractive --serverBinding "$NODE_IP:2000" --description "Unlynx Server $NODE_IDX" \
         --privateTomlPath "$CONF_FOLDER/srv$NODE_IDX-private.toml" --publicTomlPath "$CONF_FOLDER/srv$NODE_IDX-public.toml"
 
     echo "###$NODE_IDX### Generating docker-compose file"
@@ -106,6 +104,5 @@ done
 
 echo "### Generating group.toml file and finalizing shrine config file"
 cat "$CONF_FOLDER"/srv*-public.toml > "$CONF_FOLDER/group.toml"
-"$CONF_FOLDER"/unlynx server getAggregateKey --file "$CONF_FOLDER/group.toml"
 
 echo "### Configuration generated!"
