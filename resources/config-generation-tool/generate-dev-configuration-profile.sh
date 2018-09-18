@@ -28,6 +28,7 @@ mkdir -p "$CONF_FOLDER" "$COMPOSE_FOLDER"
 rm -f "$CONF_FOLDER"/*.keystore "$CONF_FOLDER"/shrine_ca_cert_aliases.conf "$CONF_FOLDER"/shrine_downstream_nodes.conf \
     "$CONF_FOLDER"/*.pem "$CONF_FOLDER"/*.toml "$CONF_FOLDER"/unlynx
 rm -rf "$CONF_FOLDER"/srv*-CA
+rm -rf "$CONF_FOLDER"/CA
 
 echo "### Producing Unlynx binary with Docker"
 docker build -t lca1/unlynx:medco-deployment "$SCRIPT_FOLDER"/../../docker-images/dev/unlynx/
