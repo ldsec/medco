@@ -29,6 +29,9 @@ RUN git apply *.diff
 # authorize admin connection for phppgadmin
 ENV POSTGRES_PASSWORD="$ADMIN_PASSWORD"
 
+# hack postgresql docker image to allow transmart loading (allow TCP/IP connections during init phase)
+RUN sed -i "s/listen_addresses=''/listen_addresses='*'/g" /usr/local/bin/docker-entrypoint.sh
+
 # .sh, .sql and .sql.gz will automatically be executed in this directory
 WORKDIR /docker-entrypoint-initdb.d
 COPY initdb-data/* ./
