@@ -1,7 +1,7 @@
 version: '2.4'
 services:
 
-  prod-i2b2-server-srv0:
+  i2b2-server-srv0:
     extends:
       file: ../docker-compose-common.yml
       service: i2b2-server
@@ -22,7 +22,7 @@ services:
           - i2b2-server-srv0
     container_name: prod-i2b2-server-srv0
 
-  prod-i2b2-database-srv0:
+  database-srv0:
     extends:
       file: ../docker-compose-common.yml
       service: i2b2-database
@@ -34,13 +34,14 @@ services:
           - i2b2-database
     container_name: prod-i2b2-database-srv0
 
-  prod-i2b2-web-srv0:
+  i2b2-web-srv0:
     extends:
       file: ../docker-compose-common.yml
       service: i2b2-web
     build:
       args:
         - NODE_IDX_ARG=0
+        - SAME_HOST_ARG=1
     ports:
       - "82:80"
       - "445:443"
@@ -52,7 +53,7 @@ services:
           - i2b2-web
     container_name: prod-i2b2-web-srv0
   
-  prod-unlynx-srv0:
+  unlynx-srv0:
     extends:
       file: ../docker-compose-common.yml
       service: unlynx
@@ -74,7 +75,7 @@ services:
         ipv4_address: 172.16.205.10
     container_name: prod-unlynx-srv0
 
-  prod-shrine-server-srv0:
+  shrine-server-srv0:
     extends:
       file: ../docker-compose-common.yml
       service: shrine-server
@@ -92,7 +93,7 @@ services:
           - shrine-server-srv0
     container_name: prod-shrine-server-srv0
 
-  prod-shrine-database-srv0:
+  shrine-database-srv0:
     extends:
       file: ../docker-compose-common.yml
       service: shrine-database

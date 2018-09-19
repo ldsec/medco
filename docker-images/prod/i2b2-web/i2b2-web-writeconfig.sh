@@ -137,10 +137,20 @@ cat > "$LIGHTTPD_WEB_ROOT/shrine-client/js-i2b2/cells/SHRINE/cell_config_data.js
 }
 EOL
 
+CA_FILE=""
+if [ "$SAME_HOST" = "1" ]; then \
+    echo "setting up configuration for SAME_HOST=1" && \
+    CA_FILE="$CONF_DIR/srv$NODE_IDX-CA/cacert.pem"; \
+else \
+    echo "setting up configuration for SAME_HOST=0" && \
+    CA_FILE="$CONF_DIR/CA/cacert.pem"; \
+fi
+echo "CA_FILE: $CA_FILE"
+
 cat > "/etc/lighttpd/conf-enabled/10-ssl.conf" <<EOL
 \$SERVER["socket"] == "0.0.0.0:443" {
 	ssl.engine  = "enable"
-	ssl.ca-file = "$CONF_DIR/CA/cacert.pem"
+	ssl.ca-file = "$CA_FILE"
 	ssl.pemfile = "$CONF_DIR/srv$NODE_IDX.pem"
     # todo: names in configuration profiles make more explicit
 

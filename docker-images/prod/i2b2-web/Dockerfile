@@ -1,6 +1,7 @@
 FROM debian:jessie-backports
 
 ARG NODE_IDX_ARG
+ARG SAME_HOST_ARG
 
 ENV SHRINE_SRC_DIR="/opt/shrine-src" \
     I2B2_DOMAIN_NAME="medcodeployment" \
@@ -9,7 +10,8 @@ ENV SHRINE_SRC_DIR="/opt/shrine-src" \
     DB_PASSWORD="pFjy3EjDVwLfT2rB9xkK" \
     CONF_DIR="/opt/medco-configuration" \
     BUILD_DIR="/opt/build-dir" \
-    NODE_IDX="$NODE_IDX_ARG"
+    NODE_IDX="$NODE_IDX_ARG" \
+    SAME_HOST="$SAME_HOST_ARG"
 
 # requirements
 RUN echo "deb http://httpredir.debian.org/debian jessie-backports main contrib non-free" >> /etc/apt/sources.list && \
