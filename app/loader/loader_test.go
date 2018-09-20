@@ -141,7 +141,7 @@ func TestGenerateFilesLocalTest(t *testing.T) {
 }
 
 func TestGeneratePubKey(t *testing.T) {
-	t.Skip()
+	//t.Skip()
 	el, _, err := getRoster("files/group.toml")
 	assert.True(t, err == nil, err)
 
