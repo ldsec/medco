@@ -166,7 +166,22 @@ func TestConvertPatientDimension(t *testing.T) {
 	loader.ParseDummyToPatient()
 
 	assert.Nil(t, loader.ParsePatientDimension(publicKey))
-	assert.Nil(t, loader.ConvertPatientDimension(true))
+	assert.Nil(t, loader.ConvertPatientDimension(publicKey, true))
+
+	local.CloseAll()
+}
+
+func TestConvertVisitDimension(t *testing.T) {
+	log.SetDebugVisible(2)
+	setupEncryptEnv()
+
+	loader.ParseDummyToPatient()
+
+	loader.ParsePatientDimension(publicKey)
+	loader.ConvertPatientDimension(publicKey, true)
+
+	assert.Nil(t, loader.ParseVisitDimension())
+	assert.Nil(t, loader.ConvertVisitDimension(true))
 
 	local.CloseAll()
 }
@@ -375,6 +390,14 @@ func TestConvertObservationFact(t *testing.T) {
 
 	assert.Nil(t, loader.ParseLocalOntology(el, 0))
 	assert.Nil(t, loader.ConvertLocalOntology())
+
+	assert.Nil(t, loader.ParseDummyToPatient())
+
+	assert.Nil(t, loader.ParsePatientDimension(publicKey))
+	assert.Nil(t, loader.ConvertPatientDimension(publicKey, true))
+
+	assert.Nil(t, loader.ParseVisitDimension())
+	assert.Nil(t, loader.ConvertVisitDimension(true))
 
 	assert.Nil(t, loader.ParseConceptDimension())
 	assert.Nil(t, loader.ConvertConceptDimension())

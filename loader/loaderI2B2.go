@@ -25,6 +25,7 @@ var (
 		"SHRINE_ONTOLOGY":    "../data/original/shrine.csv",
 		"LOCAL_ONTOLOGY":     "../data/original/i2b2.csv",
 		"PATIENT_DIMENSION":  "../data/original/patient_dimension.csv",
+		"VISIT_DIMENSION":	  "../data/original/visit_dimension.csv",
 		"CONCEPT_DIMENSION":  "../data/original/concept_dimension.csv",
 		"MODIFIER_DIMENSION": "../data/original/modifier_dimension.csv",
 		"OBSERVATION_FACT":   "../data/original/observation_fact.csv",
@@ -37,10 +38,12 @@ var (
 		"LOCAL_ONTOLOGY_CLEAR":     "../data/converted/i2b2.csv",
 		"LOCAL_ONTOLOGY_SENSITIVE": "../data/converted/sensitive_tagged.csv",
 		"PATIENT_DIMENSION":        "../data/converted/patient_dimension.csv",
+		"NEW_PATIENT_NUM":			"../data/converted/new_patient_num.csv",
+		"VISIT_DIMENSION":			"../data/converted/visit_dimension.csv",
+		"NEW_ENCOUNTER_NUM":		"../data/converted/new_encounter_num.csv",
 		"CONCEPT_DIMENSION":        "../data/converted/concept_dimension.csv",
 		"MODIFIER_DIMENSION":       "../data/converted/modifier_dimension.csv",
 		"OBSERVATION_FACT":         "../data/converted/observation_fact.csv",
-		"NEW_PATIENT_NUM":			"../data/converted/new_patient_num.csv",
 	}
 )
 
@@ -701,7 +704,6 @@ func ConvertLocalOntology() error {
 // PATIENT_DIMENSION.CSV converter
 
 // ParsePatientDimension reads and parses the patient_dimension.csv. This also means adding the encrypted flag.
-// If emtpy is set to true all other data except the patient_num and encrypted_dummy_flag are set to empty
 func ParsePatientDimension(pk kyber.Point) error {
 	lines, err := readCSV("PATIENT_DIMENSION")
 	if err != nil {
@@ -725,7 +727,7 @@ func ParsePatientDimension(pk kyber.Point) error {
 
 	// OPTIONAL FIELDS
 	"sex_cd","
-	age_in_years_num",
+	"age_in_years_num",
 	"language_cd",
 	"race_cd",
 	"marital_status_cd",
@@ -758,7 +760,8 @@ func ParsePatientDimension(pk kyber.Point) error {
 }
 
 // ConvertPatientDimension converts the old patient_dimension.csv file
-func ConvertPatientDimension(empty bool) error {
+// If emtpy is set to true all other data except the patient_num and encrypted_dummy_flag are set to empty
+func ConvertPatientDimension(pk kyber.Point, empty bool) error {
 	csvOutputFile, err := os.Create(OutputFilePaths["PATIENT_DIMENSION"])
 	if err != nil {
 		log.Fatal("Error opening [patient_dimension].csv")
@@ -801,6 +804,9 @@ func ConvertPatientDimension(empty bool) error {
 
 		patient := TablePatientDimension[PatientDimensionPK{PatientNum: patientNum}]
 		patient.PK.PatientNum = strconv.FormatInt(int64(perm[i]), 10)
+		ef := libunlynx.EncryptInt(pk, 0)
+		patient.EncryptedFlag = *ef
+
 		csvOutputFile.WriteString(patient.ToCSVText(empty) + "\n")
 		i++
 	}
@@ -817,6 +823,148 @@ func ConvertPatientDimension(empty bool) error {
 
 	for key, value := range MapNewPatientNum{
 		csvOutputNewPatientNumFile.WriteString("\"" + key + "\"," + "\"" + value + "\"\n")
+	}
+
+	return nil
+}
+
+// VISIT_DIMENSION.CSV converter
+
+// ParseVisitDimension reads and parses the visit_dimension.csv.
+func ParseVisitDimension() error {
+	lines, err := readCSV("VISIT_DIMENSION")
+	if err != nil {
+		log.Fatal("Error in readCSV()")
+		return err
+	}
+
+	TableVisitDimension = make(map[VisitDimensionPK]VisitDimension)
+	HeaderVisitDimension = make([]string, 0)
+	MapNewEncounterNum = make(map[VisitDimensionPK]VisitDimensionPK)
+	MapPatientVisits = make(map[string][]string)
+	MaxVisits = 0
+
+	/* structure of visit_dimension.csv (in order):
+
+	// PK
+	"encounter_num",
+	"patient_num",
+
+	// MANDATORY FIELDS
+	"active_status_cd",
+	"start_date",
+	"end_date",
+
+	// OPTIONAL FIELDS
+	"inout_cd",
+	"location_cd",
+	"location_path",
+	"length_of_stay",
+	"visit_blob",
+
+	// ADMIN FIELDS
+	"update_date",
+	"download_date",
+	"import_date",
+	"sourcesystem_cd",
+	"upload_id"
+
+	*/
+
+	for _, header := range lines[0] {
+		HeaderVisitDimension = append(HeaderVisitDimension, header)
+	}
+
+	//skip header
+	for _, line := range lines[1:] {
+		vdk, vd := VisitDimensionFromString(line)
+		TableVisitDimension[vdk] = vd
+
+		// if patient does not exist
+		if _, ok := MapPatientVisits[vdk.PatientNum]; ok == false {
+			// create array and add the encounter
+			tmp := make([]string, 0)
+			tmp = append(tmp, vdk.EncounterNum)
+			MapPatientVisits[vdk.PatientNum] = tmp
+		} else {
+			// append encounter to array
+			MapPatientVisits[vdk.PatientNum] = append(MapPatientVisits[vdk.PatientNum], vdk.EncounterNum)
+		}
+
+		if MaxVisits < len(MapPatientVisits[vdk.PatientNum]){
+			MaxVisits = len(MapPatientVisits[vdk.PatientNum])
+		}
+	}
+
+	return nil
+}
+
+// ConvertVisitDimension converts the old visit_dimension.csv file. The means re-randomizing the encounter_num.
+// If emtpy is set to true all other data except the patient_num and encounter_num are set to empty
+func ConvertVisitDimension(empty bool) error {
+	csvOutputFile, err := os.Create(OutputFilePaths["VISIT_DIMENSION"])
+	if err != nil {
+		log.Fatal("Error opening [visit_dimension].csv")
+		return err
+	}
+	defer csvOutputFile.Close()
+
+	headerString := ""
+	for _, header := range HeaderVisitDimension {
+		headerString += "\"" + header + "\","
+	}
+
+	// re-randomize the encounter_num
+	totalNbrVisits := len(TableVisitDimension) + len(TableDummyToPatient)*MaxVisits
+	src := make([]int,0)
+
+	for i:=0; i<totalNbrVisits; i++ {
+		src = append(src, i)
+	}
+
+	perm := rand.Perm(len(src))
+	for i, v := range perm {
+		perm[v] = src[i]
+	}
+
+	// remove the last ,
+	csvOutputFile.WriteString(headerString[:len(headerString)-1] + "\n")
+
+	i:=0
+	for _, vd := range TableVisitDimension {
+		MapNewEncounterNum[VisitDimensionPK{EncounterNum: vd.PK.EncounterNum, PatientNum: vd.PK.PatientNum}] = VisitDimensionPK{EncounterNum: strconv.FormatInt(int64(perm[i]), 10), PatientNum: MapNewPatientNum[vd.PK.PatientNum]}
+		vd.PK.EncounterNum = strconv.FormatInt(int64(perm[i]), 10)
+		vd.PK.PatientNum = MapNewPatientNum[vd.PK.PatientNum]
+		csvOutputFile.WriteString(vd.ToCSVText(empty) + "\n")
+		i++
+	}
+
+	// add dummies
+	for dummyNum, patientNum := range TableDummyToPatient {
+		listPatientVisits := MapPatientVisits[patientNum]
+
+		for _, el := range listPatientVisits {
+			MapNewEncounterNum[VisitDimensionPK{EncounterNum: el, PatientNum: dummyNum}] = VisitDimensionPK{EncounterNum: strconv.FormatInt(int64(perm[i]), 10), PatientNum: MapNewPatientNum[dummyNum]}
+			visit := TableVisitDimension[VisitDimensionPK{EncounterNum: el,PatientNum: patientNum}]
+			visit.PK.EncounterNum = strconv.FormatInt(int64(perm[i]), 10)
+			visit.PK.PatientNum = MapNewPatientNum[dummyNum]
+			csvOutputFile.WriteString(visit.ToCSVText(empty) + "\n")
+			i++
+		}
+	}
+
+	// write MapNewEncounterNum to csv
+	csvOutputNewEncounterNumFile, err := os.Create(OutputFilePaths["NEW_ENCOUNTER_NUM"])
+	if err != nil {
+		log.Fatal("Error opening [new_encounter_num].csv")
+		return err
+	}
+	defer csvOutputNewEncounterNumFile.Close()
+
+	csvOutputNewEncounterNumFile.WriteString("\"old_encounter_num\",\"old_patient_num\",\"new_encounter_num\",\"new_patient_num\"\n")
+
+	for key, value := range MapNewEncounterNum{
+		csvOutputNewEncounterNumFile.WriteString("\"" + key.EncounterNum + "\"," + "\"" + key.PatientNum + "\"," + "\"" + value.EncounterNum + "\"," + "\"" + value.PatientNum + "\"\n")
 	}
 
 	return nil
@@ -988,7 +1136,7 @@ func ConvertModifierDimension() error {
 
 // OBSERVATION_FACT.CSV converter
 
-// ParseObservationFact reads and parses the observation_fact.csv.
+// ParseObservationFact reads and parses the observation_fact_old.csv.
 func ParseObservationFact() error {
 	lines, err := readCSV("OBSERVATION_FACT")
 	if err != nil {
@@ -999,7 +1147,7 @@ func ParseObservationFact() error {
 	TableObservationFact = make(map[*ObservationFactPK]ObservationFact)
 	HeaderObservationFact = make([]string, 0)
 
-	/* structure of observation_fact.csv (in order):
+	/* structure of observation_fact_old.csv (in order):
 
 	// PK
 	"encounter_num",
@@ -1044,7 +1192,7 @@ func ParseObservationFact() error {
 	return nil
 }
 
-// ConvertObservationFact converts the old observation_fact.csv file
+// ConvertObservationFact converts the old observation_fact_old.csv file
 func ConvertObservationFact() error {
 	csvOutputFile, err := os.Create(OutputFilePaths["OBSERVATION_FACT"])
 	if err != nil {
@@ -1060,8 +1208,10 @@ func ConvertObservationFact() error {
 	// remove the last ,
 	csvOutputFile.WriteString(headerString[:len(headerString)-1] + "\n")
 
-	log.LLvl1(len(MapConceptCodeToTag))
-	log.LLvl1(len(MapModifierCodeToTag))
+	//
+
+
+
 
 	for _, of := range TableObservationFact {
 		// if the concept is sensitive we replace its code with the correspondent tag ID

@@ -158,6 +158,40 @@ func TestPatientDimension_ToCSVText(t *testing.T) {
 
 }
 
+func TestVisitDimension_ToCSVText(t *testing.T) {
+	ac := loader.AdministrativeColumns{
+		UpdateDate:     "2010-11-04 10:43:00",
+		DownloadDate:   "2010-08-18 09:50:00",
+		ImportDate:     "2010-11-04 10:43:00",
+		SourceSystemCD: "DEMO",
+		UploadID:       "\\N",
+	}
+
+	vdk := loader.VisitDimensionPK{
+		EncounterNum: 	"471185",
+		PatientNum: 	"1000000101",
+	}
+
+	op := make([]loader.OptionalFields, 0)
+	op = append(op, loader.OptionalFields{ValType: "inout_cd", Value: "O"})
+	op = append(op, loader.OptionalFields{ValType: "location_cd", Value: ""})
+	op = append(op, loader.OptionalFields{ValType: "location_path", Value: ""})
+	op = append(op, loader.OptionalFields{ValType: "length_of_stay", Value: "\\N"})
+	op = append(op, loader.OptionalFields{ValType: "visit_blob", Value: ""})
+
+	vd := loader.VisitDimension{
+		PK:             vdk,
+		ActiveStatusCD: "U",
+		StartDate:      "1997-01-02 00:00:00",
+		EndDate:      	"\\N",
+		OptionalFields: op,
+		AdminColumns:   ac,
+	}
+
+	assert.Equal(t, vd.ToCSVText(false), `"471185","1000000101","U","1997-01-02 00:00:00","\N","O","","","\N","","2010-11-04 10:43:00","2010-08-18 09:50:00","2010-11-04 10:43:00","DEMO","\N"`)
+	assert.Equal(t, vd.ToCSVText(true), `"471185","1000000101","","","","","","","","","","","","",""`)
+}
+
 func TestConceptDimension_ToCSVText(t *testing.T) {
 
 	csvString := `"\i2b2\Demographics\Age\>= 65 years old\100\","DEM|AGE:100"," 100 years old","","2010-09-28 11:15:00","2010-08-18 09:50:00","2010-09-28 11:40:00","DEMO","\N"`
@@ -408,6 +442,52 @@ func TestPatientDimensionFromString(t *testing.T) {
 	pd.EncryptedFlag = libunlynx.CipherText{}
 
 	assert.Equal(t, pdExpected, pd)
+}
+
+func TestVisitDimensionFromString(t *testing.T) {
+	aux := [...]string{"encounter_num","patient_num","active_status_cd","start_date","end_date","inout_cd","location_cd","location_path","length_of_stay","visit_blob","update_date","download_date","import_date","sourcesystem_cd","upload_id"}
+	loader.HeaderPatientDimension = aux[:]
+
+	ac := loader.AdministrativeColumns{
+		UpdateDate:     "2010-11-04 10:43:00",
+		DownloadDate:   "2010-08-18 09:50:00",
+		ImportDate:     "2010-11-04 10:43:00",
+		SourceSystemCD: "DEMO",
+		UploadID:       "\\N",
+	}
+
+	vdk := loader.VisitDimensionPK{
+		EncounterNum: 	"471185",
+		PatientNum: 	"1000000101",
+	}
+
+	op := make([]loader.OptionalFields, 0)
+	op = append(op, loader.OptionalFields{ValType: "inout_cd", Value: "O"})
+	op = append(op, loader.OptionalFields{ValType: "location_cd", Value: ""})
+	op = append(op, loader.OptionalFields{ValType: "location_path", Value: ""})
+	op = append(op, loader.OptionalFields{ValType: "length_of_stay", Value: "\\N"})
+	op = append(op, loader.OptionalFields{ValType: "visit_blob", Value: ""})
+
+	vd := loader.VisitDimension{
+		PK:             vdk,
+		ActiveStatusCD: "U",
+		StartDate:      "1997-01-02 00:00:00",
+		EndDate:      	"\\N",
+		OptionalFields: op,
+		AdminColumns:   ac,
+	}
+
+	csvString := `"471185","1000000101","U","1997-01-02 00:00:00","\N","O","","","\N","","2010-11-04 10:43:00","2010-08-18 09:50:00","2010-11-04 10:43:00","DEMO","\N"`
+
+	var csvFile = strings.NewReader(csvString)
+	r := csv.NewReader(csvFile)
+	lines, err := r.ReadAll()
+	assert.Nil(t, err, "Parsing error")
+
+	vdkExpected, vdExpected := loader.VisitDimensionFromString(lines[0])
+	assert.Equal(t, vdkExpected, vdk)
+
+	assert.Equal(t, vdExpected, vd)
 }
 
 func TestConceptDimensionFromString(t *testing.T) {
