@@ -3,6 +3,7 @@ package loader
 import (
 	"encoding/csv"
 	"encoding/xml"
+	"github.com/armon/go-radix"
 	"github.com/dedis/kyber"
 	"github.com/dedis/onet"
 	"github.com/dedis/onet/log"
@@ -22,7 +23,7 @@ var (
 		"ADAPTER_MAPPINGS":   "../data/original/AdapterMappings.xml",
 		"SHRINE_ONTOLOGY":    "../data/original/shrine.csv",
 		"LOCAL_ONTOLOGY":     "../data/original/i2b2.csv",
-		"PATIENT_DIMENSION":  "../data/original/patient_dimension.csv",
+		"PATIENT_DIMENSION":  "../data/original/patient_dimension_old.csv",
 		"CONCEPT_DIMENSION":  "../data/original/concept_dimension.csv",
 		"MODIFIER_DIMENSION": "../data/original/modifier_dimension.csv",
 		"OBSERVATION_FACT":   "../data/original/observation_fact.csv",
@@ -33,7 +34,7 @@ var (
 		"SHRINE_ONTOLOGY":          "../data/converted/shrine.csv",
 		"LOCAL_ONTOLOGY_CLEAR":     "../data/converted/i2b2.csv",
 		"LOCAL_ONTOLOGY_SENSITIVE": "../data/converted/sensitive_tagged.csv",
-		"PATIENT_DIMENSION":        "../data/converted/patient_dimension.csv",
+		"PATIENT_DIMENSION":        "../data/converted/patient_dimension_old.csv",
 		"CONCEPT_DIMENSION":        "../data/converted/concept_dimension.csv",
 		"MODIFIER_DIMENSION":       "../data/converted/modifier_dimension.csv",
 		"OBSERVATION_FACT":         "../data/converted/observation_fact.csv",
@@ -73,10 +74,9 @@ func ParseAdapterMappings() error {
 
 // ConvertAdapterMappings converts the old AdapterMappings.xml file. This file maps a shrine concept code to an i2b2 concept code
 func ConvertAdapterMappings() error {
-
 	// convert the data in temporary maps to make it easy to traverse
 	localToShrine := make(map[string][]string)
-	shrineToLocal := make(map[string][]string)
+	shrineToLocal := radix.New()
 	createTempMaps(Am, localToShrine, shrineToLocal)
 
 	ListSensitiveConceptsLocal = make(map[string][]string)
@@ -107,8 +107,8 @@ func ConvertAdapterMappings() error {
 	return nil
 }
 
-// createTempMaps simply converts the data into two different maps so that it's easier to traverse the data
-func createTempMaps(am AdapterMappings, localToShrine map[string][]string, shrineToLocal map[string][]string) {
+// createTempMaps simply converts the data into one map and one radix tree so that it's easier to traverse and manage the data
+func createTempMaps(am AdapterMappings, localToShrine map[string][]string, shrineToLocal *radix.Tree) {
 	for _, entry := range am.ListEntries {
 		// remove the first \ (in the adapter mappings file there are 2 '\\' in the beginning)
 		shrineKey := StripByLevel(entry.Key[1:], 1, true)
@@ -126,19 +126,24 @@ func createTempMaps(am AdapterMappings, localToShrine map[string][]string, shrin
 				localToShrine[localKey] = aux
 			}
 		}
-		shrineToLocal[shrineKey] = arrValues
+		shrineToLocal.Insert(shrineKey, arrValues)
 	}
 }
 
-// StoreSensitiveLocalConcepts stores the local sensitive concepts in a set that is kept in RAM during the entire loading (to make parsing the local ontology faster)
-func StoreSensitiveLocalConcepts(localToShrine map[string][]string, shrineToLocal map[string][]string) {
-	for shrineKey, val := range shrineToLocal {
-		if containsMapString(ListSensitiveConceptsShrine, shrineKey) {
-			for _, localKey := range val {
+// StoreSensitiveLocalConceptsNew stores the local sensitive concepts in a set that is kept in RAM during the entire loading (to make parsing the local ontology faster)
+func StoreSensitiveLocalConcepts(localToShrine map[string][]string, shrineToLocal *radix.Tree) {
+	// STEP 1: Pick sensitive shrine concept
+	for shrineKey := range ListSensitiveConceptsShrine {
+		// STEP 2: Traverse prefix and add other related sensitive concepts
+		shrineToLocal.WalkPrefix(shrineKey, func(s string, v interface{}) bool {
+			for _, localKey := range v.([]string) {
 				appendSensitiveConcepts(localKey, shrineKey)
 				recursivelyUpdateConceptMaps(localKey, localToShrine, shrineToLocal)
 			}
-		}
+			return false
+		})
+		// STEP 3: Delete prefix subtree
+		shrineToLocal.DeletePrefix(shrineKey)
 	}
 }
 
@@ -163,15 +168,18 @@ func appendSensitiveConcepts(localKey string, shrineKey string) {
 }
 
 // recursivelyUpdateConceptMaps recursively checks if there is any shrine concept that maps to a sensitive local concept. If true all of its values (local concepts) should be set to sensitive... rinse/repeat
-func recursivelyUpdateConceptMaps(localKey string, localToShrine map[string][]string, shrineToLocal map[string][]string) {
+func recursivelyUpdateConceptMaps(localKey string, localToShrine map[string][]string, shrineToLocal *radix.Tree) {
 	for _, shrineKey := range localToShrine[localKey] {
 		// the local concept is sensitive but its shrine key is not
 		if !containsMapString(ListSensitiveConceptsShrine, shrineKey) {
 			ListSensitiveConceptsShrine[shrineKey] = true
-			for _, localKey := range shrineToLocal[shrineKey] {
-				appendSensitiveConcepts(localKey, shrineKey)
-				recursivelyUpdateConceptMaps(localKey, localToShrine, shrineToLocal)
-			}
+			shrineToLocal.WalkPrefix(shrineKey, func(s string, v interface{}) bool {
+				for _, localKey := range v.([]string) {
+					appendSensitiveConcepts(localKey, shrineKey)
+					recursivelyUpdateConceptMaps(localKey, localToShrine, shrineToLocal)
+				}
+				return false
+			})
 		}
 	}
 }
@@ -236,7 +244,7 @@ func ParseShrineOntology() error {
 	TableShrineOntologyModifierEnc = make(map[string][]*ShrineOntology)
 	HeaderShrineOntology = make([]string, 0)
 
-	/* structure of patient_dimension.csv (in order):
+	/* structure of patient_dimension_old.csv (in order):
 
 	// MANDATORY FIELDS
 	"c_hlevel",
@@ -662,7 +670,7 @@ func ConvertLocalOntology() error {
 
 // PATIENT_DIMENSION.CSV converter
 
-// ParsePatientDimension reads and parses the patient_dimension.csv. This also means adding the encrypted flag.
+// ParsePatientDimension reads and parses the patient_dimension_old.csv. This also means adding the encrypted flag.
 func ParsePatientDimension(pk kyber.Point) error {
 	lines, err := readCSV("PATIENT_DIMENSION")
 	if err != nil {
@@ -673,7 +681,7 @@ func ParsePatientDimension(pk kyber.Point) error {
 	TablePatientDimension = make(map[*PatientDimensionPK]PatientDimension)
 	HeaderPatientDimension = make([]string, 0)
 
-	/* structure of patient_dimension.csv (in order):
+	/* structure of patient_dimension_old.csv (in order):
 
 	// PK
 	"patient_num",
@@ -701,14 +709,14 @@ func ParsePatientDimension(pk kyber.Point) error {
 	"import_date",
 	"sourcesystem_cd",
 	"upload_id"
+
+	// EXTRA FIELDS
+	"enc_dummy_flag_cd"
 	*/
 
 	for _, header := range lines[0] {
 		HeaderPatientDimension = append(HeaderPatientDimension, header)
 	}
-
-	// the encrypted_flag term
-	HeaderPatientDimension = append(HeaderPatientDimension, "enc_dummy_flag_cd")
 
 	//skip header
 	for _, line := range lines[1:] {
@@ -719,7 +727,7 @@ func ParsePatientDimension(pk kyber.Point) error {
 	return nil
 }
 
-// ConvertPatientDimension converts the old patient_dimension.csv file
+// ConvertPatientDimension converts the old patient_dimension_old.csv file
 func ConvertPatientDimension() error {
 	csvOutputFile, err := os.Create(OutputFilePaths["PATIENT_DIMENSION"])
 	if err != nil {

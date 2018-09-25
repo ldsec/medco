@@ -1,6 +1,7 @@
 package loader_test
 
 import (
+	"github.com/armon/go-radix"
 	"github.com/dedis/kyber"
 	"github.com/dedis/onet"
 	"github.com/dedis/onet/app"
@@ -69,11 +70,11 @@ func TestStoreSensitiveLocalConcepts(t *testing.T) {
 	loader.ListSensitiveConceptsLocal = make(map[string][]string)
 
 	localToShrine := make(map[string][]string)
-	shrineToLocal := make(map[string][]string)
+	shrineToLocal := radix.New()
 
-	shrineToLocal["a"] = []string{"1", "2"}
-	shrineToLocal["b"] = []string{"3"}
-	shrineToLocal["c"] = []string{"4"}
+	shrineToLocal.Insert("a",[]string{"1", "2"})
+	shrineToLocal.Insert("b",[]string{"3"})
+	shrineToLocal.Insert("c",[]string{"4"})
 
 	localToShrine["1"] = []string{"a"}
 	localToShrine["2"] = []string{"a"}
@@ -92,11 +93,11 @@ func TestStoreSensitiveLocalConcepts(t *testing.T) {
 	loader.ListSensitiveConceptsLocal = make(map[string][]string)
 
 	localToShrine = make(map[string][]string)
-	shrineToLocal = make(map[string][]string)
+	shrineToLocal = radix.New()
 
-	shrineToLocal["a"] = []string{"1", "2", "3"}
-	shrineToLocal["b"] = []string{"2"}
-	shrineToLocal["c"] = []string{"4"}
+	shrineToLocal.Insert("a",[]string{"1", "2", "3"})
+	shrineToLocal.Insert("b",[]string{"2"})
+	shrineToLocal.Insert("c",[]string{"4"})
 
 	localToShrine["1"] = []string{"a"}
 	localToShrine["2"] = []string{"a", "b"}
@@ -115,12 +116,12 @@ func TestStoreSensitiveLocalConcepts(t *testing.T) {
 	loader.ListSensitiveConceptsLocal = make(map[string][]string)
 
 	localToShrine = make(map[string][]string)
-	shrineToLocal = make(map[string][]string)
+	shrineToLocal = radix.New()
 
-	shrineToLocal["a"] = []string{"1", "2", "3"}
-	shrineToLocal["b"] = []string{"2", "4"}
-	shrineToLocal["c"] = []string{"5", "4"}
-	shrineToLocal["d"] = []string{"6"}
+	shrineToLocal.Insert("a",[]string{"1", "2", "3"})
+	shrineToLocal.Insert("b",[]string{"2", "4"})
+	shrineToLocal.Insert("c",[]string{"5", "4"})
+	shrineToLocal.Insert("d",[]string{"6"})
 
 	localToShrine["1"] = []string{"a"}
 	localToShrine["2"] = []string{"a", "b"}
@@ -142,7 +143,6 @@ func TestConvertAdapterMappings(t *testing.T) {
 	loader.ListSensitiveConceptsShrine[`\Admit Diagnosis\`] = true
 	loader.ListSensitiveConceptsShrine[`\Principal Diagnosis\`] = true
 	loader.ListSensitiveConceptsShrine[`\Secondary Diagnosis\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\`] = true
 	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\`] = true
 	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\`] = true
 	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\`] = true
