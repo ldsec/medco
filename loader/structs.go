@@ -482,15 +482,18 @@ func PatientDimensionFromString(line []string, pk kyber.Point) (*PatientDimensio
 	}
 
 	ac := AdministrativeColumns{
-		UpdateDate:     line[size-5],
-		DownloadDate:   line[size-4],
-		ImportDate:     line[size-3],
-		SourceSystemCD: line[size-2],
-		UploadID:       line[size-1],
+		UpdateDate:     line[size-7],
+		DownloadDate:   line[size-6],
+		ImportDate:     line[size-5],
+		SourceSystemCD: line[size-4],
+		UploadID:       line[size-3],
 	}
 
-	// TODO: right now we do not have fake patients
-	ef := libunlynx.EncryptInt(pk, 1)
+	dummyFlag, err := strconv.ParseInt(line[size-2],10, 64)
+	if err != nil {
+		log.Fatal("Error parsing dummy flag", dummyFlag)
+	}
+	ef := libunlynx.EncryptInt(pk, dummyFlag)
 
 	pd.OptionalFields = of
 	pd.AdminColumns = ac
