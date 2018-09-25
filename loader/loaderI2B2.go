@@ -11,6 +11,7 @@ import (
 	"github.com/lca1/unlynx/lib"
 	"io"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"strconv"
 	"strings"
@@ -23,10 +24,11 @@ var (
 		"ADAPTER_MAPPINGS":   "../data/original/AdapterMappings.xml",
 		"SHRINE_ONTOLOGY":    "../data/original/shrine.csv",
 		"LOCAL_ONTOLOGY":     "../data/original/i2b2.csv",
-		"PATIENT_DIMENSION":  "../data/original/patient_dimension_old.csv",
+		"PATIENT_DIMENSION":  "../data/original/patient_dimension.csv",
 		"CONCEPT_DIMENSION":  "../data/original/concept_dimension.csv",
 		"MODIFIER_DIMENSION": "../data/original/modifier_dimension.csv",
 		"OBSERVATION_FACT":   "../data/original/observation_fact.csv",
+		"DUMMY_TO_PATIENT":	  "../data/original/dummy_to_patient.csv",
 	}
 
 	OutputFilePaths = map[string]string{
@@ -34,10 +36,11 @@ var (
 		"SHRINE_ONTOLOGY":          "../data/converted/shrine.csv",
 		"LOCAL_ONTOLOGY_CLEAR":     "../data/converted/i2b2.csv",
 		"LOCAL_ONTOLOGY_SENSITIVE": "../data/converted/sensitive_tagged.csv",
-		"PATIENT_DIMENSION":        "../data/converted/patient_dimension_old.csv",
+		"PATIENT_DIMENSION":        "../data/converted/patient_dimension.csv",
 		"CONCEPT_DIMENSION":        "../data/converted/concept_dimension.csv",
 		"MODIFIER_DIMENSION":       "../data/converted/modifier_dimension.csv",
 		"OBSERVATION_FACT":         "../data/converted/observation_fact.csv",
+		"NEW_PATIENT_NUM":			"../data/converted/new_patient_num.csv",
 	}
 )
 
@@ -226,6 +229,33 @@ func readCSV(filename string) ([][]string, error) {
 	return lines, nil
 }
 
+// DUMMY_TO_PATIENT.csv parser
+
+// ParseDummyToPatient reads and parses the dummy_to_patient.csv.
+func ParseDummyToPatient() error {
+	lines, err := readCSV("DUMMY_TO_PATIENT")
+	if err != nil {
+		log.Fatal("Error in readCSV()")
+		return err
+	}
+
+	TableDummyToPatient = make(map[string]string)
+
+	/* structure of patient_dimension.csv (in order):
+
+	"dummy",
+	"patient"
+
+	 */
+
+	//skip header
+	for _, line := range lines[1:] {
+		TableDummyToPatient[line[0]] = line[1]
+	}
+
+	return nil
+}
+
 // SHRINE.CSV converter (shrine ontology)
 
 // ParseShrineOntology reads and parses the shrine.csv.
@@ -244,7 +274,7 @@ func ParseShrineOntology() error {
 	TableShrineOntologyModifierEnc = make(map[string][]*ShrineOntology)
 	HeaderShrineOntology = make([]string, 0)
 
-	/* structure of patient_dimension_old.csv (in order):
+	/* structure of patient_dimension.csv (in order):
 
 	// MANDATORY FIELDS
 	"c_hlevel",
@@ -670,7 +700,8 @@ func ConvertLocalOntology() error {
 
 // PATIENT_DIMENSION.CSV converter
 
-// ParsePatientDimension reads and parses the patient_dimension_old.csv. This also means adding the encrypted flag.
+// ParsePatientDimension reads and parses the patient_dimension.csv. This also means adding the encrypted flag.
+// If emtpy is set to true all other data except the patient_num and encrypted_dummy_flag are set to empty
 func ParsePatientDimension(pk kyber.Point) error {
 	lines, err := readCSV("PATIENT_DIMENSION")
 	if err != nil {
@@ -678,10 +709,11 @@ func ParsePatientDimension(pk kyber.Point) error {
 		return err
 	}
 
-	TablePatientDimension = make(map[*PatientDimensionPK]PatientDimension)
+	TablePatientDimension = make(map[PatientDimensionPK]PatientDimension)
 	HeaderPatientDimension = make([]string, 0)
+	MapNewPatientNum = make(map[string]string)
 
-	/* structure of patient_dimension_old.csv (in order):
+	/* structure of patient_dimension.csv (in order):
 
 	// PK
 	"patient_num",
@@ -689,7 +721,7 @@ func ParsePatientDimension(pk kyber.Point) error {
 	// MANDATORY FIELDS
 	"vital_status_cd",
 	"birth_date",
-	death_date",
+	"death_date",
 
 	// OPTIONAL FIELDS
 	"sex_cd","
@@ -710,8 +742,6 @@ func ParsePatientDimension(pk kyber.Point) error {
 	"sourcesystem_cd",
 	"upload_id"
 
-	// EXTRA FIELDS
-	"enc_dummy_flag_cd"
 	*/
 
 	for _, header := range lines[0] {
@@ -727,8 +757,8 @@ func ParsePatientDimension(pk kyber.Point) error {
 	return nil
 }
 
-// ConvertPatientDimension converts the old patient_dimension_old.csv file
-func ConvertPatientDimension() error {
+// ConvertPatientDimension converts the old patient_dimension.csv file
+func ConvertPatientDimension(empty bool) error {
 	csvOutputFile, err := os.Create(OutputFilePaths["PATIENT_DIMENSION"])
 	if err != nil {
 		log.Fatal("Error opening [patient_dimension].csv")
@@ -740,11 +770,53 @@ func ConvertPatientDimension() error {
 	for _, header := range HeaderPatientDimension {
 		headerString += "\"" + header + "\","
 	}
+
+	// re-randomize the patient_num
+	totalNbrPatients := len(TablePatientDimension) + len(TableDummyToPatient)
+	src := make([]int,0)
+
+	for i:=0; i<totalNbrPatients; i++ {
+		src = append(src, i)
+	}
+
+	perm := rand.Perm(len(src))
+	for i, v := range perm {
+		perm[v] = src[i]
+	}
+
 	// remove the last ,
 	csvOutputFile.WriteString(headerString[:len(headerString)-1] + "\n")
 
+	i:=0
 	for _, pd := range TablePatientDimension {
-		csvOutputFile.WriteString(pd.ToCSVText() + "\n")
+		MapNewPatientNum[pd.PK.PatientNum] = strconv.FormatInt(int64(perm[i]), 10)
+		pd.PK.PatientNum = strconv.FormatInt(int64(perm[i]), 10)
+		csvOutputFile.WriteString(pd.ToCSVText(empty) + "\n")
+		i++
+	}
+
+	// add dummies
+	for dummyNum, patientNum := range TableDummyToPatient {
+		MapNewPatientNum[dummyNum] = strconv.FormatInt(int64(perm[i]), 10)
+
+		patient := TablePatientDimension[PatientDimensionPK{PatientNum: patientNum}]
+		patient.PK.PatientNum = strconv.FormatInt(int64(perm[i]), 10)
+		csvOutputFile.WriteString(patient.ToCSVText(empty) + "\n")
+		i++
+	}
+
+	// write MapNewPatientNum to csv
+	csvOutputNewPatientNumFile, err := os.Create(OutputFilePaths["NEW_PATIENT_NUM"])
+	if err != nil {
+		log.Fatal("Error opening [new_patient_num].csv")
+		return err
+	}
+	defer csvOutputNewPatientNumFile.Close()
+
+	csvOutputNewPatientNumFile.WriteString("\"old_patient_num\",\"new_patient_num\"\n")
+
+	for key, value := range MapNewPatientNum{
+		csvOutputNewPatientNumFile.WriteString("\"" + key + "\"," + "\"" + value + "\"\n")
 	}
 
 	return nil
