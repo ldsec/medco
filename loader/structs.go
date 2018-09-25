@@ -238,15 +238,23 @@ func (lo ObservationFact) ToCSVText() string {
 
 //-------------------------------------//
 
+// TableDummyToPatient contains all dummies and the original patient that is associated with them
+var TableDummyToPatient map[string]string
+
+// MapNewPatientNum keeps track of the mapping between the old patient_num and the new one
+var MapNewPatientNum map[string]string
+
+//-------------------------------------//
+
 // TablePatientDimension is patient_dimension table
-var TablePatientDimension map[*PatientDimensionPK]PatientDimension
+var TablePatientDimension map[PatientDimensionPK]PatientDimension
 
 // HeaderPatientDimension contains all the headers for the Patient_Dimension table
 var HeaderPatientDimension []string
 
 // PatientDimension table represents a patient in the database
 type PatientDimension struct {
-	PK             *PatientDimensionPK
+	PK             PatientDimensionPK
 	VitalStatusCD  string
 	BirthDate      string
 	DeathDate      string
@@ -261,24 +269,35 @@ type PatientDimensionPK struct {
 }
 
 // ToCSVText writes the PatientDimensionPK struct in a way that can be added to a .csv file - "","","", etc.
-func (pdk *PatientDimensionPK) ToCSVText() string {
+func (pdk PatientDimensionPK) ToCSVText() string {
 	return "\"" + pdk.PatientNum + "\""
 }
 
 // ToCSVText writes the PatientDimension struct in a way that can be added to a .csv file - "","","", etc.
-func (pd PatientDimension) ToCSVText() string {
+func (pd PatientDimension) ToCSVText(empty bool) string {
 	b := pd.EncryptedFlag.ToBytes()
 	encodedEncryptedFlag := "\"" + base64.StdEncoding.EncodeToString(b) + "\""
 
 	of := pd.OptionalFields
 	ofString := ""
-	for i := 0; i < len(of); i++ {
-		// +4 because there is on pk field and 3 mandatory fields
-		ofString += "\"" + of[i].Value + "\","
-	}
+	if empty == false {
+		for i := 0; i < len(of); i++ {
+			// +4 because there is on pk field and 3 mandatory fields
+			ofString += "\"" + of[i].Value + "\","
+		}
 
-	acString := "\"" + pd.AdminColumns.UpdateDate + "\"," + "\"" + pd.AdminColumns.DownloadDate + "\"," + "\"" + pd.AdminColumns.ImportDate + "\"," + "\"" + pd.AdminColumns.SourceSystemCD + "\"," + "\"" + pd.AdminColumns.UploadID + "\""
-	return pd.PK.ToCSVText() + ",\"" + pd.VitalStatusCD + "\"," + "\"" + pd.BirthDate + "\"," + "\"" + pd.DeathDate + "\"," + ofString[:len(ofString)-1] + "," + acString + "," + encodedEncryptedFlag
+		acString := "\"" + pd.AdminColumns.UpdateDate + "\"," + "\"" + pd.AdminColumns.DownloadDate + "\"," + "\"" + pd.AdminColumns.ImportDate + "\"," + "\"" + pd.AdminColumns.SourceSystemCD + "\"," + "\"" + pd.AdminColumns.UploadID + "\""
+		return pd.PK.ToCSVText() + ",\"" + pd.VitalStatusCD + "\"," + "\"" + pd.BirthDate + "\"," + "\"" + pd.DeathDate + "\"," + ofString[:len(ofString)-1] + "," + acString + "," + encodedEncryptedFlag
+	} else {
+		for i := 0; i < len(of); i++ {
+			// +4 because there is on pk field and 3 mandatory fields
+			ofString += "\"" + "\","
+		}
+
+		acString := "\"" + "\"," + "\"" + "\"," + "\"" + "\"," + "\"" + "\"," + "\"" + "\""
+		return pd.PK.ToCSVText() + ",\"" + "\"," + "\"" + "\"," + "\"" + "\"," + ofString[:len(ofString)-1] + "," + acString + "," + encodedEncryptedFlag
+
+	}
 }
 
 // OptionalFields table contains the optional fields
@@ -460,8 +479,8 @@ func LocalOntologyFromString(line []string) *LocalOntology {
 }
 
 // PatientDimensionFromString generates a PatientDimension struct from a parsed line of a .csv file
-func PatientDimensionFromString(line []string, pk kyber.Point) (*PatientDimensionPK, PatientDimension) {
-	pdk := &PatientDimensionPK{
+func PatientDimensionFromString(line []string, pk kyber.Point) (PatientDimensionPK, PatientDimension) {
+	pdk := PatientDimensionPK{
 		PatientNum: line[0],
 	}
 
@@ -482,18 +501,14 @@ func PatientDimensionFromString(line []string, pk kyber.Point) (*PatientDimensio
 	}
 
 	ac := AdministrativeColumns{
-		UpdateDate:     line[size-7],
-		DownloadDate:   line[size-6],
-		ImportDate:     line[size-5],
-		SourceSystemCD: line[size-4],
-		UploadID:       line[size-3],
+		UpdateDate:     line[size-5],
+		DownloadDate:   line[size-4],
+		ImportDate:     line[size-3],
+		SourceSystemCD: line[size-2],
+		UploadID:       line[size-1],
 	}
 
-	dummyFlag, err := strconv.ParseInt(line[size-2],10, 64)
-	if err != nil {
-		log.Fatal("Error parsing dummy flag", dummyFlag)
-	}
-	ef := libunlynx.EncryptInt(pk, dummyFlag)
+	ef := libunlynx.EncryptInt(pk, 1)
 
 	pd.OptionalFields = of
 	pd.AdminColumns = ac

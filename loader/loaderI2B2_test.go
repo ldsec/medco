@@ -153,12 +153,20 @@ func TestConvertAdapterMappings(t *testing.T) {
 	assert.Nil(t, loader.ConvertAdapterMappings())
 }
 
+func TestDummyToPatient(t *testing.T) {
+	log.SetDebugVisible(2)
+
+	assert.Nil(t, loader.ParseDummyToPatient())
+}
+
 func TestConvertPatientDimension(t *testing.T) {
 	log.SetDebugVisible(2)
 	setupEncryptEnv()
 
+	loader.ParseDummyToPatient()
+
 	assert.Nil(t, loader.ParsePatientDimension(publicKey))
-	assert.Nil(t, loader.ConvertPatientDimension())
+	assert.Nil(t, loader.ConvertPatientDimension(true))
 
 	local.CloseAll()
 }

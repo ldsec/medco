@@ -121,7 +121,7 @@ func TestPatientDimension_ToCSVText(t *testing.T) {
 		UploadID:       "\\N",
 	}
 
-	pdk := &loader.PatientDimensionPK{
+	pdk := loader.PatientDimensionPK{
 		PatientNum: "1000000001",
 	}
 
@@ -153,7 +153,9 @@ func TestPatientDimension_ToCSVText(t *testing.T) {
 	b := pd.EncryptedFlag.ToBytes()
 	encodedEncryptedFlag := "\"" + base64.StdEncoding.EncodeToString(b) + "\""
 
-	assert.Equal(t, pd.ToCSVText(), `"1000000001","D","1985-11-17 00:00:00","\N","F","24","english","black","married","roman catholic","02140","Zip codes\Massachusetts\Cambridge\02140\","Low","","2010-11-04 10:43:00","2010-08-18 09:50:00","2010-11-04 10:43:00","DEMO","\N",`+encodedEncryptedFlag)
+	assert.Equal(t, pd.ToCSVText(false), `"1000000001","D","1985-11-17 00:00:00","\N","F","24","english","black","married","roman catholic","02140","Zip codes\Massachusetts\Cambridge\02140\","Low","","2010-11-04 10:43:00","2010-08-18 09:50:00","2010-11-04 10:43:00","DEMO","\N",`+encodedEncryptedFlag)
+	assert.Equal(t, pd.ToCSVText(true), `"1000000001","","","","","","","","","","","","","","","","","","",`+encodedEncryptedFlag)
+
 }
 
 func TestConceptDimension_ToCSVText(t *testing.T) {
@@ -362,7 +364,7 @@ func TestPatientDimensionFromString(t *testing.T) {
 		UploadID:       "\\N",
 	}
 
-	pdk := &loader.PatientDimensionPK{
+	pdk := loader.PatientDimensionPK{
 		PatientNum: "1000000001",
 	}
 
@@ -399,7 +401,7 @@ func TestPatientDimensionFromString(t *testing.T) {
 	assert.Nil(t, err, "Parsing error")
 
 	pdkExpected, pdExpected := loader.PatientDimensionFromString(lines[0], pubKey)
-	assert.Equal(t, *pdkExpected, *pdk)
+	assert.Equal(t, pdkExpected, pdk)
 
 	// place them nil because encryption is randomized
 	pdExpected.EncryptedFlag = libunlynx.CipherText{}
