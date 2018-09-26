@@ -143,10 +143,10 @@ func TestConvertAdapterMappings(t *testing.T) {
 	loader.ListSensitiveConceptsShrine[`\Admit Diagnosis\`] = true
 	loader.ListSensitiveConceptsShrine[`\Principal Diagnosis\`] = true
 	loader.ListSensitiveConceptsShrine[`\Secondary Diagnosis\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`] = true
+	//loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\`] = true
+	//loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\`] = true
+	//loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\`] = true
+	//loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`] = true
 	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.9) Benign neoplasm of bone and articular cartilage, site unspecified\`] = true
 
 	assert.Nil(t, loader.ParseAdapterMappings())
@@ -229,11 +229,10 @@ func TestConvertShrineOntology(t *testing.T) {
 	loader.ListSensitiveConceptsShrine[`\Admit Diagnosis\`] = true
 	loader.ListSensitiveConceptsShrine[`\Principal Diagnosis\`] = true
 	loader.ListSensitiveConceptsShrine[`\Secondary Diagnosis\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`] = true
+	//loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\`] = true
+	//loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\`] = true
+	//loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\`] = true
+	//loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`] = true
 	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.9) Benign neoplasm of bone and articular cartilage, site unspecified\`] = true
 
 	assert.Nil(t, loader.ParseAdapterMappings())
@@ -283,11 +282,10 @@ func TestConvertLocalOntology(t *testing.T) {
 	loader.ListSensitiveConceptsShrine[`\Admit Diagnosis\`] = true
 	loader.ListSensitiveConceptsShrine[`\Principal Diagnosis\`] = true
 	loader.ListSensitiveConceptsShrine[`\Secondary Diagnosis\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`] = true
+	//loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\`] = true
+	//loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\`] = true
+	//loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\`] = true
+	//loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`] = true
 	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.9) Benign neoplasm of bone and articular cartilage, site unspecified\`] = true
 
 	assert.Nil(t, loader.ParseAdapterMappings())
@@ -311,11 +309,10 @@ func TestConvertConceptDimension(t *testing.T) {
 	loader.ListSensitiveConceptsShrine[`\Admit Diagnosis\`] = true
 	loader.ListSensitiveConceptsShrine[`\Principal Diagnosis\`] = true
 	loader.ListSensitiveConceptsShrine[`\Secondary Diagnosis\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`] = true
+	//loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\`] = true
+	//loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\`] = true
+	//loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\`] = true
+	//loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`] = true
 	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.9) Benign neoplasm of bone and articular cartilage, site unspecified\`] = true
 
 	assert.Nil(t, loader.ParseAdapterMappings())
@@ -343,11 +340,10 @@ func TestConvertModifierDimension(t *testing.T) {
 	loader.ListSensitiveConceptsShrine[`\Admit Diagnosis\`] = true
 	loader.ListSensitiveConceptsShrine[`\Principal Diagnosis\`] = true
 	loader.ListSensitiveConceptsShrine[`\Secondary Diagnosis\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`] = true
+	//loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\`] = true
+	//loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\`] = true
+	//loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\`] = true
+	//loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`] = true
 	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.9) Benign neoplasm of bone and articular cartilage, site unspecified\`] = true
 
 	assert.Nil(t, loader.ParseAdapterMappings())
@@ -375,38 +371,53 @@ func TestConvertObservationFact(t *testing.T) {
 	loader.ListSensitiveConceptsShrine[`\Admit Diagnosis\`] = true
 	loader.ListSensitiveConceptsShrine[`\Principal Diagnosis\`] = true
 	loader.ListSensitiveConceptsShrine[`\Secondary Diagnosis\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\`] = true
-	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`] = true
+	//loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\`] = true
+	//loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\`] = true
+	//loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\`] = true
+	//loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`] = true
 	loader.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.9) Benign neoplasm of bone and articular cartilage, site unspecified\`] = true
 
 	assert.Nil(t, loader.ParseAdapterMappings())
 	assert.Nil(t, loader.ConvertAdapterMappings())
 
+	log.LLvl1("\n\n\n--- Finished converting ADAPTER_MAPPINGS ---\n\n")
+
 	assert.Nil(t, loader.ParseShrineOntology())
 	assert.Nil(t, loader.ConvertShrineOntology())
 
+	log.LLvl1("\n\n\n--- Finished converting SHRINE_ONTOLOGY ---\n\n")
+
 	assert.Nil(t, loader.ParseLocalOntology(el, 0))
 	assert.Nil(t, loader.ConvertLocalOntology())
+
+	log.LLvl1("\n\n\n--- Finished converting LOCAL_ONTOLOGY ---\n\n")
 
 	assert.Nil(t, loader.ParseDummyToPatient())
 
 	assert.Nil(t, loader.ParsePatientDimension(publicKey))
 	assert.Nil(t, loader.ConvertPatientDimension(publicKey, true))
 
+	log.LLvl1("\n\n\n--- Finished converting PATIENT_DIMENSION ---\n\n")
+
 	assert.Nil(t, loader.ParseVisitDimension())
 	assert.Nil(t, loader.ConvertVisitDimension(true))
+
+	log.LLvl1("\n\n\n--- Finished converting VISIT_DIMENSION ---\n\n")
 
 	assert.Nil(t, loader.ParseConceptDimension())
 	assert.Nil(t, loader.ConvertConceptDimension())
 
+	log.LLvl1("\n\n\n--- Finished converting CONCEPT_DIMENSION ---\n\n")
+
 	assert.Nil(t, loader.ParseModifierDimension())
 	assert.Nil(t, loader.ConvertModifierDimension())
 
+	log.LLvl1("\n\n\n--- Finished converting MODIFIER_DIMENSION ---\n\n")
+
 	assert.Nil(t, loader.ParseObservationFact())
 	assert.Nil(t, loader.ConvertObservationFact())
+
+	log.LLvl1("\n\n\n--- Finished converting OBSERVATION_FACT ---\n\n")
 
 	local.CloseAll()
 }
