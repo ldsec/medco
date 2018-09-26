@@ -25,11 +25,11 @@ var (
 		"SHRINE_ONTOLOGY":    "../data/original/shrine.csv",
 		"LOCAL_ONTOLOGY":     "../data/original/i2b2.csv",
 		"PATIENT_DIMENSION":  "../data/original/patient_dimension.csv",
-		"VISIT_DIMENSION":	  "../data/original/visit_dimension.csv",
+		"VISIT_DIMENSION":    "../data/original/visit_dimension.csv",
 		"CONCEPT_DIMENSION":  "../data/original/concept_dimension.csv",
 		"MODIFIER_DIMENSION": "../data/original/modifier_dimension.csv",
 		"OBSERVATION_FACT":   "../data/original/observation_fact.csv",
-		"DUMMY_TO_PATIENT":	  "../data/original/dummy_to_patient.csv",
+		"DUMMY_TO_PATIENT":   "../data/original/dummy_to_patient.csv",
 	}
 
 	OutputFilePaths = map[string]string{
@@ -38,9 +38,9 @@ var (
 		"LOCAL_ONTOLOGY_CLEAR":     "../data/converted/i2b2.csv",
 		"LOCAL_ONTOLOGY_SENSITIVE": "../data/converted/sensitive_tagged.csv",
 		"PATIENT_DIMENSION":        "../data/converted/patient_dimension.csv",
-		"NEW_PATIENT_NUM":			"../data/converted/new_patient_num.csv",
-		"VISIT_DIMENSION":			"../data/converted/visit_dimension.csv",
-		"NEW_ENCOUNTER_NUM":		"../data/converted/new_encounter_num.csv",
+		"NEW_PATIENT_NUM":          "../data/converted/new_patient_num.csv",
+		"VISIT_DIMENSION":          "../data/converted/visit_dimension.csv",
+		"NEW_ENCOUNTER_NUM":        "../data/converted/new_encounter_num.csv",
 		"CONCEPT_DIMENSION":        "../data/converted/concept_dimension.csv",
 		"MODIFIER_DIMENSION":       "../data/converted/modifier_dimension.csv",
 		"OBSERVATION_FACT":         "../data/converted/observation_fact.csv",
@@ -136,7 +136,7 @@ func createTempMaps(am AdapterMappings, localToShrine map[string][]string, shrin
 	}
 }
 
-// StoreSensitiveLocalConceptsNew stores the local sensitive concepts in a set that is kept in RAM during the entire loading (to make parsing the local ontology faster)
+// StoreSensitiveLocalConcepts stores the local sensitive concepts in a set that is kept in RAM during the entire loading (to make parsing the local ontology faster)
 func StoreSensitiveLocalConcepts(localToShrine map[string][]string, shrineToLocal *radix.Tree) {
 	// STEP 1: Pick sensitive shrine concept
 	for shrineKey := range ListSensitiveConceptsShrine {
@@ -249,7 +249,7 @@ func ParseDummyToPatient() error {
 	"dummy",
 	"patient"
 
-	 */
+	*/
 
 	//skip header
 	for _, line := range lines[1:] {
@@ -778,9 +778,9 @@ func ConvertPatientDimension(pk kyber.Point, empty bool) error {
 
 	// re-randomize the patient_num
 	totalNbrPatients := len(TablePatientDimension) + len(TableDummyToPatient)
-	src := make([]int,0)
+	src := make([]int, 0)
 
-	for i:=0; i<totalNbrPatients; i++ {
+	for i := 0; i < totalNbrPatients; i++ {
 		src = append(src, i)
 	}
 
@@ -792,7 +792,7 @@ func ConvertPatientDimension(pk kyber.Point, empty bool) error {
 	// remove the last ,
 	csvOutputFile.WriteString(headerString[:len(headerString)-1] + "\n")
 
-	i:=0
+	i := 0
 	for _, pd := range TablePatientDimension {
 		MapNewPatientNum[pd.PK.PatientNum] = strconv.FormatInt(int64(perm[i]), 10)
 		pd.PK.PatientNum = strconv.FormatInt(int64(perm[i]), 10)
@@ -823,7 +823,7 @@ func ConvertPatientDimension(pk kyber.Point, empty bool) error {
 
 	csvOutputNewPatientNumFile.WriteString("\"old_patient_num\",\"new_patient_num\"\n")
 
-	for key, value := range MapNewPatientNum{
+	for key, value := range MapNewPatientNum {
 		csvOutputNewPatientNumFile.WriteString("\"" + key + "\"," + "\"" + value + "\"\n")
 	}
 
@@ -893,7 +893,7 @@ func ParseVisitDimension() error {
 			MapPatientVisits[vdk.PatientNum] = append(MapPatientVisits[vdk.PatientNum], vdk.EncounterNum)
 		}
 
-		if MaxVisits < len(MapPatientVisits[vdk.PatientNum]){
+		if MaxVisits < len(MapPatientVisits[vdk.PatientNum]) {
 			MaxVisits = len(MapPatientVisits[vdk.PatientNum])
 		}
 	}
@@ -920,9 +920,9 @@ func ConvertVisitDimension(empty bool) error {
 
 	// re-randomize the encounter_num
 	totalNbrVisits := len(TableVisitDimension) + len(TableDummyToPatient)*MaxVisits
-	src := make([]int,0)
+	src := make([]int, 0)
 
-	for i:=0; i<totalNbrVisits; i++ {
+	for i := 0; i < totalNbrVisits; i++ {
 		src = append(src, i)
 	}
 
@@ -934,7 +934,7 @@ func ConvertVisitDimension(empty bool) error {
 	// remove the last ,
 	csvOutputFile.WriteString(headerString[:len(headerString)-1] + "\n")
 
-	i:=0
+	i := 0
 	for _, vd := range TableVisitDimension {
 		MapNewEncounterNum[VisitDimensionPK{EncounterNum: vd.PK.EncounterNum, PatientNum: vd.PK.PatientNum}] = VisitDimensionPK{EncounterNum: strconv.FormatInt(int64(perm[i]), 10), PatientNum: MapNewPatientNum[vd.PK.PatientNum]}
 		vd.PK.EncounterNum = strconv.FormatInt(int64(perm[i]), 10)
@@ -949,7 +949,7 @@ func ConvertVisitDimension(empty bool) error {
 
 		for _, el := range listPatientVisits {
 			MapNewEncounterNum[VisitDimensionPK{EncounterNum: el, PatientNum: dummyNum}] = VisitDimensionPK{EncounterNum: strconv.FormatInt(int64(perm[i]), 10), PatientNum: MapNewPatientNum[dummyNum]}
-			visit := TableVisitDimension[VisitDimensionPK{EncounterNum: el,PatientNum: patientNum}]
+			visit := TableVisitDimension[VisitDimensionPK{EncounterNum: el, PatientNum: patientNum}]
 			visit.PK.EncounterNum = strconv.FormatInt(int64(perm[i]), 10)
 			visit.PK.PatientNum = MapNewPatientNum[dummyNum]
 			csvOutputFile.WriteString(visit.ToCSVText(empty) + "\n")
@@ -967,7 +967,7 @@ func ConvertVisitDimension(empty bool) error {
 
 	csvOutputNewEncounterNumFile.WriteString("\"old_encounter_num\",\"old_patient_num\",\"new_encounter_num\",\"new_patient_num\"\n")
 
-	for key, value := range MapNewEncounterNum{
+	for key, value := range MapNewEncounterNum {
 		csvOutputNewEncounterNumFile.WriteString("\"" + key.EncounterNum + "\"," + "\"" + key.PatientNum + "\"," + "\"" + value.EncounterNum + "\"," + "\"" + value.PatientNum + "\"\n")
 	}
 
@@ -1282,15 +1282,15 @@ func ConvertObservationFact() error {
 	return nil
 }
 
-func regenerateObservationPK(ofk *ObservationFactPK, patientNum, encounterNum string) *ObservationFactPK{
+func regenerateObservationPK(ofk *ObservationFactPK, patientNum, encounterNum string) *ObservationFactPK {
 	ofkNew := &ObservationFactPK{
-		EncounterNum: 	encounterNum,
-		PatientNum:		patientNum,
-		ConceptCD: 		ofk.ConceptCD,
-		ProviderID:   	ofk.ProviderID,
-		StartDate:    	ofk.StartDate,
-		ModifierCD:   	ofk.ModifierCD,
-		InstanceNum:  	ofk.InstanceNum,
+		EncounterNum: encounterNum,
+		PatientNum:   patientNum,
+		ConceptCD:    ofk.ConceptCD,
+		ProviderID:   ofk.ProviderID,
+		StartDate:    ofk.StartDate,
+		ModifierCD:   ofk.ModifierCD,
+		InstanceNum:  ofk.InstanceNum,
 	}
 	return ofkNew
 }

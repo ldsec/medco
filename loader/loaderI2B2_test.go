@@ -72,9 +72,9 @@ func TestStoreSensitiveLocalConcepts(t *testing.T) {
 	localToShrine := make(map[string][]string)
 	shrineToLocal := radix.New()
 
-	shrineToLocal.Insert("a",[]string{"1", "2"})
-	shrineToLocal.Insert("b",[]string{"3"})
-	shrineToLocal.Insert("c",[]string{"4"})
+	shrineToLocal.Insert("a", []string{"1", "2"})
+	shrineToLocal.Insert("b", []string{"3"})
+	shrineToLocal.Insert("c", []string{"4"})
 
 	localToShrine["1"] = []string{"a"}
 	localToShrine["2"] = []string{"a"}
@@ -95,9 +95,9 @@ func TestStoreSensitiveLocalConcepts(t *testing.T) {
 	localToShrine = make(map[string][]string)
 	shrineToLocal = radix.New()
 
-	shrineToLocal.Insert("a",[]string{"1", "2", "3"})
-	shrineToLocal.Insert("b",[]string{"2"})
-	shrineToLocal.Insert("c",[]string{"4"})
+	shrineToLocal.Insert("a", []string{"1", "2", "3"})
+	shrineToLocal.Insert("b", []string{"2"})
+	shrineToLocal.Insert("c", []string{"4"})
 
 	localToShrine["1"] = []string{"a"}
 	localToShrine["2"] = []string{"a", "b"}
@@ -118,10 +118,10 @@ func TestStoreSensitiveLocalConcepts(t *testing.T) {
 	localToShrine = make(map[string][]string)
 	shrineToLocal = radix.New()
 
-	shrineToLocal.Insert("a",[]string{"1", "2", "3"})
-	shrineToLocal.Insert("b",[]string{"2", "4"})
-	shrineToLocal.Insert("c",[]string{"5", "4"})
-	shrineToLocal.Insert("d",[]string{"6"})
+	shrineToLocal.Insert("a", []string{"1", "2", "3"})
+	shrineToLocal.Insert("b", []string{"2", "4"})
+	shrineToLocal.Insert("c", []string{"5", "4"})
+	shrineToLocal.Insert("d", []string{"6"})
 
 	localToShrine["1"] = []string{"a"}
 	localToShrine["2"] = []string{"a", "b"}

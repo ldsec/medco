@@ -20,7 +20,6 @@ func TestRadixTreeTest(t *testing.T) {
 	r.Insert(`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`, 1)
 	r.Insert(`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.9) Benign neoplasm of bone and articular cartilage, site unspecified\`, 1)
 
-
 	assert.Equal(t, 9, r.Len())
 	r.WalkPrefix(`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\`, func(s string, v interface{}) bool {
 		log.LLvl1(s)
