@@ -296,15 +296,15 @@ func (pd PatientDimension) ToCSVText(empty bool) string {
 
 		acString := "\"" + pd.AdminColumns.UpdateDate + "\"," + "\"" + pd.AdminColumns.DownloadDate + "\"," + "\"" + pd.AdminColumns.ImportDate + "\"," + "\"" + pd.AdminColumns.SourceSystemCD + "\"," + "\"" + pd.AdminColumns.UploadID + "\""
 		return pd.PK.ToCSVText() + ",\"" + pd.VitalStatusCD + "\"," + "\"" + pd.BirthDate + "\"," + "\"" + pd.DeathDate + "\"," + ofString[:len(ofString)-1] + "," + acString + "," + encodedEncryptedFlag
-	} else {
-		for i := 0; i < len(of); i++ {
-			// +4 because there is one pk field and 3 mandatory fields
-			ofString += "\"" + "\","
-		}
-
-		acString := "\"" + "\"," + "\"" + "\"," + "\"" + "\"," + "\"" + "\"," + "\"" + "\""
-		return pd.PK.ToCSVText() + ",\"" + "\"," + "\"" + "\"," + "\"" + "\"," + ofString[:len(ofString)-1] + "," + acString + "," + encodedEncryptedFlag
 	}
+
+	for i := 0; i < len(of); i++ {
+		// +4 because there is one pk field and 3 mandatory fields
+		ofString += "\"" + "\","
+	}
+
+	acString := "\"" + "\"," + "\"" + "\"," + "\"" + "\"," + "\"" + "\"," + "\"" + "\""
+	return pd.PK.ToCSVText() + ",\"" + "\"," + "\"" + "\"," + "\"" + "\"," + ofString[:len(ofString)-1] + "," + acString + "," + encodedEncryptedFlag
 }
 
 // OptionalFields table contains the optional fields
@@ -335,18 +335,18 @@ var HeaderVisitDimension []string
 
 // VisitDimension table represents a visit in the database
 type VisitDimension struct {
-	PK             	VisitDimensionPK
-	ActiveStatusCD 	string
-	StartDate      	string
-	EndDate      	string
-	OptionalFields 	[]OptionalFields
-	AdminColumns   	AdministrativeColumns
+	PK             VisitDimensionPK
+	ActiveStatusCD string
+	StartDate      string
+	EndDate        string
+	OptionalFields []OptionalFields
+	AdminColumns   AdministrativeColumns
 }
 
 // VisitDimensionPK is the primary key of the visit_dimension table
 type VisitDimensionPK struct {
-	EncounterNum 	string
-	PatientNum 		string
+	EncounterNum string
+	PatientNum   string
 }
 
 // ToCSVText writes the VisitDimensionPK struct in a way that can be added to a .csv file - "","","", etc.
@@ -366,15 +366,15 @@ func (vd VisitDimension) ToCSVText(empty bool) string {
 
 		acString := "\"" + vd.AdminColumns.UpdateDate + "\"," + "\"" + vd.AdminColumns.DownloadDate + "\"," + "\"" + vd.AdminColumns.ImportDate + "\"," + "\"" + vd.AdminColumns.SourceSystemCD + "\"," + "\"" + vd.AdminColumns.UploadID + "\""
 		return vd.PK.ToCSVText() + ",\"" + vd.ActiveStatusCD + "\"," + "\"" + vd.StartDate + "\"," + "\"" + vd.EndDate + "\"," + ofString[:len(ofString)-1] + "," + acString
-	} else {
-		for i := 0; i < len(of); i++ {
-			// +4 because there is on pk field and 3 mandatory fields
-			ofString += "\"" + "\","
-		}
-
-		acString := "\"" + "\"," + "\"" + "\"," + "\"" + "\"," + "\"" + "\"," + "\""  + "\""
-		return vd.PK.ToCSVText() + ",\"" + "\"," + "\"" + "\"," + "\"" + "\"," + ofString[:len(ofString)-1] + "," + acString
 	}
+
+	for i := 0; i < len(of); i++ {
+		// +4 because there is on pk field and 3 mandatory fields
+		ofString += "\"" + "\","
+	}
+
+	acString := "\"" + "\"," + "\"" + "\"," + "\"" + "\"," + "\"" + "\"," + "\"" + "\""
+	return vd.PK.ToCSVText() + ",\"" + "\"," + "\"" + "\"," + "\"" + "\"," + ofString[:len(ofString)-1] + "," + acString
 }
 
 //-------------------------------------//
@@ -591,15 +591,15 @@ func PatientDimensionFromString(line []string, pk kyber.Point) (PatientDimension
 // VisitDimensionFromString generates a VisitDimension struct from a parsed line of a .csv file
 func VisitDimensionFromString(line []string) (VisitDimensionPK, VisitDimension) {
 	vdk := VisitDimensionPK{
-		EncounterNum: 	line[0],
-		PatientNum:  	line[1],
+		EncounterNum: line[0],
+		PatientNum:   line[1],
 	}
 
 	vd := VisitDimension{
-		PK:            	vdk,
+		PK:             vdk,
 		ActiveStatusCD: line[2],
-		StartDate:     	line[3],
-		EndDate:     	line[4],
+		StartDate:      line[3],
+		EndDate:        line[4],
 	}
 
 	size := len(line)

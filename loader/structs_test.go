@@ -168,8 +168,8 @@ func TestVisitDimension_ToCSVText(t *testing.T) {
 	}
 
 	vdk := loader.VisitDimensionPK{
-		EncounterNum: 	"471185",
-		PatientNum: 	"1000000101",
+		EncounterNum: "471185",
+		PatientNum:   "1000000101",
 	}
 
 	op := make([]loader.OptionalFields, 0)
@@ -183,7 +183,7 @@ func TestVisitDimension_ToCSVText(t *testing.T) {
 		PK:             vdk,
 		ActiveStatusCD: "U",
 		StartDate:      "1997-01-02 00:00:00",
-		EndDate:      	"\\N",
+		EndDate:        "\\N",
 		OptionalFields: op,
 		AdminColumns:   ac,
 	}
@@ -445,7 +445,7 @@ func TestPatientDimensionFromString(t *testing.T) {
 }
 
 func TestVisitDimensionFromString(t *testing.T) {
-	aux := [...]string{"encounter_num","patient_num","active_status_cd","start_date","end_date","inout_cd","location_cd","location_path","length_of_stay","visit_blob","update_date","download_date","import_date","sourcesystem_cd","upload_id"}
+	aux := [...]string{"encounter_num", "patient_num", "active_status_cd", "start_date", "end_date", "inout_cd", "location_cd", "location_path", "length_of_stay", "visit_blob", "update_date", "download_date", "import_date", "sourcesystem_cd", "upload_id"}
 	loader.HeaderPatientDimension = aux[:]
 
 	ac := loader.AdministrativeColumns{
@@ -457,8 +457,8 @@ func TestVisitDimensionFromString(t *testing.T) {
 	}
 
 	vdk := loader.VisitDimensionPK{
-		EncounterNum: 	"471185",
-		PatientNum: 	"1000000101",
+		EncounterNum: "471185",
+		PatientNum:   "1000000101",
 	}
 
 	op := make([]loader.OptionalFields, 0)
@@ -472,7 +472,7 @@ func TestVisitDimensionFromString(t *testing.T) {
 		PK:             vdk,
 		ActiveStatusCD: "U",
 		StartDate:      "1997-01-02 00:00:00",
-		EndDate:      	"\\N",
+		EndDate:        "\\N",
 		OptionalFields: op,
 		AdminColumns:   ac,
 	}
