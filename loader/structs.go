@@ -184,6 +184,10 @@ func LocalOntologySensitiveModifierToCSVText(tag *libunlynx.GroupingKey, tagID i
 
 //-------------------------------------//
 
+var MapPatientObs map[string][]*ObservationFactPK
+
+//-------------------------------------//
+
 // TableObservationFact is observation_fact table
 var TableObservationFact map[*ObservationFactPK]ObservationFact
 

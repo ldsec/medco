@@ -881,7 +881,7 @@ func ParseVisitDimension() error {
 		TableVisitDimension[vdk] = vd
 
 		// if patient does not exist
-		if _, ok := MapPatientVisits[vdk.PatientNum]; ok == false {
+		if _, ok := MapPatientVisits[vdk.PatientNum]; !ok {
 			// create array and add the encounter
 			tmp := make([]string, 0)
 			tmp = append(tmp, vdk.EncounterNum)
@@ -1146,6 +1146,7 @@ func ParseObservationFact() error {
 
 	TableObservationFact = make(map[*ObservationFactPK]ObservationFact)
 	HeaderObservationFact = make([]string, 0)
+	MapPatientObs = make(map[string][]*ObservationFactPK)
 
 	/* structure of observation_fact_old.csv (in order):
 
@@ -1177,16 +1178,32 @@ func ParseObservationFact() error {
 	"sourcesystem_cd",
 	"upload_id",
 	"text_search_index"
+
+	// EXTRA FIELDS (added during dummy generation)
+	"cluster_label"
 	*/
 
 	for _, header := range lines[0] {
 		HeaderObservationFact = append(HeaderObservationFact, header)
 	}
+	// remove "cluster_label"
+	HeaderObservationFact = HeaderObservationFact[:len(HeaderObservationFact)-1]
 
 	//skip header
 	for _, line := range lines[1:] {
 		ofk, of := ObservationFactFromString(line)
 		TableObservationFact[ofk] = of
+
+		// if patient does not exist
+		if _, ok := MapPatientObs[ofk.PatientNum]; !ok {
+			// create array and add the observation
+			tmp := make([]*ObservationFactPK, 0)
+			tmp = append(tmp, ofk)
+			MapPatientObs[ofk.PatientNum] = tmp
+		} else {
+			// append encounter to array
+			MapPatientObs[ofk.PatientNum] = append(MapPatientObs[ofk.PatientNum], ofk)
+		}
 	}
 
 	return nil
@@ -1194,6 +1211,8 @@ func ParseObservationFact() error {
 
 // ConvertObservationFact converts the old observation_fact_old.csv file
 func ConvertObservationFact() error {
+	rand.Seed(time.Now().Unix())
+
 	csvOutputFile, err := os.Create(OutputFilePaths["OBSERVATION_FACT"])
 	if err != nil {
 		log.Fatal("Error opening [observation_fact].csv")
@@ -1208,23 +1227,47 @@ func ConvertObservationFact() error {
 	// remove the last ,
 	csvOutputFile.WriteString(headerString[:len(headerString)-1] + "\n")
 
-	//
-
-
-
-
 	for _, of := range TableObservationFact {
+		copyObs := of
+
+		// if dummy observation
+		if originalPatient, ok := TableDummyToPatient[of.PK.PatientNum]; ok {
+			// 1. choose a random observation from the original patient
+			// 2. copy the data
+			// 3. change patient_num and encounter_num
+			listObs := MapPatientObs[originalPatient]
+			index := rand.Intn(len(listObs))
+
+			copyObs := TableObservationFact[listObs[index]]
+			// change patient_num and encounter_num
+			tmp := MapNewEncounterNum[VisitDimensionPK{EncounterNum: copyObs.PK.EncounterNum, PatientNum: of.PK.PatientNum}]
+			copyObs.PK.PatientNum = tmp.PatientNum
+			copyObs.PK.EncounterNum = tmp.EncounterNum
+
+			// delete observation from index (so we don't choose it again
+			listObs[index] = listObs[len(listObs)-1]
+			listObs[len(listObs)-1] = nil
+			listObs = listObs[:len(listObs)-1]
+			MapPatientObs[originalPatient] = listObs
+
+		} else { // if real observation
+			// change patient_num and encounter_num
+			tmp := MapNewEncounterNum[VisitDimensionPK{EncounterNum: of.PK.EncounterNum, PatientNum: of.PK.PatientNum}]
+			copyObs.PK.PatientNum = tmp.PatientNum
+			copyObs.PK.EncounterNum = tmp.EncounterNum
+		}
+
 		// if the concept is sensitive we replace its code with the correspondent tag ID
-		if _, ok := MapConceptCodeToTag[of.PK.ConceptCD]; ok {
-			of.PK.ConceptCD = strconv.FormatInt(MapConceptCodeToTag[of.PK.ConceptCD], 10)
+		if _, ok := MapConceptCodeToTag[copyObs.PK.ConceptCD]; ok {
+			copyObs.PK.ConceptCD = strconv.FormatInt(MapConceptCodeToTag[copyObs.PK.ConceptCD], 10)
 		}
 
 		// if the modifier is sensitive we replace its code with the correspondent tag ID
-		if _, ok := MapModifierCodeToTag[of.PK.ModifierCD]; ok {
-			of.PK.ModifierCD = strconv.FormatInt(MapModifierCodeToTag[of.PK.ModifierCD], 10)
+		if _, ok := MapModifierCodeToTag[copyObs.PK.ModifierCD]; ok {
+			copyObs.PK.ModifierCD = strconv.FormatInt(MapModifierCodeToTag[copyObs.PK.ModifierCD], 10)
 		}
 
-		csvOutputFile.WriteString(of.ToCSVText() + "\n")
+		csvOutputFile.WriteString(copyObs.ToCSVText() + "\n")
 	}
 
 	return nil

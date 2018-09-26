@@ -602,6 +602,6 @@ func TestObservationFactFromString(t *testing.T) {
 
 	ofkExpected, ofExpected := loader.ObservationFactFromString(lines[0])
 
-	assert.Equal(t, *ofkExpected, *ofk)
+	assert.Equal(t, ofkExpected, ofk)
 	assert.Equal(t, ofExpected, of)
 }
