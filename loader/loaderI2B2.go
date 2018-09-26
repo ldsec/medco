@@ -762,6 +762,8 @@ func ParsePatientDimension(pk kyber.Point) error {
 // ConvertPatientDimension converts the old patient_dimension.csv file
 // If emtpy is set to true all other data except the patient_num and encrypted_dummy_flag are set to empty
 func ConvertPatientDimension(pk kyber.Point, empty bool) error {
+	rand.Seed(time.Now().UnixNano())
+
 	csvOutputFile, err := os.Create(OutputFilePaths["PATIENT_DIMENSION"])
 	if err != nil {
 		log.Fatal("Error opening [patient_dimension].csv")
@@ -902,6 +904,8 @@ func ParseVisitDimension() error {
 // ConvertVisitDimension converts the old visit_dimension.csv file. The means re-randomizing the encounter_num.
 // If emtpy is set to true all other data except the patient_num and encounter_num are set to empty
 func ConvertVisitDimension(empty bool) error {
+	rand.Seed(time.Now().UnixNano())
+
 	csvOutputFile, err := os.Create(OutputFilePaths["VISIT_DIMENSION"])
 	if err != nil {
 		log.Fatal("Error opening [visit_dimension].csv")
@@ -1147,6 +1151,7 @@ func ParseObservationFact() error {
 	TableObservationFact = make(map[*ObservationFactPK]ObservationFact)
 	HeaderObservationFact = make([]string, 0)
 	MapPatientObs = make(map[string][]*ObservationFactPK)
+	MapDummyObs = make(map[string][]*ObservationFactPK)
 
 	/* structure of observation_fact_old.csv (in order):
 
@@ -1204,6 +1209,11 @@ func ParseObservationFact() error {
 			// append encounter to array
 			MapPatientObs[ofk.PatientNum] = append(MapPatientObs[ofk.PatientNum], ofk)
 		}
+
+		// if dummy
+		if originalPatient, ok := TableDummyToPatient[ofk.PatientNum]; ok {
+			MapDummyObs[ofk.PatientNum] = MapPatientObs[originalPatient]
+		}
 	}
 
 	return nil
@@ -1211,7 +1221,7 @@ func ParseObservationFact() error {
 
 // ConvertObservationFact converts the old observation_fact_old.csv file
 func ConvertObservationFact() error {
-	rand.Seed(time.Now().Unix())
+	rand.Seed(time.Now().UnixNano())
 
 	csvOutputFile, err := os.Create(OutputFilePaths["OBSERVATION_FACT"])
 	if err != nil {
@@ -1231,30 +1241,29 @@ func ConvertObservationFact() error {
 		copyObs := of
 
 		// if dummy observation
-		if originalPatient, ok := TableDummyToPatient[of.PK.PatientNum]; ok {
+		if _, ok := TableDummyToPatient[of.PK.PatientNum]; ok {
 			// 1. choose a random observation from the original patient
 			// 2. copy the data
 			// 3. change patient_num and encounter_num
-			listObs := MapPatientObs[originalPatient]
+			listObs := MapDummyObs[of.PK.PatientNum]
 			index := rand.Intn(len(listObs))
 
-			copyObs := TableObservationFact[listObs[index]]
+			copyObs = TableObservationFact[listObs[index]]
 			// change patient_num and encounter_num
 			tmp := MapNewEncounterNum[VisitDimensionPK{EncounterNum: copyObs.PK.EncounterNum, PatientNum: of.PK.PatientNum}]
-			copyObs.PK.PatientNum = tmp.PatientNum
-			copyObs.PK.EncounterNum = tmp.EncounterNum
+			copyObs.PK = regenerateObservationPK(copyObs.PK, tmp.PatientNum, tmp.EncounterNum)
+			// keep the same concept that was already there
+			copyObs.PK.ConceptCD = of.PK.ConceptCD
 
-			// delete observation from index (so we don't choose it again
+			// delete observation from the list (so we don't choose it again)
 			listObs[index] = listObs[len(listObs)-1]
-			listObs[len(listObs)-1] = nil
 			listObs = listObs[:len(listObs)-1]
-			MapPatientObs[originalPatient] = listObs
+			MapDummyObs[of.PK.PatientNum] = listObs
 
 		} else { // if real observation
 			// change patient_num and encounter_num
 			tmp := MapNewEncounterNum[VisitDimensionPK{EncounterNum: of.PK.EncounterNum, PatientNum: of.PK.PatientNum}]
-			copyObs.PK.PatientNum = tmp.PatientNum
-			copyObs.PK.EncounterNum = tmp.EncounterNum
+			copyObs.PK = regenerateObservationPK(copyObs.PK, tmp.PatientNum, tmp.EncounterNum)
 		}
 
 		// if the concept is sensitive we replace its code with the correspondent tag ID
@@ -1271,4 +1280,17 @@ func ConvertObservationFact() error {
 	}
 
 	return nil
+}
+
+func regenerateObservationPK(ofk *ObservationFactPK, patientNum, encounterNum string) *ObservationFactPK{
+	ofkNew := &ObservationFactPK{
+		EncounterNum: 	encounterNum,
+		PatientNum:		patientNum,
+		ConceptCD: 		ofk.ConceptCD,
+		ProviderID:   	ofk.ProviderID,
+		StartDate:    	ofk.StartDate,
+		ModifierCD:   	ofk.ModifierCD,
+		InstanceNum:  	ofk.InstanceNum,
+	}
+	return ofkNew
 }

@@ -184,7 +184,11 @@ func LocalOntologySensitiveModifierToCSVText(tag *libunlynx.GroupingKey, tagID i
 
 //-------------------------------------//
 
+// MapPatientObs maps patients to their observations
 var MapPatientObs map[string][]*ObservationFactPK
+
+// MapDummyObs maps dummies to the observation of the original patients they are related too
+var MapDummyObs map[string][]*ObservationFactPK
 
 //-------------------------------------//
 
