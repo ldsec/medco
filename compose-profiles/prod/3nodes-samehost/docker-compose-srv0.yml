@@ -22,7 +22,7 @@ services:
           - i2b2-server-srv0
     container_name: prod-i2b2-server-srv0
 
-  database-srv0:
+  i2b2-database-srv0:
     extends:
       file: ../docker-compose-common.yml
       service: i2b2-database
@@ -84,6 +84,8 @@ services:
         - NODE_IDX_ARG=0
     ports:
       - "6445:6443"
+    volumes:
+      - ../../../configuration-profiles/prod/3nodes-samehost:/opt/medco-configuration
     networks:
       medco-network-srv0:
         aliases:

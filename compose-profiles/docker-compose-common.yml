@@ -70,7 +70,3 @@ services:
       - "3306"
     networks:
       - medco-network
-
-networks:
-  medco-network:
-    driver: bridge

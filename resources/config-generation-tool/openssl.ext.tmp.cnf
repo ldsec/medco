@@ -3,5 +3,5 @@
         subjectKeyIdentifier = hash
 
         [ alt_names ]
-        IP.1 = 10.90.38.8
-        DNS.1 = iccluster032.iccluster.epfl.ch
+        IP.1 = 1.1.1.1
+        DNS.1 = server1.domain.com

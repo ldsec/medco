@@ -1,7 +1,7 @@
 version: '2.4'
 services:
 
-  prod-i2b2-server-srv1:
+  i2b2-server-srv1:
     extends:
       file: ../docker-compose-common.yml
       service: i2b2-server
@@ -22,7 +22,7 @@ services:
           - i2b2-server-srv1
     container_name: prod-i2b2-server-srv1
 
-  prod-i2b2-database-srv1:
+  i2b2-database-srv1:
     extends:
       file: ../docker-compose-common.yml
       service: i2b2-database
@@ -34,13 +34,14 @@ services:
           - i2b2-database
     container_name: prod-i2b2-database-srv1
 
-  prod-i2b2-web-srv1:
+  i2b2-web-srv1:
     extends:
       file: ../docker-compose-common.yml
       service: i2b2-web
     build:
       args:
         - NODE_IDX_ARG=1
+        - SAME_HOST_ARG=1
     ports:
       - "84:80"
       - "447:443"
@@ -52,7 +53,7 @@ services:
           - i2b2-web
     container_name: prod-i2b2-web-srv1
   
-  prod-unlynx-srv1:
+  unlynx-srv1:
     extends:
       file: ../docker-compose-common.yml
       service: unlynx
@@ -74,7 +75,7 @@ services:
         ipv4_address: 172.16.205.11
     container_name: prod-unlynx-srv1
 
-  prod-shrine-server-srv1:
+  shrine-server-srv1:
     extends:
       file: ../docker-compose-common.yml
       service: shrine-server
@@ -83,6 +84,8 @@ services:
         - NODE_IDX_ARG=1
     ports:
       - "6447:6443"
+    volumes:
+      - ../../../configuration-profiles/prod/3nodes-samehost:/opt/medco-configuration
     networks:
       medco-network-srv1:
         aliases:
@@ -92,7 +95,7 @@ services:
           - shrine-server-srv1
     container_name: prod-shrine-server-srv1
 
-  prod-shrine-database-srv1:
+  shrine-database-srv1:
     extends:
       file: ../docker-compose-common.yml
       service: shrine-database
