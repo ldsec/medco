@@ -18,6 +18,11 @@ RUN go get -v -d github.com/dedis/onet/... && \
     go get -v -d github.com/lib/pq/... && \
     go get -v -d github.com/lca1/unlynx/...
 
+# temporary (until onet is fixed)
+WORKDIR /go/src/github.com/dedis/onet/log/
+RUN cat log.go
+RUN sed 's/setNonblock()//' log.go
+
 # get sources and switch branch
 WORKDIR /go/src/$UNLYNX_REPO
 RUN git clone https://$UNLYNX_REPO.git . && \
@@ -25,14 +30,8 @@ RUN git clone https://$UNLYNX_REPO.git . && \
 
 # get remaining dependencies, compile and install medco binary, and make it available in the shared folder
 WORKDIR app
-RUN go get -v -d ./...
-
-# temporary (until onet is fixed)
-WORKDIR /go/src/dedis/onet/log/
-RUN cat log.go
-RUN sed 's/setNonblock()//' log.go
-
-#RUN go install -v ./...
+RUN go get -v -d ./... && \
+    go install -v ./...
 
 COPY copy-unlynx-binary-dev.sh /
 ENTRYPOINT ["sh", "-c", "/copy-unlynx-binary-dev.sh"]
