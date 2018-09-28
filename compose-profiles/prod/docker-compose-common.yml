@@ -37,7 +37,7 @@ services:
 
   shrine-server:
     build:
-      context: ../../docker-images/shrine-server
+      context: ../../docker-images/prod/shrine-server
       args:
         - SHRINE_DEBUG_LEVEL_ARG=FINE
     networks:
