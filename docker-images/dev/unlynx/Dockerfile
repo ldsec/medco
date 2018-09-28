@@ -19,9 +19,8 @@ RUN go get -v -d github.com/dedis/onet/... && \
     go get -v -d github.com/lca1/unlynx/...
 
 # temporary (until onet is fixed)
-WORKDIR /go/src/github.com/dedis/onet/log/
-RUN sed 's/\<setNonblock()\>//g' log.go
-RUN cat log.go
+WORKDIR /go/src/github.com/dedis/onet
+RUN git checkout 5931349354a8b5740be860bdad200bc3d83502da
 
 # get sources and switch branch
 WORKDIR /go/src/$UNLYNX_REPO
