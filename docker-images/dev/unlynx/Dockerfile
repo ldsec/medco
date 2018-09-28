@@ -18,6 +18,10 @@ RUN go get -v -d github.com/dedis/onet/... && \
     go get -v -d github.com/lib/pq/... && \
     go get -v -d github.com/lca1/unlynx/...
 
+# temporary (until onet is fixed)
+WORKDIR /go/src/dedis/onet
+RUN git checkout 54de41b0e9eb14c1a9556f55cd28b92dd733ca6c
+
 # get sources and switch branch
 WORKDIR /go/src/$UNLYNX_REPO
 RUN git clone https://$UNLYNX_REPO.git . && \
