@@ -41,6 +41,9 @@ _testmain.go
 .DS_Store
 
 .idea/
-data/converted/*.xml
-data/converted/*.csv
+data/genomic/
+data/i2b2/converted/*.xml
+data/i2b2/converted/*.csv
+app/*.toml
 loader/*.toml
+data/scripts/*.txt

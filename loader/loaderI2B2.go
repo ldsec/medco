@@ -21,34 +21,31 @@ import (
 // The different paths and handlers for all the file both for input and/or output
 var (
 	InputFilePaths = map[string]string{
-		"ADAPTER_MAPPINGS":   "../data/original/AdapterMappings.xml",
-		"SHRINE_ONTOLOGY":    "../data/original/shrine.csv",
-		"LOCAL_ONTOLOGY":     "../data/original/i2b2.csv",
-		"PATIENT_DIMENSION":  "../data/original/patient_dimension.csv",
-		"VISIT_DIMENSION":    "../data/original/visit_dimension.csv",
-		"CONCEPT_DIMENSION":  "../data/original/concept_dimension.csv",
-		"MODIFIER_DIMENSION": "../data/original/modifier_dimension.csv",
-		"OBSERVATION_FACT":   "../data/original/observation_fact.csv",
-		"DUMMY_TO_PATIENT":   "../data/original/dummy_to_patient.csv",
+		"ADAPTER_MAPPINGS":   "../data/i2b2/original/AdapterMappings.xml",
+		"SHRINE_ONTOLOGY":    "../data/i2b2/original/shrine.csv",
+		"LOCAL_ONTOLOGY":     "../data/i2b2/original/i2b2.csv",
+		"PATIENT_DIMENSION":  "../data/i2b2/original/patient_dimension.csv",
+		"VISIT_DIMENSION":    "../data/i2b2/original/visit_dimension.csv",
+		"CONCEPT_DIMENSION":  "../data/i2b2/original/concept_dimension.csv",
+		"MODIFIER_DIMENSION": "../data/i2b2/original/modifier_dimension.csv",
+		"OBSERVATION_FACT":   "../data/i2b2/original/observation_fact.csv",
+		"DUMMY_TO_PATIENT":   "../data/i2b2/original/dummy_to_patient.csv",
 	}
 
 	OutputFilePaths = map[string]string{
-		"ADAPTER_MAPPINGS":         "../data/converted/AdapterMappings.xml",
-		"SHRINE_ONTOLOGY":          "../data/converted/shrine.csv",
-		"LOCAL_ONTOLOGY_CLEAR":     "../data/converted/i2b2.csv",
-		"LOCAL_ONTOLOGY_SENSITIVE": "../data/converted/sensitive_tagged.csv",
-		"PATIENT_DIMENSION":        "../data/converted/patient_dimension.csv",
-		"NEW_PATIENT_NUM":          "../data/converted/new_patient_num.csv",
-		"VISIT_DIMENSION":          "../data/converted/visit_dimension.csv",
-		"NEW_ENCOUNTER_NUM":        "../data/converted/new_encounter_num.csv",
-		"CONCEPT_DIMENSION":        "../data/converted/concept_dimension.csv",
-		"MODIFIER_DIMENSION":       "../data/converted/modifier_dimension.csv",
-		"OBSERVATION_FACT":         "../data/converted/observation_fact.csv",
+		"ADAPTER_MAPPINGS":         "../data/i2b2/converted/AdapterMappings.xml",
+		"SHRINE_ONTOLOGY":          "../data/i2b2/converted/shrine.csv",
+		"LOCAL_ONTOLOGY_CLEAR":     "../data/i2b2/converted/i2b2.csv",
+		"LOCAL_ONTOLOGY_SENSITIVE": "../data/i2b2/converted/sensitive_tagged.csv",
+		"PATIENT_DIMENSION":        "../data/i2b2/converted/patient_dimension.csv",
+		"NEW_PATIENT_NUM":          "../data/i2b2/converted/new_patient_num.csv",
+		"VISIT_DIMENSION":          "../data/i2b2/converted/visit_dimension.csv",
+		"NEW_ENCOUNTER_NUM":        "../data/i2b2/converted/new_encounter_num.csv",
+		"CONCEPT_DIMENSION":        "../data/i2b2/converted/concept_dimension.csv",
+		"MODIFIER_DIMENSION":       "../data/i2b2/converted/modifier_dimension.csv",
+		"OBSERVATION_FACT":         "../data/i2b2/converted/observation_fact.csv",
 	}
 )
-
-// Testing defines whether we should run the DDT on test environment (locally) or using real nodes
-var Testing bool // testing environment
 
 const (
 	// Header is a generic XML header suitable for use with the output of Marshal.
