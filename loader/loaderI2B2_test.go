@@ -4,12 +4,10 @@ import (
 	"github.com/armon/go-radix"
 	"github.com/dedis/kyber"
 	"github.com/dedis/onet"
-	"github.com/dedis/onet/app"
 	"github.com/dedis/onet/log"
 	"github.com/lca1/medco-loader/loader"
 	"github.com/lca1/unlynx/lib"
 	"github.com/stretchr/testify/assert"
-	"os"
 	"testing"
 )
 
@@ -17,39 +15,6 @@ var publicKey kyber.Point
 var secretKey kyber.Scalar
 var el *onet.Roster
 var local *onet.LocalTest
-
-func getRoster(groupFilePath string) (*onet.Roster, *onet.LocalTest, error) {
-
-	// empty string: make localtest
-	if len(groupFilePath) == 0 {
-		log.Info("Creating local test roster")
-
-		local := onet.NewLocalTest(libunlynx.SuiTe)
-		_, el, _ := local.GenTree(3, true)
-		return el, local, nil
-
-		// generate el with group file
-	} else {
-		log.Info("Creating roster from group file path")
-
-		f, err := os.Open(groupFilePath)
-		if err != nil {
-			log.Error("Error while opening group file", err)
-			return nil, nil, err
-		}
-		el, err := app.ReadGroupDescToml(f)
-		if err != nil {
-			log.Error("Error while reading group file", err)
-			return nil, nil, err
-		}
-		if len(el.Roster.List) <= 0 {
-			log.Error("Empty or invalid group file", err)
-			return nil, nil, err
-		}
-
-		return el.Roster, nil, nil
-	}
-}
 
 func setupEncryptEnv() {
 	elAux, localAux, err := getRoster("")
