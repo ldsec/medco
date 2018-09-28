@@ -20,7 +20,7 @@ RUN go get -v -d github.com/dedis/onet/... && \
 
 # temporary (until onet is fixed)
 WORKDIR /go/src/dedis/onet/log
-RUN sed 's/setNonblock()///setNonblock()/' log.go
+RUN sed 's/setNonblock()//' log.go
 RUN cat log.go
 
 # get sources and switch branch
