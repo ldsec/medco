@@ -20,7 +20,8 @@ RUN go get -v -d github.com/dedis/onet/... && \
 
 # temporary (until onet is fixed)
 WORKDIR /go/src/dedis/onet
-RUN git checkout 54de41b0e9eb14c1a9556f55cd28b92dd733ca6c
+RUN ls
+RUN git status
 
 # get sources and switch branch
 WORKDIR /go/src/$UNLYNX_REPO
