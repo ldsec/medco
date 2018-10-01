@@ -1,0 +1,4 @@
+\Admit Diagnosis\
+\Principal Diagnosis\
+\Secondary Diagnosis\
+\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.9) Benign neoplasm of bone and articular cartilage, site unspecified\

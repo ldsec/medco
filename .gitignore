@@ -45,5 +45,6 @@ data/genomic/
 data/i2b2/converted/*.xml
 data/i2b2/converted/*.csv
 app/*.toml
+app/app
 loader/*.toml
 data/scripts/*.txt

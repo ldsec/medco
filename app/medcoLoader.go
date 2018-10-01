@@ -18,7 +18,9 @@ const (
 	// #---- COMMON ----#
 
 	// DefaultGroupFile is the name of the default file to lookup for group definition
-	DefaultGroupFile = "public.toml"
+	DefaultGroupFile = "group.toml"
+	// DefaultSensitiveFile is the name of the file that lists all sensitive attributes
+	DefaultSensitiveFile = "sensitive.txt"
 	// DefaultDBhost is the name of the default database hostname
 	DefaultDBhost = "localhost"
 	// DefaultDBport is the value of the default database access port
@@ -32,6 +34,9 @@ const (
 
 	optionGroupFile      = "group"
 	optionGroupFileShort = "g"
+
+	optionSensitiveFile      = "sensitive"
+	optionSensitiveFileShort = "sen"
 
 	optionEntryPointIdx      = "entryPointIdx"
 	optionEntryPointIdxShort = "entry"
@@ -64,9 +69,6 @@ const (
 	DefaultGenomicFile = "data_mutations_extended_skcm_broad.csv"
 
 	// dataset settings (for now we have no incremental loading, and so we require both ontology and dataset files)
-	optionListSensitive      = "sensitive"
-	optionListSensitiveShort = "sen"
-
 	optionOntologyClinical      = "ont_clinical"
 	optionOntologyClinicalShort = "oc"
 
@@ -117,8 +119,13 @@ func main() {
 			Usage: "Unlynx group definition file",
 		},
 		cli.IntFlag{
-			Name:  optionEntryPointIdx,
+			Name:  optionEntryPointIdx + ", " + optionEntryPointIdxShort,
 			Usage: "Index (relative to the group definition file) of the collective authority server to load the data",
+		},
+		cli.StringFlag{
+			Name:  optionSensitiveFile + ", " + optionSensitiveFileShort,
+			Value: DefaultSensitiveFile,
+			Usage: "List of sensitive concepts",
 		},
 		cli.StringFlag{
 			Name:  optionDBhost + ", " + optionDBhostShort,
@@ -148,11 +155,6 @@ func main() {
 	}
 
 	loaderFlagsv0 := []cli.Flag{
-		cli.StringSliceFlag{
-			Name:  optionListSensitive + ", " + optionListSensitiveShort,
-			Value: &cli.StringSlice{},
-			Usage: "Clinical fields listed as sensitive (\"all\" means all clinical fields are considered sensitive)",
-		},
 		cli.StringFlag{
 			Name:  optionOntologyClinical + ", " + optionOntologyClinicalShort,
 			Value: DefaultOntologyClinical,
