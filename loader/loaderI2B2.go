@@ -1,22 +1,31 @@
 package loader
 
 import (
-	"encoding/csv"
-	"encoding/xml"
-	"github.com/armon/go-radix"
 	"github.com/dedis/kyber"
 	"github.com/dedis/onet"
 	"github.com/dedis/onet/log"
 	"github.com/lca1/medco/services"
 	"github.com/lca1/unlynx/lib"
-	"io"
-	"io/ioutil"
 	"math/rand"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 )
+
+// Files is the object structure behind the files.toml
+type Files struct {
+	AdapterMappings   string
+	I2B2              string
+	SHRINE            string
+	DummyToPatient    string
+	PatientDimension  string
+	VisitDimension    string
+	ConceptDimension  string
+	ModifierDimension string
+	ObservationFact   string
+	OutputFolder      string
+}
 
 // The different paths and handlers for all the file both for input and/or output
 var (
@@ -53,6 +62,213 @@ const (
 	// it is provided as a convenience.
 	Header = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` + "\n"
 )
+
+// MAIN function
+
+func replaceOutputFolder(folderPath string) {
+	tokens := strings.Split(OutputFilePaths["ADAPTER_MAPPINGS"], "/")
+	OutputFilePaths["ADAPTER_MAPPINGS"] = folderPath + tokens[len(tokens)-1]
+
+	tokens = strings.Split(OutputFilePaths["SHRINE_ONTOLOGY"], "/")
+	OutputFilePaths["SHRINE_ONTOLOGY"] = folderPath + tokens[len(tokens)-1]
+
+	tokens = strings.Split(OutputFilePaths["LOCAL_ONTOLOGY_CLEAR"], "/")
+	OutputFilePaths["LOCAL_ONTOLOGY_CLEAR"] = folderPath + tokens[len(tokens)-1]
+
+	tokens = strings.Split(OutputFilePaths["LOCAL_ONTOLOGY_SENSITIVE"], "/")
+	OutputFilePaths["LOCAL_ONTOLOGY_SENSITIVE"] = folderPath + tokens[len(tokens)-1]
+
+	tokens = strings.Split(OutputFilePaths["PATIENT_DIMENSION"], "/")
+	OutputFilePaths["PATIENT_DIMENSION"] = folderPath + tokens[len(tokens)-1]
+
+	tokens = strings.Split(OutputFilePaths["NEW_PATIENT_NUM"], "/")
+	OutputFilePaths["NEW_PATIENT_NUM"] = folderPath + tokens[len(tokens)-1]
+
+	tokens = strings.Split(OutputFilePaths["VISIT_DIMENSION"], "/")
+	OutputFilePaths["VISIT_DIMENSION"] = folderPath + tokens[len(tokens)-1]
+
+	tokens = strings.Split(OutputFilePaths["NEW_ENCOUNTER_NUM"], "/")
+	OutputFilePaths["NEW_ENCOUNTER_NUM"] = folderPath + tokens[len(tokens)-1]
+
+	tokens = strings.Split(OutputFilePaths["CONCEPT_DIMENSION"], "/")
+	OutputFilePaths["CONCEPT_DIMENSION"] = folderPath + tokens[len(tokens)-1]
+
+	tokens = strings.Split(OutputFilePaths["MODIFIER_DIMENSION"], "/")
+	OutputFilePaths["MODIFIER_DIMENSION"] = folderPath + tokens[len(tokens)-1]
+
+	tokens = strings.Split(OutputFilePaths["OBSERVATION_FACT"], "/")
+	OutputFilePaths["OBSERVATION_FACT"] = folderPath + tokens[len(tokens)-1]
+}
+
+func ConvertI2B2(el *onet.Roster, entryPointIdx int, files Files, mapSensitive map[string]bool, databaseS DBSettings, empty bool) error {
+
+	ListSensitiveConceptsShrine = mapSensitive
+
+	// change input filepaths
+	InputFilePaths["ADAPTER_MAPPINGS"] = files.AdapterMappings
+	InputFilePaths["SHRINE_ONTOLOGY"] = files.SHRINE
+	InputFilePaths["LOCAL_ONTOLOGY"] = files.I2B2
+	InputFilePaths["PATIENT_DIMENSION"] = files.PatientDimension
+	InputFilePaths["VISIT_DIMENSION"] = files.VisitDimension
+	InputFilePaths["CONCEPT_DIMENSION"] = files.ConceptDimension
+	InputFilePaths["MODIFIER_DIMENSION"] = files.ModifierDimension
+	InputFilePaths["OBSERVATION_FACT"] = files.ObservationFact
+	InputFilePaths["DUMMY_TO_PATIENT"] = files.DummyToPatient
+
+	// change output filepaths
+	replaceOutputFolder(files.OutputFolder)
+
+	err := ParseAdapterMappings()
+	if err != nil {
+		return err
+	}
+	err = ConvertAdapterMappings()
+	if err != nil {
+		return err
+	}
+
+	log.Lvl2("--- Finished converting ADAPTER_MAPPINGS ---")
+
+	err = ParseShrineOntology()
+	if err != nil {
+		return err
+	}
+	err = ConvertShrineOntology()
+	if err != nil {
+		return err
+	}
+
+	log.Lvl2("--- Finished converting SHRINE_ONTOLOGY ---")
+
+	err = ParseLocalOntology(el, entryPointIdx)
+	if err != nil {
+		return err
+	}
+	err = ConvertLocalOntology()
+	if err != nil {
+		return err
+	}
+
+	log.Lvl2("--- Finished converting LOCAL_ONTOLOGY ---")
+
+	err = ParseDummyToPatient()
+	if err != nil {
+		return err
+	}
+
+	err = ParsePatientDimension(el.Aggregate)
+	if err != nil {
+		return err
+	}
+	err = ConvertPatientDimension(el.Aggregate, empty)
+	if err != nil {
+		return err
+	}
+
+	log.Lvl2("--- Finished converting PATIENT_DIMENSION ---")
+
+	err = ParseVisitDimension()
+	if err != nil {
+		return err
+	}
+	err = ConvertVisitDimension(empty)
+	if err != nil {
+		return err
+	}
+
+	log.Lvl2("--- Finished converting VISIT_DIMENSION ---")
+
+	err = ParseConceptDimension()
+	if err != nil {
+		return err
+	}
+	err = ConvertConceptDimension()
+	if err != nil {
+		return err
+	}
+
+	log.Lvl2("--- Finished converting CONCEPT_DIMENSION ---")
+
+	err = ParseModifierDimension()
+	if err != nil {
+		return err
+	}
+	err = ConvertModifierDimension()
+	if err != nil {
+		return err
+	}
+
+	log.Lvl2("--- Finished converting MODIFIER_DIMENSION ---")
+
+	err = ParseObservationFact()
+	if err != nil {
+		return err
+	}
+	err = ConvertObservationFact()
+	if err != nil {
+		return err
+	}
+
+	log.Lvl2("--- Finished converting OBSERVATION_FACT ---")
+
+	/*err = GenerateLoadingI2B2DataScript(databaseS)
+	if err != nil {
+		log.Fatal("Error while generating the loading data .sh file", err)
+		return err
+	}
+
+	err = LoadI2B2DataFiles()
+	if err != nil {
+		log.Fatal("Error while loading ontology .sql file", err)
+		return err
+	}*/
+
+	return nil
+}
+
+// GenerateLoadingI2B2DataScript creates a load dataset .sql script (deletes the data in the corresponding tables and reloads the new 'protected' data)
+func GenerateLoadingI2B2DataScript(databaseS DBSettings) error {
+	fp, err := os.Create(FileBashPath[1])
+	if err != nil {
+		return err
+	}
+
+	loading := `#!/usr/bin/env bash` + "\n" + "\n" + `PGPASSWORD=` + databaseS.DBpassword + ` psql -v ON_ERROR_STOP=1 -h "` + databaseS.DBhost +
+		`" -U "` + databaseS.DBuser + `" -p ` + strconv.FormatInt(int64(databaseS.DBport), 10) + ` -d "` + databaseS.DBname + `" <<-EOSQL` + "\n"
+
+	loading += "BEGIN;\n"
+	for i := 0; i < len(TablenamesData); i++ {
+		tokens := strings.Split(FilePathsData[i], "/")
+		loading += `\copy ` + TablenamesData[i] + ` FROM 'files/` + tokens[1] + `' ESCAPE '"' DELIMITER ',' CSV;` + "\n"
+	}
+	loading += "COMMIT;\n"
+	loading += "EOSQL"
+
+	_, err = fp.WriteString(loading)
+	if err != nil {
+		return err
+	}
+
+	fp.Close()
+
+	return nil
+}
+
+// LoadI2B2DataFiles executes the loading script for the new converted data
+func LoadI2B2DataFiles() error {
+	// Display just the stderr if an error occurs
+	cmd := exec.Command("/bin/sh", FileBashPath[1])
+	stderr := &bytes.Buffer{} // make sure to import bytes
+	cmd.Stderr = stderr
+	err := cmd.Run()
+	if err != nil {
+		log.LLvl1("Error when running command.  Error log:", stderr.String())
+		log.LLvl1("Got command status:", err.Error())
+		return err
+	}
+
+	return nil
+}
 
 // ADAPTER_MAPPINGS.XML converter
 
