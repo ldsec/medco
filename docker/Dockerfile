@@ -16,7 +16,9 @@ RUN go get -v -d github.com/dedis/onet/... && \
     go get -v -d github.com/r0fls/gostats/... && \
     go get -v -d github.com/fanliao/go-concurrentMap/... && \
     go get -v -d github.com/lib/pq/... && \
-    go get -v -d github.com/lca1/unlynx/...
+    go get -v -d github.com/lca1/unlynx/... && \
+    go get -v -d github.com/armon/go-radix/...
+
 
 # temporary (until onet is fixed)
 WORKDIR /go/src/github.com/dedis/onet
@@ -33,5 +35,5 @@ RUN go get -v -d ./...
 WORKDIR app
 RUN go install -v ./...
 
-COPY copy-unlynx-binary-dev.sh /
+COPY copy-medco-loader-binary.sh /
 ENTRYPOINT ["sh", "-c", "/copy-medco-loader-binary.sh"]
