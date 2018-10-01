@@ -1,11 +1,16 @@
 package loader
 
 import (
+	"encoding/csv"
+	"encoding/xml"
+	"github.com/armon/go-radix"
 	"github.com/dedis/kyber"
 	"github.com/dedis/onet"
 	"github.com/dedis/onet/log"
 	"github.com/lca1/medco/services"
 	"github.com/lca1/unlynx/lib"
+	"io"
+	"io/ioutil"
 	"math/rand"
 	"os"
 	"strconv"
@@ -228,7 +233,7 @@ func ConvertI2B2(el *onet.Roster, entryPointIdx int, files Files, mapSensitive m
 
 // GenerateLoadingI2B2DataScript creates a load dataset .sql script (deletes the data in the corresponding tables and reloads the new 'protected' data)
 func GenerateLoadingI2B2DataScript(databaseS DBSettings) error {
-	fp, err := os.Create(FileBashPath[1])
+	/*fp, err := os.Create(FileBashPath[1])
 	if err != nil {
 		return err
 	}
@@ -249,7 +254,7 @@ func GenerateLoadingI2B2DataScript(databaseS DBSettings) error {
 		return err
 	}
 
-	fp.Close()
+	fp.Close()*/
 
 	return nil
 }
@@ -257,7 +262,7 @@ func GenerateLoadingI2B2DataScript(databaseS DBSettings) error {
 // LoadI2B2DataFiles executes the loading script for the new converted data
 func LoadI2B2DataFiles() error {
 	// Display just the stderr if an error occurs
-	cmd := exec.Command("/bin/sh", FileBashPath[1])
+	/*cmd := exec.Command("/bin/sh", FileBashPath[1])
 	stderr := &bytes.Buffer{} // make sure to import bytes
 	cmd.Stderr = stderr
 	err := cmd.Run()
@@ -265,7 +270,7 @@ func LoadI2B2DataFiles() error {
 		log.LLvl1("Error when running command.  Error log:", stderr.String())
 		log.LLvl1("Got command status:", err.Error())
 		return err
-	}
+	}*/
 
 	return nil
 }
