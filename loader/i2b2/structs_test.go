@@ -107,7 +107,7 @@ func TestLocalOntology_ToCSVText(t *testing.T) {
 	assert.Equal(t, lo.ToCSVText(), `"4","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","Parkdale","N","FA ","\N","\N","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","\N","Demographics \ Zip codes \ Arkansas \ Parkdale","@","2007-04-10 00:00:00","2007-04-10 00:00:00","2007-04-10 00:00:00","DEMO","\N","\N","\N","\N"`)
 
 	tag := libunlynx.GroupingKey("1")
-	assert.Equal(t, loaderi2b2.LocalOntologySensitiveConceptToCSVText(&tag, 20), `"3", "\medco\tagged\concept\1\", "", "N", "LA ", "\N", "TAG_ID:20", "\N", "concept_cd", "concept_dimension", "concept_path", "T", "LIKE", "\medco\tagged\concept\1\", "\N", "\N", "NOW()", "\N", "\N", "\N", "TAG_ID", "@", "\N", "\N", "\N", "\N"`)
+	assert.Equal(t, loaderi2b2.LocalOntologySensitiveConceptToCSVText(&tag, 20), `"3","\medco\tagged\concept\1\","","N","LA ","\N","TAG_ID:20","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\medco\tagged\concept\1\","\N","\N","NOW()","\N","\N","\N","TAG_ID","@","\N","\N","\N","\N"`)
 
 }
 
@@ -219,7 +219,7 @@ func TestConceptDimension_ToCSVText(t *testing.T) {
 	assert.Equal(t, csvString, cd.ToCSVText())
 
 	tag := libunlynx.GroupingKey("1")
-	assert.Equal(t, `"\medco\tagged\concept\1\", "TAG_ID:20", "\N", "\N", "\N", "\N", "NOW()", "\N", "\N"`, loaderi2b2.ConceptDimensionSensitiveToCSVText(&tag, 20))
+	assert.Equal(t, `"\medco\tagged\concept\1\","TAG_ID:20","\N","\N","\N","\N","NOW()","\N","\N"`, loaderi2b2.ConceptDimensionSensitiveToCSVText(&tag, 20))
 }
 
 func TestModifierDimension_ToCSVText(t *testing.T) {
@@ -249,7 +249,7 @@ func TestModifierDimension_ToCSVText(t *testing.T) {
 	assert.Equal(t, csvString, md.ToCSVText())
 
 	tag := libunlynx.GroupingKey("1")
-	assert.Equal(t, `"\medco\tagged\modifier\1\", "TAG_ID:20", "\N", "\N", "\N", "\N", "NOW()", "\N", "\N"`, loaderi2b2.ModifierDimensionSensitiveToCSVText(&tag, 20))
+	assert.Equal(t, `"\medco\tagged\modifier\1\","TAG_ID:20","\N","\N","\N","\N","NOW()","\N","\N"`, loaderi2b2.ModifierDimensionSensitiveToCSVText(&tag, 20))
 }
 
 func TestObservationFact_ToCSVText(t *testing.T) {

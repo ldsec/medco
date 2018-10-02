@@ -60,6 +60,36 @@ var (
 		"MODIFIER_DIMENSION":       "../../data/i2b2/converted/modifier_dimension.csv",
 		"OBSERVATION_FACT":         "../../data/i2b2/converted/observation_fact.csv",
 	}
+
+	FileBashPath = "24-load-i2b2-data.sh"
+
+	FilePathsData = [...]string{
+		//"PATIENT_MAPPING",
+		//"ENCOUNTER_MAPPING",
+		"SHRINE_ONTOLOGY",
+		"LOCAL_ONTOLOGY_CLEAR",
+		"LOCAL_ONTOLOGY_SENSITIVE",
+		"PATIENT_DIMENSION",
+		"VISIT_DIMENSION",
+		"CONCEPT_DIMENSION",
+		"MODIFIER_DIMENSION",
+		"OBSERVATION_FACT",
+
+	}
+
+	TablenamesData = [...]string{
+		//"i2b2demodata.patient_mapping",
+		//"i2b2demodata.encounter_mapping",
+		"shrine_ont.shrine",
+		"i2b2metadata.i2b2",
+		"i2b2metadata.sensitive_tagged",
+		"i2b2demodata.patient_dimension",
+		"i2b2demodata.visit_dimension",
+		"i2b2demodata.concept_dimension",
+		"i2b2demodata.modifier_dimension",
+		"i2b2demodata.observation_fact",
+
+	}
 )
 
 const (
@@ -218,24 +248,24 @@ func ConvertI2B2(el *onet.Roster, entryPointIdx int, files Files, mapSensitive m
 
 	log.Lvl2("--- Finished converting OBSERVATION_FACT ---")
 
-	/*err = GenerateLoadingI2B2DataScript(databaseS)
+	err = GenerateLoadingDataScript(databaseS)
 	if err != nil {
 		log.Fatal("Error while generating the loading data .sh file", err)
 		return err
 	}
 
-	err = LoadI2B2DataFiles()
+	err = LoadDataFiles()
 	if err != nil {
 		log.Fatal("Error while loading ontology .sql file", err)
 		return err
-	}*/
+	}
 
 	return nil
 }
 
-// GenerateLoadingI2B2DataScript creates a load dataset .sql script (deletes the data in the corresponding tables and reloads the new 'protected' data)
-func GenerateLoadingI2B2DataScript(databaseS loader.DBSettings) error {
-	/*fp, err := os.Create(FileBashPath[1])
+// GenerateLoadingDataScript creates a load dataset .sql script (deletes the data in the corresponding tables and reloads the new 'protected' data)
+func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
+	fp, err := os.Create(FileBashPath)
 	if err != nil {
 		return err
 	}
@@ -244,6 +274,7 @@ func GenerateLoadingI2B2DataScript(databaseS loader.DBSettings) error {
 		`" -U "` + databaseS.DBuser + `" -p ` + strconv.FormatInt(int64(databaseS.DBport), 10) + ` -d "` + databaseS.DBname + `" <<-EOSQL` + "\n"
 
 	loading += "BEGIN;\n"
+
 	for i := 0; i < len(TablenamesData); i++ {
 		tokens := strings.Split(FilePathsData[i], "/")
 		loading += `\copy ` + TablenamesData[i] + ` FROM 'files/` + tokens[1] + `' ESCAPE '"' DELIMITER ',' CSV;` + "\n"
@@ -256,13 +287,13 @@ func GenerateLoadingI2B2DataScript(databaseS loader.DBSettings) error {
 		return err
 	}
 
-	fp.Close()*/
+	fp.Close()
 
 	return nil
 }
 
-// LoadI2B2DataFiles executes the loading script for the new converted data
-func LoadI2B2DataFiles() error {
+// LoadDataFiles executes the loading script for the new converted data
+func LoadDataFiles() error {
 	// Display just the stderr if an error occurs
 	/*cmd := exec.Command("/bin/sh", FileBashPath[1])
 	stderr := &bytes.Buffer{} // make sure to import bytes
