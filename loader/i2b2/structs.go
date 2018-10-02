@@ -1,4 +1,4 @@
-package loader
+package loaderi2b2
 
 import (
 	"encoding/base64"
@@ -10,15 +10,6 @@ import (
 )
 
 // ####----HELPER STRUCTS----####
-
-// DBSettings stores the database settings
-type DBSettings struct {
-	DBhost     string
-	DBport     int
-	DBuser     string
-	DBpassword string
-	DBname     string
-}
 
 // Testing defines whether we should run the DDT on test environment (locally) or using real nodes
 var Testing bool // testing environment

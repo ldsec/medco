@@ -44,8 +44,9 @@ _testmain.go
 data/genomic/
 data/i2b2/converted/*.xml
 data/i2b2/converted/*.csv
+data/scripts/*.txt
 app/*.toml
 app/app
 docker/medco-loader
-loader/*.toml
-data/scripts/*.txt
+loader/genomic/*.toml
+loader/i2b2/*.toml
