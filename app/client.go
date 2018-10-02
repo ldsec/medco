@@ -43,13 +43,13 @@ func loadData(c *cli.Context) error {
 	databaseS := loader.DBSettings{DBhost: dbHost, DBport: dbPort, DBname: dbName, DBuser: dbUser, DBpassword: dbPassword}
 
 	// check if db connection works
-	/*psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+"password=%s dbname=%s sslmode=disable", dbHost, dbPort, dbUser, dbPassword, dbName)
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+"password=%s dbname=%s sslmode=disable", dbHost, dbPort, dbUser, dbPassword, dbName)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		log.Error("Error while opening database", err)
 		return cli.NewExitError(err, 1)
 	}
-	db.Close()*/
+	db.Close()
 
 	// generate el with group file
 	f, err := os.Open(groupFilePath)
@@ -146,13 +146,13 @@ func convertI2B2DataModel(c *cli.Context) error {
 	databaseS := loader.DBSettings{DBhost: dbHost, DBport: dbPort, DBname: dbName, DBuser: dbUser, DBpassword: dbPassword}
 
 	// check if db connection works
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+"password=%s dbname=%s sslmode=disable", dbHost, dbPort, dbUser, dbPassword, dbName)
+	/*psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+"password=%s dbname=%s sslmode=disable", dbHost, dbPort, dbUser, dbPassword, dbName)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		log.Error("Error while opening database", err)
 		return cli.NewExitError(err, 1)
 	}
-	db.Close()
+	db.Close()*/
 
 	// generate el with group file
 	f, err := os.Open(groupFilePath)
