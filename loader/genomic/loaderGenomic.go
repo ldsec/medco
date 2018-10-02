@@ -1,4 +1,4 @@
-package loader
+package loadergenomic
 
 import (
 	"bytes"
@@ -9,6 +9,7 @@ import (
 	"errors"
 	"github.com/dedis/onet"
 	"github.com/dedis/onet/log"
+	"github.com/lca1/medco-loader/loader"
 	"github.com/lca1/medco/services"
 	"github.com/lca1/unlynx/lib"
 	"io"
@@ -38,19 +39,19 @@ var (
 	FileBashPath = [...]string{"25-load-ontology.sh",
 		"26-load-data.sh"}
 
-	FilePathsOntology = [...]string{"../data/genomic/SHRINE_ONT_CLINICAL_SENSITIVE.csv",
-		"../data/genomic/SHRINE_ONT_CLINICAL_NON_SENSITIVE.csv",
-		"../data/genomic/SHRINE_ONT_GENOMIC_ANNOTATIONS.csv",
-		"../data/genomic/I2B2METADATA_SENSITIVE_TAGGED.csv",
-		"../data/genomic/I2B2METADATA_NON_SENSITIVE_CLEAR.csv"}
+	FilePathsOntology = [...]string{"../../data/genomic/SHRINE_ONT_CLINICAL_SENSITIVE.csv",
+		"../../data/genomic/SHRINE_ONT_CLINICAL_NON_SENSITIVE.csv",
+		"../../data/genomic/SHRINE_ONT_GENOMIC_ANNOTATIONS.csv",
+		"../../data/genomic/I2B2METADATA_SENSITIVE_TAGGED.csv",
+		"../../data/genomic/I2B2METADATA_NON_SENSITIVE_CLEAR.csv"}
 
-	FilePathsData = [...]string{"../data/genomic/I2B2DEMODATA_CONCEPT_DIMENSION.csv",
-		"../data/genomic/I2B2DEMODATA_PATIENT_MAPPING.csv",
-		"../data/genomic/I2B2DEMODATA_PATIENT_DIMENSION.csv",
-		"../data/genomic/I2B2DEMODATA_ENCOUNTER_MAPPING.csv",
-		"../data/genomic/I2B2DEMODATA_VISIT_DIMENSION.csv",
-		"../data/genomic/I2B2DEMODATA_PROVIDER_DIMENSION.csv",
-		"../data/genomic/I2B2DEMODATA_OBSERVATION_FACT.csv"}
+	FilePathsData = [...]string{"../../data/genomic/I2B2DEMODATA_CONCEPT_DIMENSION.csv",
+		"../../data/genomic/I2B2DEMODATA_PATIENT_MAPPING.csv",
+		"../../data/genomic/I2B2DEMODATA_PATIENT_DIMENSION.csv",
+		"../../data/genomic/I2B2DEMODATA_ENCOUNTER_MAPPING.csv",
+		"../../data/genomic/I2B2DEMODATA_VISIT_DIMENSION.csv",
+		"../../data/genomic/I2B2DEMODATA_PROVIDER_DIMENSION.csv",
+		"../../data/genomic/I2B2DEMODATA_OBSERVATION_FACT.csv"}
 )
 
 /*
@@ -119,6 +120,7 @@ type ConceptID struct {
 
 // Support global variables
 var (
+	Testing         bool // testing environment
 	FileHandlers    []*os.File
 	OntValues       map[ConceptPath]ConceptID // stores the concept path and the correspondent ID
 	TextSearchIndex int64                     // needed for the observation_fact table (counter)
@@ -191,7 +193,7 @@ func ReplayDataset(filename string, x int) error {
 }
 
 // LoadClient initiates the loading process
-func LoadClient(el *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic, fClinical, fGenomic *os.File, mapSensitive map[string]struct{}, databaseS DBSettings, testing bool) error {
+func LoadClient(el *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic, fClinical, fGenomic *os.File, mapSensitive map[string]struct{}, databaseS loader.DBSettings, testing bool) error {
 	start := time.Now()
 
 	// init global variables
@@ -293,7 +295,7 @@ func LoadClient(el *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic, f
 }
 
 // GenerateLoadingOntologyScript creates a load ontology .sql script
-func GenerateLoadingOntologyScript(databaseS DBSettings) error {
+func GenerateLoadingOntologyScript(databaseS loader.DBSettings) error {
 	fp, err := os.Create(FileBashPath[0])
 	if err != nil {
 		return err
@@ -322,7 +324,7 @@ func GenerateLoadingOntologyScript(databaseS DBSettings) error {
 }
 
 // GenerateLoadingDataScript creates a load dataset .sql script
-func GenerateLoadingDataScript(databaseS DBSettings) error {
+func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
 	fp, err := os.Create(FileBashPath[1])
 	if err != nil {
 		return err
@@ -935,7 +937,7 @@ func generateGenomicID(indexGenVariant map[string]int, record []string) (int64, 
 		return int64(-1), err
 	}
 
-	id, err := GetVariantID(record[indexGenVariant["CHR"]], aux, record[indexGenVariant["RA"]], record[indexGenVariant["TSA1"]])
+	id, err := loader.GetVariantID(record[indexGenVariant["CHR"]], aux, record[indexGenVariant["RA"]], record[indexGenVariant["TSA1"]])
 	if err != nil {
 		return int64(-1), err
 	}

@@ -8,6 +8,8 @@ import (
 	"github.com/dedis/onet/app"
 	"github.com/dedis/onet/log"
 	"github.com/lca1/medco-loader/loader"
+	"github.com/lca1/medco-loader/loader/genomic"
+	"github.com/lca1/medco-loader/loader/i2b2"
 	"gopkg.in/urfave/cli.v1"
 	"os"
 )
@@ -89,7 +91,6 @@ func loadData(c *cli.Context) error {
 		return cli.NewExitError(err, 1)
 	}
 
-
 	// get the list of sensitiveConcepts
 	f, err = os.Open(sensitiveFilePath)
 	if err != nil {
@@ -110,7 +111,7 @@ func loadData(c *cli.Context) error {
 		return cli.NewExitError(err, 1)
 	} else if replaySize > 1 {
 		fGenomic.Close()
-		loader.ReplayDataset(genomicFilePath, replaySize)
+		loadergenomic.ReplayDataset(genomicFilePath, replaySize)
 
 		fGenomic, err = os.Open(genomicFilePath)
 		if err != nil {
@@ -119,7 +120,7 @@ func loadData(c *cli.Context) error {
 		}
 	}
 
-	err = loader.LoadClient(el.Roster, entryPointIdx, fOntClinical, fOntGenomic, fClinical, fGenomic, mapSensitive, databaseS, false)
+	err = loadergenomic.LoadClient(el.Roster, entryPointIdx, fOntClinical, fOntGenomic, fClinical, fGenomic, mapSensitive, databaseS, false)
 	if err != nil {
 		log.Fatal("Error while loading client data:", err)
 	}
@@ -170,7 +171,7 @@ func convertI2B2DataModel(c *cli.Context) error {
 	f.Close()
 
 	// get all files to convert
-	var files loader.Files
+	var files loaderi2b2.Files
 	if _, err := toml.DecodeFile(dataFilesPath, &files); err != nil {
 		log.Error("Error while reading [files].toml:", err)
 		return cli.NewExitError(err, 1)
@@ -191,7 +192,7 @@ func convertI2B2DataModel(c *cli.Context) error {
 		mapSensitive[line] = true
 	}
 
-	loader.ConvertI2B2(el.Roster, entryPointIdx, files, mapSensitive, databaseS, false)
+	loaderi2b2.ConvertI2B2(el.Roster, entryPointIdx, files, mapSensitive, databaseS, false)
 	if err != nil {
 		log.Error("Error while converting I2B2 data:", err)
 		return cli.NewExitError(err, 1)

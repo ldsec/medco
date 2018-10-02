@@ -1,4 +1,4 @@
-package loader
+package loaderi2b2
 
 import (
 	"encoding/csv"
@@ -7,6 +7,7 @@ import (
 	"github.com/dedis/kyber"
 	"github.com/dedis/onet"
 	"github.com/dedis/onet/log"
+	"github.com/lca1/medco-loader/loader"
 	"github.com/lca1/medco/services"
 	"github.com/lca1/unlynx/lib"
 	"io"
@@ -35,29 +36,29 @@ type Files struct {
 // The different paths and handlers for all the file both for input and/or output
 var (
 	InputFilePaths = map[string]string{
-		"ADAPTER_MAPPINGS":   "../data/i2b2/original/AdapterMappings.xml",
-		"SHRINE_ONTOLOGY":    "../data/i2b2/original/shrine.csv",
-		"LOCAL_ONTOLOGY":     "../data/i2b2/original/i2b2.csv",
-		"PATIENT_DIMENSION":  "../data/i2b2/original/patient_dimension.csv",
-		"VISIT_DIMENSION":    "../data/i2b2/original/visit_dimension.csv",
-		"CONCEPT_DIMENSION":  "../data/i2b2/original/concept_dimension.csv",
-		"MODIFIER_DIMENSION": "../data/i2b2/original/modifier_dimension.csv",
-		"OBSERVATION_FACT":   "../data/i2b2/original/observation_fact.csv",
-		"DUMMY_TO_PATIENT":   "../data/i2b2/original/dummy_to_patient.csv",
+		"ADAPTER_MAPPINGS":   "../../data/i2b2/original/AdapterMappings.xml",
+		"SHRINE_ONTOLOGY":    "../../data/i2b2/original/shrine.csv",
+		"LOCAL_ONTOLOGY":     "../../data/i2b2/original/i2b2.csv",
+		"PATIENT_DIMENSION":  "../../data/i2b2/original/patient_dimension.csv",
+		"VISIT_DIMENSION":    "../../data/i2b2/original/visit_dimension.csv",
+		"CONCEPT_DIMENSION":  "../../data/i2b2/original/concept_dimension.csv",
+		"MODIFIER_DIMENSION": "../../data/i2b2/original/modifier_dimension.csv",
+		"OBSERVATION_FACT":   "../../data/i2b2/original/observation_fact.csv",
+		"DUMMY_TO_PATIENT":   "../../data/i2b2/original/dummy_to_patient.csv",
 	}
 
 	OutputFilePaths = map[string]string{
-		"ADAPTER_MAPPINGS":         "../data/i2b2/converted/AdapterMappings.xml",
-		"SHRINE_ONTOLOGY":          "../data/i2b2/converted/shrine.csv",
-		"LOCAL_ONTOLOGY_CLEAR":     "../data/i2b2/converted/i2b2.csv",
-		"LOCAL_ONTOLOGY_SENSITIVE": "../data/i2b2/converted/sensitive_tagged.csv",
-		"PATIENT_DIMENSION":        "../data/i2b2/converted/patient_dimension.csv",
-		"NEW_PATIENT_NUM":          "../data/i2b2/converted/new_patient_num.csv",
-		"VISIT_DIMENSION":          "../data/i2b2/converted/visit_dimension.csv",
-		"NEW_ENCOUNTER_NUM":        "../data/i2b2/converted/new_encounter_num.csv",
-		"CONCEPT_DIMENSION":        "../data/i2b2/converted/concept_dimension.csv",
-		"MODIFIER_DIMENSION":       "../data/i2b2/converted/modifier_dimension.csv",
-		"OBSERVATION_FACT":         "../data/i2b2/converted/observation_fact.csv",
+		"ADAPTER_MAPPINGS":         "../../data/i2b2/converted/AdapterMappings.xml",
+		"SHRINE_ONTOLOGY":          "../../data/i2b2/converted/shrine.csv",
+		"LOCAL_ONTOLOGY_CLEAR":     "../../data/i2b2/converted/i2b2.csv",
+		"LOCAL_ONTOLOGY_SENSITIVE": "../../data/i2b2/converted/sensitive_tagged.csv",
+		"PATIENT_DIMENSION":        "../../data/i2b2/converted/patient_dimension.csv",
+		"NEW_PATIENT_NUM":          "../../data/i2b2/converted/new_patient_num.csv",
+		"VISIT_DIMENSION":          "../../data/i2b2/converted/visit_dimension.csv",
+		"NEW_ENCOUNTER_NUM":        "../../data/i2b2/converted/new_encounter_num.csv",
+		"CONCEPT_DIMENSION":        "../../data/i2b2/converted/concept_dimension.csv",
+		"MODIFIER_DIMENSION":       "../../data/i2b2/converted/modifier_dimension.csv",
+		"OBSERVATION_FACT":         "../../data/i2b2/converted/observation_fact.csv",
 	}
 )
 
@@ -105,7 +106,8 @@ func replaceOutputFolder(folderPath string) {
 	OutputFilePaths["OBSERVATION_FACT"] = folderPath + tokens[len(tokens)-1]
 }
 
-func ConvertI2B2(el *onet.Roster, entryPointIdx int, files Files, mapSensitive map[string]bool, databaseS DBSettings, empty bool) error {
+// ConvertI2B2 it's the main function that performs a full conversion and loading of the I2B2 data
+func ConvertI2B2(el *onet.Roster, entryPointIdx int, files Files, mapSensitive map[string]bool, databaseS loader.DBSettings, empty bool) error {
 
 	ListSensitiveConceptsShrine = mapSensitive
 
@@ -232,7 +234,7 @@ func ConvertI2B2(el *onet.Roster, entryPointIdx int, files Files, mapSensitive m
 }
 
 // GenerateLoadingI2B2DataScript creates a load dataset .sql script (deletes the data in the corresponding tables and reloads the new 'protected' data)
-func GenerateLoadingI2B2DataScript(databaseS DBSettings) error {
+func GenerateLoadingI2B2DataScript(databaseS loader.DBSettings) error {
 	/*fp, err := os.Create(FileBashPath[1])
 	if err != nil {
 		return err

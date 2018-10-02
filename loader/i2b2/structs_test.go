@@ -1,9 +1,9 @@
-package loader_test
+package loaderi2b2_test
 
 import (
 	"encoding/base64"
 	"encoding/csv"
-	"github.com/lca1/medco-loader/loader"
+	"github.com/lca1/medco-loader/loader/i2b2"
 	"github.com/lca1/unlynx/lib"
 	"github.com/stretchr/testify/assert"
 	"strings"
@@ -16,14 +16,14 @@ import (
 
 func TestShrineOntology_ToCSVText(t *testing.T) {
 
-	ac := loader.AdministrativeColumns{
+	ac := loaderi2b2.AdministrativeColumns{
 		UpdateDate:     "\\N",
 		DownloadDate:   "\\N",
 		ImportDate:     "\\N",
 		SourceSystemCD: "SHRINE",
 	}
 
-	so := loader.ShrineOntology{
+	so := loaderi2b2.ShrineOntology{
 		NodeEncryptID:      -1,
 		ChildrenEncryptIDs: nil,
 
@@ -70,14 +70,14 @@ func TestShrineOntology_ToCSVText(t *testing.T) {
 
 func TestLocalOntology_ToCSVText(t *testing.T) {
 
-	ac := loader.AdministrativeColumns{
+	ac := loaderi2b2.AdministrativeColumns{
 		UpdateDate:     "2007-04-10 00:00:00",
 		DownloadDate:   "2007-04-10 00:00:00",
 		ImportDate:     "2007-04-10 00:00:00",
 		SourceSystemCD: "DEMO",
 	}
 
-	lo := loader.LocalOntology{
+	lo := loaderi2b2.LocalOntology{
 		HLevel:           "4",
 		Fullname:         "\\i2b2\\Demographics\\Zip codes\\Arkansas\\Parkdale\\",
 		Name:             "Parkdale",
@@ -107,13 +107,13 @@ func TestLocalOntology_ToCSVText(t *testing.T) {
 	assert.Equal(t, lo.ToCSVText(), `"4","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","Parkdale","N","FA ","\N","\N","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","\N","Demographics \ Zip codes \ Arkansas \ Parkdale","@","2007-04-10 00:00:00","2007-04-10 00:00:00","2007-04-10 00:00:00","DEMO","\N","\N","\N","\N"`)
 
 	tag := libunlynx.GroupingKey("1")
-	assert.Equal(t, loader.LocalOntologySensitiveConceptToCSVText(&tag, 20), `"3", "\medco\tagged\concept\1\", "", "N", "LA ", "\N", "TAG_ID:20", "\N", "concept_cd", "concept_dimension", "concept_path", "T", "LIKE", "\medco\tagged\concept\1\", "\N", "\N", "NOW()", "\N", "\N", "\N", "TAG_ID", "@", "\N", "\N", "\N", "\N"`)
+	assert.Equal(t, loaderi2b2.LocalOntologySensitiveConceptToCSVText(&tag, 20), `"3", "\medco\tagged\concept\1\", "", "N", "LA ", "\N", "TAG_ID:20", "\N", "concept_cd", "concept_dimension", "concept_path", "T", "LIKE", "\medco\tagged\concept\1\", "\N", "\N", "NOW()", "\N", "\N", "\N", "TAG_ID", "@", "\N", "\N", "\N", "\N"`)
 
 }
 
 func TestPatientDimension_ToCSVText(t *testing.T) {
 
-	ac := loader.AdministrativeColumns{
+	ac := loaderi2b2.AdministrativeColumns{
 		UpdateDate:     "2010-11-04 10:43:00",
 		DownloadDate:   "2010-08-18 09:50:00",
 		ImportDate:     "2010-11-04 10:43:00",
@@ -121,26 +121,26 @@ func TestPatientDimension_ToCSVText(t *testing.T) {
 		UploadID:       "\\N",
 	}
 
-	pdk := loader.PatientDimensionPK{
+	pdk := loaderi2b2.PatientDimensionPK{
 		PatientNum: "1000000001",
 	}
 
-	op := make([]loader.OptionalFields, 0)
-	op = append(op, loader.OptionalFields{ValType: "sex_cd", Value: "F"})
-	op = append(op, loader.OptionalFields{ValType: "age_in_years_num", Value: "24"})
-	op = append(op, loader.OptionalFields{ValType: "language_cd", Value: "english"})
-	op = append(op, loader.OptionalFields{ValType: "race_cd", Value: "black"})
-	op = append(op, loader.OptionalFields{ValType: "marital_status_cd", Value: "married"})
-	op = append(op, loader.OptionalFields{ValType: "religion_cd", Value: "roman catholic"})
-	op = append(op, loader.OptionalFields{ValType: "zip_cd", Value: "02140"})
-	op = append(op, loader.OptionalFields{ValType: "statecityzip_path", Value: "Zip codes\\Massachusetts\\Cambridge\\02140\\"})
-	op = append(op, loader.OptionalFields{ValType: "income_cd", Value: "Low"})
-	op = append(op, loader.OptionalFields{ValType: "patient_blob", Value: ""})
+	op := make([]loaderi2b2.OptionalFields, 0)
+	op = append(op, loaderi2b2.OptionalFields{ValType: "sex_cd", Value: "F"})
+	op = append(op, loaderi2b2.OptionalFields{ValType: "age_in_years_num", Value: "24"})
+	op = append(op, loaderi2b2.OptionalFields{ValType: "language_cd", Value: "english"})
+	op = append(op, loaderi2b2.OptionalFields{ValType: "race_cd", Value: "black"})
+	op = append(op, loaderi2b2.OptionalFields{ValType: "marital_status_cd", Value: "married"})
+	op = append(op, loaderi2b2.OptionalFields{ValType: "religion_cd", Value: "roman catholic"})
+	op = append(op, loaderi2b2.OptionalFields{ValType: "zip_cd", Value: "02140"})
+	op = append(op, loaderi2b2.OptionalFields{ValType: "statecityzip_path", Value: "Zip codes\\Massachusetts\\Cambridge\\02140\\"})
+	op = append(op, loaderi2b2.OptionalFields{ValType: "income_cd", Value: "Low"})
+	op = append(op, loaderi2b2.OptionalFields{ValType: "patient_blob", Value: ""})
 
 	_, pubKey := libunlynx.GenKey()
 	enc := libunlynx.EncryptInt(pubKey, int64(2))
 
-	pd := loader.PatientDimension{
+	pd := loaderi2b2.PatientDimension{
 		PK:             pdk,
 		VitalStatusCD:  "D",
 		BirthDate:      "1985-11-17 00:00:00",
@@ -159,7 +159,7 @@ func TestPatientDimension_ToCSVText(t *testing.T) {
 }
 
 func TestVisitDimension_ToCSVText(t *testing.T) {
-	ac := loader.AdministrativeColumns{
+	ac := loaderi2b2.AdministrativeColumns{
 		UpdateDate:     "2010-11-04 10:43:00",
 		DownloadDate:   "2010-08-18 09:50:00",
 		ImportDate:     "2010-11-04 10:43:00",
@@ -167,19 +167,19 @@ func TestVisitDimension_ToCSVText(t *testing.T) {
 		UploadID:       "\\N",
 	}
 
-	vdk := loader.VisitDimensionPK{
+	vdk := loaderi2b2.VisitDimensionPK{
 		EncounterNum: "471185",
 		PatientNum:   "1000000101",
 	}
 
-	op := make([]loader.OptionalFields, 0)
-	op = append(op, loader.OptionalFields{ValType: "inout_cd", Value: "O"})
-	op = append(op, loader.OptionalFields{ValType: "location_cd", Value: ""})
-	op = append(op, loader.OptionalFields{ValType: "location_path", Value: ""})
-	op = append(op, loader.OptionalFields{ValType: "length_of_stay", Value: "\\N"})
-	op = append(op, loader.OptionalFields{ValType: "visit_blob", Value: ""})
+	op := make([]loaderi2b2.OptionalFields, 0)
+	op = append(op, loaderi2b2.OptionalFields{ValType: "inout_cd", Value: "O"})
+	op = append(op, loaderi2b2.OptionalFields{ValType: "location_cd", Value: ""})
+	op = append(op, loaderi2b2.OptionalFields{ValType: "location_path", Value: ""})
+	op = append(op, loaderi2b2.OptionalFields{ValType: "length_of_stay", Value: "\\N"})
+	op = append(op, loaderi2b2.OptionalFields{ValType: "visit_blob", Value: ""})
 
-	vd := loader.VisitDimension{
+	vd := loaderi2b2.VisitDimension{
 		PK:             vdk,
 		ActiveStatusCD: "U",
 		StartDate:      "1997-01-02 00:00:00",
@@ -196,7 +196,7 @@ func TestConceptDimension_ToCSVText(t *testing.T) {
 
 	csvString := `"\i2b2\Demographics\Age\>= 65 years old\100\","DEM|AGE:100"," 100 years old","","2010-09-28 11:15:00","2010-08-18 09:50:00","2010-09-28 11:40:00","DEMO","\N"`
 
-	ac := loader.AdministrativeColumns{
+	ac := loaderi2b2.AdministrativeColumns{
 		UpdateDate:     "2010-09-28 11:15:00",
 		DownloadDate:   "2010-08-18 09:50:00",
 		ImportDate:     "2010-09-28 11:40:00",
@@ -204,11 +204,11 @@ func TestConceptDimension_ToCSVText(t *testing.T) {
 		UploadID:       "\\N",
 	}
 
-	cdk := &loader.ConceptDimensionPK{
+	cdk := &loaderi2b2.ConceptDimensionPK{
 		ConceptPath: "\\i2b2\\Demographics\\Age\\>= 65 years old\\100\\",
 	}
 
-	cd := loader.ConceptDimension{
+	cd := loaderi2b2.ConceptDimension{
 		PK:           cdk,
 		ConceptCD:    "DEM|AGE:100",
 		NameChar:     " 100 years old",
@@ -219,14 +219,14 @@ func TestConceptDimension_ToCSVText(t *testing.T) {
 	assert.Equal(t, csvString, cd.ToCSVText())
 
 	tag := libunlynx.GroupingKey("1")
-	assert.Equal(t, `"\medco\tagged\concept\1\", "TAG_ID:20", "\N", "\N", "\N", "\N", "NOW()", "\N", "\N"`, loader.ConceptDimensionSensitiveToCSVText(&tag, 20))
+	assert.Equal(t, `"\medco\tagged\concept\1\", "TAG_ID:20", "\N", "\N", "\N", "\N", "NOW()", "\N", "\N"`, loaderi2b2.ConceptDimensionSensitiveToCSVText(&tag, 20))
 }
 
 func TestModifierDimension_ToCSVText(t *testing.T) {
 
 	csvString := `"\Admit Diagnosis\","0","Admit Diagnosis","","2011-04-14 00:55:00","\N","2011-04-14 00:55:00","DEMO","\N"`
 
-	ac := loader.AdministrativeColumns{
+	ac := loaderi2b2.AdministrativeColumns{
 		UpdateDate:     "2011-04-14 00:55:00",
 		DownloadDate:   "\\N",
 		ImportDate:     "2011-04-14 00:55:00",
@@ -234,11 +234,11 @@ func TestModifierDimension_ToCSVText(t *testing.T) {
 		UploadID:       "\\N",
 	}
 
-	mdk := &loader.ModifierDimensionPK{
+	mdk := &loaderi2b2.ModifierDimensionPK{
 		ModifierPath: "\\Admit Diagnosis\\",
 	}
 
-	md := loader.ModifierDimension{
+	md := loaderi2b2.ModifierDimension{
 		PK:           mdk,
 		ModifierCD:   "0",
 		NameChar:     "Admit Diagnosis",
@@ -249,14 +249,14 @@ func TestModifierDimension_ToCSVText(t *testing.T) {
 	assert.Equal(t, csvString, md.ToCSVText())
 
 	tag := libunlynx.GroupingKey("1")
-	assert.Equal(t, `"\medco\tagged\modifier\1\", "TAG_ID:20", "\N", "\N", "\N", "\N", "NOW()", "\N", "\N"`, loader.ModifierDimensionSensitiveToCSVText(&tag, 20))
+	assert.Equal(t, `"\medco\tagged\modifier\1\", "TAG_ID:20", "\N", "\N", "\N", "\N", "NOW()", "\N", "\N"`, loaderi2b2.ModifierDimensionSensitiveToCSVText(&tag, 20))
 }
 
 func TestObservationFact_ToCSVText(t *testing.T) {
 
 	csvString := `"482232","1000000060","Affy:221610_s_at","LCS-I2B2:D000109064","2009-01-16 00:00:00","@","1","N","E","79.30000","","\N","","2009-01-16 00:00:00","@","","\N","2010-09-28 11:15:00","2010-08-18 09:50:00","2010-09-28 11:40:00","DEMO","\N","1"`
 
-	ac := loader.AdministrativeColumns{
+	ac := loaderi2b2.AdministrativeColumns{
 		UpdateDate:      "2010-09-28 11:15:00",
 		DownloadDate:    "2010-08-18 09:50:00",
 		ImportDate:      "2010-09-28 11:40:00",
@@ -265,7 +265,7 @@ func TestObservationFact_ToCSVText(t *testing.T) {
 		TextSearchIndex: "1",
 	}
 
-	ofk := &loader.ObservationFactPK{
+	ofk := &loaderi2b2.ObservationFactPK{
 		EncounterNum: "482232",
 		PatientNum:   "1000000060",
 		ConceptCD:    "Affy:221610_s_at",
@@ -275,7 +275,7 @@ func TestObservationFact_ToCSVText(t *testing.T) {
 		InstanceNum:  "1",
 	}
 
-	of := loader.ObservationFact{
+	of := loaderi2b2.ObservationFact{
 		PK:              ofk,
 		ValTypeCD:       "N",
 		TValChar:        "E",
@@ -300,14 +300,14 @@ func TestObservationFact_ToCSVText(t *testing.T) {
 func TestShrineOntologyFromString(t *testing.T) {
 	csvString := `"0","\SHRINE\","SHRINE","N","CA ","\N","\N","","concept_cd","concept_dimension","concept_path","T","LIKE","\SHRINE\","","\N","\N","\N","\N","SHRINE","\N","@","\N"`
 
-	ac := loader.AdministrativeColumns{
+	ac := loaderi2b2.AdministrativeColumns{
 		UpdateDate:     "\\N",
 		DownloadDate:   "\\N",
 		ImportDate:     "\\N",
 		SourceSystemCD: "SHRINE",
 	}
 
-	so := loader.ShrineOntology{
+	so := loaderi2b2.ShrineOntology{
 		NodeEncryptID:      -1,
 		ChildrenEncryptIDs: nil,
 
@@ -338,20 +338,20 @@ func TestShrineOntologyFromString(t *testing.T) {
 	lines, err := r.ReadAll()
 	assert.Nil(t, err, "Parsing error")
 
-	assert.Equal(t, *loader.ShrineOntologyFromString(lines[0]), so)
+	assert.Equal(t, *loaderi2b2.ShrineOntologyFromString(lines[0]), so)
 }
 
 func TestLocalOntologyFromString(t *testing.T) {
 	csvString := `"4","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","Parkdale","N","FA ","\N","\N","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","\N","Demographics \ Zip codes \ Arkansas \ Parkdale","@","2007-04-10 00:00:00","2007-04-10 00:00:00","2007-04-10 00:00:00","DEMO","\N","\N","\N","\N"`
 
-	ac := loader.AdministrativeColumns{
+	ac := loaderi2b2.AdministrativeColumns{
 		UpdateDate:     "2007-04-10 00:00:00",
 		DownloadDate:   "2007-04-10 00:00:00",
 		ImportDate:     "2007-04-10 00:00:00",
 		SourceSystemCD: "DEMO",
 	}
 
-	lo := loader.LocalOntology{
+	lo := loaderi2b2.LocalOntology{
 		HLevel:           "4",
 		Fullname:         "\\i2b2\\Demographics\\Zip codes\\Arkansas\\Parkdale\\",
 		Name:             "Parkdale",
@@ -383,14 +383,14 @@ func TestLocalOntologyFromString(t *testing.T) {
 	lines, err := r.ReadAll()
 	assert.Nil(t, err, "Parsing error")
 
-	assert.Equal(t, *loader.LocalOntologyFromString(lines[0]), lo)
+	assert.Equal(t, *loaderi2b2.LocalOntologyFromString(lines[0]), lo)
 }
 
 func TestPatientDimensionFromString(t *testing.T) {
 	aux := [...]string{"patient_num", "vital_status_cd", "birth_date", "death_date", "sex_cd", "age_in_years_num", "language_cd", "race_cd", "marital_status_cd", "religion_cd", "zip_cd", "statecityzip_path", "income_cd", "patient_blob", "update_date", "download_date", "import_date", "sourcesystem_cd", "upload_id"}
-	loader.HeaderPatientDimension = aux[:]
+	loaderi2b2.HeaderPatientDimension = aux[:]
 
-	ac := loader.AdministrativeColumns{
+	ac := loaderi2b2.AdministrativeColumns{
 		UpdateDate:     "2010-11-04 10:43:00",
 		DownloadDate:   "2010-08-18 09:50:00",
 		ImportDate:     "2010-11-04 10:43:00",
@@ -398,26 +398,26 @@ func TestPatientDimensionFromString(t *testing.T) {
 		UploadID:       "\\N",
 	}
 
-	pdk := loader.PatientDimensionPK{
+	pdk := loaderi2b2.PatientDimensionPK{
 		PatientNum: "1000000001",
 	}
 
-	op := make([]loader.OptionalFields, 0)
-	op = append(op, loader.OptionalFields{ValType: "sex_cd", Value: "F"})
-	op = append(op, loader.OptionalFields{ValType: "age_in_years_num", Value: "24"})
-	op = append(op, loader.OptionalFields{ValType: "language_cd", Value: "english"})
-	op = append(op, loader.OptionalFields{ValType: "race_cd", Value: "black"})
-	op = append(op, loader.OptionalFields{ValType: "marital_status_cd", Value: "married"})
-	op = append(op, loader.OptionalFields{ValType: "religion_cd", Value: "roman catholic"})
-	op = append(op, loader.OptionalFields{ValType: "zip_cd", Value: "02140"})
-	op = append(op, loader.OptionalFields{ValType: "statecityzip_path", Value: "Zip codes\\Massachusetts\\Cambridge\\02140\\"})
-	op = append(op, loader.OptionalFields{ValType: "income_cd", Value: "Low"})
-	op = append(op, loader.OptionalFields{ValType: "patient_blob", Value: ""})
+	op := make([]loaderi2b2.OptionalFields, 0)
+	op = append(op, loaderi2b2.OptionalFields{ValType: "sex_cd", Value: "F"})
+	op = append(op, loaderi2b2.OptionalFields{ValType: "age_in_years_num", Value: "24"})
+	op = append(op, loaderi2b2.OptionalFields{ValType: "language_cd", Value: "english"})
+	op = append(op, loaderi2b2.OptionalFields{ValType: "race_cd", Value: "black"})
+	op = append(op, loaderi2b2.OptionalFields{ValType: "marital_status_cd", Value: "married"})
+	op = append(op, loaderi2b2.OptionalFields{ValType: "religion_cd", Value: "roman catholic"})
+	op = append(op, loaderi2b2.OptionalFields{ValType: "zip_cd", Value: "02140"})
+	op = append(op, loaderi2b2.OptionalFields{ValType: "statecityzip_path", Value: "Zip codes\\Massachusetts\\Cambridge\\02140\\"})
+	op = append(op, loaderi2b2.OptionalFields{ValType: "income_cd", Value: "Low"})
+	op = append(op, loaderi2b2.OptionalFields{ValType: "patient_blob", Value: ""})
 
 	_, pubKey := libunlynx.GenKey()
 	enc := libunlynx.EncryptInt(pubKey, int64(2))
 
-	pd := loader.PatientDimension{
+	pd := loaderi2b2.PatientDimension{
 		PK:             pdk,
 		VitalStatusCD:  "D",
 		BirthDate:      "1985-11-17 00:00:00",
@@ -434,7 +434,7 @@ func TestPatientDimensionFromString(t *testing.T) {
 	lines, err := r.ReadAll()
 	assert.Nil(t, err, "Parsing error")
 
-	pdkExpected, pdExpected := loader.PatientDimensionFromString(lines[0], pubKey)
+	pdkExpected, pdExpected := loaderi2b2.PatientDimensionFromString(lines[0], pubKey)
 	assert.Equal(t, pdkExpected, pdk)
 
 	// place them nil because encryption is randomized
@@ -446,9 +446,9 @@ func TestPatientDimensionFromString(t *testing.T) {
 
 func TestVisitDimensionFromString(t *testing.T) {
 	aux := [...]string{"encounter_num", "patient_num", "active_status_cd", "start_date", "end_date", "inout_cd", "location_cd", "location_path", "length_of_stay", "visit_blob", "update_date", "download_date", "import_date", "sourcesystem_cd", "upload_id"}
-	loader.HeaderPatientDimension = aux[:]
+	loaderi2b2.HeaderPatientDimension = aux[:]
 
-	ac := loader.AdministrativeColumns{
+	ac := loaderi2b2.AdministrativeColumns{
 		UpdateDate:     "2010-11-04 10:43:00",
 		DownloadDate:   "2010-08-18 09:50:00",
 		ImportDate:     "2010-11-04 10:43:00",
@@ -456,19 +456,19 @@ func TestVisitDimensionFromString(t *testing.T) {
 		UploadID:       "\\N",
 	}
 
-	vdk := loader.VisitDimensionPK{
+	vdk := loaderi2b2.VisitDimensionPK{
 		EncounterNum: "471185",
 		PatientNum:   "1000000101",
 	}
 
-	op := make([]loader.OptionalFields, 0)
-	op = append(op, loader.OptionalFields{ValType: "inout_cd", Value: "O"})
-	op = append(op, loader.OptionalFields{ValType: "location_cd", Value: ""})
-	op = append(op, loader.OptionalFields{ValType: "location_path", Value: ""})
-	op = append(op, loader.OptionalFields{ValType: "length_of_stay", Value: "\\N"})
-	op = append(op, loader.OptionalFields{ValType: "visit_blob", Value: ""})
+	op := make([]loaderi2b2.OptionalFields, 0)
+	op = append(op, loaderi2b2.OptionalFields{ValType: "inout_cd", Value: "O"})
+	op = append(op, loaderi2b2.OptionalFields{ValType: "location_cd", Value: ""})
+	op = append(op, loaderi2b2.OptionalFields{ValType: "location_path", Value: ""})
+	op = append(op, loaderi2b2.OptionalFields{ValType: "length_of_stay", Value: "\\N"})
+	op = append(op, loaderi2b2.OptionalFields{ValType: "visit_blob", Value: ""})
 
-	vd := loader.VisitDimension{
+	vd := loaderi2b2.VisitDimension{
 		PK:             vdk,
 		ActiveStatusCD: "U",
 		StartDate:      "1997-01-02 00:00:00",
@@ -484,7 +484,7 @@ func TestVisitDimensionFromString(t *testing.T) {
 	lines, err := r.ReadAll()
 	assert.Nil(t, err, "Parsing error")
 
-	vdkExpected, vdExpected := loader.VisitDimensionFromString(lines[0])
+	vdkExpected, vdExpected := loaderi2b2.VisitDimensionFromString(lines[0])
 	assert.Equal(t, vdkExpected, vdk)
 
 	assert.Equal(t, vdExpected, vd)
@@ -493,7 +493,7 @@ func TestVisitDimensionFromString(t *testing.T) {
 func TestConceptDimensionFromString(t *testing.T) {
 	csvString := `"\i2b2\Demographics\Age\>= 65 years old\100\","DEM|AGE:100"," 100 years old","","2010-09-28 11:15:00","2010-08-18 09:50:00","2010-09-28 11:40:00","DEMO","\N"`
 
-	ac := loader.AdministrativeColumns{
+	ac := loaderi2b2.AdministrativeColumns{
 		UpdateDate:     "2010-09-28 11:15:00",
 		DownloadDate:   "2010-08-18 09:50:00",
 		ImportDate:     "2010-09-28 11:40:00",
@@ -501,11 +501,11 @@ func TestConceptDimensionFromString(t *testing.T) {
 		UploadID:       "\\N",
 	}
 
-	cdk := &loader.ConceptDimensionPK{
+	cdk := &loaderi2b2.ConceptDimensionPK{
 		ConceptPath: "\\i2b2\\Demographics\\Age\\>= 65 years old\\100\\",
 	}
 
-	cd := loader.ConceptDimension{
+	cd := loaderi2b2.ConceptDimension{
 		PK:           cdk,
 		ConceptCD:    "DEM|AGE:100",
 		NameChar:     " 100 years old",
@@ -518,7 +518,7 @@ func TestConceptDimensionFromString(t *testing.T) {
 	lines, err := r.ReadAll()
 	assert.Nil(t, err, "Parsing error")
 
-	cdkExpected, cdExpected := loader.ConceptDimensionFromString(lines[0])
+	cdkExpected, cdExpected := loaderi2b2.ConceptDimensionFromString(lines[0])
 
 	assert.Equal(t, *cdkExpected, *cdk)
 	assert.Equal(t, cdExpected, cd)
@@ -527,7 +527,7 @@ func TestConceptDimensionFromString(t *testing.T) {
 func TestModifierDimensionFromString(t *testing.T) {
 	csvString := `"\Admit Diagnosis\","0","Admit Diagnosis","","2011-04-14 00:55:00","\N","2011-04-14 00:55:00","DEMO","\N"`
 
-	ac := loader.AdministrativeColumns{
+	ac := loaderi2b2.AdministrativeColumns{
 		UpdateDate:     "2011-04-14 00:55:00",
 		DownloadDate:   "\\N",
 		ImportDate:     "2011-04-14 00:55:00",
@@ -535,11 +535,11 @@ func TestModifierDimensionFromString(t *testing.T) {
 		UploadID:       "\\N",
 	}
 
-	mdk := &loader.ModifierDimensionPK{
+	mdk := &loaderi2b2.ModifierDimensionPK{
 		ModifierPath: "\\Admit Diagnosis\\",
 	}
 
-	md := loader.ModifierDimension{
+	md := loaderi2b2.ModifierDimension{
 		PK:           mdk,
 		ModifierCD:   "0",
 		NameChar:     "Admit Diagnosis",
@@ -552,7 +552,7 @@ func TestModifierDimensionFromString(t *testing.T) {
 	lines, err := r.ReadAll()
 	assert.Nil(t, err, "Parsing error")
 
-	mdkExpected, mdExpected := loader.ModifierDimensionFromString(lines[0])
+	mdkExpected, mdExpected := loaderi2b2.ModifierDimensionFromString(lines[0])
 
 	assert.Equal(t, *mdkExpected, *mdk)
 	assert.Equal(t, mdExpected, md)
@@ -561,7 +561,7 @@ func TestModifierDimensionFromString(t *testing.T) {
 func TestObservationFactFromString(t *testing.T) {
 	csvString := `"482232","1000000060","Affy:221610_s_at","LCS-I2B2:D000109064","2009-01-16 00:00:00","@","1","N","E","79.30000","","\N","","2009-01-16 00:00:00","@","","\N","2010-09-28 11:15:00","2010-08-18 09:50:00","2010-09-28 11:40:00","DEMO","\N","1"
 `
-	ac := loader.AdministrativeColumns{
+	ac := loaderi2b2.AdministrativeColumns{
 		UpdateDate:      "2010-09-28 11:15:00",
 		DownloadDate:    "2010-08-18 09:50:00",
 		ImportDate:      "2010-09-28 11:40:00",
@@ -570,7 +570,7 @@ func TestObservationFactFromString(t *testing.T) {
 		TextSearchIndex: "1",
 	}
 
-	ofk := &loader.ObservationFactPK{
+	ofk := &loaderi2b2.ObservationFactPK{
 		EncounterNum: "482232",
 		PatientNum:   "1000000060",
 		ConceptCD:    "Affy:221610_s_at",
@@ -580,7 +580,7 @@ func TestObservationFactFromString(t *testing.T) {
 		InstanceNum:  "1",
 	}
 
-	of := loader.ObservationFact{
+	of := loaderi2b2.ObservationFact{
 		PK:              ofk,
 		ValTypeCD:       "N",
 		TValChar:        "E",
@@ -600,7 +600,7 @@ func TestObservationFactFromString(t *testing.T) {
 	lines, err := r.ReadAll()
 	assert.Nil(t, err, "Parsing error")
 
-	ofkExpected, ofExpected := loader.ObservationFactFromString(lines[0])
+	ofkExpected, ofExpected := loaderi2b2.ObservationFactFromString(lines[0])
 
 	assert.Equal(t, ofkExpected, ofk)
 	assert.Equal(t, ofExpected, of)

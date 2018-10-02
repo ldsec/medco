@@ -88,6 +88,9 @@ const (
 
 	optionDataFiles      = "files"
 	optionDataFilesShort = "f"
+
+	optionEmpty      = "empty"
+	optionEmptyShort = "e"
 )
 
 /*
@@ -125,7 +128,7 @@ func main() {
 		cli.StringFlag{
 			Name:  optionSensitiveFile + ", " + optionSensitiveFileShort,
 			Value: DefaultSensitiveFile,
-			Usage: "List of sensitive concepts",
+			Usage: "File containing a list of sensitive concepts",
 		},
 		cli.StringFlag{
 			Name:  optionDBhost + ", " + optionDBhostShort,
@@ -182,7 +185,11 @@ func main() {
 		cli.StringFlag{
 			Name:  optionDataFiles + ", " + optionDataFilesShort,
 			Value: DefaultDataFiles,
-			Usage: "Configuration toml with the filepath for the all the necessary i2b2 files for conversion",
+			Usage: "Configuration toml with the path of the all the necessary i2b2 files",
+		},
+		cli.BoolFlag{
+			Name:  optionEmpty + ", " + optionEmptyShort,
+			Usage: "Empty patient and visit dimension tables (y/n)",
 		},
 	}
 	loaderFlagsv1 = append(loaderFlagsCommon, loaderFlagsv1...)
