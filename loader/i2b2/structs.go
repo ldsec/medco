@@ -167,23 +167,28 @@ type LocalOntology struct {
 // ToCSVText writes the LocalOntology object in a way that can be added to a .csv file - "","","", etc.
 func (lo LocalOntology) ToCSVText() string {
 	acString := "\"" + lo.AdminColumns.UpdateDate + "\"," + "\"" + lo.AdminColumns.DownloadDate + "\"," + "\"" + lo.AdminColumns.ImportDate + "\"," + "\"" + lo.AdminColumns.SourceSystemCD + "\""
-
-	return "\"" + lo.HLevel + "\"," + "\"" + lo.Fullname + "\"," + "\"" + lo.Name + "\"," + "\"" + lo.SynonymCD + "\"," + "\"" + lo.VisualAttributes + "\"," + "\"" + lo.TotalNum + "\"," +
+	finalString := "\"" + lo.HLevel + "\"," + "\"" + lo.Fullname + "\"," + "\"" + lo.Name + "\"," + "\"" + lo.SynonymCD + "\"," + "\"" + lo.VisualAttributes + "\"," + "\"" + lo.TotalNum + "\"," +
 		"\"" + lo.BaseCode + "\"," + "\"" + lo.MetadataXML + "\"," + "\"" + lo.FactTableColumn + "\"," + "\"" + lo.Tablename + "\"," + "\"" + lo.ColumnName + "\"," + "\"" + lo.ColumnDataType + "\"," + "\"" + lo.Operator + "\"," +
 		"\"" + lo.DimCode + "\"," + "\"" + lo.Comment + "\"," + "\"" + lo.Tooltip + "\"," + "\"" + lo.AppliedPath + "\"," + acString + "," + "\"" + lo.ValueTypeCD + "\"," + "\"" + lo.ExclusionCD + "\"," +
 		"\"" + lo.Path + "\"," + "\"" + lo.Symbol + "\""
+
+	return strings.Replace(finalString, `"\N"`,"", -1)
 }
 
 // LocalOntologySensitiveConceptToCSVText writes the tagging information of a concept of the local ontology in a way that can be added to a .csv file - "","","", etc.
 func LocalOntologySensitiveConceptToCSVText(tag *libunlynx.GroupingKey, tagID int64) string {
-	return `"3","\medco\tagged\concept\` + string(*tag) + `\","","N","LA ","\N","TAG_ID:` + strconv.FormatInt(tagID, 10) + `","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\medco\tagged\concept\` + string(*tag) +
+	finalString := `"3","\medco\tagged\concept\` + string(*tag) + `\","","N","LA ","\N","TAG_ID:` + strconv.FormatInt(tagID, 10) + `","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\medco\tagged\concept\` + string(*tag) +
 		`\","\N","\N","NOW()","\N","\N","\N","TAG_ID","@","\N","\N","\N","\N"`
+
+	return strings.Replace(finalString, `"\N"`,"", -1)
 }
 
 // LocalOntologySensitiveModifierToCSVText writes the tagging information of a modifier of the local ontology in a way that can be added to a .csv file - "","","", etc.
 func LocalOntologySensitiveModifierToCSVText(tag *libunlynx.GroupingKey, tagID int64) string {
-	return `"3","\medco\tagged\modifier\` + string(*tag) + `\","","N","LA ","\N","TAG_ID:` + strconv.FormatInt(tagID, 10) + `","\N","MODIFIER_CD","MODIFIER_DIMENSION","MODIFIER_PATH","T","LIKE","\medco\tagged\modifier\` + string(*tag) +
+	finalString := `"3","\medco\tagged\modifier\` + string(*tag) + `\","","N","LA ","\N","TAG_ID:` + strconv.FormatInt(tagID, 10) + `","\N","MODIFIER_CD","MODIFIER_DIMENSION","MODIFIER_PATH","T","LIKE","\medco\tagged\modifier\` + string(*tag) +
 		`\","\N","\N","NOW()","\N","\N","\N","TAG_ID","@","\N","\N","\N","\N"`
+
+	return strings.Replace(finalString, `"\N"`,"", -1)
 }
 
 //-------------------------------------//
@@ -242,10 +247,11 @@ type AdministrativeColumns struct {
 // ToCSVText writes the ObservationFact object in a way that can be added to a .csv file - "","","", etc.
 func (lo ObservationFact) ToCSVText() string {
 	acString := "\"" + lo.AdminColumns.UpdateDate + "\"," + "\"" + lo.AdminColumns.DownloadDate + "\"," + "\"" + lo.AdminColumns.ImportDate + "\"," + "\"" + lo.AdminColumns.SourceSystemCD + "\"," + "\"" + lo.AdminColumns.UploadID + "\"," + "\"" + lo.AdminColumns.TextSearchIndex + "\""
-
-	return "\"" + lo.PK.EncounterNum + "\"," + "\"" + lo.PK.PatientNum + "\"," + "\"" + lo.PK.ConceptCD + "\"," + "\"" + lo.PK.ProviderID + "\"," + "\"" + lo.PK.StartDate + "\"," + "\"" + lo.PK.ModifierCD + "\"," +
+	finalString := "\"" + lo.PK.EncounterNum + "\"," + "\"" + lo.PK.PatientNum + "\"," + "\"" + lo.PK.ConceptCD + "\"," + "\"" + lo.PK.ProviderID + "\"," + "\"" + lo.PK.StartDate + "\"," + "\"" + lo.PK.ModifierCD + "\"," +
 		"\"" + lo.PK.InstanceNum + "\"," + "\"" + lo.ValTypeCD + "\"," + "\"" + lo.TValChar + "\"," + "\"" + lo.NValNum + "\"," + "\"" + lo.ValueFlagCD + "\"," + "\"" + lo.QuantityNum + "\"," + "\"" + lo.UnitsCD + "\"," +
 		"\"" + lo.EndDate + "\"," + "\"" + lo.LocationCD + "\"," + "\"" + lo.ObservationBlob + "\"," + "\"" + lo.ConfidenceNum + "\"," + acString
+
+	return strings.Replace(finalString, `"\N"`,"", -1)
 }
 
 //-------------------------------------//
@@ -299,16 +305,20 @@ func (pd PatientDimension) ToCSVText(empty bool) string {
 		}
 
 		acString := "\"" + pd.AdminColumns.UpdateDate + "\"," + "\"" + pd.AdminColumns.DownloadDate + "\"," + "\"" + pd.AdminColumns.ImportDate + "\"," + "\"" + pd.AdminColumns.SourceSystemCD + "\"," + "\"" + pd.AdminColumns.UploadID + "\""
-		return pd.PK.ToCSVText() + ",\"" + pd.VitalStatusCD + "\"," + "\"" + pd.BirthDate + "\"," + "\"" + pd.DeathDate + "\"," + ofString[:len(ofString)-1] + "," + acString + "," + encodedEncryptedFlag
+		finalString := pd.PK.ToCSVText() + ",\"" + pd.VitalStatusCD + "\"," + "\"" + pd.BirthDate + "\"," + "\"" + pd.DeathDate + "\"," + ofString[:len(ofString)-1] + "," + acString + "," + encodedEncryptedFlag
+
+		return strings.Replace(finalString, `"\N"`,"", -1)
 	}
 
 	for i := 0; i < len(of); i++ {
 		// +4 because there is one pk field and 3 mandatory fields
-		ofString += "\"" + "\","
+		ofString += ","
 	}
 
-	acString := "\"" + "\"," + "\"" + "\"," + "\"" + "\"," + "\"" + "\"," + "\"" + "\""
-	return pd.PK.ToCSVText() + ",\"" + "\"," + "\"" + "\"," + "\"" + "\"," + ofString[:len(ofString)-1] + "," + acString + "," + encodedEncryptedFlag
+	acString := "," + "," + "," + ","
+	finalString := pd.PK.ToCSVText() + "," + "," + "," + "," + ofString[:len(ofString)-1] + "," + acString + "," + encodedEncryptedFlag
+
+	return strings.Replace(finalString, `"\N"`,"", -1)
 }
 
 // OptionalFields table contains the optional fields
@@ -369,16 +379,20 @@ func (vd VisitDimension) ToCSVText(empty bool) string {
 		}
 
 		acString := "\"" + vd.AdminColumns.UpdateDate + "\"," + "\"" + vd.AdminColumns.DownloadDate + "\"," + "\"" + vd.AdminColumns.ImportDate + "\"," + "\"" + vd.AdminColumns.SourceSystemCD + "\"," + "\"" + vd.AdminColumns.UploadID + "\""
-		return vd.PK.ToCSVText() + ",\"" + vd.ActiveStatusCD + "\"," + "\"" + vd.StartDate + "\"," + "\"" + vd.EndDate + "\"," + ofString[:len(ofString)-1] + "," + acString
+		finalString := vd.PK.ToCSVText() + ",\"" + vd.ActiveStatusCD + "\"," + "\"" + vd.StartDate + "\"," + "\"" + vd.EndDate + "\"," + ofString[:len(ofString)-1] + "," + acString
+
+		return strings.Replace(finalString, `"\N"`,"", -1)
 	}
 
 	for i := 0; i < len(of); i++ {
 		// +4 because there is on pk field and 3 mandatory fields
-		ofString += "\"" + "\","
+		ofString += ","
 	}
 
-	acString := "\"" + "\"," + "\"" + "\"," + "\"" + "\"," + "\"" + "\"," + "\"" + "\""
-	return vd.PK.ToCSVText() + ",\"" + "\"," + "\"" + "\"," + "\"" + "\"," + ofString[:len(ofString)-1] + "," + acString
+	acString := "," + "," + "," + ","
+	finalString := vd.PK.ToCSVText() + "," + "," + "," + "," + ofString[:len(ofString)-1] + "," + acString
+
+	return strings.Replace(finalString, `"\N"`,"", -1)
 }
 
 //-------------------------------------//
@@ -409,12 +423,16 @@ type ConceptDimensionPK struct {
 // ToCSVText writes the ConceptDimension object in a way that can be added to a .csv file - "","","", etc.
 func (cd ConceptDimension) ToCSVText() string {
 	acString := "\"" + cd.AdminColumns.UpdateDate + "\"," + "\"" + cd.AdminColumns.DownloadDate + "\"," + "\"" + cd.AdminColumns.ImportDate + "\"," + "\"" + cd.AdminColumns.SourceSystemCD + "\"," + "\"" + cd.AdminColumns.UploadID + "\""
-	return "\"" + cd.PK.ConceptPath + "\"," + "\"" + cd.ConceptCD + "\"," + "\"" + cd.NameChar + "\"," + "\"" + cd.ConceptBlob + "\"," + acString
+	finalString := "\"" + cd.PK.ConceptPath + "\"," + "\"" + cd.ConceptCD + "\"," + "\"" + cd.NameChar + "\"," + "\"" + cd.ConceptBlob + "\"," + acString
+
+	return strings.Replace(finalString, `"\N"`,"", -1)
 }
 
 // ConceptDimensionSensitiveToCSVText writes the tagging information of a concept of the concept_dimension table in a way that can be added to a .csv file - "","","", etc.
 func ConceptDimensionSensitiveToCSVText(tag *libunlynx.GroupingKey, tagID int64) string {
-	return `"\medco\tagged\concept\` + string(*tag) + `\","TAG_ID:` + strconv.FormatInt(tagID, 10) + `","\N","\N","\N","\N","NOW()","\N","\N"`
+	finalString := `"\medco\tagged\concept\` + string(*tag) + `\","TAG_ID:` + strconv.FormatInt(tagID, 10) + `","\N","\N","\N","\N","NOW()","\N","\N"`
+
+	return strings.Replace(finalString, `"\N"`,"", -1)
 }
 
 //-------------------------------------//
@@ -445,12 +463,16 @@ type ModifierDimensionPK struct {
 // ToCSVText writes the ModifierDimension object in a way that can be added to a .csv file - "","","", etc.
 func (md ModifierDimension) ToCSVText() string {
 	acString := "\"" + md.AdminColumns.UpdateDate + "\"," + "\"" + md.AdminColumns.DownloadDate + "\"," + "\"" + md.AdminColumns.ImportDate + "\"," + "\"" + md.AdminColumns.SourceSystemCD + "\"," + "\"" + md.AdminColumns.UploadID + "\""
-	return "\"" + md.PK.ModifierPath + "\"," + "\"" + md.ModifierCD + "\"," + "\"" + md.NameChar + "\"," + "\"" + md.ModifierBlob + "\"," + acString
+	finalString := "\"" + md.PK.ModifierPath + "\"," + "\"" + md.ModifierCD + "\"," + "\"" + md.NameChar + "\"," + "\"" + md.ModifierBlob + "\"," + acString
+
+	return strings.Replace(finalString, `"\N"`,"", -1)
 }
 
 // ModifierDimensionSensitiveToCSVText writes the tagging information of a concept of the modifier_dimension table in a way that can be added to a .csv file - "","","", etc.
 func ModifierDimensionSensitiveToCSVText(tag *libunlynx.GroupingKey, tagID int64) string {
-	return `"\medco\tagged\modifier\` + string(*tag) + `\","TAG_ID:` + strconv.FormatInt(tagID, 10) + `","\N","\N","\N","\N","NOW()","\N","\N"`
+	finalString := `"\medco\tagged\modifier\` + string(*tag) + `\","TAG_ID:` + strconv.FormatInt(tagID, 10) + `","\N","\N","\N","\N","NOW()","\N","\N"`
+
+	return strings.Replace(finalString, `"\N"`,"", -1)
 }
 
 //-------------------------------------//

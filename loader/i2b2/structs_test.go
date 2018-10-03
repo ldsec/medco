@@ -48,23 +48,23 @@ func TestShrineOntology_ToCSVText(t *testing.T) {
 		AppliedPath:      "@",
 		ExclusionCD:      "\\N",
 	}
-	assert.Equal(t, so.ToCSVText(), `"0","\SHRINE\","SHRINE","N","CA ","\N","\N","","concept_cd","concept_dimension","concept_path","T","LIKE","\SHRINE\","","\N","\N","\N","\N","SHRINE","\N","@","\N"`)
+	assert.Equal(t, so.ToCSVText(), `"0","\SHRINE\","SHRINE","N","CA ",,,"","concept_cd","concept_dimension","concept_path","T","LIKE","\SHRINE\","",,,,,"SHRINE",,"@",`)
 
 	so.NodeEncryptID = 1
-	assert.Equal(t, so.ToCSVText(), `"0","\SHRINE\","SHRINE","N","CA ","\N","\N","<?xml version=""1.0""?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>CONCEPT_PARENT_NODE</EncryptedType></ValueMetadata>","concept_cd","concept_dimension","concept_path","T","LIKE","\SHRINE\","","\N","\N","\N","\N","SHRINE","\N","@","\N"`)
+	assert.Equal(t, so.ToCSVText(), `"0","\SHRINE\","SHRINE","N","CA ",,,"<?xml version=""1.0""?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>CONCEPT_PARENT_NODE</EncryptedType></ValueMetadata>","concept_cd","concept_dimension","concept_path","T","LIKE","\SHRINE\","",,,,,"SHRINE",,"@",`)
 
 	so.VisualAttributes = "LA "
-	assert.Equal(t, so.ToCSVText(), `"0","\SHRINE\","SHRINE","N","LA ","\N","\N","<?xml version=""1.0""?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>CONCEPT_LEAF</EncryptedType><NodeEncryptID>1</NodeEncryptID></ValueMetadata>","concept_cd","concept_dimension","concept_path","T","LIKE","\SHRINE\","","\N","\N","\N","\N","SHRINE","\N","@","\N"`)
+	assert.Equal(t, so.ToCSVText(), `"0","\SHRINE\","SHRINE","N","LA ",,,"<?xml version=""1.0""?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>CONCEPT_LEAF</EncryptedType><NodeEncryptID>1</NodeEncryptID></ValueMetadata>","concept_cd","concept_dimension","concept_path","T","LIKE","\SHRINE\","",,,,,"SHRINE",,"@",`)
 
 	so.ChildrenEncryptIDs = append(so.ChildrenEncryptIDs, 2)
 	so.ChildrenEncryptIDs = append(so.ChildrenEncryptIDs, 3)
-	assert.Equal(t, so.ToCSVText(), `"0","\SHRINE\","SHRINE","N","LA ","\N","\N","<?xml version=""1.0""?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>CONCEPT_LEAF</EncryptedType><NodeEncryptID>1</NodeEncryptID></ValueMetadata>","concept_cd","concept_dimension","concept_path","T","LIKE","\SHRINE\","","\N","\N","\N","\N","SHRINE","\N","@","\N"`)
+	assert.Equal(t, so.ToCSVText(), `"0","\SHRINE\","SHRINE","N","LA ",,,"<?xml version=""1.0""?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>CONCEPT_LEAF</EncryptedType><NodeEncryptID>1</NodeEncryptID></ValueMetadata>","concept_cd","concept_dimension","concept_path","T","LIKE","\SHRINE\","",,,,,"SHRINE",,"@",`)
 
 	so.VisualAttributes = "FA "
-	assert.Equal(t, so.ToCSVText(), `"0","\SHRINE\","SHRINE","N","FA ","\N","\N","<?xml version=""1.0""?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>CONCEPT_INTERNAL_NODE</EncryptedType><NodeEncryptID>1</NodeEncryptID><ChildrenEncryptIDs><ChildEncryptID>2</ChildEncryptID><ChildEncryptID>3</ChildEncryptID></ChildrenEncryptIDs></ValueMetadata>","concept_cd","concept_dimension","concept_path","T","LIKE","\SHRINE\","","\N","\N","\N","\N","SHRINE","\N","@","\N"`)
+	assert.Equal(t, so.ToCSVText(), `"0","\SHRINE\","SHRINE","N","FA ",,,"<?xml version=""1.0""?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>CONCEPT_INTERNAL_NODE</EncryptedType><NodeEncryptID>1</NodeEncryptID><ChildrenEncryptIDs><ChildEncryptID>2</ChildEncryptID><ChildEncryptID>3</ChildEncryptID></ChildrenEncryptIDs></ValueMetadata>","concept_cd","concept_dimension","concept_path","T","LIKE","\SHRINE\","",,,,,"SHRINE",,"@",`)
 
 	so.VisualAttributes = "DA "
-	assert.Equal(t, so.ToCSVText(), `"0","\SHRINE\","SHRINE","N","DA ","\N","\N","<?xml version=""1.0""?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>MODIFIER_INTERNAL_NODE</EncryptedType><NodeEncryptID>1</NodeEncryptID><ChildrenEncryptIDs><ChildEncryptID>2</ChildEncryptID><ChildEncryptID>3</ChildEncryptID></ChildrenEncryptIDs></ValueMetadata>","concept_cd","concept_dimension","concept_path","T","LIKE","\SHRINE\","","\N","\N","\N","\N","SHRINE","\N","@","\N"`)
+	assert.Equal(t, so.ToCSVText(), `"0","\SHRINE\","SHRINE","N","DA ",,,"<?xml version=""1.0""?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>MODIFIER_INTERNAL_NODE</EncryptedType><NodeEncryptID>1</NodeEncryptID><ChildrenEncryptIDs><ChildEncryptID>2</ChildEncryptID><ChildEncryptID>3</ChildEncryptID></ChildrenEncryptIDs></ValueMetadata>","concept_cd","concept_dimension","concept_path","T","LIKE","\SHRINE\","",,,,,"SHRINE",,"@",`)
 
 }
 
@@ -104,10 +104,10 @@ func TestLocalOntology_ToCSVText(t *testing.T) {
 		PCoriBasecode: "\\N",
 	}
 
-	assert.Equal(t, lo.ToCSVText(), `"4","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","Parkdale","N","FA ","\N","\N","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","\N","Demographics \ Zip codes \ Arkansas \ Parkdale","@","2007-04-10 00:00:00","2007-04-10 00:00:00","2007-04-10 00:00:00","DEMO","\N","\N","\N","\N"`)
+	assert.Equal(t, lo.ToCSVText(), `"4","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","Parkdale","N","FA ",,,,"concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\",,"Demographics \ Zip codes \ Arkansas \ Parkdale","@","2007-04-10 00:00:00","2007-04-10 00:00:00","2007-04-10 00:00:00","DEMO",,,,`)
 
 	tag := libunlynx.GroupingKey("1")
-	assert.Equal(t, loaderi2b2.LocalOntologySensitiveConceptToCSVText(&tag, 20), `"3","\medco\tagged\concept\1\","","N","LA ","\N","TAG_ID:20","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\medco\tagged\concept\1\","\N","\N","NOW()","\N","\N","\N","TAG_ID","@","\N","\N","\N","\N"`)
+	assert.Equal(t, loaderi2b2.LocalOntologySensitiveConceptToCSVText(&tag, 20), `"3","\medco\tagged\concept\1\","","N","LA ",,"TAG_ID:20",,"concept_cd","concept_dimension","concept_path","T","LIKE","\medco\tagged\concept\1\",,,"NOW()",,,,"TAG_ID","@",,,,`)
 
 }
 
@@ -153,8 +153,8 @@ func TestPatientDimension_ToCSVText(t *testing.T) {
 	b := pd.EncryptedFlag.ToBytes()
 	encodedEncryptedFlag := "\"" + base64.StdEncoding.EncodeToString(b) + "\""
 
-	assert.Equal(t, pd.ToCSVText(false), `"1000000001","D","1985-11-17 00:00:00","\N","F","24","english","black","married","roman catholic","02140","Zip codes\Massachusetts\Cambridge\02140\","Low","","2010-11-04 10:43:00","2010-08-18 09:50:00","2010-11-04 10:43:00","DEMO","\N",`+encodedEncryptedFlag)
-	assert.Equal(t, pd.ToCSVText(true), `"1000000001","","","","","","","","","","","","","","","","","","",`+encodedEncryptedFlag)
+	assert.Equal(t, pd.ToCSVText(false), `"1000000001","D","1985-11-17 00:00:00",,"F","24","english","black","married","roman catholic","02140","Zip codes\Massachusetts\Cambridge\02140\","Low","","2010-11-04 10:43:00","2010-08-18 09:50:00","2010-11-04 10:43:00","DEMO",,`+encodedEncryptedFlag)
+	assert.Equal(t, pd.ToCSVText(true), `"1000000001",,,,,,,,,,,,,,,,,,,`+encodedEncryptedFlag)
 
 }
 
@@ -188,13 +188,13 @@ func TestVisitDimension_ToCSVText(t *testing.T) {
 		AdminColumns:   ac,
 	}
 
-	assert.Equal(t, vd.ToCSVText(false), `"471185","1000000101","U","1997-01-02 00:00:00","\N","O","","","\N","","2010-11-04 10:43:00","2010-08-18 09:50:00","2010-11-04 10:43:00","DEMO","\N"`)
-	assert.Equal(t, vd.ToCSVText(true), `"471185","1000000101","","","","","","","","","","","","",""`)
+	assert.Equal(t, vd.ToCSVText(false), `"471185","1000000101","U","1997-01-02 00:00:00",,"O","","",,"","2010-11-04 10:43:00","2010-08-18 09:50:00","2010-11-04 10:43:00","DEMO",`)
+	assert.Equal(t, vd.ToCSVText(true), `"471185","1000000101",,,,,,,,,,,,,`)
 }
 
 func TestConceptDimension_ToCSVText(t *testing.T) {
 
-	csvString := `"\i2b2\Demographics\Age\>= 65 years old\100\","DEM|AGE:100"," 100 years old","","2010-09-28 11:15:00","2010-08-18 09:50:00","2010-09-28 11:40:00","DEMO","\N"`
+	csvString := `"\i2b2\Demographics\Age\>= 65 years old\100\","DEM|AGE:100"," 100 years old","","2010-09-28 11:15:00","2010-08-18 09:50:00","2010-09-28 11:40:00","DEMO",`
 
 	ac := loaderi2b2.AdministrativeColumns{
 		UpdateDate:     "2010-09-28 11:15:00",
@@ -219,12 +219,12 @@ func TestConceptDimension_ToCSVText(t *testing.T) {
 	assert.Equal(t, csvString, cd.ToCSVText())
 
 	tag := libunlynx.GroupingKey("1")
-	assert.Equal(t, `"\medco\tagged\concept\1\","TAG_ID:20","\N","\N","\N","\N","NOW()","\N","\N"`, loaderi2b2.ConceptDimensionSensitiveToCSVText(&tag, 20))
+	assert.Equal(t, `"\medco\tagged\concept\1\","TAG_ID:20",,,,,"NOW()",,`, loaderi2b2.ConceptDimensionSensitiveToCSVText(&tag, 20))
 }
 
 func TestModifierDimension_ToCSVText(t *testing.T) {
 
-	csvString := `"\Admit Diagnosis\","0","Admit Diagnosis","","2011-04-14 00:55:00","\N","2011-04-14 00:55:00","DEMO","\N"`
+	csvString := `"\Admit Diagnosis\","0","Admit Diagnosis","","2011-04-14 00:55:00",,"2011-04-14 00:55:00","DEMO",`
 
 	ac := loaderi2b2.AdministrativeColumns{
 		UpdateDate:     "2011-04-14 00:55:00",
@@ -249,12 +249,12 @@ func TestModifierDimension_ToCSVText(t *testing.T) {
 	assert.Equal(t, csvString, md.ToCSVText())
 
 	tag := libunlynx.GroupingKey("1")
-	assert.Equal(t, `"\medco\tagged\modifier\1\","TAG_ID:20","\N","\N","\N","\N","NOW()","\N","\N"`, loaderi2b2.ModifierDimensionSensitiveToCSVText(&tag, 20))
+	assert.Equal(t, `"\medco\tagged\modifier\1\","TAG_ID:20",,,,,"NOW()",,`, loaderi2b2.ModifierDimensionSensitiveToCSVText(&tag, 20))
 }
 
 func TestObservationFact_ToCSVText(t *testing.T) {
 
-	csvString := `"482232","1000000060","Affy:221610_s_at","LCS-I2B2:D000109064","2009-01-16 00:00:00","@","1","N","E","79.30000","","\N","","2009-01-16 00:00:00","@","","\N","2010-09-28 11:15:00","2010-08-18 09:50:00","2010-09-28 11:40:00","DEMO","\N","1"`
+	csvString := `"482232","1000000060","Affy:221610_s_at","LCS-I2B2:D000109064","2009-01-16 00:00:00","@","1","N","E","79.30000","",,"","2009-01-16 00:00:00","@","",,"2010-09-28 11:15:00","2010-08-18 09:50:00","2010-09-28 11:40:00","DEMO",,"1"`
 
 	ac := loaderi2b2.AdministrativeColumns{
 		UpdateDate:      "2010-09-28 11:15:00",
