@@ -297,6 +297,44 @@ func TestObservationFact_ToCSVText(t *testing.T) {
 // ---------------------------------------- FROM STRING -------------------------------------------------------- //
 // ------------------------------------------------------------------------------------------------------------- //
 
+func TestTableAccessFromString(t *testing.T) {
+	csvString := `"i2b2_DEMO","I2B2","N","1","\i2b2\Demographics\","Demographics","N","CA ","\N","\N","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\Demographics\","\N","Demographics","\N","\N","\N","\N"`
+
+	ta := loaderi2b2.TableAccess{
+		TableCD:			"i2b2_DEMO",
+		TableName: 			"I2B2",
+		ProtectedAccess: 	"N",
+		Hlevel:				"1",
+		Fullname:			`\i2b2\Demographics\`,
+		Name:				"Demographics",
+		SynonymCD:			"N",
+		Visualattributes: 	"CA ",
+		Totalnum:			"\\N",
+		Basecode:			"\\N",
+		Metadataxml:		"\\N",
+		Facttablecolumn:	"concept_cd",
+		Dimtablename:		"concept_dimension",
+		Columnname:			"concept_path",
+		Columndatatype:		"T",
+		Operator:			"LIKE",
+		Dimcode:			`\i2b2\Demographics\`,
+		Comment:			"\\N",
+		Tooltip:			"Demographics",
+		EntryDate:			"\\N",
+		ChangeDate:			"\\N",
+		StatusCD:			"\\N",
+		ValuetypeCD:		"\\N",
+	}
+
+	var csvFile = strings.NewReader(csvString)
+	r := csv.NewReader(csvFile)
+	lines, err := r.ReadAll()
+	assert.Nil(t, err, "Parsing error")
+
+	assert.Equal(t, *loaderi2b2.TableAccessFromString(lines[0]), ta)
+
+}
+
 func TestShrineOntologyFromString(t *testing.T) {
 	csvString := `"0","\SHRINE\","SHRINE","N","CA ","\N","\N","","concept_cd","concept_dimension","concept_path","T","LIKE","\SHRINE\","","\N","\N","\N","\N","SHRINE","\N","@","\N"`
 

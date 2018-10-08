@@ -1,7 +1,6 @@
 package loaderi2b2_test
 
 import (
-	"github.com/armon/go-radix"
 	"github.com/dedis/kyber"
 	"github.com/dedis/onet"
 	"github.com/dedis/onet/app"
@@ -61,95 +60,8 @@ func setupEncryptEnv() {
 	secretKey, publicKey = libunlynx.GenKey()
 }
 
-func TestStoreSensitiveLocalConcepts(t *testing.T) {
-	// Test #1
-	loaderi2b2.ListSensitiveConceptsShrine = make(map[string]bool)
-	loaderi2b2.ListSensitiveConceptsShrine["a"] = true
-
-	loaderi2b2.ListSensitiveConceptsLocal = make(map[string][]string)
-
-	localToShrine := make(map[string][]string)
-	shrineToLocal := radix.New()
-
-	shrineToLocal.Insert("a", []string{"1", "2"})
-	shrineToLocal.Insert("b", []string{"3"})
-	shrineToLocal.Insert("c", []string{"4"})
-
-	localToShrine["1"] = []string{"a"}
-	localToShrine["2"] = []string{"a"}
-	localToShrine["3"] = []string{"b"}
-	localToShrine["4"] = []string{"c"}
-
-	loaderi2b2.StoreSensitiveLocalConcepts(localToShrine, shrineToLocal)
-
-	assert.Equal(t, 1, len(loaderi2b2.ListSensitiveConceptsShrine))
-	assert.Equal(t, 2, len(loaderi2b2.ListSensitiveConceptsLocal))
-
-	// Test #2
-	loaderi2b2.ListSensitiveConceptsShrine = make(map[string]bool)
-	loaderi2b2.ListSensitiveConceptsShrine["a"] = true
-
-	loaderi2b2.ListSensitiveConceptsLocal = make(map[string][]string)
-
-	localToShrine = make(map[string][]string)
-	shrineToLocal = radix.New()
-
-	shrineToLocal.Insert("a", []string{"1", "2", "3"})
-	shrineToLocal.Insert("b", []string{"2"})
-	shrineToLocal.Insert("c", []string{"4"})
-
-	localToShrine["1"] = []string{"a"}
-	localToShrine["2"] = []string{"a", "b"}
-	localToShrine["3"] = []string{"a"}
-	localToShrine["4"] = []string{"c"}
-
-	loaderi2b2.StoreSensitiveLocalConcepts(localToShrine, shrineToLocal)
-
-	assert.Equal(t, 2, len(loaderi2b2.ListSensitiveConceptsShrine))
-	assert.Equal(t, 3, len(loaderi2b2.ListSensitiveConceptsLocal))
-
-	// Test #3
-	loaderi2b2.ListSensitiveConceptsShrine = make(map[string]bool)
-	loaderi2b2.ListSensitiveConceptsShrine["a"] = true
-
-	loaderi2b2.ListSensitiveConceptsLocal = make(map[string][]string)
-
-	localToShrine = make(map[string][]string)
-	shrineToLocal = radix.New()
-
-	shrineToLocal.Insert("a", []string{"1", "2", "3"})
-	shrineToLocal.Insert("b", []string{"2", "4"})
-	shrineToLocal.Insert("c", []string{"5", "4"})
-	shrineToLocal.Insert("d", []string{"6"})
-
-	localToShrine["1"] = []string{"a"}
-	localToShrine["2"] = []string{"a", "b"}
-	localToShrine["3"] = []string{"a"}
-	localToShrine["4"] = []string{"c", "b"}
-	localToShrine["5"] = []string{"c"}
-	localToShrine["6"] = []string{"d"}
-
-	loaderi2b2.StoreSensitiveLocalConcepts(localToShrine, shrineToLocal)
-
-	assert.Equal(t, 3, len(loaderi2b2.ListSensitiveConceptsShrine))
-	assert.Equal(t, 5, len(loaderi2b2.ListSensitiveConceptsLocal))
-}
-
-func TestConvertAdapterMappings(t *testing.T) {
-	log.SetDebugVisible(2)
-
-	loaderi2b2.ListSensitiveConceptsShrine = make(map[string]bool)
-	loaderi2b2.ListSensitiveConceptsShrine[`\Admit Diagnosis\`] = true
-	loaderi2b2.ListSensitiveConceptsShrine[`\Principal Diagnosis\`] = true
-	loaderi2b2.ListSensitiveConceptsShrine[`\Secondary Diagnosis\`] = true
-	//loaderI2B2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\`] = true
-	//loaderI2B2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\`] = true
-	//loaderI2B2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\`] = true
-	//loaderI2B2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`] = true
-	loaderi2b2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.9) Benign neoplasm of bone and articular cartilage, site unspecified\`] = true
-
-	assert.Nil(t, loaderi2b2.ParseAdapterMappings())
-	assert.Nil(t, loaderi2b2.ConvertAdapterMappings())
+func TestParseTableAccess(t *testing.T) {
+	assert.Nil(t, loaderi2b2.ParseTableAccess())
 }
 
 func TestDummyToPatient(t *testing.T) {
@@ -221,26 +133,6 @@ func TestUpdateChildrenEncryptIDs(t *testing.T) {
 	assert.Equal(t, []int64{1}, loaderi2b2.TableShrineOntologyModifierEnc["\\a\\"][1].ChildrenEncryptIDs)
 }
 
-func TestConvertShrineOntology(t *testing.T) {
-	log.SetDebugVisible(2)
-
-	loaderi2b2.ListSensitiveConceptsShrine = make(map[string]bool)
-	loaderi2b2.ListSensitiveConceptsShrine[`\Admit Diagnosis\`] = true
-	loaderi2b2.ListSensitiveConceptsShrine[`\Principal Diagnosis\`] = true
-	loaderi2b2.ListSensitiveConceptsShrine[`\Secondary Diagnosis\`] = true
-	//loaderI2B2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\`] = true
-	//loaderI2B2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\`] = true
-	//loaderI2B2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\`] = true
-	//loaderI2B2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`] = true
-	loaderi2b2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.9) Benign neoplasm of bone and articular cartilage, site unspecified\`] = true
-
-	assert.Nil(t, loaderi2b2.ParseAdapterMappings())
-	assert.Nil(t, loaderi2b2.ConvertAdapterMappings())
-
-	assert.Nil(t, loaderi2b2.ParseShrineOntology())
-	assert.Nil(t, loaderi2b2.ConvertShrineOntology())
-}
-
 func TestStripByLevel(t *testing.T) {
 
 	test := `\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.9) Benign neoplasm of bone and articular cartilage, site unspecified\`
@@ -272,29 +164,23 @@ func TestStripByLevel(t *testing.T) {
 	assert.Equal(t, "", result)
 }
 
-func TestConvertLocalOntology(t *testing.T) {
+func TestConvertOntology(t *testing.T) {
 	log.SetDebugVisible(2)
 	setupEncryptEnv()
 	loaderi2b2.Testing = true
 
-	loaderi2b2.ListSensitiveConceptsShrine = make(map[string]bool)
-	loaderi2b2.ListSensitiveConceptsShrine[`\Admit Diagnosis\`] = true
-	loaderi2b2.ListSensitiveConceptsShrine[`\Principal Diagnosis\`] = true
-	loaderi2b2.ListSensitiveConceptsShrine[`\Secondary Diagnosis\`] = true
-	//loaderI2B2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\`] = true
-	//loaderI2B2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\`] = true
-	//loaderI2B2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\`] = true
-	//loaderI2B2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`] = true
-	loaderi2b2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.9) Benign neoplasm of bone and articular cartilage, site unspecified\`] = true
+	loaderi2b2.ListSensitiveConcepts = make(map[string]struct{})
+	loaderi2b2.ListSensitiveConcepts[`\i2b2\Diagnoses\Neoplasms (140-239)\Benign neoplasms (210-229)\(216) Benign neoplasm of skin\`] = struct{}{}
 
-	assert.Nil(t, loaderi2b2.ParseAdapterMappings())
-	assert.Nil(t, loaderi2b2.ConvertAdapterMappings())
-
-	assert.Nil(t, loaderi2b2.ParseShrineOntology())
-	assert.Nil(t, loaderi2b2.ConvertShrineOntology())
+	assert.Nil(t, loaderi2b2.ParseTableAccess())
 
 	assert.Nil(t, loaderi2b2.ParseLocalOntology(el, 0))
 	assert.Nil(t, loaderi2b2.ConvertLocalOntology())
+
+	assert.Nil(t, loaderi2b2.GenerateNewAdapterMappings())
+
+	assert.Nil(t, loaderi2b2.ParseShrineOntologyHeader())
+	assert.Nil(t, loaderi2b2.GenerateNewShrineOntology())
 
 	local.CloseAll()
 }
@@ -304,58 +190,21 @@ func TestConvertConceptDimension(t *testing.T) {
 	setupEncryptEnv()
 	loaderi2b2.Testing = true
 
-	loaderi2b2.ListSensitiveConceptsShrine = make(map[string]bool)
-	loaderi2b2.ListSensitiveConceptsShrine[`\Admit Diagnosis\`] = true
-	loaderi2b2.ListSensitiveConceptsShrine[`\Principal Diagnosis\`] = true
-	loaderi2b2.ListSensitiveConceptsShrine[`\Secondary Diagnosis\`] = true
-	//loaderI2B2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\`] = true
-	//loaderI2B2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\`] = true
-	//loaderI2B2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\`] = true
-	//loaderI2B2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`] = true
-	loaderi2b2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.9) Benign neoplasm of bone and articular cartilage, site unspecified\`] = true
+	loaderi2b2.ListSensitiveConcepts = make(map[string]struct{})
+	loaderi2b2.ListSensitiveConcepts[`\i2b2\Diagnoses\Neoplasms (140-239)\Benign neoplasms (210-229)\(216) Benign neoplasm of skin\`] = struct{}{}
 
-	assert.Nil(t, loaderi2b2.ParseAdapterMappings())
-	assert.Nil(t, loaderi2b2.ConvertAdapterMappings())
-
-	assert.Nil(t, loaderi2b2.ParseShrineOntology())
-	assert.Nil(t, loaderi2b2.ConvertShrineOntology())
+	assert.Nil(t, loaderi2b2.ParseTableAccess())
 
 	assert.Nil(t, loaderi2b2.ParseLocalOntology(el, 0))
 	assert.Nil(t, loaderi2b2.ConvertLocalOntology())
+
+	assert.Nil(t, loaderi2b2.GenerateNewAdapterMappings())
+
+	assert.Nil(t, loaderi2b2.ParseShrineOntologyHeader())
+	assert.Nil(t, loaderi2b2.GenerateNewShrineOntology())
 
 	assert.Nil(t, loaderi2b2.ParseConceptDimension())
 	assert.Nil(t, loaderi2b2.ConvertConceptDimension())
-
-	local.CloseAll()
-
-}
-
-func TestConvertModifierDimension(t *testing.T) {
-	log.SetDebugVisible(2)
-	setupEncryptEnv()
-	loaderi2b2.Testing = true
-
-	loaderi2b2.ListSensitiveConceptsShrine = make(map[string]bool)
-	loaderi2b2.ListSensitiveConceptsShrine[`\Admit Diagnosis\`] = true
-	loaderi2b2.ListSensitiveConceptsShrine[`\Principal Diagnosis\`] = true
-	loaderi2b2.ListSensitiveConceptsShrine[`\Secondary Diagnosis\`] = true
-	//loaderI2B2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\`] = true
-	//loaderI2B2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\`] = true
-	//loaderI2B2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\`] = true
-	//loaderI2B2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`] = true
-	loaderi2b2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.9) Benign neoplasm of bone and articular cartilage, site unspecified\`] = true
-
-	assert.Nil(t, loaderi2b2.ParseAdapterMappings())
-	assert.Nil(t, loaderi2b2.ConvertAdapterMappings())
-
-	assert.Nil(t, loaderi2b2.ParseShrineOntology())
-	assert.Nil(t, loaderi2b2.ConvertShrineOntology())
-
-	assert.Nil(t, loaderi2b2.ParseLocalOntology(el, 0))
-	assert.Nil(t, loaderi2b2.ConvertLocalOntology())
-
-	assert.Nil(t, loaderi2b2.ParseModifierDimension())
-	assert.Nil(t, loaderi2b2.ConvertModifierDimension())
 
 	local.CloseAll()
 
@@ -366,30 +215,26 @@ func TestConvertObservationFact(t *testing.T) {
 	setupEncryptEnv()
 	loaderi2b2.Testing = true
 
-	loaderi2b2.ListSensitiveConceptsShrine = make(map[string]bool)
-	loaderi2b2.ListSensitiveConceptsShrine[`\Admit Diagnosis\`] = true
-	loaderi2b2.ListSensitiveConceptsShrine[`\Principal Diagnosis\`] = true
-	loaderi2b2.ListSensitiveConceptsShrine[`\Secondary Diagnosis\`] = true
-	//loaderI2B2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\`] = true
-	//loaderI2B2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\`] = true
-	//loaderI2B2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\`] = true
-	//loaderI2B2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.8) Benign neoplasm of short bones of lower limb\`] = true
-	loaderi2b2.ListSensitiveConceptsShrine[`\SHRINE\Diagnoses\Neoplasms (140-239.99)\Benign neoplasms (210-229.99)\Benign neoplasm of bone and articular cartilage (213)\(213.9) Benign neoplasm of bone and articular cartilage, site unspecified\`] = true
+	loaderi2b2.ListSensitiveConcepts = make(map[string]struct{})
+	loaderi2b2.ListSensitiveConcepts[`\i2b2\Diagnoses\Neoplasms (140-239)\Benign neoplasms (210-229)\(216) Benign neoplasm of skin\`] = struct{}{}
 
-	assert.Nil(t, loaderi2b2.ParseAdapterMappings())
-	assert.Nil(t, loaderi2b2.ConvertAdapterMappings())
+	assert.Nil(t, loaderi2b2.ParseTableAccess())
 
-	log.LLvl1("--- Finished converting ADAPTER_MAPPINGS ---")
-
-	assert.Nil(t, loaderi2b2.ParseShrineOntology())
-	assert.Nil(t, loaderi2b2.ConvertShrineOntology())
-
-	log.LLvl1("--- Finished converting SHRINE_ONTOLOGY ---")
+	log.LLvl1("--- Finished parsing TABLE_ACCESS ---")
 
 	assert.Nil(t, loaderi2b2.ParseLocalOntology(el, 0))
 	assert.Nil(t, loaderi2b2.ConvertLocalOntology())
 
 	log.LLvl1("--- Finished converting LOCAL_ONTOLOGY ---")
+
+	assert.Nil(t, loaderi2b2.GenerateNewAdapterMappings())
+
+	log.LLvl1("--- Finished generating ADAPTER_MAPPINGS ---")
+
+	assert.Nil(t, loaderi2b2.ParseShrineOntologyHeader())
+	assert.Nil(t, loaderi2b2.GenerateNewShrineOntology())
+
+	log.LLvl1("--- Finished generating SHRINE_ONTOLOGY ---")
 
 	assert.Nil(t, loaderi2b2.ParseDummyToPatient())
 
@@ -407,11 +252,6 @@ func TestConvertObservationFact(t *testing.T) {
 	assert.Nil(t, loaderi2b2.ConvertConceptDimension())
 
 	log.LLvl1("--- Finished converting CONCEPT_DIMENSION ---")
-
-	assert.Nil(t, loaderi2b2.ParseModifierDimension())
-	assert.Nil(t, loaderi2b2.ConvertModifierDimension())
-
-	log.LLvl1("--- Finished converting MODIFIER_DIMENSION ---")
 
 	assert.Nil(t, loaderi2b2.ParseObservationFact())
 	assert.Nil(t, loaderi2b2.ConvertObservationFact())

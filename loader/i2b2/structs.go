@@ -14,10 +14,13 @@ import (
 // Testing defines whether we should run the DDT on test environment (locally) or using real nodes
 var Testing bool // testing environment
 
+// ListSensitiveConcepts list all sensitive concepts (paths) - SHRINE and LOCAL (the bool is for nothing)
+var ListSensitiveConcepts map[string]struct{}
+
 // ListSensitiveConceptsShrine list all the sensitive concepts (paths) - SHRINE (the bool is for nothing)
 var ListSensitiveConceptsShrine map[string]bool
 
-// ListSensitiveConceptsLocal list all the sensitive concepts (paths) and the respective shrine equivalent - LOCAL (the bool is for nothing)
+// ListSensitiveConceptsLocal list all the sensitive concepts (paths) and the respective shrine equivalent - LOCAL
 var ListSensitiveConceptsLocal map[string][]string
 
 // IDModifiers used to assign IDs to the modifiers concepts
@@ -27,6 +30,36 @@ var IDModifiers int64
 var IDConcepts int64
 
 // ####----DATA TYPES----####
+
+var TableAccessMap map[string]*TableAccess
+
+type TableAccess struct {
+	TableCD				string
+	TableName 			string
+	ProtectedAccess 	string
+	Hlevel				string
+	Fullname			string
+	Name				string
+	SynonymCD			string
+	Visualattributes 	string
+	Totalnum			string
+	Basecode			string
+	Metadataxml			string
+	Facttablecolumn		string
+	Dimtablename		string
+	Columnname			string
+	Columndatatype		string
+	Operator			string
+	Dimcode				string
+	Comment				string
+	Tooltip				string
+	EntryDate			string
+	ChangeDate			string
+	StatusCD			string
+	ValuetypeCD			string
+}
+
+//-------------------------------------//
 
 // TableShrineOntologyClear is the shrine_ontology table (it maps the concept path to a concept) with only the NON_SENSITIVE concepts (it INCLUDES MODIFIER NON-SENSITIVE concepts)
 var TableShrineOntologyClear map[string]*ShrineOntology
@@ -131,6 +164,9 @@ var MapConceptPathToTag map[string]TagAndID
 
 // MapModifierPathToTag maps a sensitive modifier path to its respective tag and tag_id
 var MapModifierPathToTag map[string]TagAndID
+
+// MapModifiers a map <set> of sensitive modifier paths
+var MapModifiers map[string]struct{}
 
 // HeaderLocalOntology contains all the headers for the i2b2 table
 var HeaderLocalOntology []string
@@ -494,6 +530,73 @@ type Entry struct {
 }
 
 // SUPPORT FUNCTIONS
+
+func TableAccessFromString(line []string) *TableAccess {
+	ta := &TableAccess{
+		TableCD:			line[0],
+		TableName: 			line[1],
+		ProtectedAccess: 	line[2],
+		Hlevel:				line[3],
+		Fullname:			line[4],
+		Name:				line[5],
+		SynonymCD:			line[6],
+		Visualattributes: 	line[7],
+		Totalnum:			line[8],
+		Basecode:			line[9],
+		Metadataxml:		line[10],
+		Facttablecolumn:	line[11],
+		Dimtablename:		line[12],
+		Columnname:			line[13],
+		Columndatatype:		line[14],
+		Operator:			line[15],
+		Dimcode:			line[16],
+		Comment:			line[17],
+		Tooltip:			line[18],
+		EntryDate:			line[19],
+		ChangeDate:			line[20],
+		StatusCD:			line[21],
+		ValuetypeCD:		line[22],
+	}
+
+	return ta
+}
+
+// ShrineOntologyFromLocalConcept generates a ShrineOntology struct from LocalOntology struct
+func ShrineOntologyFromLocalConcept(localConcept *LocalOntology) *ShrineOntology {
+	ac := AdministrativeColumns{
+		UpdateDate:     localConcept.AdminColumns.UpdateDate,
+		DownloadDate:   localConcept.AdminColumns.DownloadDate,
+		ImportDate:     localConcept.AdminColumns.ImportDate,
+		SourceSystemCD: localConcept.AdminColumns.SourceSystemCD,
+	}
+
+	so := &ShrineOntology{
+		NodeEncryptID:      int64(-1), //signals that this shrine ontology element is not sensitive so no need for an encrypt ID
+		ChildrenEncryptIDs: nil,       //same thing as before
+		HLevel:             localConcept.HLevel,
+		Fullname:           localConcept.Fullname,
+		Name:               localConcept.Name,
+		SynonymCD:          localConcept.SynonymCD,
+		VisualAttributes:   localConcept.VisualAttributes,
+		TotalNum:           localConcept.TotalNum,
+		BaseCode:           localConcept.BaseCode,
+		MetadataXML:        strings.Replace(localConcept.MetadataXML, "\"", "\"\"", -1),
+		FactTableColumn:    localConcept.FactTableColumn,
+		Tablename:          localConcept.Tablename,
+		ColumnName:         localConcept.ColumnName,
+		ColumnDataType:     localConcept.ColumnDataType,
+		Operator:           localConcept.Operator,
+		DimCode:            localConcept.DimCode,
+		Comment:            localConcept.Comment,
+		Tooltip:            localConcept.Tooltip,
+		AdminColumns:       ac,
+		ValueTypeCD:        localConcept.ValueTypeCD,
+		AppliedPath:        localConcept.AppliedPath,
+		ExclusionCD:        localConcept.ExclusionCD,
+	}
+
+	return so
+}
 
 // ShrineOntologyFromString generates a ShrineOntology struct from a parsed line of a .csv file
 func ShrineOntologyFromString(line []string) *ShrineOntology {
