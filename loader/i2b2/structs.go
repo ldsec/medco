@@ -757,13 +757,13 @@ func VisitDimensionFromString(line []string) (VisitDimensionPK, VisitDimension) 
 // ConceptDimensionFromString generates a ConceptDimension struct from a parsed line of a .csv file
 func ConceptDimensionFromString(line []string) (*ConceptDimensionPK, ConceptDimension) {
 	cdk := &ConceptDimensionPK{
-		ConceptPath: line[0],
+		ConceptPath: strings.Replace(line[0], `"`, "", -1),
 	}
 
 	cd := ConceptDimension{
 		PK:          cdk,
 		ConceptCD:   line[1],
-		NameChar:    line[2],
+		NameChar:    strings.Replace(line[2], `"`, "", -1),
 		ConceptBlob: line[3],
 	}
 
