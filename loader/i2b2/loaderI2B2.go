@@ -21,6 +21,7 @@ import (
 
 // Files is the object structure behind the files.toml
 type Files struct {
+	TableAccess 	  string
 	AdapterMappings   string
 	I2B2              string
 	SHRINE            string
@@ -79,8 +80,6 @@ var (
 	}
 
 	TablenamesData = [...]string{
-		//"i2b2demodata.patient_mapping",
-		//"i2b2demodata.encounter_mapping",
 		"shrine_ont.shrine",
 		"i2b2metadata.i2b2",
 		"i2b2metadata.sensitive_tagged",
@@ -143,6 +142,7 @@ func ConvertI2B2(el *onet.Roster, entryPointIdx int, files Files, mapSensitive m
 	ListSensitiveConceptsShrine = mapSensitive
 
 	// change input filepaths
+	InputFilePaths["TABLE_ACCESS"] = files.TableAccess
 	InputFilePaths["ADAPTER_MAPPINGS"] = files.AdapterMappings
 	InputFilePaths["SHRINE_ONTOLOGY"] = files.SHRINE
 	InputFilePaths["LOCAL_ONTOLOGY"] = files.I2B2
@@ -156,16 +156,7 @@ func ConvertI2B2(el *onet.Roster, entryPointIdx int, files Files, mapSensitive m
 	// change output filepaths
 	replaceOutputFolder(files.OutputFolder)
 
-	err := ParseAdapterMappings()
-	if err != nil {
-		return err
-	}
-	err = ConvertAdapterMappings()
-	if err != nil {
-		return err
-	}
-
-	err = ParseTableAccess()
+	err := ParseTableAccess()
 	if err != nil {
 		return err
 	}

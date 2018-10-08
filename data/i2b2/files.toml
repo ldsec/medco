@@ -1,3 +1,4 @@
+TableAccess         = "../data/i2b2/original/table_access.csv"
 AdapterMappings     = "../data/i2b2/original/AdapterMappings.xml"
 I2B2                = "../data/i2b2/original/i2b2.csv"
 SHRINE              = "../data/i2b2/original/shrine.csv"
