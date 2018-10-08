@@ -165,18 +165,12 @@ func ConvertI2B2(el *onet.Roster, entryPointIdx int, files Files, mapSensitive m
 		return err
 	}
 
-	log.Lvl2("--- Finished converting ADAPTER_MAPPINGS ---")
-
-	err = ParseShrineOntology()
-	if err != nil {
-		return err
-	}
-	err = ConvertShrineOntology()
+	err = ParseTableAccess()
 	if err != nil {
 		return err
 	}
 
-	log.Lvl2("--- Finished converting SHRINE_ONTOLOGY ---")
+	log.Lvl2("--- Finished parsing TABLE_ACCESS ---")
 
 	err = ParseLocalOntology(el, entryPointIdx)
 	if err != nil {
@@ -188,6 +182,24 @@ func ConvertI2B2(el *onet.Roster, entryPointIdx int, files Files, mapSensitive m
 	}
 
 	log.Lvl2("--- Finished converting LOCAL_ONTOLOGY ---")
+
+	err = GenerateNewAdapterMappings()
+	if err != nil {
+		return err
+	}
+
+	log.Lvl2("--- Finished generating ADAPTER_MAPPINGS ---")
+
+	err = ParseShrineOntologyHeader()
+	if err != nil {
+		return err
+	}
+	err = ConvertShrineOntology()
+	if err != nil {
+		return err
+	}
+
+	log.Lvl2("--- Finished generating SHRINE_ONTOLOGY ---")
 
 	err = ParseDummyToPatient()
 	if err != nil {
