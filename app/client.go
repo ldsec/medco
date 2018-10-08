@@ -186,11 +186,11 @@ func convertI2B2DataModel(c *cli.Context) error {
 	}
 
 	// place all sensitive attributes in map set to allow for faster search
-	mapSensitive := make(map[string]bool, 0)
+	mapSensitive := make(map[string]struct{}, 0)
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 		line := scanner.Text()
-		mapSensitive[line] = true
+		mapSensitive[line] = struct{}{}
 	}
 
 	loaderi2b2.ConvertI2B2(el.Roster, entryPointIdx, files, mapSensitive, databaseS, empty)

@@ -137,9 +137,9 @@ func replaceOutputFolder(folderPath string) {
 }
 
 // ConvertI2B2 it's the main function that performs a full conversion and loading of the I2B2 data
-func ConvertI2B2(el *onet.Roster, entryPointIdx int, files Files, mapSensitive map[string]bool, databaseS loader.DBSettings, empty bool) error {
+func ConvertI2B2(el *onet.Roster, entryPointIdx int, files Files, mapSensitive map[string]struct{}, databaseS loader.DBSettings, empty bool) error {
 
-	ListSensitiveConceptsShrine = mapSensitive
+	ListSensitiveConcepts = mapSensitive
 
 	// change input filepaths
 	InputFilePaths["TABLE_ACCESS"] = files.TableAccess
