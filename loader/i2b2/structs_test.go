@@ -599,13 +599,15 @@ func TestModifierDimensionFromString(t *testing.T) {
 func TestObservationFactFromString(t *testing.T) {
 	csvString := `"482232","1000000060","Affy:221610_s_at","LCS-I2B2:D000109064","2009-01-16 00:00:00","@","1","N","E","79.30000","","\N","","2009-01-16 00:00:00","@","","\N","2010-09-28 11:15:00","2010-08-18 09:50:00","2010-09-28 11:40:00","DEMO","\N","1"
 `
+	loaderi2b2.TextSearchIndex = 0
+
 	ac := loaderi2b2.AdministrativeColumns{
 		UpdateDate:      "2010-09-28 11:15:00",
 		DownloadDate:    "2010-08-18 09:50:00",
 		ImportDate:      "2010-09-28 11:40:00",
 		SourceSystemCD:  "DEMO",
 		UploadID:        "\\N",
-		TextSearchIndex: "1",
+		TextSearchIndex: "0",
 	}
 
 	ofk := &loaderi2b2.ObservationFactPK{

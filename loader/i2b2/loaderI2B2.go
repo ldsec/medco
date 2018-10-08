@@ -1740,8 +1740,9 @@ func ConvertObservationFact() error {
 			// change patient_num and encounter_num
 			tmp := MapNewEncounterNum[VisitDimensionPK{EncounterNum: copyObs.PK.EncounterNum, PatientNum: of.PK.PatientNum}]
 			copyObs.PK = regenerateObservationPK(copyObs.PK, tmp.PatientNum, tmp.EncounterNum)
-			// keep the same concept that was already there
+			// keep the same concept (and text_search_index) that was already there
 			copyObs.PK.ConceptCD = of.PK.ConceptCD
+			copyObs.AdminColumns.TextSearchIndex = of.AdminColumns.TextSearchIndex
 
 			// delete observation from the list (so we don't choose it again)
 			listObs[index] = listObs[len(listObs)-1]
@@ -1757,11 +1758,6 @@ func ConvertObservationFact() error {
 		// if the concept is sensitive we replace its code with the correspondent tag ID
 		if _, ok := MapConceptCodeToTag[copyObs.PK.ConceptCD]; ok {
 			copyObs.PK.ConceptCD = strconv.FormatInt(MapConceptCodeToTag[copyObs.PK.ConceptCD], 10)
-		}
-
-		// if the modifier is sensitive we replace its code with the correspondent tag ID
-		if _, ok := MapModifierCodeToTag[copyObs.PK.ModifierCD]; ok {
-			copyObs.PK.ModifierCD = strconv.FormatInt(MapModifierCodeToTag[copyObs.PK.ModifierCD], 10)
 		}
 
 		csvOutputFile.WriteString(copyObs.ToCSVText() + "\n")
