@@ -815,8 +815,8 @@ func GenerateNewShrineOntology() error {
 	UpdateChildrenEncryptIDs() //updates the ChildrenEncryptIDs of the internal and parent nodes
 
 	// manually add first two shrine rows
-	csvOutputFile.WriteString(`"1","\SHRINE\ONTOLOGYVERSION\","ONTOLOGYVERSION","N","FH ","\N","\N","","concept_cd","concept_dimension","concept_path","T","LIKE","\SHRINE\ONTOLOGYVERSION\","","ONTOLOGYVERSION\","\N","\N","\N","SHRINE","\N","@","\N"` + "\n")
-	csvOutputFile.WriteString(`"2","\SHRINE\ONTOLOGYVERSION\SHRINE_DEMO-Download_ONTOLOGY_V-1.18_1-20-14_Converted\","SHRINE_DEMO-Download_ONTOLOGY_V-1.18_1-20-14_Converted","N","LH ","\N","\N","","concept_cd","concept_dimension","concept_path","T","LIKE","\SHRINE\ONTOLOGYVERSION\SHRINE_DEMO-Download_ONTOLOGY_V-1.18_1-20-14_Converted\","","ONTOLOGYVERSION\SHRINE_DEMO-Download_ONTOLOGY_V-1.18_1-20-14_Converted\","\N","\N","\N","SHRINE","\N","@","\N"` + "\n")
+	csvOutputFile.WriteString(`"1","\SHRINE\ONTOLOGYVERSION\","ONTOLOGYVERSION","N","FH ",,,"","concept_cd","concept_dimension","concept_path","T","LIKE","\SHRINE\ONTOLOGYVERSION\","","ONTOLOGYVERSION\",,,,"SHRINE",,"@",` + "\n")
+	csvOutputFile.WriteString(`"2","\SHRINE\ONTOLOGYVERSION\SHRINE_DEMO-Download_ONTOLOGY_V-1.18_1-20-14_Converted\","SHRINE_DEMO-Download_ONTOLOGY_V-1.18_1-20-14_Converted","N","LH ",,,"","concept_cd","concept_dimension","concept_path","T","LIKE","\SHRINE\ONTOLOGYVERSION\SHRINE_DEMO-Download_ONTOLOGY_V-1.18_1-20-14_Converted\","","ONTOLOGYVERSION\SHRINE_DEMO-Download_ONTOLOGY_V-1.18_1-20-14_Converted\",,,,"SHRINE",,"@",` + "\n")
 
 	for _, so := range TableShrineOntologyClear {
 		csvOutputFile.WriteString(so.ToCSVText() + "\n")
