@@ -1267,8 +1267,6 @@ func ParsePatientDimension(pk kyber.Point) error {
 // ConvertPatientDimension converts the old patient_dimension.csv file
 // If emtpy is set to true all other data except the patient_num and encrypted_dummy_flag are set to empty
 func ConvertPatientDimension(pk kyber.Point, empty bool) error {
-	rand.Seed(time.Now().UnixNano())
-
 	csvOutputFile, err := os.Create(OutputFilePaths["PATIENT_DIMENSION"])
 	if err != nil {
 		log.Fatal("Error opening [patient_dimension].csv")
@@ -1283,16 +1281,9 @@ func ConvertPatientDimension(pk kyber.Point, empty bool) error {
 
 	// re-randomize the patient_num
 	totalNbrPatients := len(TablePatientDimension) + len(TableDummyToPatient)
-	src := make([]int, 0)
+	rand.Seed(time.Now().UnixNano())
+	perm := rand.Perm(totalNbrPatients)
 
-	for i := 0; i < totalNbrPatients; i++ {
-		src = append(src, i)
-	}
-
-	perm := rand.Perm(len(src))
-	for i, v := range perm {
-		perm[v] = src[i]
-	}
 
 	// remove the last ,
 	csvOutputFile.WriteString(headerString[:len(headerString)-1] + "\n")
@@ -1409,7 +1400,6 @@ func ParseVisitDimension() error {
 // ConvertVisitDimension converts the old visit_dimension.csv file. The means re-randomizing the encounter_num.
 // If emtpy is set to true all other data except the patient_num and encounter_num are set to empty
 func ConvertVisitDimension(empty bool) error {
-	rand.Seed(time.Now().UnixNano())
 
 	csvOutputFile, err := os.Create(OutputFilePaths["VISIT_DIMENSION"])
 	if err != nil {
@@ -1425,16 +1415,8 @@ func ConvertVisitDimension(empty bool) error {
 
 	// re-randomize the encounter_num
 	totalNbrVisits := len(TableVisitDimension) + len(TableDummyToPatient)*MaxVisits
-	src := make([]int, 0)
-
-	for i := 0; i < totalNbrVisits; i++ {
-		src = append(src, i)
-	}
-
-	perm := rand.Perm(len(src))
-	for i, v := range perm {
-		perm[v] = src[i]
-	}
+	rand.Seed(time.Now().UnixNano())
+	perm := rand.Perm(totalNbrVisits)
 
 	// remove the last ,
 	csvOutputFile.WriteString(headerString[:len(headerString)-1] + "\n")
