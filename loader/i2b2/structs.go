@@ -243,6 +243,9 @@ var TableObservationFact map[*ObservationFactPK]ObservationFact
 // HeaderObservationFact contains all the headers for the observation_fact table
 var HeaderObservationFact []string
 
+// TextSearchIndex counter used to fill up the last column of observation_fact table
+var TextSearchIndex int64
+
 // ObservationFact is the fact table of the CRC-I2B2 start schema
 type ObservationFact struct {
 	PK              *ObservationFactPK
@@ -838,8 +841,9 @@ func ObservationFactFromString(line []string) (*ObservationFactPK, ObservationFa
 		ImportDate:      line[19],
 		SourceSystemCD:  line[20],
 		UploadID:        line[21],
-		TextSearchIndex: line[22],
+		TextSearchIndex: strconv.FormatInt(TextSearchIndex, 10),
 	}
+	TextSearchIndex++
 
 	of.AdminColumns = ac
 

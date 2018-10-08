@@ -1639,6 +1639,7 @@ func ParseObservationFact() error {
 	HeaderObservationFact = make([]string, 0)
 	MapPatientObs = make(map[string][]*ObservationFactPK)
 	MapDummyObs = make(map[string][]*ObservationFactPK)
+	TextSearchIndex = 0
 
 	/* structure of observation_fact_old.csv (in order):
 
