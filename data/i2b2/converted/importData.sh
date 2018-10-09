@@ -10,7 +10,7 @@ TRUNCATE TABLE i2b2demodata.patient_dimension;
 TRUNCATE TABLE i2b2demodata.visit_dimension;
 TRUNCATE TABLE i2b2demodata.observation_fact;
 
-\copy shrine_ont.shrine FROM 'shrine.csv' ESCAPE '"' DELIMITER ',' CSV HEADER;
+\copy shrine_ont.table_access FROM 'table_access.csv' ESCAPE '"' DELIMITER ',' CSV HEADER;
 \copy shrine_ont.shrine FROM 'shrine.csv' ESCAPE '"' DELIMITER ',' CSV HEADER;
 \copy i2b2metadata.i2b2 FROM 'i2b2.csv' ESCAPE '"' DELIMITER ',' CSV HEADER;
 \copy i2b2metadata.sensitive_tagged FROM 'sensitive_tagged.csv' ESCAPE '"' DELIMITER ',' CSV HEADER;

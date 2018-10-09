@@ -237,17 +237,6 @@ func ConvertI2B2(el *onet.Roster, entryPointIdx int, files Files, mapSensitive m
 
 	log.Lvl2("--- Finished converting CONCEPT_DIMENSION ---")
 
-	err = ParseModifierDimension()
-	if err != nil {
-		return err
-	}
-	err = ConvertModifierDimension()
-	if err != nil {
-		return err
-	}
-
-	log.Lvl2("--- Finished converting MODIFIER_DIMENSION ---")
-
 	err = ParseObservationFact()
 	if err != nil {
 		return err
