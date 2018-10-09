@@ -31,7 +31,11 @@ var IDConcepts int64
 
 // ####----DATA TYPES----####
 
+// TableAccessMap is the table_access table
 var TableAccessMap map[string]*TableAccess
+
+// HeaderTableAccess contains all the headers for the table_access table
+var HeaderTableAccess []string
 
 type TableAccess struct {
 	TableCD				string
@@ -57,6 +61,17 @@ type TableAccess struct {
 	ChangeDate			string
 	StatusCD			string
 	ValuetypeCD			string
+}
+
+// ToCSVText writes the ShrineOntology object in a way that can be added to a .csv file - "","","", etc.
+func (ta TableAccess) ToCSVText() string {
+	finalString := "\"" + ta.TableCD + "\"," + "\"" + ta.TableName + "\"," + "\"" + ta.ProtectedAccess + "\"," + "\"" + ta.Hlevel + "\"," + "\"" + ta.Fullname + "\"," + "\"" + ta.Name + "\"," +
+		"\"" + ta.SynonymCD + "\"," + "\"" + ta.Visualattributes + "\"," + "\"" + ta.Totalnum + "\"," + "\"" + ta.Basecode + "\"," + "\"" + ta.Metadataxml + "\"," + "\"" + ta.Facttablecolumn + "\"," + "\"" + ta.Dimtablename + "\"," +
+		"\"" + ta.Columnname + "\"," + "\"" + ta.Columndatatype + "\"," + "\"" + ta.Operator + "\"," + "\"" + ta.Dimcode + "\"," + "\"" + ta.Comment + "\"," + "\"" + ta.Tooltip + "\"," + "\"" + ta.EntryDate +
+		"\"," + "\"" + ta.ChangeDate + "\"," + "\"" + ta.StatusCD + "\"," + "\"" + ta.ValuetypeCD + "\""
+
+
+	return strings.Replace(finalString, `"\N"`,"", -1)
 }
 
 //-------------------------------------//

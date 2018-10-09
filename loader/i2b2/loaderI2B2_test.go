@@ -62,6 +62,7 @@ func setupEncryptEnv() {
 
 func TestParseTableAccess(t *testing.T) {
 	assert.Nil(t, loaderi2b2.ParseTableAccess())
+	assert.Nil(t, loaderi2b2.GenerateNewTableAccess())
 }
 
 func TestDummyToPatient(t *testing.T) {
@@ -173,6 +174,7 @@ func TestConvertOntology(t *testing.T) {
 	loaderi2b2.ListSensitiveConcepts[`\i2b2\Diagnoses\Neoplasms (140-239)\Benign neoplasms (210-229)\(216) Benign neoplasm of skin\`] = struct{}{}
 
 	assert.Nil(t, loaderi2b2.ParseTableAccess())
+	assert.Nil(t, loaderi2b2.GenerateNewTableAccess())
 
 	assert.Nil(t, loaderi2b2.ParseLocalOntology(el, 0))
 	assert.Nil(t, loaderi2b2.ConvertLocalOntology())
@@ -194,6 +196,7 @@ func TestConvertConceptDimension(t *testing.T) {
 	loaderi2b2.ListSensitiveConcepts[`\i2b2\Diagnoses\Neoplasms (140-239)\Benign neoplasms (210-229)\(216) Benign neoplasm of skin\`] = struct{}{}
 
 	assert.Nil(t, loaderi2b2.ParseTableAccess())
+	assert.Nil(t, loaderi2b2.GenerateNewTableAccess())
 
 	assert.Nil(t, loaderi2b2.ParseLocalOntology(el, 0))
 	assert.Nil(t, loaderi2b2.ConvertLocalOntology())
@@ -219,6 +222,7 @@ func TestConvertObservationFact(t *testing.T) {
 	loaderi2b2.ListSensitiveConcepts[`\i2b2\Diagnoses\Neoplasms (140-239)\Benign neoplasms (210-229)\(216) Benign neoplasm of skin\`] = struct{}{}
 
 	assert.Nil(t, loaderi2b2.ParseTableAccess())
+	assert.Nil(t, loaderi2b2.GenerateNewTableAccess())
 
 	log.LLvl1("--- Finished parsing TABLE_ACCESS ---")
 

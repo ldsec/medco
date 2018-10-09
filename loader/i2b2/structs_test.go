@@ -14,6 +14,37 @@ import (
 // ---------------------------------------- TO STRING -------------------------------------------------------- //
 // ----------------------------------------------------------------------------------------------------------- //
 
+func TestTableAccess_ToCSVText(t *testing.T) {
+	ta := loaderi2b2.TableAccess{
+		TableCD: 			"i2b2_DEMO",
+		TableName: 			"I2B2",
+		ProtectedAccess: 	"N",
+		Hlevel:				"1",
+		Fullname:			"\\i2b2\\Demographics\\",
+		Name:				"Demographics",
+		SynonymCD:			"N",
+		Visualattributes: 	"CA ",
+		Totalnum:			"\\N",
+		Basecode:			"\\N",
+		Metadataxml:		"\\N",
+		Facttablecolumn:	"concept_cd",
+		Dimtablename:		"concept_dimension",
+		Columnname:			"concept_path",
+		Columndatatype:		"T",
+		Operator:			"LIKE",
+		Dimcode:			"\\i2b2\\Demographics\\",
+		Comment:			"\\N",
+		Tooltip:			"Demographics",
+		EntryDate:			"\\N",
+		ChangeDate:			"\\N",
+		StatusCD:			"\\N",
+		ValuetypeCD:		"\\N",
+	}
+
+	assert.Equal(t, ta.ToCSVText(), `"i2b2_DEMO","I2B2","N","1","\i2b2\Demographics\","Demographics","N","CA ",,,,"concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\Demographics\",,"Demographics",,,,`)
+
+}
+
 func TestShrineOntology_ToCSVText(t *testing.T) {
 
 	ac := loaderi2b2.AdministrativeColumns{

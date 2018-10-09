@@ -50,6 +50,7 @@ var (
 	}
 
 	OutputFilePaths = map[string]string{
+		"TABLE_ACCESS":		  		"../../data/i2b2/converted/table_access.csv",
 		"ADAPTER_MAPPINGS":         "../../data/i2b2/converted/AdapterMappings.xml",
 		"SHRINE_ONTOLOGY":          "../../data/i2b2/converted/shrine.csv",
 		"LOCAL_ONTOLOGY_CLEAR":     "../../data/i2b2/converted/i2b2.csv",
@@ -66,8 +67,6 @@ var (
 	FileBashPath = "24-load-i2b2-data.sh"
 
 	FilePathsData = [...]string{
-		//"PATIENT_MAPPING",
-		//"ENCOUNTER_MAPPING",
 		"SHRINE_ONTOLOGY",
 		"LOCAL_ONTOLOGY_CLEAR",
 		"LOCAL_ONTOLOGY_SENSITIVE",
@@ -102,7 +101,10 @@ const (
 // MAIN function
 
 func replaceOutputFolder(folderPath string) {
-	tokens := strings.Split(OutputFilePaths["ADAPTER_MAPPINGS"], "/")
+	tokens := strings.Split(OutputFilePaths["TABLE_ACCESS"], "/")
+	OutputFilePaths["TABLE_ACCESS"] = folderPath + tokens[len(tokens)-1]
+
+	tokens = strings.Split(OutputFilePaths["ADAPTER_MAPPINGS"], "/")
 	OutputFilePaths["ADAPTER_MAPPINGS"] = folderPath + tokens[len(tokens)-1]
 
 	tokens = strings.Split(OutputFilePaths["SHRINE_ONTOLOGY"], "/")
@@ -161,7 +163,12 @@ func ConvertI2B2(el *onet.Roster, entryPointIdx int, files Files, mapSensitive m
 		return err
 	}
 
-	log.Lvl2("--- Finished parsing TABLE_ACCESS ---")
+	err = GenerateNewTableAccess()
+	if err != nil {
+		return err
+	}
+
+	log.Lvl2("--- Finished generating TABLE_ACCESS ---")
 
 	err = ParseLocalOntology(el, entryPointIdx)
 	if err != nil {
@@ -323,6 +330,7 @@ func ParseTableAccess() error {
 
 	// initialize container structs and counters
 	TableAccessMap = make(map[string]*TableAccess)
+	HeaderTableAccess = make([]string, 0)
 
 	/* structure of table_access.csv (in order):
 
@@ -353,6 +361,10 @@ func ParseTableAccess() error {
 
 	*/
 
+	for _, header := range lines[0] {
+		HeaderTableAccess = append(HeaderTableAccess, header)
+	}
+
 	//skip header
 	for _, line := range lines[1:] {
 		ta := TableAccessFromString(line)
@@ -360,6 +372,31 @@ func ParseTableAccess() error {
 	}
 
 	return nil
+}
+
+// GenerateNewAdapterMappings generate (copy) the table_access.csv
+func GenerateNewTableAccess() error {
+	csvOutputFile, err := os.Create(OutputFilePaths["TABLE_ACCESS"])
+	if err != nil {
+		log.Fatal("Error opening [table_access].csv")
+		return err
+	}
+	defer csvOutputFile.Close()
+
+	headerString := ""
+	for _, header := range HeaderTableAccess {
+		headerString += "\"" + header + "\","
+	}
+	// remove the last ,
+	csvOutputFile.WriteString(headerString[:len(headerString)-1] + "\n")
+
+
+	for _, ta := range TableAccessMap {
+		csvOutputFile.WriteString(ta.ToCSVText() + "\n")
+	}
+
+	return nil
+
 }
 
 // ADAPTER_MAPPINGS.XML converter
