@@ -3,6 +3,7 @@ PGPASSWORD=prigen2017 psql -v ON_ERROR_STOP=1 -h "localhost" -U "postgres" -p 54
 BEGIN;
 TRUNCATE TABLE shrine_ont.table_access;
 TRUNCATE TABLE shrine_ont.shrine;
+TRUNCATE TABLE shrine_ont.i2b2;
 TRUNCATE TABLE i2b2metadata.i2b2;
 TRUNCATE TABLE i2b2metadata.sensitive_tagged;
 TRUNCATE TABLE i2b2demodata.concept_dimension;
@@ -12,7 +13,7 @@ TRUNCATE TABLE i2b2demodata.observation_fact;
 
 \copy shrine_ont.table_access FROM 'table_access.csv' ESCAPE '"' DELIMITER ',' CSV HEADER;
 \copy shrine_ont.shrine FROM 'shrine.csv' ESCAPE '"' DELIMITER ',' CSV HEADER;
-\copy i2b2metadata.i2b2 FROM 'i2b2.csv' ESCAPE '"' DELIMITER ',' CSV HEADER;
+\copy shrine_ont.i2b2 FROM 'i2b2.csv' ESCAPE '"' DELIMITER ',' CSV HEADER;
 \copy i2b2metadata.sensitive_tagged FROM 'sensitive_tagged.csv' ESCAPE '"' DELIMITER ',' CSV HEADER;
 \copy i2b2demodata.concept_dimension FROM 'concept_dimension.csv' ESCAPE '"' DELIMITER ',' CSV HEADER;
 \copy i2b2demodata.patient_dimension FROM 'patient_dimension.csv' ESCAPE '"' DELIMITER ',' CSV HEADER;
