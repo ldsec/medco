@@ -228,7 +228,7 @@ func (lo LocalOntology) ToCSVText() string {
 
 // LocalOntologySensitiveConceptToCSVText writes the tagging information of a concept of the local ontology in a way that can be added to a .csv file - "","","", etc.
 func LocalOntologySensitiveConceptToCSVText(tag *libunlynx.GroupingKey, tagID int64) string {
-	finalString := `"3","\medco\tagged\concept\` + string(*tag) + `\","","N","LA ","\N","TAG_ID:` + strconv.FormatInt(tagID, 10) + `","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\medco\tagged\concept\` + string(*tag) +
+	finalString := `"3","\medco\tagged\` + string(*tag) + `\","","N","LA ","\N","TAG_ID:` + strconv.FormatInt(tagID, 10) + `","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\medco\tagged\concept\` + string(*tag) +
 		`\","\N","\N","NOW()","\N","\N","\N","TAG_ID","@","\N","\N","\N","\N"`
 
 	return strings.Replace(finalString, `"\N"`,"", -1)
@@ -236,7 +236,7 @@ func LocalOntologySensitiveConceptToCSVText(tag *libunlynx.GroupingKey, tagID in
 
 // LocalOntologySensitiveModifierToCSVText writes the tagging information of a modifier of the local ontology in a way that can be added to a .csv file - "","","", etc.
 func LocalOntologySensitiveModifierToCSVText(tag *libunlynx.GroupingKey, tagID int64) string {
-	finalString := `"3","\medco\tagged\modifier\` + string(*tag) + `\","","N","LA ","\N","TAG_ID:` + strconv.FormatInt(tagID, 10) + `","\N","MODIFIER_CD","MODIFIER_DIMENSION","MODIFIER_PATH","T","LIKE","\medco\tagged\modifier\` + string(*tag) +
+	finalString := `"3","\medco\tagged\` + string(*tag) + `\","","N","LA ","\N","TAG_ID:` + strconv.FormatInt(tagID, 10) + `","\N","MODIFIER_CD","MODIFIER_DIMENSION","MODIFIER_PATH","T","LIKE","\medco\tagged\modifier\` + string(*tag) +
 		`\","\N","\N","NOW()","\N","\N","\N","TAG_ID","@","\N","\N","\N","\N"`
 
 	return strings.Replace(finalString, `"\N"`,"", -1)

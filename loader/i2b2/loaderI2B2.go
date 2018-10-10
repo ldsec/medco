@@ -1124,6 +1124,8 @@ func EncryptAndTag(list []int64, group *onet.Roster, entryPointIdx int) ([]libun
 	}
 	log.Lvl2("Finished encrypting the sensitive data... (", time.Since(start), ")")
 
+	log.LLvl1("LI", list)
+	log.LLvl1("LIST", listEncryptedElements)
 	// TAGGING
 	start = time.Now()
 	client := servicesmedco.NewMedCoClient(group.List[entryPointIdx], strconv.Itoa(entryPointIdx))
