@@ -1785,7 +1785,7 @@ func ConvertObservationFact() error {
 
 		// if the concept is sensitive we replace its code with the correspondent tag ID
 		if _, ok := MapConceptCodeToTag[copyObs.PK.ConceptCD]; ok {
-			copyObs.PK.ConceptCD = strconv.FormatInt(MapConceptCodeToTag[copyObs.PK.ConceptCD], 10)
+			copyObs.PK.ConceptCD = "TAG_ID:" + strconv.FormatInt(MapConceptCodeToTag[copyObs.PK.ConceptCD], 10)
 		}
 
 		csvOutputFile.WriteString(copyObs.ToCSVText() + "\n")
