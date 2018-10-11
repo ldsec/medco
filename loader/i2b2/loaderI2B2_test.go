@@ -5,6 +5,7 @@ import (
 	"github.com/dedis/onet"
 	"github.com/dedis/onet/app"
 	"github.com/dedis/onet/log"
+	"github.com/lca1/medco-loader/loader"
 	"github.com/lca1/medco-loader/loader/i2b2"
 	"github.com/lca1/unlynx/lib"
 	"github.com/stretchr/testify/assert"
@@ -13,7 +14,6 @@ import (
 )
 
 var publicKey kyber.Point
-var secretKey kyber.Scalar
 var el *onet.Roster
 var local *onet.LocalTest
 
@@ -57,7 +57,7 @@ func setupEncryptEnv() {
 	el = elAux
 	local = localAux
 
-	secretKey, publicKey = libunlynx.GenKey()
+	_, publicKey = libunlynx.GenKey()
 }
 
 func TestParseTableAccess(t *testing.T) {
@@ -247,4 +247,8 @@ func TestConvertObservationFact(t *testing.T) {
 	log.LLvl1("--- Finished converting OBSERVATION_FACT ---")
 
 	local.CloseAll()
+}
+
+func TestGenerateLoadingDataScript(t *testing.T) {
+	assert.Nil(t, loaderi2b2.GenerateLoadingDataScript(loader.DBSettings{DBhost: "localhost", DBport: 5434, DBname: "medcodeployment", DBuser: "postgres", DBpassword: "prigen2017"}))
 }

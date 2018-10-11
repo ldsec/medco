@@ -1,6 +1,7 @@
 package loaderi2b2
 
 import (
+	"bytes"
 	"encoding/csv"
 	"encoding/xml"
 	"github.com/dedis/kyber"
@@ -12,6 +13,7 @@ import (
 	"io"
 	"math/rand"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -236,11 +238,11 @@ func ConvertI2B2(el *onet.Roster, entryPointIdx int, files Files, mapSensitive m
 		return err
 	}
 
-	/*err = LoadDataFiles()
+	err = LoadDataFiles()
 	if err != nil {
 		log.Fatal("Error while loading ontology .sql file", err)
 		return err
-	}*/
+	}
 
 	return nil
 }
@@ -257,10 +259,36 @@ func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
 
 	loading += "BEGIN;\n"
 
-	for i := 0; i < len(TablenamesData); i++ {
-		tokens := strings.Split(FilePathsData[i], "/")
-		loading += `\copy ` + TablenamesData[i] + ` FROM 'files/` + tokens[1] + `' ESCAPE '"' DELIMITER ',' CSV;` + "\n"
+	loading += "TRUNCATE TABLE i2b2demodata.concept_dimension;\n" +
+				"TRUNCATE TABLE i2b2demodata.patient_dimension;\n" +
+				"TRUNCATE TABLE i2b2demodata.visit_dimension;\n" +
+				"TRUNCATE TABLE i2b2demodata.observation_fact;\n"
+
+	loading += "TRUNCATE TABLE i2b2metadata.schemes;\n"
+	loading += "TRUNCATE TABLE i2b2metadata.table_access;\n"
+	loading += "TRUNCATE TABLE i2b2metadata.sensitive_tagged;\n"
+
+	for file, fI := range OutputFilePaths {
+		if strings.HasPrefix(file, "LOCAL_"){
+			loading += "TRUNCATE TABLE "+ fI.TableName +";\n"
+			loading += `\copy ` + fI.TableName + ` FROM '` + fI.Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;`+"\n"
+		} else if strings.HasPrefix(file, "SHRINE_"){
+			rawName := strings.Split(file, "SHRINE_")[1]
+			loading += "CREATE TABLE " + fI.TableName + " AS SELECT * FROM " + OutputFilePaths["LOCAL"+rawName].TableName + " WHERE 1=2;"+"\n"
+			loading += `\copy ` + fI.TableName + ` FROM '` + fI.Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;`+"\n"
+		}
 	}
+
+	loading += `\copy ` + OutputFilePaths["SENSITIVE_TAGGED"].TableName + ` FROM '` + OutputFilePaths["SENSITIVE_TAGGED"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;`+"\n"
+
+	loading += `\copy ` + OutputFilePaths["TABLE_ACCESS_L"].TableName + ` FROM '` + OutputFilePaths["TABLE_ACCESS_L"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;`+"\n"
+	loading += `\copy ` + OutputFilePaths["TABLE_ACCESS_S"].TableName + ` FROM '` + OutputFilePaths["TABLE_ACCESS_S"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;`+"\n"
+
+	loading += `\copy ` + OutputFilePaths["CONCEPT_DIMENSION"].TableName + `FROM '` + OutputFilePaths["CONCEPT_DIMENSION"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n" +
+				`\copy ` + OutputFilePaths["PATIENT_DIMENSION"].TableName + `FROM '` + OutputFilePaths["PATIENT_DIMENSION"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n" +
+				`\copy ` + OutputFilePaths["VISIT_DIMENSION"].TableName + `FROM '` + OutputFilePaths["VISIT_DIMENSION"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n" +
+				`\copy ` + OutputFilePaths["OBSERVATION_FACT"].TableName + `FROM '` + OutputFilePaths["OBSERVATION_FACT"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` +"\n"
+
 	loading += "COMMIT;\n"
 	loading += "EOSQL"
 
@@ -272,12 +300,12 @@ func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
 	fp.Close()
 
 	return nil
-}*/
+}
 
 // LoadDataFiles executes the loading script for the new converted data
-/*func LoadDataFiles() error {
+func LoadDataFiles() error {
 	// Display just the stderr if an error occurs
-	cmd := exec.Command("/bin/sh", FileBashPath[1])
+	cmd := exec.Command("/bin/sh", FileBashPath)
 	stderr := &bytes.Buffer{} // make sure to import bytes
 	cmd.Stderr = stderr
 	err := cmd.Run()
@@ -288,7 +316,7 @@ func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
 	}
 
 	return nil
-}*/
+}
 
 func readCSV(filename string) ([][]string, error) {
 	csvInputFile, err := os.Open(InputFilePaths[filename])

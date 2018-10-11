@@ -49,3 +49,4 @@ app/*.toml
 docker/medco-loader
 loader/genomic/*.toml
 loader/i2b2/*.toml
+loader/i2b2/*.sh
