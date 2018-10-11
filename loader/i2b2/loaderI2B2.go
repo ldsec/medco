@@ -44,8 +44,8 @@ var (
 
 		"ONTOLOGY_BIRN":        "../../data/i2b2/original/birn.csv",
 		"ONTOLOGY_CUSTOM_META": "../../data/i2b2/original/custom_meta.csv",
-		"ONTOLOGY_ICD10_ICD9":  "../../data/i2b2/original/icd10_icd9.csv",
-		"ONTOLOGY_I2B2":        "../../data/i2b2/original/i2b2.csv",
+		//"ONTOLOGY_ICD10_ICD9":  "../../data/i2b2/original/icd10_icd9.csv",
+		"ONTOLOGY_I2B2": "../../data/i2b2/original/i2b2.csv",
 
 		"DUMMY_TO_PATIENT":  "../../data/i2b2/original/dummy_to_patient.csv",
 		"PATIENT_DIMENSION": "../../data/i2b2/original/patient_dimension.csv",
@@ -62,14 +62,14 @@ var (
 		"TABLE_ACCESS_L":    {TableName: "i2b2metadata.table_access", Path: "../../data/i2b2/converted/local_table_access.csv"},
 		"LOCAL_BIRN":        {TableName: "i2b2metadata.birn", Path: "../../data/i2b2/converted/local_birn.csv"},
 		"LOCAL_CUSTOM_META": {TableName: "i2b2metadata.custom_meta", Path: "../../data/i2b2/converted/local_custom_meta.csv"},
-		"LOCAL_ICD10_ICD9":  {TableName: "i2b2metadata.icd10_icd9", Path: "../../data/i2b2/converted/local_icd10_icd9.csv"},
-		"LOCAL_I2B2":        {TableName: "i2b2metadata.i2b2", Path: "../../data/i2b2/converted/local_i2b2.csv"},
+		//"LOCAL_ICD10_ICD9":  {TableName: "i2b2metadata.icd10_icd9", Path: "../../data/i2b2/converted/local_icd10_icd9.csv"},
+		"LOCAL_I2B2": {TableName: "i2b2metadata.i2b2", Path: "../../data/i2b2/converted/local_i2b2.csv"},
 
 		"TABLE_ACCESS_S":     {TableName: "shrine_ont.table_access", Path: "../../data/i2b2/converted/shrine_table_access.csv"},
 		"SHRINE_BIRN":        {TableName: "shrine_ont.birn", Path: "../../data/i2b2/converted/shrine_birn.csv"},
 		"SHRINE_CUSTOM_META": {TableName: "shrine_ont.custom_meta", Path: "../../data/i2b2/converted/shrine_custom_meta.csv"},
-		"SHRINE_ICD10_ICD9":  {TableName: "shrine_ont.icd10_icd9", Path: "../../data/i2b2/converted/shrine_icd10_icd9.csv"},
-		"SHRINE_I2B2":        {TableName: "shrine_ont.i2b2", Path: "../../data/i2b2/converted/shrine_i2b2.csv"},
+		//"SHRINE_ICD10_ICD9":  {TableName: "shrine_ont.icd10_icd9", Path: "../../data/i2b2/converted/shrine_icd10_icd9.csv"},
+		"SHRINE_I2B2": {TableName: "shrine_ont.i2b2", Path: "../../data/i2b2/converted/shrine_i2b2.csv"},
 
 		"PATIENT_DIMENSION": {TableName: "i2b2demodata.patient_dimension", Path: "../../data/i2b2/converted/patient_dimension.csv"},
 		"NEW_PATIENT_NUM":   {TableName: "", Path: "../../data/i2b2/converted/new_patient_num.csv"},
