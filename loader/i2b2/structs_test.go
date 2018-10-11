@@ -16,29 +16,29 @@ import (
 
 func TestTableAccess_ToCSVText(t *testing.T) {
 	ta := loaderi2b2.TableAccess{
-		TableCD: 			"i2b2_DEMO",
-		TableName: 			"I2B2",
-		ProtectedAccess: 	"N",
-		Hlevel:				"1",
-		Fullname:			"\\i2b2\\Demographics\\",
-		Name:				"Demographics",
-		SynonymCD:			"N",
-		Visualattributes: 	"CA ",
-		Totalnum:			"\\N",
-		Basecode:			"\\N",
-		Metadataxml:		"\\N",
-		Facttablecolumn:	"concept_cd",
-		Dimtablename:		"concept_dimension",
-		Columnname:			"concept_path",
-		Columndatatype:		"T",
-		Operator:			"LIKE",
-		Dimcode:			"\\i2b2\\Demographics\\",
-		Comment:			"\\N",
-		Tooltip:			"Demographics",
-		EntryDate:			"\\N",
-		ChangeDate:			"\\N",
-		StatusCD:			"\\N",
-		ValuetypeCD:		"\\N",
+		TableCD:          "i2b2_DEMO",
+		TableName:        "I2B2",
+		ProtectedAccess:  "N",
+		Hlevel:           "1",
+		Fullname:         "\\i2b2\\Demographics\\",
+		Name:             "Demographics",
+		SynonymCD:        "N",
+		Visualattributes: "CA ",
+		Totalnum:         "\\N",
+		Basecode:         "\\N",
+		Metadataxml:      "\\N",
+		Facttablecolumn:  "concept_cd",
+		Dimtablename:     "concept_dimension",
+		Columnname:       "concept_path",
+		Columndatatype:   "T",
+		Operator:         "LIKE",
+		Dimcode:          "\\i2b2\\Demographics\\",
+		Comment:          "\\N",
+		Tooltip:          "Demographics",
+		EntryDate:        "\\N",
+		ChangeDate:       "\\N",
+		StatusCD:         "\\N",
+		ValuetypeCD:      "\\N",
 	}
 
 	assert.Equal(t, ta.ToCSVText(), `"i2b2_DEMO","I2B2","N","1","\i2b2\Demographics\","Demographics","N","CA ",,,,"concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\Demographics\",,"Demographics",,,,`)
@@ -138,7 +138,7 @@ func TestLocalOntology_ToCSVText(t *testing.T) {
 	assert.Equal(t, lo.ToCSVText(), `"4","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","Parkdale","N","FA ",,,,"concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\",,"Demographics \ Zip codes \ Arkansas \ Parkdale","@","2007-04-10 00:00:00","2007-04-10 00:00:00","2007-04-10 00:00:00","DEMO",,,,`)
 
 	tag := libunlynx.GroupingKey("1")
-	assert.Equal(t, loaderi2b2.LocalOntologySensitiveConceptToCSVText(&tag, 20), `"3","\medco\tagged\concept\1\","","N","LA ",,"TAG_ID:20",,"concept_cd","concept_dimension","concept_path","T","LIKE","\medco\tagged\concept\1\",,,"NOW()",,,,"TAG_ID","@",,,,`)
+	assert.Equal(t, loaderi2b2.LocalOntologySensitiveConceptToCSVText(&tag, 20), `"3","\medco\tagged\1\","","N","LA ",,"TAG_ID:20",,"concept_cd","concept_dimension","concept_path","T","LIKE","\medco\tagged\concept\1\",,,"NOW()",,,,"TAG_ID","@",,,,`)
 
 }
 
@@ -253,36 +253,6 @@ func TestConceptDimension_ToCSVText(t *testing.T) {
 	assert.Equal(t, `"\medco\tagged\concept\1\","TAG_ID:20",,,,,"NOW()",,`, loaderi2b2.ConceptDimensionSensitiveToCSVText(&tag, 20))
 }
 
-func TestModifierDimension_ToCSVText(t *testing.T) {
-
-	csvString := `"\Admit Diagnosis\","0","Admit Diagnosis","","2011-04-14 00:55:00",,"2011-04-14 00:55:00","DEMO",`
-
-	ac := loaderi2b2.AdministrativeColumns{
-		UpdateDate:     "2011-04-14 00:55:00",
-		DownloadDate:   "\\N",
-		ImportDate:     "2011-04-14 00:55:00",
-		SourceSystemCD: "DEMO",
-		UploadID:       "\\N",
-	}
-
-	mdk := &loaderi2b2.ModifierDimensionPK{
-		ModifierPath: "\\Admit Diagnosis\\",
-	}
-
-	md := loaderi2b2.ModifierDimension{
-		PK:           mdk,
-		ModifierCD:   "0",
-		NameChar:     "Admit Diagnosis",
-		ModifierBlob: "",
-		AdminColumns: ac,
-	}
-
-	assert.Equal(t, csvString, md.ToCSVText())
-
-	tag := libunlynx.GroupingKey("1")
-	assert.Equal(t, `"\medco\tagged\modifier\1\","TAG_ID:20",,,,,"NOW()",,`, loaderi2b2.ModifierDimensionSensitiveToCSVText(&tag, 20))
-}
-
 func TestObservationFact_ToCSVText(t *testing.T) {
 
 	csvString := `"482232","1000000060","Affy:221610_s_at","LCS-I2B2:D000109064","2009-01-16 00:00:00","@","1","N","E","79.30000","",,"","2009-01-16 00:00:00","@","",,"2010-09-28 11:15:00","2010-08-18 09:50:00","2010-09-28 11:40:00","DEMO",,"1"`
@@ -332,29 +302,29 @@ func TestTableAccessFromString(t *testing.T) {
 	csvString := `"i2b2_DEMO","I2B2","N","1","\i2b2\Demographics\","Demographics","N","CA ","\N","\N","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\Demographics\","\N","Demographics","\N","\N","\N","\N"`
 
 	ta := loaderi2b2.TableAccess{
-		TableCD:			"i2b2_DEMO",
-		TableName: 			"I2B2",
-		ProtectedAccess: 	"N",
-		Hlevel:				"1",
-		Fullname:			`\i2b2\Demographics\`,
-		Name:				"Demographics",
-		SynonymCD:			"N",
-		Visualattributes: 	"CA ",
-		Totalnum:			"\\N",
-		Basecode:			"\\N",
-		Metadataxml:		"\\N",
-		Facttablecolumn:	"concept_cd",
-		Dimtablename:		"concept_dimension",
-		Columnname:			"concept_path",
-		Columndatatype:		"T",
-		Operator:			"LIKE",
-		Dimcode:			`\i2b2\Demographics\`,
-		Comment:			"\\N",
-		Tooltip:			"Demographics",
-		EntryDate:			"\\N",
-		ChangeDate:			"\\N",
-		StatusCD:			"\\N",
-		ValuetypeCD:		"\\N",
+		TableCD:          "i2b2_DEMO",
+		TableName:        "I2B2",
+		ProtectedAccess:  "N",
+		Hlevel:           "1",
+		Fullname:         `\i2b2\Demographics\`,
+		Name:             "Demographics",
+		SynonymCD:        "N",
+		Visualattributes: "CA ",
+		Totalnum:         "\\N",
+		Basecode:         "\\N",
+		Metadataxml:      "\\N",
+		Facttablecolumn:  "concept_cd",
+		Dimtablename:     "concept_dimension",
+		Columnname:       "concept_path",
+		Columndatatype:   "T",
+		Operator:         "LIKE",
+		Dimcode:          `\i2b2\Demographics\`,
+		Comment:          "\\N",
+		Tooltip:          "Demographics",
+		EntryDate:        "\\N",
+		ChangeDate:       "\\N",
+		StatusCD:         "\\N",
+		ValuetypeCD:      "\\N",
 	}
 
 	var csvFile = strings.NewReader(csvString)
@@ -591,40 +561,6 @@ func TestConceptDimensionFromString(t *testing.T) {
 
 	assert.Equal(t, *cdkExpected, *cdk)
 	assert.Equal(t, cdExpected, cd)
-}
-
-func TestModifierDimensionFromString(t *testing.T) {
-	csvString := `"\Admit Diagnosis\","0","Admit Diagnosis","","2011-04-14 00:55:00","\N","2011-04-14 00:55:00","DEMO","\N"`
-
-	ac := loaderi2b2.AdministrativeColumns{
-		UpdateDate:     "2011-04-14 00:55:00",
-		DownloadDate:   "\\N",
-		ImportDate:     "2011-04-14 00:55:00",
-		SourceSystemCD: "DEMO",
-		UploadID:       "\\N",
-	}
-
-	mdk := &loaderi2b2.ModifierDimensionPK{
-		ModifierPath: "\\Admit Diagnosis\\",
-	}
-
-	md := loaderi2b2.ModifierDimension{
-		PK:           mdk,
-		ModifierCD:   "0",
-		NameChar:     "Admit Diagnosis",
-		ModifierBlob: "",
-		AdminColumns: ac,
-	}
-
-	var csvFile = strings.NewReader(csvString)
-	r := csv.NewReader(csvFile)
-	lines, err := r.ReadAll()
-	assert.Nil(t, err, "Parsing error")
-
-	mdkExpected, mdExpected := loaderi2b2.ModifierDimensionFromString(lines[0])
-
-	assert.Equal(t, *mdkExpected, *mdk)
-	assert.Equal(t, mdExpected, md)
 }
 
 func TestObservationFactFromString(t *testing.T) {

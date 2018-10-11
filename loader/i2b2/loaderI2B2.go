@@ -3,7 +3,6 @@ package loaderi2b2
 import (
 	"encoding/csv"
 	"encoding/xml"
-	"github.com/armon/go-radix"
 	"github.com/dedis/kyber"
 	"github.com/dedis/onet"
 	"github.com/dedis/onet/log"
@@ -11,7 +10,6 @@ import (
 	"github.com/lca1/medco/services"
 	"github.com/lca1/unlynx/lib"
 	"io"
-	"io/ioutil"
 	"math/rand"
 	"os"
 	"strconv"
@@ -21,10 +19,9 @@ import (
 
 // Files is the object structure behind the files.toml
 type Files struct {
-	TableAccess 	  string
-	AdapterMappings   string
-	I2B2              string
-	SHRINE            string
+	TableAccess       string
+	Schemes           string
+	Ontology          []string
 	DummyToPatient    string
 	PatientDimension  string
 	VisitDimension    string
@@ -34,61 +31,55 @@ type Files struct {
 	OutputFolder      string
 }
 
-// The different paths and handlers for all the file both for input and/or output
+// FileInfo contains the tablename where the .csv should be loaded and the output path
+type FileInfo struct {
+	TableName string
+	Path      string
+}
+
+// The different paths and handlers for all the files both for input and/or output
 var (
 	InputFilePaths = map[string]string{
-		"TABLE_ACCESS":		  "../../data/i2b2/original/table_access.csv",
-		"ADAPTER_MAPPINGS":   "../../data/i2b2/original/AdapterMappings.xml",
-		"SHRINE_ONTOLOGY":    "../../data/i2b2/original/shrine.csv",
-		"LOCAL_ONTOLOGY":     "../../data/i2b2/original/i2b2.csv",
-		"PATIENT_DIMENSION":  "../../data/i2b2/original/patient_dimension.csv",
-		"VISIT_DIMENSION":    "../../data/i2b2/original/visit_dimension.csv",
-		"CONCEPT_DIMENSION":  "../../data/i2b2/original/concept_dimension.csv",
-		"MODIFIER_DIMENSION": "../../data/i2b2/original/modifier_dimension.csv",
-		"OBSERVATION_FACT":   "../../data/i2b2/original/observation_fact.csv",
-		"DUMMY_TO_PATIENT":   "../../data/i2b2/original/dummy_to_patient.csv",
+		"TABLE_ACCESS": "../../data/i2b2/original/table_access.csv",
+
+		"ONTOLOGY_BIRN":        "../../data/i2b2/original/birn.csv",
+		"ONTOLOGY_CUSTOM_META": "../../data/i2b2/original/custom_meta.csv",
+		"ONTOLOGY_ICD10_ICD9":  "../../data/i2b2/original/icd10_icd9.csv",
+		"ONTOLOGY_I2B2":        "../../data/i2b2/original/i2b2.csv",
+
+		"DUMMY_TO_PATIENT":  "../../data/i2b2/original/dummy_to_patient.csv",
+		"PATIENT_DIMENSION": "../../data/i2b2/original/patient_dimension.csv",
+		"VISIT_DIMENSION":   "../../data/i2b2/original/visit_dimension.csv",
+		"CONCEPT_DIMENSION": "../../data/i2b2/original/concept_dimension.csv",
+		"OBSERVATION_FACT":  "../../data/i2b2/original/observation_fact.csv",
 	}
 
-	OutputFilePaths = map[string]string{
-		"TABLE_ACCESS":		  		"../../data/i2b2/converted/table_access.csv",
-		"ADAPTER_MAPPINGS":         "../../data/i2b2/converted/AdapterMappings.xml",
-		"SHRINE_ONTOLOGY":          "../../data/i2b2/converted/shrine.csv",
-		"LOCAL_ONTOLOGY_CLEAR":     "../../data/i2b2/converted/i2b2.csv",
-		"LOCAL_ONTOLOGY_SENSITIVE": "../../data/i2b2/converted/sensitive_tagged.csv",
-		"PATIENT_DIMENSION":        "../../data/i2b2/converted/patient_dimension.csv",
-		"NEW_PATIENT_NUM":          "../../data/i2b2/converted/new_patient_num.csv",
-		"VISIT_DIMENSION":          "../../data/i2b2/converted/visit_dimension.csv",
-		"NEW_ENCOUNTER_NUM":        "../../data/i2b2/converted/new_encounter_num.csv",
-		"CONCEPT_DIMENSION":        "../../data/i2b2/converted/concept_dimension.csv",
-		"MODIFIER_DIMENSION":       "../../data/i2b2/converted/modifier_dimension.csv",
-		"OBSERVATION_FACT":         "../../data/i2b2/converted/observation_fact.csv",
+	OutputFilePaths = map[string]FileInfo{
+		"ADAPTER_MAPPINGS": {TableName: "", Path: "../../data/i2b2/converted/AdapterMappings.xml"},
+		"SCHEMES":          {TableName: "i2b2metadata.schemes", Path: "../../data/i2b2/converted/schemes.csv"},
+		"SENSITIVE_TAGGED": {TableName: "i2b2metadata.sensitive_tagged", Path: "../../data/i2b2/converted/sensitive_tagged.csv"},
+
+		"TABLE_ACCESS_L":    {TableName: "i2b2metadata.table_access", Path: "../../data/i2b2/converted/local_table_access.csv"},
+		"LOCAL_BIRN":        {TableName: "i2b2metadata.birn", Path: "../../data/i2b2/converted/local_birn.csv"},
+		"LOCAL_CUSTOM_META": {TableName: "i2b2metadata.custom_meta", Path: "../../data/i2b2/converted/local_custom_meta.csv"},
+		"LOCAL_ICD10_ICD9":  {TableName: "i2b2metadata.icd10_icd9", Path: "../../data/i2b2/converted/local_icd10_icd9.csv"},
+		"LOCAL_I2B2":        {TableName: "i2b2metadata.i2b2", Path: "../../data/i2b2/converted/local_i2b2.csv"},
+
+		"TABLE_ACCESS_S":     {TableName: "shrine_ont.table_access", Path: "../../data/i2b2/converted/shrine_table_access.csv"},
+		"SHRINE_BIRN":        {TableName: "shrine_ont.birn", Path: "../../data/i2b2/converted/shrine_birn.csv"},
+		"SHRINE_CUSTOM_META": {TableName: "shrine_ont.custom_meta", Path: "../../data/i2b2/converted/shrine_custom_meta.csv"},
+		"SHRINE_ICD10_ICD9":  {TableName: "shrine_ont.icd10_icd9", Path: "../../data/i2b2/converted/shrine_icd10_icd9.csv"},
+		"SHRINE_I2B2":        {TableName: "shrine_ont.i2b2", Path: "../../data/i2b2/converted/shrine_i2b2.csv"},
+
+		"PATIENT_DIMENSION": {TableName: "i2b2demodata.patient_dimension", Path: "../../data/i2b2/converted/patient_dimension.csv"},
+		"NEW_PATIENT_NUM":   {TableName: "", Path: "../../data/i2b2/converted/new_patient_num.csv"},
+		"VISIT_DIMENSION":   {TableName: "i2b2demodata.visit_dimension.i2b2", Path: "../../data/i2b2/converted/visit_dimension.csv"},
+		"NEW_ENCOUNTER_NUM": {TableName: "", Path: "../../data/i2b2/converted/new_encounter_num.csv"},
+		"CONCEPT_DIMENSION": {TableName: "i2b2demodata.concept_dimension", Path: "../../data/i2b2/converted/concept_dimension.csv"},
+		"OBSERVATION_FACT":  {TableName: "i2b2demodata.observation_fact", Path: "../../data/i2b2/converted/observation_fact.csv"},
 	}
 
 	FileBashPath = "24-load-i2b2-data.sh"
-
-	FilePathsData = [...]string{
-		"SHRINE_ONTOLOGY",
-		"LOCAL_ONTOLOGY_CLEAR",
-		"LOCAL_ONTOLOGY_SENSITIVE",
-		"PATIENT_DIMENSION",
-		"VISIT_DIMENSION",
-		"CONCEPT_DIMENSION",
-		"MODIFIER_DIMENSION",
-		"OBSERVATION_FACT",
-
-	}
-
-	TablenamesData = [...]string{
-		"shrine_ont.shrine",
-		"i2b2metadata.i2b2",
-		"i2b2metadata.sensitive_tagged",
-		"i2b2demodata.patient_dimension",
-		"i2b2demodata.visit_dimension",
-		"i2b2demodata.concept_dimension",
-		"i2b2demodata.modifier_dimension",
-		"i2b2demodata.observation_fact",
-
-	}
 )
 
 const (
@@ -100,98 +91,89 @@ const (
 
 // MAIN function
 
-func replaceOutputFolder(folderPath string) {
-	tokens := strings.Split(OutputFilePaths["TABLE_ACCESS"], "/")
-	OutputFilePaths["TABLE_ACCESS"] = folderPath + tokens[len(tokens)-1]
+func generateOutputFiles(folderPath string) {
+	// fixed demodata tables
+	OutputFilePaths["ADAPTER_MAPPINGS"] = FileInfo{TableName: "", Path: "../../data/i2b2/converted/AdapterMappings.xml"}
+	OutputFilePaths["PATIENT_DIMENSION"] = FileInfo{TableName: "i2b2demodata.patient_dimension", Path: "../../data/i2b2/converted/patient_dimension.csv"}
+	OutputFilePaths["NEW_PATIENT_NUM"] = FileInfo{TableName: "", Path: "../../data/i2b2/converted/new_patient_num.csv"}
+	OutputFilePaths["VISIT_DIMENSION"] = FileInfo{TableName: "i2b2demodata.visit_dimension.i2b2", Path: "../../data/i2b2/converted/visit_dimension.csv"}
+	OutputFilePaths["NEW_ENCOUNTER_NUM"] = FileInfo{TableName: "", Path: "../../data/i2b2/converted/new_encounter_num.csv"}
+	OutputFilePaths["CONCEPT_DIMENSION"] = FileInfo{TableName: "i2b2demodata.concept_dimension", Path: "../../data/i2b2/converted/concept_dimension.csv"}
+	OutputFilePaths["OBSERVATION_FACT"] = FileInfo{TableName: "i2b2demodata.observation_fact", Path: "../../data/i2b2/converted/observation_fact.csv"}
 
-	tokens = strings.Split(OutputFilePaths["ADAPTER_MAPPINGS"], "/")
-	OutputFilePaths["ADAPTER_MAPPINGS"] = folderPath + tokens[len(tokens)-1]
+	// fixed ontology tables
+	OutputFilePaths["SENSITIVE_TAGGED"] = FileInfo{TableName: "i2b2metadata.sensitive_tagged", Path: "../../data/i2b2/converted/sensitive_tagged.csv"}
+	OutputFilePaths["SCHEMES"] = FileInfo{TableName: "i2b2metadata.schemes", Path: "../../data/i2b2/converted/schemes.csv"}
 
-	tokens = strings.Split(OutputFilePaths["SHRINE_ONTOLOGY"], "/")
-	OutputFilePaths["SHRINE_ONTOLOGY"] = folderPath + tokens[len(tokens)-1]
+	OutputFilePaths["TABLE_ACCESS_L"] = FileInfo{TableName: "i2b2metadata.table_access", Path: "../../data/i2b2/converted/local_table_access.csv"}
+	OutputFilePaths["TABLE_ACCESS_S"] = FileInfo{TableName: "shrine_ont.table_access", Path: "../../data/i2b2/converted/shrine_table_access.csv"}
 
-	tokens = strings.Split(OutputFilePaths["LOCAL_ONTOLOGY_CLEAR"], "/")
-	OutputFilePaths["LOCAL_ONTOLOGY_CLEAR"] = folderPath + tokens[len(tokens)-1]
+	for key, path := range InputFilePaths {
+		if strings.HasPrefix(key, "ONTOLOGY_") {
+			rawKey := strings.Split(key, "ONTOLOGY_")[1]
+			tokens := strings.Split(path, "/")
 
-	tokens = strings.Split(OutputFilePaths["LOCAL_ONTOLOGY_SENSITIVE"], "/")
-	OutputFilePaths["LOCAL_ONTOLOGY_SENSITIVE"] = folderPath + tokens[len(tokens)-1]
-
-	tokens = strings.Split(OutputFilePaths["PATIENT_DIMENSION"], "/")
-	OutputFilePaths["PATIENT_DIMENSION"] = folderPath + tokens[len(tokens)-1]
-
-	tokens = strings.Split(OutputFilePaths["NEW_PATIENT_NUM"], "/")
-	OutputFilePaths["NEW_PATIENT_NUM"] = folderPath + tokens[len(tokens)-1]
-
-	tokens = strings.Split(OutputFilePaths["VISIT_DIMENSION"], "/")
-	OutputFilePaths["VISIT_DIMENSION"] = folderPath + tokens[len(tokens)-1]
-
-	tokens = strings.Split(OutputFilePaths["NEW_ENCOUNTER_NUM"], "/")
-	OutputFilePaths["NEW_ENCOUNTER_NUM"] = folderPath + tokens[len(tokens)-1]
-
-	tokens = strings.Split(OutputFilePaths["CONCEPT_DIMENSION"], "/")
-	OutputFilePaths["CONCEPT_DIMENSION"] = folderPath + tokens[len(tokens)-1]
-
-	tokens = strings.Split(OutputFilePaths["MODIFIER_DIMENSION"], "/")
-	OutputFilePaths["MODIFIER_DIMENSION"] = folderPath + tokens[len(tokens)-1]
-
-	tokens = strings.Split(OutputFilePaths["OBSERVATION_FACT"], "/")
-	OutputFilePaths["OBSERVATION_FACT"] = folderPath + tokens[len(tokens)-1]
+			OutputFilePaths["LOCAL_"+rawKey] = FileInfo{TableName: "i2b2metadata." + strings.ToLower(rawKey), Path: folderPath + tokens[len(tokens)-1]}
+			OutputFilePaths["SHRINE_"+rawKey] = FileInfo{TableName: "shrine_ont." + strings.ToLower(rawKey), Path: folderPath + tokens[len(tokens)-1]}
+		}
+	}
 }
 
 // ConvertI2B2 it's the main function that performs a full conversion and loading of the I2B2 data
 func ConvertI2B2(el *onet.Roster, entryPointIdx int, files Files, mapSensitive map[string]struct{}, databaseS loader.DBSettings, empty bool) error {
+	InputFilePaths = make(map[string]string)
+	OutputFilePaths = make(map[string]FileInfo)
 
 	ListSensitiveConcepts = mapSensitive
 
 	// change input filepaths
 	InputFilePaths["TABLE_ACCESS"] = files.TableAccess
-	InputFilePaths["ADAPTER_MAPPINGS"] = files.AdapterMappings
-	InputFilePaths["SHRINE_ONTOLOGY"] = files.SHRINE
-	InputFilePaths["LOCAL_ONTOLOGY"] = files.I2B2
+	InputFilePaths["SCHEMES"] = files.Schemes
+
+	if len(files.Ontology) == 0 {
+		log.Fatal("No Ontology files were selected for conversion")
+	}
+
+	for _, name := range files.Ontology {
+		tokens := strings.Split(name, "/")
+		ontologyName := tokens[len(tokens)-1]
+		InputFilePaths["ONTOLOGY_"+strings.ToUpper(strings.Split(ontologyName, ".")[0])] = name
+	}
 	InputFilePaths["PATIENT_DIMENSION"] = files.PatientDimension
 	InputFilePaths["VISIT_DIMENSION"] = files.VisitDimension
 	InputFilePaths["CONCEPT_DIMENSION"] = files.ConceptDimension
-	InputFilePaths["MODIFIER_DIMENSION"] = files.ModifierDimension
 	InputFilePaths["OBSERVATION_FACT"] = files.ObservationFact
 	InputFilePaths["DUMMY_TO_PATIENT"] = files.DummyToPatient
 
 	// change output filepaths
-	replaceOutputFolder(files.OutputFolder)
+	generateOutputFiles(files.OutputFolder)
 
 	err := ParseTableAccess()
 	if err != nil {
 		return err
 	}
 
-	err = GenerateNewTableAccess()
+	err = ConvertTableAccess()
 	if err != nil {
 		return err
 	}
 
-	log.Lvl2("--- Finished generating TABLE_ACCESS ---")
+	log.Lvl2("--- Finished converting TABLE_ACCESS ---")
 
-	err = ParseLocalOntology(el, entryPointIdx)
-	if err != nil {
-		return err
-	}
-	err = ConvertLocalOntology()
+	err = ConvertLocalOntology(el, entryPointIdx)
 	if err != nil {
 		return err
 	}
 
 	log.Lvl2("--- Finished converting LOCAL_ONTOLOGY ---")
 
-	err = GenerateNewAdapterMappings()
+	err = GenerateAdapterMappings()
 	if err != nil {
 		return err
 	}
 
 	log.Lvl2("--- Finished generating ADAPTER_MAPPINGS ---")
 
-	err = ParseShrineOntologyHeader()
-	if err != nil {
-		return err
-	}
 	err = GenerateNewShrineOntology()
 	if err != nil {
 		return err
@@ -264,7 +246,7 @@ func ConvertI2B2(el *onet.Roster, entryPointIdx int, files Files, mapSensitive m
 }
 
 // GenerateLoadingDataScript creates a load dataset .sql script (deletes the data in the corresponding tables and reloads the new 'protected' data)
-func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
+/*func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
 	fp, err := os.Create(FileBashPath)
 	if err != nil {
 		return err
@@ -290,12 +272,12 @@ func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
 	fp.Close()
 
 	return nil
-}
+}*/
 
 // LoadDataFiles executes the loading script for the new converted data
-func LoadDataFiles() error {
+/*func LoadDataFiles() error {
 	// Display just the stderr if an error occurs
-	/*cmd := exec.Command("/bin/sh", FileBashPath[1])
+	cmd := exec.Command("/bin/sh", FileBashPath[1])
 	stderr := &bytes.Buffer{} // make sure to import bytes
 	cmd.Stderr = stderr
 	err := cmd.Run()
@@ -303,13 +285,86 @@ func LoadDataFiles() error {
 		log.LLvl1("Error when running command.  Error log:", stderr.String())
 		log.LLvl1("Got command status:", err.Error())
 		return err
-	}*/
+	}
 
 	return nil
+}*/
+
+func readCSV(filename string) ([][]string, error) {
+	csvInputFile, err := os.Open(InputFilePaths[filename])
+	if err != nil {
+		log.Fatal("Error opening [" + strings.ToLower(filename) + "].csv")
+		return nil, err
+	}
+	defer csvInputFile.Close()
+
+	reader := csv.NewReader(csvInputFile)
+	reader.Comma = ','
+
+	lines, err := reader.ReadAll()
+	if err != nil {
+		log.Fatal("Error reading [" + strings.ToLower(filename) + "].csv")
+		return nil, err
+	}
+
+	return lines, nil
+}
+
+// StripByLevel strips the concept path based on /. The number represents the stripping level, in other words,
+// if number = 1 we strip the first element enclosed in /****/ and then on. Order means which side we start stripping: true (left-to-right),
+// false (right-to-left)
+func StripByLevel(conceptPath string, number int, order bool) string {
+	// remove the first and last \
+	conceptPath = conceptPath[1 : len(conceptPath)-1]
+	pathContainer := strings.Split(conceptPath, "\\")
+
+	if order {
+		for i := 0; i < number; i++ {
+			if len(pathContainer) == 0 {
+				break
+			}
+
+			// reduce a 'layer' at the time -  e.g. \\Admit Diagnosis\\Leg -> \\Leg
+			pathContainer = pathContainer[1:]
+		}
+	} else {
+		for i := 0; i < number; i++ {
+			if len(pathContainer) == 0 {
+				break
+			}
+
+			// reduce a 'layer' at the time -  e.g. \\Admit Diagnosis\\Leg -> \\Admit Diagnosis
+			pathContainer = pathContainer[:len(pathContainer)-1]
+		}
+	}
+	conceptPathFinal := strings.Join(pathContainer, "\\")
+
+	if conceptPathFinal == "" {
+		return conceptPathFinal
+	}
+
+	// if not empty we remove the first and last \ in the beginning when comparing we need add them again
+	return "\\" + conceptPathFinal + "\\"
+}
+
+// HasSensitiveParents is a function that checks if a node whether in the LocalOntology or ConceptDimension has any siblings which are sensitive.
+func HasSensitiveParents(conceptPath string) (string, bool) {
+	temp := conceptPath
+
+	isSensitive := false
+	for temp != "" {
+		if _, ok := ListSensitiveConcepts[temp]; ok {
+			isSensitive = true
+			break
+		}
+		temp = StripByLevel(temp, 1, false)
+	}
+	return temp, isSensitive
 }
 
 // TABLE_ACCESS.CSV reader
 
+// ParseTableAccess reads and parses the table_access.csv.
 func ParseTableAccess() error {
 	lines, err := readCSV("TABLE_ACCESS")
 	if err != nil {
@@ -363,109 +418,61 @@ func ParseTableAccess() error {
 	return nil
 }
 
-// GenerateNewAdapterMappings generate (copy) the table_access.csv
-func GenerateNewTableAccess() error {
-	csvOutputFile, err := os.Create(OutputFilePaths["TABLE_ACCESS"])
+// ConvertTableAccess generate (copy) the table_access.csv
+func ConvertTableAccess() error {
+	// local (we add a SENSITIVE_TAGGED entry)
+	csvOutputFileL, err := os.Create(OutputFilePaths["TABLE_ACCESS_L"].Path)
 	if err != nil {
-		log.Fatal("Error opening [table_access].csv")
+		log.Fatal("Error opening [local_table_access].csv")
 		return err
 	}
-	defer csvOutputFile.Close()
+	defer csvOutputFileL.Close()
+
+	// shrine (copy as is)
+	csvOutputFileS, err := os.Create(OutputFilePaths["TABLE_ACCESS_S"].Path)
+	if err != nil {
+		log.Fatal("Error opening [shrine_table_access].csv")
+		return err
+	}
+	defer csvOutputFileS.Close()
 
 	headerString := ""
 	for _, header := range HeaderTableAccess {
 		headerString += "\"" + header + "\","
 	}
 	// remove the last ,
-	csvOutputFile.WriteString(headerString[:len(headerString)-1] + "\n")
-
+	csvOutputFileL.WriteString(headerString[:len(headerString)-1] + "\n")
+	csvOutputFileS.WriteString(headerString[:len(headerString)-1] + "\n")
 
 	for _, ta := range TableAccessMap {
-		csvOutputFile.WriteString(ta.ToCSVText() + "\n")
+		csvOutputFileL.WriteString(ta.ToCSVText() + "\n")
+		csvOutputFileS.WriteString(ta.ToCSVText() + "\n")
 	}
 
-	return nil
+	csvOutputFileL.WriteString(`"SENSITIVE_TAGGED","SENSITIVE_TAGGED","N","1","\medco\tagged\","MedCo Sensitive Tagged Ontology","N","CA ",,,,"concept_cd","concept_dimension","concept_path","T","LIKE","\medco\tagged\",,"MedCo Sensitive Tagged Ontology",,,,` + "\n")
 
+	return nil
 }
 
 // ADAPTER_MAPPINGS.XML converter
 
-// ParseAdapterMappings reads and parses the AdapterMappings.xml.
-func ParseAdapterMappings() error {
-	xmlInputFile, err := os.Open(InputFilePaths["ADAPTER_MAPPINGS"])
-	if err != nil {
-		log.Fatal("Error opening [AdapterMappings].xml")
-		return err
-	}
-	defer xmlInputFile.Close()
-
-	b, _ := ioutil.ReadAll(xmlInputFile)
-
-	err = xml.Unmarshal(b, &Am)
-	if err != nil {
-		log.Fatal("Error marshaling [AdapterMappings].xml")
-		return err
-	}
-	return nil
-}
-
-// ConvertAdapterMappings converts the old AdapterMappings.xml file. This file maps a shrine concept code to an i2b2 concept code
-func ConvertAdapterMappings() error {
-	// convert the data in temporary maps to make it easy to traverse
-	localToShrine := make(map[string][]string)
-	shrineToLocal := radix.New()
-	createTempMaps(Am, localToShrine, shrineToLocal)
-
-	ListSensitiveConceptsLocal = make(map[string][]string)
-
-	// everything is fine so now we just place both the sensitive local and shrine concepts in RAM (in our global maps)
-	StoreSensitiveLocalConcepts(localToShrine, shrineToLocal)
-
-	numElementsDel := filterSensitiveEntries(&Am)
-	log.Lvl2(numElementsDel, "entries deleted")
-
-	xmlOutputFile, err := os.Create(OutputFilePaths["ADAPTER_MAPPINGS"])
-	if err != nil {
-		log.Fatal("Error creating converted [AdapterMappings].xml")
-		return err
-	}
-	xmlOutputFile.Write([]byte(Header))
-
-	xmlWriter := io.Writer(xmlOutputFile)
-
-	enc := xml.NewEncoder(xmlWriter)
-	enc.Indent("", "\t")
-	err = enc.Encode(Am)
-	if err != nil {
-		log.Fatal("Error writing converted [AdapterMappings].xml")
-		return err
-	}
-
-	return nil
-}
-
-func AddNewAdapterMapping(soc, loc string, modifier bool) {
-	listLocalKeys := make([]string,0)
+func addNewAdapterMapping(loc string, modifier bool) {
+	listLocalKeys := make([]string, 0)
 
 	if modifier == false {
-		tokens := strings.Split(loc, `\`)
-		// skip things like \i2b2\
-		if len(tokens) <= 3 {
-			return
+		for prefix := range TableAccessMap {
+			if strings.HasPrefix(loc, prefix) {
+				listLocalKeys = append(listLocalKeys, `\\`+TableAccessMap[prefix].TableCD+loc)
+				continue
+			}
 		}
-		fullname := `\` + tokens[1] + `\` + tokens[2] + `\`
-		listLocalKeys = append(listLocalKeys, `\\` + TableAccessMap[fullname].TableCD + loc)
-	} else { //TODO
-		// if it is a modifier we have to create a new concept and append the modifier
-		// e.g. \Admit Diagnosis\
 	}
-
 	Am.ListEntries = append(Am.ListEntries, Entry{Key: listLocalKeys[0], ListLocalKeys: listLocalKeys})
 }
 
-// GenerateNewAdapterMappings creates a new Adapter Mappings where 1 shrine concept is unequivocally is associated with 1 local concept
-func GenerateNewAdapterMappings() error {
-	xmlOutputFile, err := os.Create(OutputFilePaths["ADAPTER_MAPPINGS"])
+// GenerateAdapterMappings creates a new Adapter Mappings where 1 shrine concept is unequivocally associated with 1 local concept
+func GenerateAdapterMappings() error {
+	xmlOutputFile, err := os.Create(OutputFilePaths["ADAPTER_MAPPINGS"].Path)
 	if err != nil {
 		log.Fatal("Error creating converted [AdapterMappings].xml")
 		return err
@@ -483,125 +490,6 @@ func GenerateNewAdapterMappings() error {
 	}
 
 	return nil
-}
-
-// createTempMaps simply converts the data into one map and one radix tree so that it's easier to traverse and manage the data
-func createTempMaps(am AdapterMappings, localToShrine map[string][]string, shrineToLocal *radix.Tree) {
-	for _, entry := range am.ListEntries {
-		// remove the first \ (in the adapter mappings file there are 2 '\\' in the beginning)
-		shrineKey := StripByLevel(entry.Key[1:], 1, true)
-		arrValues := make([]string, 0)
-		for _, value := range entry.ListLocalKeys {
-			localKey := StripByLevel(value[1:], 1, true)
-			arrValues = append(arrValues, localKey)
-
-			// if the local concept is already mapped to another shrine concept
-			if _, ok := localToShrine[localKey]; ok {
-				localToShrine[localKey] = append(localToShrine[localKey], shrineKey)
-			} else {
-				aux := make([]string, 0)
-				aux = append(aux, shrineKey)
-				localToShrine[localKey] = aux
-			}
-		}
-		shrineToLocal.Insert(shrineKey, arrValues)
-	}
-}
-
-// StoreSensitiveLocalConcepts stores the local sensitive concepts in a set that is kept in RAM during the entire loading (to make parsing the local ontology faster)
-func StoreSensitiveLocalConcepts(localToShrine map[string][]string, shrineToLocal *radix.Tree) {
-	// STEP 1: Pick sensitive shrine concept
-	for shrineKey := range ListSensitiveConceptsShrine {
-		// STEP 2: Traverse prefix and add other related sensitive concepts
-		shrineToLocal.WalkPrefix(shrineKey, func(s string, v interface{}) bool {
-			for _, localKey := range v.([]string) {
-				appendSensitiveConcepts(localKey, shrineKey)
-				recursivelyUpdateConceptMaps(localKey, localToShrine, shrineToLocal)
-			}
-			return false
-		})
-		// STEP 3: Delete prefix subtree
-		shrineToLocal.DeletePrefix(shrineKey)
-	}
-}
-
-// appendSensitiveConcepts simply appends/relates a shrine concept to a local concept if it has not been added before
-func appendSensitiveConcepts(localKey string, shrineKey string) {
-	// if local concept already added
-	if _, ok := ListSensitiveConceptsLocal[localKey]; ok {
-		exists := false
-		for _, el := range ListSensitiveConceptsLocal[localKey] {
-			if shrineKey == el {
-				exists = true
-			}
-		}
-		if !exists {
-			ListSensitiveConceptsLocal[localKey] = append(ListSensitiveConceptsLocal[localKey], shrineKey)
-		}
-	} else {
-		aux := make([]string, 0)
-		aux = append(aux, shrineKey)
-		ListSensitiveConceptsLocal[localKey] = aux
-	}
-}
-
-// recursivelyUpdateConceptMaps recursively checks if there is any shrine concept that maps to a sensitive local concept. If true all of its values (local concepts) should be set to sensitive... rinse/repeat
-func recursivelyUpdateConceptMaps(localKey string, localToShrine map[string][]string, shrineToLocal *radix.Tree) {
-	for _, shrineKey := range localToShrine[localKey] {
-		// the local concept is sensitive but its shrine key is not
-		if !containsMapString(ListSensitiveConceptsShrine, shrineKey) {
-			ListSensitiveConceptsShrine[shrineKey] = true
-			shrineToLocal.WalkPrefix(shrineKey, func(s string, v interface{}) bool {
-				for _, localKey := range v.([]string) {
-					appendSensitiveConcepts(localKey, shrineKey)
-					recursivelyUpdateConceptMaps(localKey, localToShrine, shrineToLocal)
-				}
-				return false
-			})
-		}
-	}
-}
-
-// filterSensitiveEntries filters out (removes) the <key>, <values> pair(s) that belong to sensitive concepts
-func filterSensitiveEntries(am *AdapterMappings) int {
-	deleted := 0
-	for i := range am.ListEntries {
-		j := i - deleted
-		// remove the table value from the first key value like \\SHRINE
-		if containsMapString(ListSensitiveConceptsShrine, StripByLevel(am.ListEntries[j].Key[1:], 1, true)) {
-			am.ListEntries = am.ListEntries[:j+copy(am.ListEntries[j:], am.ListEntries[j+1:])]
-			deleted++
-		}
-	}
-
-	return deleted
-}
-
-func containsMapString(m map[string]bool, e string) bool {
-	if _, ok := m[e]; ok {
-		return true
-	}
-	return false
-}
-
-func readCSV(filename string) ([][]string, error) {
-	csvInputFile, err := os.Open(InputFilePaths[filename])
-	if err != nil {
-		log.Fatal("Error opening [" + strings.ToLower(filename) + "].csv")
-		return nil, err
-	}
-	defer csvInputFile.Close()
-
-	reader := csv.NewReader(csvInputFile)
-	reader.Comma = ','
-
-	lines, err := reader.ReadAll()
-	if err != nil {
-		log.Fatal("Error reading [" + strings.ToLower(filename) + "].csv")
-		return nil, err
-	}
-
-	return lines, nil
 }
 
 // DUMMY_TO_PATIENT.csv parser
@@ -631,202 +519,84 @@ func ParseDummyToPatient() error {
 	return nil
 }
 
-// SHRINE.CSV converter (shrine ontology)
+// SHRINE ontology converter
 
-// ParseShrineOntology reads and parses the shrine.csv.
-func ParseShrineOntology() error {
-	lines, err := readCSV("SHRINE_ONTOLOGY")
-	if err != nil {
-		log.Fatal("Error in readCSV()")
-		return err
-	}
-
-	// initialize container structs and counters
-	IDModifiers = 0
-	IDConcepts = 0
-	TableShrineOntologyClear = make(map[string]*ShrineOntology)
-	TableShrineOntologyConceptEnc = make(map[string]*ShrineOntology)
-	TableShrineOntologyModifierEnc = make(map[string][]*ShrineOntology)
-	HeaderShrineOntology = make([]string, 0)
-
-	/* structure of shrine.csv (in order):
-
-	// MANDATORY FIELDS
-	"c_hlevel",
-	"c_fullname",
-	"c_name",
-	"c_synonym_cd",
-	"c_visualattributes",
-	"c_totalnum",
-	"c_basecode",
-	"c_metadataxml",
-	"c_facttablecolumn",
-	"c_tablename",
-	"c_columnname",
-	"c_columndatatype",
-	"c_operator",
-	"c_dimcode",
-	"c_comment",
-	"c_tooltip",
-
-	// ADMIN FIELDS
-	"update_date",
-	"download_date",
-	"import_date",
-	"sourcesystem_cd",
-
-	// MANDATORY FIELDS
-	"valuetype_cd",
-	"m_applied_path",
-	"m_exclusion_cd"
-
-	*/
-
-	for _, header := range lines[0] {
-		HeaderShrineOntology = append(HeaderShrineOntology, header)
-	}
-
-	//skip header
-	for _, line := range lines[1:] {
-		so := ShrineOntologyFromString(line)
-
-		if containsMapString(ListSensitiveConceptsShrine, so.Fullname) { // if it is a sensitive concept
-			so.ChildrenEncryptIDs = make([]int64, 0)
-
-			// if it is a modifier
-			if strings.ToLower(so.FactTableColumn) == "modifier_cd" {
-				// if value already present in the map
-				if val, ok := TableShrineOntologyModifierEnc[so.Fullname]; ok {
-					so.NodeEncryptID = val[0].NodeEncryptID
-					TableShrineOntologyModifierEnc[so.Fullname] = append(TableShrineOntologyModifierEnc[so.Fullname], so)
-				} else {
-					so.NodeEncryptID = IDModifiers
-					IDModifiers++
-					TableShrineOntologyModifierEnc[so.Fullname] = make([]*ShrineOntology, 0)
-					TableShrineOntologyModifierEnc[so.Fullname] = append(TableShrineOntologyModifierEnc[so.Fullname], so)
-				}
-			} else if strings.ToLower(so.FactTableColumn) == "concept_cd" { // if it is a concept code
-				// concepts do not repeat on contrary to the modifiers
-				so.NodeEncryptID = IDConcepts
-				IDConcepts++
-				TableShrineOntologyConceptEnc[so.Fullname] = so
-
-			} else {
-				log.Fatal("Incorrect code in the FactTable column:", strings.ToLower(so.FactTableColumn))
-			}
-		} else {
-			TableShrineOntologyClear[so.Fullname] = so
-		}
-	}
-
-	return nil
-}
-
-// ConvertShrineOntology converts the old shrine.csv file (the shrine ontology)
-func ConvertShrineOntology() error {
-	csvOutputFile, err := os.Create(OutputFilePaths["SHRINE_ONTOLOGY"])
-	if err != nil {
-		log.Fatal("Error opening [shrine].csv")
-		return err
-	}
-	defer csvOutputFile.Close()
-
-	headerString := ""
-	for _, header := range HeaderShrineOntology {
-		headerString += "\"" + header + "\","
-	}
-	// remove the last ,
-	csvOutputFile.WriteString(headerString[:len(headerString)-1] + "\n")
-
-	UpdateChildrenEncryptIDs() //updates the ChildrenEncryptIDs of the internal and parent nodes
-
-	// copy the non-sensitive concept codes to the new csv file and change the name of the ONTOLOGYVERSION to blabla_convert
-	prefix := "\\SHRINE\\ONTOLOGYVERSION\\"
-
-	for _, so := range TableShrineOntologyClear {
-		// search the \SHRINE\ONTOLOGYVERSION\blabla and change the name to blabla_Converted
-		if strings.HasPrefix(so.Fullname, prefix) && len(so.Fullname) > len(prefix) {
-			newName := so.Fullname[:len(so.Fullname)-1] + "_Converted\\"
-			so.Fullname = newName
-			so.Name = newName
-			so.DimCode = newName
-			so.Tooltip = newName
-			break
-		}
-		csvOutputFile.WriteString(so.ToCSVText() + "\n")
-	}
-
-	// copy the sensitive concept codes to the new csv files (it does not include the modifier concepts)
-	for _, so := range TableShrineOntologyConceptEnc {
-		//log.LLvl1(so.Fullname, so.NodeEncryptID, so.ChildrenEncryptIDs, so.VisualAttributes)
-		csvOutputFile.WriteString(so.ToCSVText() + "\n")
-	}
-
-	// copy the sensitive modifier concept codes to the new csv files
-	for _, soArr := range TableShrineOntologyModifierEnc {
-		for _, so := range soArr {
-			//log.LLvl1(so.Fullname, so.NodeEncryptID, so.ChildrenEncryptIDs, so.VisualAttributes)
-			csvOutputFile.WriteString(so.ToCSVText() + "\n")
-		}
-	}
-
-	return nil
-}
-
-func ParseShrineOntologyHeader() error {
-	lines, err := readCSV("SHRINE_ONTOLOGY")
-	if err != nil {
-		log.Fatal("Error in readCSV()")
-		return err
-	}
-
-	// initialize container structs and counters
-	HeaderShrineOntology = make([]string, 0)
-
-	/* structure of shrine.csv (in order):
-
-	// MANDATORY FIELDS
-	"c_hlevel",
-	"c_fullname",
-	"c_name",
-	"c_synonym_cd",
-	"c_visualattributes",
-	"c_totalnum",
-	"c_basecode",
-	"c_metadataxml",
-	"c_facttablecolumn",
-	"c_tablename",
-	"c_columnname",
-	"c_columndatatype",
-	"c_operator",
-	"c_dimcode",
-	"c_comment",
-	"c_tooltip",
-
-	// ADMIN FIELDS
-	"update_date",
-	"download_date",
-	"import_date",
-	"sourcesystem_cd",
-
-	// MANDATORY FIELDS
-	"valuetype_cd",
-	"m_applied_path",
-	"m_exclusion_cd"
-
-	*/
-
-	for _, header := range lines[0] {
-		HeaderShrineOntology = append(HeaderShrineOntology, header)
-	}
-
-	return nil
-}
-
+// GenerateNewShrineOntology generates all files for the shrine ontology (these may include multiples tables)
 func GenerateNewShrineOntology() error {
-	csvOutputFile, err := os.Create(OutputFilePaths["SHRINE_ONTOLOGY"])
+	// initialize container structs and counters
+	HeaderShrineOntology = []string{"c_hlevel",
+		"c_fullname",
+		"c_name",
+		"c_synonym_cd",
+		"c_visualattributes",
+		"c_totalnum",
+		"c_basecode",
+		"c_metadataxml",
+		"c_facttablecolumn",
+		"c_tablename",
+		"c_columnname",
+		"c_columndatatype",
+		"c_operator",
+		"c_dimcode",
+		"c_comment",
+		"c_tooltip",
+		"update_date",
+		"download_date",
+		"import_date",
+		"sourcesystem_cd",
+		"valuetype_cd",
+		"m_applied_path",
+		"m_exclusion_cd"}
+
+	/* structure of shrine.csv (in order):
+
+	// MANDATORY FIELDS
+	"c_hlevel",
+	"c_fullname",
+	"c_name",
+	"c_synonym_cd",
+	"c_visualattributes",
+	"c_totalnum",
+	"c_basecode",
+	"c_metadataxml",
+	"c_facttablecolumn",
+	"c_tablename",
+	"c_columnname",
+	"c_columndatatype",
+	"c_operator",
+	"c_dimcode",
+	"c_comment",
+	"c_tooltip",
+
+	// ADMIN FIELDS
+	"update_date",
+	"download_date",
+	"import_date",
+	"sourcesystem_cd",
+
+	// MANDATORY FIELDS
+	"valuetype_cd",
+	"m_applied_path",
+	"m_exclusion_cd"
+
+	*/
+
+	for key := range InputFilePaths {
+		if strings.HasPrefix(key, "ONTOLOGY_") {
+			err := generateNewShrineTable(strings.Split(key, "ONTOLOGY_")[1])
+			if err != nil {
+				log.Fatal("Error generating [" + key + "].csv")
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func generateNewShrineTable(rawName string) error {
+	csvOutputFile, err := os.Create(OutputFilePaths["SHRINE_"+rawName].Path)
 	if err != nil {
-		log.Fatal("Error opening [shrine].csv")
+		log.Fatal("Error opening [" + rawName + "].csv")
 		return err
 	}
 	defer csvOutputFile.Close()
@@ -838,27 +608,23 @@ func GenerateNewShrineOntology() error {
 	// remove the last ,
 	csvOutputFile.WriteString(headerString[:len(headerString)-1] + "\n")
 
-	UpdateChildrenEncryptIDs() //updates the ChildrenEncryptIDs of the internal and parent nodes
+	UpdateChildrenEncryptIDs(rawName) //updates the ChildrenEncryptIDs of the internal and parent nodes
 
-	// manually add first two shrine rows
-	csvOutputFile.WriteString(`"1","\SHRINE\ONTOLOGYVERSION\","ONTOLOGYVERSION","N","FH ",,,"","concept_cd","concept_dimension","concept_path","T","LIKE","\SHRINE\ONTOLOGYVERSION\","","ONTOLOGYVERSION\",,,,"SHRINE",,"@",` + "\n")
-	csvOutputFile.WriteString(`"2","\SHRINE\ONTOLOGYVERSION\SHRINE_DEMO-Download_ONTOLOGY_V-1.18_1-20-14_Converted\","SHRINE_DEMO-Download_ONTOLOGY_V-1.18_1-20-14_Converted","N","LH ",,,"","concept_cd","concept_dimension","concept_path","T","LIKE","\SHRINE\ONTOLOGYVERSION\SHRINE_DEMO-Download_ONTOLOGY_V-1.18_1-20-14_Converted\","","ONTOLOGYVERSION\SHRINE_DEMO-Download_ONTOLOGY_V-1.18_1-20-14_Converted\",,,,"SHRINE",,"@",` + "\n")
-
-	for _, so := range TableShrineOntologyClear {
+	for _, so := range TablesShrineOntology[rawName].Clear {
 		csvOutputFile.WriteString(so.ToCSVText() + "\n")
 	}
 
 	// copy the sensitive concept codes to the new csv files (it does not include the modifier concepts)
-	for _, so := range TableShrineOntologyConceptEnc {
+	for _, so := range TablesShrineOntology[rawName].Sensitive {
 		csvOutputFile.WriteString(so.ToCSVText() + "\n")
 	}
 
 	return nil
 }
 
-// UpdateChildrenEncryptIDs updates the parent and internal concept nodes with the IDs of their respective children
-func UpdateChildrenEncryptIDs() {
-	for _, so := range TableShrineOntologyConceptEnc {
+// UpdateChildrenEncryptIDs updates the parent and internal concept nodes with the IDs of their respective children (name identifies the name of the ontology table)
+func UpdateChildrenEncryptIDs(name string) {
+	for _, so := range TablesShrineOntology[name].Sensitive {
 		path := so.Fullname
 		for true {
 			path = StripByLevel(path, 1, false)
@@ -866,64 +632,68 @@ func UpdateChildrenEncryptIDs() {
 				break
 			}
 
-			if val, ok := TableShrineOntologyConceptEnc[path]; ok {
+			if val, ok := TablesShrineOntology[name].Sensitive[path]; ok {
 				val.ChildrenEncryptIDs = append(val.ChildrenEncryptIDs, so.NodeEncryptID)
-			}
-
-		}
-	}
-
-	for path, soArr := range TableShrineOntologyModifierEnc {
-		for true {
-			path = StripByLevel(path, 1, false)
-			if path == "" {
-				break
-			}
-
-			if val, ok := TableShrineOntologyModifierEnc[path]; ok {
-				for _, el := range val {
-					// no matter the element in the array they all have the same NodeEncryptID
-					el.ChildrenEncryptIDs = append(el.ChildrenEncryptIDs, soArr[0].NodeEncryptID)
-				}
 			}
 
 		}
 	}
 }
 
-// I2B2.CSV converter (local ontology)
+// LOCAL ontology converter
 
-// ParseLocalOntology reads and parses the i2b2.csv. and generates the shrine.csv and adapter_mappings.xml
-func ParseLocalOntology(group *onet.Roster, entryPointIdx int) error {
-	lines, err := readCSV("LOCAL_ONTOLOGY")
+// ConvertLocalOntology reads and parses all local ontology tables and generates the corresponding .csv(s) (local, shrine and adapter_mappings)
+func ConvertLocalOntology(group *onet.Roster, entryPointIdx int) error {
+	// initialize container structs and counters
+	IDConcepts = 0
+	TablesShrineOntology = make(map[string]ShrineTableInfo)
+	MapConceptPathToTag = make(map[string]TagAndID)
+
+	for key := range InputFilePaths {
+		if strings.HasPrefix(key, "ONTOLOGY_") {
+			rawName := strings.Split(key, "ONTOLOGY_")[1]
+			err := ParseLocalTable(group, entryPointIdx, key)
+			if err != nil {
+				log.Fatal("Error parsing [" + strings.ToLower(rawName) + "].csv")
+				return err
+			}
+			err = ConvertClearLocalTable(rawName)
+			if err != nil {
+				log.Fatal("Error converting [" + strings.ToLower(rawName) + "].csv")
+				return err
+			}
+		}
+	}
+
+	err := ConvertSensitiveLocalTable()
+	if err != nil {
+		log.Fatal("Error converting [sensitive_tagged].csv")
+		return err
+	}
+
+	return nil
+}
+
+// ParseLocalTable reads and parses the xxxx.csv (part of the local ontology)
+// The adapter_mappings and shrine ontology are also generated based on the local ontology. Each local table (in i2b2metadata is replicated in the shrine_ont, with some minor changes)
+func ParseLocalTable(group *onet.Roster, entryPointIdx int, name string) error {
+	lines, err := readCSV(name)
 	if err != nil {
 		log.Fatal("Error in readCSV()")
 		return err
 	}
+	rawName := strings.Split(name, "ONTOLOGY_")[1]
 
-	// initialize container structs and counters
-	IDModifiers = 0
-	IDConcepts = 0
 	HeaderLocalOntology = make([]string, 0)
 	TableLocalOntologyClear = make(map[string]*LocalOntology)
-	TableShrineOntologyClear = make(map[string]*ShrineOntology)
-	TableShrineOntologyConceptEnc = make(map[string]*ShrineOntology)
 
-	MapConceptPathToTag = make(map[string]TagAndID)
-	mapConceptIDtoTagKeys := make([]string, 0)
+	listConceptCD := make([]string, 0)
 	allSensitiveConceptIDs := make([]int64, 0)
+	listEntries := make([]Entry, 0)
 
-	listEntries := make([]Entry,0)
 	Am = AdapterMappings{ListEntries: listEntries}
 	Am.Hostname = "cw-ptrevvett.MED.HARVARD.EDU"
 	Am.TimeStamp = "2014-02-26T15:48:27.286-05:00"
-
-	MapConceptPathToTag = make(map[string]TagAndID)
-	//mapConceptIDtoTagKeys := make([]string, 0)
-
-	MapModifiers = make(map[string]struct{})
-
-	//allSensitiveConceptIDs := make([]int64, 0)
 
 	/* structure of i2b2.csv (in order):
 
@@ -977,139 +747,88 @@ func ParseLocalOntology(group *onet.Roster, entryPointIdx int) error {
 			// create entry for shrine ontology (direct copy)
 			so := ShrineOntologyFromLocalConcept(lo)
 
-			// check if local ontology concept is a child of any of the sensitive concepts selected by the client
-			_, sensitive := HasSensitiveParents(lo.Fullname)
+			// if the flag AllSensitive is 'active'
+			sensitive := false
+			if AllSensitive == true {
+				sensitive = true
+			} else {
+				// check if local ontology concept is a child of any of the sensitive concepts selected by the client
+				_, sensitive = HasSensitiveParents(lo.Fullname)
+			}
+
 			// if it is sensitive or has a sensitive parent
 			if sensitive {
 				ListSensitiveConcepts[lo.Fullname] = struct{}{}
 
 				//TODO for now we remove all modifiers
-				if strings.ToLower(so.FactTableColumn) == "modifier_cd" {
-					//if _, ok := MapModifiers[so.Fullname]; !ok {
-					//AddNewAdapterMapping(so.Fullname, lo.Fullname, true)
-					//}
-				} else {
-					// concepts do not repeat on contrary to the modifiers
+				if strings.ToLower(so.FactTableColumn) == "concept_cd" {
 					so.NodeEncryptID = IDConcepts
-					TableShrineOntologyConceptEnc[so.Fullname] = so
+
+					if _, ok := TablesShrineOntology[rawName]; ok {
+						TablesShrineOntology[rawName].Sensitive[so.Fullname] = so
+					} else {
+						sensitive := make(map[string]*ShrineOntology)
+						clear := make(map[string]*ShrineOntology)
+						sensitive[so.Fullname] = so
+						TablesShrineOntology[rawName] = ShrineTableInfo{Clear: clear, Sensitive: sensitive}
+					}
 
 					// if the ID does not yet exist
 					if _, ok := MapConceptPathToTag[lo.Fullname]; !ok {
-						MapConceptPathToTag[lo.Fullname] = TagAndID{Tag: libunlynx.GroupingKey(-1), TagID: IDConcepts}
-						mapConceptIDtoTagKeys = append(mapConceptIDtoTagKeys, lo.Fullname)
+						MapConceptPathToTag[lo.Fullname] = TagAndID{Tag: libunlynx.GroupingKey(-1), TagID: -1}
+						listConceptCD = append(listConceptCD, lo.Fullname)
 						allSensitiveConceptIDs = append(allSensitiveConceptIDs, IDConcepts)
 					}
+
 					IDConcepts++
 				}
 			} else {
 
 				//TODO for now we remove all modifiers
-				if strings.ToLower(so.FactTableColumn) == "modifier_cd" {
-					//if _, ok := MapModifiers[so.Fullname]; !ok {
-					//AddNewAdapterMapping(so.Fullname, lo.Fullname, true)
-					//}
-				} else {
-					// add a new entry for the AdapterMappings (1-1 mapping between shrine and local concept)
-					AddNewAdapterMapping(so.Fullname, lo.Fullname, false)
-					// add a new entry i2b2.csv (same as before)
+				if strings.ToLower(so.FactTableColumn) == "concept_cd" {
+					if lo.HLevel != "0" {
+						// add a new entry for the AdapterMappings (1-1 mapping between shrine and local concept)
+						addNewAdapterMapping(lo.Fullname, false)
+					}
+					// add a new entry to the local ontology table
 					TableLocalOntologyClear[lo.Fullname] = lo
-					// add a new entry shrine.csv
-					TableShrineOntologyClear[so.Fullname] = so
+					// add a new entry to the shrine ontology table
+					if _, ok := TablesShrineOntology[rawName]; ok {
+						TablesShrineOntology[rawName].Clear[so.Fullname] = so
+					} else {
+						sensitive := make(map[string]*ShrineOntology)
+						clear := make(map[string]*ShrineOntology)
+						clear[so.Fullname] = so
+						TablesShrineOntology[rawName] = ShrineTableInfo{Clear: clear, Sensitive: sensitive}
+					}
+
+					TablesShrineOntology[rawName].Clear[so.Fullname] = so
 				}
 			}
 		}
 	}
 
-	taggedConceptValues, err := EncryptAndTag(allSensitiveConceptIDs, group, entryPointIdx)
-	if err != nil {
-		return err
-	}
+	// if there are sensitive concepts
+	if len(allSensitiveConceptIDs) > 0 {
+		taggedConceptValues, err := EncryptAndTag(allSensitiveConceptIDs, group, entryPointIdx)
+		if err != nil {
+			return err
+		}
 
-	// 'populate' map (Concept codes)
-	for i, id := range mapConceptIDtoTagKeys {
-		var tmp = MapConceptPathToTag[id]
-		tmp.Tag = taggedConceptValues[i]
-		MapConceptPathToTag[id] = tmp
-	}
+		// re-randomize TAG_IDs
+		rand.Seed(time.Now().UnixNano())
+		perm := rand.Perm(len(MapConceptPathToTag))
 
-		/*// if we find a mapping to a Shrine Ontology term
-		if _, ok := ListSensitiveConceptsLocal[lo.Fullname]; ok {
-			// add each shrine id (we need to replicate each concept if it matches to multiple shrine concepts)
-			for _, sk := range ListSensitiveConceptsLocal[lo.Fullname] {
-
-				if strings.ToLower(lo.FactTableColumn) == "modifier_cd" {
-					shrineID := TableShrineOntologyModifierEnc[sk][0].NodeEncryptID
-					// if the ID does not yet exist
-					if _, ok := MapModifierPathToTag[lo.Fullname]; !ok {
-						MapModifierPathToTag[lo.Fullname] = TagAndID{Tag: libunlynx.GroupingKey(-1), TagID: IDModifiers}
-						IDModifiers++
-
-						mapModifierIDtoTagKeys = append(mapModifierIDtoTagKeys, lo.Fullname)
-						allSensitiveModifierIDs = append(allSensitiveModifierIDs, shrineID)
-					}
-				} else if strings.ToLower(lo.FactTableColumn) == "concept_cd" { // if it is a concept code
-					shrineID := TableShrineOntologyConceptEnc[sk].NodeEncryptID
-					// if the ID does not yet exist
-					if _, ok := MapConceptPathToTag[lo.Fullname]; !ok {
-						MapConceptPathToTag[lo.Fullname] = TagAndID{Tag: libunlynx.GroupingKey(-1), TagID: IDConcepts}
-						IDConcepts++
-
-						log.LLvl1(lo.Fullname)
-						log.LLvl1(TableShrineOntologyConceptEnc[sk].Fullname, shrineID)
-
-						mapConceptIDtoTagKeys = append(mapConceptIDtoTagKeys, lo.Fullname)
-						allSensitiveConceptIDs = append(allSensitiveConceptIDs, shrineID)
-					}
-				} else {
-					log.Fatal("Incorrect code in the FactTable column:", strings.ToLower(lo.FactTableColumn))
-				}
-			}
-		} else if _, ok := HasSensitiveParents(lo.Fullname); !ok {
-			// Concept does not have a translation in the Shrine Ontology (consider as not sensitive)
-			TableLocalOntologyClear[lo.Fullname] = lo
+		// 'populate' map (Concept codes)
+		for i, concept := range listConceptCD {
+			var tmp = MapConceptPathToTag[concept]
+			tmp.TagID = int64(perm[i])
+			tmp.Tag = taggedConceptValues[i]
+			MapConceptPathToTag[concept] = tmp
 		}
 	}
-
-	taggedModifierValues, err := EncryptAndTag(allSensitiveModifierIDs, group, entryPointIdx)
-	if err != nil {
-		return err
-	}
-
-	taggedConceptValues, err := EncryptAndTag(allSensitiveConceptIDs, group, entryPointIdx)
-	if err != nil {
-		return err
-	}
-
-	// 'populate' map (Modifier codes)
-	for i, id := range mapModifierIDtoTagKeys {
-		var tmp = MapModifierPathToTag[id]
-		tmp.Tag = taggedModifierValues[i]
-		MapModifierPathToTag[id] = tmp
-	}
-
-	// 'populate' map (Concept codes)
-	for i, id := range mapConceptIDtoTagKeys {
-		var tmp = MapConceptPathToTag[id]
-		tmp.Tag = taggedConceptValues[i]
-		MapConceptPathToTag[id] = tmp
-	}*/
 
 	return nil
-}
-
-// HasSensitiveParents is a function that checks if a node whether in the LocalOntology or ConceptDimension has any siblings which are sensitive.
-func HasSensitiveParents(conceptPath string) (string, bool) {
-	temp := conceptPath
-
-	isSensitive := false
-	for temp != "" {
-		if _, ok := ListSensitiveConcepts[temp]; ok {
-			isSensitive = true
-			break
-		}
-		temp = StripByLevel(temp, 1, false)
-	}
-	return temp, isSensitive
 }
 
 // EncryptAndTag encrypts the elements and tags them to allow for the future comparison
@@ -1124,8 +843,6 @@ func EncryptAndTag(list []int64, group *onet.Roster, entryPointIdx int) ([]libun
 	}
 	log.Lvl2("Finished encrypting the sensitive data... (", time.Since(start), ")")
 
-	log.LLvl1("LI", list)
-	log.LLvl1("LIST", listEncryptedElements)
 	// TAGGING
 	start = time.Now()
 	client := servicesmedco.NewMedCoClient(group.List[entryPointIdx], strconv.Itoa(entryPointIdx))
@@ -1153,54 +870,34 @@ func EncryptAndTag(list []int64, group *onet.Roster, entryPointIdx int) ([]libun
 	return result, nil
 }
 
-// StripByLevel strips the concept path based on /. The number represents the stripping level, in other words,
-// if number = 1 we strip the first element enclosed in /****/ and then on. Order means which side we start stripping: true (left-to-right),
-// false (right-to-left)
-func StripByLevel(conceptPath string, number int, order bool) string {
-	// remove the first and last \
-	conceptPath = conceptPath[1 : len(conceptPath)-1]
-	pathContainer := strings.Split(conceptPath, "\\")
-
-	if order {
-		for i := 0; i < number; i++ {
-			if len(pathContainer) == 0 {
-				break
-			}
-
-			// reduce a 'layer' at the time -  e.g. \\Admit Diagnosis\\Leg -> \\Leg
-			pathContainer = pathContainer[1:]
-		}
-	} else {
-		for i := 0; i < number; i++ {
-			if len(pathContainer) == 0 {
-				break
-			}
-
-			// reduce a 'layer' at the time -  e.g. \\Admit Diagnosis\\Leg -> \\Admit Diagnosis
-			pathContainer = pathContainer[:len(pathContainer)-1]
-		}
-	}
-	conceptPathFinal := strings.Join(pathContainer, "\\")
-
-	if conceptPathFinal == "" {
-		return conceptPathFinal
-	}
-
-	// if not empty we remove the first and last \ in the beginning when comparing we need add them again
-	return "\\" + conceptPathFinal + "\\"
-}
-
-// ConvertLocalOntology converts the old i2b2.csv file
-func ConvertLocalOntology() error {
+// ConvertClearLocalTable converts the old xxxx.csv local ontology file
+func ConvertClearLocalTable(rawName string) error {
 	// two new files are generated: one to store the non-sensitive data and another to store the sensitive data
-	csvClearOutputFile, err := os.Create(OutputFilePaths["LOCAL_ONTOLOGY_CLEAR"])
+	csvClearOutputFile, err := os.Create(OutputFilePaths["LOCAL_"+rawName].Path)
 	if err != nil {
-		log.Fatal("Error opening [i2b2].csv")
+		log.Fatal("Error opening [" + strings.ToLower(rawName) + "].csv")
 		return err
 	}
 	defer csvClearOutputFile.Close()
 
-	csvSensitiveOutputFile, err := os.Create(OutputFilePaths["LOCAL_ONTOLOGY_SENSITIVE"])
+	headerString := ""
+	for _, header := range HeaderLocalOntology {
+		headerString += "\"" + header + "\","
+	}
+	// remove the last ,
+	csvClearOutputFile.WriteString(headerString[:len(headerString)-1] + "\n")
+
+	// non-sensitive
+	for _, lo := range TableLocalOntologyClear {
+		csvClearOutputFile.WriteString(lo.ToCSVText() + "\n")
+	}
+
+	return nil
+}
+
+// ConvertSensitiveLocalTable generates the sensitive_tagged file
+func ConvertSensitiveLocalTable() error {
+	csvSensitiveOutputFile, err := os.Create(OutputFilePaths["SENSITIVE_TAGGED"].Path)
 	if err != nil {
 		log.Fatal("Error opening [sensitive_tagged].csv")
 		return err
@@ -1212,18 +909,7 @@ func ConvertLocalOntology() error {
 		headerString += "\"" + header + "\","
 	}
 	// remove the last ,
-	csvClearOutputFile.WriteString(headerString[:len(headerString)-1] + "\n")
 	csvSensitiveOutputFile.WriteString(headerString[:len(headerString)-1] + "\n")
-
-	// non-sensitive
-	for _, lo := range TableLocalOntologyClear {
-		csvClearOutputFile.WriteString(lo.ToCSVText() + "\n")
-	}
-
-	// sensitive modifiers
-	/*for _, el := range MapModifierPathToTag {
-		csvSensitiveOutputFile.WriteString(LocalOntologySensitiveModifierToCSVText(&el.Tag, el.TagID) + "\n")
-	}*/
 
 	// sensitive concepts
 	for _, el := range MapConceptPathToTag {
@@ -1231,7 +917,6 @@ func ConvertLocalOntology() error {
 	}
 
 	return nil
-
 }
 
 // PATIENT_DIMENSION.CSV converter
@@ -1295,7 +980,7 @@ func ParsePatientDimension(pk kyber.Point) error {
 // ConvertPatientDimension converts the old patient_dimension.csv file
 // If emtpy is set to true all other data except the patient_num and encrypted_dummy_flag are set to empty
 func ConvertPatientDimension(pk kyber.Point, empty bool) error {
-	csvOutputFile, err := os.Create(OutputFilePaths["PATIENT_DIMENSION"])
+	csvOutputFile, err := os.Create(OutputFilePaths["PATIENT_DIMENSION"].Path)
 	if err != nil {
 		log.Fatal("Error opening [patient_dimension].csv")
 		return err
@@ -1311,7 +996,6 @@ func ConvertPatientDimension(pk kyber.Point, empty bool) error {
 	totalNbrPatients := len(TablePatientDimension) + len(TableDummyToPatient)
 	rand.Seed(time.Now().UnixNano())
 	perm := rand.Perm(totalNbrPatients)
-
 
 	// remove the last ,
 	csvOutputFile.WriteString(headerString[:len(headerString)-1] + "\n")
@@ -1338,7 +1022,7 @@ func ConvertPatientDimension(pk kyber.Point, empty bool) error {
 	}
 
 	// write MapNewPatientNum to csv
-	csvOutputNewPatientNumFile, err := os.Create(OutputFilePaths["NEW_PATIENT_NUM"])
+	csvOutputNewPatientNumFile, err := os.Create(OutputFilePaths["NEW_PATIENT_NUM"].Path)
 	if err != nil {
 		log.Fatal("Error opening [new_patient_num].csv")
 		return err
@@ -1429,7 +1113,7 @@ func ParseVisitDimension() error {
 // If emtpy is set to true all other data except the patient_num and encounter_num are set to empty
 func ConvertVisitDimension(empty bool) error {
 
-	csvOutputFile, err := os.Create(OutputFilePaths["VISIT_DIMENSION"])
+	csvOutputFile, err := os.Create(OutputFilePaths["VISIT_DIMENSION"].Path)
 	if err != nil {
 		log.Fatal("Error opening [visit_dimension].csv")
 		return err
@@ -1473,7 +1157,7 @@ func ConvertVisitDimension(empty bool) error {
 	}
 
 	// write MapNewEncounterNum to csv
-	csvOutputNewEncounterNumFile, err := os.Create(OutputFilePaths["NEW_ENCOUNTER_NUM"])
+	csvOutputNewEncounterNumFile, err := os.Create(OutputFilePaths["NEW_ENCOUNTER_NUM"].Path)
 	if err != nil {
 		log.Fatal("Error opening [new_encounter_num].csv")
 		return err
@@ -1536,7 +1220,7 @@ func ParseConceptDimension() error {
 
 // ConvertConceptDimension converts the old concept_dimension.csv file
 func ConvertConceptDimension() error {
-	csvOutputFile, err := os.Create(OutputFilePaths["CONCEPT_DIMENSION"])
+	csvOutputFile, err := os.Create(OutputFilePaths["CONCEPT_DIMENSION"].Path)
 	if err != nil {
 		log.Fatal("Error opening [concept_dimension].csv")
 		return err
@@ -1565,88 +1249,6 @@ func ConvertConceptDimension() error {
 			// if concept is not defined as sensitive but one of its parents is then we consider the tagID of the parent as its identifier
 		} else {
 			MapConceptCodeToTag[cd.ConceptCD] = MapConceptPathToTag[sensitiveParent].TagID
-		}
-	}
-
-	return nil
-}
-
-// MODIFIER_DIMENSION.CSV converter
-
-// ParseModifierDimension reads and parses the modifier_dimension.csv.
-func ParseModifierDimension() error {
-	lines, err := readCSV("MODIFIER_DIMENSION")
-	if err != nil {
-		log.Fatal("Error in readCSV()")
-		return err
-	}
-
-	TableModifierDimension = make(map[*ModifierDimensionPK]ModifierDimension)
-	HeaderModifierDimension = make([]string, 0)
-	MapModifierCodeToTag = make(map[string]int64)
-
-	/* structure of modifier_dimension.csv (in order):
-
-	// PK
-	"modifier_path",
-
-	// MANDATORY FIELDS
-	"modifier_cd",
-	"name_char",
-	"modifier_blob",
-
-	// ADMIN FIELDS
-	"update_date",
-	"download_date",
-	"import_date",
-	"sourcesystem_cd",
-	"upload_id"
-	*/
-
-	for _, header := range lines[0] {
-		HeaderModifierDimension = append(HeaderModifierDimension, header)
-	}
-
-	//skip header
-	for _, line := range lines[1:] {
-		mdk, md := ModifierDimensionFromString(line)
-		TableModifierDimension[mdk] = md
-	}
-
-	return nil
-}
-
-// ConvertModifierDimension converts the old modifier_dimension.csv file
-func ConvertModifierDimension() error {
-	csvOutputFile, err := os.Create(OutputFilePaths["MODIFIER_DIMENSION"])
-	if err != nil {
-		log.Fatal("Error opening [modifier_dimension].csv")
-		return err
-	}
-	defer csvOutputFile.Close()
-
-	headerString := ""
-	for _, header := range HeaderModifierDimension {
-		headerString += "\"" + header + "\","
-	}
-	// remove the last ,
-	csvOutputFile.WriteString(headerString[:len(headerString)-1] + "\n")
-
-	for _, md := range TableModifierDimension {
-		// if the modifier is non-sensitive -> keep it as it is
-		if _, ok := TableLocalOntologyClear[md.PK.ModifierPath]; ok {
-			csvOutputFile.WriteString(md.ToCSVText() + "\n")
-			// if the modifier is sensitive -> fetch its encrypted tag and tag_id
-		} else if _, ok := MapModifierPathToTag[md.PK.ModifierPath]; ok {
-			temp := MapModifierPathToTag[md.PK.ModifierPath].Tag
-			csvOutputFile.WriteString(ModifierDimensionSensitiveToCSVText(&temp, MapModifierPathToTag[md.PK.ModifierPath].TagID) + "\n")
-			MapModifierCodeToTag[md.ModifierCD] = MapModifierPathToTag[md.PK.ModifierPath].TagID
-			// if the modifier does not exist in the LocalOntology and none of his siblings is sensitive
-		} else if sensitiveParent, ok := HasSensitiveParents(md.PK.ModifierPath); !ok {
-			csvOutputFile.WriteString(md.ToCSVText() + "\n")
-			// if modifier is not defined as sensitive but one of its parents is then we consider the tagID of the parent as its identifier
-		} else {
-			MapModifierCodeToTag[md.ModifierCD] = MapModifierPathToTag[sensitiveParent].TagID
 		}
 	}
 
@@ -1739,7 +1341,7 @@ func ParseObservationFact() error {
 func ConvertObservationFact() error {
 	rand.Seed(time.Now().UnixNano())
 
-	csvOutputFile, err := os.Create(OutputFilePaths["OBSERVATION_FACT"])
+	csvOutputFile, err := os.Create(OutputFilePaths["OBSERVATION_FACT"].Path)
 	if err != nil {
 		log.Fatal("Error opening [observation_fact].csv")
 		return err

@@ -17,14 +17,8 @@ var Testing bool // testing environment
 // ListSensitiveConcepts list all sensitive concepts (paths) - SHRINE and LOCAL (the bool is for nothing)
 var ListSensitiveConcepts map[string]struct{}
 
-// ListSensitiveConceptsShrine list all the sensitive concepts (paths) - SHRINE (the bool is for nothing)
-var ListSensitiveConceptsShrine map[string]bool
-
-// ListSensitiveConceptsLocal list all the sensitive concepts (paths) and the respective shrine equivalent - LOCAL
-var ListSensitiveConceptsLocal map[string][]string
-
-// IDModifiers used to assign IDs to the modifiers concepts
-var IDModifiers int64
+// AllSensitive is a flag that defines whether all concepts are to be considered sensitive or not (-allSens flag)
+var AllSensitive = false
 
 // IDConcepts used to assign IDs to the different concepts
 var IDConcepts int64
@@ -37,30 +31,31 @@ var TableAccessMap map[string]*TableAccess
 // HeaderTableAccess contains all the headers for the table_access table
 var HeaderTableAccess []string
 
+// TableAccess is the table that contains all entries for the table_access table
 type TableAccess struct {
-	TableCD				string
-	TableName 			string
-	ProtectedAccess 	string
-	Hlevel				string
-	Fullname			string
-	Name				string
-	SynonymCD			string
-	Visualattributes 	string
-	Totalnum			string
-	Basecode			string
-	Metadataxml			string
-	Facttablecolumn		string
-	Dimtablename		string
-	Columnname			string
-	Columndatatype		string
-	Operator			string
-	Dimcode				string
-	Comment				string
-	Tooltip				string
-	EntryDate			string
-	ChangeDate			string
-	StatusCD			string
-	ValuetypeCD			string
+	TableCD          string
+	TableName        string
+	ProtectedAccess  string
+	Hlevel           string
+	Fullname         string
+	Name             string
+	SynonymCD        string
+	Visualattributes string
+	Totalnum         string
+	Basecode         string
+	Metadataxml      string
+	Facttablecolumn  string
+	Dimtablename     string
+	Columnname       string
+	Columndatatype   string
+	Operator         string
+	Dimcode          string
+	Comment          string
+	Tooltip          string
+	EntryDate        string
+	ChangeDate       string
+	StatusCD         string
+	ValuetypeCD      string
 }
 
 // ToCSVText writes the ShrineOntology object in a way that can be added to a .csv file - "","","", etc.
@@ -70,20 +65,19 @@ func (ta TableAccess) ToCSVText() string {
 		"\"" + ta.Columnname + "\"," + "\"" + ta.Columndatatype + "\"," + "\"" + ta.Operator + "\"," + "\"" + ta.Dimcode + "\"," + "\"" + ta.Comment + "\"," + "\"" + ta.Tooltip + "\"," + "\"" + ta.EntryDate +
 		"\"," + "\"" + ta.ChangeDate + "\"," + "\"" + ta.StatusCD + "\"," + "\"" + ta.ValuetypeCD + "\""
 
-
-	return strings.Replace(finalString, `"\N"`,"", -1)
+	return strings.Replace(finalString, `"\N"`, "", -1)
 }
 
 //-------------------------------------//
 
-// TableShrineOntologyClear is the shrine_ontology table (it maps the concept path to a concept) with only the NON_SENSITIVE concepts (it INCLUDES MODIFIER NON-SENSITIVE concepts)
-var TableShrineOntologyClear map[string]*ShrineOntology
+// ShrineTableInfo stores all the 'data' for a specific shrine ontology table
+type ShrineTableInfo struct {
+	Clear     map[string]*ShrineOntology
+	Sensitive map[string]*ShrineOntology
+}
 
-// TableShrineOntologyConceptEnc is the shrine_ontology table (it maps the concept path to a concept) with only the SENSITIVE concepts (NO MODIFIER SENSITIVE concepts)
-var TableShrineOntologyConceptEnc map[string]*ShrineOntology
-
-// TableShrineOntologyModifierEnc is the shrine_ontology table (it maps the concept path to a concept) with only the MODIFIER SENSITIVE concepts
-var TableShrineOntologyModifierEnc map[string][]*ShrineOntology
+// TablesShrineOntology distinguishes between the different shrine ontology tables
+var TablesShrineOntology map[string]ShrineTableInfo
 
 // HeaderShrineOntology contains all the headers for the shrine table
 var HeaderShrineOntology []string
@@ -154,7 +148,7 @@ func (so ShrineOntology) ToCSVText() string {
 		"\"" + so.BaseCode + "\"," + "\"" + so.MetadataXML + "\"," + "\"" + so.FactTableColumn + "\"," + "\"" + so.Tablename + "\"," + "\"" + so.ColumnName + "\"," + "\"" + so.ColumnDataType + "\"," + "\"" + so.Operator + "\"," +
 		"\"" + so.DimCode + "\"," + "\"" + so.Comment + "\"," + "\"" + so.Tooltip + "\"," + acString + "," + "\"" + so.ValueTypeCD + "\"," + "\"" + so.AppliedPath + "\"," + "\"" + so.ExclusionCD + "\""
 
-	return strings.Replace(finalString, `"\N"`,"", -1)
+	return strings.Replace(finalString, `"\N"`, "", -1)
 }
 
 //-------------------------------------//
@@ -176,12 +170,6 @@ type CodeID struct {
 
 // MapConceptPathToTag maps a sensitive concept path to its respective tag and tag_id
 var MapConceptPathToTag map[string]TagAndID
-
-// MapModifierPathToTag maps a sensitive modifier path to its respective tag and tag_id
-var MapModifierPathToTag map[string]TagAndID
-
-// MapModifiers a map <set> of sensitive modifier paths
-var MapModifiers map[string]struct{}
 
 // HeaderLocalOntology contains all the headers for the i2b2 table
 var HeaderLocalOntology []string
@@ -223,7 +211,7 @@ func (lo LocalOntology) ToCSVText() string {
 		"\"" + lo.DimCode + "\"," + "\"" + lo.Comment + "\"," + "\"" + lo.Tooltip + "\"," + "\"" + lo.AppliedPath + "\"," + acString + "," + "\"" + lo.ValueTypeCD + "\"," + "\"" + lo.ExclusionCD + "\"," +
 		"\"" + lo.Path + "\"," + "\"" + lo.Symbol + "\""
 
-	return strings.Replace(finalString, `"\N"`,"", -1)
+	return strings.Replace(finalString, `"\N"`, "", -1)
 }
 
 // LocalOntologySensitiveConceptToCSVText writes the tagging information of a concept of the local ontology in a way that can be added to a .csv file - "","","", etc.
@@ -231,15 +219,7 @@ func LocalOntologySensitiveConceptToCSVText(tag *libunlynx.GroupingKey, tagID in
 	finalString := `"3","\medco\tagged\` + string(*tag) + `\","","N","LA ","\N","TAG_ID:` + strconv.FormatInt(tagID, 10) + `","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\medco\tagged\concept\` + string(*tag) +
 		`\","\N","\N","NOW()","\N","\N","\N","TAG_ID","@","\N","\N","\N","\N"`
 
-	return strings.Replace(finalString, `"\N"`,"", -1)
-}
-
-// LocalOntologySensitiveModifierToCSVText writes the tagging information of a modifier of the local ontology in a way that can be added to a .csv file - "","","", etc.
-func LocalOntologySensitiveModifierToCSVText(tag *libunlynx.GroupingKey, tagID int64) string {
-	finalString := `"3","\medco\tagged\` + string(*tag) + `\","","N","LA ","\N","TAG_ID:` + strconv.FormatInt(tagID, 10) + `","\N","MODIFIER_CD","MODIFIER_DIMENSION","MODIFIER_PATH","T","LIKE","\medco\tagged\modifier\` + string(*tag) +
-		`\","\N","\N","NOW()","\N","\N","\N","TAG_ID","@","\N","\N","\N","\N"`
-
-	return strings.Replace(finalString, `"\N"`,"", -1)
+	return strings.Replace(finalString, `"\N"`, "", -1)
 }
 
 //-------------------------------------//
@@ -305,7 +285,7 @@ func (lo ObservationFact) ToCSVText() string {
 		"\"" + lo.PK.InstanceNum + "\"," + "\"" + lo.ValTypeCD + "\"," + "\"" + lo.TValChar + "\"," + "\"" + lo.NValNum + "\"," + "\"" + lo.ValueFlagCD + "\"," + "\"" + lo.QuantityNum + "\"," + "\"" + lo.UnitsCD + "\"," +
 		"\"" + lo.EndDate + "\"," + "\"" + lo.LocationCD + "\"," + "\"" + lo.ObservationBlob + "\"," + "\"" + lo.ConfidenceNum + "\"," + acString
 
-	return strings.Replace(finalString, `"\N"`,"", -1)
+	return strings.Replace(finalString, `"\N"`, "", -1)
 }
 
 //-------------------------------------//
@@ -361,7 +341,7 @@ func (pd PatientDimension) ToCSVText(empty bool) string {
 		acString := "\"" + pd.AdminColumns.UpdateDate + "\"," + "\"" + pd.AdminColumns.DownloadDate + "\"," + "\"" + pd.AdminColumns.ImportDate + "\"," + "\"" + pd.AdminColumns.SourceSystemCD + "\"," + "\"" + pd.AdminColumns.UploadID + "\""
 		finalString := pd.PK.ToCSVText() + ",\"" + pd.VitalStatusCD + "\"," + "\"" + pd.BirthDate + "\"," + "\"" + pd.DeathDate + "\"," + ofString[:len(ofString)-1] + "," + acString + "," + encodedEncryptedFlag
 
-		return strings.Replace(finalString, `"\N"`,"", -1)
+		return strings.Replace(finalString, `"\N"`, "", -1)
 	}
 
 	for i := 0; i < len(of); i++ {
@@ -372,7 +352,7 @@ func (pd PatientDimension) ToCSVText(empty bool) string {
 	acString := "," + "," + "," + ","
 	finalString := pd.PK.ToCSVText() + "," + "," + "," + "," + ofString[:len(ofString)-1] + "," + acString + "," + encodedEncryptedFlag
 
-	return strings.Replace(finalString, `"\N"`,"", -1)
+	return strings.Replace(finalString, `"\N"`, "", -1)
 }
 
 // OptionalFields table contains the optional fields
@@ -435,7 +415,7 @@ func (vd VisitDimension) ToCSVText(empty bool) string {
 		acString := "\"" + vd.AdminColumns.UpdateDate + "\"," + "\"" + vd.AdminColumns.DownloadDate + "\"," + "\"" + vd.AdminColumns.ImportDate + "\"," + "\"" + vd.AdminColumns.SourceSystemCD + "\"," + "\"" + vd.AdminColumns.UploadID + "\""
 		finalString := vd.PK.ToCSVText() + ",\"" + vd.ActiveStatusCD + "\"," + "\"" + vd.StartDate + "\"," + "\"" + vd.EndDate + "\"," + ofString[:len(ofString)-1] + "," + acString
 
-		return strings.Replace(finalString, `"\N"`,"", -1)
+		return strings.Replace(finalString, `"\N"`, "", -1)
 	}
 
 	for i := 0; i < len(of); i++ {
@@ -446,7 +426,7 @@ func (vd VisitDimension) ToCSVText(empty bool) string {
 	acString := "," + "," + "," + ","
 	finalString := vd.PK.ToCSVText() + "," + "," + "," + "," + ofString[:len(ofString)-1] + "," + acString
 
-	return strings.Replace(finalString, `"\N"`,"", -1)
+	return strings.Replace(finalString, `"\N"`, "", -1)
 }
 
 //-------------------------------------//
@@ -479,54 +459,14 @@ func (cd ConceptDimension) ToCSVText() string {
 	acString := "\"" + cd.AdminColumns.UpdateDate + "\"," + "\"" + cd.AdminColumns.DownloadDate + "\"," + "\"" + cd.AdminColumns.ImportDate + "\"," + "\"" + cd.AdminColumns.SourceSystemCD + "\"," + "\"" + cd.AdminColumns.UploadID + "\""
 	finalString := "\"" + cd.PK.ConceptPath + "\"," + "\"" + cd.ConceptCD + "\"," + "\"" + cd.NameChar + "\"," + "\"" + cd.ConceptBlob + "\"," + acString
 
-	return strings.Replace(finalString, `"\N"`,"", -1)
+	return strings.Replace(finalString, `"\N"`, "", -1)
 }
 
 // ConceptDimensionSensitiveToCSVText writes the tagging information of a concept of the concept_dimension table in a way that can be added to a .csv file - "","","", etc.
 func ConceptDimensionSensitiveToCSVText(tag *libunlynx.GroupingKey, tagID int64) string {
 	finalString := `"\medco\tagged\concept\` + string(*tag) + `\","TAG_ID:` + strconv.FormatInt(tagID, 10) + `","\N","\N","\N","\N","NOW()","\N","\N"`
 
-	return strings.Replace(finalString, `"\N"`,"", -1)
-}
-
-//-------------------------------------//
-
-// TableModifierDimension is modifier_dimension table
-var TableModifierDimension map[*ModifierDimensionPK]ModifierDimension
-
-// HeaderModifierDimension contains all the headers for the modifier_dimension table
-var HeaderModifierDimension []string
-
-// MapModifierCodeToTag maps the modifier code (in the concept dimension) to the tag ID value (for the sensitive terms)
-var MapModifierCodeToTag map[string]int64
-
-// ModifierDimension table contains one row for each modifier
-type ModifierDimension struct {
-	PK           *ModifierDimensionPK
-	ModifierCD   string
-	NameChar     string
-	ModifierBlob string
-	AdminColumns AdministrativeColumns
-}
-
-// ModifierDimensionPK is the primary key of the Modifier_Dimension table
-type ModifierDimensionPK struct {
-	ModifierPath string
-}
-
-// ToCSVText writes the ModifierDimension object in a way that can be added to a .csv file - "","","", etc.
-func (md ModifierDimension) ToCSVText() string {
-	acString := "\"" + md.AdminColumns.UpdateDate + "\"," + "\"" + md.AdminColumns.DownloadDate + "\"," + "\"" + md.AdminColumns.ImportDate + "\"," + "\"" + md.AdminColumns.SourceSystemCD + "\"," + "\"" + md.AdminColumns.UploadID + "\""
-	finalString := "\"" + md.PK.ModifierPath + "\"," + "\"" + md.ModifierCD + "\"," + "\"" + md.NameChar + "\"," + "\"" + md.ModifierBlob + "\"," + acString
-
-	return strings.Replace(finalString, `"\N"`,"", -1)
-}
-
-// ModifierDimensionSensitiveToCSVText writes the tagging information of a concept of the modifier_dimension table in a way that can be added to a .csv file - "","","", etc.
-func ModifierDimensionSensitiveToCSVText(tag *libunlynx.GroupingKey, tagID int64) string {
-	finalString := `"\medco\tagged\modifier\` + string(*tag) + `\","TAG_ID:` + strconv.FormatInt(tagID, 10) + `","\N","\N","\N","\N","NOW()","\N","\N"`
-
-	return strings.Replace(finalString, `"\N"`,"", -1)
+	return strings.Replace(finalString, `"\N"`, "", -1)
 }
 
 //-------------------------------------//
@@ -549,31 +489,32 @@ type Entry struct {
 
 // SUPPORT FUNCTIONS
 
+// TableAccessFromString generates a TableAccess struct from a parsed line of a .csv file
 func TableAccessFromString(line []string) *TableAccess {
 	ta := &TableAccess{
-		TableCD:			line[0],
-		TableName: 			line[1],
-		ProtectedAccess: 	line[2],
-		Hlevel:				line[3],
-		Fullname:			line[4],
-		Name:				line[5],
-		SynonymCD:			line[6],
-		Visualattributes: 	line[7],
-		Totalnum:			line[8],
-		Basecode:			line[9],
-		Metadataxml:		line[10],
-		Facttablecolumn:	line[11],
-		Dimtablename:		line[12],
-		Columnname:			line[13],
-		Columndatatype:		line[14],
-		Operator:			line[15],
-		Dimcode:			line[16],
-		Comment:			line[17],
-		Tooltip:			line[18],
-		EntryDate:			line[19],
-		ChangeDate:			line[20],
-		StatusCD:			line[21],
-		ValuetypeCD:		line[22],
+		TableCD:          line[0],
+		TableName:        line[1],
+		ProtectedAccess:  line[2],
+		Hlevel:           line[3],
+		Fullname:         line[4],
+		Name:             line[5],
+		SynonymCD:        line[6],
+		Visualattributes: line[7],
+		Totalnum:         line[8],
+		Basecode:         line[9],
+		Metadataxml:      line[10],
+		Facttablecolumn:  line[11],
+		Dimtablename:     line[12],
+		Columnname:       line[13],
+		Columndatatype:   line[14],
+		Operator:         line[15],
+		Dimcode:          line[16],
+		Comment:          line[17],
+		Tooltip:          line[18],
+		EntryDate:        line[19],
+		ChangeDate:       line[20],
+		StatusCD:         line[21],
+		ValuetypeCD:      line[22],
 	}
 
 	return ta
@@ -796,32 +737,6 @@ func ConceptDimensionFromString(line []string) (*ConceptDimensionPK, ConceptDime
 	cd.AdminColumns = ac
 
 	return cdk, cd
-}
-
-// ModifierDimensionFromString generates a ModifierDimension struct from a parsed line of a .csv file
-func ModifierDimensionFromString(line []string) (*ModifierDimensionPK, ModifierDimension) {
-	mdk := &ModifierDimensionPK{
-		ModifierPath: line[0],
-	}
-
-	md := ModifierDimension{
-		PK:           mdk,
-		ModifierCD:   line[1],
-		NameChar:     line[2],
-		ModifierBlob: line[3],
-	}
-
-	ac := AdministrativeColumns{
-		UpdateDate:     line[4],
-		DownloadDate:   line[5],
-		ImportDate:     line[6],
-		SourceSystemCD: line[7],
-		UploadID:       line[8],
-	}
-
-	md.AdminColumns = ac
-
-	return mdk, md
 }
 
 // ObservationFactFromString generates a ObservationFact struct from a parsed line of a .csv file

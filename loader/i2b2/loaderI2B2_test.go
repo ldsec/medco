@@ -62,10 +62,10 @@ func setupEncryptEnv() {
 
 func TestParseTableAccess(t *testing.T) {
 	assert.Nil(t, loaderi2b2.ParseTableAccess())
-	assert.Nil(t, loaderi2b2.GenerateNewTableAccess())
+	assert.Nil(t, loaderi2b2.ConvertTableAccess())
 }
 
-func TestDummyToPatient(t *testing.T) {
+func TestParseDummyToPatient(t *testing.T) {
 	log.SetDebugVisible(2)
 
 	assert.Nil(t, loaderi2b2.ParseDummyToPatient())
@@ -78,7 +78,7 @@ func TestConvertPatientDimension(t *testing.T) {
 	loaderi2b2.ParseDummyToPatient()
 
 	assert.Nil(t, loaderi2b2.ParsePatientDimension(publicKey))
-	assert.Nil(t, loaderi2b2.ConvertPatientDimension(publicKey, true))
+	assert.Nil(t, loaderi2b2.ConvertPatientDimension(publicKey, false))
 
 	local.CloseAll()
 }
@@ -90,17 +90,18 @@ func TestConvertVisitDimension(t *testing.T) {
 	loaderi2b2.ParseDummyToPatient()
 
 	loaderi2b2.ParsePatientDimension(publicKey)
-	loaderi2b2.ConvertPatientDimension(publicKey, true)
+	loaderi2b2.ConvertPatientDimension(publicKey, false)
 
 	assert.Nil(t, loaderi2b2.ParseVisitDimension())
-	assert.Nil(t, loaderi2b2.ConvertVisitDimension(true))
+	assert.Nil(t, loaderi2b2.ConvertVisitDimension(false))
 
 	local.CloseAll()
 }
 
 func TestUpdateChildrenEncryptIDs(t *testing.T) {
-	loaderi2b2.TableShrineOntologyConceptEnc = make(map[string]*loaderi2b2.ShrineOntology)
-	loaderi2b2.TableShrineOntologyModifierEnc = make(map[string][]*loaderi2b2.ShrineOntology)
+	loaderi2b2.TablesShrineOntology = make(map[string]loaderi2b2.ShrineTableInfo)
+	tableShrineOntologyConceptEnc := make(map[string]*loaderi2b2.ShrineOntology)
+	loaderi2b2.TablesShrineOntology["test"] = loaderi2b2.ShrineTableInfo{Sensitive: tableShrineOntologyConceptEnc}
 
 	so0 := loaderi2b2.ShrineOntology{Fullname: "\\a\\", NodeEncryptID: 0}
 	so1 := loaderi2b2.ShrineOntology{Fullname: "\\a\\b\\", NodeEncryptID: 1}
@@ -108,30 +109,19 @@ func TestUpdateChildrenEncryptIDs(t *testing.T) {
 	so3 := loaderi2b2.ShrineOntology{Fullname: "\\a\\c\\d", NodeEncryptID: 3}
 	so4 := loaderi2b2.ShrineOntology{Fullname: "\\a\\c\\f", NodeEncryptID: 4}
 
-	loaderi2b2.TableShrineOntologyConceptEnc["\\a\\"] = &so0
-	loaderi2b2.TableShrineOntologyConceptEnc["\\a\\b\\"] = &so1
-	loaderi2b2.TableShrineOntologyConceptEnc["\\a\\c\\"] = &so2
-	loaderi2b2.TableShrineOntologyConceptEnc["\\a\\c\\d"] = &so3
-	loaderi2b2.TableShrineOntologyConceptEnc["\\a\\c\\f"] = &so4
+	tableShrineOntologyConceptEnc["\\a\\"] = &so0
+	tableShrineOntologyConceptEnc["\\a\\b\\"] = &so1
+	tableShrineOntologyConceptEnc["\\a\\c\\"] = &so2
+	tableShrineOntologyConceptEnc["\\a\\c\\d"] = &so3
+	tableShrineOntologyConceptEnc["\\a\\c\\f"] = &so4
 
-	soM0 := loaderi2b2.ShrineOntology{Fullname: "\\a\\", NodeEncryptID: 0}
-	soM1 := loaderi2b2.ShrineOntology{Fullname: "\\a\\", NodeEncryptID: 0}
-	soM2 := loaderi2b2.ShrineOntology{Fullname: "\\a\\b\\", NodeEncryptID: 1}
-	soM3 := loaderi2b2.ShrineOntology{Fullname: "\\a\\b\\", NodeEncryptID: 1}
+	loaderi2b2.UpdateChildrenEncryptIDs("test")
 
-	loaderi2b2.TableShrineOntologyModifierEnc["\\a\\"] = []*loaderi2b2.ShrineOntology{&soM0, &soM1}
-	loaderi2b2.TableShrineOntologyModifierEnc["\\a\\b\\"] = []*loaderi2b2.ShrineOntology{&soM2, &soM3}
-
-	loaderi2b2.UpdateChildrenEncryptIDs()
-
-	assert.Equal(t, 4, len(loaderi2b2.TableShrineOntologyConceptEnc["\\a\\"].ChildrenEncryptIDs))
-	assert.Equal(t, 0, len(loaderi2b2.TableShrineOntologyConceptEnc["\\a\\b\\"].ChildrenEncryptIDs))
-	assert.Equal(t, 2, len(loaderi2b2.TableShrineOntologyConceptEnc["\\a\\c\\"].ChildrenEncryptIDs))
-	assert.Equal(t, 0, len(loaderi2b2.TableShrineOntologyConceptEnc["\\a\\c\\d"].ChildrenEncryptIDs))
-	assert.Equal(t, 0, len(loaderi2b2.TableShrineOntologyConceptEnc["\\a\\c\\f"].ChildrenEncryptIDs))
-
-	assert.Equal(t, []int64{1}, loaderi2b2.TableShrineOntologyModifierEnc["\\a\\"][0].ChildrenEncryptIDs)
-	assert.Equal(t, []int64{1}, loaderi2b2.TableShrineOntologyModifierEnc["\\a\\"][1].ChildrenEncryptIDs)
+	assert.Equal(t, 4, len(loaderi2b2.TablesShrineOntology["test"].Sensitive["\\a\\"].ChildrenEncryptIDs))
+	assert.Equal(t, 0, len(loaderi2b2.TablesShrineOntology["test"].Sensitive["\\a\\b\\"].ChildrenEncryptIDs))
+	assert.Equal(t, 2, len(loaderi2b2.TablesShrineOntology["test"].Sensitive["\\a\\c\\"].ChildrenEncryptIDs))
+	assert.Equal(t, 0, len(loaderi2b2.TablesShrineOntology["test"].Sensitive["\\a\\c\\d"].ChildrenEncryptIDs))
+	assert.Equal(t, 0, len(loaderi2b2.TablesShrineOntology["test"].Sensitive["\\a\\c\\f"].ChildrenEncryptIDs))
 }
 
 func TestStripByLevel(t *testing.T) {
@@ -174,14 +164,12 @@ func TestConvertOntology(t *testing.T) {
 	loaderi2b2.ListSensitiveConcepts[`\i2b2\Diagnoses\Neoplasms (140-239)\Benign neoplasms (210-229)\(216) Benign neoplasm of skin\`] = struct{}{}
 
 	assert.Nil(t, loaderi2b2.ParseTableAccess())
-	assert.Nil(t, loaderi2b2.GenerateNewTableAccess())
+	assert.Nil(t, loaderi2b2.ConvertTableAccess())
 
-	assert.Nil(t, loaderi2b2.ParseLocalOntology(el, 0))
-	assert.Nil(t, loaderi2b2.ConvertLocalOntology())
+	assert.Nil(t, loaderi2b2.ConvertLocalOntology(el, 0))
 
-	assert.Nil(t, loaderi2b2.GenerateNewAdapterMappings())
+	assert.Nil(t, loaderi2b2.GenerateAdapterMappings())
 
-	assert.Nil(t, loaderi2b2.ParseShrineOntologyHeader())
 	assert.Nil(t, loaderi2b2.GenerateNewShrineOntology())
 
 	local.CloseAll()
@@ -196,14 +184,12 @@ func TestConvertConceptDimension(t *testing.T) {
 	loaderi2b2.ListSensitiveConcepts[`\i2b2\Diagnoses\Neoplasms (140-239)\Benign neoplasms (210-229)\(216) Benign neoplasm of skin\`] = struct{}{}
 
 	assert.Nil(t, loaderi2b2.ParseTableAccess())
-	assert.Nil(t, loaderi2b2.GenerateNewTableAccess())
+	assert.Nil(t, loaderi2b2.ConvertTableAccess())
 
-	assert.Nil(t, loaderi2b2.ParseLocalOntology(el, 0))
-	assert.Nil(t, loaderi2b2.ConvertLocalOntology())
+	assert.Nil(t, loaderi2b2.ConvertLocalOntology(el, 0))
 
-	assert.Nil(t, loaderi2b2.GenerateNewAdapterMappings())
+	assert.Nil(t, loaderi2b2.GenerateAdapterMappings())
 
-	assert.Nil(t, loaderi2b2.ParseShrineOntologyHeader())
 	assert.Nil(t, loaderi2b2.GenerateNewShrineOntology())
 
 	assert.Nil(t, loaderi2b2.ParseConceptDimension())
@@ -222,20 +208,18 @@ func TestConvertObservationFact(t *testing.T) {
 	loaderi2b2.ListSensitiveConcepts[`\i2b2\Diagnoses\Neoplasms (140-239)\Benign neoplasms (210-229)\(216) Benign neoplasm of skin\`] = struct{}{}
 
 	assert.Nil(t, loaderi2b2.ParseTableAccess())
-	assert.Nil(t, loaderi2b2.GenerateNewTableAccess())
+	assert.Nil(t, loaderi2b2.ConvertTableAccess())
 
 	log.LLvl1("--- Finished parsing TABLE_ACCESS ---")
 
-	assert.Nil(t, loaderi2b2.ParseLocalOntology(el, 0))
-	assert.Nil(t, loaderi2b2.ConvertLocalOntology())
+	assert.Nil(t, loaderi2b2.ConvertLocalOntology(el, 0))
 
 	log.LLvl1("--- Finished converting LOCAL_ONTOLOGY ---")
 
-	assert.Nil(t, loaderi2b2.GenerateNewAdapterMappings())
+	assert.Nil(t, loaderi2b2.GenerateAdapterMappings())
 
 	log.LLvl1("--- Finished generating ADAPTER_MAPPINGS ---")
 
-	assert.Nil(t, loaderi2b2.ParseShrineOntologyHeader())
 	assert.Nil(t, loaderi2b2.GenerateNewShrineOntology())
 
 	log.LLvl1("--- Finished generating SHRINE_ONTOLOGY ---")
