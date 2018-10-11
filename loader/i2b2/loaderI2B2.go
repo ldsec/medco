@@ -230,13 +230,13 @@ func ConvertI2B2(el *onet.Roster, entryPointIdx int, files Files, mapSensitive m
 
 	log.Lvl2("--- Finished converting OBSERVATION_FACT ---")
 
-	/*err = GenerateLoadingDataScript(databaseS)
+	err = GenerateLoadingDataScript(databaseS)
 	if err != nil {
 		log.Fatal("Error while generating the loading data .sh file", err)
 		return err
 	}
 
-	err = LoadDataFiles()
+	/*err = LoadDataFiles()
 	if err != nil {
 		log.Fatal("Error while loading ontology .sql file", err)
 		return err
@@ -246,7 +246,7 @@ func ConvertI2B2(el *onet.Roster, entryPointIdx int, files Files, mapSensitive m
 }
 
 // GenerateLoadingDataScript creates a load dataset .sql script (deletes the data in the corresponding tables and reloads the new 'protected' data)
-/*func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
+func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
 	fp, err := os.Create(FileBashPath)
 	if err != nil {
 		return err
