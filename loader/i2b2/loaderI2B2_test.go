@@ -170,7 +170,7 @@ func TestConvertOntology(t *testing.T) {
 
 	assert.Nil(t, loaderi2b2.GenerateAdapterMappings())
 
-	assert.Nil(t, loaderi2b2.GenerateNewShrineOntology())
+	assert.Nil(t, loaderi2b2.GenerateShrineOntology())
 
 	local.CloseAll()
 }
@@ -190,7 +190,7 @@ func TestConvertConceptDimension(t *testing.T) {
 
 	assert.Nil(t, loaderi2b2.GenerateAdapterMappings())
 
-	assert.Nil(t, loaderi2b2.GenerateNewShrineOntology())
+	assert.Nil(t, loaderi2b2.GenerateShrineOntology())
 
 	assert.Nil(t, loaderi2b2.ParseConceptDimension())
 	assert.Nil(t, loaderi2b2.ConvertConceptDimension())
@@ -220,7 +220,7 @@ func TestConvertObservationFact(t *testing.T) {
 
 	log.LLvl1("--- Finished generating ADAPTER_MAPPINGS ---")
 
-	assert.Nil(t, loaderi2b2.GenerateNewShrineOntology())
+	assert.Nil(t, loaderi2b2.GenerateShrineOntology())
 
 	log.LLvl1("--- Finished generating SHRINE_ONTOLOGY ---")
 

@@ -115,8 +115,8 @@ func generateOutputFiles(folderPath string) {
 			rawKey := strings.Split(key, "ONTOLOGY_")[1]
 			tokens := strings.Split(path, "/")
 
-			OutputFilePaths["LOCAL_"+rawKey] = FileInfo{TableName: "i2b2metadata." + strings.ToLower(rawKey), Path: folderPath + tokens[len(tokens)-1]}
-			OutputFilePaths["SHRINE_"+rawKey] = FileInfo{TableName: "shrine_ont." + strings.ToLower(rawKey), Path: folderPath + tokens[len(tokens)-1]}
+			OutputFilePaths["LOCAL_"+rawKey] = FileInfo{TableName: "i2b2metadata." + strings.ToLower(rawKey), Path: folderPath + "local_" + tokens[len(tokens)-1]}
+			OutputFilePaths["SHRINE_"+rawKey] = FileInfo{TableName: "shrine_ont." + strings.ToLower(rawKey), Path: folderPath + "shrine_" + tokens[len(tokens)-1]}
 		}
 	}
 }
@@ -176,7 +176,7 @@ func ConvertI2B2(el *onet.Roster, entryPointIdx int, files Files, mapSensitive m
 
 	log.Lvl2("--- Finished generating ADAPTER_MAPPINGS ---")
 
-	err = GenerateNewShrineOntology()
+	err = GenerateShrineOntology()
 	if err != nil {
 		return err
 	}
@@ -549,8 +549,8 @@ func ParseDummyToPatient() error {
 
 // SHRINE ontology converter
 
-// GenerateNewShrineOntology generates all files for the shrine ontology (these may include multiples tables)
-func GenerateNewShrineOntology() error {
+// GenerateShrineOntology generates all files for the shrine ontology (these may include multiples tables)
+func GenerateShrineOntology() error {
 	// initialize container structs and counters
 	HeaderShrineOntology = []string{"c_hlevel",
 		"c_fullname",
