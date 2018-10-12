@@ -268,22 +268,27 @@ func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
 	loading += "TRUNCATE TABLE i2b2metadata.table_access;\n"
 	loading += "TRUNCATE TABLE i2b2metadata.sensitive_tagged;\n"
 
+	loading += "\n"
+
 	for file, fI := range OutputFilePaths {
 		if strings.HasPrefix(file, "LOCAL_"){
 			loading += "TRUNCATE TABLE "+ fI.TableName +";\n"
 			loading += `\copy ` + fI.TableName + ` FROM '` + fI.Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;`+"\n"
 		} else if strings.HasPrefix(file, "SHRINE_"){
 			rawName := strings.Split(file, "SHRINE_")[1]
-			loading += "CREATE TABLE " + fI.TableName + " AS SELECT * FROM " + OutputFilePaths["LOCAL"+rawName].TableName + " WHERE 1=2;"+"\n"
+			loading += "CREATE TABLE " + fI.TableName + " AS SELECT * FROM " + OutputFilePaths["LOCAL_"+rawName].TableName + " WHERE 1=2;"+"\n"
 			loading += `\copy ` + fI.TableName + ` FROM '` + fI.Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;`+"\n"
 		}
 	}
 
+	loading += "\n"
 	loading += `\copy ` + OutputFilePaths["SENSITIVE_TAGGED"].TableName + ` FROM '` + OutputFilePaths["SENSITIVE_TAGGED"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;`+"\n"
 
+	loading += "\n"
 	loading += `\copy ` + OutputFilePaths["TABLE_ACCESS_L"].TableName + ` FROM '` + OutputFilePaths["TABLE_ACCESS_L"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;`+"\n"
 	loading += `\copy ` + OutputFilePaths["TABLE_ACCESS_S"].TableName + ` FROM '` + OutputFilePaths["TABLE_ACCESS_S"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;`+"\n"
 
+	loading += "\n"
 	loading += `\copy ` + OutputFilePaths["CONCEPT_DIMENSION"].TableName + `FROM '` + OutputFilePaths["CONCEPT_DIMENSION"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n" +
 				`\copy ` + OutputFilePaths["PATIENT_DIMENSION"].TableName + `FROM '` + OutputFilePaths["PATIENT_DIMENSION"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n" +
 				`\copy ` + OutputFilePaths["VISIT_DIMENSION"].TableName + `FROM '` + OutputFilePaths["VISIT_DIMENSION"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n" +
