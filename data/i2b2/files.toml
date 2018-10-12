@@ -1,6 +1,6 @@
 TableAccess         = "../data/i2b2/original/table_access.csv"
 Schemes             = "../data/i2b2/original/schemes.csv"
-Ontology            = [ "../data/i2b2/original/i2b2.csv", "../data/i2b2/original/birn.csv", "../data/i2b2/original/custom_meta.csv", "../data/i2b2/original/icd10_icd9.csv" ]
+Ontology            = [ "../data/i2b2/original/i2b2.csv", "../data/i2b2/original/birn.csv", "../data/i2b2/original/custom_meta.csv" ]
 DummyToPatient      = "../data/i2b2/original/dummy_to_patient.csv"
 PatientDimension    = "../data/i2b2/original/patient_dimension.csv"
 VisitDimension      = "../data/i2b2/original/visit_dimension.csv"
