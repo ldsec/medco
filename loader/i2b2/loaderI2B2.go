@@ -95,20 +95,20 @@ const (
 
 func generateOutputFiles(folderPath string) {
 	// fixed demodata tables
-	OutputFilePaths["ADAPTER_MAPPINGS"] = FileInfo{TableName: "", Path: "../../data/i2b2/converted/AdapterMappings.xml"}
-	OutputFilePaths["PATIENT_DIMENSION"] = FileInfo{TableName: "i2b2demodata.patient_dimension", Path: "../../data/i2b2/converted/patient_dimension.csv"}
-	OutputFilePaths["NEW_PATIENT_NUM"] = FileInfo{TableName: "", Path: "../../data/i2b2/converted/new_patient_num.csv"}
-	OutputFilePaths["VISIT_DIMENSION"] = FileInfo{TableName: "i2b2demodata.visit_dimension.i2b2", Path: "../../data/i2b2/converted/visit_dimension.csv"}
-	OutputFilePaths["NEW_ENCOUNTER_NUM"] = FileInfo{TableName: "", Path: "../../data/i2b2/converted/new_encounter_num.csv"}
-	OutputFilePaths["CONCEPT_DIMENSION"] = FileInfo{TableName: "i2b2demodata.concept_dimension", Path: "../../data/i2b2/converted/concept_dimension.csv"}
-	OutputFilePaths["OBSERVATION_FACT"] = FileInfo{TableName: "i2b2demodata.observation_fact", Path: "../../data/i2b2/converted/observation_fact.csv"}
+	OutputFilePaths["ADAPTER_MAPPINGS"] = FileInfo{TableName: "", Path: folderPath + "AdapterMappings.xml"}
+	OutputFilePaths["PATIENT_DIMENSION"] = FileInfo{TableName: "i2b2demodata.patient_dimension", Path: folderPath + "patient_dimension.csv"}
+	OutputFilePaths["NEW_PATIENT_NUM"] = FileInfo{TableName: "", Path: folderPath +  "new_patient_num.csv"}
+	OutputFilePaths["VISIT_DIMENSION"] = FileInfo{TableName: "i2b2demodata.visit_dimension.i2b2", Path: folderPath + "visit_dimension.csv"}
+	OutputFilePaths["NEW_ENCOUNTER_NUM"] = FileInfo{TableName: "", Path: folderPath + "new_encounter_num.csv"}
+	OutputFilePaths["CONCEPT_DIMENSION"] = FileInfo{TableName: "i2b2demodata.concept_dimension", Path: folderPath + "concept_dimension.csv"}
+	OutputFilePaths["OBSERVATION_FACT"] = FileInfo{TableName: "i2b2demodata.observation_fact", Path: folderPath + "observation_fact.csv"}
 
 	// fixed ontology tables
-	OutputFilePaths["SENSITIVE_TAGGED"] = FileInfo{TableName: "i2b2metadata.sensitive_tagged", Path: "../../data/i2b2/converted/sensitive_tagged.csv"}
-	OutputFilePaths["SCHEMES"] = FileInfo{TableName: "i2b2metadata.schemes", Path: "../../data/i2b2/converted/schemes.csv"}
+	OutputFilePaths["SENSITIVE_TAGGED"] = FileInfo{TableName: "i2b2metadata.sensitive_tagged", Path: folderPath + "sensitive_tagged.csv"}
+	OutputFilePaths["SCHEMES"] = FileInfo{TableName: "i2b2metadata.schemes", Path: folderPath + "schemes.csv"}
 
-	OutputFilePaths["TABLE_ACCESS_L"] = FileInfo{TableName: "i2b2metadata.table_access", Path: "../../data/i2b2/converted/local_table_access.csv"}
-	OutputFilePaths["TABLE_ACCESS_S"] = FileInfo{TableName: "shrine_ont.table_access", Path: "../../data/i2b2/converted/shrine_table_access.csv"}
+	OutputFilePaths["TABLE_ACCESS_L"] = FileInfo{TableName: "i2b2metadata.table_access", Path: folderPath + "local_table_access.csv"}
+	OutputFilePaths["TABLE_ACCESS_S"] = FileInfo{TableName: "shrine_ont.table_access", Path: folderPath + "shrine_table_access.csv"}
 
 	for key, path := range InputFilePaths {
 		if strings.HasPrefix(key, "ONTOLOGY_") {
