@@ -240,7 +240,7 @@ func ConvertI2B2(el *onet.Roster, entryPointIdx int, files Files, mapSensitive m
 
 	err = LoadDataFiles()
 	if err != nil {
-		log.Fatal("Error while loading ontology .sql file", err)
+		log.Fatal("Error while loading data", err)
 		return err
 	}
 
