@@ -10,6 +10,7 @@ import (
 	"github.com/lca1/medco-loader/loader"
 	"github.com/lca1/medco-loader/loader/genomic"
 	"github.com/lca1/medco-loader/loader/i2b2"
+	_ "github.com/lib/pq"
 	"gopkg.in/urfave/cli.v1"
 	"os"
 )
@@ -146,7 +147,7 @@ func loadi2b2Data(c *cli.Context) error {
 	databaseS := loader.DBSettings{DBhost: dbHost, DBport: dbPort, DBname: dbName, DBuser: dbUser, DBpassword: dbPassword}
 
 	// check if db connection works
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+"password=%s dbname=%s sslmode=disable", dbHost, dbPort, dbUser, dbPassword, dbName)
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", dbHost, dbPort, dbUser, dbPassword, dbName)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		log.Error("Error while opening database", err)
