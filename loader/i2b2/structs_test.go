@@ -14,6 +14,21 @@ import (
 // ---------------------------------------- TO STRING -------------------------------------------------------- //
 // ----------------------------------------------------------------------------------------------------------- //
 
+func TestSchemes_ToCSVText(t *testing.T) {
+	sk := &loaderi2b2.SchemesPK{
+		Key: "NDC:",
+	}
+
+	s := loaderi2b2.Schemes{
+		PK:				 sk,
+		Name:            "NDC",
+		Description:     "National Drug Code",
+	}
+
+	assert.Equal(t, s.ToCSVText(), `"NDC:","NDC","National Drug Code"`)
+
+}
+
 func TestTableAccess_ToCSVText(t *testing.T) {
 	ta := loaderi2b2.TableAccess{
 		TableCD:          "i2b2_DEMO",
@@ -334,50 +349,6 @@ func TestTableAccessFromString(t *testing.T) {
 
 	assert.Equal(t, *loaderi2b2.TableAccessFromString(lines[0]), ta)
 
-}
-
-func TestShrineOntologyFromString(t *testing.T) {
-	csvString := `"0","\SHRINE\","SHRINE","N","CA ","\N","\N","","concept_cd","concept_dimension","concept_path","T","LIKE","\SHRINE\","","\N","\N","\N","\N","SHRINE","\N","@","\N"`
-
-	ac := loaderi2b2.AdministrativeColumns{
-		UpdateDate:     "\\N",
-		DownloadDate:   "\\N",
-		ImportDate:     "\\N",
-		SourceSystemCD: "SHRINE",
-	}
-
-	so := loaderi2b2.ShrineOntology{
-		NodeEncryptID:      -1,
-		ChildrenEncryptIDs: nil,
-
-		HLevel:           "0",
-		Fullname:         "\\SHRINE\\",
-		Name:             "SHRINE",
-		SynonymCD:        "N",
-		VisualAttributes: "CA ",
-		TotalNum:         "\\N",
-		BaseCode:         "\\N",
-		MetadataXML:      "",
-		FactTableColumn:  "concept_cd",
-		Tablename:        "concept_dimension",
-		ColumnName:       "concept_path",
-		ColumnDataType:   "T",
-		Operator:         "LIKE",
-		DimCode:          "\\SHRINE\\",
-		Comment:          "",
-		Tooltip:          "\\N",
-		AdminColumns:     ac,
-		ValueTypeCD:      "\\N",
-		AppliedPath:      "@",
-		ExclusionCD:      "\\N",
-	}
-
-	var csvFile = strings.NewReader(csvString)
-	r := csv.NewReader(csvFile)
-	lines, err := r.ReadAll()
-	assert.Nil(t, err, "Parsing error")
-
-	assert.Equal(t, *loaderi2b2.ShrineOntologyFromString(lines[0]), so)
 }
 
 func TestLocalOntologyFromString(t *testing.T) {

@@ -60,6 +60,11 @@ func setupEncryptEnv() {
 	_, publicKey = libunlynx.GenKey()
 }
 
+func TestParseSchemes(t *testing.T) {
+	assert.Nil(t, loaderi2b2.ParseSchemes())
+	assert.Nil(t, loaderi2b2.ConvertSchemes())
+}
+
 func TestParseTableAccess(t *testing.T) {
 	assert.Nil(t, loaderi2b2.ParseTableAccess())
 	assert.Nil(t, loaderi2b2.ConvertTableAccess())
@@ -199,7 +204,7 @@ func TestConvertConceptDimension(t *testing.T) {
 
 }
 
-func TestConvertObservationFact(t *testing.T) {
+func TestConvertAll(t *testing.T) {
 	log.SetDebugVisible(2)
 	setupEncryptEnv()
 	loaderi2b2.Testing = true
@@ -207,10 +212,15 @@ func TestConvertObservationFact(t *testing.T) {
 	loaderi2b2.ListSensitiveConcepts = make(map[string]struct{})
 	loaderi2b2.ListSensitiveConcepts[`\i2b2\Diagnoses\Neoplasms (140-239)\Benign neoplasms (210-229)\(216) Benign neoplasm of skin\`] = struct{}{}
 
+	assert.Nil(t, loaderi2b2.ParseSchemes())
+	assert.Nil(t, loaderi2b2.ConvertSchemes())
+
+	log.LLvl1("--- Finished converting SCHEMES ---")
+
 	assert.Nil(t, loaderi2b2.ParseTableAccess())
 	assert.Nil(t, loaderi2b2.ConvertTableAccess())
 
-	log.LLvl1("--- Finished parsing TABLE_ACCESS ---")
+	log.LLvl1("--- Finished converting TABLE_ACCESS ---")
 
 	assert.Nil(t, loaderi2b2.ConvertLocalOntology(el, 0))
 

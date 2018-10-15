@@ -25,6 +25,32 @@ var IDConcepts int64
 
 // ####----DATA TYPES----####
 
+// TableSchemes is schemes table
+var TableSchemes map[*SchemesPK]Schemes
+
+// HeaderObservationFact contains all the headers for the observation_fact table
+var HeaderSchemes []string
+
+// Schemes table represents a scheme in the database
+type Schemes struct {
+	PK         	 *SchemesPK
+	Name  		 string
+	Description  string
+}
+
+// SchemesPK is the primary key of the schemes table
+type SchemesPK struct {
+	Key string
+}
+
+// ToCSVText writes the Schemes object in a way that can be added to a .csv file - "","","", etc.
+func (s Schemes) ToCSVText() string {
+	finalString := "\"" + s.PK.Key + "\"," + "\"" + s.Name + "\"," + "\"" + s.Description + "\""
+	return strings.Replace(finalString, `"\N"`, "", -1)
+}
+
+//-------------------------------------//
+
 // TableAccessMap is the table_access table
 var TableAccessMap map[string]*TableAccess
 
@@ -489,6 +515,21 @@ type Entry struct {
 
 // SUPPORT FUNCTIONS
 
+// SchemesFromString generates a Schemes struct from a parsed line of a .csv file
+func SchemesFromString(line []string) (*SchemesPK, Schemes) {
+	sk := &SchemesPK{
+		Key: line[0],
+	}
+
+	s := Schemes{
+		PK: sk,
+		Name: line[1],
+		Description: line[2],
+	}
+
+	return sk, s
+}
+
 // TableAccessFromString generates a TableAccess struct from a parsed line of a .csv file
 func TableAccessFromString(line []string) *TableAccess {
 	ta := &TableAccess{
@@ -552,45 +593,6 @@ func ShrineOntologyFromLocalConcept(localConcept *LocalOntology) *ShrineOntology
 		ValueTypeCD:        localConcept.ValueTypeCD,
 		AppliedPath:        localConcept.AppliedPath,
 		ExclusionCD:        localConcept.ExclusionCD,
-	}
-
-	return so
-}
-
-// ShrineOntologyFromString generates a ShrineOntology struct from a parsed line of a .csv file
-func ShrineOntologyFromString(line []string) *ShrineOntology {
-	size := len(line)
-
-	ac := AdministrativeColumns{
-		UpdateDate:     line[size-7],
-		DownloadDate:   line[size-6],
-		ImportDate:     line[size-5],
-		SourceSystemCD: line[size-4],
-	}
-
-	so := &ShrineOntology{
-		NodeEncryptID:      int64(-1), //signals that this shrine ontology element is not sensitive so no need for an encrypt ID
-		ChildrenEncryptIDs: nil,       //same thing as before
-		HLevel:             line[0],
-		Fullname:           line[1],
-		Name:               line[2],
-		SynonymCD:          line[3],
-		VisualAttributes:   line[4],
-		TotalNum:           line[5],
-		BaseCode:           line[6],
-		MetadataXML:        strings.Replace(line[7], "\"", "\"\"", -1),
-		FactTableColumn:    line[8],
-		Tablename:          line[9],
-		ColumnName:         line[10],
-		ColumnDataType:     line[11],
-		Operator:           line[12],
-		DimCode:            line[13],
-		Comment:            line[14],
-		Tooltip:            line[15],
-		AdminColumns:       ac,
-		ValueTypeCD:        line[20],
-		AppliedPath:        line[21],
-		ExclusionCD:        line[22],
 	}
 
 	return so
