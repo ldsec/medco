@@ -256,11 +256,15 @@ func ConvertI2B2(el *onet.Roster, entryPointIdx int, files Files, mapSensitive m
 		return err
 	}
 
+	log.Lvl2("--- Finished generating loading script ---")
+
 	err = LoadDataFiles()
 	if err != nil {
 		log.Fatal("Error while loading data", err)
 		return err
 	}
+
+	log.Lvl2("--- Finished loading data ---")
 
 	return nil
 }
@@ -305,7 +309,7 @@ func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
 
 	for file, fI := range OutputFilePaths {
 		if strings.HasPrefix(file, "SHRINE_"){
-			loading += "CREATE TABLE " + fI.TableName + "IF NOT EXISTS AS SELECT * FROM shrine_ont.shrine WHERE 1=2;"+"\n"
+			loading += "CREATE TABLE " + fI.TableName + " IF NOT EXISTS AS SELECT * FROM shrine_ont.shrine WHERE 1=2;"+"\n"
 			loading += `\copy ` + fI.TableName + ` FROM '` + fI.Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;`+"\n"
 		}
 	}
@@ -334,8 +338,8 @@ func LoadDataFiles() error {
 	cmd.Stderr = stderr
 	err := cmd.Run()
 	if err != nil {
-		log.LLvl1("Error when running command.  Error log:", stderr.String())
-		log.LLvl1("Got command status:", err.Error())
+		log.Lvl1("Error when running command.  Error log:", stderr.String())
+		log.Lvl1("Got command status:", err.Error())
 		return err
 	}
 
