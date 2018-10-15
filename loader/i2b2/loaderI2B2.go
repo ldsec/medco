@@ -305,13 +305,13 @@ func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
 
 	for file, fI := range OutputFilePaths {
 		if strings.HasPrefix(file, "SHRINE_"){
-			loading += "CREATE TABLE " + fI.TableName + " AS SELECT * FROM shrine_ont.shrine WHERE 1=2;"+"\n"
+			loading += "CREATE TABLE " + fI.TableName + "IF NOT EXISTS AS SELECT * FROM shrine_ont.shrine WHERE 1=2;"+"\n"
 			loading += `\copy ` + fI.TableName + ` FROM '` + fI.Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;`+"\n"
 		}
 	}
-	loading += "CREATE TABLE " + OutputFilePaths["TABLE_ACCESS_S"].TableName + " AS SELECT * FROM i2b2metadata.table_access WHERE 1=2;"+"\n"
+	loading += "CREATE TABLE " + OutputFilePaths["TABLE_ACCESS_S"].TableName + " IF NOT EXISTS AS SELECT * FROM i2b2metadata.table_access WHERE 1=2;"+"\n"
 	loading += `\copy ` + OutputFilePaths["TABLE_ACCESS_S"].TableName + ` FROM '` + OutputFilePaths["TABLE_ACCESS_S"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;`+"\n"
-	loading += "CREATE TABLE " + OutputFilePaths["SCHEMES_S"].TableName + " AS SELECT * FROM i2b2metadata.schemes WHERE 1=2;"+"\n"
+	loading += "CREATE TABLE " + OutputFilePaths["SCHEMES_S"].TableName + " IF NOT EXISTS AS SELECT * FROM i2b2metadata.schemes WHERE 1=2;"+"\n"
 	loading += `\copy ` + OutputFilePaths["SCHEMES_S"].TableName + ` FROM '` + OutputFilePaths["SCHEMES_S"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;`+"\n"
 	loading += "COMMIT;\n"
 	loading += "EOSQL"
