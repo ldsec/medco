@@ -226,7 +226,10 @@ type LocalOntology struct {
 	Symbol           string
 
 	// this only exists in the sensitive tagged
-	PCoriBasecode string
+	PCoriBasecode 	 string
+
+	// only exists in some strange tables (like icd10_icd9)
+	PlainCode		 string
 }
 
 // ToCSVText writes the LocalOntology object in a way that can be added to a .csv file - "","","", etc.
@@ -236,6 +239,10 @@ func (lo LocalOntology) ToCSVText() string {
 		"\"" + lo.BaseCode + "\"," + "\"" + lo.MetadataXML + "\"," + "\"" + lo.FactTableColumn + "\"," + "\"" + lo.Tablename + "\"," + "\"" + lo.ColumnName + "\"," + "\"" + lo.ColumnDataType + "\"," + "\"" + lo.Operator + "\"," +
 		"\"" + lo.DimCode + "\"," + "\"" + lo.Comment + "\"," + "\"" + lo.Tooltip + "\"," + "\"" + lo.AppliedPath + "\"," + acString + "," + "\"" + lo.ValueTypeCD + "\"," + "\"" + lo.ExclusionCD + "\"," +
 		"\"" + lo.Path + "\"," + "\"" + lo.Symbol + "\""
+
+	if lo.PlainCode != "" {
+		finalString += ",\"" + lo.PlainCode + "\""
+	}
 
 	return strings.Replace(finalString, `"\N"`, "", -1)
 }
@@ -599,15 +606,12 @@ func ShrineOntologyFromLocalConcept(localConcept *LocalOntology) *ShrineOntology
 }
 
 // LocalOntologyFromString generates a LocalOntology struct from a parsed line of a .csv file
-func LocalOntologyFromString(line []string) *LocalOntology {
-
-	size := len(line)
-
+func LocalOntologyFromString(line []string, plainCode bool) *LocalOntology {
 	ac := AdministrativeColumns{
-		UpdateDate:     line[size-8],
-		DownloadDate:   line[size-7],
-		ImportDate:     line[size-6],
-		SourceSystemCD: line[size-5],
+		UpdateDate:     line[17],
+		DownloadDate:   line[18],
+		ImportDate:     line[19],
+		SourceSystemCD: line[20],
 	}
 
 	so := &LocalOntology{
@@ -633,6 +637,10 @@ func LocalOntologyFromString(line []string) *LocalOntology {
 		ExclusionCD:      line[22],
 		Path:             line[23],
 		Symbol:           line[24],
+	}
+
+	if plainCode {
+		so.PlainCode = line[25]
 	}
 
 	return so

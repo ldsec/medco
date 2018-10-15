@@ -865,12 +865,17 @@ func ParseLocalTable(group *onet.Roster, entryPointIdx int, name string) error {
 		HeaderLocalOntology = append(HeaderLocalOntology, header)
 	}
 
+	plainCode := false
+	if HeaderLocalOntology[len(HeaderLocalOntology)-1] == "plain_code" {
+		plainCode = true
+	}
+
 	// the pcori_basecode
 	HeaderPatientDimension = append(HeaderPatientDimension, "pcori_basecode")
 
 	//skip header
 	for _, line := range lines[1:] {
-		lo := LocalOntologyFromString(line)
+		lo := LocalOntologyFromString(line, plainCode)
 
 		// TODO for now we remove all synonyms from the i2b2 local ontology
 		// if it is the original concept (N = original, Y = synonym)

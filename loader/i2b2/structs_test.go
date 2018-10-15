@@ -352,7 +352,7 @@ func TestTableAccessFromString(t *testing.T) {
 }
 
 func TestLocalOntologyFromString(t *testing.T) {
-	csvString := `"4","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","Parkdale","N","FA ","\N","\N","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","\N","Demographics \ Zip codes \ Arkansas \ Parkdale","@","2007-04-10 00:00:00","2007-04-10 00:00:00","2007-04-10 00:00:00","DEMO","\N","\N","\N","\N"`
+	csvString := `"4","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","Parkdale","N","FA ","\N","\N","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","\N","Demographics \ Zip codes \ Arkansas \ Parkdale","@","2007-04-10 00:00:00","2007-04-10 00:00:00","2007-04-10 00:00:00","DEMO","\N","\N","\N","\N","\N"`
 
 	ac := loaderi2b2.AdministrativeColumns{
 		UpdateDate:     "2007-04-10 00:00:00",
@@ -386,6 +386,8 @@ func TestLocalOntologyFromString(t *testing.T) {
 		Symbol:           "\\N",
 
 		PCoriBasecode: "",
+
+		PlainCode: "",
 	}
 
 	var csvFile = strings.NewReader(csvString)
@@ -393,7 +395,9 @@ func TestLocalOntologyFromString(t *testing.T) {
 	lines, err := r.ReadAll()
 	assert.Nil(t, err, "Parsing error")
 
-	assert.Equal(t, *loaderi2b2.LocalOntologyFromString(lines[0]), lo)
+	assert.Equal(t, *loaderi2b2.LocalOntologyFromString(lines[0], false), lo)
+	lo.PlainCode = "\\N"
+	assert.Equal(t, *loaderi2b2.LocalOntologyFromString(lines[0], true), lo)
 }
 
 func TestPatientDimensionFromString(t *testing.T) {
