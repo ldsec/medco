@@ -137,7 +137,7 @@ type ShrineOntology struct {
 
 // ToCSVText writes the ShrineOntology object in a way that can be added to a .csv file - "","","", etc.
 func (so ShrineOntology) ToCSVText() string {
-	if so.NodeEncryptID != int64(-1) { // sensitive
+	if so.NodeEncryptID != int64(-1) && so.VisualAttributes[:1] != "M" { // sensitive
 		metadata := ""
 
 		if so.VisualAttributes[:1] == "C" { // if concept_parent_node
@@ -146,14 +146,6 @@ func (so ShrineOntology) ToCSVText() string {
 			metadata += "<?xml version=\"\"1.0\"\"?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>CONCEPT_INTERNAL_NODE</EncryptedType><NodeEncryptID>" + strconv.FormatInt(so.NodeEncryptID, 10) + "</NodeEncryptID>"
 		} else if so.VisualAttributes[:1] == "L" { // else if concept_leaf
 			metadata += "<?xml version=\"\"1.0\"\"?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>CONCEPT_LEAF</EncryptedType><NodeEncryptID>" + strconv.FormatInt(so.NodeEncryptID, 10) + "</NodeEncryptID>"
-		} else if so.VisualAttributes[:1] == "O" { // else if modifier_parent_node
-			metadata += "<?xml version=\"\"1.0\"\"?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>MODIFIER_PARENT_NODE</EncryptedType>"
-		} else if so.VisualAttributes[:1] == "D" { // else if modifier_internal_node
-			metadata += "<?xml version=\"\"1.0\"\"?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>MODIFIER_INTERNAL_NODE</EncryptedType><NodeEncryptID>" + strconv.FormatInt(so.NodeEncryptID, 10) + "</NodeEncryptID>"
-		} else if so.VisualAttributes[:1] == "R" { // else if modifier_leaf
-			metadata += "<?xml version=\"\"1.0\"\"?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>MODIFIER_LEAF</EncryptedType><NodeEncryptID>" + strconv.FormatInt(so.NodeEncryptID, 10) + "</NodeEncryptID>"
-		} else if so.VisualAttributes[:1] == "M" {
-			log.Fatal("Not supported go fuck yourself!")
 		} else {
 			log.Fatal("Wrong VisualAttribute")
 		}
@@ -169,9 +161,10 @@ func (so ShrineOntology) ToCSVText() string {
 		}
 		so.MetadataXML = metadata + "</ValueMetadata>"
 	}
+
 	acString := "\"" + so.AdminColumns.UpdateDate + "\"," + "\"" + so.AdminColumns.DownloadDate + "\"," + "\"" + so.AdminColumns.ImportDate + "\"," + "\"" + so.AdminColumns.SourceSystemCD + "\""
 	finalString := "\"" + so.HLevel + "\"," + "\"" + so.Fullname + "\"," + "\"" + so.Name + "\"," + "\"" + so.SynonymCD + "\"," + "\"" + so.VisualAttributes + "\"," + "\"" + so.TotalNum + "\"," +
-		"\"" + so.BaseCode + "\"," + "\"" + so.MetadataXML + "\"," + "\"" + so.FactTableColumn + "\"," + "\"" + so.Tablename + "\"," + "\"" + so.ColumnName + "\"," + "\"" + so.ColumnDataType + "\"," + "\"" + so.Operator + "\"," +
+		"\"" + so.BaseCode + "\",\"" + so.MetadataXML + "\"," + "\"" + so.FactTableColumn + "\"," + "\"" + so.Tablename + "\"," + "\"" + so.ColumnName + "\"," + "\"" + so.ColumnDataType + "\"," + "\"" + so.Operator + "\"," +
 		"\"" + so.DimCode + "\"," + "\"" + so.Comment + "\"," + "\"" + so.Tooltip + "\"," + acString + "," + "\"" + so.ValueTypeCD + "\"," + "\"" + so.AppliedPath + "\"," + "\"" + so.ExclusionCD + "\""
 
 	return strings.Replace(finalString, `"\N"`, "", -1)

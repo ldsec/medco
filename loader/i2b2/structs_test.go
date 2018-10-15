@@ -109,8 +109,8 @@ func TestShrineOntology_ToCSVText(t *testing.T) {
 	so.VisualAttributes = "FA "
 	assert.Equal(t, so.ToCSVText(), `"0","\SHRINE\","SHRINE","N","FA ",,,"<?xml version=""1.0""?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>CONCEPT_INTERNAL_NODE</EncryptedType><NodeEncryptID>1</NodeEncryptID><ChildrenEncryptIDs><ChildEncryptID>2</ChildEncryptID><ChildEncryptID>3</ChildEncryptID></ChildrenEncryptIDs></ValueMetadata>","concept_cd","concept_dimension","concept_path","T","LIKE","\SHRINE\","",,,,,"SHRINE",,"@",`)
 
-	so.VisualAttributes = "DA "
-	assert.Equal(t, so.ToCSVText(), `"0","\SHRINE\","SHRINE","N","DA ",,,"<?xml version=""1.0""?><ValueMetadata><Version>MedCo-0.1</Version><EncryptedType>MODIFIER_INTERNAL_NODE</EncryptedType><NodeEncryptID>1</NodeEncryptID><ChildrenEncryptIDs><ChildEncryptID>2</ChildEncryptID><ChildEncryptID>3</ChildEncryptID></ChildrenEncryptIDs></ValueMetadata>","concept_cd","concept_dimension","concept_path","T","LIKE","\SHRINE\","",,,,,"SHRINE",,"@",`)
+	so.VisualAttributes = "M "
+	assert.Equal(t, so.ToCSVText(), `"0","\SHRINE\","SHRINE","N","M ",,,"","concept_cd","concept_dimension","concept_path","T","LIKE","\SHRINE\","",,,,,"SHRINE",,"@",`)
 
 }
 
