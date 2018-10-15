@@ -310,6 +310,7 @@ func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
 	for file, fI := range OutputFilePaths {
 		if strings.HasPrefix(file, "SHRINE_"){
 			loading += "CREATE TABLE IF NOT EXISTS " + fI.TableName + " AS SELECT * FROM shrine_ont.shrine WHERE 1=2;"+"\n"
+			loading += "TRUNCATE TABLE " + fI.TableName + ";\n"
 			loading += `\copy ` + fI.TableName + ` FROM '` + fI.Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;`+"\n"
 		}
 	}
