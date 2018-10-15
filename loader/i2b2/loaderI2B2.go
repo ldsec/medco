@@ -958,12 +958,12 @@ func ParseLocalTable(group *onet.Roster, entryPointIdx int, name string) error {
 
 		// re-randomize TAG_IDs
 		rand.Seed(time.Now().UnixNano())
-		perm := rand.Perm(len(MapConceptPathToTag))
+		_ := rand.Perm(len(MapConceptPathToTag))
 
 		// 'populate' map (Concept codes)
 		for i, concept := range listConceptCD {
 			var tmp = MapConceptPathToTag[concept]
-			tmp.TagID = int64(perm[i])
+			tmp.TagID = int64(i)
 			tmp.Tag = taggedConceptValues[i]
 			MapConceptPathToTag[concept] = tmp
 		}
@@ -1389,6 +1389,7 @@ func ConvertConceptDimension() error {
 			csvOutputFile.WriteString(cd.ToCSVText() + "\n")
 			// if concept is not defined as sensitive but one of its parents is then we consider the tagID of the parent as its identifier
 		} else {
+			log.Lvl2("SHOULD NOT GO INSIDE")
 			MapConceptCodeToTag[cd.ConceptCD] = MapConceptPathToTag[sensitiveParent].TagID
 		}
 	}

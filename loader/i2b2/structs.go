@@ -160,8 +160,6 @@ func (so ShrineOntology) ToCSVText() string {
 			metadata += "</ChildrenEncryptIDs>"
 		}
 		so.MetadataXML = metadata + "</ValueMetadata>"
-	} else {
-		log.Lvl2(so.VisualAttributes)
 	}
 
 	acString := "\"" + so.AdminColumns.UpdateDate + "\"," + "\"" + so.AdminColumns.DownloadDate + "\"," + "\"" + so.AdminColumns.ImportDate + "\"," + "\"" + so.AdminColumns.SourceSystemCD + "\""
