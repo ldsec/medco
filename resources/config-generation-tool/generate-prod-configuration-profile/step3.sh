@@ -20,8 +20,8 @@ fi
 
 SCRIPT_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/..
 CONF_PROFILE="$1"
-CONF_FOLDER="$SCRIPT_FOLDER/../../configuration-profiles/prod/$CONF_PROFILE"
-COMPOSE_FOLDER="$SCRIPT_FOLDER/../../compose-profiles/prod/$CONF_PROFILE"
+CONF_FOLDER="$SCRIPT_FOLDER/../../configuration-profiles/$CONF_PROFILE"
+COMPOSE_FOLDER="$SCRIPT_FOLDER/../../compose-profiles/$CONF_PROFILE"
 NODE_IDX="$2"
 KEYSTORE_PW="$3"
 

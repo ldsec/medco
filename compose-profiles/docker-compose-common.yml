@@ -1,0 +1,83 @@
+version: '2.2'
+services:
+  i2b2-medco:
+    image: medco/i2b2-medco:latest
+    build:
+      context: ../docker-images/i2b2-medco
+    ports:
+      - "8080"
+      - "9990"
+    environment:
+      - I2B2_DB_HOST=postgresql
+      - I2B2_DB_PORT=5432
+      - I2B2_DB_USER=i2b2
+      - I2B2_DB_PW=i2b2
+      - I2B2_DB_NAME=i2b2medco
+      - WILDFLY_ADMIN_PASSWORD=admin
+      - I2B2_DOMAIN_NAME=i2b2medco
+      - I2B2_SERVICE_PASSWORD=pFjy3EjDVwLfT2rB9xkK
+      - DEFAULT_USER_PASSWORD=demouser
+      - NODE_IDX=0
+      - UNLYNX_DEBUG_LEVEL=1
+      - AXIS2_LOGLEVEL=INFO
+    volumes:
+      - ../configuration-profiles/dev-3nodes-1host:/medco-configuration
+
+  web:
+    image: medco/i2b2-web:latest
+    build:
+      context: ../docker-images/web
+    ports:
+      - "80"
+      - "443"
+    environment:
+      - I2B2_DOMAIN_NAME=i2b2medco
+      - I2B2_URL=http://i2b2-medco:8080/i2b2/services
+
+  unlynx:
+    image: medco/i2b2-unlynx:latest
+    build:
+      context: ../docker-images/unlynx
+    ports:
+      - "2000"
+      - "2001"
+    environment:
+        - NODE_IDX=0
+        - UNLYNX_DEBUG_LEVEL=1
+    volumes:
+      - ../configuration-profiles/dev-3nodes-1host:/medco-configuration
+
+  postgresql:
+    image: postgres:9.6
+    environment:
+    - POSTGRES_PASSWORD=postgres
+    ports:
+    - "5432"
+    volumes:
+    - ../docker-images/postgresql/initdb-data:/docker-entrypoint-initdb.d
+
+  pg-admin:
+    image: dpage/pgadmin4
+    ports:
+      - "80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin
+      - PGADMIN_DEFAULT_PASSWORD=admin
+
+  keycloak:
+    image: jboss/keycloak:4.5.0.Final
+    environment:
+      - KEYCLOAK_USER=keycloak
+      - KEYCLOAK_PASSWORD=keycloak
+      - DB_VENDOR=postgres
+      - DB_ADDR=postgresql
+      - DB_PORT=5432
+      - DB_DATABASE=keycloak
+      - DB_USER=keycloak
+      - DB_PASSWORD=keycloak
+    ports:
+      - "8081:8080"
+    networks:
+      - medco-srv0
+      - medco-srv1
+      - medco-srv2

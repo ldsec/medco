@@ -1,0 +1,204 @@
+version: '2.2'
+services:
+  i2b2-medco-srv0:
+    extends:
+      file: ../docker-compose-common.yml
+      service: i2b2-medco
+    ports:
+      - "8090:8080"
+      - "10000:9990"
+    environment:
+      - I2B2_DB_NAME=i2b2medcosrv0
+      - I2B2_DOMAIN_NAME=i2b2medcosrv0
+      - NODE_IDX=0
+      - UNLYNX_DEBUG_LEVEL=3
+      - AXIS2_LOGLEVEL=DEBUG
+    networks:
+      medco-srv0:
+        aliases:
+        - i2b2
+      medco-network:
+    volumes:
+      - ../../configuration-profiles/dev-3nodes-1host:/medco-configuration
+
+  unlynx-srv0:
+    extends:
+      file: ../docker-compose-common.yml
+      service: unlynx
+    ports:
+      - "2002:2002"
+      - "2003:2003"
+    environment:
+      - NODE_IDX=0
+      - UNLYNX_DEBUG_LEVEL=3
+    networks:
+      medco-srv0:
+      medco-network:
+        ipv4_address: 172.16.205.10
+    volumes:
+      - ../../configuration-profiles/dev-3nodes-1host:/medco-configuration
+
+  web-srv0:
+    extends:
+      file: ../docker-compose-common.yml
+      service: web
+    ports:
+      - "82:80"
+      - "445:443"
+    environment:
+      - I2B2_DOMAIN_NAME=i2b2medcosrv0
+      - I2B2_URL=http://i2b2-medco-srv0:8080/i2b2/services
+    networks:
+      - medco-srv0
+
+  i2b2-medco-srv1:
+    extends:
+      file: ../docker-compose-common.yml
+      service: i2b2-medco
+    ports:
+      - "8092:8080"
+      - "10002:9990"
+    environment:
+      - I2B2_DB_NAME=i2b2medcosrv1
+      - I2B2_DOMAIN_NAME=i2b2medcosrv1
+      - NODE_IDX=1
+      - UNLYNX_DEBUG_LEVEL=3
+      - AXIS2_LOGLEVEL=DEBUG
+    networks:
+      medco-srv1:
+        aliases:
+          - i2b2
+      medco-network:
+    volumes:
+      - ../../configuration-profiles/dev-3nodes-1host:/medco-configuration
+
+  unlynx-srv1:
+    extends:
+      file: ../docker-compose-common.yml
+      service: unlynx
+    ports:
+      - "2004:2004"
+      - "2005:2005"
+    environment:
+      - NODE_IDX=1
+      - UNLYNX_DEBUG_LEVEL=3
+    networks:
+      medco-srv1:
+      medco-network:
+        ipv4_address: 172.16.205.11
+    volumes:
+      - ../../configuration-profiles/dev-3nodes-1host:/medco-configuration
+
+  web-srv1:
+    extends:
+      file: ../docker-compose-common.yml
+      service: web
+    ports:
+      - "84:80"
+      - "447:443"
+    environment:
+      - I2B2_DOMAIN_NAME=i2b2medcosrv1
+      - I2B2_URL=http://i2b2-medco-srv1:8080/i2b2/services
+    networks:
+      - medco-srv1
+
+  i2b2-medco-srv2:
+    extends:
+      file: ../docker-compose-common.yml
+      service: i2b2-medco
+    ports:
+      - "8094:8080"
+      - "10004:9990"
+    environment:
+      - I2B2_DB_NAME=i2b2medcosrv2
+      - I2B2_DOMAIN_NAME=i2b2medcosrv2
+      - NODE_IDX=2
+      - UNLYNX_DEBUG_LEVEL=3
+      - AXIS2_LOGLEVEL=DEBUG
+    networks:
+      medco-srv2:
+        aliases:
+          - i2b2
+      medco-network:
+    volumes:
+      - ../../configuration-profiles/dev-3nodes-1host:/medco-configuration
+
+  unlynx-srv2:
+    extends:
+      file: ../docker-compose-common.yml
+      service: unlynx
+    ports:
+      - "2006:2004"
+      - "2007:2005"
+    environment:
+      - NODE_IDX=2
+      - UNLYNX_DEBUG_LEVEL=3
+    networks:
+      medco-srv2:
+      medco-network:
+        ipv4_address: 172.16.205.12
+    volumes:
+      - ../../configuration-profiles/dev-3nodes-1host:/medco-configuration
+
+  web-srv2:
+    extends:
+      file: ../docker-compose-common.yml
+      service: web
+    ports:
+      - "86:80"
+      - "449:443"
+    environment:
+      - I2B2_DOMAIN_NAME=i2b2medcosrv2
+      - I2B2_URL=http://i2b2-medco-srv2:8080/i2b2/services
+    networks:
+      - medco-srv2
+
+  postgresql:
+    extends:
+      file: ../docker-compose-common.yml
+      service: postgresql
+    ports:
+      - "5432:5432"
+    networks:
+      - medco-srv0
+      - medco-srv1
+      - medco-srv2
+
+  pg-admin:
+    extends:
+      file: ../docker-compose-common.yml
+      service: pg-admin
+    ports:
+      - "81:80"
+    networks:
+      - medco-srv0
+      - medco-srv1
+      - medco-srv2
+
+  keycloak:
+    extends:
+      file: ../docker-compose-common.yml
+      service: keycloak
+    depends_on:
+      - postgresql
+    ports:
+      - "8081:8080"
+    networks:
+      - medco-srv0
+      - medco-srv1
+      - medco-srv2
+
+networks:
+  medco-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.205.0/24
+
+  medco-srv0:
+    driver: bridge
+  medco-srv1:
+    driver: bridge
+  medco-srv2:
+    driver: bridge

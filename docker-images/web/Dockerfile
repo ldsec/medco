@@ -1,0 +1,60 @@
+FROM debian:stretch as dev
+
+# build-time variables
+ENV I2B2_VERSION="tags/v1.7.10.0001"
+
+# requirements
+RUN apt-get -y update && \
+    apt-get -y install git wget tar && \
+    apt-get -y clean
+
+# download i2b2 webclient
+WORKDIR "/i2b2-webclient"
+RUN git init . && \
+    git remote add origin https://github.com/i2b2/i2b2-webclient.git && \
+    git pull --depth=1 origin $I2B2_VERSION && \
+    rm -rf ./.git && \
+    mkdir /www && \
+    cp -R . /www/i2b2-admin && \
+    cp -R . /www/i2b2-client
+
+# -------------------------------------------
+FROM debian:stretch as prod
+
+# run-time variables
+ENV I2B2_DOMAIN_NAME="medcodeployment"
+#    I2B2_DEMO_DB_NAME="i2b2demo" \
+#    I2B2_MEDCO_DB_NAME="i2b2medco" \
+#    DB_PASSWORD="pFjy3EjDVwLfT2rB9xkK" \
+#    NODE_IDX="0"
+
+# build-time variables
+ENV LIGHTTPD_WEB_ROOT="/var/www/html"
+#    CONF_DIR="/medco-configuration"
+
+COPY --from=dev --chown=www-data:www-data "/www" "$LIGHTTPD_WEB_ROOT"
+COPY --chown=www-data:www-data www-data/* "$LIGHTTPD_WEB_ROOT/"
+COPY --chown=www-data:www-data lighttpd-conf/* /etc/lighttpd/conf-enabled/
+COPY --chown=www-data:www-data i2b2-web-writeconfig.sh /
+COPY docker-entrypoint.sh /usr/local/bin/
+
+# install lighttpd & write config
+RUN apt-get -y update && \
+    apt-get -y install wget apt-transport-https lsb-release ca-certificates && \
+    wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg && \
+    sh -c 'echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list' && \
+    apt-get -y update && \
+    apt-get -y install lighttpd postgresql-client libterm-readline-gnu-perl curl php5.6 php5.6-cgi php5.6-curl && \
+    apt-get -y clean && \
+    chgrp -R www-data /etc/lighttpd && \
+    chmod -R g+rwx /etc/lighttpd && \
+    chown -R www-data:www-data "$LIGHTTPD_WEB_ROOT" && \
+    chmod -R +rx "$LIGHTTPD_WEB_ROOT" && \
+    install -d -o www-data -g www-data -m 0750 "/var/run/lighttpd" && \
+    chmod +x /i2b2-web-writeconfig.sh /usr/local/bin/docker-entrypoint.sh && \
+    lighttpd-enable-mod fastcgi-php
+
+# run
+EXPOSE 80
+ENTRYPOINT docker-entrypoint.sh
+# todo: factor appart installed web services (i2b2 web client and others)

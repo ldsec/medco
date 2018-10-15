@@ -1,0 +1,30 @@
+<html><head><title>I2b2-web</title>
+    <script>
+        document.addEventListener('click', function(event) {
+            var target = event.target;
+            if (target.tagName.toLowerCase() == 'a')
+            {
+                var port = target.getAttribute('href').match(/^:(\d+)(.*)/);
+                if (port)
+                {
+                    target.href = port[2];
+                    target.port = port[1];
+                }
+            }
+        }, false);
+    </script>
+</head><body>
+
+<div align="center">
+    <p><br /><br /></p>
+
+    <p><a href="/i2b2-admin">I2b2 admin</a></p>
+    <p><a href="/i2b2-client">I2b2 client</a></p>
+    <p><a href=":9990">WildFly Management</a></p>
+    <p><a href=":8080/i2b2">I2b2 Axis2 Management</a></p>
+    <p><a href=":81">PgAdmin</a></p>
+</div>
+<!-- todo: links -->
+
+</body>
+</html>
