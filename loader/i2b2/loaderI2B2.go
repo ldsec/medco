@@ -42,45 +42,45 @@ type FileInfo struct {
 // The different paths and handlers for all the files both for input and/or output
 var (
 	InputFilePaths = map[string]string{
-		"TABLE_ACCESS": 			"../../data/i2b2/original/table_access.csv",
-		"SCHEMES":					"../../data/i2b2/original/schemes.csv",
+		"TABLE_ACCESS": "../../data/i2b2/original/table_access.csv",
+		"SCHEMES":      "../../data/i2b2/original/schemes.csv",
 
-		"ONTOLOGY_BIRN":        	"../../data/i2b2/original/birn.csv",
-		"ONTOLOGY_CUSTOM_META": 	"../../data/i2b2/original/custom_meta.csv",
+		"ONTOLOGY_BIRN":        "../../data/i2b2/original/birn.csv",
+		"ONTOLOGY_CUSTOM_META": "../../data/i2b2/original/custom_meta.csv",
 		//"ONTOLOGY_ICD10_ICD9":  	"../../data/i2b2/original/icd10_icd9.csv",
-		"ONTOLOGY_I2B2": 			"../../data/i2b2/original/i2b2.csv",
+		"ONTOLOGY_I2B2": "../../data/i2b2/original/i2b2.csv",
 
-		"DUMMY_TO_PATIENT":  		"../../data/i2b2/original/dummy_to_patient.csv",
-		"PATIENT_DIMENSION": 		"../../data/i2b2/original/patient_dimension.csv",
-		"VISIT_DIMENSION":   		"../../data/i2b2/original/visit_dimension.csv",
-		"CONCEPT_DIMENSION": 		"../../data/i2b2/original/concept_dimension.csv",
-		"OBSERVATION_FACT":  		"../../data/i2b2/original/observation_fact.csv",
+		"DUMMY_TO_PATIENT":  "../../data/i2b2/original/dummy_to_patient.csv",
+		"PATIENT_DIMENSION": "../../data/i2b2/original/patient_dimension.csv",
+		"VISIT_DIMENSION":   "../../data/i2b2/original/visit_dimension.csv",
+		"CONCEPT_DIMENSION": "../../data/i2b2/original/concept_dimension.csv",
+		"OBSERVATION_FACT":  "../../data/i2b2/original/observation_fact.csv",
 	}
 
 	OutputFilePaths = map[string]FileInfo{
-		"ADAPTER_MAPPINGS": 	{TableName: "", Path: "../../data/i2b2/converted/AdapterMappings.xml"},
-		"SENSITIVE_TAGGED": 	{TableName: "i2b2metadata.sensitive_tagged", Path: "../../data/i2b2/converted/sensitive_tagged.csv"},
+		"ADAPTER_MAPPINGS": {TableName: "", Path: "../../data/i2b2/converted/AdapterMappings.xml"},
+		"SENSITIVE_TAGGED": {TableName: "i2b2metadata.sensitive_tagged", Path: "../../data/i2b2/converted/sensitive_tagged.csv"},
 
-		"TABLE_ACCESS_L":    	{TableName: "i2b2metadata.table_access", Path: "../../data/i2b2/converted/local_table_access.csv"},
-		"SCHEMES_L":         	{TableName: "i2b2metadata.local_schemes", Path: "../../data/i2b2/converted/local_schemes.csv"},
-		"LOCAL_BIRN":        	{TableName: "i2b2metadata.birn", Path: "../../data/i2b2/converted/local_birn.csv"},
-		"LOCAL_CUSTOM_META": 	{TableName: "i2b2metadata.custom_meta", Path: "../../data/i2b2/converted/local_custom_meta.csv"},
+		"TABLE_ACCESS_L":    {TableName: "i2b2metadata.table_access", Path: "../../data/i2b2/converted/local_table_access.csv"},
+		"SCHEMES_L":         {TableName: "i2b2metadata.local_schemes", Path: "../../data/i2b2/converted/local_schemes.csv"},
+		"LOCAL_BIRN":        {TableName: "i2b2metadata.birn", Path: "../../data/i2b2/converted/local_birn.csv"},
+		"LOCAL_CUSTOM_META": {TableName: "i2b2metadata.custom_meta", Path: "../../data/i2b2/converted/local_custom_meta.csv"},
 		//"LOCAL_ICD10_ICD9":  	{TableName: "i2b2metadata.icd10_icd9", Path: "../../data/i2b2/converted/local_icd10_icd9.csv"},
-		"LOCAL_I2B2": 			{TableName: "i2b2metadata.i2b2", Path: "../../data/i2b2/converted/local_i2b2.csv"},
+		"LOCAL_I2B2": {TableName: "i2b2metadata.i2b2", Path: "../../data/i2b2/converted/local_i2b2.csv"},
 
-		"TABLE_ACCESS_S":     	{TableName: "shrine_ont.table_access", Path: "../../data/i2b2/converted/shrine_table_access.csv"},
-		"SCHEMES_S":         	{TableName: "shrine_ont.shrine_schemes", Path: "../../data/i2b2/converted/shrine_schemes.csv"},
-		"SHRINE_BIRN":        	{TableName: "shrine_ont.birn", Path: "../../data/i2b2/converted/shrine_birn.csv"},
-		"SHRINE_CUSTOM_META": 	{TableName: "shrine_ont.custom_meta", Path: "../../data/i2b2/converted/shrine_custom_meta.csv"},
+		"TABLE_ACCESS_S":     {TableName: "shrine_ont.table_access", Path: "../../data/i2b2/converted/shrine_table_access.csv"},
+		"SCHEMES_S":          {TableName: "shrine_ont.shrine_schemes", Path: "../../data/i2b2/converted/shrine_schemes.csv"},
+		"SHRINE_BIRN":        {TableName: "shrine_ont.birn", Path: "../../data/i2b2/converted/shrine_birn.csv"},
+		"SHRINE_CUSTOM_META": {TableName: "shrine_ont.custom_meta", Path: "../../data/i2b2/converted/shrine_custom_meta.csv"},
 		//"SHRINE_ICD10_ICD9":  {TableName: "shrine_ont.icd10_icd9", Path: "../../data/i2b2/converted/shrine_icd10_icd9.csv"},
-		"SHRINE_I2B2": 			{TableName: "shrine_ont.i2b2", Path: "../../data/i2b2/converted/shrine_i2b2.csv"},
+		"SHRINE_I2B2": {TableName: "shrine_ont.i2b2", Path: "../../data/i2b2/converted/shrine_i2b2.csv"},
 
-		"PATIENT_DIMENSION": 	{TableName: "i2b2demodata.patient_dimension", Path: "../../data/i2b2/converted/patient_dimension.csv"},
-		"NEW_PATIENT_NUM":   	{TableName: "", Path: "../../data/i2b2/converted/new_patient_num.csv"},
-		"VISIT_DIMENSION":   	{TableName: "i2b2demodata.visit_dimension", Path: "../../data/i2b2/converted/visit_dimension.csv"},
-		"NEW_ENCOUNTER_NUM": 	{TableName: "", Path: "../../data/i2b2/converted/new_encounter_num.csv"},
-		"CONCEPT_DIMENSION": 	{TableName: "i2b2demodata.concept_dimension", Path: "../../data/i2b2/converted/concept_dimension.csv"},
-		"OBSERVATION_FACT":  	{TableName: "i2b2demodata.observation_fact", Path: "../../data/i2b2/converted/observation_fact.csv"},
+		"PATIENT_DIMENSION": {TableName: "i2b2demodata.patient_dimension", Path: "../../data/i2b2/converted/patient_dimension.csv"},
+		"NEW_PATIENT_NUM":   {TableName: "", Path: "../../data/i2b2/converted/new_patient_num.csv"},
+		"VISIT_DIMENSION":   {TableName: "i2b2demodata.visit_dimension", Path: "../../data/i2b2/converted/visit_dimension.csv"},
+		"NEW_ENCOUNTER_NUM": {TableName: "", Path: "../../data/i2b2/converted/new_encounter_num.csv"},
+		"CONCEPT_DIMENSION": {TableName: "i2b2demodata.concept_dimension", Path: "../../data/i2b2/converted/concept_dimension.csv"},
+		"OBSERVATION_FACT":  {TableName: "i2b2demodata.observation_fact", Path: "../../data/i2b2/converted/observation_fact.csv"},
 	}
 
 	FileBashPath = "24-load-i2b2-data.sh"
@@ -99,7 +99,7 @@ func generateOutputFiles(folderPath string) {
 	// fixed demodata tables
 	OutputFilePaths["ADAPTER_MAPPINGS"] = FileInfo{TableName: "", Path: folderPath + "AdapterMappings.xml"}
 	OutputFilePaths["PATIENT_DIMENSION"] = FileInfo{TableName: "i2b2demodata.patient_dimension", Path: folderPath + "patient_dimension.csv"}
-	OutputFilePaths["NEW_PATIENT_NUM"] = FileInfo{TableName: "", Path: folderPath +  "new_patient_num.csv"}
+	OutputFilePaths["NEW_PATIENT_NUM"] = FileInfo{TableName: "", Path: folderPath + "new_patient_num.csv"}
 	OutputFilePaths["VISIT_DIMENSION"] = FileInfo{TableName: "i2b2demodata.visit_dimension", Path: folderPath + "visit_dimension.csv"}
 	OutputFilePaths["NEW_ENCOUNTER_NUM"] = FileInfo{TableName: "", Path: folderPath + "new_encounter_num.csv"}
 	OutputFilePaths["CONCEPT_DIMENSION"] = FileInfo{TableName: "i2b2demodata.concept_dimension", Path: folderPath + "concept_dimension.csv"}
@@ -126,11 +126,15 @@ func generateOutputFiles(folderPath string) {
 }
 
 // ConvertI2B2 it's the main function that performs a full conversion and loading of the I2B2 data
-func ConvertI2B2(el *onet.Roster, entryPointIdx int, files Files, mapSensitive map[string]struct{}, databaseS loader.DBSettings, empty bool) error {
+func ConvertI2B2(el *onet.Roster, entryPointIdx int, files Files, allSensitive bool, mapSensitive map[string]struct{}, databaseS loader.DBSettings, empty bool) error {
 	InputFilePaths = make(map[string]string)
 	OutputFilePaths = make(map[string]FileInfo)
 
-	ListSensitiveConcepts = mapSensitive
+	if allSensitive {
+		AllSensitive = true
+	} else {
+		ListSensitiveConcepts = mapSensitive
+	}
 
 	// change input filepaths
 	InputFilePaths["TABLE_ACCESS"] = files.TableAccess
@@ -282,42 +286,42 @@ func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
 	loading += "BEGIN;\n"
 
 	loading += "TRUNCATE TABLE i2b2demodata.concept_dimension;\n" +
-				"TRUNCATE TABLE i2b2demodata.patient_dimension;\n" +
-				"TRUNCATE TABLE i2b2demodata.visit_dimension;\n" +
-				"TRUNCATE TABLE i2b2demodata.observation_fact;\n"
+		"TRUNCATE TABLE i2b2demodata.patient_dimension;\n" +
+		"TRUNCATE TABLE i2b2demodata.visit_dimension;\n" +
+		"TRUNCATE TABLE i2b2demodata.observation_fact;\n"
 
 	loading += `\copy ` + OutputFilePaths["CONCEPT_DIMENSION"].TableName + ` FROM '` + OutputFilePaths["CONCEPT_DIMENSION"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n" +
 		`\copy ` + OutputFilePaths["PATIENT_DIMENSION"].TableName + ` FROM '` + OutputFilePaths["PATIENT_DIMENSION"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n" +
 		`\copy ` + OutputFilePaths["VISIT_DIMENSION"].TableName + ` FROM '` + OutputFilePaths["VISIT_DIMENSION"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n" +
-		`\copy ` + OutputFilePaths["OBSERVATION_FACT"].TableName + ` FROM '` + OutputFilePaths["OBSERVATION_FACT"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` +"\n"
+		`\copy ` + OutputFilePaths["OBSERVATION_FACT"].TableName + ` FROM '` + OutputFilePaths["OBSERVATION_FACT"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n"
 
 	loading += "\n"
 
 	for file, fI := range OutputFilePaths {
-		if strings.HasPrefix(file, "LOCAL_"){
-			loading += "TRUNCATE TABLE "+ fI.TableName +";\n"
-			loading += `\copy ` + fI.TableName + ` FROM '` + fI.Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;`+"\n"
+		if strings.HasPrefix(file, "LOCAL_") {
+			loading += "TRUNCATE TABLE " + fI.TableName + ";\n"
+			loading += `\copy ` + fI.TableName + ` FROM '` + fI.Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n"
 		}
 	}
 	loading += "TRUNCATE TABLE i2b2metadata.sensitive_tagged;\n"
-	loading += `\copy ` + OutputFilePaths["SENSITIVE_TAGGED"].TableName + ` FROM '` + OutputFilePaths["SENSITIVE_TAGGED"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;`+"\n"
+	loading += `\copy ` + OutputFilePaths["SENSITIVE_TAGGED"].TableName + ` FROM '` + OutputFilePaths["SENSITIVE_TAGGED"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n"
 	loading += "TRUNCATE TABLE i2b2metadata.table_access;\n"
-	loading += `\copy ` + OutputFilePaths["TABLE_ACCESS_L"].TableName + ` FROM '` + OutputFilePaths["TABLE_ACCESS_L"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;`+"\n"
+	loading += `\copy ` + OutputFilePaths["TABLE_ACCESS_L"].TableName + ` FROM '` + OutputFilePaths["TABLE_ACCESS_L"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n"
 	loading += "TRUNCATE TABLE i2b2metadata.schemes;\n"
-	loading += `\copy ` + OutputFilePaths["SCHEMES_L"].TableName + ` FROM '` + OutputFilePaths["SCHEMES_L"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;`+"\n"
+	loading += `\copy ` + OutputFilePaths["SCHEMES_L"].TableName + ` FROM '` + OutputFilePaths["SCHEMES_L"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n"
 	loading += "\n"
 
 	for file, fI := range OutputFilePaths {
-		if strings.HasPrefix(file, "SHRINE_"){
-			loading += "CREATE TABLE IF NOT EXISTS " + fI.TableName + " AS SELECT * FROM shrine_ont.shrine WHERE 1=2;"+"\n"
+		if strings.HasPrefix(file, "SHRINE_") {
+			loading += "CREATE TABLE IF NOT EXISTS " + fI.TableName + " AS SELECT * FROM shrine_ont.shrine WHERE 1=2;" + "\n"
 			loading += "TRUNCATE TABLE " + fI.TableName + ";\n"
-			loading += `\copy ` + fI.TableName + ` FROM '` + fI.Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;`+"\n"
+			loading += `\copy ` + fI.TableName + ` FROM '` + fI.Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n"
 		}
 	}
 	loading += "TRUNCATE TABLE " + OutputFilePaths["TABLE_ACCESS_S"].TableName + ";\n"
-	loading += `\copy ` + OutputFilePaths["TABLE_ACCESS_S"].TableName + ` FROM '` + OutputFilePaths["TABLE_ACCESS_S"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;`+"\n"
+	loading += `\copy ` + OutputFilePaths["TABLE_ACCESS_S"].TableName + ` FROM '` + OutputFilePaths["TABLE_ACCESS_S"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n"
 	loading += "TRUNCATE TABLE " + OutputFilePaths["SCHEMES_S"].TableName + ";\n"
-	loading += `\copy ` + OutputFilePaths["SCHEMES_S"].TableName + ` FROM '` + OutputFilePaths["SCHEMES_S"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;`+"\n"
+	loading += `\copy ` + OutputFilePaths["SCHEMES_S"].TableName + ` FROM '` + OutputFilePaths["SCHEMES_S"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n"
 	loading += "COMMIT;\n"
 	loading += "EOSQL"
 
@@ -410,12 +414,17 @@ func StripByLevel(conceptPath string, number int, order bool) string {
 
 // HasSensitiveParents is a function that checks if a node whether in the LocalOntology or ConceptDimension has any siblings which are sensitive.
 func HasSensitiveParents(conceptPath string) (string, bool) {
+	if AllSensitive == true {
+		return "", true
+	}
+
 	temp := conceptPath
 
 	isSensitive := false
 	for temp != "" {
 		if _, ok := ListSensitiveConcepts[temp]; ok {
 			isSensitive = true
+			ListSensitiveConcepts[conceptPath] = struct{}{}
 			break
 		}
 		temp = StripByLevel(temp, 1, false)
@@ -425,7 +434,7 @@ func HasSensitiveParents(conceptPath string) (string, bool) {
 
 // SCHEMES.CSV reader
 
-// ParseTableAccess reads and parses the schemes.csv.
+// ParseSchemes reads and parses the schemes.csv.
 func ParseSchemes() error {
 	lines, err := readCSV("SCHEMES")
 	if err != nil {
@@ -887,18 +896,10 @@ func ParseLocalTable(group *onet.Roster, entryPointIdx int, name string) error {
 			// create entry for shrine ontology (direct copy)
 			so := ShrineOntologyFromLocalConcept(lo)
 
-			// if the flag AllSensitive is 'active'
-			sensitive := false
-			if AllSensitive == true {
-				sensitive = true
-			} else {
-				// check if local ontology concept is a child of any of the sensitive concepts selected by the client
-				_, sensitive = HasSensitiveParents(lo.Fullname)
-			}
+			_, sensitive := HasSensitiveParents(lo.Fullname)
 
 			// if it is sensitive or has a sensitive parent
 			if sensitive {
-				ListSensitiveConcepts[lo.Fullname] = struct{}{}
 
 				//TODO for now we remove all modifiers
 				if strings.ToLower(so.FactTableColumn) == "concept_cd" {

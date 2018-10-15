@@ -21,7 +21,7 @@ import (
 //#----------------------------------------------- LOAD DATA -----------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------
 
-func loadData(c *cli.Context) error {
+func loadGenomicData(c *cli.Context) error {
 
 	// data set file paths
 	clinicalOntologyPath := c.String("ont_clinical")
@@ -128,7 +128,7 @@ func loadData(c *cli.Context) error {
 	return nil
 }
 
-func convertI2B2DataModel(c *cli.Context) error {
+func loadi2b2Data(c *cli.Context) error {
 	// data set file paths
 	groupFilePath := c.String("group")
 	dataFilesPath := c.String("files")
@@ -146,13 +146,13 @@ func convertI2B2DataModel(c *cli.Context) error {
 	databaseS := loader.DBSettings{DBhost: dbHost, DBport: dbPort, DBname: dbName, DBuser: dbUser, DBpassword: dbPassword}
 
 	// check if db connection works
-	/*psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+"password=%s dbname=%s sslmode=disable", dbHost, dbPort, dbUser, dbPassword, dbName)
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+"password=%s dbname=%s sslmode=disable", dbHost, dbPort, dbUser, dbPassword, dbName)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		log.Error("Error while opening database", err)
 		return cli.NewExitError(err, 1)
 	}
-	db.Close()*/
+	db.Close()
 
 	// generate el with group file
 	f, err := os.Open(groupFilePath)
@@ -188,12 +188,16 @@ func convertI2B2DataModel(c *cli.Context) error {
 	// place all sensitive attributes in map set to allow for faster search
 	mapSensitive := make(map[string]struct{}, 0)
 	scanner := bufio.NewScanner(f)
+	allSensitive := false
 	for scanner.Scan() {
 		line := scanner.Text()
+		if line == "all" {
+			allSensitive = true
+		}
 		mapSensitive[line] = struct{}{}
 	}
 
-	loaderi2b2.ConvertI2B2(el.Roster, entryPointIdx, files, mapSensitive, databaseS, empty)
+	loaderi2b2.ConvertI2B2(el.Roster, entryPointIdx, files, allSensitive, mapSensitive, databaseS, empty)
 	if err != nil {
 		log.Error("Error while converting I2B2 data:", err)
 		return cli.NewExitError(err, 1)

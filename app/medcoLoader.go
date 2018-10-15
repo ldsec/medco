@@ -201,14 +201,14 @@ func main() {
 			Aliases: []string{"v0"},
 			Usage:   "Load genomic data (e.g. tcga_bio and skcm_broad datasets)",
 			Flags:   loaderFlagsv0,
-			Action:  loadData,
+			Action:  loadGenomicData,
 		},
 		{
 			Name:    "version1",
 			Aliases: []string{"v1"},
 			Usage:   "Convert existing i2b2 data model",
 			Flags:   loaderFlagsv1,
-			Action:  convertI2B2DataModel,
+			Action:  loadi2b2Data,
 		},
 		// CLIENT END: DATA LOADER ------------
 	}

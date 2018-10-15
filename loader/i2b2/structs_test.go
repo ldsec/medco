@@ -20,9 +20,9 @@ func TestSchemes_ToCSVText(t *testing.T) {
 	}
 
 	s := loaderi2b2.Schemes{
-		PK:				 sk,
-		Name:            "NDC",
-		Description:     "National Drug Code",
+		PK:          sk,
+		Name:        "NDC",
+		Description: "National Drug Code",
 	}
 
 	assert.Equal(t, s.ToCSVText(), `"NDC:","NDC","National Drug Code"`)

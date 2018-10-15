@@ -28,14 +28,14 @@ var IDConcepts int64
 // TableSchemes is schemes table
 var TableSchemes map[*SchemesPK]Schemes
 
-// HeaderObservationFact contains all the headers for the observation_fact table
+// HeaderSchemes contains all the headers for the observation_fact table
 var HeaderSchemes []string
 
 // Schemes table represents a scheme in the database
 type Schemes struct {
-	PK         	 *SchemesPK
-	Name  		 string
-	Description  string
+	PK          *SchemesPK
+	Name        string
+	Description string
 }
 
 // SchemesPK is the primary key of the schemes table
@@ -226,10 +226,10 @@ type LocalOntology struct {
 	Symbol           string
 
 	// this only exists in the sensitive tagged
-	PCoriBasecode 	 string
+	PCoriBasecode string
 
 	// only exists in some strange tables (like icd10_icd9)
-	PlainCode		 string
+	PlainCode string
 }
 
 // ToCSVText writes the LocalOntology object in a way that can be added to a .csv file - "","","", etc.
@@ -529,8 +529,8 @@ func SchemesFromString(line []string) (*SchemesPK, Schemes) {
 	}
 
 	s := Schemes{
-		PK: sk,
-		Name: line[1],
+		PK:          sk,
+		Name:        line[1],
 		Description: line[2],
 	}
 
