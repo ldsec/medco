@@ -20,8 +20,11 @@ var ListSensitiveConcepts map[string]struct{}
 // AllSensitive is a flag that defines whether all concepts are to be considered sensitive or not (-allSens flag)
 var AllSensitive = false
 
-// IDConcepts used to assign IDs to the different concepts
+// IDConcepts used to assign IDs (NodeEncryptIDs) to be encrypted to the different concepts
 var IDConcepts int64
+
+// TagIDConceptsUsed used to keep track of the number of TAG_IDs that have been used
+var TagIDConceptsUsed int64
 
 // ####----DATA TYPES----####
 

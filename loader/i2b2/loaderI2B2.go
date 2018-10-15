@@ -790,6 +790,7 @@ func UpdateChildrenEncryptIDs(name string) {
 func ConvertLocalOntology(group *onet.Roster, entryPointIdx int) error {
 	// initialize container structs and counters
 	IDConcepts = 0
+	TagIDConceptsUsed = 0
 	TablesShrineOntology = make(map[string]ShrineTableInfo)
 	MapConceptPathToTag = make(map[string]TagAndID)
 
@@ -958,15 +959,18 @@ func ParseLocalTable(group *onet.Roster, entryPointIdx int, name string) error {
 
 		// re-randomize TAG_IDs
 		rand.Seed(time.Now().UnixNano())
-		_ := rand.Perm(len(MapConceptPathToTag))
+		perm := rand.Perm(len(MapConceptPathToTag))
 
 		// 'populate' map (Concept codes)
+		// we create a permutation of [0, n] and then add #concepts_already_parsed
 		for i, concept := range listConceptCD {
 			var tmp = MapConceptPathToTag[concept]
-			tmp.TagID = int64(i)
+			tmp.TagID = TagIDConceptsUsed + int64(perm[i])
 			tmp.Tag = taggedConceptValues[i]
 			MapConceptPathToTag[concept] = tmp
 		}
+
+		TagIDConceptsUsed += int64(len(MapConceptPathToTag))
 	}
 
 	return nil
@@ -1389,7 +1393,6 @@ func ConvertConceptDimension() error {
 			csvOutputFile.WriteString(cd.ToCSVText() + "\n")
 			// if concept is not defined as sensitive but one of its parents is then we consider the tagID of the parent as its identifier
 		} else {
-			log.Lvl2("SHOULD NOT GO INSIDE")
 			MapConceptCodeToTag[cd.ConceptCD] = MapConceptPathToTag[sensitiveParent].TagID
 		}
 	}
