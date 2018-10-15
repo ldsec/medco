@@ -335,11 +335,15 @@ func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
 func LoadDataFiles() error {
 	// Display just the stderr if an error occurs
 	cmd := exec.Command("/bin/sh", FileBashPath)
-	stderr := &bytes.Buffer{} // make sure to import bytes
-	cmd.Stderr = stderr
-	err := cmd.Run()
-	if err != nil {
-		log.Lvl1("Error when running command.  Error log:", stderr.String())
+	var stdBuffer bytes.Buffer
+	mw := io.MultiWriter(os.Stdout, &stdBuffer)
+
+	cmd.Stdout = mw
+	cmd.Stderr = mw
+
+	// Execute the command
+	if err := cmd.Run(); err != nil {
+		log.Lvl1("Error when running command.  Error log:", cmd.Stderr)
 		log.Lvl1("Got command status:", err.Error())
 		return err
 	}

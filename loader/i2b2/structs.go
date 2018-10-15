@@ -616,8 +616,8 @@ func LocalOntologyFromString(line []string, plainCode bool) *LocalOntology {
 
 	so := &LocalOntology{
 		HLevel:           line[0],
-		Fullname:         line[1],
-		Name:             line[2],
+		Fullname:         strings.Replace(line[1], `"`, "", -1),
+		Name:             strings.Replace(line[2], `"`, "", -1),
 		SynonymCD:        line[3],
 		VisualAttributes: line[4],
 		TotalNum:         line[5],
@@ -628,15 +628,15 @@ func LocalOntologyFromString(line []string, plainCode bool) *LocalOntology {
 		ColumnName:       line[10],
 		ColumnDataType:   line[11],
 		Operator:         line[12],
-		DimCode:          line[13],
+		DimCode:          strings.Replace(line[13], "\"", "\"\"", -1),
 		Comment:          line[14],
-		Tooltip:          line[15],
+		Tooltip:          strings.Replace(line[15], "\"", "\"\"", -1),
 		AppliedPath:      line[16],
 		AdminColumns:     ac,
 		ValueTypeCD:      line[21],
 		ExclusionCD:      line[22],
-		Path:             line[23],
-		Symbol:           line[24],
+		Path:             strings.Replace(line[23], "\"", "\"\"", -1),
+		Symbol:           strings.Replace(line[24], "\"", "\"\"", -1),
 	}
 
 	if plainCode {
