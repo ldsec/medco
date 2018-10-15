@@ -616,8 +616,8 @@ func LocalOntologyFromString(line []string, plainCode bool) *LocalOntology {
 
 	so := &LocalOntology{
 		HLevel:           line[0],
-		Fullname:         strings.Replace(line[1], `"`, "", -1),
-		Name:             strings.Replace(line[2], `"`, "", -1),
+		Fullname:         strings.Replace(line[1], "\"", "\"\"", -1),
+		Name:             strings.Replace(line[2], "\"", "\"\"", -1),
 		SynonymCD:        line[3],
 		VisualAttributes: line[4],
 		TotalNum:         line[5],
@@ -726,13 +726,13 @@ func VisitDimensionFromString(line []string) (VisitDimensionPK, VisitDimension) 
 // ConceptDimensionFromString generates a ConceptDimension struct from a parsed line of a .csv file
 func ConceptDimensionFromString(line []string) (*ConceptDimensionPK, ConceptDimension) {
 	cdk := &ConceptDimensionPK{
-		ConceptPath: strings.Replace(line[0], `"`, "", -1),
+		ConceptPath: strings.Replace(line[0], "\"", "\"\"", -1),
 	}
 
 	cd := ConceptDimension{
 		PK:          cdk,
 		ConceptCD:   line[1],
-		NameChar:    strings.Replace(line[2], `"`, "", -1),
+		NameChar:    strings.Replace(line[2], "\"", "\"\"", -1),
 		ConceptBlob: line[3],
 	}
 
