@@ -313,9 +313,9 @@ func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
 			loading += `\copy ` + fI.TableName + ` FROM '` + fI.Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;`+"\n"
 		}
 	}
-	loading += "CREATE TABLE IF NOT EXISTS " + OutputFilePaths["TABLE_ACCESS_S"].TableName + " AS SELECT * FROM i2b2metadata.table_access WHERE 1=2;"+"\n"
+	loading += "TRUNCATE TABLE " + OutputFilePaths["TABLE_ACCESS_S"].TableName + ";\n"
 	loading += `\copy ` + OutputFilePaths["TABLE_ACCESS_S"].TableName + ` FROM '` + OutputFilePaths["TABLE_ACCESS_S"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;`+"\n"
-	loading += "CREATE TABLE IF NOT EXISTS " + OutputFilePaths["SCHEMES_S"].TableName + " AS SELECT * FROM i2b2metadata.schemes WHERE 1=2;"+"\n"
+	loading += "TRUNCATE TABLE " + OutputFilePaths["SCHEMES_S"].TableName + ";\n"
 	loading += `\copy ` + OutputFilePaths["SCHEMES_S"].TableName + ` FROM '` + OutputFilePaths["SCHEMES_S"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;`+"\n"
 	loading += "COMMIT;\n"
 	loading += "EOSQL"
