@@ -47,7 +47,7 @@ var (
 
 		"ONTOLOGY_BIRN":        "../../data/i2b2/original/birn.csv",
 		"ONTOLOGY_CUSTOM_META": "../../data/i2b2/original/custom_meta.csv",
-		//"ONTOLOGY_ICD10_ICD9":  	"../../data/i2b2/original/icd10_icd9.csv",
+		"ONTOLOGY_ICD10_ICD9":  	"../../data/i2b2/original/icd10_icd9.csv",
 		"ONTOLOGY_I2B2": "../../data/i2b2/original/i2b2.csv",
 
 		"DUMMY_TO_PATIENT":  "../../data/i2b2/original/dummy_to_patient.csv",
@@ -65,14 +65,14 @@ var (
 		"SCHEMES_L":         {TableName: "i2b2metadata.local_schemes", Path: "../../data/i2b2/converted/local_schemes.csv"},
 		"LOCAL_BIRN":        {TableName: "i2b2metadata.birn", Path: "../../data/i2b2/converted/local_birn.csv"},
 		"LOCAL_CUSTOM_META": {TableName: "i2b2metadata.custom_meta", Path: "../../data/i2b2/converted/local_custom_meta.csv"},
-		//"LOCAL_ICD10_ICD9":  	{TableName: "i2b2metadata.icd10_icd9", Path: "../../data/i2b2/converted/local_icd10_icd9.csv"},
+		"LOCAL_ICD10_ICD9":  	{TableName: "i2b2metadata.icd10_icd9", Path: "../../data/i2b2/converted/local_icd10_icd9.csv"},
 		"LOCAL_I2B2": {TableName: "i2b2metadata.i2b2", Path: "../../data/i2b2/converted/local_i2b2.csv"},
 
 		"TABLE_ACCESS_S":     {TableName: "shrine_ont.table_access", Path: "../../data/i2b2/converted/shrine_table_access.csv"},
 		"SCHEMES_S":          {TableName: "shrine_ont.shrine_schemes", Path: "../../data/i2b2/converted/shrine_schemes.csv"},
 		"SHRINE_BIRN":        {TableName: "shrine_ont.birn", Path: "../../data/i2b2/converted/shrine_birn.csv"},
 		"SHRINE_CUSTOM_META": {TableName: "shrine_ont.custom_meta", Path: "../../data/i2b2/converted/shrine_custom_meta.csv"},
-		//"SHRINE_ICD10_ICD9":  {TableName: "shrine_ont.icd10_icd9", Path: "../../data/i2b2/converted/shrine_icd10_icd9.csv"},
+		"SHRINE_ICD10_ICD9":  {TableName: "shrine_ont.icd10_icd9", Path: "../../data/i2b2/converted/shrine_icd10_icd9.csv"},
 		"SHRINE_I2B2": {TableName: "shrine_ont.i2b2", Path: "../../data/i2b2/converted/shrine_i2b2.csv"},
 
 		"PATIENT_DIMENSION": {TableName: "i2b2demodata.patient_dimension", Path: "../../data/i2b2/converted/patient_dimension.csv"},
@@ -903,7 +903,7 @@ func ParseLocalTable(group *onet.Roster, entryPointIdx int, name string) error {
 			if sensitive {
 
 				//TODO for now we remove all modifiers
-				if strings.ToLower(so.FactTableColumn) == "concept_cd" {
+				if strings.ToLower(so.FactTableColumn) != "modifier_cd" {
 					so.NodeEncryptID = IDConcepts
 
 					if _, ok := TablesShrineOntology[rawName]; ok {
@@ -927,7 +927,7 @@ func ParseLocalTable(group *onet.Roster, entryPointIdx int, name string) error {
 			} else {
 
 				//TODO for now we remove all modifiers
-				if strings.ToLower(so.FactTableColumn) == "concept_cd" {
+				if strings.ToLower(so.FactTableColumn) != "modifier_cd" {
 					if lo.HLevel != "0" {
 						// add a new entry for the AdapterMappings (1-1 mapping between shrine and local concept)
 						addNewAdapterMapping(lo.Fullname, false)
@@ -1328,6 +1328,7 @@ func ParseConceptDimension() error {
 		return err
 	}
 
+	ListConceptsToIgnore = make(map[string]struct{})
 	TableConceptDimension = make(map[*ConceptDimensionPK]ConceptDimension)
 	HeaderConceptDimension = make([]string, 0)
 	MapConceptCodeToTag = make(map[string]int64)
@@ -1389,11 +1390,10 @@ func ConvertConceptDimension() error {
 			csvOutputFile.WriteString(ConceptDimensionSensitiveToCSVText(&temp, MapConceptPathToTag[cd.PK.ConceptPath].TagID) + "\n")
 			MapConceptCodeToTag[cd.ConceptCD] = MapConceptPathToTag[cd.PK.ConceptPath].TagID
 			// if the concept does not exist in the LocalOntology and none of his siblings is sensitive
-		} else if sensitiveParent, ok := HasSensitiveParents(cd.PK.ConceptPath); !ok {
+		} else if _, ok := HasSensitiveParents(cd.PK.ConceptPath); !ok {
 			csvOutputFile.WriteString(cd.ToCSVText() + "\n")
-			// if concept is not defined as sensitive but one of its parents is then we consider the tagID of the parent as its identifier
 		} else {
-			MapConceptCodeToTag[cd.ConceptCD] = MapConceptPathToTag[sensitiveParent].TagID
+			ListConceptsToIgnore[cd.ConceptCD] = struct {}{}
 		}
 	}
 
@@ -1460,22 +1460,26 @@ func ParseObservationFact() error {
 	//skip header
 	for _, line := range lines[1:] {
 		ofk, of := ObservationFactFromString(line)
-		TableObservationFact[ofk] = of
 
-		// if patient does not exist
-		if _, ok := MapPatientObs[ofk.PatientNum]; !ok {
-			// create array and add the observation
-			tmp := make([]*ObservationFactPK, 0)
-			tmp = append(tmp, ofk)
-			MapPatientObs[ofk.PatientNum] = tmp
-		} else {
-			// append encounter to array
-			MapPatientObs[ofk.PatientNum] = append(MapPatientObs[ofk.PatientNum], ofk)
-		}
+		//TODO do not consider observation where the concept is not mapped in the ontology
+		if _, ok := ListConceptsToIgnore[ofk.ConceptCD]; !ok {
+			TableObservationFact[ofk] = of
 
-		// if dummy
-		if originalPatient, ok := TableDummyToPatient[ofk.PatientNum]; ok {
-			MapDummyObs[ofk.PatientNum] = MapPatientObs[originalPatient]
+			// if patient does not exist
+			if _, ok := MapPatientObs[ofk.PatientNum]; !ok {
+				// create array and add the observation
+				tmp := make([]*ObservationFactPK, 0)
+				tmp = append(tmp, ofk)
+				MapPatientObs[ofk.PatientNum] = tmp
+			} else {
+				// append encounter to array
+				MapPatientObs[ofk.PatientNum] = append(MapPatientObs[ofk.PatientNum], ofk)
+			}
+
+			// if dummy
+			if originalPatient, ok := TableDummyToPatient[ofk.PatientNum]; ok {
+				MapDummyObs[ofk.PatientNum] = MapPatientObs[originalPatient]
+			}
 		}
 	}
 

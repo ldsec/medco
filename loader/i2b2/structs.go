@@ -17,6 +17,9 @@ var Testing bool // testing environment
 // ListSensitiveConcepts list all sensitive concepts (paths) - SHRINE and LOCAL (the bool is for nothing)
 var ListSensitiveConcepts map[string]struct{}
 
+// ListConceptsToIgnore lists concepts that appear in the concept_dimension and not in the ontology (which is kind of strange)
+var ListConceptsToIgnore map[string]struct{}
+
 // AllSensitive is a flag that defines whether all concepts are to be considered sensitive or not (-allSens flag)
 var AllSensitive = false
 
