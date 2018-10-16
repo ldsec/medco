@@ -44,6 +44,7 @@ _testmain.go
 
 services/*.toml
 app/*.toml
+app/app
 app/loader/*.toml
 app/loader/files/
 app/loader/scripts/*.txt

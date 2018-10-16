@@ -271,7 +271,6 @@ func (s *Service) HandleSurveyDDTRequestTerms(sdq *SurveyDDTRequest) (network.Me
 		survey.TR.DDTRequestTimeExec += time.Since(start)
 
 		tr := survey.TR
-		log.Lvl1("Final DDT data:", listTaggedTerms)
 		return &ResultDDT{Result: listTaggedTerms, TR: tr}, nil
 	}
 
