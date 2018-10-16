@@ -41,6 +41,13 @@ type FileInfo struct {
 
 // The different paths and handlers for all the files both for input and/or output
 var (
+	OntologyFilesPaths = []string {
+		"ONTOLOGY_BIRN",
+		"ONTOLOGY_CUSTOM_META",
+		"ONTOLOGY_ICD10_ICD9",
+		"ONTOLOGY_I2B2",
+	}
+
 	InputFilePaths = map[string]string{
 		"TABLE_ACCESS": "../../data/i2b2/original/table_access.csv",
 		"SCHEMES":      "../../data/i2b2/original/schemes.csv",
@@ -129,6 +136,7 @@ func generateOutputFiles(folderPath string) {
 func ConvertI2B2(el *onet.Roster, entryPointIdx int, files Files, allSensitive bool, mapSensitive map[string]struct{}, databaseS loader.DBSettings, empty bool) error {
 	InputFilePaths = make(map[string]string)
 	OutputFilePaths = make(map[string]FileInfo)
+	OntologyFilesPaths = make([]string,0)
 
 	if allSensitive {
 		AllSensitive = true
@@ -146,8 +154,9 @@ func ConvertI2B2(el *onet.Roster, entryPointIdx int, files Files, allSensitive b
 
 	for _, name := range files.Ontology {
 		tokens := strings.Split(name, "/")
-		ontologyName := tokens[len(tokens)-1]
-		InputFilePaths["ONTOLOGY_"+strings.ToUpper(strings.Split(ontologyName, ".")[0])] = name
+		ontologyName := "ONTOLOGY_"+strings.ToUpper(strings.Split(tokens[len(tokens)-1], ".")[0])
+		InputFilePaths[ontologyName] = name
+		OntologyFilesPaths = append(OntologyFilesPaths,ontologyName)
 	}
 	InputFilePaths["PATIENT_DIMENSION"] = files.PatientDimension
 	InputFilePaths["VISIT_DIMENSION"] = files.VisitDimension
@@ -725,13 +734,11 @@ func GenerateShrineOntology() error {
 
 	*/
 
-	for key := range InputFilePaths {
-		if strings.HasPrefix(key, "ONTOLOGY_") {
-			err := generateNewShrineTable(strings.Split(key, "ONTOLOGY_")[1])
-			if err != nil {
-				log.Fatal("Error generating [" + key + "].csv")
-				return err
-			}
+	for _, key := range OntologyFilesPaths {
+		err := generateNewShrineTable(strings.Split(key, "ONTOLOGY_")[1])
+		if err != nil {
+			log.Fatal("Error generating [" + key + "].csv")
+			return err
 		}
 	}
 	return nil
@@ -794,19 +801,17 @@ func ConvertLocalOntology(group *onet.Roster, entryPointIdx int) error {
 	TablesShrineOntology = make(map[string]ShrineTableInfo)
 	MapConceptPathToTag = make(map[string]TagAndID)
 
-	for key := range InputFilePaths {
-		if strings.HasPrefix(key, "ONTOLOGY_") {
-			rawName := strings.Split(key, "ONTOLOGY_")[1]
-			err := ParseLocalTable(group, entryPointIdx, key)
-			if err != nil {
-				log.Fatal("Error parsing [" + strings.ToLower(rawName) + "].csv")
-				return err
-			}
-			err = ConvertClearLocalTable(rawName)
-			if err != nil {
-				log.Fatal("Error converting [" + strings.ToLower(rawName) + "].csv")
-				return err
-			}
+	for _, key := range OntologyFilesPaths {
+		rawName := strings.Split(key, "ONTOLOGY_")[1]
+		err := ParseLocalTable(group, entryPointIdx, key)
+		if err != nil {
+			log.Fatal("Error parsing [" + strings.ToLower(rawName) + "].csv")
+			return err
+		}
+		err = ConvertClearLocalTable(rawName)
+		if err != nil {
+			log.Fatal("Error converting [" + strings.ToLower(rawName) + "].csv")
+			return err
 		}
 	}
 
