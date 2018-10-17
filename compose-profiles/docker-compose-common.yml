@@ -77,7 +77,3 @@ services:
       - DB_PASSWORD=keycloak
     ports:
       - "8081:8080"
-    networks:
-      - medco-srv0
-      - medco-srv1
-      - medco-srv2
