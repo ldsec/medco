@@ -131,8 +131,8 @@ services:
       file: ../docker-compose-common.yml
       service: unlynx
     ports:
-      - "2006:2004"
-      - "2007:2005"
+      - "2006:2006"
+      - "2007:2007"
     environment:
       - NODE_IDX=2
       - UNLYNX_DEBUG_LEVEL=3
