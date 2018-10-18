@@ -25,7 +25,7 @@ FROM debian:stretch as prod
 ENV I2B2_DB_HOST="postgresql" \
     I2B2_DB_PORT="5432" \
     I2B2_DB_USER="i2b2" \
-    I2B2_DB_PW ="i2b2" \
+    I2B2_DB_PW="i2b2" \
     I2B2_DB_NAME="i2b2medco" \
     I2B2_DOMAIN_NAME="i2b2medco"
 
