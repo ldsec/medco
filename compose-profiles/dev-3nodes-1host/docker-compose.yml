@@ -47,6 +47,7 @@ services:
       - "82:80"
       - "445:443"
     environment:
+      - I2B2_DB_PW=i2b2
       - I2B2_DOMAIN_NAME=i2b2medcosrv0
       - I2B2_URL=http://i2b2-medco-srv0:8080/i2b2/services
     networks:
