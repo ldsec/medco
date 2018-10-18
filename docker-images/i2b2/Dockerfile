@@ -47,10 +47,12 @@ ENV I2B2_SQL_DIR="/i2b2-sql" \
     PRE_INIT_SCRIPT_DIR="/pre-init-scripts" \
     I2B2_DATA_VERSION="v1.7.10.0002" \
     I2B2_FR_FILES_DIR="$JBOSS_HOME/standalone/data/i2b2_FR_files" \
-    PG_JDBC_JAR="postgresql-42.1.4.jar"
+    PG_JDBC_JAR="postgresql-42.1.4.jar" \
+    JBOSS_WAR_DEPLOYMENTS="$JBOSS_HOME/standalone/deployments"
 
 COPY --from=dev --chown=jboss:jboss "$JBOSS_HOME/standalone/configuration" "$JBOSS_HOME/standalone/configuration"
 COPY --from=dev --chown=jboss:jboss "$JBOSS_HOME/standalone/deployments" "$JBOSS_HOME/standalone/deployments"
+COPY --from=dev --chown=jboss:jboss "$JBOSS_HOME/I2b2PasswordHash" "$JBOSS_HOME/I2b2PasswordHash"
 COPY docker-entrypoint.sh /usr/local/bin/
 COPY sql "$I2B2_SQL_DIR"
 COPY pre-init-scripts "$PRE_INIT_SCRIPT_DIR"
@@ -60,7 +62,7 @@ RUN sed -i 's/Xmx512m/Xmx2048m/g' $JBOSS_HOME/bin/standalone.conf && \
     sed -i 's/MaxMetaspaceSize=256m/MaxMetaspaceSize=1024m/g' $JBOSS_HOME/bin/standalone.conf && \
     chmod +x /usr/local/bin/docker-entrypoint.sh && \
     mkdir -p "$I2B2_DATA_DIR" "$I2B2_FR_FILES_DIR" && \
-    chown -R jboss:jboss "$I2B2_DATA_DIR" && \
+    chown -R jboss:jboss "$I2B2_DATA_DIR" "$JBOSS_HOME" && \
     yum update -y && \
     yum -y install wget git ant postgresql && \
     yum clean all
