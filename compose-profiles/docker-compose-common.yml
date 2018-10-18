@@ -31,8 +31,14 @@ services:
       - "80"
       - "443"
     environment:
+      - I2B2_DB_HOST=postgresql
+      - I2B2_DB_PORT=5432
+      - I2B2_DB_USER=i2b2
+      - I2B2_DB_PW=i2b2
+      - I2B2_DB_NAME=i2b2medco
       - I2B2_DOMAIN_NAME=i2b2medco
       - I2B2_URL=http://i2b2-medco:8080/i2b2/services
+      - CORS_ALLOW_ORIGIN=http://localhost:4200
 
   unlynx:
     image: medco/i2b2-unlynx:latest

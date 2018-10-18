@@ -22,10 +22,17 @@ RUN git init . && \
 FROM debian:stretch as prod
 
 # run-time variables
-ENV I2B2_DOMAIN_NAME="medcodeployment"
+ENV I2B2_DB_HOST="postgresql" \
+    I2B2_DB_PORT="5432" \
+    I2B2_DB_USER="i2b2" \
+    I2B2_DB_PW ="i2b2" \
+    I2B2_DB_NAME="i2b2medco" \
+    I2B2_DOMAIN_NAME="i2b2medco"
 
 # build-time variables
 ENV LIGHTTPD_WEB_ROOT="/var/www/html"
+
+ENV CORS_ALLOW_ORIGIN="http://localhost:4200"
 
 COPY --from=dev --chown=www-data:www-data "/www" "$LIGHTTPD_WEB_ROOT"
 COPY --chown=www-data:www-data www-data/* "$LIGHTTPD_WEB_ROOT/"
