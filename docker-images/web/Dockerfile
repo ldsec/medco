@@ -46,7 +46,7 @@ RUN apt-get -y update && \
     wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg && \
     sh -c 'echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list' && \
     apt-get -y update && \
-    apt-get -y install lighttpd postgresql-client libterm-readline-gnu-perl curl php5.6 php5.6-cgi php5.6-curl && \
+    apt-get -y install lighttpd postgresql-client libterm-readline-gnu-perl curl php5.6 php5.6-cgi php5.6-curl php5.6-pgsql && \
     apt-get -y clean && \
     sed -i 's/display_errors = Off/display_errors = On/g' /etc/php/5.6/cgi/php.ini && \
     chgrp -R www-data /etc/lighttpd && \
