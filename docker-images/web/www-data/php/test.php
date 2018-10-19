@@ -9,11 +9,9 @@ header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, HEAD');
 include 'sqlConnection.php';
 
 // get the row which contains all the values of the passed annotation
-$query = "
-	SELECT concept_path 
-    FROM i2b2demodata.concept_dimension
-    WHERE concept_code = 'TAG_ID:0';
-";
+$query = "SELECT concept_path 
+    	FROM i2b2demodata_i2b2.concept_dimension
+    	WHERE concept_cd = 'TAG_ID:0';";
 
 $result = pg_query($conn, $query);
 if (!$result) {
@@ -21,7 +19,6 @@ if (!$result) {
     exit;
 }
 
-// In json format return the list of genes
 $concept_path = "";
 while ($row = pg_fetch_row($result)) {
     $concept_path .= "\"$row[0]\",";
