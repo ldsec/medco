@@ -32,7 +32,7 @@ ENV I2B2_DB_HOST="postgresql" \
 # build-time variables
 ENV LIGHTTPD_WEB_ROOT="/var/www/html"
 
-ENV CORS_ALLOW_ORIGIN="http://localhost:4200"
+ENV CORS_ALLOW_ORIGIN="http:\/\/localhost:4200"
 
 COPY --from=dev --chown=www-data:www-data "/www" "$LIGHTTPD_WEB_ROOT"
 COPY --chown=www-data:www-data www-data/ "$LIGHTTPD_WEB_ROOT/"
@@ -58,13 +58,13 @@ RUN apt-get -y update && \
     lighttpd-enable-mod fastcgi-php
 
 # set global variables (to be available for php scripts)
-#RUN sed -i "s/\"bin-environment\" => (/\"bin-environment\" => (\n\t\t\t\"CORS_ALLOW_ORIGIN\" => \"$CORS_ALLOW_ORIGIN\",/g" /etc/lighttpd/conf-enabled/15-fastcgi-php.conf
-    #sed -i "s/\"bin-environment\" => (/\"bin-environment\" => (\n\t\t\t\"I2B2_DB_HOST\" => \"$I2B2_DB_HOST\",/g" /etc/lighttpd/conf-enabled/15-fastcgi-php.conf && \
-    #sed -i "s/\"bin-environment\" => (/\"bin-environment\" => (\n\t\t\t\"I2B2_DB_PORT\" => \"$I2B2_DB_PORT\",/g" /etc/lighttpd/conf-enabled/15-fastcgi-php.conf && \
-    #sed -i "s/\"bin-environment\" => (/\"bin-environment\" => (\n\t\t\t\"I2B2_DB_USER\" => \"$I2B2_DB_USER\",/g" /etc/lighttpd/conf-enabled/15-fastcgi-php.conf && \
-    #sed -i "s/\"bin-environment\" => (/\"bin-environment\" => (\n\t\t\t\"I2B2_DB_PW\" => \"$I2B2_DB_PW\",/g" /etc/lighttpd/conf-enabled/15-fastcgi-php.conf && \
-    #sed -i "s/\"bin-environment\" => (/\"bin-environment\" => (\n\t\t\t\"I2B2_DB_NAME\" => \"$I2B2_DB_NAME\",/g" /etc/lighttpd/conf-enabled/15-fastcgi-php.conf && \
-    #sed -i "s/\"bin-environment\" => (/\"bin-environment\" => (\n\t\t\t\"I2B2_DOMAIN_NAME\" => \"$I2B2_DOMAIN_NAME\",/g" /etc/lighttpd/conf-enabled/15-fastcgi-php.conf
+RUN sed -i "s/\"bin-environment\" => (/\"bin-environment\" => (\n\t\t\t\"CORS_ALLOW_ORIGIN\" => \"$CORS_ALLOW_ORIGIN\",/g" /etc/lighttpd/conf-enabled/15-fastcgi-php.conf && \
+    sed -i "s/\"bin-environment\" => (/\"bin-environment\" => (\n\t\t\t\"I2B2_DB_HOST\" => \"$I2B2_DB_HOST\",/g" /etc/lighttpd/conf-enabled/15-fastcgi-php.conf && \
+    sed -i "s/\"bin-environment\" => (/\"bin-environment\" => (\n\t\t\t\"I2B2_DB_PORT\" => \"$I2B2_DB_PORT\",/g" /etc/lighttpd/conf-enabled/15-fastcgi-php.conf && \
+    sed -i "s/\"bin-environment\" => (/\"bin-environment\" => (\n\t\t\t\"I2B2_DB_USER\" => \"$I2B2_DB_USER\",/g" /etc/lighttpd/conf-enabled/15-fastcgi-php.conf && \
+    sed -i "s/\"bin-environment\" => (/\"bin-environment\" => (\n\t\t\t\"I2B2_DB_PW\" => \"$I2B2_DB_PW\",/g" /etc/lighttpd/conf-enabled/15-fastcgi-php.conf && \
+    sed -i "s/\"bin-environment\" => (/\"bin-environment\" => (\n\t\t\t\"I2B2_DB_NAME\" => \"$I2B2_DB_NAME\",/g" /etc/lighttpd/conf-enabled/15-fastcgi-php.conf && \
+    sed -i "s/\"bin-environment\" => (/\"bin-environment\" => (\n\t\t\t\"I2B2_DOMAIN_NAME\" => \"$I2B2_DOMAIN_NAME\",/g" /etc/lighttpd/conf-enabled/15-fastcgi-php.conf
 
 # run
 EXPOSE 80
