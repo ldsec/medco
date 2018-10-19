@@ -49,7 +49,6 @@ RUN apt-get -y update && \
     apt-get -y install lighttpd postgresql-client libterm-readline-gnu-perl curl php5.6 php5.6-cgi php5.6-curl && \
     apt-get -y clean && \
     sed -i 's/display_errors = Off/display_errors = On/g' /etc/php/5.6/cgi/php.ini \
-    sed -i 's/"PHP_FCGI_MAX_REQUESTS" => "10000"/"PHP_FCGI_MAX_REQUESTS" => "10000"\n"CORS_ALLOW_ORIGIN" => "$CORS_ALLOW_ORIGIN"/g' /etc/lighttpd/conf-enabled/15-fastcgi-php.conf \
     chgrp -R www-data /etc/lighttpd && \
     chmod -R g+rwx /etc/lighttpd && \
     chown -R www-data:www-data "$LIGHTTPD_WEB_ROOT" && \
