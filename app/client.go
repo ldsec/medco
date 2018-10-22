@@ -75,12 +75,14 @@ func loadGenomicData(c *cli.Context) error {
 	}
 
 	fOntGenomic, err := os.Open(genomicOntologyPath)
+	log.LLvl1(genomicOntologyPath)
 	if err != nil {
 		log.Error("Error while opening the genomic ontology file", err)
 		return cli.NewExitError(err, 1)
 	}
 
 	fClinical, err := os.Open(clinicalFilePath)
+	log.LLvl1(clinicalFilePath)
 	if err != nil {
 		log.Error("Error while opening the clinical file", err)
 		return cli.NewExitError(err, 1)
