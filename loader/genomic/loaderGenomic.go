@@ -34,7 +34,7 @@ const ANNOTATIONS = "genomic_annotations."
 
 // The different paths and handlers for all the .sql files
 var (
-	OutputFilePath = "../data/genomic/"
+	OutputFilePath = "../data/genomic/files/"
 
 	TablenamesOntology = [...]string{ ONT + "clinical_sensitive",
 		ONT + "clinical_non_sensitive",
