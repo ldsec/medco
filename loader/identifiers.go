@@ -95,7 +95,7 @@ func checkRegex(input, expression, errorMessage string) error {
 	correct := aux.MatchString(input)
 
 	if !correct {
-		log.Error(errorMessage)
+		//log.Error(errorMessage)
 		return errors.New(errorMessage)
 	}
 

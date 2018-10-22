@@ -420,7 +420,6 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 	first := true
 	headerClinical := make([]string, 0)
 	for {
-		log.Lvl2("AQUIIII")
 		// read just one record, but we could ReadAll() as well
 		record, err := reader.Read()
 		// end-of-file is fitted into err
