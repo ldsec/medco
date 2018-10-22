@@ -44,7 +44,6 @@ _testmain.go
 data/genomic/
 data/i2b2/converted/*.xml
 data/i2b2/converted/*.csv
-data/i2b2/original/icd10_icd9.csv
 data/scripts/*.txt
 app/*.toml
 docker/medco-loader

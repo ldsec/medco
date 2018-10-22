@@ -39,13 +39,17 @@ type FileInfo struct {
 	Path      string
 }
 
+// I2B2METADATA path to i2b2metadata schema
 const I2B2METADATA = "i2b2metadata_i2b2."
+
+// I2B2DEMODATA path to i2b2demodata schema
 const I2B2DEMODATA = "i2b2demodata_i2b2."
+
+// ONT path to medco_ont schema
 const ONT = "medco_ont."
 
 // The different paths and handlers for all the files both for input and/or output
 var (
-
 	OntologyFilesPaths = []string{
 		"ONTOLOGY_BIRN",
 		"ONTOLOGY_CUSTOM_META",
@@ -328,7 +332,6 @@ func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
 	loading += "\n"
 
 	// Create Shrine Table
-
 
 	for file, fI := range OutputFilePaths {
 		if strings.HasPrefix(file, "SHRINE_") {
