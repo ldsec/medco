@@ -133,7 +133,7 @@ func TestSanitizeHeader(t *testing.T) {
 }
 
 func TestGenerateFilesLocalTest(t *testing.T) {
-	t.Skip()
+	//t.Skip()
 	el, local, err := getRoster("")
 	assert.True(t, err == nil, err)
 	generateFiles(t, el, 0)
