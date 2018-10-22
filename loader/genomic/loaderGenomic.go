@@ -320,8 +320,7 @@ func GenerateLoadingOntologyScript(databaseS loader.DBSettings) error {
 
 	loading += "BEGIN;\n"
 	for i := 0; i < len(TablenamesOntology); i++ {
-		tokens := strings.Split(FilePathsOntology[i], "/")
-		loading += `\copy ` + TablenamesOntology[i] + ` FROM '` + OutputFilePath + `files/` + tokens[1] + `' ESCAPE '"' DELIMITER ',' CSV;` + "\n"
+		loading += `\copy ` + TablenamesOntology[i] + ` FROM '` + FilePathsOntology[i] + `' ESCAPE '"' DELIMITER ',' CSV;` + "\n"
 	}
 	loading += "COMMIT;\n"
 	loading += "EOSQL"
@@ -350,7 +349,7 @@ func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
 	loading += "BEGIN;\n"
 	for i := 0; i < len(TablenamesData); i++ {
 		tokens := strings.Split(FilePathsData[i], "/")
-		loading += `\copy ` + TablenamesData[i] + ` FROM '` + OutputFilePath + `files/` + tokens[1] + `' ESCAPE '"' DELIMITER ',' CSV;` + "\n"
+		loading += `\copy ` + TablenamesData[i] + ` FROM '` + FilePathsOntology[i] + `' ESCAPE '"' DELIMITER ',' CSV;` + "\n"
 	}
 	loading += "COMMIT;\n"
 	loading += "EOSQL"
