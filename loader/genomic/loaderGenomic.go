@@ -217,7 +217,7 @@ func LoadClient(el *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic, f
 	TextSearchIndex = int64(1) // needed for the observation_fact table (counter)
 
 	// create files directory
-	mkdirErr := os.MkdirAll("files/", os.ModeDir)
+	mkdirErr := os.MkdirAll(OutputFilePath + "files/", os.ModeDir)
 	if mkdirErr != nil {
 		log.Fatal("Cannot create directory.")
 	}
@@ -321,7 +321,7 @@ func GenerateLoadingOntologyScript(databaseS loader.DBSettings) error {
 	loading += "BEGIN;\n"
 	for i := 0; i < len(TablenamesOntology); i++ {
 		tokens := strings.Split(FilePathsOntology[i], "/")
-		loading += `\copy ` + TablenamesOntology[i] + ` FROM 'files/` + tokens[1] + `' ESCAPE '"' DELIMITER ',' CSV;` + "\n"
+		loading += `\copy ` + TablenamesOntology[i] + ` FROM '` + OutputFilePath + `files/` + tokens[1] + `' ESCAPE '"' DELIMITER ',' CSV;` + "\n"
 	}
 	loading += "COMMIT;\n"
 	loading += "EOSQL"
