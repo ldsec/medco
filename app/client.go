@@ -29,7 +29,7 @@ func loadGenomicData(c *cli.Context) error {
 	genomicOntologyPath := c.String("ont_genomic")
 	clinicalFilePath := c.String("clinical")
 	genomicFilePath := c.String("genomic")
-	groupFilePath := c.String("file")
+	groupFilePath := c.String("group")
 	entryPointIdx := c.Int("entryPointIdx")
 	sensitiveFilePath := c.String("sensitive")
 	replaySize := c.Int("replay")
