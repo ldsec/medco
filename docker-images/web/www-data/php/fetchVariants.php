@@ -1,5 +1,5 @@
 <?php
-header('Access-Control-Allow-Origin: ' getenv('CORS_ALLOW_ORIGIN')); 
+header('Access-Control-Allow-Origin: '.getenv('CORS_ALLOW_ORIGIN')); 
 header('Access-Control-Allow-Credentials: true'); 
 header('Access-Control-Allow-Headers: origin, content-type, accept, authorization'); 
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, HEAD'); 
@@ -8,6 +8,8 @@ header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, HEAD');
 // - old is the old version that uses the first version of the schema
 // - Gene + Zygosity
 // - ...
+
+include 'sqlConnection.php';
 
 $query = "";
 switch($_GET["query_type"]){
@@ -19,20 +21,15 @@ switch($_GET["query_type"]){
 
         $zigosity = $_GET["zygosity"]; // array of zygosity options, put them in the query separated by | (or)
 
-        $query =
-            "SELECT variant_id " .
-            "FROM genomic_annotations " .
-            "WHERE hugo_gene_symbol='" . $_GET["gene_value"] . "' AND annotations ~* '^(" . join('|', $zigosity) .");'";
-
+        $stmt = $pdo->prepare("SELECT variant_id FROM genomic_annotations WHERE hugo_gene_symbol=? AND annotations ~* '^(?)");
+        $stmt->execute([$_GET["gene_value"], join('|', $zigosity)]);
         break;
 
     case "protein_position_and_zygosity":
         $zigosity = $_GET["zygosity"]; // array of zygosity options, put them in the query separated by | (or)
 
-        $query =
-            "SELECT variant_id " .
-            "FROM genomic_annotations " .
-            "WHERE 	protein_change='" . $_GET["protein_change_value"] . "' AND annotations ~* '^(" . join('|', $zigosity) .");'";
+        $stmt = $pdo->prepare("SELECT variant_id FROM genomic_annotations WHERE protein_change=? AND annotations ~* '^(?)");
+        $stmt->execute([$_GET["protein_change_value"], join('|', $zigosity)]);
         break;
 
     case "variantName_and_zygosity":
@@ -42,10 +39,8 @@ switch($_GET["query_type"]){
 
         $zigosity = $_GET["zygosity"];
 
-        $query = "SELECT variant_id " .
-        "FROM genomic_annotations " .
-        "WHERE variant_name='" . $_GET["variant_name"] ."' AND " .
-        "annotations ~* '" . "(" . join('|', $zigosity) .")'";
+        $stmt = $pdo->prepare("SELECT variant_id FROM genomic_annotations WHERE variant_name=? AND annotations ~* '^(?)");
+        $stmt->execute([$_GET["variant_name"], join('|', $zigosity)]);
         break;
 
     case "annotation_and_zygosity":
@@ -53,10 +48,9 @@ switch($_GET["query_type"]){
         //from genomic_annotations_new
         //where annotations ~* '(Homozygous|Unknown);.*VARIANT_CLASS=DELETION'
         $zigosity = $_GET["zygosity"];
-        $query = "SELECT variant_id " .
-            "FROM genomic_annotations " .
-            "WHERE annotations ~* '" . "(" . join('|', $zigosity) .");.*" . $_GET["annotation_name"] . "=" . $_GET["annotation_value"] . "'";
 
+        $stmt = $pdo->prepare("SELECT variant_id FROM genomic_annotations WHERE annotations ~* '(?); ?=?");
+        $stmt->execute([join('|', $zigosity)], $_GET["annotation_name"], $_GET["annotation_value"]);
         break;
 
     default:
@@ -65,22 +59,12 @@ switch($_GET["query_type"]){
 
 }
 
-//echo $query;
-//return;
-
-include 'sqlConnection.php';
-
-$result = pg_query($conn, $query);
-if (!$result) {
-    echo "An error occurred while querying the database.\n";
-    exit;
-}
-
 // In json format return both the panel number and the list of variants
 echo "{ \"variants\" : ";
 $variantList = "";
-while ($row = pg_fetch_row($result)) {
+while ($row = $stmt->fetch()) {
     $variantList .= "\"$row[0]\",";
 }
 // drop the last comma
 echo "[" . substr($variantList, 0, -1) . "]}";
+?>

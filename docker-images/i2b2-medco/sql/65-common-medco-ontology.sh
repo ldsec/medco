@@ -30,7 +30,7 @@ psql $PSQL_PARAMS -d "$I2B2_DB_NAME" <<-EOSQL
         C_STATUS_CD CHAR(1),
         VALUETYPE_CD VARCHAR(50)
     );
-    --INSERT into medco_ont.TABLE_ACCESS
+    --INSERT into medco_ont.table_access
     --    ( C_TABLE_CD, C_TABLE_NAME, C_PROTECTED_ACCESS, C_HLEVEL, C_NAME, C_FULLNAME, C_SYNONYM_CD, C_VISUALATTRIBUTES,
     --    C_TOOLTIP, C_FACTTABLECOLUMN, C_DIMTABLENAME, C_COLUMNNAME, C_COLUMNDATATYPE, C_DIMCODE, C_OPERATOR) values
     --    ( 'MedCo', 'MedCo', 'N', 0, 'MedCo Ontology', '\medco\', 'N', 'CA', 'MedCo Ontology', 'concept_cd',
@@ -64,31 +64,31 @@ psql $PSQL_PARAMS -d "$I2B2_DB_NAME" <<-EOSQL
     insert into medco_ont.schemes(c_key, c_name, c_description) values('GEN:', 'GEN', 'MedCo genomic annotations');
 
     -- ontology table
-    --CREATE TABLE medco_ont.MedCo(
-    --    C_HLEVEL NUMERIC(22,0),
-    --    C_FULLNAME VARCHAR(900),
-    --    C_NAME VARCHAR(2000),
-    --    C_SYNONYM_CD CHAR(1),
-    --    C_VISUALATTRIBUTES CHAR(3),
-    --    C_TOTALNUM NUMERIC(22,0),
-    --    C_BASECODE VARCHAR(450),
-    --    C_METADATAXML TEXT,
-    --    C_FACTTABLECOLUMN VARCHAR(50),
-    --    C_TABLENAME VARCHAR(50),
-    --    C_COLUMNNAME VARCHAR(50),
-    --    C_COLUMNDATATYPE VARCHAR(50),
-    --    C_OPERATOR VARCHAR(10),
-    --    C_DIMCODE VARCHAR(900),
-    --    C_COMMENT TEXT,
-    --    C_TOOLTIP VARCHAR(900),
-    --    UPDATE_DATE DATE,
-    --    DOWNLOAD_DATE DATE,
-    --    IMPORT_DATE DATE,
-    --    SOURCESYSTEM_CD VARCHAR(50),
-    --    VALUETYPE_CD VARCHAR(50),
-    --    M_APPLIED_PATH VARCHAR(900),
-    --    M_EXCLUSION_CD VARCHAR(900)
-    --);
+    CREATE TABLE shrine_ont.shrine(
+        C_HLEVEL NUMERIC(22,0),
+        C_FULLNAME VARCHAR(900),
+        C_NAME VARCHAR(2000),
+        C_SYNONYM_CD CHAR(1),
+        C_VISUALATTRIBUTES CHAR(3),
+        C_TOTALNUM NUMERIC(22,0),
+        C_BASECODE VARCHAR(450),
+        C_METADATAXML TEXT,
+        C_FACTTABLECOLUMN VARCHAR(50),
+        C_TABLENAME VARCHAR(50),
+        C_COLUMNNAME VARCHAR(50),
+        C_COLUMNDATATYPE VARCHAR(50),
+        C_OPERATOR VARCHAR(10),
+        C_DIMCODE VARCHAR(900),
+        C_COMMENT TEXT,
+        C_TOOLTIP VARCHAR(900),
+        UPDATE_DATE DATE,
+        DOWNLOAD_DATE DATE,
+        IMPORT_DATE DATE,
+        SOURCESYSTEM_CD VARCHAR(50),
+        VALUETYPE_CD VARCHAR(50),
+        M_APPLIED_PATH VARCHAR(900),
+        M_EXCLUSION_CD VARCHAR(900)
+    );
 
     -- clinical sensitive ontology
     CREATE TABLE medco_ont.clinical_sensitive(
