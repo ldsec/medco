@@ -320,6 +320,7 @@ func GenerateLoadingOntologyScript(databaseS loader.DBSettings) error {
 
 	loading += "BEGIN;\n"
 	for i := 0; i < len(TablenamesOntology); i++ {
+		loading += "TRUNCATE " + TablenamesOntology[i] + ";\n"
 		loading += `\copy ` + TablenamesOntology[i] + ` FROM '` + FilePathsOntology[i] + `' ESCAPE '"' DELIMITER ',' CSV;` + "\n"
 	}
 	loading += "COMMIT;\n"
@@ -348,6 +349,7 @@ func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
 
 	loading += "BEGIN;\n"
 	for i := 0; i < len(TablenamesData); i++ {
+		loading += "TRUNCATE " + TablenamesData[i] + ";\n"
 		loading += `\copy ` + TablenamesData[i] + ` FROM '` + FilePathsOntology[i] + `' ESCAPE '"' DELIMITER ',' CSV;` + "\n"
 	}
 	loading += "COMMIT;\n"
