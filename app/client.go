@@ -107,7 +107,7 @@ func loadGenomicData(c *cli.Context) error {
 		mapSensitive[line] = struct{}{}
 	}
 
-	if replaySize < 1 {
+	if replaySize < 0 {
 		log.Error("Wrong file size value (1>)", err)
 		return cli.NewExitError(err, 1)
 	} else if replaySize > 1 {
