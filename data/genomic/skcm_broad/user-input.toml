@@ -1,0 +1,28 @@
+sensitive = [       "AJCC_PATHOLOGIC_TUMOR_STAGE",
+                    "CANCER_TYPE",
+                    "CANCER_TYPE_DETAILED",
+                    "HISTOLOGICAL_DIAGNOSIS",
+                    "ICD_O_3_HISTOLOGY",
+                    "ICD_O_3_SITE",
+                    "SAMPLE_TYPE",
+                    "TISSUE_SOURCE_SITE",
+                    "TUMOR_TISSUE_SITE",
+                    "VITAL_STATUS",
+                    "CLIN_M_STAGE",
+            ]
+annotations = [   "HUGO_GENE_SYMBOL",
+                  "PROTEIN_CHANGE",
+              ]
+ignore = [  "PATIENT_ID",
+            "P_STABLE_ID",
+            "SAMPLE_ID",
+            "S_STABLE_ID",
+         ]
+[table]
+PATIENT_ID          = "PATIENT_ID"
+SAMPLE_ID           = "SAMPLE_ID"
+CHR                 = "CHR"
+START_POSITION      = "SP"
+REFERENCE_ALLELE    = "RA"
+TUMOR_SEQ_ALLELE1   = "TSA1"
+TUMOR_SEQ_ALLELE2   = "TSA2"
