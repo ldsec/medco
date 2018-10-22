@@ -348,7 +348,6 @@ func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
 
 	loading += "BEGIN;\n"
 	for i := 0; i < len(TablenamesData); i++ {
-		tokens := strings.Split(FilePathsData[i], "/")
 		loading += `\copy ` + TablenamesData[i] + ` FROM '` + FilePathsOntology[i] + `' ESCAPE '"' DELIMITER ',' CSV;` + "\n"
 	}
 	loading += "COMMIT;\n"
