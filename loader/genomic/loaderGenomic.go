@@ -62,10 +62,10 @@ AnnotationsToQuery: defines the annotations to be queried (to speed up the query
 */
 var (
 	ToIgnore = map[string]struct{}{
-		"PATIENT_ID":  struct{}{},
-		"P_STABLE_ID": struct{}{},
-		"SAMPLE_ID":   struct{}{},
-		"S_STABLE_ID": struct{}{},
+		"PATIENT_ID":  {},
+		"P_STABLE_ID": {},
+		"SAMPLE_ID":   {},
+		"S_STABLE_ID": {},
 	}
 
 	TranslationDic = map[string]string{
@@ -85,10 +85,10 @@ var (
 	}
 
 	AnnotationsToQuery = map[string]struct{}{
-		"HUGO_GENE_SYMBOL":  struct{}{},
-		"Hugo_Symbol":       struct{}{},
-		"PROTEIN_CHANGE":    struct{}{},
-		"MA:protein.change": struct{}{},
+		"HUGO_GENE_SYMBOL":  {},
+		"Hugo_Symbol":       {},
+		"PROTEIN_CHANGE":    {},
+		"MA:protein.change": {},
 	}
 )
 
