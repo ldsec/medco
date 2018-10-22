@@ -48,6 +48,7 @@ data/i2b2/converted/*.xml
 data/i2b2/converted/*.csv
 data/scripts/*.txt
 app/*.toml
+app/files/
 docker/medco-loader
 loader/genomic/*.toml
 loader/i2b2/*.toml
