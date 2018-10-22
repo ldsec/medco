@@ -1,18 +1,3 @@
-"c_key","c_name","c_description"
-"NDC:","NDC","National Drug Code"
-"DSG-NLP:","DSG-NLP","Natural Language Processing Data"
-"UMLS:","UMLS","United Medical Language System"
-"LCS-I2B2:","LCS-I2B2","\N"
-"ICD9:","ICD9","ICD9 code for diagnoses and procedures"
-"ICD10:","ICD10","ICD10 code for diagnoses"
-"LOINC:","LOINC","Lab codes"
-"DEM|AGE:","DEM|AGE","Age of patient from demographics data"
-"DEM|DATE:","DEM|DATE","Patient date of birth from demographics data"
-"DEM|MARITAL:","DEM|MARITAL","Marital Status of patient"
-"DEM|LANGUAGE:","DEM|LANGUAGE","Primary language spoken by patient"
-"DEM|RACE:","DEM|RACE","Race of patient"
-"DEM|RELIGION:","DEM|RELIGION","Religion of patient"
-"DEM|SEX:","DEM|SEX","Gender of patient"
-"DEM|VITAL:","DEM|VITAL","Vital status of patient"
-"DEM|ZIPCODE:","DEM|ZIPCODE","\N"
-"(null)","None","No scheme"
+version https://git-lfs.github.com/spec/v1
+oid sha256:64d71c6c38f12bb07f75fe64182ee8658108064e54d1f9b847131ee1af3f1911
+size 850

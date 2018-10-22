@@ -756,7 +756,7 @@ func ObservationFactFromString(line []string) (*ObservationFactPK, ObservationFa
 		ConceptCD:    line[2],
 		ProviderID:   line[3],
 		StartDate:    line[4],
-		ModifierCD:   line[5],
+		ModifierCD:   "", //TODO we do not consider modifiers
 		InstanceNum:  line[6],
 	}
 
