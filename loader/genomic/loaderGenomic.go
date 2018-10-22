@@ -20,38 +20,52 @@ import (
 	"time"
 )
 
+// I2B2METADATA path to i2b2metadata schema
+const I2B2METADATA = "i2b2metadata_i2b2."
+
+// I2B2DEMODATA path to i2b2demodata schema
+const I2B2DEMODATA = "i2b2demodata_i2b2."
+
+// ONT path to medco_ont schema
+const ONT = "medco_ont."
+
+// ANNOTATIONS path to genomic_annotations schema
+const ANNOTATIONS = "genomic_annotations."
+
 // The different paths and handlers for all the .sql files
 var (
-	TablenamesOntology = [...]string{"shrine_ont.clinical_sensitive",
-		"shrine_ont.clinical_non_sensitive",
-		"genomic_annotations.genomic_annotations",
-		"i2b2metadata.sensitive_tagged",
-		"i2b2metadata.non_sensitive_clear"}
+	OutputFilePath = "../data/genomic/"
 
-	TablenamesData = [...]string{"i2b2demodata.concept_dimension",
-		"i2b2demodata.patient_mapping",
-		"i2b2demodata.patient_dimension",
-		"i2b2demodata.encounter_mapping",
-		"i2b2demodata.visit_dimension",
-		"i2b2demodata.provider_dimension",
-		"i2b2demodata.observation_fact"}
+	TablenamesOntology = [...]string{ ONT + "clinical_sensitive",
+		ONT + "clinical_non_sensitive",
+		ANNOTATIONS + "genomic_annotations",
+		I2B2METADATA + "sensitive_tagged",
+		I2B2METADATA + "non_sensitive_clear"}
+
+	TablenamesData = [...]string{ I2B2DEMODATA + "concept_dimension",
+		I2B2DEMODATA + "patient_mapping",
+		I2B2DEMODATA + "patient_dimension",
+		I2B2DEMODATA + "encounter_mapping",
+		I2B2DEMODATA + "visit_dimension",
+		I2B2DEMODATA + "provider_dimension",
+		I2B2DEMODATA + "observation_fact"}
 
 	FileBashPath = [...]string{"25-load-ontology.sh",
 		"26-load-data.sh"}
 
-	FilePathsOntology = [...]string{"../../data/genomic/SHRINE_ONT_CLINICAL_SENSITIVE.csv",
-		"../../data/genomic/SHRINE_ONT_CLINICAL_NON_SENSITIVE.csv",
-		"../../data/genomic/SHRINE_ONT_GENOMIC_ANNOTATIONS.csv",
-		"../../data/genomic/I2B2METADATA_SENSITIVE_TAGGED.csv",
-		"../../data/genomic/I2B2METADATA_NON_SENSITIVE_CLEAR.csv"}
+	FilePathsOntology = [...]string{ OutputFilePath + "SHRINE_ONT_CLINICAL_SENSITIVE.csv",
+		OutputFilePath + "SHRINE_ONT_CLINICAL_NON_SENSITIVE.csv",
+		OutputFilePath + "SHRINE_ONT_GENOMIC_ANNOTATIONS.csv",
+		OutputFilePath + "I2B2METADATA_SENSITIVE_TAGGED.csv",
+		OutputFilePath + "I2B2METADATA_NON_SENSITIVE_CLEAR.csv"}
 
-	FilePathsData = [...]string{"../../data/genomic/I2B2DEMODATA_CONCEPT_DIMENSION.csv",
-		"../../data/genomic/I2B2DEMODATA_PATIENT_MAPPING.csv",
-		"../../data/genomic/I2B2DEMODATA_PATIENT_DIMENSION.csv",
-		"../../data/genomic/I2B2DEMODATA_ENCOUNTER_MAPPING.csv",
-		"../../data/genomic/I2B2DEMODATA_VISIT_DIMENSION.csv",
-		"../../data/genomic/I2B2DEMODATA_PROVIDER_DIMENSION.csv",
-		"../../data/genomic/I2B2DEMODATA_OBSERVATION_FACT.csv"}
+	FilePathsData = [...]string{ OutputFilePath + "I2B2DEMODATA_CONCEPT_DIMENSION.csv",
+		OutputFilePath + "I2B2DEMODATA_PATIENT_MAPPING.csv",
+		OutputFilePath + "I2B2DEMODATA_PATIENT_DIMENSION.csv",
+		OutputFilePath + "I2B2DEMODATA_ENCOUNTER_MAPPING.csv",
+		OutputFilePath + "I2B2DEMODATA_VISIT_DIMENSION.csv",
+		OutputFilePath + "I2B2DEMODATA_PROVIDER_DIMENSION.csv",
+		OutputFilePath + "I2B2DEMODATA_OBSERVATION_FACT.csv"}
 )
 
 /*
@@ -211,7 +225,7 @@ func LoadClient(el *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic, f
 	for _, f := range FilePathsOntology {
 		fp, err := os.Create(f)
 		if err != nil {
-			log.Fatal("Error while opening", f)
+			log.Fatal("Error while creating", f)
 			return err
 		}
 		FileHandlers = append(FileHandlers, fp)
@@ -220,7 +234,7 @@ func LoadClient(el *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic, f
 	for _, f := range FilePathsData {
 		fp, err := os.Create(f)
 		if err != nil {
-			log.Fatal("Error while opening", f)
+			log.Fatal("Error while creating", f)
 			return err
 		}
 		FileHandlers = append(FileHandlers, fp)
