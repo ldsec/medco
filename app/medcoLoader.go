@@ -9,12 +9,6 @@ import (
 )
 
 const (
-	// BinaryName is the name of the binary
-	BinaryName = "medcoLoader"
-
-	// Version of the binary
-	Version = "1.00"
-
 	// #---- COMMON ----#
 
 	// DefaultGroupFile is the name of the default file to lookup for group definition
@@ -67,6 +61,8 @@ const (
 	DefaultClinicalFile = "data_clinical_skcm_broad.csv"
 	// DefaultGenomicFile is the name of the default genomic file (dataset)
 	DefaultGenomicFile = "data_mutations_extended_skcm_broad.csv"
+	// DefaultOutputPath is the output path for the generated .csv files
+	DefaultOutputPath = "../data/genomic/"
 
 	// dataset settings (for now we have no incremental loading, and so we require both ontology and dataset files)
 	optionOntologyClinical      = "ont_clinical"
@@ -80,6 +76,9 @@ const (
 
 	optionGenomicFile      = "genomic"
 	optionGenomicFileShort = "gen"
+
+	optionOutputPath 		= "output"
+	optionOuputPathShort 	= "o"
 
 	// #---- V1 ----#
 
@@ -103,9 +102,8 @@ func main() {
 	network.MaxPacketSize = network.Size(^uint32(0))
 
 	cliApp := cli.NewApp()
-	cliApp.Name = "medcoLoader"
+	cliApp.Name = "MedCo Loader"
 	cliApp.Usage = "Software tool to manipulate i2b2/medco data"
-	cliApp.Version = Version
 
 	binaryFlags := []cli.Flag{
 		cli.IntFlag{
@@ -177,6 +175,11 @@ func main() {
 			Name:  optionGenomicFile + ", " + optionGenomicFileShort,
 			Value: DefaultGenomicFile,
 			Usage: "Genomic file to load",
+		},
+		cli.StringFlag{
+			Name:  optionOutputPath + ", " + optionOuputPathShort,
+			Value: DefaultOutputPath,
+			Usage: "Output path for the .csv files",
 		},
 	}
 	loaderFlagsv0 = append(loaderFlagsCommon, loaderFlagsv0...)

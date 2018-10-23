@@ -141,8 +141,8 @@ func generateOutputFiles(folderPath string) {
 	}
 }
 
-// ConvertI2B2 it's the main function that performs a full conversion and loading of the I2B2 data
-func ConvertI2B2(el *onet.Roster, entryPointIdx int, files Files, allSensitive bool, mapSensitive map[string]struct{}, databaseS loader.DBSettings, empty bool) error {
+// Loadi2b2Data it's the main function that performs a full conversion and loading of the I2B2 data
+func Loadi2b2Data(el *onet.Roster, entryPointIdx int, files Files, allSensitive bool, mapSensitive map[string]struct{}, databaseS loader.DBSettings, empty bool) error {
 	InputFilePaths = make(map[string]string)
 	OutputFilePaths = make(map[string]FileInfo)
 	OntologyFilesPaths = make([]string, 0)

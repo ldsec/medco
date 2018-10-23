@@ -34,7 +34,7 @@ const ANNOTATIONS = "genomic_annotations."
 
 // The different paths and handlers for all the .sql files
 var (
-	OutputFilePath = "../data/genomic/files/"
+	OutputFilePath = "../data/genomic/"
 
 	TablenamesOntology = [...]string{ ONT + "clinical_sensitive",
 		ONT + "clinical_non_sensitive",
@@ -53,19 +53,19 @@ var (
 	FileBashPath = [...]string{"25-load-ontology.sh",
 		"26-load-data.sh"}
 
-	FilePathsOntology = [...]string{ OutputFilePath + "SHRINE_ONT_CLINICAL_SENSITIVE.csv",
-		OutputFilePath + "SHRINE_ONT_CLINICAL_NON_SENSITIVE.csv",
-		OutputFilePath + "SHRINE_ONT_GENOMIC_ANNOTATIONS.csv",
-		OutputFilePath + "I2B2METADATA_SENSITIVE_TAGGED.csv",
-		OutputFilePath + "I2B2METADATA_NON_SENSITIVE_CLEAR.csv"}
+	FilePathsOntology = [...]string{ "SHRINE_ONT_CLINICAL_SENSITIVE.csv",
+		"SHRINE_ONT_CLINICAL_NON_SENSITIVE.csv",
+		"SHRINE_ONT_GENOMIC_ANNOTATIONS.csv",
+		"I2B2METADATA_SENSITIVE_TAGGED.csv",
+		"I2B2METADATA_NON_SENSITIVE_CLEAR.csv"}
 
-	FilePathsData = [...]string{ OutputFilePath + "I2B2DEMODATA_CONCEPT_DIMENSION.csv",
-		OutputFilePath + "I2B2DEMODATA_PATIENT_MAPPING.csv",
-		OutputFilePath + "I2B2DEMODATA_PATIENT_DIMENSION.csv",
-		OutputFilePath + "I2B2DEMODATA_ENCOUNTER_MAPPING.csv",
-		OutputFilePath + "I2B2DEMODATA_VISIT_DIMENSION.csv",
-		OutputFilePath + "I2B2DEMODATA_PROVIDER_DIMENSION.csv",
-		OutputFilePath + "I2B2DEMODATA_OBSERVATION_FACT.csv"}
+	FilePathsData = [...]string{ "I2B2DEMODATA_CONCEPT_DIMENSION.csv",
+		"I2B2DEMODATA_PATIENT_MAPPING.csv",
+		"I2B2DEMODATA_PATIENT_DIMENSION.csv",
+		"I2B2DEMODATA_ENCOUNTER_MAPPING.csv",
+		"I2B2DEMODATA_VISIT_DIMENSION.csv",
+		"I2B2DEMODATA_PROVIDER_DIMENSION.csv",
+		"I2B2DEMODATA_OBSERVATION_FACT.csv"}
 )
 
 /*
@@ -104,6 +104,8 @@ var (
 		"PROTEIN_CHANGE":    {},
 		"MA:protein.change": {},
 	}
+
+	AllSensitive = false
 )
 
 /* NumElMap: defines an approximate size of the map (it avoids rehashing and speeds up the execution)
@@ -206,8 +208,8 @@ func ReplayDataset(filename string, x int) error {
 
 }
 
-// LoadClient initiates the loading process
-func LoadClient(el *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic, fClinical, fGenomic *os.File, mapSensitive map[string]struct{}, databaseS loader.DBSettings, testing bool) error {
+// LoadGenomicData initiates the loading process
+func LoadGenomicData(el *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic, fClinical, fGenomic *os.File, outputPath string, allSensitive bool, mapSensitive map[string]struct{}, databaseS loader.DBSettings, testing bool) error {
 	start := time.Now()
 
 	// init global variables
@@ -215,26 +217,24 @@ func LoadClient(el *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic, f
 	OntValues = make(map[ConceptPath]ConceptID)
 	Testing = testing
 	TextSearchIndex = int64(1) // needed for the observation_fact table (counter)
+	OutputFilePath = outputPath
+	AllSensitive = allSensitive
 
-	// create files directory
-	mkdirErr := os.MkdirAll(OutputFilePath + "files/", os.ModeDir)
-	if mkdirErr != nil {
-		log.Fatal("Cannot create directory.")
-	}
-
-	for _, f := range FilePathsOntology {
-		fp, err := os.Create(f)
+	for i := range FilePathsOntology {
+		FilePathsOntology[i] = OutputFilePath + FilePathsOntology[i]
+		fp, err := os.Create(FilePathsOntology[i])
 		if err != nil {
-			log.Fatal("Error while creating", f)
+			log.Fatal("Error while creating", FilePathsOntology[i])
 			return err
 		}
 		FileHandlers = append(FileHandlers, fp)
 	}
 
-	for _, f := range FilePathsData {
-		fp, err := os.Create(f)
+	for i := range FilePathsData {
+		FilePathsData[i] = OutputFilePath + FilePathsData[i]
+		fp, err := os.Create(FilePathsData[i])
 		if err != nil {
-			log.Fatal("Error while creating", f)
+			log.Fatal("Error while creating", FilePathsData[i])
 			return err
 		}
 		FileHandlers = append(FileHandlers, fp)
@@ -437,8 +437,7 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 					// skip SampleID and PatientID and other similar fields
 					if _, ok := ToIgnore[rec]; !ok {
 						// sensitive
-						_, all := mapSensitive["all"]
-						if _, ok := mapSensitive[rec]; ok || (len(mapSensitive) == 1 && all) {
+						if _, ok := mapSensitive[rec]; ok || AllSensitive == true {
 							if err := writeShrineOntologyEnc(rec); err != nil {
 								return err
 							}
@@ -474,8 +473,7 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 					}
 
 					// sensitive
-					_, all := mapSensitive["all"]
-					if _, ok := mapSensitive[headerClinical[j]]; ok || (len(mapSensitive) == 1 && all) {
+					if _, ok := mapSensitive[headerClinical[j]]; ok || AllSensitive == true {
 						// if concept path does not exist
 						if _, ok := OntValues[ConceptPath{Field: headerClinical[j], Record: record[i]}]; ok == false {
 							if err := writeShrineOntologyLeafEnc(headerClinical[j], record[i], encID); err != nil {

@@ -75,23 +75,26 @@ func generateFiles(t *testing.T, el *onet.Roster, entryPointIdx int) {
 	loadergenomic.Testing = true
 	loadergenomic.OntValues = make(map[loadergenomic.ConceptPath]loadergenomic.ConceptID)
 	loadergenomic.TextSearchIndex = int64(1)
+	loadergenomic.OutputFilePath = "../../data/genomic/"
 
-	for _, f := range loadergenomic.FilePathsOntology {
-		fp, err := os.Create(f)
+	for i := range loadergenomic.FilePathsOntology {
+		loadergenomic.FilePathsOntology[i] = loadergenomic.OutputFilePath + loadergenomic.FilePathsOntology[i]
+		fp, err := os.Create(loadergenomic.FilePathsOntology[i])
 		assert.True(t, err == nil, err)
 		loadergenomic.FileHandlers = append(loadergenomic.FileHandlers, fp)
 	}
 
-	for _, f := range loadergenomic.FilePathsData {
-		fp, err := os.Create(f)
+	for i := range loadergenomic.FilePathsData {
+		loadergenomic.FilePathsData[i] = loadergenomic.OutputFilePath + loadergenomic.FilePathsData[i]
+		fp, err := os.Create(loadergenomic.FilePathsData[i])
 		assert.True(t, err == nil, err)
 		loadergenomic.FileHandlers = append(loadergenomic.FileHandlers, fp)
 	}
 
-	mapSensitive := make(map[string]struct{}, 11) // DO NOT FORGET!! to modify the '11' value depending on the number of sensitive attributes
+	mapSensitive := make(map[string]struct{}, 2) // DO NOT FORGET!! to modify the '11' value depending on the number of sensitive attributes
 	mapSensitive["AJCC_PATHOLOGIC_TUMOR_STAGE"] = struct{}{}
 	mapSensitive["CANCER_TYPE"] = struct{}{}
-	mapSensitive["CANCER_TYPE_DETAILED"] = struct{}{}
+	/*mapSensitive["CANCER_TYPE_DETAILED"] = struct{}{}
 	mapSensitive["HISTOLOGICAL_DIAGNOSIS"] = struct{}{}
 	mapSensitive["ICD_O_3_HISTOLOGY"] = struct{}{}
 	mapSensitive["ICD_O_3_SITE"] = struct{}{}
@@ -99,7 +102,9 @@ func generateFiles(t *testing.T, el *onet.Roster, entryPointIdx int) {
 	mapSensitive["TISSUE_SOURCE_SITE"] = struct{}{}
 	mapSensitive["TUMOR_TISSUE_SITE"] = struct{}{}
 	mapSensitive["VITAL_STATUS"] = struct{}{}
-	mapSensitive["CLIN_M_STAGE"] = struct{}{}
+	mapSensitive["CLIN_M_STAGE"] = struct{}{}*/
+
+	loadergenomic.AllSensitive = true
 
 	err = loadergenomic.GenerateOntologyFiles(el, entryPointIdx, fOntologyClinical, fOntologyGenomic, mapSensitive)
 	assert.True(t, err == nil, err)
@@ -133,7 +138,6 @@ func TestSanitizeHeader(t *testing.T) {
 }
 
 func TestGenerateFilesLocalTest(t *testing.T) {
-	//t.Skip()
 	el, local, err := getRoster("")
 	assert.True(t, err == nil, err)
 	generateFiles(t, el, 0)
@@ -141,7 +145,6 @@ func TestGenerateFilesLocalTest(t *testing.T) {
 }
 
 func TestGeneratePubKey(t *testing.T) {
-	t.Skip()
 	el, _, err := getRoster("../../data/genomic/group.toml")
 	assert.True(t, err == nil, err)
 

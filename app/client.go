@@ -33,6 +33,7 @@ func loadGenomicData(c *cli.Context) error {
 	entryPointIdx := c.Int("entryPointIdx")
 	sensitiveFilePath := c.String("sensitive")
 	replaySize := c.Int("replay")
+	outputPath := c.String("output")
 
 	// db settings
 	dbHost := c.String("dbHost")
@@ -102,8 +103,12 @@ func loadGenomicData(c *cli.Context) error {
 	// place all sensitive attributes in map set to allow for faster search
 	mapSensitive := make(map[string]struct{}, 0)
 	scanner := bufio.NewScanner(f)
+	allSensitive := false
 	for scanner.Scan() {
 		line := scanner.Text()
+		if line == "all" {
+			allSensitive = true
+		}
 		mapSensitive[line] = struct{}{}
 	}
 
@@ -121,7 +126,7 @@ func loadGenomicData(c *cli.Context) error {
 		}
 	}
 
-	err = loadergenomic.LoadClient(el.Roster, entryPointIdx, fOntClinical, fOntGenomic, fClinical, fGenomic, mapSensitive, databaseS, false)
+	err = loadergenomic.LoadGenomicData(el.Roster, entryPointIdx, fOntClinical, fOntGenomic, fClinical, fGenomic, outputPath, allSensitive, mapSensitive, databaseS, false)
 	if err != nil {
 		log.Fatal("Error while loading client data:", err)
 	}
@@ -198,7 +203,7 @@ func loadi2b2Data(c *cli.Context) error {
 		mapSensitive[line] = struct{}{}
 	}
 
-	loaderi2b2.ConvertI2B2(el.Roster, entryPointIdx, files, allSensitive, mapSensitive, databaseS, empty)
+	loaderi2b2.Loadi2b2Data(el.Roster, entryPointIdx, files, allSensitive, mapSensitive, databaseS, empty)
 	if err != nil {
 		log.Error("Error while converting I2B2 data:", err)
 		return cli.NewExitError(err, 1)
