@@ -54,7 +54,8 @@ RUN apt-get -y update && \
     chown -R www-data:www-data "$LIGHTTPD_WEB_ROOT" && \
     chmod -R +rx "$LIGHTTPD_WEB_ROOT" && \
     install -d -o www-data -g www-data -m 0750 "/var/run/lighttpd" && \
-    chmod +x /i2b2-web-writeconfig.sh /usr/local/bin/docker-entrypoint.sh
+    chmod +x /i2b2-web-writeconfig.sh /usr/local/bin/docker-entrypoint.sh && \
+    lighttpd-enable-mod fastcgi
 
 # run
 EXPOSE 80
