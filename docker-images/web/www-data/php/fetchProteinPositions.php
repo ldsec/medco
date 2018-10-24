@@ -13,9 +13,14 @@ header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, HEAD');
 
 include 'sqlConnection.php';
 
+//fetchProteinPositions.php?proteinPosition=100/1&limit=10
+
 // get the row which contains all the values of the passed annotation
-$stmt = $pdo->prepare("SELECT annotation_value FROM protein_position WHERE annotation_value ~* '.*?.*' LIMIT ?");
-$stmt->execute([$_GET["proteinPosition"], $_GET["limit"]]);
+$proteinPosition = ".*".$_GET["proteinPosition"].".*";
+$stmt = $pdo->prepare("SELECT annotation_value FROM genomic_annotations.protein_position WHERE annotation_value ~* ? LIMIT ?");
+$stmt->bindValue(1, $proteinPosition, PDO::PARAM_STR);
+$stmt->bindValue(2, $_GET["limit"], PDO::PARAM_STR);
+$stmt->execute();
 
 // In json format return the list of annotation names
 $proteinPositions = "";

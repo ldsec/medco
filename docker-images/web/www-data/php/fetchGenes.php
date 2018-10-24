@@ -20,22 +20,18 @@ header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, HEAD');
 
 include 'sqlConnection.php';
 
-// get the row which contains all the values of the passed annotation
-$query = "
-	SELECT gene_value 
-	FROM gene_values
-	WHERE gene_value ~* '.*" . $_GET["gene"] .".*'
-	LIMIT " . $_GET["limit"].";";
+//fetchGenes.php?gene=AA&limit=10
 
-$result = pg_query($conn, $query);
-if (!$result) {
-    echo "An error occurred while querying the database.\n";
-    exit;
-}
+// get the row which contains all the values of the passed annotation
+$gene = ".*".$_GET["gene"].".*";
+$stmt = $pdo->prepare("SELECT gene_value FROM genomic_annotations.gene_values WHERE gene_value ~* ? LIMIT ?");
+$stmt->bindValue(1, $gene, PDO::PARAM_STR);
+$stmt->bindValue(2, $_GET["limit"], PDO::PARAM_STR);
+$stmt->execute();
 
 // In json format return the list of genes
 $geneList = "";
-while ($row = pg_fetch_row($result)) {
+while ($row = $stmt->fetch()) {
     $geneList .= "\"$row[0]\",";
 }
 // drop the last comma and concatenate in json format

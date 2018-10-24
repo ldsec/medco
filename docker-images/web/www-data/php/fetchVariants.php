@@ -12,45 +12,57 @@ header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, HEAD');
 include 'sqlConnection.php';
 
 $query = "";
+$zigosity = "^(".join('|', $_GET["zygosity"]).");"; // array of zygosity options, put them in the query separated by | (or)
 switch($_GET["query_type"]){
     case "gene_and_zygosity":
         // case insensitive regex query
         // select variant_id
-        // from genomic_annotations_new
+        // from genomic_annotations
         // where annotations ~* '^CTBP2P1;(Homozygous|Unknown);'
 
-        $zigosity = $_GET["zygosity"]; // array of zygosity options, put them in the query separated by | (or)
+        //fetchVariants.php?query_type=gene_and_zygosity&gene_value=ACACB&zygosity[]=Heterozygous
 
-        $stmt = $pdo->prepare("SELECT variant_id FROM genomic_annotations WHERE hugo_gene_symbol=? AND annotations ~* '^(?)");
-        $stmt->execute([$_GET["gene_value"], join('|', $zigosity)]);
+        $stmt = $pdo->prepare("SELECT variant_id FROM genomic_annotations.genomic_annotations WHERE hugo_gene_symbol=? AND annotations ~* ?");
+        $stmt->bindValue(1, $_GET["gene_value"], PDO::PARAM_STR);
+        $stmt->bindValue(2, $zigosity, PDO::PARAM_STR);
+        $stmt->execute();
         break;
 
     case "protein_position_and_zygosity":
-        $zigosity = $_GET["zygosity"]; // array of zygosity options, put them in the query separated by | (or)
 
-        $stmt = $pdo->prepare("SELECT variant_id FROM genomic_annotations WHERE protein_change=? AND annotations ~* '^(?)");
-        $stmt->execute([$_GET["protein_change_value"], join('|', $zigosity)]);
+        //fetchVariants.php?query_type=protein_position_and_zygosity&protein_change_value=A443V&zygosity[]=Heterozygous
+        
+        $stmt = $pdo->prepare("SELECT variant_id FROM genomic_annotations.genomic_annotations WHERE protein_change=? AND annotations ~* ?");
+        $stmt->bindValue(1, $_GET["protein_change_value"], PDO::PARAM_STR);
+        $stmt->bindValue(2, $zigosity, PDO::PARAM_STR);
+        $stmt->execute();
         break;
 
     case "variantName_and_zygosity":
         // select variant_id
-        // from genomic_annotations_new
+        // from genomic_annotations
         /* where variant_name='Y:59022489:?>A'*/
 
-        $zigosity = $_GET["zygosity"];
+        //fetchVariants.php?query_type=variantName_and_zygosity&variant_name=12:109613959:C>C&zygosity[]=Heterozygous
 
-        $stmt = $pdo->prepare("SELECT variant_id FROM genomic_annotations WHERE variant_name=? AND annotations ~* '^(?)");
-        $stmt->execute([$_GET["variant_name"], join('|', $zigosity)]);
+        $stmt = $pdo->prepare("SELECT variant_id FROM genomic_annotations.genomic_annotations WHERE variant_name=? AND annotations ~* ?");
+        $stmt->bindValue(1, $_GET["variant_name"], PDO::PARAM_STR);
+        $stmt->bindValue(2, $zigosity, PDO::PARAM_STR);
+        $stmt->execute();
         break;
 
     case "annotation_and_zygosity":
         //select variant_id
-        //from genomic_annotations_new
+        //from genomic_annotations
         //where annotations ~* '(Homozygous|Unknown);.*VARIANT_CLASS=DELETION'
-        $zigosity = $_GET["zygosity"];
+        $zigosity = $zigosity.".*" . $_GET["annotation_name"] . "=" . $_GET["annotation_value"];
+        echo $zigosity."\n"
 
-        $stmt = $pdo->prepare("SELECT variant_id FROM genomic_annotations WHERE annotations ~* '(?); ?=?");
-        $stmt->execute([join('|', $zigosity)], $_GET["annotation_name"], $_GET["annotation_value"]);
+        //fetchVariants.php?query_type=annotation_and_zygosity&annotation_name=Variant%20Type&annotation_value=SNP&zygosity[]=Heterozygous
+
+        $stmt = $pdo->prepare("SELECT variant_id FROM genomic_annotations.genomic_annotations WHERE annotations ~* ?");
+        $stmt->bindValue(1, $zigosity, PDO::PARAM_STR);
+        $stmt->execute();
         break;
 
     default:

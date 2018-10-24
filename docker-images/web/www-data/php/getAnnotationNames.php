@@ -6,7 +6,7 @@ header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, HEAD');
 
 // case insensitive with regex
 
-//select annotation_value
+//select annotation_name
 //from annotation_names
 //where annotation_name ~* '.*a1.*'
 //LIMIT 20
@@ -14,8 +14,11 @@ header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, HEAD');
 include 'sqlConnection.php';
 
 // get the row which contains all the values of the passed annotation
-$stmt = $pdo->prepare("SELECT annotation_name FROM annotation_names WHERE annotation_name ~* '.*?.*' LIMIT ?");
-$stmt->execute([$_GET["annotation_name"], $_GET["limit"]]);
+$annotation_name=".*".$_GET["annotation_name"].".*";
+$stmt = $pdo->prepare("SELECT annotation_name FROM genomic_annotations.annotation_names WHERE annotation_name ~* ? LIMIT ?");
+$stmt->bindValue(1, $annotation_name, PDO::PARAM_STR);
+$stmt->bindValue(2, $_GET["limit"], PDO::PARAM_STR);
+$stmt->execute();
 
 // In json format return the list of annotation names
 $annotationList = "";

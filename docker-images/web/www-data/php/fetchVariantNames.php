@@ -13,11 +13,15 @@ header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, HEAD');
 
 include 'sqlConnection.php';
 
+//fetchVariantNames.php?variant_name=17&limit=10
+
 // escape the ? for regex query
-$variant_name = str_replace("?", "\?", $_GET["variant_name"]);
+$variant_name = ".*".str_replace("?", "\?", $_GET["variant_name"]).".*";
 // get the row which contains all the values of the passed annotation
-$stmt = $pdo->prepare("SELECT variant_name FROM genomic_annotations WHERE variant_name ~* '.*?.*' LIMIT ?");
-$stmt->execute([$variant_name, $_GET["limit"]]);
+$stmt = $pdo->prepare("SELECT variant_name FROM genomic_annotations.genomic_annotations WHERE variant_name ~* ? LIMIT ?");
+$stmt->bindValue(1, $variant_name, PDO::PARAM_STR);
+$stmt->bindValue(2, $_GET["limit"], PDO::PARAM_STR);
+$stmt->execute();
 
 // In json format return the list of genes
 $variantNames = "";
