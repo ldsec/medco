@@ -47,6 +47,7 @@ services:
       - "82:80"
       - "445:443"
     environment:
+      - I2B2_DB_NAME=i2b2medcosrv0
       - I2B2_DOMAIN_NAME=i2b2medcosrv0
       - I2B2_URL=http://i2b2-medco-srv0:8080/i2b2/services
     networks:
@@ -99,6 +100,7 @@ services:
       - "84:80"
       - "447:443"
     environment:
+      - I2B2_DB_NAME=i2b2medcosrv1
       - I2B2_DOMAIN_NAME=i2b2medcosrv1
       - I2B2_URL=http://i2b2-medco-srv1:8080/i2b2/services
     networks:
@@ -151,6 +153,7 @@ services:
       - "86:80"
       - "449:443"
     environment:
+      - I2B2_DB_NAME=i2b2medcosrv2
       - I2B2_DOMAIN_NAME=i2b2medcosrv2
       - I2B2_URL=http://i2b2-medco-srv2:8080/i2b2/services
     networks:

@@ -59,7 +59,7 @@ psql $PSQL_PARAMS -d "$I2B2_DB_NAME" <<-EOSQL
         c_synonym_cd, c_visualattributes, c_facttablecolumn, c_dimtablename,
         c_columnname, c_columndatatype, c_operator, c_dimcode, c_tooltip) VALUES
         ('NON_SENSITIVE_CLEAR', 'NON_SENSITIVE_CLEAR', 'N', 2, '\medco\clinical\nonsensitive\', 'MedCo Clinical Non-Sensitive Ontology',
-        'N', 'CH', 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\medco\clinical\nonsensitive\', 'MedCo Clinical Non-Sensitive Ontology');
+        'N', 'CA', 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\medco\clinical\nonsensitive\', 'MedCo Clinical Non-Sensitive Ontology');
 
     -- schemes
     CREATE TABLE medco_ont.schemes(
@@ -296,8 +296,7 @@ psql $PSQL_PARAMS -d "$I2B2_DB_NAME" <<-EOSQL
     ALTER TABLE medco_ont.genomic OWNER TO $I2B2_DB_USER;
     ALTER TABLE medco_ont.clinical_sensitive OWNER TO $I2B2_DB_USER;
     ALTER TABLE medco_ont.clinical_non_sensitive OWNER TO $I2B2_DB_USER;
-    ALTER TABLE medco_ont.sensitive_tagged owner to $I2B2_DB_USER;
-    ALTER TABLE medco_ont.non_sensitive_clear owner to $I2B2_DB_USER;
+    --ALTER TABLE medco_ont.shrine OWNER TO $I2B2_DB_USER;
 
     grant all on schema medco_ont to $I2B2_DB_USER;
     grant all privileges on all tables in schema medco_ont to $I2B2_DB_USER;

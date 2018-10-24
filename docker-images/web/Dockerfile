@@ -22,13 +22,20 @@ RUN git init . && \
 FROM debian:stretch as prod
 
 # run-time variables
-ENV I2B2_DOMAIN_NAME="medcodeployment"
+ENV I2B2_DB_HOST="postgresql" \
+    I2B2_DB_PORT="5432" \
+    I2B2_DB_USER="i2b2" \
+    I2B2_DB_PW="i2b2" \
+    I2B2_DB_NAME="i2b2medco" \
+    I2B2_DOMAIN_NAME="i2b2medco"
 
 # build-time variables
 ENV LIGHTTPD_WEB_ROOT="/var/www/html"
 
+ENV CORS_ALLOW_ORIGIN="http:\/\/localhost:4200"
+
 COPY --from=dev --chown=www-data:www-data "/www" "$LIGHTTPD_WEB_ROOT"
-COPY --chown=www-data:www-data www-data/* "$LIGHTTPD_WEB_ROOT/"
+COPY --chown=www-data:www-data www-data/ "$LIGHTTPD_WEB_ROOT/"
 COPY --chown=www-data:www-data lighttpd-conf/* /etc/lighttpd/conf-enabled/
 COPY --chown=www-data:www-data i2b2-web-writeconfig.sh /
 COPY docker-entrypoint.sh /usr/local/bin/
@@ -39,8 +46,9 @@ RUN apt-get -y update && \
     wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg && \
     sh -c 'echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list' && \
     apt-get -y update && \
-    apt-get -y install lighttpd postgresql-client libterm-readline-gnu-perl curl php5.6 php5.6-cgi php5.6-curl && \
+    apt-get -y install lighttpd postgresql-client libterm-readline-gnu-perl curl php5.6 php5.6-cgi php5.6-curl php5.6-pgsql && \
     apt-get -y clean && \
+    sed -i 's/display_errors = Off/display_errors = On/g' /etc/php/5.6/cgi/php.ini && \
     chgrp -R www-data /etc/lighttpd && \
     chmod -R g+rwx /etc/lighttpd && \
     chown -R www-data:www-data "$LIGHTTPD_WEB_ROOT" && \
