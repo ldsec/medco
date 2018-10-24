@@ -32,7 +32,7 @@ ENV I2B2_DB_HOST="postgresql" \
 # build-time variables
 ENV LIGHTTPD_WEB_ROOT="/var/www/html"
 
-ENV CORS_ALLOW_ORIGIN="http:\/\/localhost:4200"
+ENV CORS_ALLOW_ORIGIN="http://localhost:4200"
 
 COPY --from=dev --chown=www-data:www-data "/www" "$LIGHTTPD_WEB_ROOT"
 COPY --chown=www-data:www-data www-data/ "$LIGHTTPD_WEB_ROOT/"
