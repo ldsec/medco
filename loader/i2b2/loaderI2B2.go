@@ -3,7 +3,6 @@ package loaderi2b2
 import (
 	"bytes"
 	"encoding/csv"
-	"encoding/xml"
 	"github.com/dedis/kyber"
 	"github.com/dedis/onet"
 	"github.com/dedis/onet/log"
@@ -58,9 +57,6 @@ var (
 	}
 
 	InputFilePaths = map[string]string{
-		"TABLE_ACCESS": "../../data/i2b2/original/table_access.csv",
-		"SCHEMES":      "../../data/i2b2/original/schemes.csv",
-
 		"ONTOLOGY_BIRN":        "../../data/i2b2/original/birn.csv",
 		"ONTOLOGY_CUSTOM_META": "../../data/i2b2/original/custom_meta.csv",
 		"ONTOLOGY_ICD10_ICD9":  "../../data/i2b2/original/icd10_icd9.csv",
@@ -74,22 +70,17 @@ var (
 	}
 
 	OutputFilePaths = map[string]FileInfo{
-		"ADAPTER_MAPPINGS": {TableName: "", Path: "../../data/i2b2/converted/AdapterMappings.xml"},
 		"SENSITIVE_TAGGED": {TableName: I2B2METADATA + "sensitive_tagged", Path: "../../data/i2b2/converted/sensitive_tagged.csv"},
 
-		"TABLE_ACCESS_L":    {TableName: I2B2METADATA + "table_access", Path: "../../data/i2b2/converted/local_table_access.csv"},
-		"SCHEMES_L":         {TableName: I2B2METADATA + "local_schemes", Path: "../../data/i2b2/converted/local_schemes.csv"},
 		"LOCAL_BIRN":        {TableName: I2B2METADATA + "birn", Path: "../../data/i2b2/converted/local_birn.csv"},
 		"LOCAL_CUSTOM_META": {TableName: I2B2METADATA + "custom_meta", Path: "../../data/i2b2/converted/local_custom_meta.csv"},
 		"LOCAL_ICD10_ICD9":  {TableName: I2B2METADATA + "icd10_icd9", Path: "../../data/i2b2/converted/local_icd10_icd9.csv"},
 		"LOCAL_I2B2":        {TableName: I2B2METADATA + "i2b2", Path: "../../data/i2b2/converted/local_i2b2.csv"},
 
-		"TABLE_ACCESS_S":     {TableName: ONT + "table_access", Path: "../../data/i2b2/converted/shrine_table_access.csv"},
-		"SCHEMES_S":          {TableName: ONT + "shrine_schemes", Path: "../../data/i2b2/converted/shrine_schemes.csv"},
-		"SHRINE_BIRN":        {TableName: ONT + "birn", Path: "../../data/i2b2/converted/shrine_birn.csv"},
-		"SHRINE_CUSTOM_META": {TableName: ONT + "custom_meta", Path: "../../data/i2b2/converted/shrine_custom_meta.csv"},
-		"SHRINE_ICD10_ICD9":  {TableName: ONT + "icd10_icd9", Path: "../../data/i2b2/converted/shrine_icd10_icd9.csv"},
-		"SHRINE_I2B2":        {TableName: ONT + "i2b2", Path: "../../data/i2b2/converted/shrine_i2b2.csv"},
+		"MEDCO_BIRN":        {TableName: ONT + "birn", Path: "../../data/i2b2/converted/shrine_birn.csv"},
+		"MEDCO_CUSTOM_META": {TableName: ONT + "custom_meta", Path: "../../data/i2b2/converted/shrine_custom_meta.csv"},
+		"MEDCO_ICD10_ICD9":  {TableName: ONT + "icd10_icd9", Path: "../../data/i2b2/converted/shrine_icd10_icd9.csv"},
+		"MEDCO_I2B2":        {TableName: ONT + "i2b2", Path: "../../data/i2b2/converted/shrine_i2b2.csv"},
 
 		"PATIENT_DIMENSION": {TableName: I2B2DEMODATA + "patient_dimension", Path: "../../data/i2b2/converted/patient_dimension.csv"},
 		"NEW_PATIENT_NUM":   {TableName: "", Path: "../../data/i2b2/converted/new_patient_num.csv"},
@@ -113,7 +104,6 @@ const (
 
 func generateOutputFiles(folderPath string) {
 	// fixed demodata tables
-	OutputFilePaths["ADAPTER_MAPPINGS"] = FileInfo{TableName: "", Path: folderPath + "AdapterMappings.xml"}
 	OutputFilePaths["PATIENT_DIMENSION"] = FileInfo{TableName: I2B2DEMODATA + "patient_dimension", Path: folderPath + "patient_dimension.csv"}
 	OutputFilePaths["NEW_PATIENT_NUM"] = FileInfo{TableName: "", Path: folderPath + "new_patient_num.csv"}
 	OutputFilePaths["VISIT_DIMENSION"] = FileInfo{TableName: I2B2DEMODATA + "visit_dimension", Path: folderPath + "visit_dimension.csv"}
@@ -124,19 +114,13 @@ func generateOutputFiles(folderPath string) {
 	// fixed ontology tables
 	OutputFilePaths["SENSITIVE_TAGGED"] = FileInfo{TableName: I2B2METADATA + "sensitive_tagged", Path: folderPath + "sensitive_tagged.csv"}
 
-	OutputFilePaths["TABLE_ACCESS_L"] = FileInfo{TableName: I2B2METADATA + "i2b2metadata.table_access", Path: folderPath + "local_table_access.csv"}
-	OutputFilePaths["TABLE_ACCESS_S"] = FileInfo{TableName: ONT + "table_access", Path: folderPath + "shrine_table_access.csv"}
-
-	OutputFilePaths["SCHEMES_L"] = FileInfo{TableName: I2B2METADATA + "i2b2metadata.schemes", Path: folderPath + "local_schemes.csv"}
-	OutputFilePaths["SCHEMES_S"] = FileInfo{TableName: ONT + "shrine_ont.schemes", Path: folderPath + "shrine_schemes.csv"}
-
 	for key, path := range InputFilePaths {
 		if strings.HasPrefix(key, "ONTOLOGY_") {
 			rawKey := strings.Split(key, "ONTOLOGY_")[1]
 			tokens := strings.Split(path, "/")
 
 			OutputFilePaths["LOCAL_"+rawKey] = FileInfo{TableName: I2B2METADATA + strings.ToLower(rawKey), Path: folderPath + "local_" + tokens[len(tokens)-1]}
-			OutputFilePaths["SHRINE_"+rawKey] = FileInfo{TableName: ONT + strings.ToLower(rawKey), Path: folderPath + "shrine_" + tokens[len(tokens)-1]}
+			OutputFilePaths["MEDCO_"+rawKey] = FileInfo{TableName: ONT + strings.ToLower(rawKey), Path: folderPath + "shrine_" + tokens[len(tokens)-1]}
 		}
 	}
 }
@@ -154,9 +138,6 @@ func Loadi2b2Data(el *onet.Roster, entryPointIdx int, files Files, allSensitive 
 	}
 
 	// change input filepaths
-	InputFilePaths["TABLE_ACCESS"] = files.TableAccess
-	InputFilePaths["SCHEMES"] = files.Schemes
-
 	if len(files.Ontology) == 0 {
 		log.Fatal("No Ontology files were selected for conversion")
 	}
@@ -176,52 +157,19 @@ func Loadi2b2Data(el *onet.Roster, entryPointIdx int, files Files, allSensitive 
 	// change output filepaths
 	generateOutputFiles(files.OutputFolder)
 
-	// parse and convert i2b2 files
-
-	err := ParseSchemes()
-	if err != nil {
-		return err
-	}
-
-	err = ConvertSchemes()
-	if err != nil {
-		return err
-	}
-
-	log.Lvl2("--- Finished converting SCHEMES ---")
-
-	err = ParseTableAccess()
-	if err != nil {
-		return err
-	}
-
-	err = ConvertTableAccess()
-	if err != nil {
-		return err
-	}
-
-	log.Lvl2("--- Finished converting TABLE_ACCESS ---")
-
-	err = ConvertLocalOntology(el, entryPointIdx)
+	err := ConvertLocalOntology(el, entryPointIdx)
 	if err != nil {
 		return err
 	}
 
 	log.Lvl2("--- Finished converting LOCAL_ONTOLOGY ---")
 
-	err = GenerateAdapterMappings()
+	err = GenerateMedCoOntology()
 	if err != nil {
 		return err
 	}
 
-	log.Lvl2("--- Finished generating ADAPTER_MAPPINGS ---")
-
-	err = GenerateShrineOntology()
-	if err != nil {
-		return err
-	}
-
-	log.Lvl2("--- Finished generating SHRINE_ONTOLOGY ---")
+	log.Lvl2("--- Finished generating MEDCO_ONTOLOGY ---")
 
 	err = ParseDummyToPatient()
 	if err != nil {
@@ -325,25 +273,17 @@ func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
 	}
 	loading += "TRUNCATE TABLE " + I2B2METADATA + "sensitive_tagged;\n"
 	loading += `\copy ` + OutputFilePaths["SENSITIVE_TAGGED"].TableName + ` FROM '` + OutputFilePaths["SENSITIVE_TAGGED"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n"
-	loading += "TRUNCATE TABLE " + I2B2METADATA + "table_access;\n"
-	loading += `\copy ` + OutputFilePaths["TABLE_ACCESS_L"].TableName + ` FROM '` + OutputFilePaths["TABLE_ACCESS_L"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n"
-	loading += "TRUNCATE TABLE " + I2B2METADATA + "schemes;\n"
-	loading += `\copy ` + OutputFilePaths["SCHEMES_L"].TableName + ` FROM '` + OutputFilePaths["SCHEMES_L"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n"
 	loading += "\n"
 
-	// Create Shrine Table
+	// Create MedCo Table
 
 	for file, fI := range OutputFilePaths {
-		if strings.HasPrefix(file, "SHRINE_") {
+		if strings.HasPrefix(file, "MEDCO_") {
 			loading += "CREATE TABLE IF NOT EXISTS " + fI.TableName + " AS SELECT * FROM " + ONT + "shrine WHERE 1=2;" + "\n"
 			loading += "TRUNCATE TABLE " + fI.TableName + ";\n"
 			loading += `\copy ` + fI.TableName + ` FROM '` + fI.Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n"
 		}
 	}
-	loading += "TRUNCATE TABLE " + OutputFilePaths["TABLE_ACCESS_S"].TableName + ";\n"
-	loading += `\copy ` + OutputFilePaths["TABLE_ACCESS_S"].TableName + ` FROM '` + OutputFilePaths["TABLE_ACCESS_S"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n"
-	loading += "TRUNCATE TABLE " + OutputFilePaths["SCHEMES_S"].TableName + ";\n"
-	loading += `\copy ` + OutputFilePaths["SCHEMES_S"].TableName + ` FROM '` + OutputFilePaths["SCHEMES_S"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n"
 	loading += "COMMIT;\n"
 	loading += "EOSQL"
 
@@ -454,210 +394,6 @@ func HasSensitiveParents(conceptPath string) (string, bool) {
 	return temp, isSensitive
 }
 
-// SCHEMES.CSV reader
-
-// ParseSchemes reads and parses the schemes.csv.
-func ParseSchemes() error {
-	lines, err := readCSV("SCHEMES")
-	if err != nil {
-		log.Fatal("Error in readCSV()")
-		return err
-	}
-
-	// initialize container structs and counters
-	TableSchemes = make(map[*SchemesPK]Schemes)
-	HeaderSchemes = make([]string, 0)
-
-	/* structure of patient_dimension.csv (in order):
-
-	// PK
-	"key",
-
-	// MANDATORY FIELDS
-	"name",
-	"description"
-
-	*/
-
-	for _, header := range lines[0] {
-		HeaderSchemes = append(HeaderSchemes, header)
-	}
-
-	//skip header
-	for _, line := range lines[1:] {
-		sk, s := SchemesFromString(line)
-		TableSchemes[sk] = s
-	}
-
-	return nil
-}
-
-// ConvertSchemes generate (copy) the schemes.csv
-func ConvertSchemes() error {
-	// local (we add a TAG_ID: entry)
-	csvOutputFileL, err := os.Create(OutputFilePaths["SCHEMES_L"].Path)
-	if err != nil {
-		log.Fatal("Error opening [local_schemes].csv")
-		return err
-	}
-	defer csvOutputFileL.Close()
-
-	// shrine (copy as is)
-	csvOutputFileS, err := os.Create(OutputFilePaths["SCHEMES_S"].Path)
-	if err != nil {
-		log.Fatal("Error opening [shrine_schemes].csv")
-		return err
-	}
-	defer csvOutputFileS.Close()
-
-	headerString := ""
-	for _, header := range HeaderSchemes {
-		headerString += "\"" + header + "\","
-	}
-	// remove the last ,
-	csvOutputFileL.WriteString(headerString[:len(headerString)-1] + "\n")
-	csvOutputFileS.WriteString(headerString[:len(headerString)-1] + "\n")
-
-	for _, ta := range TableSchemes {
-		csvOutputFileL.WriteString(ta.ToCSVText() + "\n")
-		csvOutputFileS.WriteString(ta.ToCSVText() + "\n")
-	}
-
-	csvOutputFileL.WriteString(`"TAG_ID:","TAG_ID","MedCo tag identifier"` + "\n")
-
-	return nil
-}
-
-// TABLE_ACCESS.CSV reader
-
-// ParseTableAccess reads and parses the table_access.csv.
-func ParseTableAccess() error {
-	lines, err := readCSV("TABLE_ACCESS")
-	if err != nil {
-		log.Fatal("Error in readCSV()")
-		return err
-	}
-
-	// initialize container structs and counters
-	TableAccessMap = make(map[string]*TableAccess)
-	HeaderTableAccess = make([]string, 0)
-
-	/* structure of table_access.csv (in order):
-
-	// FIELDS
-	"c_table_cd",
-	"c_table_name",
-	"c_protected_access",
-	"c_hlevel",
-	"c_fullname",
-	"c_name",
-	"c_synonym_cd",
-	"c_visualattributes",
-	"c_totalnum",
-	"c_basecode",
-	"c_metadataxml",
-	"c_facttablecolumn",
-	"c_dimtablename",
-	"c_columnname",
-	"c_columndatatype",
-	"c_operator",
-	"c_dimcode",
-	"c_comment",
-	"c_tooltip",
-	"c_entry_date",
-	"c_change_date",
-	"c_status_cd",
-	"valuetype_cd"
-
-	*/
-
-	for _, header := range lines[0] {
-		HeaderTableAccess = append(HeaderTableAccess, header)
-	}
-
-	//skip header
-	for _, line := range lines[1:] {
-		ta := TableAccessFromString(line)
-		TableAccessMap[ta.Fullname] = ta
-	}
-
-	return nil
-}
-
-// ConvertTableAccess generate (copy) the table_access.csv
-func ConvertTableAccess() error {
-	// local (we add a SENSITIVE_TAGGED entry)
-	csvOutputFileL, err := os.Create(OutputFilePaths["TABLE_ACCESS_L"].Path)
-	if err != nil {
-		log.Fatal("Error opening [local_table_access].csv")
-		return err
-	}
-	defer csvOutputFileL.Close()
-
-	// shrine (copy as is)
-	csvOutputFileS, err := os.Create(OutputFilePaths["TABLE_ACCESS_S"].Path)
-	if err != nil {
-		log.Fatal("Error opening [shrine_table_access].csv")
-		return err
-	}
-	defer csvOutputFileS.Close()
-
-	headerString := ""
-	for _, header := range HeaderTableAccess {
-		headerString += "\"" + header + "\","
-	}
-	// remove the last ,
-	csvOutputFileL.WriteString(headerString[:len(headerString)-1] + "\n")
-	csvOutputFileS.WriteString(headerString[:len(headerString)-1] + "\n")
-
-	for _, ta := range TableAccessMap {
-		csvOutputFileL.WriteString(ta.ToCSVText() + "\n")
-		csvOutputFileS.WriteString(ta.ToCSVText() + "\n")
-	}
-
-	csvOutputFileL.WriteString(`"SENSITIVE_TAGGED","SENSITIVE_TAGGED","N","1","\medco\tagged\","MedCo Sensitive Tagged Ontology","N","CA ",,,,"concept_cd","concept_dimension","concept_path","T","LIKE","\medco\tagged\",,"MedCo Sensitive Tagged Ontology",,,,` + "\n")
-
-	return nil
-}
-
-// ADAPTER_MAPPINGS.XML converter
-
-func addNewAdapterMapping(loc string, modifier bool) {
-	listLocalKeys := make([]string, 0)
-
-	if modifier == false {
-		for prefix := range TableAccessMap {
-			if strings.HasPrefix(loc, prefix) {
-				listLocalKeys = append(listLocalKeys, `\\`+TableAccessMap[prefix].TableCD+loc)
-				continue
-			}
-		}
-	}
-	Am.ListEntries = append(Am.ListEntries, Entry{Key: listLocalKeys[0], ListLocalKeys: listLocalKeys})
-}
-
-// GenerateAdapterMappings creates a new Adapter Mappings where 1 shrine concept is unequivocally associated with 1 local concept
-func GenerateAdapterMappings() error {
-	xmlOutputFile, err := os.Create(OutputFilePaths["ADAPTER_MAPPINGS"].Path)
-	if err != nil {
-		log.Fatal("Error creating converted [AdapterMappings].xml")
-		return err
-	}
-	xmlOutputFile.Write([]byte(Header))
-
-	xmlWriter := io.Writer(xmlOutputFile)
-
-	enc := xml.NewEncoder(xmlWriter)
-	enc.Indent("", "\t")
-	err = enc.Encode(Am)
-	if err != nil {
-		log.Fatal("Error writing converted [AdapterMappings].xml")
-		return err
-	}
-
-	return nil
-}
-
 // DUMMY_TO_PATIENT.csv parser
 
 // ParseDummyToPatient reads and parses the dummy_to_patient.csv.
@@ -685,12 +421,12 @@ func ParseDummyToPatient() error {
 	return nil
 }
 
-// SHRINE ontology converter
+// MEDCO ontology converter
 
-// GenerateShrineOntology generates all files for the shrine ontology (these may include multiples tables)
-func GenerateShrineOntology() error {
+// GenerateMedCoOntology generates all files for the shrine ontology (these may include multiples tables)
+func GenerateMedCoOntology() error {
 	// initialize container structs and counters
-	HeaderShrineOntology = []string{"c_hlevel",
+	HeaderMedCoOntology = []string{"c_hlevel",
 		"c_fullname",
 		"c_name",
 		"c_synonym_cd",
@@ -748,7 +484,7 @@ func GenerateShrineOntology() error {
 	*/
 
 	for _, key := range OntologyFilesPaths {
-		err := generateNewShrineTable(strings.Split(key, "ONTOLOGY_")[1])
+		err := generateNewMedCoTable(strings.Split(key, "ONTOLOGY_")[1])
 		if err != nil {
 			log.Fatal("Error generating [" + key + "].csv")
 			return err
@@ -757,8 +493,8 @@ func GenerateShrineOntology() error {
 	return nil
 }
 
-func generateNewShrineTable(rawName string) error {
-	csvOutputFile, err := os.Create(OutputFilePaths["SHRINE_"+rawName].Path)
+func generateNewMedCoTable(rawName string) error {
+	csvOutputFile, err := os.Create(OutputFilePaths["MEDCO_"+rawName].Path)
 	if err != nil {
 		log.Fatal("Error opening [" + rawName + "].csv")
 		return err
@@ -766,7 +502,7 @@ func generateNewShrineTable(rawName string) error {
 	defer csvOutputFile.Close()
 
 	headerString := ""
-	for _, header := range HeaderShrineOntology {
+	for _, header := range HeaderMedCoOntology {
 		headerString += "\"" + header + "\","
 	}
 	// remove the last ,
@@ -774,12 +510,12 @@ func generateNewShrineTable(rawName string) error {
 
 	UpdateChildrenEncryptIDs(rawName) //updates the ChildrenEncryptIDs of the internal and parent nodes
 
-	for _, so := range TablesShrineOntology[rawName].Clear {
+	for _, so := range TablesMedCoOntology[rawName].Clear {
 		csvOutputFile.WriteString(so.ToCSVText() + "\n")
 	}
 
 	// copy the sensitive concept codes to the new csv files (it does not include the modifier concepts)
-	for _, so := range TablesShrineOntology[rawName].Sensitive {
+	for _, so := range TablesMedCoOntology[rawName].Sensitive {
 		csvOutputFile.WriteString(so.ToCSVText() + "\n")
 	}
 
@@ -788,7 +524,7 @@ func generateNewShrineTable(rawName string) error {
 
 // UpdateChildrenEncryptIDs updates the parent and internal concept nodes with the IDs of their respective children (name identifies the name of the ontology table)
 func UpdateChildrenEncryptIDs(name string) {
-	for _, so := range TablesShrineOntology[name].Sensitive {
+	for _, so := range TablesMedCoOntology[name].Sensitive {
 		path := so.Fullname
 		for true {
 			path = StripByLevel(path, 1, false)
@@ -796,7 +532,7 @@ func UpdateChildrenEncryptIDs(name string) {
 				break
 			}
 
-			if val, ok := TablesShrineOntology[name].Sensitive[path]; ok {
+			if val, ok := TablesMedCoOntology[name].Sensitive[path]; ok {
 				val.ChildrenEncryptIDs = append(val.ChildrenEncryptIDs, so.NodeEncryptID)
 			}
 
@@ -811,7 +547,7 @@ func ConvertLocalOntology(group *onet.Roster, entryPointIdx int) error {
 	// initialize container structs and counters
 	IDConcepts = 0
 	TagIDConceptsUsed = 0
-	TablesShrineOntology = make(map[string]ShrineTableInfo)
+	TablesMedCoOntology = make(map[string]MedCoTableInfo)
 	MapConceptPathToTag = make(map[string]TagAndID)
 
 	for _, key := range OntologyFilesPaths {
@@ -838,7 +574,7 @@ func ConvertLocalOntology(group *onet.Roster, entryPointIdx int) error {
 }
 
 // ParseLocalTable reads and parses the xxxx.csv (part of the local ontology)
-// The adapter_mappings and shrine ontology are also generated based on the local ontology. Each local table (in i2b2metadata is replicated in the shrine_ont, with some minor changes)
+// The shrine ontology is also generated based on the local ontology. Each local table (in i2b2metadata is replicated in the medco_ont, with some minor changes)
 func ParseLocalTable(group *onet.Roster, entryPointIdx int, name string) error {
 	lines, err := readCSV(name)
 	if err != nil {
@@ -852,11 +588,6 @@ func ParseLocalTable(group *onet.Roster, entryPointIdx int, name string) error {
 
 	listConceptCD := make([]string, 0)
 	allSensitiveConceptIDs := make([]int64, 0)
-	listEntries := make([]Entry, 0)
-
-	Am = AdapterMappings{ListEntries: listEntries}
-	Am.Hostname = "cw-ptrevvett.MED.HARVARD.EDU"
-	Am.TimeStamp = "2014-02-26T15:48:27.286-05:00"
 
 	/* structure of i2b2.csv (in order):
 
@@ -913,7 +644,7 @@ func ParseLocalTable(group *onet.Roster, entryPointIdx int, name string) error {
 		// if it is the original concept (N = original, Y = synonym)
 		if strings.ToLower(lo.SynonymCD) == "n" || strings.ToLower(lo.SynonymCD) == "" {
 			// create entry for shrine ontology (direct copy)
-			so := ShrineOntologyFromLocalConcept(lo)
+			so := MedCoOntologyFromLocalConcept(lo)
 
 			_, sensitive := HasSensitiveParents(lo.Fullname)
 
@@ -924,13 +655,13 @@ func ParseLocalTable(group *onet.Roster, entryPointIdx int, name string) error {
 				if strings.ToLower(so.FactTableColumn) != "modifier_cd" {
 					so.NodeEncryptID = IDConcepts
 
-					if _, ok := TablesShrineOntology[rawName]; ok {
-						TablesShrineOntology[rawName].Sensitive[so.Fullname] = so
+					if _, ok := TablesMedCoOntology[rawName]; ok {
+						TablesMedCoOntology[rawName].Sensitive[so.Fullname] = so
 					} else {
-						sensitive := make(map[string]*ShrineOntology)
-						clear := make(map[string]*ShrineOntology)
+						sensitive := make(map[string]*MedCoOntology)
+						clear := make(map[string]*MedCoOntology)
 						sensitive[so.Fullname] = so
-						TablesShrineOntology[rawName] = ShrineTableInfo{Clear: clear, Sensitive: sensitive}
+						TablesMedCoOntology[rawName] = MedCoTableInfo{Clear: clear, Sensitive: sensitive}
 					}
 
 					// if the ID does not yet exist
@@ -946,23 +677,19 @@ func ParseLocalTable(group *onet.Roster, entryPointIdx int, name string) error {
 
 				//TODO for now we remove all modifiers
 				if strings.ToLower(so.FactTableColumn) != "modifier_cd" {
-					if lo.HLevel != "0" {
-						// add a new entry for the AdapterMappings (1-1 mapping between shrine and local concept)
-						addNewAdapterMapping(lo.Fullname, false)
-					}
 					// add a new entry to the local ontology table
 					TableLocalOntologyClear[lo.Fullname] = lo
 					// add a new entry to the shrine ontology table
-					if _, ok := TablesShrineOntology[rawName]; ok {
-						TablesShrineOntology[rawName].Clear[so.Fullname] = so
+					if _, ok := TablesMedCoOntology[rawName]; ok {
+						TablesMedCoOntology[rawName].Clear[so.Fullname] = so
 					} else {
-						sensitive := make(map[string]*ShrineOntology)
-						clear := make(map[string]*ShrineOntology)
+						sensitive := make(map[string]*MedCoOntology)
+						clear := make(map[string]*MedCoOntology)
 						clear[so.Fullname] = so
-						TablesShrineOntology[rawName] = ShrineTableInfo{Clear: clear, Sensitive: sensitive}
+						TablesMedCoOntology[rawName] = MedCoTableInfo{Clear: clear, Sensitive: sensitive}
 					}
 
-					TablesShrineOntology[rawName].Clear[so.Fullname] = so
+					TablesMedCoOntology[rawName].Clear[so.Fullname] = so
 				}
 			}
 		}

@@ -31,91 +31,20 @@ var TagIDConceptsUsed int64
 
 // ####----DATA TYPES----####
 
-// TableSchemes is schemes table
-var TableSchemes map[*SchemesPK]Schemes
-
-// HeaderSchemes contains all the headers for the observation_fact table
-var HeaderSchemes []string
-
-// Schemes table represents a scheme in the database
-type Schemes struct {
-	PK          *SchemesPK
-	Name        string
-	Description string
+// MedCoTableInfo stores all the 'data' for a specific shrine ontology table
+type MedCoTableInfo struct {
+	Clear     map[string]*MedCoOntology
+	Sensitive map[string]*MedCoOntology
 }
 
-// SchemesPK is the primary key of the schemes table
-type SchemesPK struct {
-	Key string
-}
+// TablesMedCoOntology distinguishes between the different shrine ontology tables
+var TablesMedCoOntology map[string]MedCoTableInfo
 
-// ToCSVText writes the Schemes object in a way that can be added to a .csv file - "","","", etc.
-func (s Schemes) ToCSVText() string {
-	finalString := "\"" + s.PK.Key + "\"," + "\"" + s.Name + "\"," + "\"" + s.Description + "\""
-	return strings.Replace(finalString, `"\N"`, "", -1)
-}
+// HeaderMedCoOntology contains all the headers for the shrine table
+var HeaderMedCoOntology []string
 
-//-------------------------------------//
-
-// TableAccessMap is the table_access table
-var TableAccessMap map[string]*TableAccess
-
-// HeaderTableAccess contains all the headers for the table_access table
-var HeaderTableAccess []string
-
-// TableAccess is the table that contains all entries for the table_access table
-type TableAccess struct {
-	TableCD          string
-	TableName        string
-	ProtectedAccess  string
-	Hlevel           string
-	Fullname         string
-	Name             string
-	SynonymCD        string
-	Visualattributes string
-	Totalnum         string
-	Basecode         string
-	Metadataxml      string
-	Facttablecolumn  string
-	Dimtablename     string
-	Columnname       string
-	Columndatatype   string
-	Operator         string
-	Dimcode          string
-	Comment          string
-	Tooltip          string
-	EntryDate        string
-	ChangeDate       string
-	StatusCD         string
-	ValuetypeCD      string
-}
-
-// ToCSVText writes the ShrineOntology object in a way that can be added to a .csv file - "","","", etc.
-func (ta TableAccess) ToCSVText() string {
-	finalString := "\"" + ta.TableCD + "\"," + "\"" + ta.TableName + "\"," + "\"" + ta.ProtectedAccess + "\"," + "\"" + ta.Hlevel + "\"," + "\"" + ta.Fullname + "\"," + "\"" + ta.Name + "\"," +
-		"\"" + ta.SynonymCD + "\"," + "\"" + ta.Visualattributes + "\"," + "\"" + ta.Totalnum + "\"," + "\"" + ta.Basecode + "\"," + "\"" + ta.Metadataxml + "\"," + "\"" + ta.Facttablecolumn + "\"," + "\"" + ta.Dimtablename + "\"," +
-		"\"" + ta.Columnname + "\"," + "\"" + ta.Columndatatype + "\"," + "\"" + ta.Operator + "\"," + "\"" + ta.Dimcode + "\"," + "\"" + ta.Comment + "\"," + "\"" + ta.Tooltip + "\"," + "\"" + ta.EntryDate +
-		"\"," + "\"" + ta.ChangeDate + "\"," + "\"" + ta.StatusCD + "\"," + "\"" + ta.ValuetypeCD + "\""
-
-	return strings.Replace(finalString, `"\N"`, "", -1)
-}
-
-//-------------------------------------//
-
-// ShrineTableInfo stores all the 'data' for a specific shrine ontology table
-type ShrineTableInfo struct {
-	Clear     map[string]*ShrineOntology
-	Sensitive map[string]*ShrineOntology
-}
-
-// TablesShrineOntology distinguishes between the different shrine ontology tables
-var TablesShrineOntology map[string]ShrineTableInfo
-
-// HeaderShrineOntology contains all the headers for the shrine table
-var HeaderShrineOntology []string
-
-// ShrineOntology is the table that contains all concept codes from the shrine ontology
-type ShrineOntology struct {
+// MedCoOntology is the table that contains all concept codes from the shrine ontology
+type MedCoOntology struct {
 	NodeEncryptID      int64
 	ChildrenEncryptIDs []int64
 
@@ -141,8 +70,8 @@ type ShrineOntology struct {
 	ExclusionCD      string
 }
 
-// ToCSVText writes the ShrineOntology object in a way that can be added to a .csv file - "","","", etc.
-func (so ShrineOntology) ToCSVText() string {
+// ToCSVText writes the MedCoOntology object in a way that can be added to a .csv file - "","","", etc.
+func (so MedCoOntology) ToCSVText() string {
 	if so.NodeEncryptID != int64(-1) && so.VisualAttributes[:1] != "M" { // sensitive
 		metadata := ""
 
@@ -506,72 +435,8 @@ func ConceptDimensionSensitiveToCSVText(tag *libunlynx.GroupingKey, tagID int64)
 
 //-------------------------------------//
 
-// Am maps a shrine ontology sensitive concept or modifier concept to the local ontology (we need this to know which concepts from the local ontology are sensitive)
-var Am AdapterMappings
-
-// AdapterMappings is the xml pre-generated struct to parse the AdapterMappings.xml
-type AdapterMappings struct {
-	Hostname    string  `xml:"hostname"`
-	TimeStamp   string  `xml:"timestamp"`
-	ListEntries []Entry `xml:"mappings>entry"`
-}
-
-// Entry is part of the AdapterMappings.xml
-type Entry struct {
-	Key           string   `xml:"key"`
-	ListLocalKeys []string `xml:"value>local_key"`
-}
-
-// SUPPORT FUNCTIONS
-
-// SchemesFromString generates a Schemes struct from a parsed line of a .csv file
-func SchemesFromString(line []string) (*SchemesPK, Schemes) {
-	sk := &SchemesPK{
-		Key: line[0],
-	}
-
-	s := Schemes{
-		PK:          sk,
-		Name:        line[1],
-		Description: line[2],
-	}
-
-	return sk, s
-}
-
-// TableAccessFromString generates a TableAccess struct from a parsed line of a .csv file
-func TableAccessFromString(line []string) *TableAccess {
-	ta := &TableAccess{
-		TableCD:          line[0],
-		TableName:        line[1],
-		ProtectedAccess:  line[2],
-		Hlevel:           line[3],
-		Fullname:         line[4],
-		Name:             line[5],
-		SynonymCD:        line[6],
-		Visualattributes: line[7],
-		Totalnum:         line[8],
-		Basecode:         line[9],
-		Metadataxml:      line[10],
-		Facttablecolumn:  line[11],
-		Dimtablename:     line[12],
-		Columnname:       line[13],
-		Columndatatype:   line[14],
-		Operator:         line[15],
-		Dimcode:          line[16],
-		Comment:          line[17],
-		Tooltip:          line[18],
-		EntryDate:        line[19],
-		ChangeDate:       line[20],
-		StatusCD:         line[21],
-		ValuetypeCD:      line[22],
-	}
-
-	return ta
-}
-
-// ShrineOntologyFromLocalConcept generates a ShrineOntology struct from LocalOntology struct
-func ShrineOntologyFromLocalConcept(localConcept *LocalOntology) *ShrineOntology {
+// MedCoOntologyFromLocalConcept generates a MedCoOntology struct from LocalOntology struct
+func MedCoOntologyFromLocalConcept(localConcept *LocalOntology) *MedCoOntology {
 	ac := AdministrativeColumns{
 		UpdateDate:     localConcept.AdminColumns.UpdateDate,
 		DownloadDate:   localConcept.AdminColumns.DownloadDate,
@@ -579,7 +444,7 @@ func ShrineOntologyFromLocalConcept(localConcept *LocalOntology) *ShrineOntology
 		SourceSystemCD: localConcept.AdminColumns.SourceSystemCD,
 	}
 
-	so := &ShrineOntology{
+	so := &MedCoOntology{
 		NodeEncryptID:      int64(-1), //signals that this shrine ontology element is not sensitive so no need for an encrypt ID
 		ChildrenEncryptIDs: nil,       //same thing as before
 		HLevel:             localConcept.HLevel,

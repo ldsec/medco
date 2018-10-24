@@ -1,3 +1,0 @@
-http://icsil1noteb206.epfl.ch:82/phppgadmin
-postgres
-prigen2017

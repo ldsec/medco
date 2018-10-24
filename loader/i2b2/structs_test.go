@@ -14,53 +14,7 @@ import (
 // ---------------------------------------- TO STRING -------------------------------------------------------- //
 // ----------------------------------------------------------------------------------------------------------- //
 
-func TestSchemes_ToCSVText(t *testing.T) {
-	sk := &loaderi2b2.SchemesPK{
-		Key: "NDC:",
-	}
-
-	s := loaderi2b2.Schemes{
-		PK:          sk,
-		Name:        "NDC",
-		Description: "National Drug Code",
-	}
-
-	assert.Equal(t, s.ToCSVText(), `"NDC:","NDC","National Drug Code"`)
-
-}
-
-func TestTableAccess_ToCSVText(t *testing.T) {
-	ta := loaderi2b2.TableAccess{
-		TableCD:          "i2b2_DEMO",
-		TableName:        "I2B2",
-		ProtectedAccess:  "N",
-		Hlevel:           "1",
-		Fullname:         "\\i2b2\\Demographics\\",
-		Name:             "Demographics",
-		SynonymCD:        "N",
-		Visualattributes: "CA ",
-		Totalnum:         "\\N",
-		Basecode:         "\\N",
-		Metadataxml:      "\\N",
-		Facttablecolumn:  "concept_cd",
-		Dimtablename:     "concept_dimension",
-		Columnname:       "concept_path",
-		Columndatatype:   "T",
-		Operator:         "LIKE",
-		Dimcode:          "\\i2b2\\Demographics\\",
-		Comment:          "\\N",
-		Tooltip:          "Demographics",
-		EntryDate:        "\\N",
-		ChangeDate:       "\\N",
-		StatusCD:         "\\N",
-		ValuetypeCD:      "\\N",
-	}
-
-	assert.Equal(t, ta.ToCSVText(), `"i2b2_DEMO","I2B2","N","1","\i2b2\Demographics\","Demographics","N","CA ",,,,"concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\Demographics\",,"Demographics",,,,`)
-
-}
-
-func TestShrineOntology_ToCSVText(t *testing.T) {
+func TestMedCoOntology_ToCSVText(t *testing.T) {
 
 	ac := loaderi2b2.AdministrativeColumns{
 		UpdateDate:     "\\N",
@@ -69,7 +23,7 @@ func TestShrineOntology_ToCSVText(t *testing.T) {
 		SourceSystemCD: "SHRINE",
 	}
 
-	so := loaderi2b2.ShrineOntology{
+	so := loaderi2b2.MedCoOntology{
 		NodeEncryptID:      -1,
 		ChildrenEncryptIDs: nil,
 
@@ -313,44 +267,6 @@ func TestObservationFact_ToCSVText(t *testing.T) {
 // ---------------------------------------- FROM STRING -------------------------------------------------------- //
 // ------------------------------------------------------------------------------------------------------------- //
 
-func TestTableAccessFromString(t *testing.T) {
-	csvString := `"i2b2_DEMO","I2B2","N","1","\i2b2\Demographics\","Demographics","N","CA ","\N","\N","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\Demographics\","\N","Demographics","\N","\N","\N","\N"`
-
-	ta := loaderi2b2.TableAccess{
-		TableCD:          "i2b2_DEMO",
-		TableName:        "I2B2",
-		ProtectedAccess:  "N",
-		Hlevel:           "1",
-		Fullname:         `\i2b2\Demographics\`,
-		Name:             "Demographics",
-		SynonymCD:        "N",
-		Visualattributes: "CA ",
-		Totalnum:         "\\N",
-		Basecode:         "\\N",
-		Metadataxml:      "\\N",
-		Facttablecolumn:  "concept_cd",
-		Dimtablename:     "concept_dimension",
-		Columnname:       "concept_path",
-		Columndatatype:   "T",
-		Operator:         "LIKE",
-		Dimcode:          `\i2b2\Demographics\`,
-		Comment:          "\\N",
-		Tooltip:          "Demographics",
-		EntryDate:        "\\N",
-		ChangeDate:       "\\N",
-		StatusCD:         "\\N",
-		ValuetypeCD:      "\\N",
-	}
-
-	var csvFile = strings.NewReader(csvString)
-	r := csv.NewReader(csvFile)
-	lines, err := r.ReadAll()
-	assert.Nil(t, err, "Parsing error")
-
-	assert.Equal(t, *loaderi2b2.TableAccessFromString(lines[0]), ta)
-
-}
-
 func TestLocalOntologyFromString(t *testing.T) {
 	csvString := `"4","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","Parkdale","N","FA ","\N","\N","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","\N","Demographics \ Zip codes \ Arkansas \ Parkdale","@","2007-04-10 00:00:00","2007-04-10 00:00:00","2007-04-10 00:00:00","DEMO","\N","\N","\N","\N","\N"`
 
@@ -558,7 +474,7 @@ func TestObservationFactFromString(t *testing.T) {
 		ConceptCD:    "Affy:221610_s_at",
 		ProviderID:   "LCS-I2B2:D000109064",
 		StartDate:    "2009-01-16 00:00:00",
-		ModifierCD:   "@",
+		ModifierCD:   "",
 		InstanceNum:  "1",
 	}
 

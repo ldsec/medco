@@ -77,8 +77,8 @@ const (
 	optionGenomicFile      = "genomic"
 	optionGenomicFileShort = "gen"
 
-	optionOutputPath 		= "output"
-	optionOuputPathShort 	= "o"
+	optionOutputPath     = "output"
+	optionOuputPathShort = "o"
 
 	// #---- V1 ----#
 

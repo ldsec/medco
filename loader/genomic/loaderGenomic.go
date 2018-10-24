@@ -36,13 +36,13 @@ const ANNOTATIONS = "genomic_annotations."
 var (
 	OutputFilePath = "../data/genomic/"
 
-	TablenamesOntology = [...]string{ ONT + "clinical_sensitive",
+	TablenamesOntology = [...]string{ONT + "clinical_sensitive",
 		ONT + "clinical_non_sensitive",
 		ANNOTATIONS + "genomic_annotations",
 		I2B2METADATA + "sensitive_tagged",
 		I2B2METADATA + "non_sensitive_clear"}
 
-	TablenamesData = [...]string{ I2B2DEMODATA + "concept_dimension",
+	TablenamesData = [...]string{I2B2DEMODATA + "concept_dimension",
 		I2B2DEMODATA + "patient_mapping",
 		I2B2DEMODATA + "patient_dimension",
 		I2B2DEMODATA + "encounter_mapping",
@@ -53,13 +53,13 @@ var (
 	FileBashPath = [...]string{"25-load-ontology.sh",
 		"26-load-data.sh"}
 
-	FilePathsOntology = [...]string{ "SHRINE_ONT_CLINICAL_SENSITIVE.csv",
+	FilePathsOntology = [...]string{"SHRINE_ONT_CLINICAL_SENSITIVE.csv",
 		"SHRINE_ONT_CLINICAL_NON_SENSITIVE.csv",
 		"SHRINE_ONT_GENOMIC_ANNOTATIONS.csv",
 		"I2B2METADATA_SENSITIVE_TAGGED.csv",
 		"I2B2METADATA_NON_SENSITIVE_CLEAR.csv"}
 
-	FilePathsData = [...]string{ "I2B2DEMODATA_CONCEPT_DIMENSION.csv",
+	FilePathsData = [...]string{"I2B2DEMODATA_CONCEPT_DIMENSION.csv",
 		"I2B2DEMODATA_PATIENT_MAPPING.csv",
 		"I2B2DEMODATA_PATIENT_DIMENSION.csv",
 		"I2B2DEMODATA_ENCOUNTER_MAPPING.csv",
@@ -402,8 +402,8 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 	parsingTime := time.Duration(0)
 	startParsing := time.Now()
 
-	writeShrineOntologyClearHeader()
-	writeShrineOntologyEncHeader()
+	writeMedCoOntologyClearHeader()
+	writeMedCoOntologyEncHeader()
 	writeMetadataOntologyClearHeader()
 	writeMetadataSensitiveTaggedHeader()
 
@@ -438,12 +438,12 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 					if _, ok := ToIgnore[rec]; !ok {
 						// sensitive
 						if _, ok := mapSensitive[rec]; ok || AllSensitive == true {
-							if err := writeShrineOntologyEnc(rec); err != nil {
+							if err := writeMedCoOntologyEnc(rec); err != nil {
 								return err
 							}
 							// we don't generate the MetadataOntologyEnc because we will do this afterwards (so that we only perform 1 DDT with all sensitive elements)
 						} else {
-							if err := writeShrineOntologyClear(rec); err != nil {
+							if err := writeMedCoOntologyClear(rec); err != nil {
 								return err
 							}
 							if err := writeMetadataOntologyClear(rec); err != nil {
@@ -476,7 +476,7 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 					if _, ok := mapSensitive[headerClinical[j]]; ok || AllSensitive == true {
 						// if concept path does not exist
 						if _, ok := OntValues[ConceptPath{Field: headerClinical[j], Record: record[i]}]; ok == false {
-							if err := writeShrineOntologyLeafEnc(headerClinical[j], record[i], encID); err != nil {
+							if err := writeMedCoOntologyLeafEnc(headerClinical[j], record[i], encID); err != nil {
 								return err
 							}
 							// we don't generate the MetadataOntologyLeafEnc because we will do this afterwards (so that we only perform 1 DDT with all sensitive elements)
@@ -488,7 +488,7 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 					} else {
 						// if concept path does not exist
 						if _, ok := OntValues[ConceptPath{Field: headerClinical[j], Record: record[i]}]; ok == false {
-							if err := writeShrineOntologyLeafClear(headerClinical[j], record[i], clearID); err != nil {
+							if err := writeMedCoOntologyLeafClear(headerClinical[j], record[i], clearID); err != nil {
 								return err
 							}
 							if err := writeMetadataOntologyLeafClear(headerClinical[j], record[i], clearID); err != nil {
@@ -558,7 +558,7 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 
 				// if genomic id already exist we don't need to add it to the shrine_ont.genomic_annotations
 				if _, ok := allSensitiveIDs[genomicID]; ok == false && err == nil {
-					allSensitiveIDs[genomicID] = SensitiveIDValue{CP: ConceptPath{Field: strconv.FormatInt(genomicID, 10), Record: ""}, Annotation: generateShrineOntologyGenomicAnnotation(headerGenomic, record)}
+					allSensitiveIDs[genomicID] = SensitiveIDValue{CP: ConceptPath{Field: strconv.FormatInt(genomicID, 10), Record: ""}, Annotation: generateMedCoOntologyGenomicAnnotation(headerGenomic, record)}
 				}
 			}
 
@@ -584,7 +584,7 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 
 	// encrypt sensitive ids
 	listEncryptedElements := EncryptElements(listSensitiveIDs, group)
-	if err := writeShrineOntologyGenomicAnnotations(listEncryptedElements, annotations); err != nil {
+	if err := writeMedCoOntologyGenomicAnnotations(listEncryptedElements, annotations); err != nil {
 		return err
 	}
 
@@ -834,20 +834,20 @@ func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 	return nil
 }
 
-func writeShrineOntologyEncHeader() error {
+func writeMedCoOntologyEncHeader() error {
 	clinicalSensitive := `"2","\medco\clinical\sensitive\","MedCo Clinical Sensitive Ontology","N","CA","0",,,"concept_cd","concept_dimension","concept_path","T","LIKE","\medco\clinical\sensitive\","MedCo Clinical Sensitive Ontology","\medco\clinical\sensitive\","NOW()","NOW()","NOW()",,"ENC_ID","@",,,,` + "\n"
 
 	_, err := FileHandlers[0].WriteString(clinicalSensitive)
 
 	if err != nil {
-		log.Fatal("Error in the writeShrineOntologyEnc():", err)
+		log.Fatal("Error in the writeMedCoOntologyEnc():", err)
 		return err
 	}
 
 	return nil
 }
 
-func writeShrineOntologyEnc(el string) error {
+func writeMedCoOntologyEnc(el string) error {
 	el = SanitizeHeader(el)
 
 	/*clinicalSensitive := `INSERT INTO shrine_ont.clinical_sensitive VALUES (3, '\medco\clinical\sensitive\` + el + `\', '` + el + `', 'N', 'CA', NULL, NULL, NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE',
@@ -859,14 +859,14 @@ func writeShrineOntologyEnc(el string) error {
 	_, err := FileHandlers[0].WriteString(clinicalSensitive)
 
 	if err != nil {
-		log.Fatal("Error in the writeShrineOntologyEnc():", err)
+		log.Fatal("Error in the writeMedCoOntologyEnc():", err)
 		return err
 	}
 
 	return nil
 }
 
-func writeShrineOntologyLeafEnc(field, el string, id int64) error {
+func writeMedCoOntologyLeafEnc(field, el string, id int64) error {
 	field = SanitizeHeader(field)
 
 	/*clinicalSensitive := `INSERT INTO shrine_ont.clinical_sensitive VALUES (4, '\medco\clinical\sensitive\` + field + `\` + el + `\', '` + el + `', 'N', 'LA', NULL, 'ENC_ID:` + strconv.FormatInt(id, 10) + `', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE',
@@ -878,27 +878,27 @@ func writeShrineOntologyLeafEnc(field, el string, id int64) error {
 	_, err := FileHandlers[0].WriteString(clinicalSensitive)
 
 	if err != nil {
-		log.Fatal("Error in the writeShrineOntologyLeafEnc():", err)
+		log.Fatal("Error in the writeMedCoOntologyLeafEnc():", err)
 		return err
 	}
 
 	return nil
 }
 
-func writeShrineOntologyClearHeader() error {
+func writeMedCoOntologyClearHeader() error {
 	clinical := `"2","\medco\clinical\nonsensitive\","MedCo Clinical Non-Sensitive Ontology","N","CA","0",,,"concept_cd","concept_dimension","concept_path","T","LIKE","\medco\clinical\nonsensitive\","MedCo Clinical Non-Sensitive Ontology","\medco\clinical\nonsensitive\","NOW()","NOW()","NOW()",,"CLEAR","@",,,,` + "\n"
 
 	_, err := FileHandlers[1].WriteString(clinical)
 
 	if err != nil {
-		log.Fatal("Error in the writeShrineOntologyClear():", err)
+		log.Fatal("Error in the writeMedCoOntologyClear():", err)
 		return err
 	}
 
 	return nil
 }
 
-func writeShrineOntologyClear(el string) error {
+func writeMedCoOntologyClear(el string) error {
 	el = SanitizeHeader(el)
 
 	/*clinical := `INSERT INTO shrine_ont.clinical_non_sensitive VALUES (3, '\medco\clinical\nonsensitive\` + el + `\', '` + el + `', 'N', 'CA', NULL, NULL, NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE',
@@ -910,14 +910,14 @@ func writeShrineOntologyClear(el string) error {
 	_, err := FileHandlers[1].WriteString(clinical)
 
 	if err != nil {
-		log.Fatal("Error in the writeShrineOntologyClear():", err)
+		log.Fatal("Error in the writeMedCoOntologyClear():", err)
 		return err
 	}
 
 	return nil
 }
 
-func writeShrineOntologyLeafClear(field, el string, id int64) error {
+func writeMedCoOntologyLeafClear(field, el string, id int64) error {
 	field = SanitizeHeader(field)
 
 	/*clinical := `INSERT INTO shrine_ont.clinical_non_sensitive VALUES (4, '\medco\clinical\nonsensitive\` + field + `\` + el + `\', '` + el + `', 'N', 'LA', NULL, 'CLEAR:` + strconv.FormatInt(id, 10) + `', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE',
@@ -929,7 +929,7 @@ func writeShrineOntologyLeafClear(field, el string, id int64) error {
 	_, err := FileHandlers[1].WriteString(clinical)
 
 	if err != nil {
-		log.Fatal("Error in the writeShrineOntologyLeafClear():", err)
+		log.Fatal("Error in the writeMedCoOntologyLeafClear():", err)
 		return err
 	}
 
@@ -958,7 +958,7 @@ func generateGenomicID(indexGenVariant map[string]int, record []string) (int64, 
 
 }
 
-func generateShrineOntologyGenomicAnnotation(fields []string, record []string) string {
+func generateMedCoOntologyGenomicAnnotation(fields []string, record []string) string {
 	// genomic info
 	chr, sp, ra, tsa1, tsa2 := "?", "?", "?", "?", "?"
 
@@ -1023,14 +1023,14 @@ func generateShrineOntologyGenomicAnnotation(fields []string, record []string) s
 	return annotation
 }
 
-func writeShrineOntologyGenomicAnnotations(listEncryptedElements *libunlynx.CipherVector, annotations []string) error {
+func writeMedCoOntologyGenomicAnnotations(listEncryptedElements *libunlynx.CipherVector, annotations []string) error {
 	for i, annotation := range annotations {
 		if annotation != "NA" && annotation != "" {
 			ciphertextStr := (*listEncryptedElements)[i].Serialize()
 			_, err := FileHandlers[2].WriteString(`"` + ciphertextStr + `",` + annotation)
 
 			if err != nil {
-				log.Fatal("Error in the writeShrineOntologyGenomicAnnotations():", err)
+				log.Fatal("Error in the writeMedCoOntologyGenomicAnnotations():", err)
 				return err
 			}
 		}

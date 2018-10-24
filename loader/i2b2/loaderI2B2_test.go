@@ -60,16 +60,6 @@ func setupEncryptEnv() {
 	_, publicKey = libunlynx.GenKey()
 }
 
-func TestParseSchemes(t *testing.T) {
-	assert.Nil(t, loaderi2b2.ParseSchemes())
-	assert.Nil(t, loaderi2b2.ConvertSchemes())
-}
-
-func TestParseTableAccess(t *testing.T) {
-	assert.Nil(t, loaderi2b2.ParseTableAccess())
-	assert.Nil(t, loaderi2b2.ConvertTableAccess())
-}
-
 func TestParseDummyToPatient(t *testing.T) {
 	log.SetDebugVisible(2)
 
@@ -104,29 +94,29 @@ func TestConvertVisitDimension(t *testing.T) {
 }
 
 func TestUpdateChildrenEncryptIDs(t *testing.T) {
-	loaderi2b2.TablesShrineOntology = make(map[string]loaderi2b2.ShrineTableInfo)
-	tableShrineOntologyConceptEnc := make(map[string]*loaderi2b2.ShrineOntology)
-	loaderi2b2.TablesShrineOntology["test"] = loaderi2b2.ShrineTableInfo{Sensitive: tableShrineOntologyConceptEnc}
+	loaderi2b2.TablesMedCoOntology = make(map[string]loaderi2b2.MedCoTableInfo)
+	tableMedCoOntologyConceptEnc := make(map[string]*loaderi2b2.MedCoOntology)
+	loaderi2b2.TablesMedCoOntology["test"] = loaderi2b2.MedCoTableInfo{Sensitive: tableMedCoOntologyConceptEnc}
 
-	so0 := loaderi2b2.ShrineOntology{Fullname: "\\a\\", NodeEncryptID: 0}
-	so1 := loaderi2b2.ShrineOntology{Fullname: "\\a\\b\\", NodeEncryptID: 1}
-	so2 := loaderi2b2.ShrineOntology{Fullname: "\\a\\c\\", NodeEncryptID: 2}
-	so3 := loaderi2b2.ShrineOntology{Fullname: "\\a\\c\\d", NodeEncryptID: 3}
-	so4 := loaderi2b2.ShrineOntology{Fullname: "\\a\\c\\f", NodeEncryptID: 4}
+	so0 := loaderi2b2.MedCoOntology{Fullname: "\\a\\", NodeEncryptID: 0}
+	so1 := loaderi2b2.MedCoOntology{Fullname: "\\a\\b\\", NodeEncryptID: 1}
+	so2 := loaderi2b2.MedCoOntology{Fullname: "\\a\\c\\", NodeEncryptID: 2}
+	so3 := loaderi2b2.MedCoOntology{Fullname: "\\a\\c\\d", NodeEncryptID: 3}
+	so4 := loaderi2b2.MedCoOntology{Fullname: "\\a\\c\\f", NodeEncryptID: 4}
 
-	tableShrineOntologyConceptEnc["\\a\\"] = &so0
-	tableShrineOntologyConceptEnc["\\a\\b\\"] = &so1
-	tableShrineOntologyConceptEnc["\\a\\c\\"] = &so2
-	tableShrineOntologyConceptEnc["\\a\\c\\d"] = &so3
-	tableShrineOntologyConceptEnc["\\a\\c\\f"] = &so4
+	tableMedCoOntologyConceptEnc["\\a\\"] = &so0
+	tableMedCoOntologyConceptEnc["\\a\\b\\"] = &so1
+	tableMedCoOntologyConceptEnc["\\a\\c\\"] = &so2
+	tableMedCoOntologyConceptEnc["\\a\\c\\d"] = &so3
+	tableMedCoOntologyConceptEnc["\\a\\c\\f"] = &so4
 
 	loaderi2b2.UpdateChildrenEncryptIDs("test")
 
-	assert.Equal(t, 4, len(loaderi2b2.TablesShrineOntology["test"].Sensitive["\\a\\"].ChildrenEncryptIDs))
-	assert.Equal(t, 0, len(loaderi2b2.TablesShrineOntology["test"].Sensitive["\\a\\b\\"].ChildrenEncryptIDs))
-	assert.Equal(t, 2, len(loaderi2b2.TablesShrineOntology["test"].Sensitive["\\a\\c\\"].ChildrenEncryptIDs))
-	assert.Equal(t, 0, len(loaderi2b2.TablesShrineOntology["test"].Sensitive["\\a\\c\\d"].ChildrenEncryptIDs))
-	assert.Equal(t, 0, len(loaderi2b2.TablesShrineOntology["test"].Sensitive["\\a\\c\\f"].ChildrenEncryptIDs))
+	assert.Equal(t, 4, len(loaderi2b2.TablesMedCoOntology["test"].Sensitive["\\a\\"].ChildrenEncryptIDs))
+	assert.Equal(t, 0, len(loaderi2b2.TablesMedCoOntology["test"].Sensitive["\\a\\b\\"].ChildrenEncryptIDs))
+	assert.Equal(t, 2, len(loaderi2b2.TablesMedCoOntology["test"].Sensitive["\\a\\c\\"].ChildrenEncryptIDs))
+	assert.Equal(t, 0, len(loaderi2b2.TablesMedCoOntology["test"].Sensitive["\\a\\c\\d"].ChildrenEncryptIDs))
+	assert.Equal(t, 0, len(loaderi2b2.TablesMedCoOntology["test"].Sensitive["\\a\\c\\f"].ChildrenEncryptIDs))
 }
 
 func TestStripByLevel(t *testing.T) {
@@ -168,14 +158,8 @@ func TestConvertOntology(t *testing.T) {
 	loaderi2b2.ListSensitiveConcepts = make(map[string]struct{})
 	loaderi2b2.ListSensitiveConcepts[`\i2b2\Diagnoses\Neoplasms (140-239)\Benign neoplasms (210-229)\(216) Benign neoplasm of skin\`] = struct{}{}
 
-	assert.Nil(t, loaderi2b2.ParseTableAccess())
-	assert.Nil(t, loaderi2b2.ConvertTableAccess())
-
 	assert.Nil(t, loaderi2b2.ConvertLocalOntology(el, 0))
-
-	assert.Nil(t, loaderi2b2.GenerateAdapterMappings())
-
-	assert.Nil(t, loaderi2b2.GenerateShrineOntology())
+	assert.Nil(t, loaderi2b2.GenerateMedCoOntology())
 
 	local.CloseAll()
 }
@@ -188,14 +172,8 @@ func TestConvertConceptDimension(t *testing.T) {
 	loaderi2b2.ListSensitiveConcepts = make(map[string]struct{})
 	loaderi2b2.ListSensitiveConcepts[`\i2b2\Diagnoses\Neoplasms (140-239)\Benign neoplasms (210-229)\(216) Benign neoplasm of skin\`] = struct{}{}
 
-	assert.Nil(t, loaderi2b2.ParseTableAccess())
-	assert.Nil(t, loaderi2b2.ConvertTableAccess())
-
 	assert.Nil(t, loaderi2b2.ConvertLocalOntology(el, 0))
-
-	assert.Nil(t, loaderi2b2.GenerateAdapterMappings())
-
-	assert.Nil(t, loaderi2b2.GenerateShrineOntology())
+	assert.Nil(t, loaderi2b2.GenerateMedCoOntology())
 
 	assert.Nil(t, loaderi2b2.ParseConceptDimension())
 	assert.Nil(t, loaderi2b2.ConvertConceptDimension())
@@ -208,30 +186,16 @@ func TestConvertAll(t *testing.T) {
 	log.SetDebugVisible(2)
 	setupEncryptEnv()
 	loaderi2b2.Testing = true
-	loaderi2b2.AllSensitive = true
+	loaderi2b2.AllSensitive = false
 
 	loaderi2b2.ListSensitiveConcepts = make(map[string]struct{})
-	//loaderi2b2.ListSensitiveConcepts[`\i2b2\Diagnoses\Neoplasms (140-239)\Benign neoplasms (210-229)\(216) Benign neoplasm of skin\`] = struct{}{}
-
-	assert.Nil(t, loaderi2b2.ParseSchemes())
-	assert.Nil(t, loaderi2b2.ConvertSchemes())
-
-	log.LLvl1("--- Finished converting SCHEMES ---")
-
-	assert.Nil(t, loaderi2b2.ParseTableAccess())
-	assert.Nil(t, loaderi2b2.ConvertTableAccess())
-
-	log.LLvl1("--- Finished converting TABLE_ACCESS ---")
+	loaderi2b2.ListSensitiveConcepts[`\i2b2\Diagnoses\Neoplasms (140-239)\Benign neoplasms (210-229)\(216) Benign neoplasm of skin\`] = struct{}{}
 
 	assert.Nil(t, loaderi2b2.ConvertLocalOntology(el, 0))
 
 	log.LLvl1("--- Finished converting LOCAL_ONTOLOGY ---")
 
-	assert.Nil(t, loaderi2b2.GenerateAdapterMappings())
-
-	log.LLvl1("--- Finished generating ADAPTER_MAPPINGS ---")
-
-	assert.Nil(t, loaderi2b2.GenerateShrineOntology())
+	assert.Nil(t, loaderi2b2.GenerateMedCoOntology())
 
 	log.LLvl1("--- Finished generating SHRINE_ONTOLOGY ---")
 
@@ -261,5 +225,5 @@ func TestConvertAll(t *testing.T) {
 }
 
 func TestGenerateLoadingDataScript(t *testing.T) {
-	assert.Nil(t, loaderi2b2.GenerateLoadingDataScript(loader.DBSettings{DBhost: "localhost", DBport: 5434, DBname: "medcodeployment", DBuser: "postgres", DBpassword: "prigen2017"}))
+	assert.Nil(t, loaderi2b2.GenerateLoadingDataScript(loader.DBSettings{DBhost: "localhost", DBport: 5434, DBname: "i2b2medcosrv0", DBuser: "i2b2", DBpassword: "i2b2"}))
 }
