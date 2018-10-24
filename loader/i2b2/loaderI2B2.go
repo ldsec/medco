@@ -70,7 +70,7 @@ var (
 	}
 
 	OutputFilePaths = map[string]FileInfo{
-		"SENSITIVE_TAGGED": {TableName: I2B2METADATA + "sensitive_tagged", Path: "../../data/i2b2/converted/sensitive_tagged.csv"},
+		"SENSITIVE_TAGGED": {TableName: ONT + "sensitive_tagged", Path: "../../data/i2b2/converted/sensitive_tagged.csv"},
 
 		"LOCAL_BIRN":        {TableName: I2B2METADATA + "birn", Path: "../../data/i2b2/converted/local_birn.csv"},
 		"LOCAL_CUSTOM_META": {TableName: I2B2METADATA + "custom_meta", Path: "../../data/i2b2/converted/local_custom_meta.csv"},
@@ -112,7 +112,7 @@ func generateOutputFiles(folderPath string) {
 	OutputFilePaths["OBSERVATION_FACT"] = FileInfo{TableName: I2B2DEMODATA + "observation_fact", Path: folderPath + "observation_fact.csv"}
 
 	// fixed ontology tables
-	OutputFilePaths["SENSITIVE_TAGGED"] = FileInfo{TableName: I2B2METADATA + "sensitive_tagged", Path: folderPath + "sensitive_tagged.csv"}
+	OutputFilePaths["SENSITIVE_TAGGED"] = FileInfo{TableName: ONT + "sensitive_tagged", Path: folderPath + "sensitive_tagged.csv"}
 
 	for key, path := range InputFilePaths {
 		if strings.HasPrefix(key, "ONTOLOGY_") {
@@ -125,8 +125,8 @@ func generateOutputFiles(folderPath string) {
 	}
 }
 
-// Loadi2b2Data it's the main function that performs a full conversion and loading of the I2B2 data
-func Loadi2b2Data(el *onet.Roster, entryPointIdx int, files Files, allSensitive bool, mapSensitive map[string]struct{}, databaseS loader.DBSettings, empty bool) error {
+// LoadI2B2Data it's the main function that performs a full conversion and loading of the I2B2 data
+func LoadI2B2Data(el *onet.Roster, entryPointIdx int, files Files, allSensitive bool, mapSensitive map[string]struct{}, databaseS loader.DBSettings, empty bool) error {
 	InputFilePaths = make(map[string]string)
 	OutputFilePaths = make(map[string]FileInfo)
 	OntologyFilesPaths = make([]string, 0)
@@ -271,7 +271,7 @@ func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
 			loading += `\copy ` + fI.TableName + ` FROM '` + fI.Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n"
 		}
 	}
-	loading += "TRUNCATE TABLE " + I2B2METADATA + "sensitive_tagged;\n"
+	loading += "TRUNCATE TABLE " + OutputFilePaths["SENSITIVE_TAGGED"].TableName + ";\n"
 	loading += `\copy ` + OutputFilePaths["SENSITIVE_TAGGED"].TableName + ` FROM '` + OutputFilePaths["SENSITIVE_TAGGED"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n"
 	loading += "\n"
 

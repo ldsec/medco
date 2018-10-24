@@ -39,8 +39,8 @@ var (
 	TablenamesOntology = [...]string{ONT + "clinical_sensitive",
 		ONT + "clinical_non_sensitive",
 		ANNOTATIONS + "genomic_annotations",
-		I2B2METADATA + "sensitive_tagged",
-		I2B2METADATA + "non_sensitive_clear"}
+		ONT + "sensitive_tagged",
+		ONT + "non_sensitive_clear"}
 
 	TablenamesData = [...]string{I2B2DEMODATA + "concept_dimension",
 		I2B2DEMODATA + "patient_mapping",
@@ -1159,7 +1159,7 @@ func writeMetadataSensitiveTagged(list []libunlynx.GroupingKey, keyForSensitiveI
 			}
 		}
 
-		/*sensitive := `INSERT INTO i2b2metadata.sensitive_tagged VALUES (2, '\medco\tagged\` + string(el) + `\', '', 'N', 'LA ', NULL, 'TAG_ID:` + strconv.FormatUint(int64(tagID), 10) + `', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE',
+		/*sensitive := `INSERT INTO medco_ont.sensitive_tagged VALUES (2, '\medco\tagged\` + string(el) + `\', '', 'N', 'LA ', NULL, 'TAG_ID:` + strconv.FormatUint(int64(tagID), 10) + `', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE',
 		'\medco\tagged\` + string(el) + `\', NULL, NULL, 'NOW()', NULL, NULL, NULL, 'TAG_ID', '@', NULL, NULL, NULL, NULL);` + "\n"*/
 
 		sensitive := `"2","\medco\tagged\` + string(el) + `\","""","N","LA",,"TAG_ID:` + strconv.FormatInt(int64(tagID), 10) + `",,"concept_cd","concept_dimension","concept_path","T","LIKE","\medco\tagged\` + string(el) + `\",,,"NOW()",,,,"TAG_ID","@",,,,` + "\n"
@@ -1192,7 +1192,7 @@ func writeMetadataOntologyClearHeader() error {
 func writeMetadataOntologyClear(el string) error {
 	el = SanitizeHeader(el)
 
-	/*clinical := `INSERT INTO i2b2metadata.clinical_non_sensitive VALUES (3, '\medco\clinical\nonsensitive\` + el + `\', '` + el + `', 'N', 'CA', NULL, NULL, NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE',
+	/*clinical := `INSERT INTO medco_ont.clinical_non_sensitive VALUES (3, '\medco\clinical\nonsensitive\` + el + `\', '` + el + `', 'N', 'CA', NULL, NULL, NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE',
 	  '\medco\clinical\nonsensitive\` + el + `\', 'Non-sensitive field', '\medco\clinical\nonsensitive\` + el + `\',
 	   'NOW()', NULL, NULL, NULL, 'CLEAR', '@', NULL, NULL, NULL, NULL);` + "\n"*/
 
@@ -1211,7 +1211,7 @@ func writeMetadataOntologyClear(el string) error {
 func writeMetadataOntologyLeafClear(field, el string, id int64) error {
 	field = SanitizeHeader(field)
 
-	/*clinical := `INSERT INTO i2b2metadata.clinical_non_sensitive VALUES (4, '\medco\clinical\nonsensitive\` + field + `\` + el + `\', '` + el + `', 'N', 'LA', NULL, 'CLEAR:` + strconv.FormatInt(id, 10) + `', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE',
+	/*clinical := `INSERT INTO medco_ont.clinical_non_sensitive VALUES (4, '\medco\clinical\nonsensitive\` + field + `\` + el + `\', '` + el + `', 'N', 'LA', NULL, 'CLEAR:` + strconv.FormatInt(id, 10) + `', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE',
 	  '\medco\clinical\nonsensitive\` + field + `\` + el + `\', 'Non-sensitive value',  '\medco\clinical\sensitive\` + field + `\` + el + `\',
 	   'NOW()', NULL, NULL, NULL, 'CLEAR', '@', NULL, NULL, NULL, NULL);` + "\n"*/
 

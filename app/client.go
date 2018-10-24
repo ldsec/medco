@@ -22,7 +22,7 @@ import (
 //#----------------------------------------------- LOAD DATA -----------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------
 
-func loadGenomicData(c *cli.Context) error {
+func loadV0(c *cli.Context) error {
 
 	// data set file paths
 	clinicalOntologyPath := c.String("ont_clinical")
@@ -134,7 +134,7 @@ func loadGenomicData(c *cli.Context) error {
 	return nil
 }
 
-func loadi2b2Data(c *cli.Context) error {
+func loadV1(c *cli.Context) error {
 	// data set file paths
 	groupFilePath := c.String("group")
 	dataFilesPath := c.String("files")
@@ -203,7 +203,7 @@ func loadi2b2Data(c *cli.Context) error {
 		mapSensitive[line] = struct{}{}
 	}
 
-	loaderi2b2.Loadi2b2Data(el.Roster, entryPointIdx, files, allSensitive, mapSensitive, databaseS, empty)
+	loaderi2b2.LoadI2B2Data(el.Roster, entryPointIdx, files, allSensitive, mapSensitive, databaseS, empty)
 	if err != nil {
 		log.Error("Error while converting I2B2 data:", err)
 		return cli.NewExitError(err, 1)
