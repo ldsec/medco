@@ -157,13 +157,16 @@ func (so ShrineOntology) ToCSVText() string {
 		}
 
 		// only internal and parent nodes can have children ;)
+		// TODO we are appending all children IDs (split by ;) in a single xml attribute. We should find a cleaner way to do this
 		if len(so.ChildrenEncryptIDs) > 0 && so.VisualAttributes[:1] != "L" && so.VisualAttributes[:1] != "R" {
-			metadata += "<ChildrenEncryptIDs>"
+			metadata += "<ChildrenEncryptIDs>\""
 			for _, childID := range so.ChildrenEncryptIDs {
-				metadata += "<ChildEncryptID>" + strconv.FormatInt(childID, 10) + "</ChildEncryptID>"
+				metadata += strconv.FormatInt(childID, 10) + ";"
 			}
+			// remove last;
+			metadata = metadata[:len(metadata)-1]
 
-			metadata += "</ChildrenEncryptIDs>"
+			metadata += "\"</ChildrenEncryptIDs>"
 		}
 		so.MetadataXML = metadata + "</ValueMetadata>"
 	}
