@@ -92,9 +92,9 @@ func generateFiles(t *testing.T, el *onet.Roster, entryPointIdx int) {
 	}
 
 	mapSensitive := make(map[string]struct{}, 2) // DO NOT FORGET!! to modify the '11' value depending on the number of sensitive attributes
-	mapSensitive["AJCC_PATHOLOGIC_TUMOR_STAGE"] = struct{}{}
+	/*mapSensitive["AJCC_PATHOLOGIC_TUMOR_STAGE"] = struct{}{}
 	mapSensitive["CANCER_TYPE"] = struct{}{}
-	/*mapSensitive["CANCER_TYPE_DETAILED"] = struct{}{}
+	mapSensitive["CANCER_TYPE_DETAILED"] = struct{}{}
 	mapSensitive["HISTOLOGICAL_DIAGNOSIS"] = struct{}{}
 	mapSensitive["ICD_O_3_HISTOLOGY"] = struct{}{}
 	mapSensitive["ICD_O_3_SITE"] = struct{}{}
@@ -170,8 +170,10 @@ func TestReplayDataset(t *testing.T) {
 }
 
 func TestGenerateLoadingScript(t *testing.T) {
-	t.Skip()
-	err := loadergenomic.GenerateLoadingDataScript(loader.DBSettings{DBhost: "localhost", DBport: 5434, DBname: "medcodeployment", DBuser: "postgres", DBpassword: "prigen2017"})
+	dbSettings := loader.DBSettings{DBhost: "localhost", DBport: 5434, DBname: "medcodeployment", DBuser: "postgres", DBpassword: "prigen2017"}
+	err := loadergenomic.GenerateLoadingOntologyScript(dbSettings)
+	assert.True(t, err == nil)
+	err = loadergenomic.GenerateLoadingDataScript(dbSettings)
 	assert.True(t, err == nil)
 }
 

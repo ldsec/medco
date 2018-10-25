@@ -53,9 +53,9 @@ var (
 	FileBashPath = [...]string{"25-load-ontology.sh",
 		"26-load-data.sh"}
 
-	FilePathsOntology = [...]string{"SHRINE_ONT_CLINICAL_SENSITIVE.csv",
-		"SHRINE_ONT_CLINICAL_NON_SENSITIVE.csv",
-		"SHRINE_ONT_GENOMIC_ANNOTATIONS.csv",
+	FilePathsOntology = [...]string{"MEDCO_ONT_CLINICAL_SENSITIVE.csv",
+		"MEDCO_ONT_CLINICAL_NON_SENSITIVE.csv",
+		"MEDCO_ONT_GENOMIC_ANNOTATIONS.csv",
 		"I2B2METADATA_SENSITIVE_TAGGED.csv",
 		"I2B2METADATA_NON_SENSITIVE_CLEAR.csv"}
 
@@ -322,7 +322,13 @@ func GenerateLoadingOntologyScript(databaseS loader.DBSettings) error {
 	for i := 0; i < len(TablenamesOntology); i++ {
 		loading += "TRUNCATE " + TablenamesOntology[i] + ";\n"
 		loading += `\copy ` + TablenamesOntology[i] + ` FROM '` + FilePathsOntology[i] + `' ESCAPE '"' DELIMITER ',' CSV;` + "\n"
+
 	}
+	loading += "\n"
+	// create annotations table
+	loading += `CREATE TABLE genomic_annotations.hugo_gene_symbol as select distinct hugo_gene_symbol as annotation_value from genomic_annotations.genomic_annotations;` + "\n"
+	loading += `CREATE TABLE genomic_annotations.protein_change as select distinct protein_change as annotation_value from genomic_annotations.genomic_annotations;` + "\n"
+	loading += `CREATE TABLE genomic_annotations.variant_name as select distinct variant_name as annotation_value from genomic_annotations.genomic_annotations;` + "\n"
 	loading += "COMMIT;\n"
 	loading += "EOSQL"
 
@@ -354,6 +360,8 @@ func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
 	}
 	loading += "COMMIT;\n"
 	loading += "EOSQL"
+
+
 
 	_, err = fp.WriteString(loading)
 	if err != nil {
@@ -397,7 +405,7 @@ func LoadDataFiles() error {
 	return nil
 }
 
-// GenerateOntologyFiles generates the .csv files that 'belong' to the whole ontology (metadata & shrine)
+// GenerateOntologyFiles generates the .csv files that 'belong' to the whole ontology (metadata & medco)
 func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic *os.File, mapSensitive map[string]struct{}) error {
 	parsingTime := time.Duration(0)
 	startParsing := time.Now()
@@ -556,7 +564,7 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 				// the number of genomic ids does not match the number of distinct mutation because if the RA is too big we discard the mutation
 				genomicID, err := generateGenomicID(indexGenVariant, record)
 
-				// if genomic id already exist we don't need to add it to the shrine_ont.genomic_annotations
+				// if genomic id already exist we don't need to add it to the medco_ont.genomic_annotations
 				if _, ok := allSensitiveIDs[genomicID]; ok == false && err == nil {
 					allSensitiveIDs[genomicID] = SensitiveIDValue{CP: ConceptPath{Field: strconv.FormatInt(genomicID, 10), Record: ""}, Annotation: generateMedCoOntologyGenomicAnnotation(headerGenomic, record)}
 				}
@@ -850,7 +858,7 @@ func writeMedCoOntologyEncHeader() error {
 func writeMedCoOntologyEnc(el string) error {
 	el = SanitizeHeader(el)
 
-	/*clinicalSensitive := `INSERT INTO shrine_ont.clinical_sensitive VALUES (3, '\medco\clinical\sensitive\` + el + `\', '` + el + `', 'N', 'CA', NULL, NULL, NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE',
+	/*clinicalSensitive := `INSERT INTO medco_ont.clinical_sensitive VALUES (3, '\medco\clinical\sensitive\` + el + `\', '` + el + `', 'N', 'CA', NULL, NULL, NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE',
 	  '\medco\clinical\sensitive\` + el + `\', 'Sensitive field encrypted by Unlynx', '\medco\clinical\sensitive\` + el + `\',
 	   'NOW()', NULL, NULL, NULL, 'ENC_ID', '@', NULL, NULL, NULL, NULL);` + "\n"*/
 
@@ -869,7 +877,7 @@ func writeMedCoOntologyEnc(el string) error {
 func writeMedCoOntologyLeafEnc(field, el string, id int64) error {
 	field = SanitizeHeader(field)
 
-	/*clinicalSensitive := `INSERT INTO shrine_ont.clinical_sensitive VALUES (4, '\medco\clinical\sensitive\` + field + `\` + el + `\', '` + el + `', 'N', 'LA', NULL, 'ENC_ID:` + strconv.FormatInt(id, 10) + `', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE',
+	/*clinicalSensitive := `INSERT INTO medco_ont.clinical_sensitive VALUES (4, '\medco\clinical\sensitive\` + field + `\` + el + `\', '` + el + `', 'N', 'LA', NULL, 'ENC_ID:` + strconv.FormatInt(id, 10) + `', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE',
 	  '\medco\clinical\sensitive\` + field + `\` + el + `\', 'Sensitive value encrypted by Unlynx',  '\medco\clinical\sensitive\` + field + `\` + el + `\',
 	   'NOW()', NULL, NULL, NULL, 'ENC_ID', '@', NULL, NULL, NULL, NULL);` + "\n"*/
 
@@ -901,7 +909,7 @@ func writeMedCoOntologyClearHeader() error {
 func writeMedCoOntologyClear(el string) error {
 	el = SanitizeHeader(el)
 
-	/*clinical := `INSERT INTO shrine_ont.clinical_non_sensitive VALUES (3, '\medco\clinical\nonsensitive\` + el + `\', '` + el + `', 'N', 'CA', NULL, NULL, NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE',
+	/*clinical := `INSERT INTO medco_ont.clinical_non_sensitive VALUES (3, '\medco\clinical\nonsensitive\` + el + `\', '` + el + `', 'N', 'CA', NULL, NULL, NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE',
 	  '\medco\clinical\nonsensitive\` + el + `\', 'Non-sensitive field', '\medco\clinical\nonsensitive\` + el + `\',
 	   'NOW()', NULL, NULL, NULL, 'CLEAR', '@', NULL, NULL, NULL, NULL);` + "\n"*/
 
@@ -920,7 +928,7 @@ func writeMedCoOntologyClear(el string) error {
 func writeMedCoOntologyLeafClear(field, el string, id int64) error {
 	field = SanitizeHeader(field)
 
-	/*clinical := `INSERT INTO shrine_ont.clinical_non_sensitive VALUES (4, '\medco\clinical\nonsensitive\` + field + `\` + el + `\', '` + el + `', 'N', 'LA', NULL, 'CLEAR:` + strconv.FormatInt(id, 10) + `', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE',
+	/*clinical := `INSERT INTO medco_ont.clinical_non_sensitive VALUES (4, '\medco\clinical\nonsensitive\` + field + `\` + el + `\', '` + el + `', 'N', 'LA', NULL, 'CLEAR:` + strconv.FormatInt(id, 10) + `', NULL, 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE',
 	  '\medco\clinical\nonsensitive\` + field + `\` + el + `\', 'Non-sensitive value',  '\medco\clinical\sensitive\` + field + `\` + el + `\',
 	   'NOW()', NULL, NULL, NULL, 'CLEAR', '@', NULL, NULL, NULL, NULL);` + "\n"*/
 

@@ -14,7 +14,7 @@ import (
 // Testing defines whether we should run the DDT on test environment (locally) or using real nodes
 var Testing bool // testing environment
 
-// ListSensitiveConcepts list all sensitive concepts (paths) - SHRINE and LOCAL (the bool is for nothing)
+// ListSensitiveConcepts list all sensitive concepts (paths) - MedCo and LOCAL (the bool is for nothing)
 var ListSensitiveConcepts map[string]struct{}
 
 // ListConceptsToIgnore lists concepts that appear in the concept_dimension and not in the ontology (which is kind of strange)
@@ -31,19 +31,19 @@ var TagIDConceptsUsed int64
 
 // ####----DATA TYPES----####
 
-// MedCoTableInfo stores all the 'data' for a specific shrine ontology table
+// MedCoTableInfo stores all the 'data' for a specific medco ontology table
 type MedCoTableInfo struct {
 	Clear     map[string]*MedCoOntology
 	Sensitive map[string]*MedCoOntology
 }
 
-// TablesMedCoOntology distinguishes between the different shrine ontology tables
+// TablesMedCoOntology distinguishes between the different medco ontology tables
 var TablesMedCoOntology map[string]MedCoTableInfo
 
-// HeaderMedCoOntology contains all the headers for the shrine table
+// HeaderMedCoOntology contains all the headers for the medco table
 var HeaderMedCoOntology []string
 
-// MedCoOntology is the table that contains all concept codes from the shrine ontology
+// MedCoOntology is the table that contains all concept codes from the medco ontology
 type MedCoOntology struct {
 	NodeEncryptID      int64
 	ChildrenEncryptIDs []int64
@@ -445,7 +445,7 @@ func MedCoOntologyFromLocalConcept(localConcept *LocalOntology) *MedCoOntology {
 	}
 
 	so := &MedCoOntology{
-		NodeEncryptID:      int64(-1), //signals that this shrine ontology element is not sensitive so no need for an encrypt ID
+		NodeEncryptID:      int64(-1), //signals that this medco ontology element is not sensitive so no need for an encrypt ID
 		ChildrenEncryptIDs: nil,       //same thing as before
 		HLevel:             localConcept.HLevel,
 		Fullname:           localConcept.Fullname,

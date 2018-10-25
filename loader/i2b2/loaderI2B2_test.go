@@ -197,7 +197,7 @@ func TestConvertAll(t *testing.T) {
 
 	assert.Nil(t, loaderi2b2.GenerateMedCoOntology())
 
-	log.LLvl1("--- Finished generating SHRINE_ONTOLOGY ---")
+	log.LLvl1("--- Finished generating MEDCO_ONTOLOGY ---")
 
 	assert.Nil(t, loaderi2b2.ParseDummyToPatient())
 

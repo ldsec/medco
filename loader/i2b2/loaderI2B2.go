@@ -77,10 +77,10 @@ var (
 		"LOCAL_ICD10_ICD9":  {TableName: I2B2METADATA + "icd10_icd9", Path: "../../data/i2b2/converted/local_icd10_icd9.csv"},
 		"LOCAL_I2B2":        {TableName: I2B2METADATA + "i2b2", Path: "../../data/i2b2/converted/local_i2b2.csv"},
 
-		"MEDCO_BIRN":        {TableName: ONT + "birn", Path: "../../data/i2b2/converted/shrine_birn.csv"},
-		"MEDCO_CUSTOM_META": {TableName: ONT + "custom_meta", Path: "../../data/i2b2/converted/shrine_custom_meta.csv"},
-		"MEDCO_ICD10_ICD9":  {TableName: ONT + "icd10_icd9", Path: "../../data/i2b2/converted/shrine_icd10_icd9.csv"},
-		"MEDCO_I2B2":        {TableName: ONT + "i2b2", Path: "../../data/i2b2/converted/shrine_i2b2.csv"},
+		"MEDCO_BIRN":        {TableName: ONT + "birn", Path: "../../data/i2b2/converted/medco_birn.csv"},
+		"MEDCO_CUSTOM_META": {TableName: ONT + "custom_meta", Path: "../../data/i2b2/converted/medco_custom_meta.csv"},
+		"MEDCO_ICD10_ICD9":  {TableName: ONT + "icd10_icd9", Path: "../../data/i2b2/converted/medco_icd10_icd9.csv"},
+		"MEDCO_I2B2":        {TableName: ONT + "i2b2", Path: "../../data/i2b2/converted/medco_i2b2.csv"},
 
 		"PATIENT_DIMENSION": {TableName: I2B2DEMODATA + "patient_dimension", Path: "../../data/i2b2/converted/patient_dimension.csv"},
 		"NEW_PATIENT_NUM":   {TableName: "", Path: "../../data/i2b2/converted/new_patient_num.csv"},
@@ -120,7 +120,7 @@ func generateOutputFiles(folderPath string) {
 			tokens := strings.Split(path, "/")
 
 			OutputFilePaths["LOCAL_"+rawKey] = FileInfo{TableName: I2B2METADATA + strings.ToLower(rawKey), Path: folderPath + "local_" + tokens[len(tokens)-1]}
-			OutputFilePaths["MEDCO_"+rawKey] = FileInfo{TableName: ONT + strings.ToLower(rawKey), Path: folderPath + "shrine_" + tokens[len(tokens)-1]}
+			OutputFilePaths["MEDCO_"+rawKey] = FileInfo{TableName: ONT + strings.ToLower(rawKey), Path: folderPath + "medco_" + tokens[len(tokens)-1]}
 		}
 	}
 }
@@ -423,7 +423,7 @@ func ParseDummyToPatient() error {
 
 // MEDCO ontology converter
 
-// GenerateMedCoOntology generates all files for the shrine ontology (these may include multiples tables)
+// GenerateMedCoOntology generates all files for the medco ontology (these may include multiples tables)
 func GenerateMedCoOntology() error {
 	// initialize container structs and counters
 	HeaderMedCoOntology = []string{"c_hlevel",
@@ -542,7 +542,7 @@ func UpdateChildrenEncryptIDs(name string) {
 
 // LOCAL ontology converter
 
-// ConvertLocalOntology reads and parses all local ontology tables and generates the corresponding .csv(s) (local, shrine and adapter_mappings)
+// ConvertLocalOntology reads and parses all local ontology tables and generates the corresponding .csv(s) (local, medco and adapter_mappings)
 func ConvertLocalOntology(group *onet.Roster, entryPointIdx int) error {
 	// initialize container structs and counters
 	IDConcepts = 0
@@ -574,7 +574,7 @@ func ConvertLocalOntology(group *onet.Roster, entryPointIdx int) error {
 }
 
 // ParseLocalTable reads and parses the xxxx.csv (part of the local ontology)
-// The shrine ontology is also generated based on the local ontology. Each local table (in i2b2metadata is replicated in the medco_ont, with some minor changes)
+// The medco ontology is also generated based on the local ontology. Each local table (in i2b2metadata is replicated in the medco_ont, with some minor changes)
 func ParseLocalTable(group *onet.Roster, entryPointIdx int, name string) error {
 	lines, err := readCSV(name)
 	if err != nil {
@@ -643,7 +643,7 @@ func ParseLocalTable(group *onet.Roster, entryPointIdx int, name string) error {
 		// TODO for now we remove all synonyms from the i2b2 local ontology
 		// if it is the original concept (N = original, Y = synonym)
 		if strings.ToLower(lo.SynonymCD) == "n" || strings.ToLower(lo.SynonymCD) == "" {
-			// create entry for shrine ontology (direct copy)
+			// create entry for medco ontology (direct copy)
 			so := MedCoOntologyFromLocalConcept(lo)
 
 			_, sensitive := HasSensitiveParents(lo.Fullname)
@@ -679,7 +679,7 @@ func ParseLocalTable(group *onet.Roster, entryPointIdx int, name string) error {
 				if strings.ToLower(so.FactTableColumn) != "modifier_cd" {
 					// add a new entry to the local ontology table
 					TableLocalOntologyClear[lo.Fullname] = lo
-					// add a new entry to the shrine ontology table
+					// add a new entry to the medco ontology table
 					if _, ok := TablesMedCoOntology[rawName]; ok {
 						TablesMedCoOntology[rawName].Clear[so.Fullname] = so
 					} else {
