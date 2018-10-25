@@ -56,7 +56,7 @@ var (
 	FilePathsOntology = [...]string{"MEDCO_ONT_CLINICAL_SENSITIVE.csv",
 		"MEDCO_ONT_CLINICAL_NON_SENSITIVE.csv",
 		"MEDCO_ONT_GENOMIC_ANNOTATIONS.csv",
-		"I2B2METADATA_SENSITIVE_TAGGED.csv",
+		"MEDCO_ONT_SENSITIVE_TAGGED.csv",
 		"I2B2METADATA_NON_SENSITIVE_CLEAR.csv"}
 
 	FilePathsData = [...]string{"I2B2DEMODATA_CONCEPT_DIMENSION.csv",
@@ -320,9 +320,12 @@ func GenerateLoadingOntologyScript(databaseS loader.DBSettings) error {
 
 	loading += "BEGIN;\n"
 	for i := 0; i < len(TablenamesOntology); i++ {
-		loading += "TRUNCATE " + TablenamesOntology[i] + ";\n"
-		loading += `\copy ` + TablenamesOntology[i] + ` FROM '` + FilePathsOntology[i] + `' ESCAPE '"' DELIMITER ',' CSV;` + "\n"
 
+		//TODO: Delete this please
+		if TablenamesOntology[i] != ONT + "non_sensitive_clear" {
+			loading += "TRUNCATE " + TablenamesOntology[i] + ";\n"
+			loading += `\copy ` + TablenamesOntology[i] + ` FROM '` + FilePathsOntology[i] + `' ESCAPE '"' DELIMITER ',' CSV;` + "\n"
+		}
 	}
 	loading += "\n"
 	// create annotations table
@@ -360,8 +363,6 @@ func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
 	}
 	loading += "COMMIT;\n"
 	loading += "EOSQL"
-
-
 
 	_, err = fp.WriteString(loading)
 	if err != nil {
