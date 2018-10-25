@@ -5,22 +5,22 @@ set -Eeuo pipefail
 psql $PSQL_PARAMS -d "$I2B2_DB_NAME" <<-EOSQL
 
     -- genomic entries in i2b2/medco ontology
-    insert into medco_ont.genomic (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum,
+    insert into medco_ont.genomic (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum, c_basecode,
         c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, update_date,
         download_date, import_date, valuetype_cd, m_applied_path) values
-        ('2', '\medco\genomic\annotations_Hugo_Symbol\', 'Gene Name', 'N', 'LA', '0', 'concept_cd', 'concept_dimension', 'concept_path',
+        ('2', '\medco\genomic\annotations_Hugo_Symbol\', 'Gene Name', 'N', 'LA', '0', 'GEN:Hugo_Gene_Symbol', 'concept_cd', 'concept_dimension', 'concept_path',
         'T', 'LIKE', '\medco\genomic\annotations_Hugo_Symbol\', 'Gene Name', '\medco\genomic\annotations_Hugo_Symbol\',
         'NOW()', 'NOW()', 'NOW()', 'GEN', '@');
-    insert into medco_ont.genomic (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum,
+    insert into medco_ont.genomic (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum, c_basecode,
         c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, update_date,
         download_date, import_date, valuetype_cd, m_applied_path) values
-        ('2', '\medco\genomic\annotations_Protein_position\', 'Protein Position', 'N', 'LA', '0', 'concept_cd', 'concept_dimension', 'concept_path',
+        ('2', '\medco\genomic\annotations_Protein_position\', 'Protein Position', 'N', 'LA', '0', 'GEN:Protein_Change', 'concept_cd', 'concept_dimension', 'concept_path',
         'T', 'LIKE', '\medco\genomic\annotations_Protein_position\', 'Protein Position', '\medco\genomic\annotations_Protein_position\',
         'NOW()', 'NOW()', 'NOW()', 'GEN', '@');
-    insert into medco_ont.genomic (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum,
+    insert into medco_ont.genomic (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum, c_basecode,
         c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, update_date,
         download_date, import_date, valuetype_cd, m_applied_path) values
-        ('2', '\medco\genomic\variant\', 'Variant Name', 'N', 'LA', '0', 'concept_cd', 'concept_dimension', 'concept_path',
+        ('2', '\medco\genomic\variant\', 'Variant Name', 'N', 'LA', '0', 'GEN:variant_name', 'concept_cd', 'concept_dimension', 'concept_path',
         'T', 'LIKE', '\medco\genomic\variant\', 'Variant Name', '\medco\genomic\variant\',
         'NOW()', 'NOW()', 'NOW()', 'GEN', '@');
 
