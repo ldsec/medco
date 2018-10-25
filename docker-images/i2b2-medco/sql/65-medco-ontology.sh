@@ -55,11 +55,6 @@ psql $PSQL_PARAMS -d "$I2B2_DB_NAME" <<-EOSQL
         c_columnname, c_columndatatype, c_operator, c_dimcode, c_tooltip) VALUES
         ('SENSITIVE_TAGGED', 'SENSITIVE_TAGGED', 'N', 1, '\medco\tagged\', 'MedCo Sensitive Tagged Ontology',
         'N', 'CH', 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\medco\tagged\', 'MedCo Sensitive Tagged Ontology');
-    insert into medco_ont.table_access (c_table_cd, c_table_name, c_protected_access, c_hlevel, c_fullname, c_name,
-        c_synonym_cd, c_visualattributes, c_facttablecolumn, c_dimtablename,
-        c_columnname, c_columndatatype, c_operator, c_dimcode, c_tooltip) VALUES
-        ('NON_SENSITIVE_CLEAR', 'NON_SENSITIVE_CLEAR', 'N', 2, '\medco\clinical\nonsensitive\', 'MedCo Clinical Non-Sensitive Ontology',
-        'N', 'CA', 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\medco\clinical\nonsensitive\', 'MedCo Clinical Non-Sensitive Ontology');
 
     -- schemes
     CREATE TABLE medco_ont.schemes(
@@ -176,44 +171,6 @@ psql $PSQL_PARAMS -d "$I2B2_DB_NAME" <<-EOSQL
     --    'T', 'LIKE', '\medco\clinical\nonsensitive\', 'MedCo Clinical Non-Sensitive Ontology', '\medco\clinical\nonsensitive\',
     --    'NOW()', 'NOW()', 'NOW()', 'CLEAR', '@');
 
-    -- clear non sensitive ontology
-    CREATE TABLE medco_ont.non_sensitive_clear (
-        c_hlevel numeric(22,0) not null,
-        c_fullname character varying(900) not null,
-        c_name character varying(2000) not null,
-        c_synonym_cd character(1) not null,
-        c_visualattributes character(3) not null,
-        c_totalnum numeric(22,0),
-        c_basecode character varying(450),
-        c_metadataxml text,
-        c_facttablecolumn character varying(50) not null,
-        c_tablename character varying(50) not null,
-        c_columnname character varying(50) not null,
-        c_columndatatype character varying(50) not null,
-        c_operator character varying(10) not null,
-        c_dimcode character varying(900) not null,
-        c_comment text,
-        c_tooltip character varying(900),
-        update_date date not null,
-        download_date date,
-        import_date date,
-        sourcesystem_cd character varying(50),
-        valuetype_cd character varying(50),
-        m_applied_path character varying(900) not null,
-        m_exclusion_cd character varying(900),
-        c_path character varying(700),
-        c_symbol character varying(50),
-        pcori_basecode character varying(50)
-    );
-    ALTER TABLE ONLY medco_ont.non_sensitive_clear ADD CONSTRAINT fullname_pk_10 PRIMARY KEY (c_fullname);
-    ALTER TABLE ONLY medco_ont.non_sensitive_clear ADD CONSTRAINT basecode_un_10 UNIQUE (c_basecode);
-    --insert into medco_ont.non_sensitive_clear (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum,
-    --c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, update_date,
-    --download_date, import_date, valuetype_cd, m_applied_path) values
-    --('2', '\medco\clinical\nonsensitive\', 'MedCo Clinical Non-Sensitive Ontology', 'N', 'CA', '0', 'concept_cd', 'concept_dimension', 'concept_path',
-    --'T', 'LIKE', '\medco\clinical\nonsensitive\', 'MedCo Clinical Non-Sensitive Ontology', '\medco\clinical\nonsensitive\',
-    --'NOW()', 'NOW()', 'NOW()', 'CLEAR', '@');
-
     -- tagged sensitive ontology
     CREATE TABLE medco_ont.sensitive_tagged (
         c_hlevel numeric(22,0) not null,
@@ -296,7 +253,7 @@ psql $PSQL_PARAMS -d "$I2B2_DB_NAME" <<-EOSQL
     ALTER TABLE medco_ont.genomic OWNER TO $I2B2_DB_USER;
     ALTER TABLE medco_ont.clinical_sensitive OWNER TO $I2B2_DB_USER;
     ALTER TABLE medco_ont.clinical_non_sensitive OWNER TO $I2B2_DB_USER;
-    --ALTER TABLE medco_ont.shrine OWNER TO $I2B2_DB_USER;
+    ALTER TABLE medco_ont.sensitive_tagged OWNER TO $I2B2_DB_USER;
 
     grant all on schema medco_ont to $I2B2_DB_USER;
     grant all privileges on all tables in schema medco_ont to $I2B2_DB_USER;
