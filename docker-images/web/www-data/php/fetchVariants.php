@@ -51,12 +51,27 @@ switch($_GET["query_type"]){
         $stmt->execute();
         break;
 
+    case "generic_annotation_and_zygosity":
+        // select variant_id
+        // from genomic_annotations
+        /* where annotation_value='Y:59022489:?>A' AND
+           annotation_name=variant_name*/
+
+        //fetchVariants.php?query_type=generic_annotation_and_zygosity&annotation_value=12:109613959:C>C&annotation_name=variant_name&zygosity[]=Heterozygous
+
+        $sql = "SELECT variant_id FROM genomic_annotations.genomic_annotations WHERE ".$_GET["annotation_name"]."=? AND annotations ~* ?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(1, $_GET["annotation_value"], PDO::PARAM_STR);
+        $stmt->bindValue(2, $zigosity, PDO::PARAM_STR);
+        $stmt->execute();
+        break;
+
     case "annotation_and_zygosity":
         //select variant_id
         //from genomic_annotations
         //where annotations ~* '(Homozygous|Unknown);.*VARIANT_CLASS=DELETION'
         $zigosity = $zigosity.".*" . $_GET["annotation_name"] . "=" . $_GET["annotation_value"];
-        echo $zigosity."\n";
+//        echo $zigosity."\n";
 
         //fetchVariants.php?query_type=annotation_and_zygosity&annotation_name=Variant%20Type&annotation_value=SNP&zygosity[]=Heterozygous
 
