@@ -11,21 +11,6 @@ import (
 const (
 	// #---- COMMON ----#
 
-	// DefaultGroupFile is the name of the default file to lookup for group definition
-	DefaultGroupFile = "group.toml"
-	// DefaultSensitiveFile is the name of the file that lists all sensitive attributes
-	DefaultSensitiveFile = "sensitive.txt"
-	// DefaultDBhost is the name of the default database hostname
-	DefaultDBhost = "localhost"
-	// DefaultDBport is the value of the default database access port
-	DefaultDBport = 5434
-	// DefaultDBname is the name of the default database name
-	DefaultDBname = "medcodeployment"
-	// DefaultDBuser is the name of the default user
-	DefaultDBuser = "postgres"
-	// DefaultDBpassword is the name of the default password
-	DefaultDBpassword = "prigen2017"
-
 	optionGroupFile      = "group"
 	optionGroupFileShort = "g"
 
@@ -54,13 +39,13 @@ const (
 	// #---- V0 ----#
 
 	// DefaultOntologyClinical is the name of the default clinical file (dataset)
-	DefaultOntologyClinical = "data_clinical_skcm_broad.csv"
+	DefaultOntologyClinical = "../../data/genomic/tcga_cbio/clinical_data.csv"
 	// DefaultOntologyGenomic is the name of the default clinical file (dataset)
-	DefaultOntologyGenomic = "data_mutations_extended_skcm_broad.csv"
+	DefaultOntologyGenomic = "../../data/genomic/tcga_cbio/mutation_data.csv"
 	// DefaultClinicalFile is the name of the default clinical file (dataset)
-	DefaultClinicalFile = "data_clinical_skcm_broad.csv"
+	DefaultClinicalFile = "../../data/genomic/tcga_cbio/clinical_data.csv"
 	// DefaultGenomicFile is the name of the default genomic file (dataset)
-	DefaultGenomicFile = "data_mutations_extended_skcm_broad.csv"
+	DefaultGenomicFile = "../../data/genomic/tcga_cbio/mutation_data.csv"
 	// DefaultOutputPath is the output path for the generated .csv files
 	DefaultOutputPath = "../data/genomic/"
 
@@ -116,8 +101,7 @@ func main() {
 	loaderFlagsCommon := []cli.Flag{
 		cli.StringFlag{
 			Name:  optionGroupFile + ", " + optionGroupFileShort,
-			Value: DefaultGroupFile,
-			Usage: "Unlynx group definition file",
+			Usage: "UnLynx group definition file",
 		},
 		cli.IntFlag{
 			Name:  optionEntryPointIdx + ", " + optionEntryPointIdxShort,
@@ -125,32 +109,26 @@ func main() {
 		},
 		cli.StringFlag{
 			Name:  optionSensitiveFile + ", " + optionSensitiveFileShort,
-			Value: DefaultSensitiveFile,
 			Usage: "File containing a list of sensitive concepts",
 		},
 		cli.StringFlag{
 			Name:  optionDBhost + ", " + optionDBhostShort,
-			Value: DefaultDBhost,
 			Usage: "Database hostname",
 		},
 		cli.IntFlag{
 			Name:  optionDBport + ", " + optionDBportShort,
-			Value: DefaultDBport,
 			Usage: "Database port",
 		},
 		cli.StringFlag{
 			Name:  optionDBname + ", " + optionDBnameShort,
-			Value: DefaultDBname,
 			Usage: "Database name",
 		},
 		cli.StringFlag{
 			Name:  optionDBuser + ", " + optionDBuserShort,
-			Value: DefaultDBuser,
 			Usage: "Database user",
 		},
 		cli.StringFlag{
 			Name:  optionDBpassword + ", " + optionDBpasswordShort,
-			Value: DefaultDBpassword,
 			Usage: "Database password",
 		},
 	}
@@ -200,14 +178,14 @@ func main() {
 	cliApp.Commands = []cli.Command{
 		// BEGIN CLIENT: DATA LOADER ----------
 		{
-			Name:    "version0",
+			Name:    "v0",
 			Aliases: []string{"v0"},
-			Usage:   "Load genomic data (e.g. tcga_bio and skcm_broad datasets)",
+			Usage:   "Load genomic data (e.g. tcga_bio dataset)",
 			Flags:   loaderFlagsv0,
 			Action:  loadV0,
 		},
 		{
-			Name:    "version1",
+			Name:    "v1",
 			Aliases: []string{"v1"},
 			Usage:   "Convert existing i2b2 data model",
 			Flags:   loaderFlagsv1,
