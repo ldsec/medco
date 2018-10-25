@@ -16,8 +16,7 @@ RUN go get -v -d github.com/dedis/onet/... && \
     go get -v -d github.com/r0fls/gostats/... && \
     go get -v -d github.com/fanliao/go-concurrentMap/... && \
     go get -v -d github.com/lib/pq/... && \
-    go get -v -d github.com/lca1/unlynx/... && \
-    go get -v -d github.com/armon/go-radix/...
+    go get -v -d github.com/lca1/unlynx/...
 
 
 # temporary (until onet is fixed)
