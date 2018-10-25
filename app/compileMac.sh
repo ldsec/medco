@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-go build -o medcoLoader *.go
+go build -o medco-loader *.go

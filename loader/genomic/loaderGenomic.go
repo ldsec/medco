@@ -1094,7 +1094,7 @@ func TagElements(listEncryptedElements *libunlynx.CipherVector, group *onet.Rost
 		group, // Roster
 		servicesmedco.SurveyID("tagging_loading_phase"), // SurveyID
 		*listEncryptedElements,                          // Encrypted query terms to tag
-		false, // compute proofs?
+		false,                                           // compute proofs?
 		Testing,
 	)
 
