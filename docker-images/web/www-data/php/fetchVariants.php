@@ -56,7 +56,7 @@ switch($_GET["query_type"]){
         //from genomic_annotations
         //where annotations ~* '(Homozygous|Unknown);.*VARIANT_CLASS=DELETION'
         $zigosity = $zigosity.".*" . $_GET["annotation_name"] . "=" . $_GET["annotation_value"];
-        echo $zigosity."\n"
+        echo $zigosity."\n";
 
         //fetchVariants.php?query_type=annotation_and_zygosity&annotation_name=Variant%20Type&annotation_value=SNP&zygosity[]=Heterozygous
 
