@@ -42,6 +42,7 @@ _testmain.go
 
 .idea/
 data/genomic/*.csv
+data/genomic/skcm_broad/
 data/genomic/tcga_cbio/manipulations/
 data/genomic/tcga_cbio/*.zip
 data/i2b2/converted/*.xml
