@@ -2,5 +2,5 @@
 
 ## Documentation
 
-[medco-documentation](https://github.com/lca1/medco-documentation)
+MedCo documention is centralized in a set of github-pages: [medco-documentation](https://github.com/lca1/medco-documentation)
 
