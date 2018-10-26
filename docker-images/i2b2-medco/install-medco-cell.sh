@@ -3,7 +3,7 @@ set -Eeuo pipefail
 
 # get medco cell sources
 pushd "$MEDCO_CELL_SRC_DIR"
-git clone --depth 1 --branch $MEDCO_CELL_VERSION https://c4science.ch/source/medco-i2b2-cell.git .
+git clone --depth 1 --branch $MEDCO_CELL_VERSION https://github.com/lca1/medco-i2b2-cell.git .
 
 # compile and deploy
 sed -i "/jboss.home/c\jboss.home=$JBOSS_HOME" build.properties
