@@ -3,7 +3,6 @@
 ## Documentation
 
 MedCo documention is centralized in a set of github-pages: [medco-documentation](https://lca1.github.io/medco-documentation/index.html).
-For specific documentation about the medco-loader: 
 
 ## Version
 
