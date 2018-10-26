@@ -5,8 +5,8 @@ ENV UNLYNX_REPO="github.com/lca1/medco" \
     UNLYNX_VERSION="master"
 
 # get maximum of dependencies and cache them
-RUN go get -v -d gopkg.in/dedis/onet.v1/... && \
-    go get -v -d gopkg.in/dedis/crypto.v0/... && \
+RUN go get -v -d gopkg.in/dedis/onet/... && \
+    go get -v -d gopkg.in/dedis/kyber/... && \
     go get -v -d gopkg.in/urfave/cli.v1/... && \
     go get -v -d github.com/Knetic/govaluate/... && \
     go get -v -d github.com/btcsuite/goleveldb/... && \
@@ -14,6 +14,9 @@ RUN go get -v -d gopkg.in/dedis/onet.v1/... && \
     go get -v -d github.com/fanliao/go-concurrentMap/... && \
     go get -v -d github.com/lib/pq/... && \
     go get -v -d github.com/lca1/unlynx/...
+
+RUN sed 's/var timeout = 1 * time.Minute/var timeout = 1 * time.Hour/' /go/src/github.com/dedis/onet/network/tcp.go && \
+    sed 's/var MaxPacketSize = Size(10 * 1024 * 1024)/var MaxPacketSize = Size(10 * 1024 * 1024 * 1024)/' /go/src/github.com/dedis/onet/network/tcp.go
 
 # get sources and switch branch
 WORKDIR /go/src/$UNLYNX_REPO
