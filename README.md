@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/lca1/medco-loader.svg?branch=master)](https://travis-ci.org/lca1/medco-loader) [![Go Report Card](https://goreportcard.com/badge/github.com/lca1/medco-loader)](https://goreportcard.com/report/github.com/lca1/medco-loader)
+[![Build Status](https://travis-ci.org/lca1/medco-loader.svg?branch=master)](https://travis-ci.org/lca1/medco-loader) [![Go Report Card](https://goreportcard.com/badge/github.com/lca1/medco-loader)](https://goreportcard.com/report/github.com/lca1/medco-loader) [![codecov](https://codecov.io/gh/lca1/medco-loader/branch/master/graph/badge.svg)](https://codecov.io/gh/lca1/medco-loader)
 
 ## Documentation
 
