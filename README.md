@@ -4,3 +4,10 @@
 
 MedCo documention is centralized in a set of github-pages: [medco-documentation](https://github.com/lca1/medco-documentation)
 
+## Version
+
+The version in the `master`-branch is stable and has no incompatible changes.
+
+## License
+
+*medco-loader* is licensed under a End User Software License Agreement ('EULA') for non-commercial use. If you need more information, please contact us.
