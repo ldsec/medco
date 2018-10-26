@@ -108,6 +108,7 @@ func loadV0(c *cli.Context) error {
 		line := scanner.Text()
 		if line == "all" {
 			allSensitive = true
+			break
 		}
 		mapSensitive[line] = struct{}{}
 	}
@@ -199,6 +200,7 @@ func loadV1(c *cli.Context) error {
 		line := scanner.Text()
 		if line == "all" {
 			allSensitive = true
+			break
 		}
 		mapSensitive[line] = struct{}{}
 	}
