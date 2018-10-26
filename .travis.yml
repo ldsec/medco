@@ -1,6 +1,8 @@
 language: go
 go:
 - 1.x
+before_install:
+- git lfs pull
 install:
 - go get -t ./...
 - go get golang.org/x/tools/cmd/cover
@@ -8,6 +10,6 @@ install:
 script:
 - make test
 after_success:
-- $GOPATH/bin/goveralls -coverprofile=profile.cov -service=travis-ci
+- $GOPATH/bin/goveralls -coverprofile=profile.cov -service=travis-ci || true
 notifications:
   email: false

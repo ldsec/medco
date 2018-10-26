@@ -3,14 +3,11 @@ package main
 // MedCo UnLynx client
 
 import (
-	"database/sql"
 	"encoding/xml"
-	"fmt"
 	"github.com/dedis/kyber"
 	"github.com/dedis/onet"
 	"github.com/dedis/onet/app"
 	"github.com/dedis/onet/log"
-	"github.com/lca1/medco/app/loader"
 	"github.com/lca1/medco/lib"
 	"github.com/lca1/medco/services"
 	"github.com/lca1/unlynx/lib"
@@ -22,113 +19,6 @@ import (
 	"strconv"
 	"time"
 )
-
-// Loader functions
-//______________________________________________________________________________________________________________________
-
-//----------------------------------------------------------------------------------------------------------------------
-//#----------------------------------------------- LOAD DATA -----------------------------------------------------------
-//----------------------------------------------------------------------------------------------------------------------
-
-func loadData(c *cli.Context) error {
-
-	// data set file paths
-	clinicalOntologyPath := c.String("ont_clinical")
-	genomicOntologyPath := c.String("ont_genomic")
-	clinicalFilePath := c.String("clinical")
-	genomicFilePath := c.String("genomic")
-	groupFilePath := c.String("file")
-	entryPointIdx := c.Int("entryPointIdx")
-	listSensitive := c.StringSlice("sensitive")
-	replaySize := c.Int("replay")
-
-	// db settings
-	dbHost := c.String("dbHost")
-	dbPort := c.Int("dbPort")
-	dbName := c.String("dbName")
-	dbUser := c.String("dbUser")
-	dbPassword := c.String("dbPassword")
-
-	databaseS := loader.DBSettings{DBhost: dbHost, DBport: dbPort, DBname: dbName, DBuser: dbUser, DBpassword: dbPassword}
-
-	// check if db connection works
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+"password=%s dbname=%s sslmode=disable", dbHost, dbPort, dbUser, dbPassword, dbName)
-	db, err := sql.Open("postgres", psqlInfo)
-	if err != nil {
-		log.Error("Error while opening database", err)
-		return cli.NewExitError(err, 1)
-	}
-	db.Close()
-
-	// generate el with group file
-	f, err := os.Open(groupFilePath)
-	if err != nil {
-		log.Error("Error while opening group file", err)
-		return cli.NewExitError(err, 1)
-	}
-	el, err := app.ReadGroupDescToml(f)
-	if err != nil {
-		log.Error("Error while reading group file", err)
-		return cli.NewExitError(err, 1)
-	}
-	if len(el.Roster.List) <= 0 {
-		log.Error("Empty or invalid group file", err)
-		return cli.NewExitError(err, 1)
-	}
-
-	fOntClinical, err := os.Open(clinicalOntologyPath)
-	if err != nil {
-		log.Error("Error while opening the clinical ontology file", err)
-		return cli.NewExitError(err, 1)
-	}
-
-	fOntGenomic, err := os.Open(genomicOntologyPath)
-	if err != nil {
-		log.Error("Error while opening the genomic ontology file", err)
-		return cli.NewExitError(err, 1)
-	}
-
-	fClinical, err := os.Open(clinicalFilePath)
-	if err != nil {
-		log.Error("Error while opening the clinical file", err)
-		return cli.NewExitError(err, 1)
-	}
-
-	fGenomic, err := os.Open(genomicFilePath)
-	if err != nil {
-		log.Error("Error while opening the genomic file", err)
-		return cli.NewExitError(err, 1)
-	}
-
-	if listSensitive == nil {
-		log.Error("Error while parsing list of sensitive files", err)
-		return cli.NewExitError(err, 1)
-	}
-
-	// convert listSensitive to map set to allow for faster search
-	mapSensitive := make(map[string]struct{}, len(listSensitive))
-	for _, attSensitive := range listSensitive {
-		mapSensitive[attSensitive] = struct{}{}
-	}
-
-	if replaySize < 1 {
-		log.Error("Wrong file size value (1>)", err)
-		return cli.NewExitError(err, 1)
-	} else if replaySize > 1 {
-		fGenomic.Close()
-		loader.ReplayDataset(genomicFilePath, replaySize)
-
-		fGenomic, err = os.Open(genomicFilePath)
-		if err != nil {
-			log.Error("Error while opening the new genomic file", err)
-			return cli.NewExitError(err, 1)
-		}
-	}
-
-	loader.LoadClient(el.Roster, entryPointIdx, fOntClinical, fOntGenomic, fClinical, fGenomic, mapSensitive, databaseS, false)
-
-	return nil
-}
 
 // Client functions
 //______________________________________________________________________________________________________________________
@@ -234,7 +124,7 @@ func unlynxDDTRequest(input []byte, output io.Writer, el *onet.Roster, entryPoin
 
 	client := servicesmedco.NewMedCoClient(el.List[entryPointIdx], strconv.Itoa(entryPointIdx))
 	_, result, tr, err := client.SendSurveyDDTRequestTerms(
-		el, // Roster
+		el,                         // Roster
 		servicesmedco.SurveyID(id), // SurveyID
 		encQueryTerms,              // Encrypted query terms to tag
 		proofs,                     // compute proofs?
@@ -380,11 +270,11 @@ func unlynxAggRequest(input []byte, output io.Writer, el *onet.Roster, entryPoin
 
 	client := servicesmedco.NewMedCoClient(el.List[entryPointIdx], strconv.Itoa(entryPointIdx))
 	_, result, tr, err := client.SendSurveyAggRequest(
-		el, // Roster
+		el,                         // Roster
 		servicesmedco.SurveyID(id), // SurveyID
-		cPK,        // client public key
-		*aggregate, // Encrypted local aggregation result
-		proofs,     // compute proofs?
+		cPK,                        // client public key
+		*aggregate,                 // Encrypted local aggregation result
+		proofs,                     // compute proofs?
 	)
 
 	totalTime := time.Since(start)

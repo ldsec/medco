@@ -48,26 +48,6 @@ func encryptIntFromApp(c *cli.Context) error {
 	// encrypt
 	encryptedInt := libunlynx.EncryptInt(el.Roster.Aggregate, toEncryptInt)
 
-	// test encryption for ETL
-	/*originalDatasetNbr := 250000
-	start := time.Now()
-	for i:=0; i< originalDatasetNbr; i++ {
-		lib.EncryptInt(el.Aggregate, toEncryptInt)
-	}
-	log.LLvl1("1x: ", time.Since(start))
-
-	start = time.Now()
-	for i:=0; i< originalDatasetNbr*2; i++ {
-		lib.EncryptInt(el.Aggregate, toEncryptInt)
-	}
-	log.LLvl1("2x: ", time.Since(start))
-
-	start = time.Now()
-	for i:=0; i< originalDatasetNbr*3; i++ {
-		lib.EncryptInt(el.Aggregate, toEncryptInt)
-	}
-	log.LLvl1("4x: ", time.Since(start))*/
-
 	// output in xml format on stdout
 	resultString := "<encrypted>" + (*encryptedInt).Serialize() + "</encrypted>\n"
 	_, err = io.WriteString(os.Stdout, resultString)
