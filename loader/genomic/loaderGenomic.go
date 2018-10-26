@@ -327,13 +327,13 @@ func GenerateLoadingOntologyScript(databaseS loader.DBSettings) error {
 	}
 	loading += "\n"
 	// create annotations table
-	loading += `DROP TABLE IF EXISTS genomic_annotations.hugo_gene_symbol` + "\n"
+	loading += `DROP TABLE IF EXISTS genomic_annotations.hugo_gene_symbol;` + "\n"
 	loading += `CREATE TABLE genomic_annotations.hugo_gene_symbol as select distinct hugo_gene_symbol as annotation_value from genomic_annotations.genomic_annotations;` + "\n"
 
-	loading += `DROP TABLE IF EXISTS genomic_annotations.protein_change` + "\n"
+	loading += `DROP TABLE IF EXISTS genomic_annotations.protein_change;` + "\n"
 	loading += `CREATE TABLE genomic_annotations.protein_change as select distinct protein_change as annotation_value from genomic_annotations.genomic_annotations;` + "\n"
 
-	loading += `DROP TABLE IF EXISTS genomic_annotations.variant_name` + "\n"
+	loading += `DROP TABLE IF EXISTS genomic_annotations.variant_name;` + "\n"
 	loading += `CREATE TABLE genomic_annotations.variant_name as select distinct variant_name as annotation_value from genomic_annotations.genomic_annotations;` + "\n"
 	loading += "COMMIT;\n"
 	loading += "EOSQL"
