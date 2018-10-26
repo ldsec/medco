@@ -26,21 +26,12 @@ test_lint:
 		fi \
 	}
 
-test_verbose:
-	go test -v -race -short -p=1 ./...
+test_local:
+	go test -v -race -short ./...
 
-test_playground:
-	cd protocols; \
-	for a in $$( seq 10 ); do \
-	  go test -v -race -p=1 || exit 1 ; \
-	done;
+test_codecov:
+	go test -v -short -race -coverprofile=coverage.txt -covermode=atomic ./...
 
-test_goveralls:
-	go get github.com/mattn/goveralls
-	./coveralls.sh
+test: test_fmt test_lint test_codecov
 
-test: test_fmt test_lint test_goveralls
-
-local: test_fmt test_lint test_verbose
-
-all: install test
+local: test_fmt test_lint test_local
