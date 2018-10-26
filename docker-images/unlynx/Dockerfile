@@ -1,7 +1,7 @@
 FROM golang:1.11 as dev
 
 # build time environment variables
-ENV UNLYNX_REPO="github.com/lca1/medco" \
+ENV UNLYNX_REPO="github.com/lca1/medco-unlynx" \
     UNLYNX_VERSION="master"
 
 # get maximum of dependencies and cache them
