@@ -11,7 +11,6 @@ import (
 	"github.com/dedis/onet/log"
 	"github.com/lca1/medco-loader/loader"
 	"github.com/lca1/medco-unlynx/services"
-	"github.com/lca1/medco/services"
 	"github.com/lca1/unlynx/lib"
 	"io"
 	"os"
