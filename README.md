@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/lca1/medco-loader.svg?branch=master)](https://travis-ci.org/LCA1/UnLynx) [![Go Report Card](https://goreportcard.com/badge/github.com/lca1/unlynx)](https://goreportcard.com/report/github.com/lca1/unlynx)
+[![Build Status][![Build Status](https://travis-ci.org/lca1/medco-loader.svg?branch=master)](https://travis-ci.org/lca1/medco-loader) [![Go Report Card](https://goreportcard.com/badge/github.com/lca1/medco-loader)](https://goreportcard.com/report/github.com/lca1/medco-loader)
 
 ## Documentation
 
