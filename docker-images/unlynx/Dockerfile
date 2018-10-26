@@ -5,8 +5,8 @@ ENV UNLYNX_REPO="github.com/lca1/medco-unlynx" \
     UNLYNX_VERSION="master"
 
 # get maximum of dependencies and cache them
-RUN go get -v -d gopkg.in/dedis/onet/... && \
-    go get -v -d gopkg.in/dedis/kyber/... && \
+RUN go get -v -d github.com/dedis/onet/... && \
+    go get -v -d github.com/dedis/kyber/... && \
     go get -v -d gopkg.in/urfave/cli.v1/... && \
     go get -v -d github.com/Knetic/govaluate/... && \
     go get -v -d github.com/btcsuite/goleveldb/... && \
