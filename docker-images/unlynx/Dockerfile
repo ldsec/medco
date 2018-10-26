@@ -17,7 +17,7 @@ RUN go get -v -d github.com/dedis/onet/... && \
 
 
 RUN sed -i 's/var timeout = 1 \* time.Minute/var timeout = 1 \* time.Hour/' /go/src/github.com/dedis/onet/network/tcp.go && \
-    sed -i 's/var MaxPacketSize \= Size(10 \* 1024 \* 1024)/var MaxPacketSize = Size(10 \* 1024 \* 1024 \* 1024)/' /go/src/github.com/dedis/onet/network/tcp.go 
+    sed -i 's/var MaxPacketSize \= Size(10 \* 1024 \* 1024)/var MaxPacketSize = Size(10 \* 1024 \* 1024 \* 100)/' /go/src/github.com/dedis/onet/network/tcp.go 
 
 RUN cat /go/src/github.com/dedis/onet/network/tcp.go
 
