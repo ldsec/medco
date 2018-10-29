@@ -14,10 +14,10 @@ import (
 )
 
 const (
-	clinicalOntology = "../../data/genomic/tcga_cbio/8_clinical_data.csv"
-	genomicOntology  = "../../data/genomic/tcga_cbio/8_mutation_data.csv"
-	clinicalFile     = "../../data/genomic/tcga_cbio/8_clinical_data.csv"
-	genomicFile      = "../../data/genomic/tcga_cbio/8_mutation_data.csv"
+	clinicalOntology = "../../data/genomic/tcga_cbio/clinical_data.csv"
+	genomicOntology  = "../../data/genomic/tcga_cbio/mutation_data.csv"
+	clinicalFile     = "../../data/genomic/tcga_cbio/clinical_data.csv"
+	genomicFile      = "../../data/genomic/tcga_cbio/mutation_data.csv"
 
 	//clinicalOntology = "../data/genomic/tcga_cbio/clinical_data.csv"
 	//genomicOntology  = "../data/genomic/tcga_cbio/mutation_data.csv"
