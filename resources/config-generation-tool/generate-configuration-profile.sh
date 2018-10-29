@@ -4,7 +4,7 @@ shopt -s nullglob
 
 # dependencies: openssl, keytool (java), docker
 # usage: bash generate-dev-configuration-profile.sh CONFIGURATION_PROFILE NODE_IP_1 NODE_IP_2 NODE_IP_3 ...
-if [ $# -lt 5 ]
+if [ $# -lt 3 ]
 then
     echo "Wrong number of arguments, usage: bash generate-dev-configuration-profile.sh CONFIGURATION_PROFILE NODE_IP_1 NODE_IP_2 NODE_IP_3 ..."
     exit
