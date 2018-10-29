@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 apt-get -y update
-apt-get -y install git apt-transport-https ca-certificates curl software-properties-common screen default-jre nano unzip
+apt-get -y install git apt-transport-https curl software-properties-common screen
 
 apt-get remove docker docker-engine docker.io
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
