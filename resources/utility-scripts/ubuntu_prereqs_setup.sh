@@ -20,6 +20,6 @@ apt-get -y install docker-ce postgresql-client-10
 
 docker run hello-world
 
-curl -L "https://github.com/docker/compose/releases/download/1.23.0-rc1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+curl -L "https://github.com/docker/compose/releases/download/1.23.0-rc3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose
 git clone https://github.com/lca1/medco-deployment.git
