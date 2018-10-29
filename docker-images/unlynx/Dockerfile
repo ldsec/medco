@@ -16,8 +16,8 @@ RUN go get -v -d github.com/dedis/onet/... && \
     go get -v -d github.com/lca1/unlynx/...
 
 
-RUN sed -i 's/var timeout = 1 \* time.Minute/var timeout = 1 \* time.Hour/' /go/src/github.com/dedis/onet/network/tcp.go && \
-    sed -i 's/var MaxPacketSize \= Size(10 \* 1024 \* 1024)/var MaxPacketSize = Size(10 \* 1024 \* 1024 \* 100)/' /go/src/github.com/dedis/onet/network/tcp.go 
+RUN sed -i 's/conn.SetReadDeadline(time.Now().Add(5 \* time.Minute))/conn.SetReadDeadline(time.Now().Add(5 \* time.Hour))/' /go/src/github.com/dedis/onet/websocket.go && \
+    sed -i 's/const expirationTime = 1 \* time.Minute/const expirationTime = 1 \* time.Hour/' /go/src/github.com/dedis/onet/overlay.go
 
 # get sources and switch branch
 WORKDIR /go/src/$UNLYNX_REPO
