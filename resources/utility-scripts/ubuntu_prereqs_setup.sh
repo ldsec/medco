@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 
 apt-get -y update
-apt-get -y install git apt-transport-https curl software-properties-common screen
+add-apt-repository ppa:git-core/ppa -y
+curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash
+apt-get install git-lfs
+
+apt-get -y install git apt-transport-https curl software-properties-common screen nano
 
 apt-get remove docker docker-engine docker.io
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
