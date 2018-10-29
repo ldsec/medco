@@ -38,7 +38,7 @@ do
     KEYSTORE_PRIVATE_ALIAS="srv$NODE_IDX-private"
 
     echo "###$NODE_IDX### Generating unlynx keys"
-    "$BUILD_FOLDER"/unlynxMedCo server setupNonInteractive --serverBinding "$NODE_IP:2000" --description "MedCo-UnLynx Server $NODE_IDX" \
+    "$CONF_FOLDER"/unlynxMedCo server setupNonInteractive --serverBinding "$NODE_IP:2000" --description "MedCo-UnLynx Server $NODE_IDX" \
         --privateTomlPath "$CONF_FOLDER/srv$NODE_IDX-private.toml" --publicTomlPath "$CONF_FOLDER/srv$NODE_IDX-public.toml"
 done
 
