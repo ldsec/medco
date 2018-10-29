@@ -15,9 +15,15 @@ psql $PSQL_PARAMS -d "$I2B2_DB_NAME" <<-EOSQL
 
     -- hive & users data
     insert into i2b2pm.pm_project_data (project_id, project_name, project_wiki, project_path, status_cd) values
-        ('MedCo', 'MedCo', 'https://github.com/lca1/medco', '/MedCo', 'A');
-    --insert into i2b2pm.pm_cell_data (cell_id, project_path, name, method_cd, url, can_override, status_cd)
-    --    values ('CRC', '/MedCo', 'MedCo Federated Query', 'REST', 'https://tbd:6443/shrine/rest/i2b2/', 1, 'A');
+        ('MedCo', 'MedCo', 'https://lca1.github.io/medco-documentation', '/MedCo', 'A');
+
+    -- cell URLs
+    UPDATE i2b2pm.PM_CELL_DATA SET URL = 'http://i2b2-medco:8080/i2b2/services/QueryToolService/' WHERE CELL_ID = 'CRC';
+    UPDATE i2b2pm.PM_CELL_DATA SET URL = 'http://i2b2-medco:8080/i2b2/services/FRService/' WHERE CELL_ID = 'FRC';
+    UPDATE i2b2pm.PM_CELL_DATA SET URL = 'http://i2b2-medco:8080/i2b2/services/OntologyService/' WHERE CELL_ID = 'ONT';
+    UPDATE i2b2pm.PM_CELL_DATA SET URL = 'http://i2b2-medco:8080/i2b2/services/WorkplaceService/' WHERE CELL_ID = 'WORK';
+    UPDATE i2b2pm.PM_CELL_DATA SET URL = 'http://i2b2-medco:8080/i2b2/services/IMService/' WHERE CELL_ID = 'IM';
+
 
     INSERT INTO i2b2pm.PM_USER_DATA (USER_ID, FULL_NAME, PASSWORD, STATUS_CD)
         VALUES('medcoadmin', 'MedCo Admin', '$DEFAULT_USER_PASSWORD_HASH', 'A');
