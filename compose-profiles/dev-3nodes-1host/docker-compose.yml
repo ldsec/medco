@@ -11,7 +11,7 @@ services:
       - I2B2_DB_NAME=i2b2medcosrv0
       - I2B2_DOMAIN_NAME=i2b2medcosrv0
       - NODE_IDX=0
-      - UNLYNX_DEBUG_LEVEL=3
+      - UNLYNX_DEBUG_LEVEL=2
       - AXIS2_LOGLEVEL=DEBUG
     networks:
       medco-srv0:
@@ -31,7 +31,7 @@ services:
       - "2003:2003"
     environment:
       - NODE_IDX=0
-      - UNLYNX_DEBUG_LEVEL=3
+      - UNLYNX_DEBUG_LEVEL=2
     networks:
       medco-srv0:
       medco-network:
@@ -64,7 +64,7 @@ services:
       - I2B2_DB_NAME=i2b2medcosrv1
       - I2B2_DOMAIN_NAME=i2b2medcosrv1
       - NODE_IDX=1
-      - UNLYNX_DEBUG_LEVEL=3
+      - UNLYNX_DEBUG_LEVEL=2
       - AXIS2_LOGLEVEL=DEBUG
     networks:
       medco-srv1:
@@ -84,7 +84,7 @@ services:
       - "2005:2005"
     environment:
       - NODE_IDX=1
-      - UNLYNX_DEBUG_LEVEL=3
+      - UNLYNX_DEBUG_LEVEL=2
     networks:
       medco-srv1:
       medco-network:
@@ -117,7 +117,7 @@ services:
       - I2B2_DB_NAME=i2b2medcosrv2
       - I2B2_DOMAIN_NAME=i2b2medcosrv2
       - NODE_IDX=2
-      - UNLYNX_DEBUG_LEVEL=3
+      - UNLYNX_DEBUG_LEVEL=2
       - AXIS2_LOGLEVEL=DEBUG
     networks:
       medco-srv2:
@@ -137,7 +137,7 @@ services:
       - "2007:2007"
     environment:
       - NODE_IDX=2
-      - UNLYNX_DEBUG_LEVEL=3
+      - UNLYNX_DEBUG_LEVEL=2
     networks:
       medco-srv2:
       medco-network:
