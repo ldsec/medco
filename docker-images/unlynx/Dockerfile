@@ -41,6 +41,7 @@ ENV UNLYNX_BIN_EXPORT_PATH="$MEDCO_CONF_DIR/unlynxMedCo"
 
 COPY --from=dev /go/bin/app /go/bin/unlynxMedCo
 COPY docker-entrypoint.sh /usr/local/bin/
+COPY copy-unlynx-binary.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh && \
     apk add --no-cache bash outils-md5
 
