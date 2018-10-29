@@ -25,7 +25,7 @@ rm -f  "$CONF_FOLDER"/*.toml "$CONF_FOLDER"/unlynxMedCo
 
 echo "### Producing medco-unlynx binary with Docker"
 docker pull medco/i2b2-unlynx:latest
-docker run -v "$CONF_FOLDER":/opt/medco-configuration medco/i2b2-unlynx:latest
+docker run -v "$CONF_FOLDER":/opt/medco-configuration --entrypoint sh medco/i2b2-unlynx:latest /copy-unlynx-binary.sh
 
 # generate configuration for each node
 NODE_IDX="-1"
