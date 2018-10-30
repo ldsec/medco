@@ -28,7 +28,7 @@ services:
       file: ../docker-compose-common.yml
       service: web
     environment:
-      - CORS_ALLOW_ORIGIN=http://iccluster056.iccluster.epfl.ch:4200
+      - CORS_ALLOW_ORIGIN=http://iccluster056.iccluster.epfl.ch:82
     ports:
       - "80:80"
       - "443:443"
