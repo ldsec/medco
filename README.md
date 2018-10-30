@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/lca1/medco.svg?branch=master)](https://travis-ci.org/lca1/medco) [![Go Report Card](https://goreportcard.com/badge/github.com/lca1/medco)](https://goreportcard.com/report/github.com/lca1/medco) [![codecov](https://codecov.io/gh/lca1/medco/branch/master/graph/badge.svg)](https://codecov.io/gh/lca1/medco)
+[![Build Status](https://travis-ci.org/lca1/medco-unlynx.svg?branch=master)](https://travis-ci.org/lca1/medco-unlynx) [![Go Report Card](https://goreportcard.com/badge/github.com/lca1/medco)](https://goreportcard.com/report/github.com/lca1/medco) [![codecov](https://codecov.io/gh/lca1/medco/branch/master/graph/badge.svg)](https://codecov.io/gh/lca1/medco)
 
 ## Documentation
 
