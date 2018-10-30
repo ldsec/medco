@@ -8,6 +8,7 @@ import (
 	"gopkg.in/urfave/cli.v1"
 	"os"
 	"path"
+	"strconv"
 )
 
 func generateTaggingSecrets(c *cli.Context) error {
@@ -37,11 +38,11 @@ func generateTaggingSecrets(c *cli.Context) error {
 		return err
 	}
 
-	for _, src := range el.Roster.List {
+	for i := range el.Roster.List {
 		dir, _ := path.Split(groupTomlPath)
 
 		for _, dest := range el.Roster.List {
-			servicesmedco.CheckDDTSecrets(dir+servicesmedco.DDTSecretsPath+"_"+src.Address.Host()+":"+src.Address.Port()+".toml", dest.Address)
+			servicesmedco.CheckDDTSecrets(dir+"srv"+strconv.FormatInt(int64(i), 10)+"-ddtsecrets.toml", dest.Address)
 		}
 	}
 
