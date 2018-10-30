@@ -14,7 +14,7 @@ import (
 func encryptIntFromApp(c *cli.Context) error {
 
 	// cli arguments
-	groupFilePath := c.String("file")
+	groupTomlPath := c.String("file")
 
 	if c.NArg() != 1 {
 		err := errors.New("wrong number of arguments (only 1 allowed, except for the flags)")
@@ -30,7 +30,7 @@ func encryptIntFromApp(c *cli.Context) error {
 	}
 
 	// generate el with group file
-	f, err := os.Open(groupFilePath)
+	f, err := os.Open(groupTomlPath)
 	if err != nil {
 		log.Error("Error while opening group file", err)
 		return cli.NewExitError(err, 1)

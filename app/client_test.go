@@ -8,7 +8,7 @@ import (
 	"github.com/dedis/onet"
 	"github.com/dedis/onet/app"
 	"github.com/dedis/onet/log"
-	"github.com/lca1/medco/lib"
+	"github.com/lca1/medco-unlynx/lib"
 	"github.com/lca1/unlynx/lib"
 	"github.com/stretchr/testify/assert"
 	"io"

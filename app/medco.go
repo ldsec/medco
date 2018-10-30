@@ -18,7 +18,7 @@ const (
 	Version = "1.00"
 
 	// DefaultGroupFile is the name of the default file to lookup for group definition
-	DefaultGroupFile = "public.toml"
+	DefaultGroupFile = "group.toml"
 
 	optionConfig      = "config"
 	optionConfigShort = "c"
@@ -29,8 +29,6 @@ const (
 	optionEntryPointIdx = "entryPointIdx"
 
 	optionProofs = "proofs"
-
-	optionPerfType = "perf"
 
 	optionDecryptKey      = "key"
 	optionDecryptKeyShort = "k"
@@ -130,6 +128,14 @@ func main() {
 		},
 	}
 
+	getAggregateKeyFlags := []cli.Flag{
+		cli.StringFlag{
+			Name:  optionGroupFile + ", " + optionGroupFileShort,
+			Value: DefaultGroupFile,
+			Usage: "Unlynx group definition file",
+		},
+	}
+
 	cliApp.Commands = []cli.Command{
 		// BEGIN CLIENT: DATA ENCRYPTION ----------
 		{
@@ -201,6 +207,20 @@ func main() {
 					Usage:   "Setup server configuration (non-interactive)",
 					Action:  NonInteractiveSetup,
 					Flags:   nonInteractiveSetupFlags,
+				},
+				{
+					Name:    "getAggregateKey",
+					Aliases: []string{"gak"},
+					Usage:   "Get Aggregate Key from group.toml",
+					Action:  getAggregateKey,
+					Flags:   getAggregateKeyFlags,
+				},
+				{
+					Name:    "generateTaggingSecrets",
+					Aliases: []string{"gs"},
+					Usage:   "Generate DDT Secrets for the participating nodes",
+					Action:  generateTaggingSecrets,
+					Flags:   getAggregateKeyFlags,
 				},
 			},
 		},

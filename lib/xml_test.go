@@ -2,7 +2,7 @@ package libmedco_test
 
 import (
 	"encoding/xml"
-	"github.com/lca1/medco/lib"
+	"github.com/lca1/medco-unlynx/lib"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

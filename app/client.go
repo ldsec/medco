@@ -8,8 +8,8 @@ import (
 	"github.com/dedis/onet"
 	"github.com/dedis/onet/app"
 	"github.com/dedis/onet/log"
-	"github.com/lca1/medco/lib"
-	"github.com/lca1/medco/services"
+	"github.com/lca1/medco-unlynx/lib"
+	"github.com/lca1/medco-unlynx/services"
 	"github.com/lca1/unlynx/lib"
 	_ "github.com/lib/pq"
 	"gopkg.in/urfave/cli.v1"
@@ -25,13 +25,13 @@ import (
 
 func unlynxRequestFromApp(c *cli.Context) error {
 	// cli arguments
-	groupFilePath := c.String("file")
+	groupTomlPath := c.String("file")
 	// TODO: use the serverIdentityID / UUID + el.Search rather than the entry point index
 	entryPointIdx := c.Int("entryPointIdx")
 	proofs := c.Bool("proofs")
 
 	// generate el with group file
-	f, err := os.Open(groupFilePath)
+	f, err := os.Open(groupTomlPath)
 	if err != nil {
 		log.Error("Error while opening group file", err)
 		return cli.NewExitError(err, 1)
