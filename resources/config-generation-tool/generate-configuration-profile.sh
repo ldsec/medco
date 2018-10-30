@@ -44,6 +44,7 @@ done
 
 echo "### Generating group.toml file"
 cat "$CONF_FOLDER"/srv*-public.toml > "$CONF_FOLDER/group.toml"
-"$CONF_FOLDER"/unlynx server getAggregateKey --file "$CONF_FOLDER/group.toml"
+"$CONF_FOLDER"/unlynxMedCo server getAggregateKey --file "$CONF_FOLDER/group.toml"
+"$CONF_FOLDER"/unlynxMedCo server generateDDTSecrets --file "$CONF_FOLDER/group.toml"
 
 echo "### Configuration generated!"
