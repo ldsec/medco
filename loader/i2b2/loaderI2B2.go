@@ -745,7 +745,7 @@ func EncryptAndTag(list []int64, group *onet.Roster, entryPointIdx int) ([]libun
 	)
 
 	if err != nil {
-		log.Fatal("Error during DDT")
+		log.Fatal("Error during DDT:", err)
 		return nil, err
 	}
 

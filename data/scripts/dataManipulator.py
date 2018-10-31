@@ -5,10 +5,10 @@ import numpy as np
 # PLEASE USE THIS TO CONFIGURE YOUR SCRIPT #
 # ---------------------------------------- #
 # specify input data files
-cli_in_fn = "/Users/jagomes/Go/src/github.com/lca1/medco-loader/data/genomic/tcga_cbio/clinical_data.csv"
-mut_in_fn = "/Users/jagomes/Go/src/github.com/lca1/medco-loader/data/genomic/tcga_cbio/mutation_data.csv"
+cli_in_fn = "../genomic/tcga_cbio/clinical_data.csv"
+mut_in_fn = "../genomic/tcga_cbio/mutation_data.csv"
 # specify output folder
-out_folder = "/Users/jagomes/Go/src/github.com/lca1/medco-loader/data/genomic/tcga_cbio/manipulations/"
+out_folder = "../genomic/tcga_cbio/manipulations/"
 # ---------------------------------------- #
 
 df_cli = pd.read_csv(cli_in_fn, sep='\t', dtype=object)
