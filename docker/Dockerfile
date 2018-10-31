@@ -1,4 +1,4 @@
-FROM golang:1.10.3
+FROM golang:1.11
 
 # environment variables
 ENV MEDCO_LOADER_REPO="github.com/lca1/medco-loader" \
@@ -18,10 +18,8 @@ RUN go get -v -d github.com/dedis/onet/... && \
     go get -v -d github.com/lib/pq/... && \
     go get -v -d github.com/lca1/unlynx/...
 
-
-# temporary (until onet is fixed)
-WORKDIR /go/src/github.com/dedis/onet
-RUN git checkout 5931349354a8b5740be860bdad200bc3d83502da
+RUN sed -i 's/conn.SetReadDeadline(time.Now().Add(5 \* time.Minute))/conn.SetReadDeadline(time.Now().Add(5 \* time.Hour))/' /go/src/github.com/dedis/onet/websocket.go && \
+    sed -i 's/const expirationTime = 1 \* time.Minute/const expirationTime = 1 \* time.Hour/' /go/src/github.com/dedis/onet/overlay.go
 
 # get sources and switch branch
 WORKDIR /go/src/$MEDCO_LOADER_REPO

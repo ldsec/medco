@@ -108,10 +108,6 @@ func main() {
 			Usage: "Index (relative to the group definition file) of the collective authority server to load the data",
 		},
 		cli.StringFlag{
-			Name:  optionSensitiveFile + ", " + optionSensitiveFileShort,
-			Usage: "File containing a list of sensitive concepts",
-		},
-		cli.StringFlag{
 			Name:  optionDBhost + ", " + optionDBhostShort,
 			Usage: "Database hostname",
 		},
@@ -138,6 +134,10 @@ func main() {
 			Name:  optionOntologyClinical + ", " + optionOntologyClinicalShort,
 			Value: DefaultOntologyClinical,
 			Usage: "Clinical ontology to load",
+		},
+		cli.StringFlag{
+			Name:  optionSensitiveFile + ", " + optionSensitiveFileShort,
+			Usage: "File with the list of clinical sensitive attributes (e.g., CANCER_TYPE_DETAILED). The entry 'all' means all attributes are considered sensitive)",
 		},
 		cli.StringFlag{
 			Name:  optionOntologyGenomic + ", " + optionOntologyGenomicShort,
@@ -167,6 +167,10 @@ func main() {
 			Name:  optionDataFiles + ", " + optionDataFilesShort,
 			Value: DefaultDataFiles,
 			Usage: "Configuration toml with the path of the all the necessary i2b2 files",
+		},
+		cli.StringFlag{
+			Name:  optionSensitiveFile + ", " + optionSensitiveFileShort,
+			Usage: `File with the list of sensitive concepts (e.g., \i2b2\Diagnoses\Neoplasms (140-239)\Benign neoplasms (210-229)\(216) Benign neoplasm of skin\). The entry 'all' means all concepts are considered sensitive)`,
 		},
 		cli.BoolFlag{
 			Name:  optionEmpty + ", " + optionEmptyShort,
