@@ -40,10 +40,10 @@ services:
       - I2B2_URL=http://i2b2-medco:8080/i2b2/services
       - CORS_ALLOW_ORIGIN=http://localhost:4200
 
-  unlynx:
-    image: medco/i2b2-unlynx:latest
+  medco-unlynx:
+    image: medco/medco-unlynx:latest
     build:
-      context: ../docker-images/unlynx
+      context: ../docker-images/medco-unlynx
     ports:
       - "2000"
       - "2001"
@@ -82,4 +82,4 @@ services:
       - DB_USER=keycloak
       - DB_PASSWORD=keycloak
     ports:
-      - "8081:8080"
+      - "8080"

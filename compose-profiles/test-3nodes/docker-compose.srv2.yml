@@ -11,10 +11,10 @@ services:
     volumes:
       - ../../configuration-profiles/test-3nodes:/medco-configuration
 
-  unlynx:
+  medco-unlynx:
     extends:
       file: ../docker-compose-common.yml
-      service: unlynx
+      service: medco-unlynx
     ports:
       - "2000:2000"
       - "2001:2001"

@@ -22,10 +22,10 @@ services:
     volumes:
       - ../../configuration-profiles/dev-3nodes-1host:/medco-configuration
 
-  unlynx-srv0:
+  medco-unlynx-srv0:
     extends:
       file: ../docker-compose-common.yml
-      service: unlynx
+      service: medco-unlynx
     ports:
       - "2002:2002"
       - "2003:2003"
@@ -75,10 +75,10 @@ services:
     volumes:
       - ../../configuration-profiles/dev-3nodes-1host:/medco-configuration
 
-  unlynx-srv1:
+  medco-unlynx-srv1:
     extends:
       file: ../docker-compose-common.yml
-      service: unlynx
+      service: medco-unlynx
     ports:
       - "2004:2004"
       - "2005:2005"
@@ -128,10 +128,10 @@ services:
     volumes:
       - ../../configuration-profiles/dev-3nodes-1host:/medco-configuration
 
-  unlynx-srv2:
+  medco-unlynx-srv2:
     extends:
       file: ../docker-compose-common.yml
-      service: unlynx
+      service: medco-unlynx
     ports:
       - "2006:2006"
       - "2007:2007"
