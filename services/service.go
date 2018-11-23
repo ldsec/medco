@@ -11,6 +11,7 @@ import (
 	"github.com/dedis/onet/network"
 	"github.com/fanliao/go-concurrentMap"
 	"github.com/lca1/unlynx/lib"
+	"github.com/lca1/unlynx/lib/tools"
 	"github.com/lca1/unlynx/protocols"
 	"os"
 	"sync"
@@ -231,7 +232,7 @@ func (s *Service) HandleSurveyDDTRequestTerms(sdq *SurveyDDTRequest) (network.Me
 
 		// signal the other nodes that they need to prepare to execute a DDT (no need to send the terms
 		// we only need the message source so that they know which node requested the DDT and fetch the secret accordingly)
-		err := libunlynx.SendISMOthers(s.ServiceProcessor, &sdq.Roster,
+		err := libunlynxtools.SendISMOthers(s.ServiceProcessor, &sdq.Roster,
 			&SurveyDDTRequest{
 				SurveyID:      sdq.SurveyID,
 				Roster:        sdq.Roster,
@@ -332,7 +333,7 @@ func (s *Service) HandleSurveyAggRequest(sar *SurveyAggRequest) (network.Message
 			})
 
 		// send signal to unlock the other nodes
-		err := libunlynx.SendISMOthers(s.ServiceProcessor, &sar.Roster, &SurveyAggGenerated{SurveyID: sar.SurveyID})
+		err := libunlynxtools.SendISMOthers(s.ServiceProcessor, &sar.Roster, &SurveyAggGenerated{SurveyID: sar.SurveyID})
 		if err != nil {
 			log.Error("broadcasting error ", err)
 		}
@@ -374,7 +375,7 @@ func (s *Service) HandleSurveyAggRequest(sar *SurveyAggRequest) (network.Message
 			// signal the other nodes that they need to prepare to execute a key switching
 			// basically after shuffling the results the root server needs to send them back
 			// to the remaining nodes for key switching
-			err = libunlynx.SendISMOthers(s.ServiceProcessor, &sar.Roster, sar)
+			err = libunlynxtools.SendISMOthers(s.ServiceProcessor, &sar.Roster, sar)
 			if err != nil {
 				log.Error("broadcasting error ", err)
 			}
