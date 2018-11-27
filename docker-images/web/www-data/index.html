@@ -1,31 +1,21 @@
-<html><head><title>I2b2-web</title>
-    <script>
-        document.addEventListener('click', function(event) {
-            var target = event.target;
-            if (target.tagName.toLowerCase() == 'a')
-            {
-                var port = target.getAttribute('href').match(/^:(\d+)(.*)/);
-                if (port)
-                {
-                    target.href = port[2];
-                    target.port = port[1];
-                }
-            }
-        }, false);
-    </script>
-</head><body>
+<html><head><title>I2b2 MedCo Web Index</title></head><body>
 
 <div align="center">
+    <p><a href="/glowing-bear">Glowing Bear</a></p>
+
     <p><br /><br /></p>
 
-    <p><a href="/i2b2-admin">I2b2 admin</a></p>
-    <p><a href="/i2b2-client">I2b2 client</a></p>
-    <p><a href=":9990">WildFly Management</a></p>
-    <p><a href=":8080/i2b2">I2b2 Axis2 Management</a></p>
-    <p><a href=":81">PgAdmin</a></p>
-    <p><a href=":8081">Keycloak</a></p>
+    <p><a href="/pg-admin">PgAdmin</a></p>
+    <p><a href="/auth">Keycloak</a></p>
+    <p><a href="/i2b2-medco/i2b2">I2b2 MedCo Axis2 Management</a></p>
+
+    <p><br /></p>
+
+    <p><a href="/i2b2-medco/wildfly">i2b2 MedCo WildFly Management</a></p>
+    <p><a href="/keycloak/wildfly">Keycloak WildFly Management</a></p>
+    <p><a href="/irct/wildfly">IRCT WildFly Management</a></p>
+
 </div>
-<!-- todo: links -->
 
 </body>
 </html>
