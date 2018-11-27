@@ -1,5 +1,5 @@
 [[servers]]
-  Address = "tcp://172.16.205.12:2006"
+  Address = "tls://medco-unlynx-srv2:2004"
   Suite = "Ed25519"
   Public = "2c5195464fe086f21e1b0205bff64014ab4cd9459c8d2ca9695c7460039d90c5"
   Description = "Unlynx Server 2"
