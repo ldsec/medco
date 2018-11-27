@@ -1,12 +1,9 @@
 version: '2.2'
 services:
   i2b2-medco:
-    image: medco/i2b2-medco:latest
+    image: medco/i2b2-medco:v0.1
     build:
       context: ../docker-images/i2b2-medco
-    ports:
-      - "8080"
-      - "9990"
     environment:
       - I2B2_DB_HOST=postgresql
       - I2B2_DB_PORT=5432
@@ -23,25 +20,40 @@ services:
     volumes:
       - ../configuration-profiles/dev-3nodes-1host:/medco-configuration
 
-  web:
-    image: medco/i2b2-web:latest
+  nginx:
+    image: medco/nginx:v0.1
     build:
       context: ../docker-images/web
+      dockerfile: nginx.Dockerfile
     ports:
       - "80"
       - "443"
     environment:
-      - I2B2_DB_HOST=postgresql
-      - I2B2_DB_PORT=5432
-      - I2B2_DB_USER=i2b2
-      - I2B2_DB_PW=i2b2
-      - I2B2_DB_NAME=i2b2medco
-      - I2B2_DOMAIN_NAME=i2b2medco
-      - I2B2_URL=http://i2b2-medco:8080/i2b2/services
-      - CORS_ALLOW_ORIGIN=http://localhost:4200
+      - MEDCO_ENV=dev
+    volumes:
+      - ../docker-images/web/www-data:/www-data
+      - ../docker-images/web/nginx-conf.d:/etc/nginx/conf.d
+      - ../configuration-profiles/dev-3nodes-1host/group.toml:/medco-configuration/group.toml
+
+  php-fpm:
+    image: medco/php-fpm:v0.1
+    build:
+      context: ../docker-images/web
+      dockerfile: php-fpm.Dockerfile
+    environment:
+    - I2B2_DB_HOST=postgresql
+    - I2B2_DB_PORT=5432
+    - I2B2_DB_USER=i2b2
+    - I2B2_DB_PW=i2b2
+    - I2B2_DB_NAME=i2b2medco
+    - I2B2_DOMAIN_NAME=i2b2medco
+    - I2B2_URL=http://i2b2-medco:8080/i2b2/services
+    - CORS_ALLOW_ORIGIN=http://localhost:4200
+    volumes:
+    - ../docker-images/web/www-data:/www-data
 
   medco-unlynx:
-    image: medco/medco-unlynx:latest
+    image: medco/medco-unlynx:v0.1
     build:
       context: ../docker-images/medco-unlynx
     ports:
@@ -63,23 +75,23 @@ services:
     - ../docker-images/postgresql/initdb-data:/docker-entrypoint-initdb.d
 
   pg-admin:
-    image: dpage/pgadmin4
-    ports:
-      - "80"
+    image: dpage/pgadmin4:latest
     environment:
       - PGADMIN_DEFAULT_EMAIL=admin
       - PGADMIN_DEFAULT_PASSWORD=admin
 
   keycloak:
     image: jboss/keycloak:4.5.0.Final
+    build:
+      context: https://github.com/jboss-dockerfiles/keycloak.git#4.5.0.Final:server
     environment:
       - KEYCLOAK_USER=keycloak
       - KEYCLOAK_PASSWORD=keycloak
+      - KEYCLOAK_IMPORTTODO=/realm-import.json
       - DB_VENDOR=postgres
       - DB_ADDR=postgresql
       - DB_PORT=5432
       - DB_DATABASE=keycloak
       - DB_USER=keycloak
       - DB_PASSWORD=keycloak
-    ports:
-      - "8080"
+      - PROXY_ADDRESS_FORWARDING=true

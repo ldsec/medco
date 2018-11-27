@@ -4,15 +4,14 @@ services:
     extends:
       file: ../docker-compose-common.yml
       service: i2b2-medco
-    ports:
-      - "8090:8080"
-      - "10000:9990"
     environment:
       - I2B2_DB_NAME=i2b2medcosrv0
       - I2B2_DOMAIN_NAME=i2b2medcosrv0
       - NODE_IDX=0
       - UNLYNX_DEBUG_LEVEL=2
       - AXIS2_LOGLEVEL=DEBUG
+    ports:
+      - "8090:8080"
     networks:
       medco-srv0:
         aliases:
@@ -27,45 +26,54 @@ services:
       file: ../docker-compose-common.yml
       service: medco-unlynx
     ports:
-      - "2002:2002"
-      - "2003:2003"
+      - "2000:2000"
+      - "2001:2001"
     environment:
       - NODE_IDX=0
       - UNLYNX_DEBUG_LEVEL=2
     networks:
-      medco-srv0:
-      medco-network:
-        ipv4_address: 172.16.205.10
+      - medco-srv0
+      - medco-network
     volumes:
       - ../../configuration-profiles/dev-3nodes-1host:/medco-configuration
 
-  web-srv0:
+  nginx-srv0:
     extends:
       file: ../docker-compose-common.yml
-      service: web
+      service: nginx
     ports:
-      - "82:80"
-      - "445:443"
+      - "80:80"
     environment:
-      - I2B2_DB_NAME=i2b2medcosrv0
-      - I2B2_DOMAIN_NAME=i2b2medcosrv0
-      - I2B2_URL=http://i2b2-medco-srv0:8080/i2b2/services
+      - MEDCO_ENV=dev
     networks:
       - medco-srv0
+      - keycloak-network
+
+  php-fpm-srv0:
+    extends:
+      file: ../docker-compose-common.yml
+      service: php-fpm
+    environment:
+    - I2B2_DB_NAME=i2b2medcosrv0
+    - I2B2_DOMAIN_NAME=i2b2medcosrv0
+    - I2B2_URL=http://i2b2-medco-srv0:8080/i2b2/services
+    networks:
+      medco-srv0:
+        aliases:
+          - php-fpm
 
   i2b2-medco-srv1:
     extends:
       file: ../docker-compose-common.yml
       service: i2b2-medco
-    ports:
-      - "8092:8080"
-      - "10002:9990"
     environment:
       - I2B2_DB_NAME=i2b2medcosrv1
       - I2B2_DOMAIN_NAME=i2b2medcosrv1
       - NODE_IDX=1
       - UNLYNX_DEBUG_LEVEL=2
       - AXIS2_LOGLEVEL=DEBUG
+    ports:
+      - "8091:8080"
     networks:
       medco-srv1:
         aliases:
@@ -80,45 +88,54 @@ services:
       file: ../docker-compose-common.yml
       service: medco-unlynx
     ports:
-      - "2004:2004"
-      - "2005:2005"
+      - "2002:2002"
+      - "2003:2003"
     environment:
       - NODE_IDX=1
       - UNLYNX_DEBUG_LEVEL=2
     networks:
-      medco-srv1:
-      medco-network:
-        ipv4_address: 172.16.205.11
+      - medco-srv1
+      - medco-network
     volumes:
       - ../../configuration-profiles/dev-3nodes-1host:/medco-configuration
 
-  web-srv1:
+  nginx-srv1:
     extends:
       file: ../docker-compose-common.yml
-      service: web
+      service: nginx
     ports:
-      - "84:80"
-      - "447:443"
+      - "81:80"
     environment:
-      - I2B2_DB_NAME=i2b2medcosrv1
-      - I2B2_DOMAIN_NAME=i2b2medcosrv1
-      - I2B2_URL=http://i2b2-medco-srv1:8080/i2b2/services
+      - MEDCO_ENV=dev
     networks:
       - medco-srv1
+      - keycloak-network
+
+  php-fpm-srv1:
+    extends:
+      file: ../docker-compose-common.yml
+      service: php-fpm
+    environment:
+    - I2B2_DB_NAME=i2b2medcosrv1
+    - I2B2_DOMAIN_NAME=i2b2medcosrv1
+    - I2B2_URL=http://i2b2-medco-srv1:8080/i2b2/services
+    networks:
+      medco-srv1:
+        aliases:
+        - php-fpm
 
   i2b2-medco-srv2:
     extends:
       file: ../docker-compose-common.yml
       service: i2b2-medco
-    ports:
-      - "8094:8080"
-      - "10004:9990"
     environment:
       - I2B2_DB_NAME=i2b2medcosrv2
       - I2B2_DOMAIN_NAME=i2b2medcosrv2
       - NODE_IDX=2
       - UNLYNX_DEBUG_LEVEL=2
       - AXIS2_LOGLEVEL=DEBUG
+    ports:
+      - "8092:8080"
     networks:
       medco-srv2:
         aliases:
@@ -133,31 +150,41 @@ services:
       file: ../docker-compose-common.yml
       service: medco-unlynx
     ports:
-      - "2006:2006"
-      - "2007:2007"
+      - "2004:2004"
+      - "2005:2005"
     environment:
       - NODE_IDX=2
       - UNLYNX_DEBUG_LEVEL=2
     networks:
-      medco-srv2:
-      medco-network:
-        ipv4_address: 172.16.205.12
+      - medco-srv2
+      - medco-network
     volumes:
       - ../../configuration-profiles/dev-3nodes-1host:/medco-configuration
 
-  web-srv2:
+  nginx-srv2:
     extends:
       file: ../docker-compose-common.yml
-      service: web
+      service: nginx
     ports:
-      - "86:80"
-      - "449:443"
+      - "82:80"
     environment:
-      - I2B2_DB_NAME=i2b2medcosrv2
-      - I2B2_DOMAIN_NAME=i2b2medcosrv2
-      - I2B2_URL=http://i2b2-medco-srv2:8080/i2b2/services
+      - MEDCO_ENV=dev
     networks:
       - medco-srv2
+      - keycloak-network
+
+  php-fpm-srv2:
+    extends:
+      file: ../docker-compose-common.yml
+      service: php-fpm
+    environment:
+    - I2B2_DB_NAME=i2b2medcosrv2
+    - I2B2_DOMAIN_NAME=i2b2medcosrv2
+    - I2B2_URL=http://i2b2-medco-srv2:8080/i2b2/services
+    networks:
+      medco-srv2:
+        aliases:
+        - php-fpm
 
   postgresql:
     extends:
@@ -176,7 +203,7 @@ services:
       file: ../docker-compose-common.yml
       service: pg-admin
     ports:
-      - "81:80"
+      - "79:80"
     networks:
       - medco-srv0
       - medco-srv1
@@ -186,20 +213,16 @@ services:
     extends:
       file: ../docker-compose-common.yml
       service: keycloak
-    depends_on:
-      - postgresql
     ports:
       - "8081:8080"
+    depends_on:
+      - postgresql
     networks:
       - keycloak-network
 
 networks:
   medco-network:
     driver: bridge
-    ipam:
-      driver: default
-      config:
-        - subnet: 172.16.205.0/24
 
   keycloak-network:
     driver: bridge

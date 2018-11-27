@@ -3,7 +3,7 @@ FROM jboss/wildfly:10.0.0.Final as dev
 # build-time variables
 ENV MEDCO_CONF_DIR="/medco-configuration" \
     MEDCO_CELL_SRC_DIR="/medco-cell-src" \
-    MEDCO_CELL_VERSION="master"
+    MEDCO_CELL_VERSION="v0.1"
 
 USER root
 COPY install-medco-cell.sh /usr/local/bin/
