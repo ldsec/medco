@@ -28,9 +28,11 @@ RUN git clone https://$MEDCO_LOADER_REPO.git . && \
 
 RUN go get -v -d ./...
 
-# get remaining dependencies, compile and install medco binary, and make it available in the shared folder
+# get remaining dependencies, compile and install medco binary, and rename it
 WORKDIR app
-RUN go install -v ./...
+RUN go install -v ./... && \
+    mkdir -p $BUILD_DIR && \
+    cp -a $(which app) $MEDCO_LOADER_BIN_EXPORT_PATH && \
+    apt-get update && apt-get install -y postgresql-client-common postgresql-client && apt-get clean
 
-COPY copy-medco-loader-binary.sh /
-ENTRYPOINT ["sh", "-c", "/copy-medco-loader-binary.sh"]
+ENTRYPOINT ["/opt/build-dir/medco-loader"]
