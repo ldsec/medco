@@ -438,7 +438,7 @@ func GenerateLoadingOntologyScript(databaseS loader.DBSettings) error {
         		('2', '\medco\genomic\annotations_Hugo_Symbol\', 'Gene Name', 'N', 'LA', '0', 'GEN:Hugo_Gene_Symbol', 'concept_cd', 'concept_dimension', 'concept_path',
         		'T', 'LIKE', '\medco\genomic\annotations_Hugo_Symbol\', 'Gene Name', '\medco\genomic\annotations_Hugo_Symbol\',
         		'NOW()', 'NOW()', 'NOW()', 'GEN', '@');
-    			INSERTO INTO medco_ont.genomic (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum, c_basecode,
+    			INSERT INTO medco_ont.genomic (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum, c_basecode,
         		c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, update_date,
         		download_date, import_date, valuetype_cd, m_applied_path) values
         		('2', '\medco\genomic\annotations_Protein_position\', 'Protein Position', 'N', 'LA', '0', 'GEN:Protein_Change', 'concept_cd', 'concept_dimension', 'concept_path',
