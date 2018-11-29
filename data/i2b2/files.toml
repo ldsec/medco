@@ -1,8 +1,8 @@
-Ontology            = [ "../data/i2b2/original/i2b2.csv", "../data/i2b2/original/birn.csv", "../data/i2b2/original/custom_meta.csv", "../data/i2b2/original/icd10_icd9.csv"]
-DummyToPatient      = "../data/i2b2/original/dummy_to_patient.csv"
-PatientDimension    = "../data/i2b2/original/patient_dimension.csv"
-VisitDimension      = "../data/i2b2/original/visit_dimension.csv"
-ConceptDimension    = "../data/i2b2/original/concept_dimension.csv"
-ModifierDimension   = "../data/i2b2/original/modifier_dimension.csv"
-ObservationFact     = "../data/i2b2/original/observation_fact.csv"
-OutputFolder        = "../data/i2b2/converted/"
+Ontology            = [ "original/i2b2.csv", "../data/i2b2/original/birn.csv", "../data/i2b2/original/custom_meta.csv", "../data/i2b2/original/icd10_icd9.csv"]
+DummyToPatient      = "original/dummy_to_patient.csv"
+PatientDimension    = "original/patient_dimension.csv"
+VisitDimension      = "original/visit_dimension.csv"
+ConceptDimension    = "original/concept_dimension.csv"
+ModifierDimension   = "original/modifier_dimension.csv"
+ObservationFact     = "original/observation_fact.csv"
+OutputFolder        = "converted/"

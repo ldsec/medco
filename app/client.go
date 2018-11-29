@@ -13,6 +13,7 @@ import (
 	_ "github.com/lib/pq"
 	"gopkg.in/urfave/cli.v1"
 	"os"
+	"path/filepath"
 )
 
 // Loader functions
@@ -184,6 +185,7 @@ func loadV1(c *cli.Context) error {
 		log.Error("Error while reading [files].toml:", err)
 		return cli.NewExitError(err, 1)
 	}
+	directory := filepath.Dir(dataFilesPath)
 
 	// get the list of sensitiveConcepts
 	f, err = os.Open(sensitiveFilePath)
@@ -205,7 +207,7 @@ func loadV1(c *cli.Context) error {
 		mapSensitive[line] = struct{}{}
 	}
 
-	loaderi2b2.LoadI2B2Data(el.Roster, entryPointIdx, files, allSensitive, mapSensitive, databaseS, empty)
+	loaderi2b2.LoadI2B2Data(el.Roster, entryPointIdx, directory, files, allSensitive, mapSensitive, databaseS, empty)
 	if err != nil {
 		log.Error("Error while converting I2B2 data:", err)
 		return cli.NewExitError(err, 1)

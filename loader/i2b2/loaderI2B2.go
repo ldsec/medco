@@ -126,7 +126,7 @@ func generateOutputFiles(folderPath string) {
 }
 
 // LoadI2B2Data it's the main function that performs a full conversion and loading of the I2B2 data
-func LoadI2B2Data(el *onet.Roster, entryPointIdx int, files Files, allSensitive bool, mapSensitive map[string]struct{}, databaseS loader.DBSettings, empty bool) error {
+func LoadI2B2Data(el *onet.Roster, entryPointIdx int, directory string, files Files, allSensitive bool, mapSensitive map[string]struct{}, databaseS loader.DBSettings, empty bool) error {
 	InputFilePaths = make(map[string]string)
 	OutputFilePaths = make(map[string]FileInfo)
 	OntologyFilesPaths = make([]string, 0)
@@ -145,7 +145,7 @@ func LoadI2B2Data(el *onet.Roster, entryPointIdx int, files Files, allSensitive 
 	for _, name := range files.Ontology {
 		tokens := strings.Split(name, "/")
 		ontologyName := "ONTOLOGY_" + strings.ToUpper(strings.Split(tokens[len(tokens)-1], ".")[0])
-		InputFilePaths[ontologyName] = name
+		InputFilePaths[ontologyName] = directory + "/" + name
 		OntologyFilesPaths = append(OntologyFilesPaths, ontologyName)
 	}
 	InputFilePaths["PATIENT_DIMENSION"] = files.PatientDimension
@@ -155,7 +155,7 @@ func LoadI2B2Data(el *onet.Roster, entryPointIdx int, files Files, allSensitive 
 	InputFilePaths["DUMMY_TO_PATIENT"] = files.DummyToPatient
 
 	// change output filepaths
-	generateOutputFiles(files.OutputFolder)
+	generateOutputFiles(directory + "/" + files.OutputFolder)
 
 	err := ConvertLocalOntology(el, entryPointIdx)
 	if err != nil {

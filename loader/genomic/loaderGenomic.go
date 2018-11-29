@@ -482,7 +482,6 @@ func GenerateLoadingOntologyScript(databaseS loader.DBSettings) error {
     			GRANT ALL on schema genomic_annotations to i2b2;
     			GRANT ALL privileges on all tables in schema genomic_annotations to i2b2;` + "\n"
 
-
 	for i := 0; i < len(TablenamesOntology); i++ {
 
 		//TODO: Delete this please
