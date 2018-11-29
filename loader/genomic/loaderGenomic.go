@@ -469,7 +469,7 @@ func GenerateLoadingOntologyScript(databaseS loader.DBSettings) error {
     			ALTER TABLE genomic_annotations.annotation_names OWNER TO i2b2;
     			ALTER TABLE genomic_annotations.gene_values OWNER TO i2b2;
     			GRANT ALL on schema genomic_annotations to i2b2;
-    			GRANT ALL privileges on all tables in schema genomic_annotations to i2b2;`
+    			GRANT ALL privileges on all tables in schema genomic_annotations to i2b2;` + "\n"
 
 
 	for i := 0; i < len(TablenamesOntology); i++ {
@@ -481,6 +481,9 @@ func GenerateLoadingOntologyScript(databaseS loader.DBSettings) error {
 		}
 	}
 	loading += "\n"
+
+	loading += `UPDATE medco_ont.table_access SET c_visualattributes = 'CH ' WHERE c_table_cd = 'E2ETEST';` + "\n"
+
 	// create annotations table
 	loading += `DROP TABLE IF EXISTS genomic_annotations.hugo_gene_symbol;` + "\n"
 	loading += `CREATE TABLE genomic_annotations.hugo_gene_symbol as select distinct hugo_gene_symbol as annotation_value from genomic_annotations.genomic_annotations;` + "\n"
