@@ -1,7 +1,6 @@
 package loaderi2b2
 
 import (
-	"encoding/base64"
 	"github.com/dedis/kyber"
 	"github.com/dedis/onet/log"
 	"github.com/lca1/unlynx/lib"
@@ -291,8 +290,8 @@ func (pdk PatientDimensionPK) ToCSVText() string {
 
 // ToCSVText writes the PatientDimension struct in a way that can be added to a .csv file - "","","", etc.
 func (pd PatientDimension) ToCSVText(empty bool) string {
-	b := pd.EncryptedFlag.ToBytes()
-	encodedEncryptedFlag := "\"" + base64.StdEncoding.EncodeToString(b) + "\""
+	encryptedFlagString := pd.EncryptedFlag.Serialize()
+	encodedEncryptedFlag := "\"" + encryptedFlagString + "\""
 
 	of := pd.OptionalFields
 	ofString := ""

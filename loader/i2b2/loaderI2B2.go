@@ -148,11 +148,11 @@ func LoadI2B2Data(el *onet.Roster, entryPointIdx int, directory string, files Fi
 		InputFilePaths[ontologyName] = directory + "/" + name
 		OntologyFilesPaths = append(OntologyFilesPaths, ontologyName)
 	}
-	InputFilePaths["PATIENT_DIMENSION"] = files.PatientDimension
-	InputFilePaths["VISIT_DIMENSION"] = files.VisitDimension
-	InputFilePaths["CONCEPT_DIMENSION"] = files.ConceptDimension
-	InputFilePaths["OBSERVATION_FACT"] = files.ObservationFact
-	InputFilePaths["DUMMY_TO_PATIENT"] = files.DummyToPatient
+	InputFilePaths["PATIENT_DIMENSION"] = directory + "/" + files.PatientDimension
+	InputFilePaths["VISIT_DIMENSION"] = directory + "/"  + files.VisitDimension
+	InputFilePaths["CONCEPT_DIMENSION"] = directory + "/"  + files.ConceptDimension
+	InputFilePaths["OBSERVATION_FACT"] = directory + "/"  + files.ObservationFact
+	InputFilePaths["DUMMY_TO_PATIENT"] = directory + "/"  + files.DummyToPatient
 
 	// change output filepaths
 	generateOutputFiles(directory + "/" + files.OutputFolder)
