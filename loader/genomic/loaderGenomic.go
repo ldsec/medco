@@ -322,19 +322,19 @@ func GenerateLoadingOntologyScript(databaseS loader.DBSettings) error {
 				c_synonym_cd, c_visualattributes, c_facttablecolumn, c_dimtablename,
         		c_columnname, c_columndatatype, c_operator, c_dimcode, c_tooltip) VALUES
         		('CLINICAL_SENSITIVE', 'CLINICAL_SENSITIVE', 'N', 2, '\medco\clinical\sensitive\', 'MedCo Clinical Sensitive Ontology',
-        		'N', 'CA', 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\medco\clinical\sensitive\', 'MedCo Clinical Sensitive Ontology');
+        		'N', 'CA', 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\medco\clinical\sensitive\', 'MedCo Clinical Sensitive Ontology') ON CONFLICT DO NOTHING;
     			INSERT INTO medco_ont.table_access (c_table_cd, c_table_name, c_protected_access, c_hlevel, c_fullname, c_name,
         		c_synonym_cd, c_visualattributes, c_facttablecolumn, c_dimtablename,
         		c_columnname, c_columndatatype, c_operator, c_dimcode, c_tooltip) VALUES
         		('CLINICAL_NON_SENSITIVE', 'CLINICAL_NON_SENSITIVE', 'N', 2, '\medco\clinical\nonsensitive\', 'MedCo Clinical Non-Sensitive Ontology',
-        		'N', 'CA', 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\medco\clinical\nonsensitive\', 'MedCo Clinical Non-Sensitive Ontology');
+        		'N', 'CA', 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\medco\clinical\nonsensitive\', 'MedCo Clinical Non-Sensitive Ontology') ON CONFLICT DO NOTHING;
     			INSERT INTO medco_ont.table_access (c_table_cd, c_table_name, c_protected_access, c_hlevel, c_fullname, c_name,
         		c_synonym_cd, c_visualattributes, c_facttablecolumn, c_dimtablename,
         		c_columnname, c_columndatatype, c_operator, c_dimcode, c_tooltip) VALUES
 				('GENOMIC', 'GENOMIC', 'N', 1, '\medco\genomic\', 'MedCo Genomic Ontology',
-        		'N', 'CA', 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\medco\genomic\', 'MedCo Genomic Ontology');` + "\n"
+        		'N', 'CA', 'concept_cd', 'concept_dimension', 'concept_path', 'T', 'LIKE', '\medco\genomic\', 'MedCo Genomic Ontology') ON CONFLICT DO NOTHING;` + "\n"
 
-	loading += `CREATE TABLE medco_ont.clinical_sensitive(
+	loading += `CREATE TABLE IF NOT EXISTS medco_ont.clinical_sensitive(
         		c_hlevel numeric(22,0) not null,
         		c_fullname character varying(900) not null,
         		c_name character varying(2000) not null,
@@ -361,10 +361,14 @@ func GenerateLoadingOntologyScript(databaseS loader.DBSettings) error {
         		c_path character varying(700),
         		c_symbol character varying(50),
         		pcori_basecode character varying(50));
+				
+				ALTER TABLE medco_ont.clinical_sensitive DROP CONSTRAINT IF EXISTS fullname_pk_20;
     			ALTER TABLE ONLY medco_ont.clinical_sensitive ADD CONSTRAINT fullname_pk_20 PRIMARY KEY (c_fullname);
+				
+				ALTER TABLE medco_ont.clinical_sensitive DROP CONSTRAINT IF EXISTS basecode_un_20;
     			ALTER TABLE ONLY medco_ont.clinical_sensitive ADD CONSTRAINT basecode_un_20 UNIQUE (c_basecode);
 	
-	   			CREATE TABLE medco_ont.clinical_non_sensitive(
+	   			CREATE TABLE IF NOT EXISTS medco_ont.clinical_non_sensitive(
         		c_hlevel numeric(22,0) not null,
         		c_fullname character varying(900) not null,
         		c_name character varying(2000) not null,
@@ -391,11 +395,15 @@ func GenerateLoadingOntologyScript(databaseS loader.DBSettings) error {
         		c_path character varying(700),
         		c_symbol character varying(50),
         		pcori_basecode character varying(50));
+
+				ALTER TABLE medco_ont.clinical_non_sensitive DROP CONSTRAINT IF EXISTS fullname_pk_21;
     			ALTER TABLE ONLY medco_ont.clinical_non_sensitive ADD CONSTRAINT fullname_pk_21 PRIMARY KEY (c_fullname);
+
+				ALTER TABLE medco_ont.clinical_non_sensitive DROP CONSTRAINT IF EXISTS basecode_un_21;
     			ALTER TABLE ONLY medco_ont.clinical_non_sensitive ADD CONSTRAINT basecode_un_21 UNIQUE (c_basecode);
 	
 	
-    			CREATE TABLE medco_ont.genomic(
+    			CREATE TABLE IF NOT EXISTS medco_ont.genomic(
         		c_hlevel numeric(22,0) not null,
         		c_fullname character varying(900) not null,
         		c_name character varying(2000) not null,
@@ -422,7 +430,11 @@ func GenerateLoadingOntologyScript(databaseS loader.DBSettings) error {
         		c_path character varying(700),
         		c_symbol character varying(50),
         		pcori_basecode character varying(50));
+
+				ALTER TABLE medco_ont.genomic DROP CONSTRAINT IF EXISTS fullname_pk_22;
     			ALTER TABLE ONLY medco_ont.genomic ADD CONSTRAINT fullname_pk_22 PRIMARY KEY (c_fullname);
+				
+				ALTER TABLE medco_ont.genomic DROP CONSTRAINT IF EXISTS basecode_un_22;
     			ALTER TABLE ONLY medco_ont.genomic ADD CONSTRAINT basecode_un_22 UNIQUE (c_basecode);` + "\n"
 
 	loading += `INSERT INTO medco_ont.genomic (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum,
@@ -430,37 +442,37 @@ func GenerateLoadingOntologyScript(databaseS loader.DBSettings) error {
         		download_date, import_date, valuetype_cd, m_applied_path) values
         		('1', '\medco\genomic\', 'MedCo Genomic Ontology', 'N', 'CA', '0', 'concept_cd', 'concept_dimension', 'concept_path',
         		'T', 'LIKE', '\medco\genomic\', 'MedCo Genomic Ontology', '\medco\genomic\',
-        		'NOW()', 'NOW()', 'NOW()', 'GEN', '@');
+        		'NOW()', 'NOW()', 'NOW()', 'GEN', '@') ON CONFLICT DO NOTHING;
             	INSERT INTO medco_ont.genomic (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum, c_basecode,
         		c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, update_date,
         		download_date, import_date, valuetype_cd, m_applied_path) values
         		('2', '\medco\genomic\annotations_Hugo_Symbol\', 'Gene Name', 'N', 'LA', '0', 'GEN:Hugo_Gene_Symbol', 'concept_cd', 'concept_dimension', 'concept_path',
         		'T', 'LIKE', '\medco\genomic\annotations_Hugo_Symbol\', 'Gene Name', '\medco\genomic\annotations_Hugo_Symbol\',
-        		'NOW()', 'NOW()', 'NOW()', 'GEN', '@');
+        		'NOW()', 'NOW()', 'NOW()', 'GEN', '@') ON CONFLICT DO NOTHING;
     			INSERT INTO medco_ont.genomic (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum, c_basecode,
         		c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, update_date,
         		download_date, import_date, valuetype_cd, m_applied_path) values
         		('2', '\medco\genomic\annotations_Protein_position\', 'Protein Position', 'N', 'LA', '0', 'GEN:Protein_Change', 'concept_cd', 'concept_dimension', 'concept_path',
         		'T', 'LIKE', '\medco\genomic\annotations_Protein_position\', 'Protein Position', '\medco\genomic\annotations_Protein_position\',
-        		'NOW()', 'NOW()', 'NOW()', 'GEN', '@');
+        		'NOW()', 'NOW()', 'NOW()', 'GEN', '@') ON CONFLICT DO NOTHING;
     			INSERT INTO medco_ont.genomic (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum, c_basecode,
 				c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, update_date,
         		download_date, import_date, valuetype_cd, m_applied_path) values
         		('2', '\medco\genomic\variant\', 'Variant Name', 'N', 'LA', '0', 'GEN:variant_name', 'concept_cd', 'concept_dimension', 'concept_path',
         		'T', 'LIKE', '\medco\genomic\variant\', 'Variant Name', '\medco\genomic\variant\',
-        		'NOW()', 'NOW()', 'NOW()', 'GEN', '@');` + "\n"
+        		'NOW()', 'NOW()', 'NOW()', 'GEN', '@') ON CONFLICT DO NOTHING;` + "\n"
 
-	loading += `CREATE TABLE genomic_annotations.genomic_annotations(
+	loading += `CREATE TABLE IF NOT EXISTS genomic_annotations.genomic_annotations(
         		variant_id character varying(255) NOT NULL,
         		variant_name character varying(255) NOT NULL,
         		protein_change character varying(255) NOT NULL,
         		hugo_gene_symbol character varying(255) NOT NULL,
         		annotations text NOT NULL);
 
-    			CREATE TABLE genomic_annotations.annotation_names(
+    			CREATE TABLE IF NOT EXISTS genomic_annotations.annotation_names(
         		annotation_name character varying(255) NOT NULL PRIMARY KEY);
     			
-				CREATE TABLE genomic_annotations.gene_values(
+				CREATE TABLE IF NOT EXISTS genomic_annotations.gene_values(
         		gene_value character varying(255) NOT NULL PRIMARY KEY);
 
     			-- permissions
