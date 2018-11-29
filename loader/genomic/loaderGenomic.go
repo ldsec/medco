@@ -3,7 +3,6 @@ package loadergenomic
 import (
 	"bytes"
 	"crypto/rand"
-	"encoding/base64"
 	"encoding/binary"
 	"encoding/csv"
 	"errors"
@@ -1408,11 +1407,11 @@ func writeDemodataPatientMapping(el string, id int64) error {
 func writeDemodataPatientDimension(group *onet.Roster, id int64) error {
 
 	encryptedFlag := libunlynx.EncryptInt(group.Aggregate, 1)
-	b := encryptedFlag.ToBytes()
+	encryptedFlagString := encryptedFlag.Serialize()
 
 	/*patientDimension := `INSERT INTO i2b2demodata.patient_dimension VALUES (` + strconv.FormatInt(id, 10) + `, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'NOW()', NULL, 1, '` + base64.StdEncoding.EncodeToString(b) + `');` + "\n"*/
 
-	patientDimension := `"` + strconv.FormatInt(id, 10) + `",,,,,,,,,,,,,,,,"NOW()",,"1","` + base64.StdEncoding.EncodeToString(b) + `"` + "\n"
+	patientDimension := `"` + strconv.FormatInt(id, 10) + `",,,,,,,,,,,,,,,,"NOW()",,"1","` + encryptedFlagString + `"` + "\n"
 
 	_, err := FileHandlers[6].WriteString(patientDimension)
 
