@@ -451,6 +451,27 @@ func GenerateLoadingOntologyScript(databaseS loader.DBSettings) error {
         		'T', 'LIKE', '\medco\genomic\variant\', 'Variant Name', '\medco\genomic\variant\',
         		'NOW()', 'NOW()', 'NOW()', 'GEN', '@');` + "\n"
 
+	loading += `CREATE TABLE genomic_annotations.genomic_annotations(
+        		variant_id character varying(255) NOT NULL,
+        		variant_name character varying(255) NOT NULL,
+        		protein_change character varying(255) NOT NULL,
+        		hugo_gene_symbol character varying(255) NOT NULL,
+        		annotations text NOT NULL);
+
+    			CREATE TABLE genomic_annotations.annotation_names(
+        		annotation_name character varying(255) NOT NULL PRIMARY KEY);
+    			
+				CREATE TABLE genomic_annotations.gene_values(
+        		gene_value character varying(255) NOT NULL PRIMARY KEY);
+
+    			-- permissions
+    			ALTER TABLE genomic_annotations.genomic_annotations OWNER TO i2b2;
+    			ALTER TABLE genomic_annotations.annotation_names OWNER TO i2b2;
+    			ALTER TABLE genomic_annotations.gene_values OWNER TO i2b2;
+    			GRANT ALL on schema genomic_annotations to i2b2;
+    			GRANT ALL privileges on all tables in schema genomic_annotations to i2b2;`
+
+
 	for i := 0; i < len(TablenamesOntology); i++ {
 
 		//TODO: Delete this please
