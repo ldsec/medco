@@ -279,7 +279,33 @@ func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
 
 	for file, fI := range OutputFilePaths {
 		if strings.HasPrefix(file, "MEDCO_") {
-			loading += "CREATE TABLE IF NOT EXISTS " + fI.TableName + " AS SELECT * FROM " + ONT + "shrine WHERE 1=2;" + "\n"
+			loading += `CREATE TABLE IF NOT EXISTS ` + fI.TableName + ` (
+        				C_HLEVEL NUMERIC(22,0),
+        				C_FULLNAME VARCHAR(900),
+        				C_NAME VARCHAR(2000),
+        				C_SYNONYM_CD CHAR(1),
+        				C_VISUALATTRIBUTES CHAR(3),
+        				C_TOTALNUM NUMERIC(22,0),
+        				C_BASECODE VARCHAR(450),
+        				C_METADATAXML TEXT,
+        				C_FACTTABLECOLUMN VARCHAR(50),
+        				C_TABLENAME VARCHAR(50),
+						C_COLUMNNAME VARCHAR(50),
+        				C_COLUMNDATATYPE VARCHAR(50),
+        				C_OPERATOR VARCHAR(10),
+        				C_DIMCODE VARCHAR(900),
+        				C_COMMENT TEXT,
+        				C_TOOLTIP VARCHAR(900),
+        				UPDATE_DATE DATE,
+						DOWNLOAD_DATE DATE,
+        				IMPORT_DATE DATE,
+        				SOURCESYSTEM_CD VARCHAR(50),
+        				VALUETYPE_CD VARCHAR(50),
+        				M_APPLIED_PATH VARCHAR(900),
+        				M_EXCLUSION_CD VARCHAR(900));
+        				
+						ALTER TABLE ` + fI.TableName + ` OWNER TO i2b2;` + "\n"
+
 			loading += "TRUNCATE TABLE " + fI.TableName + ";\n"
 			loading += `\copy ` + fI.TableName + ` FROM '` + fI.Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n"
 		}
