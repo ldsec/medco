@@ -289,32 +289,7 @@ func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
 		}
 	}
 
-	loading += `CREATE TABLE ` + OutputFilePaths["TABLE_ACCESS"].TableName + `(
-				C_TABLE_CD VARCHAR(50),
-        		C_TABLE_NAME VARCHAR(50),
-        		C_PROTECTED_ACCESS CHAR(1),
-				C_HLEVEL NUMERIC(22,0),
-				C_FULLNAME VARCHAR(900),
-        		C_NAME VARCHAR(2000),
-        		C_SYNONYM_CD CHAR(1),
-        		C_VISUALATTRIBUTES CHAR(3),
-				C_TOTALNUM NUMERIC(22,0),
-        		C_BASECODE VARCHAR(450),
-				C_METADATAXML TEXT,
-        		C_FACTTABLECOLUMN VARCHAR(50),
-        		C_DIMTABLENAME VARCHAR(50),
-        		C_COLUMNNAME VARCHAR(50),
-        		C_COLUMNDATATYPE VARCHAR(50),
-        		C_OPERATOR VARCHAR(10),
-        		C_DIMCODE VARCHAR(900),
-        		C_COMMENT TEXT,
-        		C_TOOLTIP VARCHAR(900),
-				C_ENTRY_DATE DATE,
-        		C_CHANGE_DATE DATE,
-        		C_STATUS_CD CHAR(1),
-        		VALUETYPE_CD VARCHAR(50));` + "\n"
 	loading += `\copy ` + OutputFilePaths["TABLE_ACCESS"].TableName + ` FROM '` + OutputFilePaths["TABLE_ACCESS"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n"
-
 	loading += "TRUNCATE TABLE " + OutputFilePaths["SENSITIVE_TAGGED"].TableName + ";\n"
 	loading += `\copy ` + OutputFilePaths["SENSITIVE_TAGGED"].TableName + ` FROM '` + OutputFilePaths["SENSITIVE_TAGGED"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n"
 	loading += "\n"
@@ -537,9 +512,6 @@ func ConvertTableAccess() error {
 	for _, ta := range TableTableAccess {
 		csvOutputFile.WriteString(ta.ToCSVText() + "\n")
 	}
-
-	//add new mandatory fields
-	csvOutputFile.WriteString(`"SENSITIVE_TAGGED","SENSITIVE_TAGGED","N","1","\medco\tagged\","MedCo Sensitive Tagged Ontology","N","CH ","concept_cd","concept_dimension","concept_path","T","LIKE","\medco\tagged\","MedCo Sensitive Tagged Ontology"` + "\n")
 
 	return nil
 
