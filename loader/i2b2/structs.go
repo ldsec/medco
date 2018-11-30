@@ -30,6 +30,51 @@ var TagIDConceptsUsed int64
 
 // ####----DATA TYPES----####
 
+// HeaderTableAccess contains all the headers for the table_access table
+var HeaderTableAccess []string
+
+// TableTableAccess is the table that contains all data from the table_access table
+var TableTableAccess []TableAccess
+
+// TableAccess is the struct that represents each row of the table_access table
+type TableAccess struct {
+	TableCD          string
+	TableName        string
+	ProtectedAccess  string
+	Hlevel           string
+	Fullname         string
+	Name             string
+	SynonymCD        string
+	VisualAttributes string
+	TotalNum         string
+	BaseCode         string
+	MetadataXML      string
+	FactTableColumn  string
+	DimTableName     string
+	ColumnName       string
+	ColumnDataType   string
+	Operator         string
+	DimCode          string
+	Comment          string
+	Tooltip          string
+	EntryData        string
+	ChangeData       string
+	StatusCD         string
+	ValueType        string
+}
+
+// ToCSVText writes the MedCoOntology object in a way that can be added to a .csv file - "","","", etc.
+func (ta TableAccess) ToCSVText() string {
+	finalString := "\"" + ta.TableCD + "\"," + "\"" + ta.TableName + "\"," + "\"" + ta.ProtectedAccess + "\"," + "\"" + ta.Hlevel + "\"," + "\"" + ta.Fullname + "\"," + "\"" + ta.Name + "\"," +
+		"\"" + ta.SynonymCD + "\",\"" + ta.VisualAttributes + "\"," + "\"" + ta.TotalNum + "\"," + "\"" + ta.BaseCode + "\"," + "\"" + ta.MetadataXML + "\"," + "\"" + ta.FactTableColumn + "\"," + "\"" + ta.DimTableName + "\"," +
+		"\"" + ta.ColumnName + "\"," + "\"" + ta.ColumnDataType + "\"," + "\"" + ta.Operator + "\"," + "\"" + ta.DimCode + "\"," + "\"" + ta.Comment + "\"," + "\"" + ta.Tooltip + "\"," + "\"" + ta.EntryData + "\"," + "\"" +
+		ta.ChangeData + "\"," + "\"" + ta.StatusCD + "\"," + "\"" + ta.ValueType + "\""
+
+	return strings.Replace(finalString, `"\N"`, "", -1)
+}
+
+//-------------------------------------//
+
 // MedCoTableInfo stores all the 'data' for a specific medco ontology table
 type MedCoTableInfo struct {
 	Clear     map[string]*MedCoOntology
@@ -433,6 +478,36 @@ func ConceptDimensionSensitiveToCSVText(tag *libunlynx.GroupingKey, tagID int64)
 }
 
 //-------------------------------------//
+
+// TableAccessFromString generates a TableAccess struct from a parsed line of a .csv file
+func TableAccessFromString(line []string) TableAccess {
+	ta := TableAccess{
+		TableCD:          line[0],
+		TableName:        line[1],
+		ProtectedAccess:  line[2],
+		Hlevel:           line[3],
+		Fullname:         line[4],
+		Name:             line[5],
+		SynonymCD:        line[6],
+		VisualAttributes: line[7],
+		TotalNum:         line[8],
+		BaseCode:         line[9],
+		MetadataXML:      line[10],
+		FactTableColumn:  line[11],
+		DimTableName:     line[12],
+		ColumnName:       line[13],
+		ColumnDataType:   line[14],
+		Operator:         line[15],
+		DimCode:          line[16],
+		Comment:          line[17],
+		Tooltip:          line[18],
+		EntryData:        line[19],
+		ChangeData:       line[20],
+		StatusCD:         line[21],
+		ValueType:        line[22],
+	}
+	return ta
+}
 
 // MedCoOntologyFromLocalConcept generates a MedCoOntology struct from LocalOntology struct
 func MedCoOntologyFromLocalConcept(localConcept *LocalOntology) *MedCoOntology {

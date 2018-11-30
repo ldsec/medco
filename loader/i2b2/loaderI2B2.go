@@ -21,7 +21,6 @@ import (
 // Files is the object structure behind the files.toml
 type Files struct {
 	TableAccess       string
-	Schemes           string
 	Ontology          []string
 	DummyToPatient    string
 	PatientDimension  string
@@ -62,6 +61,7 @@ var (
 		"ONTOLOGY_ICD10_ICD9":  "../../data/i2b2/original/icd10_icd9.csv",
 		"ONTOLOGY_I2B2":        "../../data/i2b2/original/i2b2.csv",
 
+		"TABLE_ACCESS":      "../../data/i2b2/original/table_access.csv",
 		"DUMMY_TO_PATIENT":  "../../data/i2b2/original/dummy_to_patient.csv",
 		"PATIENT_DIMENSION": "../../data/i2b2/original/patient_dimension.csv",
 		"VISIT_DIMENSION":   "../../data/i2b2/original/visit_dimension.csv",
@@ -70,6 +70,7 @@ var (
 	}
 
 	OutputFilePaths = map[string]FileInfo{
+		"TABLE_ACCESS":     {TableName: ONT + "table_access", Path: "../../data/i2b2/converted/table_access.csv"},
 		"SENSITIVE_TAGGED": {TableName: ONT + "sensitive_tagged", Path: "../../data/i2b2/converted/sensitive_tagged.csv"},
 
 		"LOCAL_BIRN":        {TableName: I2B2METADATA + "birn", Path: "../../data/i2b2/converted/local_birn.csv"},
@@ -112,6 +113,7 @@ func generateOutputFiles(folderPath string) {
 	OutputFilePaths["OBSERVATION_FACT"] = FileInfo{TableName: I2B2DEMODATA + "observation_fact", Path: folderPath + "observation_fact.csv"}
 
 	// fixed ontology tables
+	OutputFilePaths["TABLE_ACCESS"] = FileInfo{TableName: ONT + "table_access", Path: folderPath + "table_access.csv"}
 	OutputFilePaths["SENSITIVE_TAGGED"] = FileInfo{TableName: ONT + "sensitive_tagged", Path: folderPath + "sensitive_tagged.csv"}
 
 	for key, path := range InputFilePaths {
@@ -148,16 +150,31 @@ func LoadI2B2Data(el *onet.Roster, entryPointIdx int, directory string, files Fi
 		InputFilePaths[ontologyName] = directory + "/" + name
 		OntologyFilesPaths = append(OntologyFilesPaths, ontologyName)
 	}
+	InputFilePaths["TABLE_ACCESS"] = directory + "/" + files.TableAccess
 	InputFilePaths["PATIENT_DIMENSION"] = directory + "/" + files.PatientDimension
-	InputFilePaths["VISIT_DIMENSION"] = directory + "/"  + files.VisitDimension
-	InputFilePaths["CONCEPT_DIMENSION"] = directory + "/"  + files.ConceptDimension
-	InputFilePaths["OBSERVATION_FACT"] = directory + "/"  + files.ObservationFact
-	InputFilePaths["DUMMY_TO_PATIENT"] = directory + "/"  + files.DummyToPatient
+	InputFilePaths["VISIT_DIMENSION"] = directory + "/" + files.VisitDimension
+	InputFilePaths["CONCEPT_DIMENSION"] = directory + "/" + files.ConceptDimension
+	InputFilePaths["OBSERVATION_FACT"] = directory + "/" + files.ObservationFact
+	InputFilePaths["DUMMY_TO_PATIENT"] = directory + "/" + files.DummyToPatient
 
 	// change output filepaths
 	generateOutputFiles(directory + "/" + files.OutputFolder)
 
-	err := ConvertLocalOntology(el, entryPointIdx)
+	log.Lvl2("--- Started v1 Data Conversion ---")
+
+	err := ParseTableAccess()
+	if err != nil {
+		return err
+	}
+
+	err = ConvertTableAccess()
+	if err != nil {
+		return err
+	}
+
+	log.Lvl2("--- Finished converting TABLE_ACCESS ---")
+
+	err = ConvertLocalOntology(el, entryPointIdx)
 	if err != nil {
 		return err
 	}
@@ -271,6 +288,33 @@ func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
 			loading += `\copy ` + fI.TableName + ` FROM '` + fI.Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n"
 		}
 	}
+
+	loading += `CREATE TABLE ` + OutputFilePaths["TABLE_ACCESS"].TableName + `(
+				C_TABLE_CD VARCHAR(50),
+        		C_TABLE_NAME VARCHAR(50),
+        		C_PROTECTED_ACCESS CHAR(1),
+				C_HLEVEL NUMERIC(22,0),
+				C_FULLNAME VARCHAR(900),
+        		C_NAME VARCHAR(2000),
+        		C_SYNONYM_CD CHAR(1),
+        		C_VISUALATTRIBUTES CHAR(3),
+				C_TOTALNUM NUMERIC(22,0),
+        		C_BASECODE VARCHAR(450),
+				C_METADATAXML TEXT,
+        		C_FACTTABLECOLUMN VARCHAR(50),
+        		C_DIMTABLENAME VARCHAR(50),
+        		C_COLUMNNAME VARCHAR(50),
+        		C_COLUMNDATATYPE VARCHAR(50),
+        		C_OPERATOR VARCHAR(10),
+        		C_DIMCODE VARCHAR(900),
+        		C_COMMENT TEXT,
+        		C_TOOLTIP VARCHAR(900),
+				C_ENTRY_DATE DATE,
+        		C_CHANGE_DATE DATE,
+        		C_STATUS_CD CHAR(1),
+        		VALUETYPE_CD VARCHAR(50));` + "\n"
+	loading += `\copy ` + OutputFilePaths["TABLE_ACCESS"].TableName + ` FROM '` + OutputFilePaths["TABLE_ACCESS"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n"
+
 	loading += "TRUNCATE TABLE " + OutputFilePaths["SENSITIVE_TAGGED"].TableName + ";\n"
 	loading += `\copy ` + OutputFilePaths["SENSITIVE_TAGGED"].TableName + ` FROM '` + OutputFilePaths["SENSITIVE_TAGGED"].Path + `' ESCAPE '"' DELIMITER ',' CSV HEADER;` + "\n"
 	loading += "\n"
@@ -418,6 +462,87 @@ func HasSensitiveParents(conceptPath string) (string, bool) {
 		temp = StripByLevel(temp, 1, false)
 	}
 	return temp, isSensitive
+}
+
+// TABLE_ACCESS.csv parser
+
+// ParseTableAccess reads and parses the table_access.csv.
+func ParseTableAccess() error {
+	lines, err := readCSV("TABLE_ACCESS")
+	if err != nil {
+		log.Fatal("Error in readCSV()")
+		return err
+	}
+
+	HeaderTableAccess = make([]string, 0)
+	TableTableAccess = make([]TableAccess, 0)
+
+	/* structure of table_access.csv (in order):
+
+	"c_table_cd",
+	"c_table_name",
+	"c_protected_access",
+	"c_hlevel",
+	"c_fullname",
+	"c_name",
+	"c_synonym_cd",
+	"c_visualattributes",
+	"c_totalnum",
+	"c_basecode",
+	"c_metadataxml",
+	"c_facttablecolumn",
+	"c_dimtablename",
+	"c_columnname",
+	"c_columndatatype",
+	"c_operator",
+	"c_dimcode",
+	"c_comment",
+	"c_tooltip",
+	"c_entry_date",
+	"c_change_date",
+	"c_status_cd",
+	"valuetype_cd"
+
+	*/
+
+	for _, header := range lines[0] {
+		HeaderTableAccess = append(HeaderTableAccess, header)
+	}
+
+	//skip header
+	for _, line := range lines[1:] {
+		TableTableAccess = append(TableTableAccess, TableAccessFromString(line))
+	}
+
+	return nil
+}
+
+// ConvertTableAccess converts the old xxxx.csv table_access file
+func ConvertTableAccess() error {
+	// two new files are generated: one to store the non-sensitive data and another to store the sensitive data
+	csvOutputFile, err := os.Create(OutputFilePaths["TABLE_ACCESS"].Path)
+	if err != nil {
+		log.Fatal("Error opening [TABLE_ACCESS].csv")
+		return err
+	}
+	defer csvOutputFile.Close()
+
+	headerString := ""
+	for _, header := range HeaderTableAccess {
+		headerString += "\"" + header + "\","
+	}
+	// remove the last ,
+	csvOutputFile.WriteString(headerString[:len(headerString)-1] + "\n")
+
+	for _, ta := range TableTableAccess {
+		csvOutputFile.WriteString(ta.ToCSVText() + "\n")
+	}
+
+	//add new mandatory fields
+	csvOutputFile.WriteString(`"SENSITIVE_TAGGED","SENSITIVE_TAGGED","N","1","\medco\tagged\","MedCo Sensitive Tagged Ontology","N","CH ","concept_cd","concept_dimension","concept_path","T","LIKE","\medco\tagged\","MedCo Sensitive Tagged Ontology"` + "\n")
+
+	return nil
+
 }
 
 // DUMMY_TO_PATIENT.csv parser

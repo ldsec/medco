@@ -60,6 +60,13 @@ func setupEncryptEnv() {
 	_, publicKey = libunlynx.GenKey()
 }
 
+func TestConvertTableAccess(t *testing.T) {
+	log.SetDebugVisible(2)
+
+	assert.Nil(t, loaderi2b2.ParseTableAccess())
+	assert.Nil(t, loaderi2b2.ConvertTableAccess())
+}
+
 func TestParseDummyToPatient(t *testing.T) {
 	log.SetDebugVisible(2)
 

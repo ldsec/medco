@@ -13,6 +13,36 @@ import (
 // ---------------------------------------- TO STRING -------------------------------------------------------- //
 // ----------------------------------------------------------------------------------------------------------- //
 
+func TestTableAccess_ToCSVText(t *testing.T) {
+	ta := loaderi2b2.TableAccess{
+		TableCD:          "BIRN",
+		TableName:        "BIRN",
+		ProtectedAccess:  "N",
+		Hlevel:           "0",
+		Fullname:         "\\BIRN\\",
+		Name:             "Clinical Trials",
+		SynonymCD:        "N",
+		VisualAttributes: "CA ",
+		TotalNum:         "",
+		BaseCode:         "",
+		MetadataXML:      "",
+		FactTableColumn:  "concept_cd",
+		DimTableName:     "concept_dimension",
+		ColumnName:       "concept_path",
+		ColumnDataType:   "T",
+		Operator:         "LIKE",
+		DimCode:          "\\BIRN\\",
+		Comment:          "",
+		Tooltip:          "Clinical Trials",
+		EntryData:        "",
+		ChangeData:       "",
+		StatusCD:         "",
+		ValueType:        "",
+	}
+
+	assert.Equal(t, ta.ToCSVText(), `"BIRN","BIRN","N","0","\BIRN\","Clinical Trials","N","CA ","","","","concept_cd","concept_dimension","concept_path","T","LIKE","\BIRN\","","Clinical Trials","","","",""`)
+}
+
 func TestMedCoOntology_ToCSVText(t *testing.T) {
 
 	ac := loaderi2b2.AdministrativeColumns{
@@ -265,6 +295,43 @@ func TestObservationFact_ToCSVText(t *testing.T) {
 // ------------------------------------------------------------------------------------------------------------- //
 // ---------------------------------------- FROM STRING -------------------------------------------------------- //
 // ------------------------------------------------------------------------------------------------------------- //
+
+func TestTableAccessFromString(t *testing.T) {
+	csvString := `"BIRN","BIRN","N","0","\BIRN\","Clinical Trials","N","CA ","","","","concept_cd","concept_dimension","concept_path","T","LIKE","\BIRN\","","Clinical Trials","","","",""`
+
+	ta := loaderi2b2.TableAccess{
+		TableCD:          "BIRN",
+		TableName:        "BIRN",
+		ProtectedAccess:  "N",
+		Hlevel:           "0",
+		Fullname:         "\\BIRN\\",
+		Name:             "Clinical Trials",
+		SynonymCD:        "N",
+		VisualAttributes: "CA ",
+		TotalNum:         "",
+		BaseCode:         "",
+		MetadataXML:      "",
+		FactTableColumn:  "concept_cd",
+		DimTableName:     "concept_dimension",
+		ColumnName:       "concept_path",
+		ColumnDataType:   "T",
+		Operator:         "LIKE",
+		DimCode:          "\\BIRN\\",
+		Comment:          "",
+		Tooltip:          "Clinical Trials",
+		EntryData:        "",
+		ChangeData:       "",
+		StatusCD:         "",
+		ValueType:        "",
+	}
+
+	var csvFile = strings.NewReader(csvString)
+	r := csv.NewReader(csvFile)
+	lines, err := r.ReadAll()
+	assert.Nil(t, err, "Parsing error")
+
+	assert.Equal(t, loaderi2b2.TableAccessFromString(lines[0]), ta)
+}
 
 func TestLocalOntologyFromString(t *testing.T) {
 	csvString := `"4","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","Parkdale","N","FA ","\N","\N","\N","concept_cd","concept_dimension","concept_path","T","LIKE","\i2b2\Demographics\Zip codes\Arkansas\Parkdale\","\N","Demographics \ Zip codes \ Arkansas \ Parkdale","@","2007-04-10 00:00:00","2007-04-10 00:00:00","2007-04-10 00:00:00","DEMO","\N","\N","\N","\N","\N"`
