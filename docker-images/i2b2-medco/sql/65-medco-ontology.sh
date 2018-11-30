@@ -6,7 +6,7 @@ psql $PSQL_PARAMS -d "$I2B2_DB_NAME" <<-EOSQL
 
     -- table_access
     CREATE TABLE medco_ont.table_access(
-        C_TABLE_CD VARCHAR(50),
+        C_TABLE_CD VARCHAR(50) PRIMARY KEY,
         C_TABLE_NAME VARCHAR(50),
         C_PROTECTED_ACCESS CHAR(1),
         C_HLEVEL NUMERIC(22,0),
