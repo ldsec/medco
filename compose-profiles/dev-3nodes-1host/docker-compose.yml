@@ -37,31 +37,6 @@ services:
     volumes:
       - ../../configuration-profiles/dev-3nodes-1host:/medco-configuration
 
-  nginx-srv0:
-    extends:
-      file: ../docker-compose-common.yml
-      service: nginx
-    ports:
-      - "80:80"
-    environment:
-      - MEDCO_ENV=dev
-    networks:
-      - medco-srv0
-      - keycloak-network
-
-  php-fpm-srv0:
-    extends:
-      file: ../docker-compose-common.yml
-      service: php-fpm
-    environment:
-    - I2B2_DB_NAME=i2b2medcosrv0
-    - I2B2_DOMAIN_NAME=i2b2medcosrv0
-    - I2B2_URL=http://i2b2-medco-srv0:8080/i2b2/services
-    networks:
-      medco-srv0:
-        aliases:
-          - php-fpm
-
   i2b2-medco-srv1:
     extends:
       file: ../docker-compose-common.yml
@@ -98,31 +73,6 @@ services:
       - medco-network
     volumes:
       - ../../configuration-profiles/dev-3nodes-1host:/medco-configuration
-
-  nginx-srv1:
-    extends:
-      file: ../docker-compose-common.yml
-      service: nginx
-    ports:
-      - "81:80"
-    environment:
-      - MEDCO_ENV=dev
-    networks:
-      - medco-srv1
-      - keycloak-network
-
-  php-fpm-srv1:
-    extends:
-      file: ../docker-compose-common.yml
-      service: php-fpm
-    environment:
-    - I2B2_DB_NAME=i2b2medcosrv1
-    - I2B2_DOMAIN_NAME=i2b2medcosrv1
-    - I2B2_URL=http://i2b2-medco-srv1:8080/i2b2/services
-    networks:
-      medco-srv1:
-        aliases:
-        - php-fpm
 
   i2b2-medco-srv2:
     extends:
@@ -161,30 +111,30 @@ services:
     volumes:
       - ../../configuration-profiles/dev-3nodes-1host:/medco-configuration
 
-  nginx-srv2:
+  nginx:
     extends:
       file: ../docker-compose-common.yml
       service: nginx
     ports:
-      - "82:80"
+    - "80:80"
     environment:
-      - MEDCO_ENV=dev
+    - MEDCO_ENV=dev
     networks:
-      - medco-srv2
-      - keycloak-network
+    - medco-srv0
+    - keycloak-network
+    volumes:
+    - ../configuration-profiles/dev-3nodes-1host/group.toml:/medco-configuration/group.toml
 
-  php-fpm-srv2:
+  php-fpm:
     extends:
       file: ../docker-compose-common.yml
       service: php-fpm
     environment:
-    - I2B2_DB_NAME=i2b2medcosrv2
-    - I2B2_DOMAIN_NAME=i2b2medcosrv2
-    - I2B2_URL=http://i2b2-medco-srv2:8080/i2b2/services
+    - I2B2_DB_NAME=i2b2medcosrv0
+    - I2B2_DOMAIN_NAME=i2b2medcosrv0
+    - I2B2_URL=http://i2b2-medco-srv0:8080/i2b2/services
     networks:
-      medco-srv2:
-        aliases:
-        - php-fpm
+    - medco-srv0
 
   postgresql:
     extends:
