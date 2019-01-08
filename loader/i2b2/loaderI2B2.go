@@ -1,7 +1,6 @@
 package loaderi2b2
 
 import (
-	"bytes"
 	"encoding/csv"
 	"github.com/dedis/kyber"
 	"github.com/dedis/onet"
@@ -9,10 +8,8 @@ import (
 	"github.com/lca1/medco-loader/loader"
 	"github.com/lca1/medco-unlynx/services"
 	"github.com/lca1/unlynx/lib"
-	"io"
 	"math/rand"
 	"os"
-	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -344,22 +341,7 @@ func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
 
 // LoadDataFiles executes the loading script for the new converted data
 func LoadDataFiles() error {
-	// Display just the stderr if an error occurs
-	cmd := exec.Command("/bin/sh", FileBashPath)
-	var stdBuffer bytes.Buffer
-	mw := io.MultiWriter(os.Stdout, &stdBuffer)
-
-	cmd.Stdout = mw
-	cmd.Stderr = mw
-
-	// Execute the command
-	if err := cmd.Run(); err != nil {
-		log.Lvl1("Error when running command.  Error log:", cmd.Stderr)
-		log.Lvl1("Got command status:", err.Error())
-		return err
-	}
-
-	return nil
+	return loader.ExecuteScript(FileBashPath)
 }
 
 func readCSV(filename string) ([][]string, error) {

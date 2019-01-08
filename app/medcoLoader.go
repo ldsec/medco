@@ -73,6 +73,10 @@ const (
 	optionDataFiles      = "files"
 	optionDataFilesShort = "f"
 
+	// re-execute the python script to re-generate dummy patients
+	optionDummy		 = "dummy"
+	optionDummyShort = "dmy"
+
 	optionEmpty      = "empty"
 	optionEmptyShort = "e"
 )
@@ -173,8 +177,12 @@ func main() {
 			Usage: `File with the list of sensitive concepts (e.g., \i2b2\Diagnoses\Neoplasms (140-239)\Benign neoplasms (210-229)\(216) Benign neoplasm of skin\). The entry 'all' means all concepts are considered sensitive)`,
 		},
 		cli.BoolFlag{
+			Name:  optionDummy + ", " + optionDummyShort,
+			Usage: "Re-generate dummy patients",
+		},
+		cli.BoolFlag{
 			Name:  optionEmpty + ", " + optionEmptyShort,
-			Usage: "Empty patient and visit dimension tables (y/n)",
+			Usage: "Empty patient and visit dimension tables",
 		},
 	}
 	loaderFlagsv1 = append(loaderFlagsCommon, loaderFlagsv1...)

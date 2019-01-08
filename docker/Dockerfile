@@ -7,6 +7,12 @@ ENV MEDCO_LOADER_REPO="github.com/lca1/medco-loader" \
 
 ENV MEDCO_LOADER_BIN_EXPORT_PATH="$BUILD_DIR/medco-loader"
 
+# pre-requisites: python 2.7
+USER root
+RUN yum update -y && \
+    yum -y install python2.7 && \
+    yum clean all
+
 # get maximum of dependencies and cache them
 RUN go get -v -d github.com/dedis/onet/... && \
     go get -v -d github.com/dedis/kyber/... && \

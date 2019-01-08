@@ -3,9 +3,9 @@
 
 # In[1]:
 
-
 from clustering import HierarchicalClustering
 import csv
+import pandas as pd
 
 observation_fact = "data/original/observation_fact.csv"
 patient_dimension = "data/original/patient_dimension.csv"
