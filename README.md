@@ -4,7 +4,7 @@
 
 ## Documentation
 MedCo documentation is centralized on the following website: 
-[MedCo Loader](https://lca1.github.io/medco-documentation/components/medco-loader.html).
+[MedCo Loader](https://medco.epfl.ch/documentation/developer/components/medco-loader.html).
 
 ## Version
 The version in the `master`-branch is stable and has no incompatible changes.
