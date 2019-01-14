@@ -1,4 +1,4 @@
-FROM php:7.0-fpm-stretch as prod
+FROM php:7.0-fpm-stretch
 
 # build time env
 ENV WWW_DATA="/www-data"

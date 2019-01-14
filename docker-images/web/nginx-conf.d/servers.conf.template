@@ -1,1 +1,1 @@
-include /etc/nginx/conf.d/servers.conf.$MEDCO_ENV.inc;
+include /etc/nginx/conf.d/servers.conf.$HTTP_SCHEME.inc;
