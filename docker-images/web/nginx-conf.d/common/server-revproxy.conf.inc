@@ -49,5 +49,5 @@ location /i2b2 {
 
 location /glowing-bear {
     set $upstream_host glowing-bear;
-    proxy_pass http://$upstream_host/;
+    proxy_pass http://$upstream_host;
 }
