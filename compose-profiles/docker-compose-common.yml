@@ -1,9 +1,7 @@
 version: '2.2'
 services:
   i2b2-medco:
-    image: medco/i2b2-medco:v0.1
-    build:
-      context: ../docker-images/i2b2-medco
+    image: medco/i2b2-medco:v0.1a
     environment:
       - I2B2_DB_HOST=postgresql
       - I2B2_DB_PORT=5432
@@ -20,8 +18,18 @@ services:
     volumes:
       - ../configuration-profiles/dev-3nodes-1host:/medco-configuration
 
+  medco-unlynx:
+    image: medco/medco-unlynx:v0.1a
+    ports:
+    - "2000"
+    - "2001"
+    environment:
+    - NODE_IDX=0
+    - UNLYNX_DEBUG_LEVEL=1
+    volumes:
+    - ../configuration-profiles/dev-3nodes-1host:/medco-configuration
+
   nginx:
-    image: medco/nginx:v0.1
     build:
       context: ../docker-images/web
       dockerfile: nginx.Dockerfile
@@ -29,14 +37,13 @@ services:
       - "80"
       - "443"
     environment:
-      - MEDCO_ENV=dev
+      - HTTP_SCHEME=http
     volumes:
       - ../docker-images/web/www-data:/www-data
       - ../docker-images/web/nginx-conf.d:/etc/nginx/conf.d
       - ../configuration-profiles/dev-3nodes-1host/group.toml:/medco-configuration/group.toml
 
   php-fpm:
-    image: medco/php-fpm:v0.1
     build:
       context: ../docker-images/web
       dockerfile: php-fpm.Dockerfile
@@ -51,19 +58,6 @@ services:
     - CORS_ALLOW_ORIGIN=http://localhost:4200
     volumes:
     - ../docker-images/web/www-data:/www-data
-
-  medco-unlynx:
-    image: medco/medco-unlynx:v0.1
-    build:
-      context: ../docker-images/medco-unlynx
-    ports:
-      - "2000"
-      - "2001"
-    environment:
-        - NODE_IDX=0
-        - UNLYNX_DEBUG_LEVEL=1
-    volumes:
-      - ../configuration-profiles/dev-3nodes-1host:/medco-configuration
 
   postgresql:
     image: postgres:9.6
@@ -81,13 +75,11 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=admin
 
   keycloak:
-    image: jboss/keycloak:4.5.0.Final
     build:
-      context: https://github.com/jboss-dockerfiles/keycloak.git#4.5.0.Final:server
+      context: https://github.com/jboss-dockerfiles/keycloak.git#4.8.2.Final:server
     environment:
       - KEYCLOAK_USER=keycloak
       - KEYCLOAK_PASSWORD=keycloak
-      - KEYCLOAK_IMPORTTODO=/realm-import.json
       - DB_VENDOR=postgres
       - DB_ADDR=postgresql
       - DB_PORT=5432
@@ -95,3 +87,16 @@ services:
       - DB_USER=keycloak
       - DB_PASSWORD=keycloak
       - PROXY_ADDRESS_FORWARDING=true
+
+  glowing-bear:
+    image: medco/glowing-bear:MedCo-v0.1c
+    ports:
+      - "80"
+    environment:
+      - GB_API_URL=http://localhost/pic-sure/rest
+      - GB_URL=http://localhost:82
+      - GB_OIDC_URL=http://localhost/auth/realms/master/protocol/openid-connect
+      - GB_OIDC_CLIENT_ID=i2b2-local
+      - GB_PICSURE_RES_NAME=i2b2-medco-local
+      - GB_COTHORITY_KEY_URL=http://localhost/cothority-key.pub.toml
+      - GB_GENOMIC_ANNOTATIONS_URL=http://localhost/genomicAnnotations

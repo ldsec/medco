@@ -4,13 +4,10 @@ services:
     extends:
       file: ../docker-compose-common.yml
       service: i2b2-medco
-    image: medco/i2b2-medco:dev
     environment:
       - I2B2_DB_NAME=i2b2medcosrv0
       - I2B2_DOMAIN_NAME=i2b2medcosrv0
       - NODE_IDX=0
-      - UNLYNX_DEBUG_LEVEL=2
-      - AXIS2_LOGLEVEL=DEBUG
     ports:
       - "8090:8080"
     networks:
@@ -20,36 +17,31 @@ services:
       medco-network:
       keycloak-network:
     volumes:
-      - ../../configuration-profiles/dev-local-3nodes:/medco-configuration
+      - ../../configuration-profiles/test-local-3nodes:/medco-configuration
 
   medco-unlynx-srv0:
     extends:
       file: ../docker-compose-common.yml
       service: medco-unlynx
-    image: medco/medco-unlynx:dev
     ports:
       - "2000:2000"
       - "2001:2001"
     environment:
       - NODE_IDX=0
-      - UNLYNX_DEBUG_LEVEL=2
     networks:
       - medco-srv0
       - medco-network
     volumes:
-      - ../../configuration-profiles/dev-local-3nodes:/medco-configuration
+      - ../../configuration-profiles/test-local-3nodes:/medco-configuration
 
   i2b2-medco-srv1:
     extends:
       file: ../docker-compose-common.yml
       service: i2b2-medco
-    image: medco/i2b2-medco:dev
     environment:
       - I2B2_DB_NAME=i2b2medcosrv1
       - I2B2_DOMAIN_NAME=i2b2medcosrv1
       - NODE_IDX=1
-      - UNLYNX_DEBUG_LEVEL=2
-      - AXIS2_LOGLEVEL=DEBUG
     ports:
       - "8091:8080"
     networks:
@@ -59,36 +51,31 @@ services:
       medco-network:
       keycloak-network:
     volumes:
-      - ../../configuration-profiles/dev-local-3nodes:/medco-configuration
+      - ../../configuration-profiles/test-local-3nodes:/medco-configuration
 
   medco-unlynx-srv1:
     extends:
       file: ../docker-compose-common.yml
       service: medco-unlynx
-    image: medco/medco-unlynx:dev
     ports:
       - "2002:2002"
       - "2003:2003"
     environment:
       - NODE_IDX=1
-      - UNLYNX_DEBUG_LEVEL=2
     networks:
       - medco-srv1
       - medco-network
     volumes:
-      - ../../configuration-profiles/dev-local-3nodes:/medco-configuration
+      - ../../configuration-profiles/test-local-3nodes:/medco-configuration
 
   i2b2-medco-srv2:
     extends:
       file: ../docker-compose-common.yml
       service: i2b2-medco
-    image: medco/i2b2-medco:dev
     environment:
       - I2B2_DB_NAME=i2b2medcosrv2
       - I2B2_DOMAIN_NAME=i2b2medcosrv2
       - NODE_IDX=2
-      - UNLYNX_DEBUG_LEVEL=2
-      - AXIS2_LOGLEVEL=DEBUG
     ports:
       - "8092:8080"
     networks:
@@ -98,24 +85,39 @@ services:
       medco-network:
       keycloak-network:
     volumes:
-      - ../../configuration-profiles/dev-local-3nodes:/medco-configuration
+      - ../../configuration-profiles/test-local-3nodes:/medco-configuration
 
   medco-unlynx-srv2:
     extends:
       file: ../docker-compose-common.yml
       service: medco-unlynx
-    image: medco/medco-unlynx:dev
     ports:
       - "2004:2004"
       - "2005:2005"
     environment:
       - NODE_IDX=2
-      - UNLYNX_DEBUG_LEVEL=2
     networks:
       - medco-srv2
       - medco-network
     volumes:
-      - ../../configuration-profiles/dev-local-3nodes:/medco-configuration
+      - ../../configuration-profiles/test-local-3nodes:/medco-configuration
+
+  glowing-bear:
+    extends:
+      file: ../docker-compose-common.yml
+      service: glowing-bear
+    ports:
+    - "82:80"
+    environment:
+    - GB_API_URL=${MEDCO_NODE_URL}/IRCT-CL/rest
+    - GB_URL=${MEDCO_NODE_URL}/glowing-bear
+    - GB_OIDC_URL=${MEDCO_NODE_URL}/auth/realms/master/protocol/openid-connect
+    - GB_OIDC_CLIENT_ID=i2b2-local
+    - GB_PICSURE_RES_NAME=i2b2-medco-local
+    - GB_COTHORITY_KEY_URL=${MEDCO_NODE_URL}/cothority-key.pub.toml
+    - GB_GENOMIC_ANNOTATIONS_URL=${MEDCO_NODE_URL}/genomicAnnotations
+    networks:
+      - keycloak-network
 
   nginx:
     extends:
@@ -124,12 +126,14 @@ services:
     ports:
     - "80:80"
     environment:
-    - HTTP_SCHEME=http
+    - HTTP_SCHEME=${HTTP_SCHEME}
     networks:
     - medco-srv0
     - keycloak-network
     volumes:
-    - ../../configuration-profiles/dev-local-3nodes/group.toml:/medco-configuration/group.toml
+    - ../../configuration-profiles/test-local-3nodes/group.toml:/medco-configuration/group.toml
+    - ../../configuration-profiles/test-local-3nodes/certificate.crt:/medco-configuration/certificate.crt
+    - ../../configuration-profiles/test-local-3nodes/certificate.key:/medco-configuration/certificate.key
 
   php-fpm:
     extends:
