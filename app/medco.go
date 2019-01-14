@@ -58,7 +58,7 @@ func main() {
 	network.MaxPacketSize = network.Size(^uint32(0))
 
 	cliApp := cli.NewApp()
-	cliApp.Name = "unlynxMedCo"
+	cliApp.Name = "medco-unlynx"
 	cliApp.Usage = "Query medical information securely and privately"
 	cliApp.Version = Version
 
