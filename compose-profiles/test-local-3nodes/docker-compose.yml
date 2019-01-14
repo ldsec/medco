@@ -125,6 +125,7 @@ services:
       service: nginx
     ports:
     - "80:80"
+    - "443:443"
     environment:
     - HTTP_SCHEME=${HTTP_SCHEME}
     networks:
