@@ -4,7 +4,7 @@
 
 ## Documentation
 MedCo documentation is centralized on the following website: 
-[MedCo Unlynx](https://lca1.github.io/medco-documentation/components/medco-unlynx.html).
+[MedCo Unlynx](https://medco.epfl.ch/documentation/developer/components/medco-unlynx.html).
 
 ## Version
 The version in the `master`-branch is stable and has no incompatible changes.
