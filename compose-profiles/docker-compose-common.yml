@@ -89,7 +89,7 @@ services:
       - PROXY_ADDRESS_FORWARDING=true
 
   glowing-bear:
-    image: medco/glowing-bear:MedCo-v0.1d
+    image: medco/glowing-bear:MedCo-v0.1e
     ports:
       - "80"
     environment:
