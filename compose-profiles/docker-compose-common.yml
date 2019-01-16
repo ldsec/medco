@@ -89,7 +89,7 @@ services:
       - PROXY_ADDRESS_FORWARDING=true
 
   glowing-bear:
-    image: medco/glowing-bear:MedCo-v0.1c
+    image: medco/glowing-bear:MedCo-v0.1d
     ports:
       - "80"
     environment:
@@ -100,3 +100,4 @@ services:
       - GB_PICSURE_RES_NAME=i2b2-medco-local
       - GB_COTHORITY_KEY_URL=http://localhost/cothority-key.pub.toml
       - GB_GENOMIC_ANNOTATIONS_URL=http://localhost/genomicAnnotations
+      - GB_MEDCO_RESULTS_RANDOMIZATION=0

@@ -116,6 +116,7 @@ services:
     - GB_PICSURE_RES_NAME=i2b2-medco-local
     - GB_COTHORITY_KEY_URL=${MEDCO_NODE_URL}/cothority-key.pub.toml
     - GB_GENOMIC_ANNOTATIONS_URL=${MEDCO_NODE_URL}/genomicAnnotations
+    - GB_MEDCO_RESULTS_RANDOMIZATION=0
     networks:
       - keycloak-network
 
