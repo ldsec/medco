@@ -1,7 +1,9 @@
 # --- web root configuration ---
 location / {
     root   /www-data/;
-    index  index.html index.htm;
+
+    # redirect root to glowing-bear
+    rewrite ^(/)$ /glowing-bear;
 
     # php configuration
     location ~ \.php$ {
