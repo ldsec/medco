@@ -1,4 +1,4 @@
-FROM medco/medco-unlynx:v0.1a as build
+FROM medco/medco-unlynx:v0.1b as build
 
 # environment variables
 ENV MEDCO_LOADER_REPO="github.com/lca1/medco-loader"
