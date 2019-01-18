@@ -1,4 +1,4 @@
-FROM medco/unlynx:v1.2a-alpha as build
+FROM medco/unlynx:v1.2b-alpha as build
 
 # build time environment variables
 ENV MEDCO_UNLYNX_REPO="github.com/lca1/medco-unlynx"
@@ -32,4 +32,5 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh && \
     apk add --no-cache bash outils-md5
 
 VOLUME "$MEDCO_CONF_DIR"
-ENTRYPOINT docker-entrypoint.sh
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["-d", "$UNLYNX_DEBUG_LEVEL", "server", "-c", "$UNLYNX_KEY_FILE_PATH"]

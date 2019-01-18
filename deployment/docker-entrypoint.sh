@@ -16,4 +16,4 @@ if [[ ! -f "$UNLYNX_BIN_EXPORT_PATH" ]]; then
 fi
 
 # run unlynx
-exec medco-unlynx -d $UNLYNX_DEBUG_LEVEL server -c $UNLYNX_KEY_FILE_PATH
+exec medco-unlynx $@
