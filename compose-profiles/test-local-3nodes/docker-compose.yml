@@ -11,11 +11,9 @@ services:
     ports:
       - "8090:8080"
     networks:
-      medco-srv0:
-        aliases:
-        - i2b2
-      medco-network:
-      keycloak-network:
+      - medco-srv0
+      - medco-network
+      - keycloak-network
     volumes:
       - ../../configuration-profiles/test-local-3nodes:/medco-configuration
 
@@ -45,11 +43,9 @@ services:
     ports:
       - "8091:8080"
     networks:
-      medco-srv1:
-        aliases:
-          - i2b2
-      medco-network:
-      keycloak-network:
+      - medco-srv1
+      - medco-network
+      - keycloak-network
     volumes:
       - ../../configuration-profiles/test-local-3nodes:/medco-configuration
 
@@ -79,11 +75,9 @@ services:
     ports:
       - "8092:8080"
     networks:
-      medco-srv2:
-        aliases:
-          - i2b2
-      medco-network:
-      keycloak-network:
+      - medco-srv2
+      - medco-network
+      - keycloak-network
     volumes:
       - ../../configuration-profiles/test-local-3nodes:/medco-configuration
 
@@ -145,6 +139,7 @@ services:
     - I2B2_DB_NAME=i2b2medcosrv0
     - I2B2_DOMAIN_NAME=i2b2medcosrv0
     - I2B2_URL=http://i2b2-medco-srv0:8080/i2b2/services
+    - CORS_ALLOW_ORIGIN=${MEDCO_NODE_URL}
     networks:
     - medco-srv0
 
