@@ -33,8 +33,9 @@ location /auth {
 
 location /pgadmin {
     set $upstream_host pg-admin;
-    proxy_pass http://$upstream_host/;
-    proxy_redirect  http:// $scheme://;
+    proxy_pass http://$upstream_host;
+    proxy_set_header X-Script-Name /pgadmin;
+    proxy_redirect http://$upstream_host/pgadmin /pgadmin;
 }
 
 location /IRCT-CL {

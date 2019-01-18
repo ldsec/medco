@@ -69,7 +69,8 @@ services:
     - ../docker-images/postgresql/initdb-data:/docker-entrypoint-initdb.d
 
   pg-admin:
-    image: dpage/pgadmin4:latest
+    build:
+      context: ../docker-images/pgadmin
     environment:
       - PGADMIN_DEFAULT_EMAIL=admin
       - PGADMIN_DEFAULT_PASSWORD=admin
