@@ -11,7 +11,7 @@ if [[ (-f "$UNLYNX_BIN_EXPORT_PATH" && $(md5 /go/bin/medco-unlynx) != $(md5 $UNL
 fi
 
 if [[ ! -f "$UNLYNX_BIN_EXPORT_PATH" ]]; then
-    cp -a /go/bin/medco-unlynx $UNLYNX_BIN_EXPORT_PATH
+    cp /go/bin/medco-unlynx $UNLYNX_BIN_EXPORT_PATH
     chmod 777 $UNLYNX_BIN_EXPORT_PATH
 fi
 
