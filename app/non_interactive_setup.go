@@ -33,18 +33,30 @@ func NonInteractiveSetup(c *cli.Context) error {
 	public, _ := encoding.StringHexToPoint(libunlynx.SuiTe, pubStr)
 
 	serverBinding := network.NewTLSAddress(serverBindingStr)
+	services := app.GenerateServiceKeyPairs()
+
 	conf := &app.CothorityConfig{
+		Suite:       libunlynx.SuiTe.String(),
 		Public:      pubStr,
 		Private:     privStr,
 		Address:     serverBinding,
+		Services:    services,
 		Description: description,
 	}
 
-	server := app.NewServerToml(libunlynx.SuiTe, public, serverBinding, conf.Description)
+	server := app.NewServerToml(libunlynx.SuiTe, public, serverBinding, conf.Description, services)
 	group := app.NewGroupToml(server)
 
-	conf.Save(privateTomlPath)
-	group.Save(publicTomlPath)
+	if err := conf.Save(privateTomlPath); err != nil {
+		err := errors.New("failed saving private.toml")
+		log.Error(err)
+		return cli.NewExitError(err, 3)
+	}
+	if err := group.Save(publicTomlPath); err != nil {
+		err := errors.New("failed saving group.toml")
+		log.Error(err)
+		return cli.NewExitError(err, 3)
+	}
 
 	return nil
 }
