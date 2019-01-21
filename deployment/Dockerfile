@@ -3,10 +3,6 @@ FROM medco/medco-unlynx:v0.1d as build
 # environment variables
 ENV MEDCO_LOADER_REPO="github.com/lca1/medco-loader"
 
-# adjust timeout values
-RUN sed -i 's/conn.SetReadDeadline(time.Now().Add(5 \* time.Minute))/conn.SetReadDeadline(time.Now().Add(5 \* time.Hour))/' /go/src/github.com/dedis/onet/websocket.go && \
-    sed -i 's/const expirationTime = 1 \* time.Minute/const expirationTime = 1 \* time.Hour/' /go/src/github.com/dedis/onet/overlay.go
-
 COPY ./ /go/src/$MEDCO_LOADER_REPO
 
 # get remaining dependencies, compile and install medco-loader binary
