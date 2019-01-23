@@ -19,7 +19,7 @@ services:
       - ../configuration-profiles/dev-3nodes-1host:/medco-configuration
 
   medco-unlynx:
-    image: medco/medco-unlynx:v0.1.1a
+    image: medco/medco-unlynx:v0.1.1b
     ports:
     - "2000"
     - "2001"
