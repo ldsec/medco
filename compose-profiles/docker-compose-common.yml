@@ -1,7 +1,7 @@
 version: '2.2'
 services:
   i2b2-medco:
-    image: medco/i2b2-medco:v0.1a
+    image: medco/i2b2-medco:v0.1.1
     environment:
       - I2B2_DB_HOST=postgresql
       - I2B2_DB_PORT=5432
@@ -19,7 +19,7 @@ services:
       - ../configuration-profiles/dev-3nodes-1host:/medco-configuration
 
   medco-unlynx:
-    image: medco/medco-unlynx:v0.1c
+    image: medco/medco-unlynx:v0.1.1a
     ports:
     - "2000"
     - "2001"
@@ -90,7 +90,7 @@ services:
       - PROXY_ADDRESS_FORWARDING=true
 
   glowing-bear:
-    image: medco/glowing-bear:MedCo-v0.1e
+    image: medco/glowing-bear:MedCo-v0.1.1
     ports:
       - "80"
     environment:
@@ -102,3 +102,4 @@ services:
       - GB_COTHORITY_KEY_URL=http://localhost/cothority-key.pub.toml
       - GB_GENOMIC_ANNOTATIONS_URL=http://localhost/genomicAnnotations
       - GB_MEDCO_RESULTS_RANDOMIZATION=0
+      - GB_FOOTER_TEXT=
