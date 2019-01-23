@@ -32,5 +32,5 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh && \
     apk add --no-cache bash outils-md5
 
 VOLUME "$MEDCO_CONF_DIR"
-ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["-d", "$UNLYNX_DEBUG_LEVEL", "server", "-c", "$UNLYNX_KEY_FILE_PATH"]
+ENTRYPOINT docker-entrypoint.sh
+CMD -d "$UNLYNX_DEBUG_LEVEL" server -c "$UNLYNX_KEY_FILE_PATH"
