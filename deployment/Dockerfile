@@ -33,4 +33,3 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh && \
 
 VOLUME "$MEDCO_CONF_DIR"
 ENTRYPOINT docker-entrypoint.sh
-CMD -d "$UNLYNX_DEBUG_LEVEL" server -c "$UNLYNX_KEY_FILE_PATH"
