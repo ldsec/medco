@@ -18,10 +18,10 @@ RUN go get -v -d ./... && \
     mv /go/bin/app /go/bin/medco-loader && \
     apt-get update && apt-get install -y postgresql-client-common postgresql-client && apt-get clean
 
-ENTRYPOINT ["medco-loader"]
 
 # -------------------------------------------
 FROM golang:1.11-alpine as release
 
 COPY --from=build /go/bin/medco-loader /go/bin/
 RUN apk add --no-cache postgresql-client
+ENTRYPOINT ["medco-loader"]
