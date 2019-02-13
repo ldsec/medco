@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/lca1/medco-loader.svg?branch=master)](https://travis-ci.org/lca1/medco-loader) 
 [![Go Report Card](https://goreportcard.com/badge/github.com/lca1/medco-loader)](https://goreportcard.com/report/github.com/lca1/medco-loader) 
-[![codecov](https://codecov.io/gh/lca1/medco-loader/branch/master/graph/badge.svg)](https://codecov.io/gh/lca1/medco-loader)
+[![Coverage Status](https://coveralls.io/repos/github/lca1/medco-loader/badge.svg?branch=master)](https://coveralls.io/github/lca1/medco-loader?branch=master)
 
 ## Documentation
 MedCo documentation is centralized on the following website: 
