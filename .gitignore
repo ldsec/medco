@@ -51,6 +51,7 @@ data/scripts/*.txt
 data/scripts/import-tool/*.csv
 app/*.toml
 app/files/
+app/medco-loader
 docker/medco-loader
 loader/genomic/*.toml
 loader/genomic/*.sh
