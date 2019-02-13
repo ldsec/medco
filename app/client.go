@@ -142,7 +142,7 @@ func loadV1(c *cli.Context) error {
 	dataFilesPath := c.String("files")
 	sensitiveFilePath := c.String("sensitive")
 	entryPointIdx := c.Int("entryPointIdx")
-	dummy :=  c.Bool("dummy")
+	dummy := c.Bool("dummy")
 	empty := c.Bool("empty")
 
 	// db settings

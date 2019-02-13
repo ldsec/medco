@@ -74,7 +74,7 @@ const (
 	optionDataFilesShort = "f"
 
 	// re-execute the python script to re-generate dummy patients
-	optionDummy		 = "dummy"
+	optionDummy      = "dummy"
 	optionDummyShort = "dmy"
 
 	optionEmpty      = "empty"
