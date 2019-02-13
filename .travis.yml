@@ -13,7 +13,7 @@ install:
   - git checkout 5796104343ef247e2eed58e573f68c566db2136f
   - cd $GOPATH/src/github.com/dedis/kyber
   - git checkout f55fec5463cda138dfc7ff15e4091d12c4ddcbfe
-  - cd $GOPATH/src/github.com/lca1/unlynx
+  - cd $GOPATH/src/github.com/lca1/medco-unlynx
   # ------------------------------------------------------------------
   - go get -t ./...
   - go get golang.org/x/tools/cmd/cover
