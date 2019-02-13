@@ -30,7 +30,7 @@ test_local:
 	go test -v -race -short -p=1 ./...
 
 test_codecov:
-    ./coveralls.sh
+	./coveralls.sh
 
 test: test_fmt test_lint test_codecov
 
