@@ -30,7 +30,7 @@ test_local:
 	go test -v -race -short -p=1 ./...
 
 test_codecov:
-	go test -v -race -short -p=1 -coverprofile=coverage.txt -covermode=atomic ./...
+	./coveralls.sh
 
 test: test_fmt test_lint test_codecov
 
