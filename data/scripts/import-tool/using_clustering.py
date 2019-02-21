@@ -7,9 +7,12 @@ from clustering import HierarchicalClustering
 import csv
 import pandas as pd
 
-observation_fact = "data/original/observation_fact.csv"
-patient_dimension = "data/original/patient_dimension.csv"
+original_observation_fact = "data/original/observation_fact.csv"
+original_patient_dimension = "data/original/patient_dimension.csv"
 
+output_observation_fact = "data/output/observation_fact.csv"
+output_patient_dimension = "data/output/patient_dimension.csv"
+output_dummy_to_patient = "data/output/dummy_to_patient.csv"
 
 # In[2]:
 
@@ -19,7 +22,7 @@ print("Started hierarchical clustering.")
 # Creating an instance of the clustering wrapper.
 # Need to specify the observation fact path and (optionally) the separator between concept_cd 
 # and modifier_cd in the new observation_fact.csv file
-clustering_wrapper = HierarchicalClustering(observation_fact, concept_modifier_separator="_")
+clustering_wrapper = HierarchicalClustering(original_observation_fact, concept_modifier_separator="_")
 
 # performing hiearchical clustering
 # need to specify the similarity metric and linkage method
@@ -61,7 +64,7 @@ patient_concepts_matrix_dummies, dummy_to_patient = clustering_wrapper.generate_
 
 # generating the new patient dimension
 # need to specify the old patent_dimension.csv path and the new one
-clustering_wrapper.generate_patient_dimension(patient_dimension, 'patient_dimension.csv')
+clustering_wrapper.generate_patient_dimension(original_patient_dimension, output_patient_dimension)
 
 
 # In[6]:
@@ -69,16 +72,16 @@ clustering_wrapper.generate_patient_dimension(patient_dimension, 'patient_dimens
 
 # generating the new observation fact
 # need to specify the old observation_fact.csv and the new one
-clustering_wrapper.generate_observation_fact('observation_fact.csv')
+clustering_wrapper.generate_observation_fact(output_observation_fact)
 
 
 # In[7]:
 
 
-df = pd.DataFrame(zip(dummy_to_patient.index.values.tolist(), dummy_to_patient.values.tolist()), columns=['dummy', 'patient'])
+df = pd.DataFrame(list(zip(dummy_to_patient.index.values.tolist(), dummy_to_patient.values.tolist())), columns=['dummy', 'patient'])
 for col in df.columns:
     df[col] = df[col].astype(str)
-df.to_csv('dummy_to_patient.csv', quoting=csv.QUOTE_NONNUMERIC, index=False)
+df.to_csv(output_dummy_to_patient, quoting=csv.QUOTE_NONNUMERIC, index=False)
 
 
 # In[ ]:

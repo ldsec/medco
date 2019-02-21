@@ -142,7 +142,6 @@ func loadV1(c *cli.Context) error {
 	dataFilesPath := c.String("files")
 	sensitiveFilePath := c.String("sensitive")
 	entryPointIdx := c.Int("entryPointIdx")
-	dummy := c.Bool("dummy")
 	empty := c.Bool("empty")
 
 	// db settings
@@ -187,15 +186,6 @@ func loadV1(c *cli.Context) error {
 		return cli.NewExitError(err, 1)
 	}
 	directory := filepath.Dir(dataFilesPath)
-
-	//if flag is on -> re-generate dummy patients
-	if dummy {
-		err := loader.ExecuteScript("/scripts/import-tool/generateDummyData.sh " + directory + "/" + files.PatientDimension + " " + directory + "/" + files.ObservationFact + " " + directory + "/" + files.DummyToPatient)
-		if err != nil {
-			log.Error("Error while executing generateDummyData script:", err)
-			return cli.NewExitError(err, 1)
-		}
-	}
 
 	// get the list of sensitiveConcepts
 	f, err = os.Open(sensitiveFilePath)

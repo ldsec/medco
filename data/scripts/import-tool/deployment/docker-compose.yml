@@ -1,0 +1,9 @@
+version: '3.5'
+services:
+  gen-dummies:
+    image: medco/gen-dummies:master
+    build:
+      context: ../
+      dockerfile: deployment/Dockerfile
+    volumes:
+      - ../data:/root/import-tool/data
