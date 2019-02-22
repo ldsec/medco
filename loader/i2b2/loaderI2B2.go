@@ -1336,7 +1336,7 @@ func ParseObservationFact() error {
 	return nil
 }
 
-// ConvertObservationFact converts the old observation_fact_old.csv file
+// ConvertObservationFact converts the old observation.csv file
 func ConvertObservationFact() error {
 	rand.Seed(time.Now().UnixNano())
 
@@ -1354,6 +1354,7 @@ func ConvertObservationFact() error {
 	// remove the last ,
 	csvOutputFile.WriteString(headerString[:len(headerString)-1] + "\n")
 
+
 	for _, of := range TableObservationFact {
 		copyObs := of
 
@@ -1363,6 +1364,11 @@ func ConvertObservationFact() error {
 			// 2. copy the data
 			// 3. change patient_num and encounter_num
 			listObs := MapDummyObs[of.PK.PatientNum]
+
+			// TODO: find out why this can be 0 (the generation should not allow this
+			if len(listObs) == 0 {
+				continue
+			}
 			index := rand.Intn(len(listObs))
 
 			copyObs = TableObservationFact[listObs[index]]
@@ -1389,7 +1395,10 @@ func ConvertObservationFact() error {
 			copyObs.PK.ConceptCD = "TAG_ID:" + strconv.FormatInt(MapConceptCodeToTag[copyObs.PK.ConceptCD], 10)
 		}
 
-		csvOutputFile.WriteString(copyObs.ToCSVText() + "\n")
+		// TODO: connected with the previous TODO
+		if copyObs.PK.EncounterNum != "" {
+			csvOutputFile.WriteString(copyObs.ToCSVText() + "\n")
+		}
 	}
 
 	return nil

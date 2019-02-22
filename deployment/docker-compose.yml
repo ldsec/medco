@@ -7,21 +7,21 @@ services:
       dockerfile: deployment/Dockerfile
       target: release
     volumes:
-      - ./group.toml:/group.toml
-      - ../data/genomic:/dataset
+      - ~/medco-loader/data/genomic:/dataset
+      - ~/medco-deployment/configuration-profiles/dev-local-3nodes/group.toml:/group.toml
     networks:
-      - dev-6nodes-1host_medco-network
-      - dev-6nodes-1host_medco-srv0
+      - dev-local-3nodes_medco-network
+      - dev-local-3nodes_medco-srv0
     command: >-
       -debug 2 v0 --group /group.toml --entryPointIdx 0
       --ont_clinical /dataset/tcga_cbio/clinical_data.csv --sen /dataset/sensitive.txt
       --ont_genomic /dataset/tcga_cbio/videodemo_mutation_data.csv --clinical /dataset/tcga_cbio/clinical_data.csv
-      --genomic /dataset/tcga_cbio/videodemo_mutation_data.csv --output /dataset/ --dbHost postgresql --dbPort 5432
+      --genomic /dataset/tcga_cbio/videodemo_mutation_data.csv --output /dataset/ --dbHost localhost --dbPort 5432
       --dbName i2b2medcosrv0 --dbUser i2b2 --dbPassword i2b2
 
 networks:
-  dev-6nodes-1host_medco-network:
+  dev-local-3nodes_medco-network:
     external: true
 
-  dev-6nodes-1host_medco-srv0:
+  dev-local-3nodes_medco-srv0:
     external: true
