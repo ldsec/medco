@@ -1354,7 +1354,6 @@ func ConvertObservationFact() error {
 	// remove the last ,
 	csvOutputFile.WriteString(headerString[:len(headerString)-1] + "\n")
 
-
 	for _, of := range TableObservationFact {
 		copyObs := of
 
