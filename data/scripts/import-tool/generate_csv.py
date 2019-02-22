@@ -1,6 +1,7 @@
 import pandas as pd
 import csv
 
+
 def generate_patient_dimension(mapping, patient_dimension_path, output_path):
     patient_dim_df = pd.read_csv(patient_dimension_path, low_memory=False)
 
@@ -20,7 +21,8 @@ def generate_patient_dimension(mapping, patient_dimension_path, output_path):
     for col in patient_dim_df.columns:
         patient_dim_df[col] = patient_dim_df[col].astype(str)
 
-    patient_dim_df.to_csv('new_patient_dimension.csv', quoting=csv.QUOTE_NONNUMERIC, index=False)
+    patient_dim_df.to_csv(output_path, quoting=csv.QUOTE_NONNUMERIC, index=False)
+
 
 def generate_observation_fact(observation_fact_df, histogram, new_patient_concepts_matrix, old_patient_concepts_matrix, clusters_labels, output_path):
     observation_fact_df = observation_fact_df[observation_fact_df['concept_cd'].isin(histogram.index)]

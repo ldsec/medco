@@ -174,7 +174,7 @@ func main() {
 		},
 		cli.BoolFlag{
 			Name:  optionEmpty + ", " + optionEmptyShort,
-			Usage: "Empty patient and visit dimension tables (y/n)",
+			Usage: "Empty patient and visit dimension tables",
 		},
 	}
 	loaderFlagsv1 = append(loaderFlagsCommon, loaderFlagsv1...)

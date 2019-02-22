@@ -1,0 +1,11 @@
+version: '3.5'
+services:
+  gen-dummies:
+    image: medco/gen-dummies:master
+    environment:
+      PYTHONUNBUFFERED: 1
+    build:
+      context: ../
+      dockerfile: deployment/Dockerfile
+    volumes:
+      - ../data:/root/import-tool/data

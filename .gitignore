@@ -48,7 +48,7 @@ data/genomic/tcga_cbio/*.zip
 data/i2b2/converted/*.xml
 data/i2b2/converted/*.csv
 data/scripts/*.txt
-data/scripts/import-tool/*.csv
+data/scripts/import-tool/data/output/*.csv
 app/*.toml
 app/files/
 app/medco-loader

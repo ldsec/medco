@@ -207,7 +207,7 @@ func loadV1(c *cli.Context) error {
 		mapSensitive[line] = struct{}{}
 	}
 
-	loaderi2b2.LoadI2B2Data(el.Roster, entryPointIdx, directory, files, allSensitive, mapSensitive, databaseS, empty)
+	err = loaderi2b2.LoadI2B2Data(el.Roster, entryPointIdx, directory, files, allSensitive, mapSensitive, databaseS, empty)
 	if err != nil {
 		log.Error("Error while converting I2B2 data:", err)
 		return cli.NewExitError(err, 1)
