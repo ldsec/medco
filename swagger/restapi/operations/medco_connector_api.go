@@ -19,7 +19,7 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
-	"github.com/lca1/medco-connector/restapi/operations/picsure2"
+	"github.com/lca1/medco-connector/swagger/restapi/operations/picsure2"
 )
 
 // NewMedcoConnectorAPI creates a new MedcoConnector instance

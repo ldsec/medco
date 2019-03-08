@@ -10,11 +10,11 @@ import (
 	runtime "github.com/go-openapi/runtime"
 	middleware "github.com/go-openapi/runtime/middleware"
 
-	"github.com/lca1/medco-connector/restapi/operations"
-	"github.com/lca1/medco-connector/restapi/operations/picsure2"
+	"github.com/lca1/medco-connector/swagger/restapi/operations"
+	"github.com/lca1/medco-connector/swagger/restapi/operations/picsure2"
 )
 
-//go:generate swagger generate server --target ../../medco-connector --name MedcoConnector --spec ../swagger.yml
+//go:generate swagger generate server --target ../../swagger --name MedcoConnector --spec ../swagger.yml
 
 func configureFlags(api *operations.MedcoConnectorAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }

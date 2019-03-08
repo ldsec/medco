@@ -13,43 +13,43 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 	swag "github.com/go-openapi/swag"
 
-	models "github.com/lca1/medco-connector/models"
+	models "github.com/lca1/medco-connector/swagger/models"
 )
 
-// QueryHandlerFunc turns a function with the right signature into a query handler
-type QueryHandlerFunc func(QueryParams, interface{}) middleware.Responder
+// QueryResultHandlerFunc turns a function with the right signature into a query result handler
+type QueryResultHandlerFunc func(QueryResultParams, interface{}) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn QueryHandlerFunc) Handle(params QueryParams, principal interface{}) middleware.Responder {
+func (fn QueryResultHandlerFunc) Handle(params QueryResultParams, principal interface{}) middleware.Responder {
 	return fn(params, principal)
 }
 
-// QueryHandler interface for that can handle valid query params
-type QueryHandler interface {
-	Handle(QueryParams, interface{}) middleware.Responder
+// QueryResultHandler interface for that can handle valid query result params
+type QueryResultHandler interface {
+	Handle(QueryResultParams, interface{}) middleware.Responder
 }
 
-// NewQuery creates a new http.Handler for the query operation
-func NewQuery(ctx *middleware.Context, handler QueryHandler) *Query {
-	return &Query{Context: ctx, Handler: handler}
+// NewQueryResult creates a new http.Handler for the query result operation
+func NewQueryResult(ctx *middleware.Context, handler QueryResultHandler) *QueryResult {
+	return &QueryResult{Context: ctx, Handler: handler}
 }
 
-/*Query swagger:route POST /picsure2/query picsure2 query
+/*QueryResult swagger:route POST /picsure2/{queryId}/result picsure2 queryResult
 
-Query MedCo node.
+Get result of query.
 
 */
-type Query struct {
+type QueryResult struct {
 	Context *middleware.Context
-	Handler QueryHandler
+	Handler QueryResultHandler
 }
 
-func (o *Query) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+func (o *QueryResult) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	route, rCtx, _ := o.Context.RouteInfo(r)
 	if rCtx != nil {
 		r = rCtx
 	}
-	var Params = NewQueryParams()
+	var Params = NewQueryResultParams()
 
 	uprinc, aCtx, err := o.Context.Authorize(r, route)
 	if err != nil {
@@ -75,22 +75,16 @@ func (o *Query) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 }
 
-// QueryBody query body
-// swagger:model QueryBody
-type QueryBody struct {
-
-	// query
-	Query models.Query `json:"query,omitempty"`
-
-	// resource UUID
-	ResourceUUID string `json:"resourceUUID,omitempty"`
+// QueryResultBody query result body
+// swagger:model QueryResultBody
+type QueryResultBody struct {
 
 	// resources credentials
 	ResourcesCredentials *models.ResourceCredentials `json:"resourcesCredentials,omitempty"`
 }
 
-// Validate validates this query body
-func (o *QueryBody) Validate(formats strfmt.Registry) error {
+// Validate validates this query result body
+func (o *QueryResultBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := o.validateResourcesCredentials(formats); err != nil {
@@ -103,7 +97,7 @@ func (o *QueryBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *QueryBody) validateResourcesCredentials(formats strfmt.Registry) error {
+func (o *QueryResultBody) validateResourcesCredentials(formats strfmt.Registry) error {
 
 	if swag.IsZero(o.ResourcesCredentials) { // not required
 		return nil
@@ -122,7 +116,7 @@ func (o *QueryBody) validateResourcesCredentials(formats strfmt.Registry) error 
 }
 
 // MarshalBinary interface implementation
-func (o *QueryBody) MarshalBinary() ([]byte, error) {
+func (o *QueryResultBody) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -130,8 +124,8 @@ func (o *QueryBody) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *QueryBody) UnmarshalBinary(b []byte) error {
-	var res QueryBody
+func (o *QueryResultBody) UnmarshalBinary(b []byte) error {
+	var res QueryResultBody
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

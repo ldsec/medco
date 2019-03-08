@@ -13,43 +13,43 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 	swag "github.com/go-openapi/swag"
 
-	models "github.com/lca1/medco-connector/models"
+	models "github.com/lca1/medco-connector/swagger/models"
 )
 
-// GetInfoHandlerFunc turns a function with the right signature into a get info handler
-type GetInfoHandlerFunc func(GetInfoParams, interface{}) middleware.Responder
+// QuerySyncHandlerFunc turns a function with the right signature into a query sync handler
+type QuerySyncHandlerFunc func(QuerySyncParams, interface{}) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn GetInfoHandlerFunc) Handle(params GetInfoParams, principal interface{}) middleware.Responder {
+func (fn QuerySyncHandlerFunc) Handle(params QuerySyncParams, principal interface{}) middleware.Responder {
 	return fn(params, principal)
 }
 
-// GetInfoHandler interface for that can handle valid get info params
-type GetInfoHandler interface {
-	Handle(GetInfoParams, interface{}) middleware.Responder
+// QuerySyncHandler interface for that can handle valid query sync params
+type QuerySyncHandler interface {
+	Handle(QuerySyncParams, interface{}) middleware.Responder
 }
 
-// NewGetInfo creates a new http.Handler for the get info operation
-func NewGetInfo(ctx *middleware.Context, handler GetInfoHandler) *GetInfo {
-	return &GetInfo{Context: ctx, Handler: handler}
+// NewQuerySync creates a new http.Handler for the query sync operation
+func NewQuerySync(ctx *middleware.Context, handler QuerySyncHandler) *QuerySync {
+	return &QuerySync{Context: ctx, Handler: handler}
 }
 
-/*GetInfo swagger:route POST /picsure2/info picsure2 getInfo
+/*QuerySync swagger:route POST /picsure2/query/sync picsure2 querySync
 
-Returns information on how to interact with this PIC-SURE endpoint.
+Query MedCo node synchronously.
 
 */
-type GetInfo struct {
+type QuerySync struct {
 	Context *middleware.Context
-	Handler GetInfoHandler
+	Handler QuerySyncHandler
 }
 
-func (o *GetInfo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+func (o *QuerySync) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	route, rCtx, _ := o.Context.RouteInfo(r)
 	if rCtx != nil {
 		r = rCtx
 	}
-	var Params = NewGetInfoParams()
+	var Params = NewQuerySyncParams()
 
 	uprinc, aCtx, err := o.Context.Authorize(r, route)
 	if err != nil {
@@ -75,16 +75,22 @@ func (o *GetInfo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 }
 
-// GetInfoBody get info body
-// swagger:model GetInfoBody
-type GetInfoBody struct {
+// QuerySyncBody query sync body
+// swagger:model QuerySyncBody
+type QuerySyncBody struct {
+
+	// query
+	Query models.Query `json:"query,omitempty"`
+
+	// resource UUID
+	ResourceUUID string `json:"resourceUUID,omitempty"`
 
 	// resources credentials
 	ResourcesCredentials *models.ResourceCredentials `json:"resourcesCredentials,omitempty"`
 }
 
-// Validate validates this get info body
-func (o *GetInfoBody) Validate(formats strfmt.Registry) error {
+// Validate validates this query sync body
+func (o *QuerySyncBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := o.validateResourcesCredentials(formats); err != nil {
@@ -97,7 +103,7 @@ func (o *GetInfoBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *GetInfoBody) validateResourcesCredentials(formats strfmt.Registry) error {
+func (o *QuerySyncBody) validateResourcesCredentials(formats strfmt.Registry) error {
 
 	if swag.IsZero(o.ResourcesCredentials) { // not required
 		return nil
@@ -116,7 +122,7 @@ func (o *GetInfoBody) validateResourcesCredentials(formats strfmt.Registry) erro
 }
 
 // MarshalBinary interface implementation
-func (o *GetInfoBody) MarshalBinary() ([]byte, error) {
+func (o *QuerySyncBody) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -124,8 +130,8 @@ func (o *GetInfoBody) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *GetInfoBody) UnmarshalBinary(b []byte) error {
-	var res GetInfoBody
+func (o *QuerySyncBody) UnmarshalBinary(b []byte) error {
+	var res QuerySyncBody
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

@@ -13,43 +13,43 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 	swag "github.com/go-openapi/swag"
 
-	models "github.com/lca1/medco-connector/models"
+	models "github.com/lca1/medco-connector/swagger/models"
 )
 
-// QuerySyncHandlerFunc turns a function with the right signature into a query sync handler
-type QuerySyncHandlerFunc func(QuerySyncParams, interface{}) middleware.Responder
+// QueryHandlerFunc turns a function with the right signature into a query handler
+type QueryHandlerFunc func(QueryParams, interface{}) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn QuerySyncHandlerFunc) Handle(params QuerySyncParams, principal interface{}) middleware.Responder {
+func (fn QueryHandlerFunc) Handle(params QueryParams, principal interface{}) middleware.Responder {
 	return fn(params, principal)
 }
 
-// QuerySyncHandler interface for that can handle valid query sync params
-type QuerySyncHandler interface {
-	Handle(QuerySyncParams, interface{}) middleware.Responder
+// QueryHandler interface for that can handle valid query params
+type QueryHandler interface {
+	Handle(QueryParams, interface{}) middleware.Responder
 }
 
-// NewQuerySync creates a new http.Handler for the query sync operation
-func NewQuerySync(ctx *middleware.Context, handler QuerySyncHandler) *QuerySync {
-	return &QuerySync{Context: ctx, Handler: handler}
+// NewQuery creates a new http.Handler for the query operation
+func NewQuery(ctx *middleware.Context, handler QueryHandler) *Query {
+	return &Query{Context: ctx, Handler: handler}
 }
 
-/*QuerySync swagger:route POST /picsure2/query/sync picsure2 querySync
+/*Query swagger:route POST /picsure2/query picsure2 query
 
-Query MedCo node synchronously.
+Query MedCo node.
 
 */
-type QuerySync struct {
+type Query struct {
 	Context *middleware.Context
-	Handler QuerySyncHandler
+	Handler QueryHandler
 }
 
-func (o *QuerySync) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+func (o *Query) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	route, rCtx, _ := o.Context.RouteInfo(r)
 	if rCtx != nil {
 		r = rCtx
 	}
-	var Params = NewQuerySyncParams()
+	var Params = NewQueryParams()
 
 	uprinc, aCtx, err := o.Context.Authorize(r, route)
 	if err != nil {
@@ -75,9 +75,9 @@ func (o *QuerySync) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 }
 
-// QuerySyncBody query sync body
-// swagger:model QuerySyncBody
-type QuerySyncBody struct {
+// QueryBody query body
+// swagger:model QueryBody
+type QueryBody struct {
 
 	// query
 	Query models.Query `json:"query,omitempty"`
@@ -89,8 +89,8 @@ type QuerySyncBody struct {
 	ResourcesCredentials *models.ResourceCredentials `json:"resourcesCredentials,omitempty"`
 }
 
-// Validate validates this query sync body
-func (o *QuerySyncBody) Validate(formats strfmt.Registry) error {
+// Validate validates this query body
+func (o *QueryBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := o.validateResourcesCredentials(formats); err != nil {
@@ -103,7 +103,7 @@ func (o *QuerySyncBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *QuerySyncBody) validateResourcesCredentials(formats strfmt.Registry) error {
+func (o *QueryBody) validateResourcesCredentials(formats strfmt.Registry) error {
 
 	if swag.IsZero(o.ResourcesCredentials) { // not required
 		return nil
@@ -122,7 +122,7 @@ func (o *QuerySyncBody) validateResourcesCredentials(formats strfmt.Registry) er
 }
 
 // MarshalBinary interface implementation
-func (o *QuerySyncBody) MarshalBinary() ([]byte, error) {
+func (o *QueryBody) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -130,8 +130,8 @@ func (o *QuerySyncBody) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *QuerySyncBody) UnmarshalBinary(b []byte) error {
-	var res QuerySyncBody
+func (o *QueryBody) UnmarshalBinary(b []byte) error {
+	var res QueryBody
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
