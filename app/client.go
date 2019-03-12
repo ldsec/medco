@@ -4,14 +4,14 @@ package main
 
 import (
 	"encoding/xml"
-	"github.com/dedis/kyber"
-	"github.com/dedis/onet"
-	"github.com/dedis/onet/app"
-	"github.com/dedis/onet/log"
 	"github.com/lca1/medco-unlynx/lib"
 	"github.com/lca1/medco-unlynx/services"
 	"github.com/lca1/unlynx/lib"
 	_ "github.com/lib/pq"
+	"go.dedis.ch/kyber/v3"
+	"go.dedis.ch/onet/v3"
+	"go.dedis.ch/onet/v3/app"
+	"go.dedis.ch/onet/v3/log"
 	"gopkg.in/urfave/cli.v1"
 	"io"
 	"io/ioutil"

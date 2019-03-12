@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/base64"
 	"errors"
-	"github.com/dedis/onet/app"
-	"github.com/dedis/onet/log"
+	"go.dedis.ch/onet/v3/app"
+	"go.dedis.ch/onet/v3/log"
 	"gopkg.in/urfave/cli.v1"
 	"os"
 	"path"

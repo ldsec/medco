@@ -2,9 +2,9 @@ package main
 
 import (
 	"errors"
-	"github.com/dedis/onet/app"
-	"github.com/dedis/onet/log"
 	"github.com/lca1/medco-unlynx/services"
+	"go.dedis.ch/onet/v3/app"
+	"go.dedis.ch/onet/v3/log"
 	"gopkg.in/urfave/cli.v1"
 	"os"
 	"path"

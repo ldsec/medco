@@ -2,12 +2,12 @@ package main
 
 import (
 	"errors"
-	"github.com/dedis/kyber/util/encoding"
-	"github.com/dedis/kyber/util/key"
-	"github.com/dedis/onet/app"
-	"github.com/dedis/onet/log"
-	"github.com/dedis/onet/network"
 	"github.com/lca1/unlynx/lib"
+	"go.dedis.ch/kyber/v3/util/encoding"
+	"go.dedis.ch/kyber/v3/util/key"
+	"go.dedis.ch/onet/v3/app"
+	"go.dedis.ch/onet/v3/log"
+	"go.dedis.ch/onet/v3/network"
 	"gopkg.in/urfave/cli.v1"
 )
 
