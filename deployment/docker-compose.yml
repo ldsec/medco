@@ -1,0 +1,13 @@
+version: '3.5'
+services:
+  medco-connector:
+    image: medco/medco-connector:dev
+    build:
+      context: ../
+      dockerfile: deployment/Dockerfile
+    ports:
+      - "1999"
+    environment:
+      - PICSURE2_INTERNAL_TOKEN=asdasd-456465-asdasd-x
+      - I2B2_CRC_URL=http://i2b2:8080/i2b2/services/QueryToolService
+      - I2B2_ONT_URL=http://i2b2:8080/i2b2/services/OntologyService
