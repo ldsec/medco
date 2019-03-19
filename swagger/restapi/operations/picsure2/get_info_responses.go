@@ -9,8 +9,6 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/runtime"
-
-	models "github.com/lca1/medco-connector/swagger/models"
 )
 
 // GetInfoOKCode is the HTTP code returned for type GetInfoOK
@@ -25,7 +23,7 @@ type GetInfoOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.ResourceInfo `json:"body,omitempty"`
+	Payload *GetInfoOKBody `json:"body,omitempty"`
 }
 
 // NewGetInfoOK creates GetInfoOK with default headers values
@@ -35,13 +33,13 @@ func NewGetInfoOK() *GetInfoOK {
 }
 
 // WithPayload adds the payload to the get info o k response
-func (o *GetInfoOK) WithPayload(payload *models.ResourceInfo) *GetInfoOK {
+func (o *GetInfoOK) WithPayload(payload *GetInfoOKBody) *GetInfoOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get info o k response
-func (o *GetInfoOK) SetPayload(payload *models.ResourceInfo) {
+func (o *GetInfoOK) SetPayload(payload *GetInfoOKBody) {
 	o.Payload = payload
 }
 
@@ -49,6 +47,64 @@ func (o *GetInfoOK) SetPayload(payload *models.ResourceInfo) {
 func (o *GetInfoOK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(200)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+/*GetInfoDefault Error response
+
+swagger:response getInfoDefault
+*/
+type GetInfoDefault struct {
+	_statusCode int
+
+	/*
+	  In: Body
+	*/
+	Payload *GetInfoDefaultBody `json:"body,omitempty"`
+}
+
+// NewGetInfoDefault creates GetInfoDefault with default headers values
+func NewGetInfoDefault(code int) *GetInfoDefault {
+	if code <= 0 {
+		code = 500
+	}
+
+	return &GetInfoDefault{
+		_statusCode: code,
+	}
+}
+
+// WithStatusCode adds the status to the get info default response
+func (o *GetInfoDefault) WithStatusCode(code int) *GetInfoDefault {
+	o._statusCode = code
+	return o
+}
+
+// SetStatusCode sets the status to the get info default response
+func (o *GetInfoDefault) SetStatusCode(code int) {
+	o._statusCode = code
+}
+
+// WithPayload adds the payload to the get info default response
+func (o *GetInfoDefault) WithPayload(payload *GetInfoDefaultBody) *GetInfoDefault {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get info default response
+func (o *GetInfoDefault) SetPayload(payload *GetInfoDefaultBody) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetInfoDefault) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(o._statusCode)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

@@ -58,9 +58,8 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 			return middleware.NotImplemented("operation Picsure2Search has not yet been implemented")
 		}),
 
-		// Applies when the "Authorization" header is set
-		PICSURE2ResourceTokenAuth: func(token string) (interface{}, error) {
-			return nil, errors.NotImplemented("api key auth (PICSURE2ResourceToken) Authorization from header param [Authorization] has not yet been implemented")
+		PICSURE2ResourceTokenAuth: func(token string, scopes []string) (interface{}, error) {
+			return nil, errors.NotImplemented("oauth2 bearer auth (PICSURE2ResourceToken) has not yet been implemented")
 		},
 
 		// default authorizer is authorized meaning no requests are blocked
@@ -96,9 +95,9 @@ type MedcoConnectorAPI struct {
 	// JSONProducer registers a producer for a "application/json" mime type
 	JSONProducer runtime.Producer
 
-	// PICSURE2ResourceTokenAuth registers a function that takes a token and returns a principal
-	// it performs authentication based on an api key Authorization provided in the header
-	PICSURE2ResourceTokenAuth func(string) (interface{}, error)
+	// PICSURE2ResourceTokenAuth registers a function that takes an access token and a collection of required scopes and returns a principal
+	// it performs authentication based on an oauth2 bearer token provided in the request
+	PICSURE2ResourceTokenAuth func(string, []string) (interface{}, error)
 
 	// APIAuthorizer provides access control (ACL/RBAC/ABAC) by providing access to the request and authenticated principal
 	APIAuthorizer runtime.Authorizer
@@ -179,7 +178,7 @@ func (o *MedcoConnectorAPI) Validate() error {
 	}
 
 	if o.PICSURE2ResourceTokenAuth == nil {
-		unregistered = append(unregistered, "AuthorizationAuth")
+		unregistered = append(unregistered, "PICSURE2ResourceTokenAuth")
 	}
 
 	if o.Picsure2GetInfoHandler == nil {
@@ -227,7 +226,7 @@ func (o *MedcoConnectorAPI) AuthenticatorsFor(schemes map[string]spec.SecuritySc
 
 		case "PICSURE2ResourceToken":
 
-			result[name] = o.APIKeyAuthenticator(scheme.Name, scheme.In, o.PICSURE2ResourceTokenAuth)
+			result[name] = o.BearerAuthenticator(scheme.Name, o.PICSURE2ResourceTokenAuth)
 
 		}
 	}

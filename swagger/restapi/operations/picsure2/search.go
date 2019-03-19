@@ -7,6 +7,7 @@ package picsure2
 
 import (
 	"net/http"
+	"strconv"
 
 	errors "github.com/go-openapi/errors"
 	middleware "github.com/go-openapi/runtime/middleware"
@@ -80,20 +81,24 @@ func (o *Search) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 type SearchBody struct {
 
 	// query
-	Query models.SearchQuery `json:"query,omitempty"`
+	Query *models.SearchQuery `json:"query,omitempty"`
+
+	// resource credentials
+	ResourceCredentials *models.ResourceCredentials `json:"resourceCredentials,omitempty"`
 
 	// resource UUID
 	ResourceUUID string `json:"resourceUUID,omitempty"`
-
-	// resources credentials
-	ResourcesCredentials *models.ResourceCredentials `json:"resourcesCredentials,omitempty"`
 }
 
 // Validate validates this search body
 func (o *SearchBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := o.validateResourcesCredentials(formats); err != nil {
+	if err := o.validateQuery(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateResourceCredentials(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -103,16 +108,34 @@ func (o *SearchBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *SearchBody) validateResourcesCredentials(formats strfmt.Registry) error {
+func (o *SearchBody) validateQuery(formats strfmt.Registry) error {
 
-	if swag.IsZero(o.ResourcesCredentials) { // not required
+	if swag.IsZero(o.Query) { // not required
 		return nil
 	}
 
-	if o.ResourcesCredentials != nil {
-		if err := o.ResourcesCredentials.Validate(formats); err != nil {
+	if o.Query != nil {
+		if err := o.Query.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("body" + "." + "resourcesCredentials")
+				return ve.ValidateName("body" + "." + "query")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *SearchBody) validateResourceCredentials(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.ResourceCredentials) { // not required
+		return nil
+	}
+
+	if o.ResourceCredentials != nil {
+		if err := o.ResourceCredentials.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("body" + "." + "resourceCredentials")
 			}
 			return err
 		}
@@ -139,12 +162,43 @@ func (o *SearchBody) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
+// SearchDefaultBody search default body
+// swagger:model SearchDefaultBody
+type SearchDefaultBody struct {
+
+	// message
+	Message string `json:"message,omitempty"`
+}
+
+// Validate validates this search default body
+func (o *SearchDefaultBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *SearchDefaultBody) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *SearchDefaultBody) UnmarshalBinary(b []byte) error {
+	var res SearchDefaultBody
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
 // SearchOKBody search o k body
 // swagger:model SearchOKBody
 type SearchOKBody struct {
 
 	// results
-	Results interface{} `json:"results,omitempty"`
+	Results []*models.SearchResultElement `json:"results"`
 
 	// search query
 	SearchQuery string `json:"searchQuery,omitempty"`
@@ -152,6 +206,40 @@ type SearchOKBody struct {
 
 // Validate validates this search o k body
 func (o *SearchOKBody) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateResults(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *SearchOKBody) validateResults(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.Results) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(o.Results); i++ {
+		if swag.IsZero(o.Results[i]) { // not required
+			continue
+		}
+
+		if o.Results[i] != nil {
+			if err := o.Results[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("searchOK" + "." + "results" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
 	return nil
 }
 

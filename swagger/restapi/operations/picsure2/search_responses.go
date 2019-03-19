@@ -54,3 +54,61 @@ func (o *SearchOK) WriteResponse(rw http.ResponseWriter, producer runtime.Produc
 		}
 	}
 }
+
+/*SearchDefault Error response
+
+swagger:response searchDefault
+*/
+type SearchDefault struct {
+	_statusCode int
+
+	/*
+	  In: Body
+	*/
+	Payload *SearchDefaultBody `json:"body,omitempty"`
+}
+
+// NewSearchDefault creates SearchDefault with default headers values
+func NewSearchDefault(code int) *SearchDefault {
+	if code <= 0 {
+		code = 500
+	}
+
+	return &SearchDefault{
+		_statusCode: code,
+	}
+}
+
+// WithStatusCode adds the status to the search default response
+func (o *SearchDefault) WithStatusCode(code int) *SearchDefault {
+	o._statusCode = code
+	return o
+}
+
+// SetStatusCode sets the status to the search default response
+func (o *SearchDefault) SetStatusCode(code int) {
+	o._statusCode = code
+}
+
+// WithPayload adds the payload to the search default response
+func (o *SearchDefault) WithPayload(payload *SearchDefaultBody) *SearchDefault {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the search default response
+func (o *SearchDefault) SetPayload(payload *SearchDefaultBody) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *SearchDefault) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(o._statusCode)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}

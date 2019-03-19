@@ -6,12 +6,14 @@ package picsure2
 // Editing this file might prove futile when you re-run the generate command
 
 import (
+	"encoding/json"
 	"net/http"
 
 	errors "github.com/go-openapi/errors"
 	middleware "github.com/go-openapi/runtime/middleware"
 	strfmt "github.com/go-openapi/strfmt"
 	swag "github.com/go-openapi/swag"
+	validate "github.com/go-openapi/validate"
 
 	models "github.com/lca1/medco-connector/swagger/models"
 )
@@ -79,15 +81,15 @@ func (o *QueryStatus) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 // swagger:model QueryStatusBody
 type QueryStatusBody struct {
 
-	// resources credentials
-	ResourcesCredentials *models.ResourceCredentials `json:"resourcesCredentials,omitempty"`
+	// resource credentials
+	ResourceCredentials *models.ResourceCredentials `json:"resourceCredentials,omitempty"`
 }
 
 // Validate validates this query status body
 func (o *QueryStatusBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := o.validateResourcesCredentials(formats); err != nil {
+	if err := o.validateResourceCredentials(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -97,16 +99,16 @@ func (o *QueryStatusBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *QueryStatusBody) validateResourcesCredentials(formats strfmt.Registry) error {
+func (o *QueryStatusBody) validateResourceCredentials(formats strfmt.Registry) error {
 
-	if swag.IsZero(o.ResourcesCredentials) { // not required
+	if swag.IsZero(o.ResourceCredentials) { // not required
 		return nil
 	}
 
-	if o.ResourcesCredentials != nil {
-		if err := o.ResourcesCredentials.Validate(formats); err != nil {
+	if o.ResourceCredentials != nil {
+		if err := o.ResourceCredentials.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("body" + "." + "resourcesCredentials")
+				return ve.ValidateName("body" + "." + "resourceCredentials")
 			}
 			return err
 		}
@@ -126,6 +128,170 @@ func (o *QueryStatusBody) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (o *QueryStatusBody) UnmarshalBinary(b []byte) error {
 	var res QueryStatusBody
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+// QueryStatusDefaultBody query status default body
+// swagger:model QueryStatusDefaultBody
+type QueryStatusDefaultBody struct {
+
+	// message
+	Message string `json:"message,omitempty"`
+}
+
+// Validate validates this query status default body
+func (o *QueryStatusDefaultBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *QueryStatusDefaultBody) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *QueryStatusDefaultBody) UnmarshalBinary(b []byte) error {
+	var res QueryStatusDefaultBody
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+// QueryStatusOKBody query status o k body
+// swagger:model QueryStatusOKBody
+type QueryStatusOKBody struct {
+
+	// duration
+	Duration int64 `json:"duration,omitempty"`
+
+	// expiration
+	Expiration int64 `json:"expiration,omitempty"`
+
+	// picsure result Id
+	PicsureResultID string `json:"picsureResultId,omitempty"`
+
+	// resource ID
+	ResourceID string `json:"resourceID,omitempty"`
+
+	// resource result Id
+	ResourceResultID string `json:"resourceResultId,omitempty"`
+
+	// resource status
+	ResourceStatus string `json:"resourceStatus,omitempty"`
+
+	// result metadata
+	// Format: byte
+	ResultMetadata strfmt.Base64 `json:"resultMetadata,omitempty"`
+
+	// size in bytes
+	SizeInBytes int64 `json:"sizeInBytes,omitempty"`
+
+	// start time
+	StartTime int64 `json:"startTime,omitempty"`
+
+	// status
+	// Enum: [QUEUED PENDING ERROR AVAILABLE]
+	Status string `json:"status,omitempty"`
+}
+
+// Validate validates this query status o k body
+func (o *QueryStatusOKBody) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateResultMetadata(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateStatus(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *QueryStatusOKBody) validateResultMetadata(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.ResultMetadata) { // not required
+		return nil
+	}
+
+	// Format "byte" (base64 string) is already validated when unmarshalled
+
+	return nil
+}
+
+var queryStatusOKBodyTypeStatusPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["QUEUED","PENDING","ERROR","AVAILABLE"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		queryStatusOKBodyTypeStatusPropEnum = append(queryStatusOKBodyTypeStatusPropEnum, v)
+	}
+}
+
+const (
+
+	// QueryStatusOKBodyStatusQUEUED captures enum value "QUEUED"
+	QueryStatusOKBodyStatusQUEUED string = "QUEUED"
+
+	// QueryStatusOKBodyStatusPENDING captures enum value "PENDING"
+	QueryStatusOKBodyStatusPENDING string = "PENDING"
+
+	// QueryStatusOKBodyStatusERROR captures enum value "ERROR"
+	QueryStatusOKBodyStatusERROR string = "ERROR"
+
+	// QueryStatusOKBodyStatusAVAILABLE captures enum value "AVAILABLE"
+	QueryStatusOKBodyStatusAVAILABLE string = "AVAILABLE"
+)
+
+// prop value enum
+func (o *QueryStatusOKBody) validateStatusEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, queryStatusOKBodyTypeStatusPropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *QueryStatusOKBody) validateStatus(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.Status) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := o.validateStatusEnum("queryStatusOK"+"."+"status", "body", o.Status); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *QueryStatusOKBody) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *QueryStatusOKBody) UnmarshalBinary(b []byte) error {
+	var res QueryStatusOKBody
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

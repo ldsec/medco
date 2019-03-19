@@ -9,8 +9,6 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/runtime"
-
-	models "github.com/lca1/medco-connector/swagger/models"
 )
 
 // QuerySyncOKCode is the HTTP code returned for type QuerySyncOK
@@ -25,7 +23,7 @@ type QuerySyncOK struct {
 	/*
 	  In: Body
 	*/
-	Payload models.QueryResult `json:"body,omitempty"`
+	Payload interface{} `json:"body,omitempty"`
 }
 
 // NewQuerySyncOK creates QuerySyncOK with default headers values
@@ -35,13 +33,13 @@ func NewQuerySyncOK() *QuerySyncOK {
 }
 
 // WithPayload adds the payload to the query sync o k response
-func (o *QuerySyncOK) WithPayload(payload models.QueryResult) *QuerySyncOK {
+func (o *QuerySyncOK) WithPayload(payload interface{}) *QuerySyncOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the query sync o k response
-func (o *QuerySyncOK) SetPayload(payload models.QueryResult) {
+func (o *QuerySyncOK) SetPayload(payload interface{}) {
 	o.Payload = payload
 }
 
@@ -52,5 +50,63 @@ func (o *QuerySyncOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pro
 	payload := o.Payload
 	if err := producer.Produce(rw, payload); err != nil {
 		panic(err) // let the recovery middleware deal with this
+	}
+}
+
+/*QuerySyncDefault Error response
+
+swagger:response querySyncDefault
+*/
+type QuerySyncDefault struct {
+	_statusCode int
+
+	/*
+	  In: Body
+	*/
+	Payload *QuerySyncDefaultBody `json:"body,omitempty"`
+}
+
+// NewQuerySyncDefault creates QuerySyncDefault with default headers values
+func NewQuerySyncDefault(code int) *QuerySyncDefault {
+	if code <= 0 {
+		code = 500
+	}
+
+	return &QuerySyncDefault{
+		_statusCode: code,
+	}
+}
+
+// WithStatusCode adds the status to the query sync default response
+func (o *QuerySyncDefault) WithStatusCode(code int) *QuerySyncDefault {
+	o._statusCode = code
+	return o
+}
+
+// SetStatusCode sets the status to the query sync default response
+func (o *QuerySyncDefault) SetStatusCode(code int) {
+	o._statusCode = code
+}
+
+// WithPayload adds the payload to the query sync default response
+func (o *QuerySyncDefault) WithPayload(payload *QuerySyncDefaultBody) *QuerySyncDefault {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the query sync default response
+func (o *QuerySyncDefault) SetPayload(payload *QuerySyncDefaultBody) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *QuerySyncDefault) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(o._statusCode)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
 	}
 }

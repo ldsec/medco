@@ -19,7 +19,6 @@ var (
 func init() {
 	SwaggerJSON = json.RawMessage([]byte(`{
   "schemes": [
-    "https",
     "http"
   ],
   "swagger": "2.0",
@@ -64,7 +63,7 @@ func init() {
             "schema": {
               "type": "object",
               "properties": {
-                "resourcesCredentials": {
+                "resourceCredentials": {
                   "$ref": "#/definitions/resourceCredentials"
                 }
               }
@@ -73,10 +72,10 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "PIC-SURE 2 resource information.",
-            "schema": {
-              "$ref": "#/definitions/resourceInfo"
-            }
+            "$ref": "#/responses/resourceInfo"
+          },
+          "default": {
+            "$ref": "#/responses/error"
           }
         }
       }
@@ -111,11 +110,11 @@ func init() {
                 "query": {
                   "$ref": "#/definitions/query"
                 },
+                "resourceCredentials": {
+                  "$ref": "#/definitions/resourceCredentials"
+                },
                 "resourceUUID": {
                   "type": "string"
-                },
-                "resourcesCredentials": {
-                  "$ref": "#/definitions/resourceCredentials"
                 }
               }
             }
@@ -123,10 +122,10 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "Query status.",
-            "schema": {
-              "$ref": "#/definitions/queryStatus"
-            }
+            "$ref": "#/responses/queryStatus"
+          },
+          "default": {
+            "$ref": "#/responses/error"
           }
         }
       }
@@ -161,11 +160,11 @@ func init() {
                 "query": {
                   "$ref": "#/definitions/query"
                 },
+                "resourceCredentials": {
+                  "$ref": "#/definitions/resourceCredentials"
+                },
                 "resourceUUID": {
                   "type": "string"
-                },
-                "resourcesCredentials": {
-                  "$ref": "#/definitions/resourceCredentials"
                 }
               }
             }
@@ -173,10 +172,10 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "Query result.",
-            "schema": {
-              "$ref": "#/definitions/queryResult"
-            }
+            "$ref": "#/responses/queryResult"
+          },
+          "default": {
+            "$ref": "#/responses/error"
           }
         }
       }
@@ -211,11 +210,11 @@ func init() {
                 "query": {
                   "$ref": "#/definitions/searchQuery"
                 },
+                "resourceCredentials": {
+                  "$ref": "#/definitions/resourceCredentials"
+                },
                 "resourceUUID": {
                   "type": "string"
-                },
-                "resourcesCredentials": {
-                  "$ref": "#/definitions/resourceCredentials"
                 }
               }
             }
@@ -223,18 +222,10 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "Search results.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "results": {
-                  "type": "object"
-                },
-                "searchQuery": {
-                  "type": "string"
-                }
-              }
-            }
+            "$ref": "#/responses/searchResult"
+          },
+          "default": {
+            "$ref": "#/responses/error"
           }
         }
       }
@@ -273,7 +264,7 @@ func init() {
             "schema": {
               "type": "object",
               "properties": {
-                "resourcesCredentials": {
+                "resourceCredentials": {
                   "$ref": "#/definitions/resourceCredentials"
                 }
               }
@@ -282,10 +273,10 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "Query result.",
-            "schema": {
-              "$ref": "#/definitions/queryResult"
-            }
+            "$ref": "#/responses/queryResult"
+          },
+          "default": {
+            "$ref": "#/responses/error"
           }
         }
       }
@@ -324,7 +315,7 @@ func init() {
             "schema": {
               "type": "object",
               "properties": {
-                "resourcesCredentials": {
+                "resourceCredentials": {
                   "$ref": "#/definitions/resourceCredentials"
                 }
               }
@@ -333,10 +324,10 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "Query status.",
-            "schema": {
-              "$ref": "#/definitions/queryStatus"
-            }
+            "$ref": "#/responses/queryStatus"
+          },
+          "default": {
+            "$ref": "#/responses/error"
           }
         }
       }
@@ -345,75 +336,6 @@ func init() {
   "definitions": {
     "query": {
       "type": "object"
-    },
-    "queryFormat": {
-      "type": "object",
-      "properties": {
-        "description": {
-          "type": "string"
-        },
-        "examples": {
-          "type": "array",
-          "items": {
-            "type": "object"
-          }
-        },
-        "name": {
-          "type": "string"
-        },
-        "specifications": {
-          "type": "object"
-        }
-      }
-    },
-    "queryResult": {
-      "type": "object"
-    },
-    "queryStatus": {
-      "type": "object",
-      "properties": {
-        "duration": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "expiration": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "picsureResultId": {
-          "type": "string"
-        },
-        "resourceID": {
-          "type": "string"
-        },
-        "resourceResultId": {
-          "type": "string"
-        },
-        "resourceStatus": {
-          "type": "string"
-        },
-        "resultMetadata": {
-          "type": "string",
-          "format": "byte"
-        },
-        "sizeInBytes": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "startTime": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "status": {
-          "type": "string",
-          "enum": [
-            "QUEUED",
-            "PENDING",
-            "ERROR",
-            "AVAILABLE"
-          ]
-        }
-      }
     },
     "resourceCredentials": {
       "type": "object",
@@ -424,33 +346,207 @@ func init() {
         }
       }
     },
-    "resourceInfo": {
+    "searchQuery": {
       "type": "object",
       "properties": {
-        "id": {
+        "path": {
           "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "children",
+            "metadata"
+          ]
+        }
+      }
+    },
+    "searchResultElement": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "medcoEncryption": {
+          "type": "object",
+          "properties": {
+            "childrenIds": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "encrypted": {
+              "type": "boolean"
+            },
+            "id": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "CONCEPT_PARENT_NODE",
+                "CONCEPT_INTERNAL_NODE",
+                "CONCEPT_LEAF"
+              ]
+            }
+          }
+        },
+        "metadata": {
+          "type": "object"
         },
         "name": {
           "type": "string"
         },
-        "queryFormats": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/queryFormat"
+        "path": {
+          "type": "string"
+        },
+        "valueType": {
+          "type": "string",
+          "enum": [
+            "none",
+            "numeric",
+            "enum",
+            "text",
+            "genomic_annotation"
+          ]
+        }
+      }
+    }
+  },
+  "responses": {
+    "error": {
+      "description": "Error response",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
           }
         }
       }
     },
-    "searchQuery": {
-      "type": "object"
+    "queryResult": {
+      "description": "Query result.",
+      "schema": {
+        "type": "object"
+      }
+    },
+    "queryStatus": {
+      "description": "Query status.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "duration": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "expiration": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "picsureResultId": {
+            "type": "string"
+          },
+          "resourceID": {
+            "type": "string"
+          },
+          "resourceResultId": {
+            "type": "string"
+          },
+          "resourceStatus": {
+            "type": "string"
+          },
+          "resultMetadata": {
+            "type": "string",
+            "format": "byte"
+          },
+          "sizeInBytes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "startTime": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "QUEUED",
+              "PENDING",
+              "ERROR",
+              "AVAILABLE"
+            ]
+          }
+        }
+      }
+    },
+    "resourceInfo": {
+      "description": "PIC-SURE 2 resource information.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "queryFormats": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "description": {
+                  "type": "string"
+                },
+                "examples": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "name": {
+                  "type": "string"
+                },
+                "specifications": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "searchResult": {
+      "description": "Search results.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/searchResultElement"
+            }
+          },
+          "searchQuery": {
+            "type": "string"
+          }
+        }
+      }
     }
   },
   "securityDefinitions": {
     "PICSURE2ResourceToken": {
       "description": "PICSURE 2 resource authorization (shared secret passed in headers).",
-      "type": "apiKey",
-      "name": "Authorization",
-      "in": "header"
+      "type": "oauth2",
+      "flow": "password",
+      "tokenUrl": "http://test.com/asdasd"
     }
   },
   "tags": [
@@ -466,7 +562,6 @@ func init() {
 }`))
 	FlatSwaggerJSON = json.RawMessage([]byte(`{
   "schemes": [
-    "https",
     "http"
   ],
   "swagger": "2.0",
@@ -511,7 +606,7 @@ func init() {
             "schema": {
               "type": "object",
               "properties": {
-                "resourcesCredentials": {
+                "resourceCredentials": {
                   "$ref": "#/definitions/resourceCredentials"
                 }
               }
@@ -522,7 +617,49 @@ func init() {
           "200": {
             "description": "PIC-SURE 2 resource information.",
             "schema": {
-              "$ref": "#/definitions/resourceInfo"
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "queryFormats": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "description": {
+                        "type": "string"
+                      },
+                      "examples": {
+                        "type": "array",
+                        "items": {
+                          "type": "object"
+                        }
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "specifications": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
             }
           }
         }
@@ -558,11 +695,11 @@ func init() {
                 "query": {
                   "$ref": "#/definitions/query"
                 },
+                "resourceCredentials": {
+                  "$ref": "#/definitions/resourceCredentials"
+                },
                 "resourceUUID": {
                   "type": "string"
-                },
-                "resourcesCredentials": {
-                  "$ref": "#/definitions/resourceCredentials"
                 }
               }
             }
@@ -572,7 +709,61 @@ func init() {
           "200": {
             "description": "Query status.",
             "schema": {
-              "$ref": "#/definitions/queryStatus"
+              "type": "object",
+              "properties": {
+                "duration": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "expiration": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "picsureResultId": {
+                  "type": "string"
+                },
+                "resourceID": {
+                  "type": "string"
+                },
+                "resourceResultId": {
+                  "type": "string"
+                },
+                "resourceStatus": {
+                  "type": "string"
+                },
+                "resultMetadata": {
+                  "type": "string",
+                  "format": "byte"
+                },
+                "sizeInBytes": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "startTime": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "QUEUED",
+                    "PENDING",
+                    "ERROR",
+                    "AVAILABLE"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
             }
           }
         }
@@ -608,11 +799,11 @@ func init() {
                 "query": {
                   "$ref": "#/definitions/query"
                 },
+                "resourceCredentials": {
+                  "$ref": "#/definitions/resourceCredentials"
+                },
                 "resourceUUID": {
                   "type": "string"
-                },
-                "resourcesCredentials": {
-                  "$ref": "#/definitions/resourceCredentials"
                 }
               }
             }
@@ -622,7 +813,18 @@ func init() {
           "200": {
             "description": "Query result.",
             "schema": {
-              "$ref": "#/definitions/queryResult"
+              "type": "object"
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
             }
           }
         }
@@ -658,11 +860,11 @@ func init() {
                 "query": {
                   "$ref": "#/definitions/searchQuery"
                 },
+                "resourceCredentials": {
+                  "$ref": "#/definitions/resourceCredentials"
+                },
                 "resourceUUID": {
                   "type": "string"
-                },
-                "resourcesCredentials": {
-                  "$ref": "#/definitions/resourceCredentials"
                 }
               }
             }
@@ -675,9 +877,23 @@ func init() {
               "type": "object",
               "properties": {
                 "results": {
-                  "type": "object"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/searchResultElement"
+                  }
                 },
                 "searchQuery": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
                   "type": "string"
                 }
               }
@@ -720,7 +936,7 @@ func init() {
             "schema": {
               "type": "object",
               "properties": {
-                "resourcesCredentials": {
+                "resourceCredentials": {
                   "$ref": "#/definitions/resourceCredentials"
                 }
               }
@@ -731,7 +947,18 @@ func init() {
           "200": {
             "description": "Query result.",
             "schema": {
-              "$ref": "#/definitions/queryResult"
+              "type": "object"
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
             }
           }
         }
@@ -771,7 +998,7 @@ func init() {
             "schema": {
               "type": "object",
               "properties": {
-                "resourcesCredentials": {
+                "resourceCredentials": {
                   "$ref": "#/definitions/resourceCredentials"
                 }
               }
@@ -782,7 +1009,61 @@ func init() {
           "200": {
             "description": "Query status.",
             "schema": {
-              "$ref": "#/definitions/queryStatus"
+              "type": "object",
+              "properties": {
+                "duration": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "expiration": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "picsureResultId": {
+                  "type": "string"
+                },
+                "resourceID": {
+                  "type": "string"
+                },
+                "resourceResultId": {
+                  "type": "string"
+                },
+                "resourceStatus": {
+                  "type": "string"
+                },
+                "resultMetadata": {
+                  "type": "string",
+                  "format": "byte"
+                },
+                "sizeInBytes": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "startTime": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "QUEUED",
+                    "PENDING",
+                    "ERROR",
+                    "AVAILABLE"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
             }
           }
         }
@@ -793,75 +1074,6 @@ func init() {
     "query": {
       "type": "object"
     },
-    "queryFormat": {
-      "type": "object",
-      "properties": {
-        "description": {
-          "type": "string"
-        },
-        "examples": {
-          "type": "array",
-          "items": {
-            "type": "object"
-          }
-        },
-        "name": {
-          "type": "string"
-        },
-        "specifications": {
-          "type": "object"
-        }
-      }
-    },
-    "queryResult": {
-      "type": "object"
-    },
-    "queryStatus": {
-      "type": "object",
-      "properties": {
-        "duration": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "expiration": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "picsureResultId": {
-          "type": "string"
-        },
-        "resourceID": {
-          "type": "string"
-        },
-        "resourceResultId": {
-          "type": "string"
-        },
-        "resourceStatus": {
-          "type": "string"
-        },
-        "resultMetadata": {
-          "type": "string",
-          "format": "byte"
-        },
-        "sizeInBytes": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "startTime": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "status": {
-          "type": "string",
-          "enum": [
-            "QUEUED",
-            "PENDING",
-            "ERROR",
-            "AVAILABLE"
-          ]
-        }
-      }
-    },
     "resourceCredentials": {
       "type": "object",
       "properties": {
@@ -871,33 +1083,207 @@ func init() {
         }
       }
     },
-    "resourceInfo": {
+    "searchQuery": {
       "type": "object",
       "properties": {
-        "id": {
+        "path": {
           "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "children",
+            "metadata"
+          ]
+        }
+      }
+    },
+    "searchResultElement": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "medcoEncryption": {
+          "type": "object",
+          "properties": {
+            "childrenIds": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "encrypted": {
+              "type": "boolean"
+            },
+            "id": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "CONCEPT_PARENT_NODE",
+                "CONCEPT_INTERNAL_NODE",
+                "CONCEPT_LEAF"
+              ]
+            }
+          }
+        },
+        "metadata": {
+          "type": "object"
         },
         "name": {
           "type": "string"
         },
-        "queryFormats": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/queryFormat"
+        "path": {
+          "type": "string"
+        },
+        "valueType": {
+          "type": "string",
+          "enum": [
+            "none",
+            "numeric",
+            "enum",
+            "text",
+            "genomic_annotation"
+          ]
+        }
+      }
+    }
+  },
+  "responses": {
+    "error": {
+      "description": "Error response",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
           }
         }
       }
     },
-    "searchQuery": {
-      "type": "object"
+    "queryResult": {
+      "description": "Query result.",
+      "schema": {
+        "type": "object"
+      }
+    },
+    "queryStatus": {
+      "description": "Query status.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "duration": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "expiration": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "picsureResultId": {
+            "type": "string"
+          },
+          "resourceID": {
+            "type": "string"
+          },
+          "resourceResultId": {
+            "type": "string"
+          },
+          "resourceStatus": {
+            "type": "string"
+          },
+          "resultMetadata": {
+            "type": "string",
+            "format": "byte"
+          },
+          "sizeInBytes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "startTime": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "QUEUED",
+              "PENDING",
+              "ERROR",
+              "AVAILABLE"
+            ]
+          }
+        }
+      }
+    },
+    "resourceInfo": {
+      "description": "PIC-SURE 2 resource information.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "queryFormats": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "description": {
+                  "type": "string"
+                },
+                "examples": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "name": {
+                  "type": "string"
+                },
+                "specifications": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "searchResult": {
+      "description": "Search results.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/searchResultElement"
+            }
+          },
+          "searchQuery": {
+            "type": "string"
+          }
+        }
+      }
     }
   },
   "securityDefinitions": {
     "PICSURE2ResourceToken": {
       "description": "PICSURE 2 resource authorization (shared secret passed in headers).",
-      "type": "apiKey",
-      "name": "Authorization",
-      "in": "header"
+      "type": "oauth2",
+      "flow": "password",
+      "tokenUrl": "http://test.com/asdasd"
     }
   },
   "tags": [

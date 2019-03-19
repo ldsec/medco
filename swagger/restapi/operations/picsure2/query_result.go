@@ -79,15 +79,15 @@ func (o *QueryResult) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 // swagger:model QueryResultBody
 type QueryResultBody struct {
 
-	// resources credentials
-	ResourcesCredentials *models.ResourceCredentials `json:"resourcesCredentials,omitempty"`
+	// resource credentials
+	ResourceCredentials *models.ResourceCredentials `json:"resourceCredentials,omitempty"`
 }
 
 // Validate validates this query result body
 func (o *QueryResultBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := o.validateResourcesCredentials(formats); err != nil {
+	if err := o.validateResourceCredentials(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -97,16 +97,16 @@ func (o *QueryResultBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *QueryResultBody) validateResourcesCredentials(formats strfmt.Registry) error {
+func (o *QueryResultBody) validateResourceCredentials(formats strfmt.Registry) error {
 
-	if swag.IsZero(o.ResourcesCredentials) { // not required
+	if swag.IsZero(o.ResourceCredentials) { // not required
 		return nil
 	}
 
-	if o.ResourcesCredentials != nil {
-		if err := o.ResourcesCredentials.Validate(formats); err != nil {
+	if o.ResourceCredentials != nil {
+		if err := o.ResourceCredentials.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("body" + "." + "resourcesCredentials")
+				return ve.ValidateName("body" + "." + "resourceCredentials")
 			}
 			return err
 		}
@@ -126,6 +126,37 @@ func (o *QueryResultBody) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (o *QueryResultBody) UnmarshalBinary(b []byte) error {
 	var res QueryResultBody
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+// QueryResultDefaultBody query result default body
+// swagger:model QueryResultDefaultBody
+type QueryResultDefaultBody struct {
+
+	// message
+	Message string `json:"message,omitempty"`
+}
+
+// Validate validates this query result default body
+func (o *QueryResultDefaultBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *QueryResultDefaultBody) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *QueryResultDefaultBody) UnmarshalBinary(b []byte) error {
+	var res QueryResultDefaultBody
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

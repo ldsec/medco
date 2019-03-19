@@ -4,11 +4,13 @@ package restapi
 
 import (
 	"crypto/tls"
+	"github.com/lca1/medco-connector/util"
+	"log"
 	"net/http"
 
-	errors "github.com/go-openapi/errors"
-	runtime "github.com/go-openapi/runtime"
-	middleware "github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/errors"
+	"github.com/go-openapi/runtime"
+	"github.com/go-openapi/runtime/middleware"
 
 	"github.com/lca1/medco-connector/swagger/restapi/operations"
 	"github.com/lca1/medco-connector/swagger/restapi/operations/picsure2"
@@ -35,8 +37,13 @@ func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
 	api.JSONProducer = runtime.JSONProducer()
 
 	// Applies when the "Authorization" header is set
-	api.PICSURE2ResourceTokenAuth = func(token string) (interface{}, error) {
-		return nil, errors.NotImplemented("api key auth (PICSURE2ResourceToken) Authorization from header param [Authorization] has not yet been implemented")
+	api.PICSURE2ResourceTokenAuth = func(token string, scopes []string) (interface{}, error) {
+		log.Printf("Authenticating token %v", token)
+		if util.ValidatePICSURE2InternalToken(token) {
+			return "", nil
+		} else {
+			return nil, errors.New(401, "PICSURE2 internal authentication failed (invalid token)")
+		}
 	}
 
 	// Set your custom authorizer if needed. Default one is security.Authorized()
@@ -44,9 +51,24 @@ func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
 	//
 	// Example:
 	// api.APIAuthorizer = security.Authorized()
+	// todo: use it to auth the user (access to the principal: populate it, set the model for the principal in swagger etc.)
+
 	api.Picsure2GetInfoHandler = picsure2.GetInfoHandlerFunc(func(params picsure2.GetInfoParams, principal interface{}) middleware.Responder {
-		return middleware.NotImplemented("operation picsure2.GetInfo has not yet been implemented")
+
+		return picsure2.NewGetInfoOK().WithPayload(&picsure2.GetInfoOKBody{
+			ID: "",
+			Name: "MedCo Connector (i2b2: " + util.I2b2CRCCellURL() + ")",
+			QueryFormats: []*picsure2.QueryFormatsItems0{
+				{
+					Name:           "MedCo Query",
+					Description:    "Execute a federated MedCo query",
+					Examples:       nil,
+					Specifications: nil,
+				},
+			},
+		})
 	})
+
 	api.Picsure2QueryHandler = picsure2.QueryHandlerFunc(func(params picsure2.QueryParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation picsure2.Query has not yet been implemented")
 	})
@@ -60,7 +82,12 @@ func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
 		return middleware.NotImplemented("operation picsure2.QuerySync has not yet been implemented")
 	})
 	api.Picsure2SearchHandler = picsure2.SearchHandlerFunc(func(params picsure2.SearchParams, principal interface{}) middleware.Responder {
-		return middleware.NotImplemented("operation picsure2.Search has not yet been implemented")
+		// todo: better
+		//params.Body.Query.Path
+
+		//return models.SearchResult{}
+		return picsure2.NewSearchOK().WithPayload(&picsure2.SearchOKBody{Results: nil, SearchQuery: ""})
+		//return middleware.NotImplemented("operation picsure2.Search has not yet been implemented")
 	})
 
 	api.ServerShutdown = func() {}

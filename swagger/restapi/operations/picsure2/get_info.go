@@ -7,6 +7,7 @@ package picsure2
 
 import (
 	"net/http"
+	"strconv"
 
 	errors "github.com/go-openapi/errors"
 	middleware "github.com/go-openapi/runtime/middleware"
@@ -79,15 +80,15 @@ func (o *GetInfo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 // swagger:model GetInfoBody
 type GetInfoBody struct {
 
-	// resources credentials
-	ResourcesCredentials *models.ResourceCredentials `json:"resourcesCredentials,omitempty"`
+	// resource credentials
+	ResourceCredentials *models.ResourceCredentials `json:"resourceCredentials,omitempty"`
 }
 
 // Validate validates this get info body
 func (o *GetInfoBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := o.validateResourcesCredentials(formats); err != nil {
+	if err := o.validateResourceCredentials(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -97,16 +98,16 @@ func (o *GetInfoBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *GetInfoBody) validateResourcesCredentials(formats strfmt.Registry) error {
+func (o *GetInfoBody) validateResourceCredentials(formats strfmt.Registry) error {
 
-	if swag.IsZero(o.ResourcesCredentials) { // not required
+	if swag.IsZero(o.ResourceCredentials) { // not required
 		return nil
 	}
 
-	if o.ResourcesCredentials != nil {
-		if err := o.ResourcesCredentials.Validate(formats); err != nil {
+	if o.ResourceCredentials != nil {
+		if err := o.ResourceCredentials.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("body" + "." + "resourcesCredentials")
+				return ve.ValidateName("body" + "." + "resourceCredentials")
 			}
 			return err
 		}
@@ -126,6 +127,148 @@ func (o *GetInfoBody) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (o *GetInfoBody) UnmarshalBinary(b []byte) error {
 	var res GetInfoBody
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+// GetInfoDefaultBody get info default body
+// swagger:model GetInfoDefaultBody
+type GetInfoDefaultBody struct {
+
+	// message
+	Message string `json:"message,omitempty"`
+}
+
+// Validate validates this get info default body
+func (o *GetInfoDefaultBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *GetInfoDefaultBody) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *GetInfoDefaultBody) UnmarshalBinary(b []byte) error {
+	var res GetInfoDefaultBody
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+// GetInfoOKBody get info o k body
+// swagger:model GetInfoOKBody
+type GetInfoOKBody struct {
+
+	// id
+	ID string `json:"id,omitempty"`
+
+	// name
+	Name string `json:"name,omitempty"`
+
+	// query formats
+	QueryFormats []*QueryFormatsItems0 `json:"queryFormats"`
+}
+
+// Validate validates this get info o k body
+func (o *GetInfoOKBody) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateQueryFormats(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *GetInfoOKBody) validateQueryFormats(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.QueryFormats) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(o.QueryFormats); i++ {
+		if swag.IsZero(o.QueryFormats[i]) { // not required
+			continue
+		}
+
+		if o.QueryFormats[i] != nil {
+			if err := o.QueryFormats[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("getInfoOK" + "." + "queryFormats" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *GetInfoOKBody) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *GetInfoOKBody) UnmarshalBinary(b []byte) error {
+	var res GetInfoOKBody
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+// QueryFormatsItems0 query formats items0
+// swagger:model QueryFormatsItems0
+type QueryFormatsItems0 struct {
+
+	// description
+	Description string `json:"description,omitempty"`
+
+	// examples
+	Examples []interface{} `json:"examples"`
+
+	// name
+	Name string `json:"name,omitempty"`
+
+	// specifications
+	Specifications interface{} `json:"specifications,omitempty"`
+}
+
+// Validate validates this query formats items0
+func (o *QueryFormatsItems0) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *QueryFormatsItems0) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *QueryFormatsItems0) UnmarshalBinary(b []byte) error {
+	var res QueryFormatsItems0
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

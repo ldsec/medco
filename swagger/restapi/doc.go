@@ -7,7 +7,6 @@ This is the API of the MedCo connector, that orchestrates the query at the MedCo
 
     Schemes:
       http
-      https
     Host: localhost
     BasePath: /medco
     Version: 0.2.0

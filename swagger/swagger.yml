@@ -13,7 +13,6 @@ tags:
   - name: "picsure2"
     description: "PIC-SURE 2 Resource Service API"
 schemes:
-  - "https"
   - "http"
 externalDocs:
   description: "MedCo Technical Documentation"
@@ -25,7 +24,6 @@ paths:
       tags:
         - "picsure2"
       summary: "Returns information on how to interact with this PIC-SURE endpoint."
-      description: ""
       operationId: "getInfo"
       consumes:
         - "application/json"
@@ -39,13 +37,13 @@ paths:
           schema:
             type: "object"
             properties:
-              resourcesCredentials:
+              resourceCredentials:
                 $ref: "#/definitions/resourceCredentials"
       responses:
         200:
-          description: "PIC-SURE 2 resource information."
-          schema:
-            $ref: "#/definitions/resourceInfo"
+          $ref: "#/responses/resourceInfo"
+        default:
+          $ref: "#/responses/error"
       security:
         - PICSURE2ResourceToken: []
 
@@ -67,7 +65,7 @@ paths:
           schema:
             type: "object"
             properties:
-              resourcesCredentials:
+              resourceCredentials:
                 $ref: "#/definitions/resourceCredentials"
               query:
                 $ref: "#/definitions/searchQuery"
@@ -75,14 +73,9 @@ paths:
                 type: "string"
       responses:
         200:
-          description: "Search results."
-          schema:
-            type: "object"
-            properties:
-              searchQuery:
-                type: "string"
-              results:
-                type: "object"
+          $ref: "#/responses/searchResult"
+        default:
+          $ref: "#/responses/error"
       security:
         - PICSURE2ResourceToken: []
 
@@ -104,7 +97,7 @@ paths:
           schema:
             type: "object"
             properties:
-              resourcesCredentials:
+              resourceCredentials:
                 $ref: "#/definitions/resourceCredentials"
               query:
                 $ref: "#/definitions/query"
@@ -112,9 +105,9 @@ paths:
                 type: "string"
       responses:
         200:
-          description: "Query status."
-          schema:
-            $ref: "#/definitions/queryStatus"
+          $ref: "#/responses/queryStatus"
+        default:
+          $ref: "#/responses/error"
       security:
         - PICSURE2ResourceToken: []
 
@@ -136,7 +129,7 @@ paths:
           schema:
             type: "object"
             properties:
-              resourcesCredentials:
+              resourceCredentials:
                 $ref: "#/definitions/resourceCredentials"
               query:
                 $ref: "#/definitions/query"
@@ -144,9 +137,9 @@ paths:
                 type: "string"
       responses:
         200:
-          description: "Query result."
-          schema:
-            $ref: "#/definitions/queryResult"
+          $ref: "#/responses/queryResult"
+        default:
+          $ref: "#/responses/error"
       security:
         - PICSURE2ResourceToken: []
 
@@ -173,13 +166,13 @@ paths:
           schema:
             type: "object"
             properties:
-              resourcesCredentials:
+              resourceCredentials:
                 $ref: "#/definitions/resourceCredentials"
       responses:
         200:
-          description: "Query status."
-          schema:
-            $ref: "#/definitions/queryStatus"
+          $ref: "#/responses/queryStatus"
+        default:
+          $ref: "#/responses/error"
       security:
         - PICSURE2ResourceToken: []
 
@@ -207,22 +200,109 @@ paths:
           schema:
             type: "object"
             properties:
-              resourcesCredentials:
+              resourceCredentials:
                 $ref: "#/definitions/resourceCredentials"
       responses:
         200:
-          description: "Query result."
-          schema:
-            $ref: "#/definitions/queryResult"
+          $ref: "#/responses/queryResult"
+        default:
+          $ref: "#/responses/error"
       security:
         - PICSURE2ResourceToken: []
 
 securityDefinitions:
   PICSURE2ResourceToken:
-    type: "apiKey"
-    name: "Authorization"
-    in: "header"
+    type: "oauth2"
+    flow: "password"
+    tokenUrl: "http://test.com/asdasd"
     description: "PICSURE 2 resource authorization (shared secret passed in headers)."
+
+responses:
+  error:
+    description: "Error response"
+    schema:
+      type: "object"
+      properties:
+        message:
+          type: "string"
+
+  resourceInfo:
+    description: "PIC-SURE 2 resource information."
+    schema:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+        name:
+          type: "string"
+        queryFormats:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              name:
+                type: "string"
+              description:
+                type: "string"
+              examples:
+                type: "array"
+                items:
+                  type: "object"
+              specifications:
+                type: "object"
+
+  searchResult:
+    description: "Search results."
+    schema:
+      type: "object"
+      properties:
+        searchQuery:
+          type: "string"
+        results:
+          type: "array"
+          items:
+            $ref: "#/definitions/searchResultElement"
+
+  queryStatus:
+    description: "Query status."
+    schema:
+      type: "object"
+      properties:
+        status:
+          type: "string"
+          enum:
+            - QUEUED
+            - PENDING
+            - ERROR
+            - AVAILABLE
+        resourceID:
+          type: "string"
+        resourceStatus:
+          type: "string"
+        picsureResultId:
+          type: "string"
+        resourceResultId:
+          type: "string"
+        resultMetadata:
+          type: "string"
+          format: "byte"
+        sizeInBytes:
+          type: "integer"
+          format: "int64"
+        startTime:
+          type: "integer"
+          format: "int64"
+        duration:
+          type: "integer"
+          format: "int64"
+        expiration:
+          type: "integer"
+          format: "int64"
+
+  queryResult:
+    description: "Query result."
+    schema:
+      type: "object"
 
 definitions:
   resourceCredentials:
@@ -232,73 +312,57 @@ definitions:
         type: "string"
         description: "MedCo authorization token."
 
-  resourceInfo:
-    type: "object"
-    properties:
-      id:
-        type: "string"
-      name:
-        type: "string"
-      queryFormats:
-        type: "array"
-        items:
-          $ref: '#/definitions/queryFormat'
-
-  queryFormat:
-    type: "object"
-    properties:
-      name:
-        type: "string"
-      description:
-        type: "string"
-      examples:
-        type: "array"
-        items:
-          type: "object"
-      specifications:
-        type: "object"
-
   searchQuery:
     type: "object"
+    properties:
+      type:
+        type: "string"
+        enum:
+          - children
+          - metadata
+      path:
+        type: "string"
 
   query:
     type: "object"
 
-  queryResult:
-    type: "object"
-
-  queryStatus:
+  searchResultElement:
     type: "object"
     properties:
-      status:
+      path:
+        type: "string"
+      name:
+        type: "string"
+      displayName:
+        type: "string"
+      code:
+        type: "string"
+      valueType:
         type: "string"
         enum:
-          - QUEUED
-          - PENDING
-          - ERROR
-          - AVAILABLE
-      resourceID:
-        type: "string"
-      resourceStatus:
-        type: "string"
-      picsureResultId:
-        type: "string"
-      resourceResultId:
-        type: "string"
-      resultMetadata:
-        type: "string"
-        format: "byte"
-      sizeInBytes:
-        type: "integer"
-        format: "int64"
-      startTime:
-        type: "integer"
-        format: "int64"
-      duration:
-        type: "integer"
-        format: "int64"
-      expiration:
-        type: "integer"
-        format: "int64"
-
-
+          - none
+          - numeric
+          - enum
+          - text
+          - genomic_annotation
+      medcoEncryption:
+        type: "object"
+        properties:
+          encrypted:
+            type: "boolean"
+          id:
+            type: "integer"
+            format: "int64"
+          childrenIds:
+            type: "array"
+            items:
+              type: "integer"
+              format: "int64"
+          type:
+            type: "string"
+            enum:
+              - CONCEPT_PARENT_NODE
+              - CONCEPT_INTERNAL_NODE
+              - CONCEPT_LEAF
+      metadata:
+        type: "object"

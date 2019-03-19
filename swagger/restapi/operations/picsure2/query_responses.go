@@ -9,8 +9,6 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/runtime"
-
-	models "github.com/lca1/medco-connector/swagger/models"
 )
 
 // QueryOKCode is the HTTP code returned for type QueryOK
@@ -25,7 +23,7 @@ type QueryOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.QueryStatus `json:"body,omitempty"`
+	Payload *QueryOKBody `json:"body,omitempty"`
 }
 
 // NewQueryOK creates QueryOK with default headers values
@@ -35,13 +33,13 @@ func NewQueryOK() *QueryOK {
 }
 
 // WithPayload adds the payload to the query o k response
-func (o *QueryOK) WithPayload(payload *models.QueryStatus) *QueryOK {
+func (o *QueryOK) WithPayload(payload *QueryOKBody) *QueryOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the query o k response
-func (o *QueryOK) SetPayload(payload *models.QueryStatus) {
+func (o *QueryOK) SetPayload(payload *QueryOKBody) {
 	o.Payload = payload
 }
 
@@ -49,6 +47,64 @@ func (o *QueryOK) SetPayload(payload *models.QueryStatus) {
 func (o *QueryOK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(200)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+/*QueryDefault Error response
+
+swagger:response queryDefault
+*/
+type QueryDefault struct {
+	_statusCode int
+
+	/*
+	  In: Body
+	*/
+	Payload *QueryDefaultBody `json:"body,omitempty"`
+}
+
+// NewQueryDefault creates QueryDefault with default headers values
+func NewQueryDefault(code int) *QueryDefault {
+	if code <= 0 {
+		code = 500
+	}
+
+	return &QueryDefault{
+		_statusCode: code,
+	}
+}
+
+// WithStatusCode adds the status to the query default response
+func (o *QueryDefault) WithStatusCode(code int) *QueryDefault {
+	o._statusCode = code
+	return o
+}
+
+// SetStatusCode sets the status to the query default response
+func (o *QueryDefault) SetStatusCode(code int) {
+	o._statusCode = code
+}
+
+// WithPayload adds the payload to the query default response
+func (o *QueryDefault) WithPayload(payload *QueryDefaultBody) *QueryDefault {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the query default response
+func (o *QueryDefault) SetPayload(payload *QueryDefaultBody) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *QueryDefault) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(o._statusCode)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {
