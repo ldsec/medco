@@ -3,8 +3,8 @@ package main
 import (
 	"os"
 
-	"github.com/dedis/onet/log"
-	"github.com/dedis/onet/network"
+	"go.dedis.ch/onet/v3/log"
+	"go.dedis.ch/onet/v3/network"
 	"gopkg.in/urfave/cli.v1"
 )
 

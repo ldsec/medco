@@ -2,7 +2,7 @@ package loader
 
 import (
 	"bytes"
-	"github.com/dedis/onet/log"
+	"go.dedis.ch/onet/v3/log"
 	"io"
 	"os"
 	"os/exec"
