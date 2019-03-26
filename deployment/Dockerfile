@@ -20,6 +20,8 @@ RUN go get -v -d ./... && \
 # -------------------------------------------
 FROM golang:1.11-alpine as release
 
+ENV GO111MODULE=on
+
 # run time environment variables
 ENV NODE_IDX="0" \
     UNLYNX_DEBUG_LEVEL="1" \
