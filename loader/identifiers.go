@@ -2,7 +2,7 @@ package loader
 
 import (
 	"errors"
-	"github.com/dedis/onet/log"
+	"go.dedis.ch/onet/v3/log"
 	"regexp"
 	"strconv"
 )

@@ -14,7 +14,7 @@ Use one of the latest tags `v0.1.1a` that are stable and have no incompatible ch
 
 **Very Important!!** 
 
-Due to the current changes being made to [onet](https://github.com/dedis/onet) and [kyber](https://github.com/dedis/kyber) (release of v3) you must revert back to previous commits for these two libraries if you want medco-loader to work. This will change in the near future. 
+Due to the current changes being made to [onet](https://go.dedis.ch/onet/v3) and [kyber](https://go.dedis.ch/kyber/v3) (release of v3) you must revert back to previous commits for these two libraries if you want medco-loader to work. This will change in the near future. 
 
 ```bash
 cd $GOPATH/src/dedis/onet/

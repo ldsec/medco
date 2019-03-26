@@ -1,9 +1,9 @@
 package loaderi2b2
 
 import (
-	"github.com/dedis/kyber"
-	"github.com/dedis/onet/log"
 	"github.com/lca1/unlynx/lib"
+	"go.dedis.ch/kyber/v3"
+	"go.dedis.ch/onet/v3/log"
 	"strconv"
 	"strings"
 )
