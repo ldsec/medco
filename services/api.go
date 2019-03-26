@@ -1,13 +1,13 @@
 package servicesmedco
 
 import (
-	"github.com/dedis/kyber"
-	"github.com/dedis/kyber/util/key"
-	"github.com/dedis/onet"
-	"github.com/dedis/onet/log"
-	"github.com/dedis/onet/network"
 	"github.com/lca1/unlynx/lib"
 	"github.com/satori/go.uuid"
+	"go.dedis.ch/kyber/v3"
+	"go.dedis.ch/kyber/v3/util/key"
+	"go.dedis.ch/onet/v3"
+	"go.dedis.ch/onet/v3/log"
+	"go.dedis.ch/onet/v3/network"
 )
 
 // API represents a client with the server to which he is connected and its public/private key pair.
@@ -39,7 +39,7 @@ func NewMedCoClient(entryPoint *network.ServerIdentity, clientID string) *API {
 func (c *API) SendSurveyDDTRequestTerms(entities *onet.Roster, surveyID SurveyID, terms libunlynx.CipherVector, proofs bool, testing bool) (*SurveyID, []libunlynx.GroupingKey, TimeResults, error) {
 	log.Lvl1("Client", c.ClientID, "is creating a DDT survey with ID:", surveyID)
 
-	rndUUID, _ := uuid.NewV4()
+	rndUUID := uuid.NewV4()
 	sdq := SurveyDDTRequest{
 		SurveyID: SurveyID(rndUUID.String()),
 		Roster:   *entities,

@@ -3,8 +3,8 @@ package libmedco
 
 import (
 	"encoding/xml"
-	"github.com/dedis/onet/log"
 	"github.com/lca1/unlynx/lib"
+	"go.dedis.ch/onet/v3/log"
 )
 
 // Input XML definition and methods
