@@ -14,8 +14,10 @@ require (
 	github.com/go-openapi/validate v0.18.0
 	github.com/google/uuid v1.1.1 // indirect
 	github.com/jessevdk/go-flags v1.4.0
+	github.com/lca1/medco-unlynx v0.0.0-20190326092154-e12359adb567
+	github.com/lca1/unlynx v0.0.0-20190312131415-2e3533f65afe
 	github.com/mailru/easyjson v0.0.0-20190221075403-6243d8e04c3f // indirect
-	github.com/stretchr/objx v0.1.1 // indirect
-	github.com/stretchr/testify v1.3.0 // indirect
-	golang.org/x/net v0.0.0-20190301231341-16b79f2e4e95
+	github.com/sirupsen/logrus v1.4.0
+	go.dedis.ch/onet/v3 v3.0.0
+	golang.org/x/net v0.0.0-20190311183353-d8887717615a
 )
