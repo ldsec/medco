@@ -2,6 +2,7 @@ package i2b2
 
 import (
 	"encoding/xml"
+	"errors"
 	"github.com/lca1/medco-connector/util"
 	"strconv"
 	"time"
@@ -27,9 +28,9 @@ func NewRequest() Request {
 			ReceivingApplicationApplicationVersion: "1.7",
 			ReceivingFacilityFacilityName: "i2b2 hive",
 			DatetimeOfMessage: now.Format(time.RFC3339),
-			SecurityDomain: util.I2b2LoginDomain(),
-			SecurityUsername: util.I2b2LoginUser(),
-			SecurityPassword: util.I2b2LoginPassword(),
+			SecurityDomain: util.I2b2LoginDomain,
+			SecurityUsername: util.I2b2LoginUser,
+			SecurityPassword: util.I2b2LoginPassword,
 			MessageTypeMessageCode: "EQQ",
 			MessageTypeEventType: "Q04",
 			MessageTypeMessageStructure: "EQQ_Q04",
@@ -41,10 +42,10 @@ func NewRequest() Request {
 			AcceptAcknowledgementType: "messageId",
 			ApplicationAcknowledgementType: "",
 			CountryCode: "CH",
-			ProjectID: util.I2b2LoginProject(),
+			ProjectID: util.I2b2LoginProject,
 		},
 		RequestHeader: RequestHeader{
-			ResultWaittimeMs: strconv.Itoa(util.I2b2TimeoutSeconds() * 1000),
+			ResultWaittimeMs: strconv.Itoa(util.I2b2TimeoutSeconds* 1000),
 		},
 	}
 }
@@ -75,6 +76,14 @@ type Response struct {
 	RequestHeader  RequestHeader `xml:"request_header"`
 	ResponseHeader ResponseHeader `xml:"response_header"`
 	MessageBody    MessageBody   `xml:"message_body"`
+}
+
+func (response *Response) checkStatus() error {
+	if response.ResponseHeader.ResultStatus.Status.Type == "DONE" {
+		return nil
+	} else {
+		return errors.New(response.ResponseHeader.ResultStatus.Status.Text)
+	}
 }
 
 type MessageHeader struct {

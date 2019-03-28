@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/lca1/medco-connector/swagger/models"
 	"github.com/lca1/medco-connector/util"
-	"log"
+	"github.com/sirupsen/logrus"
 	"strconv"
 	"strings"
 )
@@ -21,13 +21,13 @@ func GetOntologyChildren(path string) (results []*models.SearchResultElement, er
 
 	if len(path) == 0 {
 		err = errors.New("empty path")
-		log.Print(err)
+		logrus.Error(err)
 		return
 
 	} else if path == "/" {
 		err = i2b2XMLRequest(
-			util.I2b2ONTCellURL() + "/getCategories",
-			NewOntReqGetCategoriesRequest(),
+			util.I2b2HiveURL + "/OntologyService/getCategories",
+			NewOntReqGetCategoriesMessageBody(),
 			xmlResponse,
 		)
 		if err != nil {
@@ -36,7 +36,7 @@ func GetOntologyChildren(path string) (results []*models.SearchResultElement, er
 
 	} else {
 		err = i2b2XMLRequest(
-			util.I2b2ONTCellURL() + "/getChildren",
+			util.I2b2HiveURL + "/OntologyService/getChildren",
 			NewOntReqGetChildrenMessageBody(convertPathToI2b2Format(path)),
 			xmlResponse,
 		)
@@ -100,9 +100,9 @@ func parseI2b2Concept(concept Concept) (result *models.SearchResultElement) {
 }
 
 func convertPathToI2b2Format(path string) string {
-	return "\\" + strings.Replace(path, "/", "\\", -1)
+	return `\` + strings.Replace(path, "/", `\`, -1)
 }
 
 func convertPathFromI2b2Format(path string) string {
-	return strings.Replace(strings.Replace(path, "\\", "/", -1), "//", "/", 1)
+	return strings.Replace(strings.Replace(path, `\`, "/", -1), "//", "/", 1)
 }

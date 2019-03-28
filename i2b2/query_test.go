@@ -1,22 +1,23 @@
 package i2b2
 
 import (
-	"os"
+	"github.com/lca1/medco-connector/util"
 	"testing"
 )
 
-func setupEnv() {
-	os.Setenv("I2B2_ONT_URL", "http://localhost:8090/i2b2/services/OntologyService")
-	os.Setenv("I2B2_LOGIN_DOMAIN", "i2b2medcosrv0")
-	os.Setenv("I2B2_LOGIN_PROJECT", "MedCo")
-	os.Setenv("I2B2_LOGIN_USER", "e2etest")
-	os.Setenv("I2B2_LOGIN_PASSWORD", "e2etest")
+func init() {
+	util.I2b2HiveURL = "http://localhost:8090/i2b2/services"
+	util.I2b2LoginDomain = "i2b2medcosrv0"
+	util.I2b2LoginProject = "MedCo"
+	util.I2b2LoginUser = "e2etest"
+	util.I2b2LoginPassword = "e2etest"
+	util.SetLogLevel("5")
 }
 
+// warning: all tests need the dev-local-3nodes medco deployment running locally, loaded with default data
+
 // test ontology search query
-// warning: needs the dev-local-3nodes medco deployment running locally
 func TestGetOntologyChildrenRoot(t *testing.T) {
-	setupEnv()
 
 	results, err := GetOntologyChildren("/")
 	if err != nil {
@@ -26,11 +27,33 @@ func TestGetOntologyChildrenRoot(t *testing.T) {
 }
 
 func TestGetOntologyChildrenNode(t *testing.T) {
-	setupEnv()
 
 	results, err := GetOntologyChildren("/E2ETEST/e2etest/")
 	if err != nil {
 		t.Fail()
 	}
 	t.Log(*results[0].MedcoEncryption)
+}
+
+func TestExecutePsmQuery(t *testing.T) {
+
+	patientCount, patientSetID, err := ExecutePsmQuery(
+		"testQuery",
+		[][]string{{`\\SENSITIVE_TAGGED\medco\tagged\09bc15e0d90046c102199f1b4d20eef9ee91b2ea3fd4608303775d000dd1248c\`}},
+		[]bool{false},
+	)
+	if err != nil {
+		t.Fail()
+	}
+	t.Log("count:" + patientCount, "set ID:" + patientSetID)
+}
+
+func TestGetPatientSet(t *testing.T) {
+
+	patientIDs, patientDummyFlags, err := GetPatientSet("9")
+	if err != nil {
+		t.Fail()
+	}
+	t.Log(patientIDs)
+	t.Log(patientDummyFlags)
 }

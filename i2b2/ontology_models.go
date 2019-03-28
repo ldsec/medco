@@ -5,7 +5,7 @@ import (
 )
 
 // returns a new request object for i2b2 categories (ontology root nodes)
-func NewOntReqGetCategoriesRequest() Request {
+func NewOntReqGetCategoriesMessageBody() Request {
 	body := OntReqGetCategoriesMessageBody{}
 	body.GetCategories.Hiddens = "false"
 	body.GetCategories.Blob = "true"
@@ -22,11 +22,13 @@ func NewOntReqGetChildrenMessageBody(path string) Request {
 	body.GetChildren.Hiddens= "false"
 	body.GetChildren.Blob= "true"
 	body.GetChildren.Synonyms= "false"
-	body.GetChildren.Max= ""
+	body.GetChildren.Max= "200"
 	body.GetChildren.Type= "core"
 
 	return NewRequestWithBody(body)
 }
+
+// --- request
 
 type OntReqGetCategoriesMessageBody struct {
 	XMLName       xml.Name `xml:"message_body"`
@@ -50,6 +52,8 @@ type OntReqGetChildrenMessageBody struct {
 		Parent   string `xml:"parent"`
 	}`xml:"ontns:get_children"`
 }
+
+// --- response
 
 type OntRespConceptsMessageBody struct {
 	XMLName  xml.Name `xml:"message_body"`
