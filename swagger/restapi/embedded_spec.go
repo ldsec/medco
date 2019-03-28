@@ -34,7 +34,7 @@ func init() {
     },
     "version": "0.2.0"
   },
-  "basePath": "/medco",
+  "basePath": "/medco-connector",
   "paths": {
     "/picsure2/info": {
       "post": {
@@ -335,7 +335,138 @@ func init() {
   },
   "definitions": {
     "query": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "genomic-annotations": {
+          "description": "genomic annotations query (todo)",
+          "type": "object"
+        },
+        "i2b2-medco": {
+          "description": "i2b2-medco query",
+          "type": "object",
+          "properties": {
+            "panels": {
+              "description": "i2b2 panels (linked by an AND)",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "items": {
+                    "description": "i2b2 items (linked by an OR)",
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "encrypted": {
+                          "type": "boolean"
+                        },
+                        "operator": {
+                          "type": "string",
+                          "enum": [
+                            "exists",
+                            "equals"
+                          ]
+                        },
+                        "queryTerm": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "not": {
+                    "description": "exclude the i2b2 panel",
+                    "type": "boolean"
+                  }
+                }
+              }
+            },
+            "select": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "count",
+                  "patient_list"
+                ]
+              }
+            },
+            "userPublicKey": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "queryResultElement": {
+      "type": "object",
+      "properties": {
+        "encryptedCount": {
+          "type": "string"
+        },
+        "encryptionKey": {
+          "type": "string"
+        },
+        "patientList": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "queryStatus": {
+      "type": "object",
+      "properties": {
+        "duration": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "expiration": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "picsureResultId": {
+          "type": "string"
+        },
+        "resourceID": {
+          "type": "string"
+        },
+        "resourceResultId": {
+          "type": "string"
+        },
+        "resourceStatus": {
+          "type": "string"
+        },
+        "resultMetadata": {
+          "type": "string",
+          "format": "byte"
+        },
+        "sizeInBytes": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "startTime": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "QUEUED",
+            "PENDING",
+            "ERROR",
+            "AVAILABLE"
+          ]
+        }
+      }
     },
     "resourceCredentials": {
       "type": "object",
@@ -434,56 +565,13 @@ func init() {
     "queryResult": {
       "description": "Query result.",
       "schema": {
-        "type": "object"
+        "$ref": "#/definitions/queryResultElement"
       }
     },
     "queryStatus": {
       "description": "Query status.",
       "schema": {
-        "type": "object",
-        "properties": {
-          "duration": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "expiration": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "picsureResultId": {
-            "type": "string"
-          },
-          "resourceID": {
-            "type": "string"
-          },
-          "resourceResultId": {
-            "type": "string"
-          },
-          "resourceStatus": {
-            "type": "string"
-          },
-          "resultMetadata": {
-            "type": "string",
-            "format": "byte"
-          },
-          "sizeInBytes": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "startTime": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "QUEUED",
-              "PENDING",
-              "ERROR",
-              "AVAILABLE"
-            ]
-          }
-        }
+        "$ref": "#/definitions/queryStatus"
       }
     },
     "resourceInfo": {
@@ -577,7 +665,7 @@ func init() {
     },
     "version": "0.2.0"
   },
-  "basePath": "/medco",
+  "basePath": "/medco-connector",
   "paths": {
     "/picsure2/info": {
       "post": {
@@ -709,50 +797,7 @@ func init() {
           "200": {
             "description": "Query status.",
             "schema": {
-              "type": "object",
-              "properties": {
-                "duration": {
-                  "type": "integer",
-                  "format": "int64"
-                },
-                "expiration": {
-                  "type": "integer",
-                  "format": "int64"
-                },
-                "picsureResultId": {
-                  "type": "string"
-                },
-                "resourceID": {
-                  "type": "string"
-                },
-                "resourceResultId": {
-                  "type": "string"
-                },
-                "resourceStatus": {
-                  "type": "string"
-                },
-                "resultMetadata": {
-                  "type": "string",
-                  "format": "byte"
-                },
-                "sizeInBytes": {
-                  "type": "integer",
-                  "format": "int64"
-                },
-                "startTime": {
-                  "type": "integer",
-                  "format": "int64"
-                },
-                "status": {
-                  "type": "string",
-                  "enum": [
-                    "QUEUED",
-                    "PENDING",
-                    "ERROR",
-                    "AVAILABLE"
-                  ]
-                }
-              }
+              "$ref": "#/definitions/queryStatus"
             }
           },
           "default": {
@@ -813,7 +858,7 @@ func init() {
           "200": {
             "description": "Query result.",
             "schema": {
-              "type": "object"
+              "$ref": "#/definitions/queryResultElement"
             }
           },
           "default": {
@@ -947,7 +992,7 @@ func init() {
           "200": {
             "description": "Query result.",
             "schema": {
-              "type": "object"
+              "$ref": "#/definitions/queryResultElement"
             }
           },
           "default": {
@@ -1009,50 +1054,7 @@ func init() {
           "200": {
             "description": "Query status.",
             "schema": {
-              "type": "object",
-              "properties": {
-                "duration": {
-                  "type": "integer",
-                  "format": "int64"
-                },
-                "expiration": {
-                  "type": "integer",
-                  "format": "int64"
-                },
-                "picsureResultId": {
-                  "type": "string"
-                },
-                "resourceID": {
-                  "type": "string"
-                },
-                "resourceResultId": {
-                  "type": "string"
-                },
-                "resourceStatus": {
-                  "type": "string"
-                },
-                "resultMetadata": {
-                  "type": "string",
-                  "format": "byte"
-                },
-                "sizeInBytes": {
-                  "type": "integer",
-                  "format": "int64"
-                },
-                "startTime": {
-                  "type": "integer",
-                  "format": "int64"
-                },
-                "status": {
-                  "type": "string",
-                  "enum": [
-                    "QUEUED",
-                    "PENDING",
-                    "ERROR",
-                    "AVAILABLE"
-                  ]
-                }
-              }
+              "$ref": "#/definitions/queryStatus"
             }
           },
           "default": {
@@ -1072,7 +1074,138 @@ func init() {
   },
   "definitions": {
     "query": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "genomic-annotations": {
+          "description": "genomic annotations query (todo)",
+          "type": "object"
+        },
+        "i2b2-medco": {
+          "description": "i2b2-medco query",
+          "type": "object",
+          "properties": {
+            "panels": {
+              "description": "i2b2 panels (linked by an AND)",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "items": {
+                    "description": "i2b2 items (linked by an OR)",
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "encrypted": {
+                          "type": "boolean"
+                        },
+                        "operator": {
+                          "type": "string",
+                          "enum": [
+                            "exists",
+                            "equals"
+                          ]
+                        },
+                        "queryTerm": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "not": {
+                    "description": "exclude the i2b2 panel",
+                    "type": "boolean"
+                  }
+                }
+              }
+            },
+            "select": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "count",
+                  "patient_list"
+                ]
+              }
+            },
+            "userPublicKey": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "queryResultElement": {
+      "type": "object",
+      "properties": {
+        "encryptedCount": {
+          "type": "string"
+        },
+        "encryptionKey": {
+          "type": "string"
+        },
+        "patientList": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "queryStatus": {
+      "type": "object",
+      "properties": {
+        "duration": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "expiration": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "picsureResultId": {
+          "type": "string"
+        },
+        "resourceID": {
+          "type": "string"
+        },
+        "resourceResultId": {
+          "type": "string"
+        },
+        "resourceStatus": {
+          "type": "string"
+        },
+        "resultMetadata": {
+          "type": "string",
+          "format": "byte"
+        },
+        "sizeInBytes": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "startTime": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "QUEUED",
+            "PENDING",
+            "ERROR",
+            "AVAILABLE"
+          ]
+        }
+      }
     },
     "resourceCredentials": {
       "type": "object",
@@ -1171,56 +1304,13 @@ func init() {
     "queryResult": {
       "description": "Query result.",
       "schema": {
-        "type": "object"
+        "$ref": "#/definitions/queryResultElement"
       }
     },
     "queryStatus": {
       "description": "Query status.",
       "schema": {
-        "type": "object",
-        "properties": {
-          "duration": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "expiration": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "picsureResultId": {
-            "type": "string"
-          },
-          "resourceID": {
-            "type": "string"
-          },
-          "resourceResultId": {
-            "type": "string"
-          },
-          "resourceStatus": {
-            "type": "string"
-          },
-          "resultMetadata": {
-            "type": "string",
-            "format": "byte"
-          },
-          "sizeInBytes": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "startTime": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "QUEUED",
-              "PENDING",
-              "ERROR",
-              "AVAILABLE"
-            ]
-          }
-        }
+        "$ref": "#/definitions/queryStatus"
       }
     },
     "resourceInfo": {

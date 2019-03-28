@@ -39,7 +39,7 @@ func (o *SearchURL) Build() (*url.URL, error) {
 
 	_basePath := o._basePath
 	if _basePath == "" {
-		_basePath = "/medco"
+		_basePath = "/medco-connector"
 	}
 	_result.Path = golangswaggerpaths.Join(_basePath, _path)
 

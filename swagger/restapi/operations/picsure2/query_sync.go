@@ -80,7 +80,7 @@ func (o *QuerySync) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 type QuerySyncBody struct {
 
 	// query
-	Query models.Query `json:"query,omitempty"`
+	Query *models.Query `json:"query,omitempty"`
 
 	// resource credentials
 	ResourceCredentials *models.ResourceCredentials `json:"resourceCredentials,omitempty"`
@@ -93,6 +93,10 @@ type QuerySyncBody struct {
 func (o *QuerySyncBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := o.validateQuery(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := o.validateResourceCredentials(formats); err != nil {
 		res = append(res, err)
 	}
@@ -100,6 +104,24 @@ func (o *QuerySyncBody) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (o *QuerySyncBody) validateQuery(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.Query) { // not required
+		return nil
+	}
+
+	if o.Query != nil {
+		if err := o.Query.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("body" + "." + "query")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 

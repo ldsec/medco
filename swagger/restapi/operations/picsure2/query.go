@@ -6,14 +6,12 @@ package picsure2
 // Editing this file might prove futile when you re-run the generate command
 
 import (
-	"encoding/json"
 	"net/http"
 
 	errors "github.com/go-openapi/errors"
 	middleware "github.com/go-openapi/runtime/middleware"
 	strfmt "github.com/go-openapi/strfmt"
 	swag "github.com/go-openapi/swag"
-	validate "github.com/go-openapi/validate"
 
 	models "github.com/lca1/medco-connector/swagger/models"
 )
@@ -82,7 +80,7 @@ func (o *Query) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 type QueryBody struct {
 
 	// query
-	Query models.Query `json:"query,omitempty"`
+	Query *models.Query `json:"query,omitempty"`
 
 	// resource credentials
 	ResourceCredentials *models.ResourceCredentials `json:"resourceCredentials,omitempty"`
@@ -95,6 +93,10 @@ type QueryBody struct {
 func (o *QueryBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := o.validateQuery(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := o.validateResourceCredentials(formats); err != nil {
 		res = append(res, err)
 	}
@@ -102,6 +104,24 @@ func (o *QueryBody) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (o *QueryBody) validateQuery(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.Query) { // not required
+		return nil
+	}
+
+	if o.Query != nil {
+		if err := o.Query.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("body" + "." + "query")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -165,139 +185,6 @@ func (o *QueryDefaultBody) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (o *QueryDefaultBody) UnmarshalBinary(b []byte) error {
 	var res QueryDefaultBody
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*o = res
-	return nil
-}
-
-// QueryOKBody query o k body
-// swagger:model QueryOKBody
-type QueryOKBody struct {
-
-	// duration
-	Duration int64 `json:"duration,omitempty"`
-
-	// expiration
-	Expiration int64 `json:"expiration,omitempty"`
-
-	// picsure result Id
-	PicsureResultID string `json:"picsureResultId,omitempty"`
-
-	// resource ID
-	ResourceID string `json:"resourceID,omitempty"`
-
-	// resource result Id
-	ResourceResultID string `json:"resourceResultId,omitempty"`
-
-	// resource status
-	ResourceStatus string `json:"resourceStatus,omitempty"`
-
-	// result metadata
-	// Format: byte
-	ResultMetadata strfmt.Base64 `json:"resultMetadata,omitempty"`
-
-	// size in bytes
-	SizeInBytes int64 `json:"sizeInBytes,omitempty"`
-
-	// start time
-	StartTime int64 `json:"startTime,omitempty"`
-
-	// status
-	// Enum: [QUEUED PENDING ERROR AVAILABLE]
-	Status string `json:"status,omitempty"`
-}
-
-// Validate validates this query o k body
-func (o *QueryOKBody) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := o.validateResultMetadata(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := o.validateStatus(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (o *QueryOKBody) validateResultMetadata(formats strfmt.Registry) error {
-
-	if swag.IsZero(o.ResultMetadata) { // not required
-		return nil
-	}
-
-	// Format "byte" (base64 string) is already validated when unmarshalled
-
-	return nil
-}
-
-var queryOKBodyTypeStatusPropEnum []interface{}
-
-func init() {
-	var res []string
-	if err := json.Unmarshal([]byte(`["QUEUED","PENDING","ERROR","AVAILABLE"]`), &res); err != nil {
-		panic(err)
-	}
-	for _, v := range res {
-		queryOKBodyTypeStatusPropEnum = append(queryOKBodyTypeStatusPropEnum, v)
-	}
-}
-
-const (
-
-	// QueryOKBodyStatusQUEUED captures enum value "QUEUED"
-	QueryOKBodyStatusQUEUED string = "QUEUED"
-
-	// QueryOKBodyStatusPENDING captures enum value "PENDING"
-	QueryOKBodyStatusPENDING string = "PENDING"
-
-	// QueryOKBodyStatusERROR captures enum value "ERROR"
-	QueryOKBodyStatusERROR string = "ERROR"
-
-	// QueryOKBodyStatusAVAILABLE captures enum value "AVAILABLE"
-	QueryOKBodyStatusAVAILABLE string = "AVAILABLE"
-)
-
-// prop value enum
-func (o *QueryOKBody) validateStatusEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, queryOKBodyTypeStatusPropEnum); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (o *QueryOKBody) validateStatus(formats strfmt.Registry) error {
-
-	if swag.IsZero(o.Status) { // not required
-		return nil
-	}
-
-	// value enum
-	if err := o.validateStatusEnum("queryOK"+"."+"status", "body", o.Status); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (o *QueryOKBody) MarshalBinary() ([]byte, error) {
-	if o == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(o)
-}
-
-// UnmarshalBinary interface implementation
-func (o *QueryOKBody) UnmarshalBinary(b []byte) error {
-	var res QueryOKBody
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

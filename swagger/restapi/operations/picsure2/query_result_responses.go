@@ -9,6 +9,8 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/runtime"
+
+	models "github.com/lca1/medco-connector/swagger/models"
 )
 
 // QueryResultOKCode is the HTTP code returned for type QueryResultOK
@@ -23,7 +25,7 @@ type QueryResultOK struct {
 	/*
 	  In: Body
 	*/
-	Payload interface{} `json:"body,omitempty"`
+	Payload *models.QueryResultElement `json:"body,omitempty"`
 }
 
 // NewQueryResultOK creates QueryResultOK with default headers values
@@ -33,13 +35,13 @@ func NewQueryResultOK() *QueryResultOK {
 }
 
 // WithPayload adds the payload to the query result o k response
-func (o *QueryResultOK) WithPayload(payload interface{}) *QueryResultOK {
+func (o *QueryResultOK) WithPayload(payload *models.QueryResultElement) *QueryResultOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the query result o k response
-func (o *QueryResultOK) SetPayload(payload interface{}) {
+func (o *QueryResultOK) SetPayload(payload *models.QueryResultElement) {
 	o.Payload = payload
 }
 
@@ -47,9 +49,11 @@ func (o *QueryResultOK) SetPayload(payload interface{}) {
 func (o *QueryResultOK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(200)
-	payload := o.Payload
-	if err := producer.Produce(rw, payload); err != nil {
-		panic(err) // let the recovery middleware deal with this
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
 	}
 }
 

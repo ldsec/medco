@@ -4,7 +4,10 @@ package restapi
 
 import (
 	"crypto/tls"
+	"github.com/lca1/medco-connector/i2b2"
+	"github.com/lca1/medco-connector/medco"
 	"github.com/lca1/medco-connector/util"
+	"github.com/sirupsen/logrus"
 	"log"
 	"net/http"
 
@@ -23,20 +26,13 @@ func configureFlags(api *operations.MedcoConnectorAPI) {
 }
 
 func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
-	// configure the api here
+
 	api.ServeError = errors.ServeError
-
-	// Set your custom logger if needed. Default one is log.Printf
-	// Expected interface func(string, ...interface{})
-	//
-	// Example:
-	// api.Logger = log.Printf
-
 	api.JSONConsumer = runtime.JSONConsumer()
-
 	api.JSONProducer = runtime.JSONProducer()
+	api.Logger = logrus.Printf
 
-	// Applies when the "Authorization" header is set
+	// Applies when the "Authorization" header is set ; enforce layer of security to talk
 	api.PICSURE2ResourceTokenAuth = func(token string, scopes []string) (interface{}, error) {
 		log.Printf("Authenticating token %v", token)
 		if util.ValidatePICSURE2InternalToken(token) {
@@ -52,12 +48,14 @@ func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
 	// Example:
 	// api.APIAuthorizer = security.Authorized()
 	// todo: use it to auth the user (access to the principal: populate it, set the model for the principal in swagger etc.)
+	// todo: and redo with having a model for the principal
 
+	// /medco/picsure2/info
 	api.Picsure2GetInfoHandler = picsure2.GetInfoHandlerFunc(func(params picsure2.GetInfoParams, principal interface{}) middleware.Responder {
 
 		return picsure2.NewGetInfoOK().WithPayload(&picsure2.GetInfoOKBody{
 			ID: "",
-			Name: "MedCo Connector (i2b2: " + util.I2b2CRCCellURL() + ")",
+			Name: "MedCo Connector (i2b2: " + util.I2b2HiveURL + ")",
 			QueryFormats: []*picsure2.QueryFormatsItems0{
 				{
 					Name:           "MedCo Query",
@@ -69,25 +67,48 @@ func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
 		})
 	})
 
+	// /medco/picsure2/query
 	api.Picsure2QueryHandler = picsure2.QueryHandlerFunc(func(params picsure2.QueryParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation picsure2.Query has not yet been implemented")
 	})
+
+	// /medco/picsure2/query/{id}/result
 	api.Picsure2QueryResultHandler = picsure2.QueryResultHandlerFunc(func(params picsure2.QueryResultParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation picsure2.QueryResult has not yet been implemented")
 	})
+
+	// /medco/picsure2/query/{id}/status
 	api.Picsure2QueryStatusHandler = picsure2.QueryStatusHandlerFunc(func(params picsure2.QueryStatusParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation picsure2.QueryStatus has not yet been implemented")
 	})
-	api.Picsure2QuerySyncHandler = picsure2.QuerySyncHandlerFunc(func(params picsure2.QuerySyncParams, principal interface{}) middleware.Responder {
-		return middleware.NotImplemented("operation picsure2.QuerySync has not yet been implemented")
-	})
-	api.Picsure2SearchHandler = picsure2.SearchHandlerFunc(func(params picsure2.SearchParams, principal interface{}) middleware.Responder {
-		// todo: better
-		//params.Body.Query.Path
 
-		//return models.SearchResult{}
-		return picsure2.NewSearchOK().WithPayload(&picsure2.SearchOKBody{Results: nil, SearchQuery: ""})
-		//return middleware.NotImplemented("operation picsure2.Search has not yet been implemented")
+	// /medco/picsure2/query/sync
+	api.Picsure2QuerySyncHandler = picsure2.QuerySyncHandlerFunc(func(params picsure2.QuerySyncParams, principal interface{}) middleware.Responder {
+
+		queryResult, err := medco.I2b2MedCoQuery(params.Body.Query.I2b2Medco)
+		if err != nil {
+			return picsure2.NewQuerySyncDefault(500).WithPayload(&picsure2.QuerySyncDefaultBody{
+				Message: err.Error(),
+			})
+		}
+
+		return picsure2.NewQuerySyncOK().WithPayload(queryResult)
+	})
+
+	// /medco/picsure2/search
+	api.Picsure2SearchHandler = picsure2.SearchHandlerFunc(func(params picsure2.SearchParams, principal interface{}) middleware.Responder {
+
+		searchResult, err := i2b2.GetOntologyChildren(params.Body.Query.Path)
+		if err != nil {
+			return picsure2.NewSearchDefault(500).WithPayload(&picsure2.SearchDefaultBody{
+				Message: err.Error(),
+			})
+		}
+
+		return picsure2.NewSearchOK().WithPayload(&picsure2.SearchOKBody{
+			Results: searchResult,
+			SearchQuery: params.Body.Query.Path,
+		})
 	})
 
 	api.ServerShutdown = func() {}

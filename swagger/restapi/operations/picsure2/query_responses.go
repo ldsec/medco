@@ -9,6 +9,8 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/runtime"
+
+	models "github.com/lca1/medco-connector/swagger/models"
 )
 
 // QueryOKCode is the HTTP code returned for type QueryOK
@@ -23,7 +25,7 @@ type QueryOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *QueryOKBody `json:"body,omitempty"`
+	Payload *models.QueryStatus `json:"body,omitempty"`
 }
 
 // NewQueryOK creates QueryOK with default headers values
@@ -33,13 +35,13 @@ func NewQueryOK() *QueryOK {
 }
 
 // WithPayload adds the payload to the query o k response
-func (o *QueryOK) WithPayload(payload *QueryOKBody) *QueryOK {
+func (o *QueryOK) WithPayload(payload *models.QueryStatus) *QueryOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the query o k response
-func (o *QueryOK) SetPayload(payload *QueryOKBody) {
+func (o *QueryOK) SetPayload(payload *models.QueryStatus) {
 	o.Payload = payload
 }
 

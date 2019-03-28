@@ -8,7 +8,7 @@ This is the API of the MedCo connector, that orchestrates the query at the MedCo
     Schemes:
       http
     Host: localhost
-    BasePath: /medco
+    BasePath: /medco-connector
     Version: 0.2.0
     License: EULA https://raw.githubusercontent.com/lca1/medco-connector/master/LICENSE
     Contact: <medco-dev@listes.epfl.ch>

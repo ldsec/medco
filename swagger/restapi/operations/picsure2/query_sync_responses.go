@@ -9,6 +9,8 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/runtime"
+
+	models "github.com/lca1/medco-connector/swagger/models"
 )
 
 // QuerySyncOKCode is the HTTP code returned for type QuerySyncOK
@@ -23,7 +25,7 @@ type QuerySyncOK struct {
 	/*
 	  In: Body
 	*/
-	Payload interface{} `json:"body,omitempty"`
+	Payload *models.QueryResultElement `json:"body,omitempty"`
 }
 
 // NewQuerySyncOK creates QuerySyncOK with default headers values
@@ -33,13 +35,13 @@ func NewQuerySyncOK() *QuerySyncOK {
 }
 
 // WithPayload adds the payload to the query sync o k response
-func (o *QuerySyncOK) WithPayload(payload interface{}) *QuerySyncOK {
+func (o *QuerySyncOK) WithPayload(payload *models.QueryResultElement) *QuerySyncOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the query sync o k response
-func (o *QuerySyncOK) SetPayload(payload interface{}) {
+func (o *QuerySyncOK) SetPayload(payload *models.QueryResultElement) {
 	o.Payload = payload
 }
 
@@ -47,9 +49,11 @@ func (o *QuerySyncOK) SetPayload(payload interface{}) {
 func (o *QuerySyncOK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(200)
-	payload := o.Payload
-	if err := producer.Produce(rw, payload); err != nil {
-		panic(err) // let the recovery middleware deal with this
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
 	}
 }
 
