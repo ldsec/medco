@@ -18,8 +18,12 @@ ENV HOST=0.0.0.0 \
 
 # run-time environment
 ENV PICSURE2_INTERNAL_TOKEN=xxx \
-    I2B2_CRC_URL=http://i2b2:8080/i2b2/services/QueryToolService \
-    I2B2_ONT_URL=http://i2b2:8080/i2b2/services/OntologyService
+    I2B2_HIVE_URL=http://i2b2:8080/i2b2/services \
+    I2B2_LOGIN_DOMAIN=i2b2medco \
+    I2B2_LOGIN_PROJECT=MedCo \
+    I2B2_LOGIN_USER=e2etest \
+    I2B2_LOGIN_PASSWORD=e2etest \
+    LOG_LEVEL=5
 
 EXPOSE 1999
 ENTRYPOINT ["medco-connector-server"]

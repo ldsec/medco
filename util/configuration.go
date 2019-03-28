@@ -1,47 +1,71 @@
 package util
 
-import "os"
+import (
+	"github.com/sirupsen/logrus"
+	onetLog "go.dedis.ch/onet/v3/log"
+	"os"
+	"strconv"
+)
 
-// public ------------
+// LogLevel returns the log level, assuming the same convention as the cothority / unlynx log levels:
+// TRACE(5), DEBUG(4), INFO(3), WARNING(2), ERROR(1), FATAL(0)
+var LogLevel int
 
-// i2b2 connection ---
+var UnlynxGroupFilePath string
+var UnlynxGroupFileIdx int
+var UnlynxTimeoutSeconds int
 
-// get the URL of the i2b2 CRC cell this connector is using
-func I2b2CRCCellURL() string {
-	return os.Getenv("I2B2_CRC_URL")
+// URL of the i2b2 hive this connector is using
+var I2b2HiveURL string
+// i2b2 login domain
+var I2b2LoginDomain string
+// i2b2 login project
+var I2b2LoginProject string
+// i2b2 login user
+var I2b2LoginUser string
+// i2b2 login password
+var I2b2LoginPassword string
+// i2b2 timeout (seconds)
+var I2b2TimeoutSeconds int
+
+// token (shared secret) used for internal PICSURE 2 authorization
+var picsure2InternalToken string
+
+func init() {
+	SetLogLevel(os.Getenv("LOG_LEVEL"))
+
+	UnlynxGroupFilePath = os.Getenv("UNLYNX_GROUP_FILE_PATH")
+	UnlynxTimeoutSeconds = 180
+
+	UnlynxGroupFileIdx, err := strconv.ParseInt(os.Getenv("UNLYNX_GROUP_FILE_IDX"), 10, 64)
+	if err != nil || UnlynxGroupFileIdx < 0 {
+		logrus.Warn("invalid UnlynxGroupFileIdx")
+	}
+
+	I2b2HiveURL = os.Getenv("I2B2_HIVE_URL")
+	I2b2LoginDomain = os.Getenv("I2B2_LOGIN_DOMAIN")
+	I2b2LoginProject = os.Getenv("I2B2_LOGIN_PROJECT")
+	I2b2LoginUser = os.Getenv("I2B2_LOGIN_USER")
+	I2b2LoginPassword = os.Getenv("I2B2_LOGIN_PASSWORD")
+	I2b2TimeoutSeconds = 180
+
+	picsure2InternalToken = os.Getenv("PICSURE2_INTERNAL_TOKEN")
 }
 
-// get the URL of the i2b2 ONT cell this connector is using
-func I2b2ONTCellURL() string {
-	return os.Getenv("I2B2_ONT_URL")
-}
+// SetLogLevel initializes the log levels of all loggers
+func SetLogLevel(lvl string) {
+	// formatting
+	logrus.SetFormatter(&logrus.TextFormatter{
+		ForceColors: true,
+	})
 
-// get the login domain for i2b2
-func I2b2LoginDomain() string {
-	return os.Getenv("I2B2_LOGIN_DOMAIN")
-}
-// get the login project for i2b2
-func I2b2LoginProject() string {
-	return os.Getenv("I2B2_LOGIN_PROJECT")
-}
-// get the login user for i2b2
-func I2b2LoginUser() string {
-	return os.Getenv("I2B2_LOGIN_USER")
-}
-// get the login password
-func I2b2LoginPassword() string {
-	return os.Getenv("I2B2_LOGIN_PASSWORD")
-}
+	intLvl, err := strconv.ParseInt(lvl, 10, 64)
+	if err != nil || intLvl < 0 || intLvl > 5 {
+		logrus.Warn("invalid LogLevel, defaulted")
+		intLvl = 3
+	}
+	LogLevel = int(intLvl)
+	logrus.SetLevel(logrus.Level(LogLevel + 1))
+	onetLog.SetDebugVisible(LogLevel)
 
-// get the timeout in seconds for communications with i2b2
-func I2b2TimeoutSeconds() int {
-	return 180
 }
-
-// private ------------
-
-// get the token (shared secret) used for internal PICSURE 2 authorization
-func picsure2InternalToken() string {
-	return os.Getenv("PICSURE2_INTERNAL_TOKEN")
-}
-
