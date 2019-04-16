@@ -25,6 +25,10 @@ type SearchResultElement struct {
 	// display name
 	DisplayName string `json:"displayName,omitempty"`
 
+	// leaf
+	// Required: true
+	Leaf *bool `json:"leaf"`
+
 	// medco encryption
 	MedcoEncryption *SearchResultElementMedcoEncryption `json:"medcoEncryption,omitempty"`
 
@@ -37,26 +41,39 @@ type SearchResultElement struct {
 	// path
 	Path string `json:"path,omitempty"`
 
-	// value type
-	// Enum: [none numeric enum text genomic_annotation]
-	ValueType string `json:"valueType,omitempty"`
+	// type
+	// Enum: [container concept concept_numeric concept_enum concept_text genomic_annotation]
+	Type string `json:"type,omitempty"`
 }
 
 // Validate validates this search result element
 func (m *SearchResultElement) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateLeaf(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateMedcoEncryption(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateValueType(formats); err != nil {
+	if err := m.validateType(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *SearchResultElement) validateLeaf(formats strfmt.Registry) error {
+
+	if err := validate.Required("leaf", "body", m.Leaf); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -78,52 +95,55 @@ func (m *SearchResultElement) validateMedcoEncryption(formats strfmt.Registry) e
 	return nil
 }
 
-var searchResultElementTypeValueTypePropEnum []interface{}
+var searchResultElementTypeTypePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["none","numeric","enum","text","genomic_annotation"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["container","concept","concept_numeric","concept_enum","concept_text","genomic_annotation"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
-		searchResultElementTypeValueTypePropEnum = append(searchResultElementTypeValueTypePropEnum, v)
+		searchResultElementTypeTypePropEnum = append(searchResultElementTypeTypePropEnum, v)
 	}
 }
 
 const (
 
-	// SearchResultElementValueTypeNone captures enum value "none"
-	SearchResultElementValueTypeNone string = "none"
+	// SearchResultElementTypeContainer captures enum value "container"
+	SearchResultElementTypeContainer string = "container"
 
-	// SearchResultElementValueTypeNumeric captures enum value "numeric"
-	SearchResultElementValueTypeNumeric string = "numeric"
+	// SearchResultElementTypeConcept captures enum value "concept"
+	SearchResultElementTypeConcept string = "concept"
 
-	// SearchResultElementValueTypeEnum captures enum value "enum"
-	SearchResultElementValueTypeEnum string = "enum"
+	// SearchResultElementTypeConceptNumeric captures enum value "concept_numeric"
+	SearchResultElementTypeConceptNumeric string = "concept_numeric"
 
-	// SearchResultElementValueTypeText captures enum value "text"
-	SearchResultElementValueTypeText string = "text"
+	// SearchResultElementTypeConceptEnum captures enum value "concept_enum"
+	SearchResultElementTypeConceptEnum string = "concept_enum"
 
-	// SearchResultElementValueTypeGenomicAnnotation captures enum value "genomic_annotation"
-	SearchResultElementValueTypeGenomicAnnotation string = "genomic_annotation"
+	// SearchResultElementTypeConceptText captures enum value "concept_text"
+	SearchResultElementTypeConceptText string = "concept_text"
+
+	// SearchResultElementTypeGenomicAnnotation captures enum value "genomic_annotation"
+	SearchResultElementTypeGenomicAnnotation string = "genomic_annotation"
 )
 
 // prop value enum
-func (m *SearchResultElement) validateValueTypeEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, searchResultElementTypeValueTypePropEnum); err != nil {
+func (m *SearchResultElement) validateTypeEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, searchResultElementTypeTypePropEnum); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m *SearchResultElement) validateValueType(formats strfmt.Registry) error {
+func (m *SearchResultElement) validateType(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.ValueType) { // not required
+	if swag.IsZero(m.Type) { // not required
 		return nil
 	}
 
 	// value enum
-	if err := m.validateValueTypeEnum("valueType", "body", m.ValueType); err != nil {
+	if err := m.validateTypeEnum("type", "body", m.Type); err != nil {
 		return err
 	}
 
@@ -156,21 +176,18 @@ type SearchResultElementMedcoEncryption struct {
 	ChildrenIds []int64 `json:"childrenIds"`
 
 	// encrypted
-	Encrypted bool `json:"encrypted,omitempty"`
+	// Required: true
+	Encrypted *bool `json:"encrypted"`
 
 	// id
 	ID int64 `json:"id,omitempty"`
-
-	// type
-	// Enum: [CONCEPT_PARENT_NODE CONCEPT_INTERNAL_NODE CONCEPT_LEAF]
-	Type string `json:"type,omitempty"`
 }
 
 // Validate validates this search result element medco encryption
 func (m *SearchResultElementMedcoEncryption) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateType(formats); err != nil {
+	if err := m.validateEncrypted(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -180,46 +197,9 @@ func (m *SearchResultElementMedcoEncryption) Validate(formats strfmt.Registry) e
 	return nil
 }
 
-var searchResultElementMedcoEncryptionTypeTypePropEnum []interface{}
+func (m *SearchResultElementMedcoEncryption) validateEncrypted(formats strfmt.Registry) error {
 
-func init() {
-	var res []string
-	if err := json.Unmarshal([]byte(`["CONCEPT_PARENT_NODE","CONCEPT_INTERNAL_NODE","CONCEPT_LEAF"]`), &res); err != nil {
-		panic(err)
-	}
-	for _, v := range res {
-		searchResultElementMedcoEncryptionTypeTypePropEnum = append(searchResultElementMedcoEncryptionTypeTypePropEnum, v)
-	}
-}
-
-const (
-
-	// SearchResultElementMedcoEncryptionTypeCONCEPTPARENTNODE captures enum value "CONCEPT_PARENT_NODE"
-	SearchResultElementMedcoEncryptionTypeCONCEPTPARENTNODE string = "CONCEPT_PARENT_NODE"
-
-	// SearchResultElementMedcoEncryptionTypeCONCEPTINTERNALNODE captures enum value "CONCEPT_INTERNAL_NODE"
-	SearchResultElementMedcoEncryptionTypeCONCEPTINTERNALNODE string = "CONCEPT_INTERNAL_NODE"
-
-	// SearchResultElementMedcoEncryptionTypeCONCEPTLEAF captures enum value "CONCEPT_LEAF"
-	SearchResultElementMedcoEncryptionTypeCONCEPTLEAF string = "CONCEPT_LEAF"
-)
-
-// prop value enum
-func (m *SearchResultElementMedcoEncryption) validateTypeEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, searchResultElementMedcoEncryptionTypeTypePropEnum); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *SearchResultElementMedcoEncryption) validateType(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Type) { // not required
-		return nil
-	}
-
-	// value enum
-	if err := m.validateTypeEnum("medcoEncryption"+"."+"type", "body", m.Type); err != nil {
+	if err := validate.Required("medcoEncryption"+"."+"encrypted", "body", m.Encrypted); err != nil {
 		return err
 	}
 

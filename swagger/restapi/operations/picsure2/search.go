@@ -18,16 +18,16 @@ import (
 )
 
 // SearchHandlerFunc turns a function with the right signature into a search handler
-type SearchHandlerFunc func(SearchParams, interface{}) middleware.Responder
+type SearchHandlerFunc func(SearchParams, *models.User) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn SearchHandlerFunc) Handle(params SearchParams, principal interface{}) middleware.Responder {
+func (fn SearchHandlerFunc) Handle(params SearchParams, principal *models.User) middleware.Responder {
 	return fn(params, principal)
 }
 
 // SearchHandler interface for that can handle valid search params
 type SearchHandler interface {
-	Handle(SearchParams, interface{}) middleware.Responder
+	Handle(SearchParams, *models.User) middleware.Responder
 }
 
 // NewSearch creates a new http.Handler for the search operation
@@ -60,9 +60,9 @@ func (o *Search) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	if aCtx != nil {
 		r = aCtx
 	}
-	var principal interface{}
+	var principal *models.User
 	if uprinc != nil {
-		principal = uprinc
+		principal = uprinc.(*models.User) // this is really a models.User, I promise
 	}
 
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params

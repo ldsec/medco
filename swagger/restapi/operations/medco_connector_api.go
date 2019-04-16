@@ -20,6 +20,8 @@ import (
 	"github.com/go-openapi/swag"
 
 	"github.com/lca1/medco-connector/swagger/restapi/operations/picsure2"
+
+	models "github.com/lca1/medco-connector/swagger/models"
 )
 
 // NewMedcoConnectorAPI creates a new MedcoConnector instance
@@ -39,27 +41,27 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 		BearerAuthenticator: security.BearerAuth,
 		JSONConsumer:        runtime.JSONConsumer(),
 		JSONProducer:        runtime.JSONProducer(),
-		Picsure2GetInfoHandler: picsure2.GetInfoHandlerFunc(func(params picsure2.GetInfoParams, principal interface{}) middleware.Responder {
+		Picsure2GetInfoHandler: picsure2.GetInfoHandlerFunc(func(params picsure2.GetInfoParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation Picsure2GetInfo has not yet been implemented")
 		}),
-		Picsure2QueryHandler: picsure2.QueryHandlerFunc(func(params picsure2.QueryParams, principal interface{}) middleware.Responder {
+		Picsure2QueryHandler: picsure2.QueryHandlerFunc(func(params picsure2.QueryParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation Picsure2Query has not yet been implemented")
 		}),
-		Picsure2QueryResultHandler: picsure2.QueryResultHandlerFunc(func(params picsure2.QueryResultParams, principal interface{}) middleware.Responder {
+		Picsure2QueryResultHandler: picsure2.QueryResultHandlerFunc(func(params picsure2.QueryResultParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation Picsure2QueryResult has not yet been implemented")
 		}),
-		Picsure2QueryStatusHandler: picsure2.QueryStatusHandlerFunc(func(params picsure2.QueryStatusParams, principal interface{}) middleware.Responder {
+		Picsure2QueryStatusHandler: picsure2.QueryStatusHandlerFunc(func(params picsure2.QueryStatusParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation Picsure2QueryStatus has not yet been implemented")
 		}),
-		Picsure2QuerySyncHandler: picsure2.QuerySyncHandlerFunc(func(params picsure2.QuerySyncParams, principal interface{}) middleware.Responder {
+		Picsure2QuerySyncHandler: picsure2.QuerySyncHandlerFunc(func(params picsure2.QuerySyncParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation Picsure2QuerySync has not yet been implemented")
 		}),
-		Picsure2SearchHandler: picsure2.SearchHandlerFunc(func(params picsure2.SearchParams, principal interface{}) middleware.Responder {
+		Picsure2SearchHandler: picsure2.SearchHandlerFunc(func(params picsure2.SearchParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation Picsure2Search has not yet been implemented")
 		}),
 
-		PICSURE2ResourceTokenAuth: func(token string, scopes []string) (interface{}, error) {
-			return nil, errors.NotImplemented("oauth2 bearer auth (PICSURE2ResourceToken) has not yet been implemented")
+		MedCoTokenAuth: func(token string, scopes []string) (*models.User, error) {
+			return nil, errors.NotImplemented("oauth2 bearer auth (MedCoToken) has not yet been implemented")
 		},
 
 		// default authorizer is authorized meaning no requests are blocked
@@ -95,9 +97,9 @@ type MedcoConnectorAPI struct {
 	// JSONProducer registers a producer for a "application/json" mime type
 	JSONProducer runtime.Producer
 
-	// PICSURE2ResourceTokenAuth registers a function that takes an access token and a collection of required scopes and returns a principal
+	// MedCoTokenAuth registers a function that takes an access token and a collection of required scopes and returns a principal
 	// it performs authentication based on an oauth2 bearer token provided in the request
-	PICSURE2ResourceTokenAuth func(string, []string) (interface{}, error)
+	MedCoTokenAuth func(string, []string) (*models.User, error)
 
 	// APIAuthorizer provides access control (ACL/RBAC/ABAC) by providing access to the request and authenticated principal
 	APIAuthorizer runtime.Authorizer
@@ -177,8 +179,8 @@ func (o *MedcoConnectorAPI) Validate() error {
 		unregistered = append(unregistered, "JSONProducer")
 	}
 
-	if o.PICSURE2ResourceTokenAuth == nil {
-		unregistered = append(unregistered, "PICSURE2ResourceTokenAuth")
+	if o.MedCoTokenAuth == nil {
+		unregistered = append(unregistered, "MedCoTokenAuth")
 	}
 
 	if o.Picsure2GetInfoHandler == nil {
@@ -224,9 +226,11 @@ func (o *MedcoConnectorAPI) AuthenticatorsFor(schemes map[string]spec.SecuritySc
 	for name, scheme := range schemes {
 		switch name {
 
-		case "PICSURE2ResourceToken":
+		case "MedCoToken":
 
-			result[name] = o.BearerAuthenticator(scheme.Name, o.PICSURE2ResourceTokenAuth)
+			result[name] = o.BearerAuthenticator(scheme.Name, func(token string, scopes []string) (interface{}, error) {
+				return o.MedCoTokenAuth(token, scopes)
+			})
 
 		}
 	}

@@ -17,6 +17,8 @@ schemes:
 externalDocs:
   description: "MedCo Technical Documentation"
   url: "https://medco.epfl.ch/documentation"
+security:
+  - MedCoToken: []
 
 paths:
   /picsure2/info:
@@ -44,8 +46,6 @@ paths:
           $ref: "#/responses/resourceInfo"
         default:
           $ref: "#/responses/error"
-      security:
-        - PICSURE2ResourceToken: []
 
   /picsure2/search:
     post:
@@ -76,8 +76,6 @@ paths:
           $ref: "#/responses/searchResult"
         default:
           $ref: "#/responses/error"
-      security:
-        - PICSURE2ResourceToken: []
 
   /picsure2/query:
     post:
@@ -108,8 +106,6 @@ paths:
           $ref: "#/responses/queryStatus"
         default:
           $ref: "#/responses/error"
-      security:
-        - PICSURE2ResourceToken: []
 
   /picsure2/query/sync:
     post:
@@ -140,8 +136,6 @@ paths:
           $ref: "#/responses/queryResult"
         default:
           $ref: "#/responses/error"
-      security:
-        - PICSURE2ResourceToken: []
 
   /picsure2/{queryId}/status:
     post:
@@ -173,8 +167,6 @@ paths:
           $ref: "#/responses/queryStatus"
         default:
           $ref: "#/responses/error"
-      security:
-        - PICSURE2ResourceToken: []
 
   /picsure2/{queryId}/result:
     post:
@@ -206,15 +198,13 @@ paths:
           $ref: "#/responses/queryResult"
         default:
           $ref: "#/responses/error"
-      security:
-        - PICSURE2ResourceToken: []
 
 securityDefinitions:
-  PICSURE2ResourceToken:
+  MedCoToken:
     type: "oauth2"
-    flow: "password"
-    tokenUrl: "http://test.com/asdasd"
-    description: "PICSURE 2 resource authorization (shared secret passed in headers)."
+    flow: "application"
+    tokenUrl: "https://medco-demo.epfl.ch/auth"
+    description: "MedCo JWT token."
 
 responses:
   error:
@@ -293,6 +283,7 @@ definitions:
 
   searchResultElement:
     type: "object"
+    required: [leaf]
     properties:
       path:
         type: "string"
@@ -302,16 +293,20 @@ definitions:
         type: "string"
       code:
         type: "string"
-      valueType:
+      type:
         type: "string"
         enum:
-          - none
-          - numeric
-          - enum
-          - text
+          - container
+          - concept
+          - concept_numeric
+          - concept_enum
+          - concept_text
           - genomic_annotation
+      leaf:
+        type: "boolean"
       medcoEncryption:
         type: "object"
+        required: [encrypted]
         properties:
           encrypted:
             type: "boolean"
@@ -323,18 +318,14 @@ definitions:
             items:
               type: "integer"
               format: "int64"
-          type:
-            type: "string"
-            enum:
-              - CONCEPT_PARENT_NODE
-              - CONCEPT_INTERNAL_NODE
-              - CONCEPT_LEAF
       metadata:
         type: "object"
 
   query:
     type: "object"
     properties:
+      name:
+        type: "string"
       i2b2-medco:
         type: "object"
         description: "i2b2-medco query"
@@ -351,6 +342,7 @@ definitions:
             description: "i2b2 panels (linked by an AND)"
             items:
               type: "object"
+              required: [not]
               properties:
                 not:
                   type: "boolean"
@@ -360,6 +352,7 @@ definitions:
                   description: "i2b2 items (linked by an OR)"
                   items:
                     type: "object"
+                    required: [encrypted]
                     properties:
                       queryTerm:
                         type: "string"
@@ -426,3 +419,11 @@ definitions:
       expiration:
         type: "integer"
         format: "int64"
+
+  user:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      token:
+        type: "string"

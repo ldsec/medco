@@ -38,11 +38,6 @@ func init() {
   "paths": {
     "/picsure2/info": {
       "post": {
-        "security": [
-          {
-            "PICSURE2ResourceToken": []
-          }
-        ],
         "consumes": [
           "application/json"
         ],
@@ -82,11 +77,6 @@ func init() {
     },
     "/picsure2/query": {
       "post": {
-        "security": [
-          {
-            "PICSURE2ResourceToken": []
-          }
-        ],
         "consumes": [
           "application/json"
         ],
@@ -132,11 +122,6 @@ func init() {
     },
     "/picsure2/query/sync": {
       "post": {
-        "security": [
-          {
-            "PICSURE2ResourceToken": []
-          }
-        ],
         "consumes": [
           "application/json"
         ],
@@ -182,11 +167,6 @@ func init() {
     },
     "/picsure2/search": {
       "post": {
-        "security": [
-          {
-            "PICSURE2ResourceToken": []
-          }
-        ],
         "consumes": [
           "application/json"
         ],
@@ -232,11 +212,6 @@ func init() {
     },
     "/picsure2/{queryId}/result": {
       "post": {
-        "security": [
-          {
-            "PICSURE2ResourceToken": []
-          }
-        ],
         "consumes": [
           "application/json"
         ],
@@ -283,11 +258,6 @@ func init() {
     },
     "/picsure2/{queryId}/status": {
       "post": {
-        "security": [
-          {
-            "PICSURE2ResourceToken": []
-          }
-        ],
         "consumes": [
           "application/json"
         ],
@@ -350,12 +320,18 @@ func init() {
               "type": "array",
               "items": {
                 "type": "object",
+                "required": [
+                  "not"
+                ],
                 "properties": {
                   "items": {
                     "description": "i2b2 items (linked by an OR)",
                     "type": "array",
                     "items": {
                       "type": "object",
+                      "required": [
+                        "encrypted"
+                      ],
                       "properties": {
                         "encrypted": {
                           "type": "boolean"
@@ -397,6 +373,9 @@ func init() {
               "type": "string"
             }
           }
+        },
+        "name": {
+          "type": "string"
         }
       }
     },
@@ -494,6 +473,9 @@ func init() {
     },
     "searchResultElement": {
       "type": "object",
+      "required": [
+        "leaf"
+      ],
       "properties": {
         "code": {
           "type": "string"
@@ -501,8 +483,14 @@ func init() {
         "displayName": {
           "type": "string"
         },
+        "leaf": {
+          "type": "boolean"
+        },
         "medcoEncryption": {
           "type": "object",
+          "required": [
+            "encrypted"
+          ],
           "properties": {
             "childrenIds": {
               "type": "array",
@@ -517,14 +505,6 @@ func init() {
             "id": {
               "type": "integer",
               "format": "int64"
-            },
-            "type": {
-              "type": "string",
-              "enum": [
-                "CONCEPT_PARENT_NODE",
-                "CONCEPT_INTERNAL_NODE",
-                "CONCEPT_LEAF"
-              ]
             }
           }
         },
@@ -537,15 +517,27 @@ func init() {
         "path": {
           "type": "string"
         },
-        "valueType": {
+        "type": {
           "type": "string",
           "enum": [
-            "none",
-            "numeric",
-            "enum",
-            "text",
+            "container",
+            "concept",
+            "concept_numeric",
+            "concept_enum",
+            "concept_text",
             "genomic_annotation"
           ]
+        }
+      }
+    },
+    "user": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
         }
       }
     }
@@ -630,13 +622,18 @@ func init() {
     }
   },
   "securityDefinitions": {
-    "PICSURE2ResourceToken": {
-      "description": "PICSURE 2 resource authorization (shared secret passed in headers).",
+    "MedCoToken": {
+      "description": "MedCo JWT token.",
       "type": "oauth2",
-      "flow": "password",
-      "tokenUrl": "http://test.com/asdasd"
+      "flow": "application",
+      "tokenUrl": "https://medco-demo.epfl.ch/auth"
     }
   },
+  "security": [
+    {
+      "MedCoToken": null
+    }
+  ],
   "tags": [
     {
       "description": "PIC-SURE 2 Resource Service API",
@@ -669,11 +666,6 @@ func init() {
   "paths": {
     "/picsure2/info": {
       "post": {
-        "security": [
-          {
-            "PICSURE2ResourceToken": []
-          }
-        ],
         "consumes": [
           "application/json"
         ],
@@ -755,11 +747,6 @@ func init() {
     },
     "/picsure2/query": {
       "post": {
-        "security": [
-          {
-            "PICSURE2ResourceToken": []
-          }
-        ],
         "consumes": [
           "application/json"
         ],
@@ -816,11 +803,6 @@ func init() {
     },
     "/picsure2/query/sync": {
       "post": {
-        "security": [
-          {
-            "PICSURE2ResourceToken": []
-          }
-        ],
         "consumes": [
           "application/json"
         ],
@@ -877,11 +859,6 @@ func init() {
     },
     "/picsure2/search": {
       "post": {
-        "security": [
-          {
-            "PICSURE2ResourceToken": []
-          }
-        ],
         "consumes": [
           "application/json"
         ],
@@ -949,11 +926,6 @@ func init() {
     },
     "/picsure2/{queryId}/result": {
       "post": {
-        "security": [
-          {
-            "PICSURE2ResourceToken": []
-          }
-        ],
         "consumes": [
           "application/json"
         ],
@@ -1011,11 +983,6 @@ func init() {
     },
     "/picsure2/{queryId}/status": {
       "post": {
-        "security": [
-          {
-            "PICSURE2ResourceToken": []
-          }
-        ],
         "consumes": [
           "application/json"
         ],
@@ -1089,12 +1056,18 @@ func init() {
               "type": "array",
               "items": {
                 "type": "object",
+                "required": [
+                  "not"
+                ],
                 "properties": {
                   "items": {
                     "description": "i2b2 items (linked by an OR)",
                     "type": "array",
                     "items": {
                       "type": "object",
+                      "required": [
+                        "encrypted"
+                      ],
                       "properties": {
                         "encrypted": {
                           "type": "boolean"
@@ -1136,6 +1109,9 @@ func init() {
               "type": "string"
             }
           }
+        },
+        "name": {
+          "type": "string"
         }
       }
     },
@@ -1233,6 +1209,9 @@ func init() {
     },
     "searchResultElement": {
       "type": "object",
+      "required": [
+        "leaf"
+      ],
       "properties": {
         "code": {
           "type": "string"
@@ -1240,8 +1219,14 @@ func init() {
         "displayName": {
           "type": "string"
         },
+        "leaf": {
+          "type": "boolean"
+        },
         "medcoEncryption": {
           "type": "object",
+          "required": [
+            "encrypted"
+          ],
           "properties": {
             "childrenIds": {
               "type": "array",
@@ -1256,14 +1241,6 @@ func init() {
             "id": {
               "type": "integer",
               "format": "int64"
-            },
-            "type": {
-              "type": "string",
-              "enum": [
-                "CONCEPT_PARENT_NODE",
-                "CONCEPT_INTERNAL_NODE",
-                "CONCEPT_LEAF"
-              ]
             }
           }
         },
@@ -1276,15 +1253,27 @@ func init() {
         "path": {
           "type": "string"
         },
-        "valueType": {
+        "type": {
           "type": "string",
           "enum": [
-            "none",
-            "numeric",
-            "enum",
-            "text",
+            "container",
+            "concept",
+            "concept_numeric",
+            "concept_enum",
+            "concept_text",
             "genomic_annotation"
           ]
+        }
+      }
+    },
+    "user": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
         }
       }
     }
@@ -1369,13 +1358,18 @@ func init() {
     }
   },
   "securityDefinitions": {
-    "PICSURE2ResourceToken": {
-      "description": "PICSURE 2 resource authorization (shared secret passed in headers).",
+    "MedCoToken": {
+      "description": "MedCo JWT token.",
       "type": "oauth2",
-      "flow": "password",
-      "tokenUrl": "http://test.com/asdasd"
+      "flow": "application",
+      "tokenUrl": "https://medco-demo.epfl.ch/auth"
     }
   },
+  "security": [
+    {
+      "MedCoToken": []
+    }
+  ],
   "tags": [
     {
       "description": "PIC-SURE 2 Resource Service API",

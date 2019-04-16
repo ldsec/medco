@@ -17,16 +17,16 @@ import (
 )
 
 // QueryStatusHandlerFunc turns a function with the right signature into a query status handler
-type QueryStatusHandlerFunc func(QueryStatusParams, interface{}) middleware.Responder
+type QueryStatusHandlerFunc func(QueryStatusParams, *models.User) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn QueryStatusHandlerFunc) Handle(params QueryStatusParams, principal interface{}) middleware.Responder {
+func (fn QueryStatusHandlerFunc) Handle(params QueryStatusParams, principal *models.User) middleware.Responder {
 	return fn(params, principal)
 }
 
 // QueryStatusHandler interface for that can handle valid query status params
 type QueryStatusHandler interface {
-	Handle(QueryStatusParams, interface{}) middleware.Responder
+	Handle(QueryStatusParams, *models.User) middleware.Responder
 }
 
 // NewQueryStatus creates a new http.Handler for the query status operation
@@ -59,9 +59,9 @@ func (o *QueryStatus) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	if aCtx != nil {
 		r = aCtx
 	}
-	var principal interface{}
+	var principal *models.User
 	if uprinc != nil {
-		principal = uprinc
+		principal = uprinc.(*models.User) // this is really a models.User, I promise
 	}
 
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params

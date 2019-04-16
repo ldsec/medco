@@ -17,16 +17,16 @@ import (
 )
 
 // QuerySyncHandlerFunc turns a function with the right signature into a query sync handler
-type QuerySyncHandlerFunc func(QuerySyncParams, interface{}) middleware.Responder
+type QuerySyncHandlerFunc func(QuerySyncParams, *models.User) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn QuerySyncHandlerFunc) Handle(params QuerySyncParams, principal interface{}) middleware.Responder {
+func (fn QuerySyncHandlerFunc) Handle(params QuerySyncParams, principal *models.User) middleware.Responder {
 	return fn(params, principal)
 }
 
 // QuerySyncHandler interface for that can handle valid query sync params
 type QuerySyncHandler interface {
-	Handle(QuerySyncParams, interface{}) middleware.Responder
+	Handle(QuerySyncParams, *models.User) middleware.Responder
 }
 
 // NewQuerySync creates a new http.Handler for the query sync operation
@@ -59,9 +59,9 @@ func (o *QuerySync) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	if aCtx != nil {
 		r = aCtx
 	}
-	var principal interface{}
+	var principal *models.User
 	if uprinc != nil {
-		principal = uprinc
+		principal = uprinc.(*models.User) // this is really a models.User, I promise
 	}
 
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params

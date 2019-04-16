@@ -17,16 +17,16 @@ import (
 )
 
 // QueryHandlerFunc turns a function with the right signature into a query handler
-type QueryHandlerFunc func(QueryParams, interface{}) middleware.Responder
+type QueryHandlerFunc func(QueryParams, *models.User) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn QueryHandlerFunc) Handle(params QueryParams, principal interface{}) middleware.Responder {
+func (fn QueryHandlerFunc) Handle(params QueryParams, principal *models.User) middleware.Responder {
 	return fn(params, principal)
 }
 
 // QueryHandler interface for that can handle valid query params
 type QueryHandler interface {
-	Handle(QueryParams, interface{}) middleware.Responder
+	Handle(QueryParams, *models.User) middleware.Responder
 }
 
 // NewQuery creates a new http.Handler for the query operation
@@ -59,9 +59,9 @@ func (o *Query) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	if aCtx != nil {
 		r = aCtx
 	}
-	var principal interface{}
+	var principal *models.User
 	if uprinc != nil {
-		principal = uprinc
+		principal = uprinc.(*models.User) // this is really a models.User, I promise
 	}
 
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params

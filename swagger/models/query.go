@@ -25,6 +25,9 @@ type Query struct {
 
 	// i2b2 medco
 	I2b2Medco *QueryI2b2Medco `json:"i2b2-medco,omitempty"`
+
+	// name
+	Name string `json:"name,omitempty"`
 }
 
 // Validate validates this query
@@ -197,7 +200,8 @@ type QueryI2b2MedcoPanelsItems0 struct {
 	Items []*QueryI2b2MedcoPanelsItems0ItemsItems0 `json:"items"`
 
 	// exclude the i2b2 panel
-	Not bool `json:"not,omitempty"`
+	// Required: true
+	Not *bool `json:"not"`
 }
 
 // Validate validates this query i2b2 medco panels items0
@@ -205,6 +209,10 @@ func (m *QueryI2b2MedcoPanelsItems0) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateItems(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateNot(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -239,6 +247,15 @@ func (m *QueryI2b2MedcoPanelsItems0) validateItems(formats strfmt.Registry) erro
 	return nil
 }
 
+func (m *QueryI2b2MedcoPanelsItems0) validateNot(formats strfmt.Registry) error {
+
+	if err := validate.Required("not", "body", m.Not); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // MarshalBinary interface implementation
 func (m *QueryI2b2MedcoPanelsItems0) MarshalBinary() ([]byte, error) {
 	if m == nil {
@@ -262,7 +279,8 @@ func (m *QueryI2b2MedcoPanelsItems0) UnmarshalBinary(b []byte) error {
 type QueryI2b2MedcoPanelsItems0ItemsItems0 struct {
 
 	// encrypted
-	Encrypted bool `json:"encrypted,omitempty"`
+	// Required: true
+	Encrypted *bool `json:"encrypted"`
 
 	// operator
 	// Enum: [exists equals]
@@ -279,6 +297,10 @@ type QueryI2b2MedcoPanelsItems0ItemsItems0 struct {
 func (m *QueryI2b2MedcoPanelsItems0ItemsItems0) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateEncrypted(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateOperator(formats); err != nil {
 		res = append(res, err)
 	}
@@ -286,6 +308,15 @@ func (m *QueryI2b2MedcoPanelsItems0ItemsItems0) Validate(formats strfmt.Registry
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *QueryI2b2MedcoPanelsItems0ItemsItems0) validateEncrypted(formats strfmt.Registry) error {
+
+	if err := validate.Required("encrypted", "body", m.Encrypted); err != nil {
+		return err
+	}
+
 	return nil
 }
 

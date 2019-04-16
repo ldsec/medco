@@ -18,16 +18,16 @@ import (
 )
 
 // GetInfoHandlerFunc turns a function with the right signature into a get info handler
-type GetInfoHandlerFunc func(GetInfoParams, interface{}) middleware.Responder
+type GetInfoHandlerFunc func(GetInfoParams, *models.User) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn GetInfoHandlerFunc) Handle(params GetInfoParams, principal interface{}) middleware.Responder {
+func (fn GetInfoHandlerFunc) Handle(params GetInfoParams, principal *models.User) middleware.Responder {
 	return fn(params, principal)
 }
 
 // GetInfoHandler interface for that can handle valid get info params
 type GetInfoHandler interface {
-	Handle(GetInfoParams, interface{}) middleware.Responder
+	Handle(GetInfoParams, *models.User) middleware.Responder
 }
 
 // NewGetInfo creates a new http.Handler for the get info operation
@@ -60,9 +60,9 @@ func (o *GetInfo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	if aCtx != nil {
 		r = aCtx
 	}
-	var principal interface{}
+	var principal *models.User
 	if uprinc != nil {
-		principal = uprinc
+		principal = uprinc.(*models.User) // this is really a models.User, I promise
 	}
 
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params
