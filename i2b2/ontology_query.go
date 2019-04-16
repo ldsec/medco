@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// make request to browse the i2b2 ontology
+// GetOntologyChildren makes request to browse the i2b2 ontology
 func GetOntologyChildren(path string) (results []*models.SearchResultElement, err error) {
 
 	// craft and make request
@@ -54,46 +54,71 @@ func GetOntologyChildren(path string) (results []*models.SearchResultElement, er
 	return
 }
 
-// parse the i2b2 concept into the result model
 func parseI2b2Concept(concept Concept) (result *models.SearchResultElement) {
-
+	// todo: add leaf, ensure type OK
+	//          type:
+	//            type: "string"
+	//            enum:
+	//              - CONCEPT_PARENT_NODE
+	//              - CONCEPT_INTERNAL_NODE
+	//              - CONCEPT_LEAF
+	true := true
+	false := false
 	result = &models.SearchResultElement{
 		Name: concept.Name,
 		DisplayName: concept.Name,
 		Code: concept.Basecode,
 		MedcoEncryption: &models.SearchResultElementMedcoEncryption{
-			Encrypted: false,
+			Encrypted: &false,
 			ID: -1,
 			ChildrenIds: []int64{},
-			Type: "",
 		},
 		Metadata: nil,
 		Path: convertPathFromI2b2Format(concept.Key),
-		ValueType: models.SearchResultElementValueTypeNone,
+		//Type: models.SearchResultElementTypeConcept,
+		//Leaf: false,
+	}
+
+	switch concept.Visualattributes[0] {
+	// i2b2 leaf
+	case 'L':
+		result.Leaf = &true
+		result.Type = models.SearchResultElementTypeConcept
+
+	// i2b2 container
+	case 'C':
+		result.Leaf = &false
+		result.Type = models.SearchResultElementTypeContainer
+
+	// i2b2 folder (& default)
+	default:
+		fallthrough
+	case 'F':
+		result.Leaf = &false
+		result.Type = models.SearchResultElementTypeConcept
+
 	}
 
 	splitCode := strings.Split(concept.Basecode, ":")
 
 	// if clinical concept from data loader v0 (from concept code)
 	if splitCode[0] == "ENC_ID" {
-		result.MedcoEncryption.Encrypted = true
-		result.MedcoEncryption.Type = models.SearchResultElementMedcoEncryptionTypeCONCEPTLEAF
+		result.MedcoEncryption.Encrypted = &true
 		result.MedcoEncryption.ID, _ = strconv.ParseInt(splitCode[1], 10, 64)
 
 	// if concept from loader v1 encrypted (from metadata xml)
 	} else if concept.Metadataxml.ValueMetadata.EncryptedType != "" {
-		result.MedcoEncryption.Encrypted = true
-		result.MedcoEncryption.Type = concept.Metadataxml.ValueMetadata.EncryptedType
+		result.MedcoEncryption.Encrypted = &true
 		result.MedcoEncryption.ID, _ = strconv.ParseInt(concept.Metadataxml.ValueMetadata.NodeEncryptID, 10, 64)
 
-		for _, childEncryptIdString := range strings.Split(concept.Metadataxml.ValueMetadata.ChildrenEncryptIDs, ",") {
-			childEncryptId, _ := strconv.ParseInt(childEncryptIdString, 10, 64)
-			result.MedcoEncryption.ChildrenIds = append(result.MedcoEncryption.ChildrenIds, childEncryptId)
+		for _, childEncryptIDString := range strings.Split(concept.Metadataxml.ValueMetadata.ChildrenEncryptIDs, ",") {
+			childEncryptID, _ := strconv.ParseInt(childEncryptIDString, 10, 64)
+			result.MedcoEncryption.ChildrenIds = append(result.MedcoEncryption.ChildrenIds, childEncryptID)
 		}
 
-		// if genomic concept from data loader v0 (from concept code)
+	// if genomic concept from data loader v0 (from concept code)
 	} else if splitCode[0] == "GEN" {
-		result.ValueType = models.SearchResultElementValueTypeGenomicAnnotation
+		result.Type = models.SearchResultElementTypeGenomicAnnotation
 	}
 
 	return
