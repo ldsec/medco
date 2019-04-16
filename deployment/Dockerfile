@@ -17,13 +17,18 @@ ENV HOST=0.0.0.0 \
     PORT=1999
 
 # run-time environment
-ENV PICSURE2_INTERNAL_TOKEN=xxx \
-    I2B2_HIVE_URL=http://i2b2:8080/i2b2/services \
+ENV I2B2_HIVE_URL=http://i2b2:8080/i2b2/services \
     I2B2_LOGIN_DOMAIN=i2b2medco \
     I2B2_LOGIN_PROJECT=MedCo \
     I2B2_LOGIN_USER=e2etest \
     I2B2_LOGIN_PASSWORD=e2etest \
-    LOG_LEVEL=5
+    LOG_LEVEL=5 \
+    UNLYNX_GROUP_FILE_PATH=/medco-configuration/group.toml \
+    UNLYNX_GROUP_FILE_IDX=0 \
+    JWKS_URL=http://keycloak:8080/auth/realms/master/protocol/openid-connect/certs \
+    OIDC_JWT_ISSUER=http://keycloak:8080/auth/realms/master \
+    OIDC_CLIENT_ID=medco \
+    OIDC_JWT_USER_ID_CLAIM=preferred_username
 
 EXPOSE 1999
 ENTRYPOINT ["medco-connector-server"]
