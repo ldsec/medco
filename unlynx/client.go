@@ -13,33 +13,9 @@ import (
 	"time"
 )
 
-var unlynxClient *servicesmedco.API
-var cothorityRoster *onet.Roster
-
-func setupUnlynxClient() {
-
-	// initialize medco client
-	groupFile, err := os.Open(util.UnlynxGroupFilePath)
-	if err != nil {
-		logrus.Panic("unlynx error opening group file: ", err)
-	}
-
-	group, err := app.ReadGroupDescToml(groupFile)
-	if err != nil || len(group.Roster.List) <= 0 {
-		logrus.Panic("unlynx error parsing group file: ", err)
-	}
-
-	cothorityRoster = group.Roster
-	unlynxClient = servicesmedco.NewMedCoClient(
-		cothorityRoster.List[util.UnlynxGroupFileIdx],
-		strconv.Itoa(util.UnlynxGroupFileIdx),
-	)
-}
-
+// GetQueryTermsDDT makes request through unlynx to compute distributed deterministic tags
 func GetQueryTermsDDT(queryName string, encQueryTerms []string) (taggedQueryTerms map[string]string, err error) {
-	if unlynxClient == nil {
-		setupUnlynxClient()
-	}
+	unlynxClient, cothorityRoster := newUnlynxClient()
 
 	// todo: wrap ddt in go routine, have channel for result + error, select with result / error / timeout
 	// todo: get time measurements
@@ -60,7 +36,7 @@ func GetQueryTermsDDT(queryName string, encQueryTerms []string) (taggedQueryTerm
 	go func() {
 		_, ddtResults, _, ddtErr := unlynxClient.SendSurveyDDTRequestTerms(
 			cothorityRoster,
-			servicesmedco.SurveyID(queryName),
+			servicesmedco.SurveyID(queryName + "_DDT"),
 			deserializedEncQueryTerms,
 			false,
 			false,
@@ -91,10 +67,10 @@ func GetQueryTermsDDT(queryName string, encQueryTerms []string) (taggedQueryTerm
 	return
 }
 
+// AggregateAndKeySwitchDummyFlags makes request through unlynx to aggregate and key switch encrypted values
 func AggregateAndKeySwitchDummyFlags(queryName string, dummyFlags []string, clientPubKey string) (agg string, err error) {
-	if unlynxClient == nil {
-		setupUnlynxClient()
-	}
+	unlynxClient, cothorityRoster := newUnlynxClient()
+
 
 	// todo: get time measurements
 	// 	tr.AggRequestTimeCommunication = totalTime - tr.DDTRequestTimeExec
@@ -125,7 +101,7 @@ func AggregateAndKeySwitchDummyFlags(queryName string, dummyFlags []string, clie
 	go func() {
 		_, aggResult, _, aggErr := unlynxClient.SendSurveyAggRequest(
 			cothorityRoster,
-			servicesmedco.SurveyID(queryName),
+			servicesmedco.SurveyID(queryName + "_AGG"),
 			deserializedClientPubKey,
 			*aggregate,
 			false,
@@ -163,5 +139,28 @@ func deserializeCipherVector(cipherTexts []string) (cipherVector libunlynx.Ciphe
 
 		cipherVector = append(cipherVector, deserialized)
 	}
+	return
+}
+
+// newUnlynxClient creates a new client to communicate with unlynx
+func newUnlynxClient() (unlynxClient *servicesmedco.API, cothorityRoster *onet.Roster) {
+
+	// initialize medco client
+	groupFile, err := os.Open(util.UnlynxGroupFilePath)
+	if err != nil {
+		logrus.Panic("unlynx error opening group file: ", err)
+	}
+
+	group, err := app.ReadGroupDescToml(groupFile)
+	if err != nil || len(group.Roster.List) <= 0 {
+		logrus.Panic("unlynx error parsing group file: ", err)
+	}
+
+	cothorityRoster = group.Roster
+	unlynxClient = servicesmedco.NewMedCoClient(
+		cothorityRoster.List[util.UnlynxGroupFileIdx],
+		strconv.Itoa(util.UnlynxGroupFileIdx),
+	)
+
 	return
 }
