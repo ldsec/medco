@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// returns a new request object for i2b2 psm request
+// NewCrcPsmReqFromQueryDef returns a new request object for i2b2 psm request
 func NewCrcPsmReqFromQueryDef(queryName string, panelsItemKeys [][]string, panelsIsNot []bool, resultOutputs []ResultOutputName) Request {
 
 	// PSM header
@@ -77,6 +77,7 @@ func NewCrcPsmReqFromQueryDef(queryName string, panelsItemKeys [][]string, panel
 
 // --- request
 
+// CrcPsmReqFromQueryDefMessageBody is an i2b2 XML message body for CRC PSM request from query definition
 type CrcPsmReqFromQueryDefMessageBody struct {
 	XMLName       xml.Name `xml:"message_body"`
 
@@ -84,6 +85,7 @@ type CrcPsmReqFromQueryDefMessageBody struct {
 	PsmRequest PsmRequestFromQueryDef `xml:"crcpsmns:request"`
 }
 
+// PsmHeader is an i2b2 XML header for PSM request
 type PsmHeader struct {
 	User    struct {
 		Text  string `xml:",chardata"`
@@ -97,6 +99,7 @@ type PsmHeader struct {
 	RequestType     string `xml:"request_type"`
 }
 
+// PsmRequestFromQueryDef is an i2b2 XML PSM request from query definition
 type PsmRequestFromQueryDef struct {
 	Type    string   `xml:"xsi:type,attr"`
 	Xsi     string   `xml:"xmlns:xsi,attr"`
@@ -111,6 +114,7 @@ type PsmRequestFromQueryDef struct {
 	ResultOutputs []ResultOutput `xml:"result_output_list>result_output"`
 }
 
+// Panel is an i2b2 XML panel
 type Panel struct {
 	PanelNumber          string `xml:"panel_number"`
 	PanelAccuracyScale   string `xml:"panel_accuracy_scale"`
@@ -121,6 +125,7 @@ type Panel struct {
 	Items 				 []Item `xml:"item"`
 }
 
+// Item is an i2b2 XML item
 type Item struct {
 	Hlevel        string `xml:"hlevel"`
 	ItemName      string `xml:"item_name"`
@@ -131,24 +136,29 @@ type Item struct {
 	ItemIsSynonym string `xml:"item_is_synonym"`
 }
 
+// ResultOutput is an i2b2 XML requested result type
 type ResultOutput struct {
 	PriorityIndex string `xml:"priority_index,attr"`
 	Name          string `xml:"name,attr"`
 }
 
+// ResultOutputName is an i2b2 XML requested result type value
 type ResultOutputName string
+
+// enumerated values of ResultOutputName
 const (
-	PATIENTSET ResultOutputName = "PATIENTSET"
-	PATIENT_ENCOUNTER_SET ResultOutputName = "PATIENT_ENCOUNTER_SET"
-	PATIENT_COUNT_XML ResultOutputName = "PATIENT_COUNT_XML"
-	PATIENT_GENDER_COUNT_XML ResultOutputName = "PATIENT_GENDER_COUNT_XML"
-	PATIENT_AGE_COUNT_XML ResultOutputName = "PATIENT_AGE_COUNT_XML"
-	PATIENT_VITALSTATUS_COUNT_XML ResultOutputName = "PATIENT_VITALSTATUS_COUNT_XML"
-	PATIENT_RACE_COUNT_XML ResultOutputName = "PATIENT_RACE_COUNT_XML"
+	Patientset                 ResultOutputName = "PATIENTSET"
+	PatientEncounterSet        ResultOutputName = "PATIENT_ENCOUNTER_SET"
+	PatientCountXML            ResultOutputName = "PATIENT_COUNT_XML"
+	PatientGenderCountXML      ResultOutputName = "PATIENT_GENDER_COUNT_XML"
+	PatientAgeCountXML         ResultOutputName = "PATIENT_AGE_COUNT_XML"
+	PatientVitalstatusCountXML ResultOutputName = "PATIENT_VITALSTATUS_COUNT_XML"
+	PatientRaceCountXML        ResultOutputName = "PATIENT_RACE_COUNT_XML"
 )
 
 // --- response
 
+// CrcPsmRespMessageBody is an i2b2 XML message body for CRC PSM response
 type CrcPsmRespMessageBody struct {
 	XMLName  xml.Name `xml:"message_body"`
 
@@ -168,7 +178,7 @@ type CrcPsmRespMessageBody struct {
 			CreateDate    string `xml:"create_date"`
 			DeleteDate    string `xml:"delete_date"`
 			RequestXML    string `xml:"request_xml"`
-			GeneratedSql  string `xml:"generated_sql"`
+			GeneratedSQL  string `xml:"generated_sql"`
 		} `xml:"query_master"`
 
 		QueryInstances []struct {
@@ -198,13 +208,13 @@ func (responseBody *CrcPsmRespMessageBody) checkStatus() error {
 		}
 	}
 
-	if len(errorMessages) == 0 {
-		return nil
-	} else {
+	if len(errorMessages) != 0 {
 		return errors.New(strings.Join(errorMessages, "; "))
 	}
+	return nil
 }
 
+// QueryResultInstance is an i2b2 XML query result instance
 type QueryResultInstance struct {
 	ResultInstanceID string `xml:"result_instance_id"`
 	QueryInstanceID  string `xml:"query_instance_id"`
@@ -224,9 +234,8 @@ type QueryResultInstance struct {
 }
 
 func (instance *QueryResultInstance) checkStatus() error {
-	if instance.QueryStatusType.StatusTypeID == "3" {
-		return nil
-	} else {
+	if instance.QueryStatusType.StatusTypeID != "3" {
 		return errors.New("i2b2 result instance does not have finished status")
 	}
+	return nil
 }

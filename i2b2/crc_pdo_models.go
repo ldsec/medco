@@ -4,7 +4,7 @@ import (
 	"encoding/xml"
 )
 
-// returns a new request object for i2b2 pdo request
+// NewCrcPdoReqFromInputList returns a new request object for i2b2 pdo request
 func NewCrcPdoReqFromInputList(patientSetID string) Request {
 
 	// PDO header
@@ -38,6 +38,7 @@ func NewCrcPdoReqFromInputList(patientSetID string) Request {
 
 // --- request
 
+// CrcPdoReqFromInputListMessageBody is an i2b2 XML message body for CRC PDO request from input list
 type CrcPdoReqFromInputListMessageBody struct {
 	XMLName       xml.Name `xml:"message_body"`
 
@@ -45,12 +46,14 @@ type CrcPdoReqFromInputListMessageBody struct {
 	PdoRequest PdoRequestFromInputList `xml:"crcpdons:request"`
 }
 
+// PdoHeader is an i2b2 XML header for PDO requests
 type PdoHeader struct {
 	PatientSetLimit string `xml:"patient_set_limit"`
 	EstimatedTime   string `xml:"estimated_time"`
 	RequestType     string `xml:"request_type"`
 }
 
+// PdoRequestFromInputList is an i2b2 XML PDO request - from input list
 type PdoRequestFromInputList struct {
 	Type    string   `xml:"xsi:type,attr"`
 	Xsi     string   `xml:"xmlns:xsi,attr"`
@@ -78,6 +81,7 @@ type PdoRequestFromInputList struct {
 
 // --- response
 
+// CrcPdoRespMessageBody is an i2b2 XML message body for CRC PDO response
 type CrcPdoRespMessageBody struct {
 	XMLName  xml.Name `xml:"message_body"`
 

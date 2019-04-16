@@ -4,7 +4,7 @@ import (
 	"encoding/xml"
 )
 
-// returns a new request object for i2b2 categories (ontology root nodes)
+// NewOntReqGetCategoriesMessageBody returns a new request object for i2b2 categories (ontology root nodes)
 func NewOntReqGetCategoriesMessageBody() Request {
 	body := OntReqGetCategoriesMessageBody{}
 	body.GetCategories.Hiddens = "false"
@@ -15,7 +15,7 @@ func NewOntReqGetCategoriesMessageBody() Request {
 	return NewRequestWithBody(body)
 }
 
-// returns a new request object for i2b2 children of a node
+// NewOntReqGetChildrenMessageBody returns a new request object for i2b2 children of a node
 func NewOntReqGetChildrenMessageBody(path string) Request {
 	body := OntReqGetChildrenMessageBody{}
 	body.GetChildren.Parent = path
@@ -30,6 +30,7 @@ func NewOntReqGetChildrenMessageBody(path string) Request {
 
 // --- request
 
+// OntReqGetCategoriesMessageBody is an i2b2 XML message body for ontology categories request
 type OntReqGetCategoriesMessageBody struct {
 	XMLName       xml.Name `xml:"message_body"`
 	GetCategories struct {
@@ -41,6 +42,7 @@ type OntReqGetCategoriesMessageBody struct {
 
 }
 
+// OntReqGetChildrenMessageBody is an i2b2 XML message for ontology children request
 type OntReqGetChildrenMessageBody struct {
 	XMLName     xml.Name `xml:"message_body"`
 	GetChildren struct {
@@ -55,11 +57,13 @@ type OntReqGetChildrenMessageBody struct {
 
 // --- response
 
+// OntRespConceptsMessageBody is an i2b2 XML message body for ontology concepts response
 type OntRespConceptsMessageBody struct {
 	XMLName  xml.Name `xml:"message_body"`
 	Concepts []Concept `xml:"concepts>concept"`
 }
 
+// Concept is an i2b2 XML concept
 type Concept struct {
 	Level            string `xml:"level"`
 	Key              string `xml:"key"`
@@ -84,6 +88,7 @@ type Concept struct {
 	ValuetypeCd      string `xml:"valuetype_cd"`
 }
 
+// Metadataxml is an i2b2 XML metadata entity
 type Metadataxml struct {
 	XMLName       xml.Name `xml:"metadataxml"`
 	ValueMetadata struct {

@@ -6,8 +6,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// returns the corresponding patient set id
-func ExecutePsmQuery(queryName string, panelsItemKeys [][]string, panelsIsNot []bool) (patientCount string, patientSetId string, err error) {
+// ExecutePsmQuery executes an i2b2 PSM query and returns the corresponding patient set id
+func ExecutePsmQuery(queryName string, panelsItemKeys [][]string, panelsIsNot []bool) (patientCount string, patientSetID string, err error) {
 
 	// craft and execute request
 	xmlResponse := &Response{
@@ -20,7 +20,7 @@ func ExecutePsmQuery(queryName string, panelsItemKeys [][]string, panelsIsNot []
 			queryName,
 			panelsItemKeys,
 			panelsIsNot,
-			[]ResultOutputName{PATIENTSET, PATIENT_COUNT_XML},
+			[]ResultOutputName{Patientset, PatientCountXML},
 		),
 		xmlResponse,
 	)
@@ -47,14 +47,14 @@ func ExecutePsmQuery(queryName string, panelsItemKeys [][]string, panelsIsNot []
 		}
 
 		// extract results
-		if resultInstance.QueryResultType.Name == string(PATIENTSET) {
-			patientSetId = resultInstance.ResultInstanceID
-		} else if resultInstance.QueryResultType.Name == string(PATIENT_COUNT_XML) {
+		if resultInstance.QueryResultType.Name == string(Patientset) {
+			patientSetID = resultInstance.ResultInstanceID
+		} else if resultInstance.QueryResultType.Name == string(PatientCountXML) {
 			patientCount = resultInstance.SetSize
 		}
 	}
 
-	if patientCount == "" || patientSetId == "" {
+	if patientCount == "" || patientSetID == "" {
 		err = errors.New("i2b2 results not found")
 		logrus.Error(err)
 		return
@@ -63,6 +63,7 @@ func ExecutePsmQuery(queryName string, panelsItemKeys [][]string, panelsIsNot []
 	return
 }
 
+// GetPatientSet retrieves an i2b2 patient set
 func GetPatientSet(patientSetID string) (patientIDs []string, patientDummyFlags []string, err error) {
 
 	// craft and execute request

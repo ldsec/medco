@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// create a new ready-to-use i2b2 request, with a nil message body
+// NewRequest creates a new ready-to-use i2b2 request, with a nil message body
 func NewRequest() Request {
 	now := time.Now()
 	return Request{
@@ -50,13 +50,14 @@ func NewRequest() Request {
 	}
 }
 
-// create a new ready-to-use i2b2 request, with a message body
+// NewRequestWithBody creates a new ready-to-use i2b2 request, with a message body
 func NewRequestWithBody(body MessageBody) (req Request) {
 	req = NewRequest()
 	req.MessageBody = body
 	return
 }
 
+// Request is an i2b2 XML request
 type Request struct {
 	XMLName        xml.Name `xml:"msgns:request"`
 	XMLNSMSG       string `xml:"xmlns:msgns,attr"`
@@ -70,6 +71,7 @@ type Request struct {
 	MessageBody    MessageBody   `xml:"message_body"`
 }
 
+// Response is an i2b2 XML response
 type Response struct {
 	XMLName        xml.Name `xml:"response"`
 	MessageHeader  MessageHeader `xml:"message_header"`
@@ -79,13 +81,13 @@ type Response struct {
 }
 
 func (response *Response) checkStatus() error {
-	if response.ResponseHeader.ResultStatus.Status.Type == "DONE" {
-		return nil
-	} else {
+	if response.ResponseHeader.ResultStatus.Status.Type != "DONE" {
 		return errors.New(response.ResponseHeader.ResultStatus.Status.Text)
 	}
+	return nil
 }
 
+// MessageHeader is an i2b2 XML header embedded in a request or response
 type MessageHeader struct {
 	XMLName               xml.Name `xml:"message_header"`
 
@@ -125,11 +127,13 @@ type MessageHeader struct {
 	ProjectID                      string `xml:"project_id"`
 }
 
+// RequestHeader is an i2b2 XML header embedded in a request
 type RequestHeader struct {
 	XMLName          xml.Name `xml:"request_header"`
 	ResultWaittimeMs string   `xml:"result_waittime_ms"`
 }
 
+// ResponseHeader is an i2b2 XML header embedded in a response
 type ResponseHeader struct {
 	XMLName xml.Name `xml:"response_header"`
 	Info    struct {
@@ -155,5 +159,6 @@ type ResponseHeader struct {
 	} `xml:"result_status"`
 }
 
+// MessageBody is an i2b2 XML generic body
 type MessageBody interface{}
 
