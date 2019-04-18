@@ -1,0 +1,2 @@
+embed-server
+/subsystem=naming/binding=java\:global\/jwks_url:add(binding-type=simple, value=${env.PICSURE2_JWKS_URL})
