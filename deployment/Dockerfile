@@ -27,7 +27,6 @@ FROM golang:1.11-alpine as release
 ENV NODE_IDX="0" \
     UNLYNX_DEBUG_LEVEL="1" \
     MEDCO_CONF_DIR="/medco-configuration"
-#ENV UNLYNX_BIN_EXPORT_PATH="$MEDCO_CONF_DIR/medco-unlynx"
 
 COPY --from=build /go/bin/medco-unlynx /go/bin/
 COPY deployment/docker-entrypoint.sh /usr/local/bin/
