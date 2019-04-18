@@ -1,26 +1,22 @@
-version: '2.2'
+version: '2.4'
 services:
-  i2b2-medco-srv0:
+  i2b2-srv0:
     extends:
       file: ../docker-compose-common.yml
-      service: i2b2-medco
-    image: medco/i2b2-medco:dev
+      service: i2b2
+    image: medco/i2b2:v1.7.10.0001-MedCo-dev
     environment:
       - I2B2_DB_NAME=i2b2medcosrv0
       - I2B2_DOMAIN_NAME=i2b2medcosrv0
-      - NODE_IDX=0
-      - UNLYNX_DEBUG_LEVEL=2
       - AXIS2_LOGLEVEL=DEBUG
     ports:
       - "8090:8080"
     networks:
       medco-srv0:
         aliases:
-        - i2b2
+          - i2b2
       medco-network:
       keycloak-network:
-    volumes:
-      - ../../configuration-profiles/dev-local-3nodes:/medco-configuration
 
   medco-unlynx-srv0:
     extends:
@@ -32,23 +28,37 @@ services:
       - "2001:2001"
     environment:
       - NODE_IDX=0
-      - UNLYNX_DEBUG_LEVEL=2
+      - UNLYNX_DEBUG_LEVEL=3
+    networks:
+      medco-srv0:
+      medco-network:
+        ipv4_address: 172.31.0.10
+
+  medco-connector-srv0:
+    extends:
+      file: ../docker-compose-common.yml
+      service: medco-connector
+    image: medco/medco-connector:dev
+    ports:
+      - "1990:1999"
+    environment:
+      - I2B2_HIVE_URL=http://i2b2-srv0:8080/i2b2/services
+      - I2B2_LOGIN_DOMAIN=i2b2medcosrv0
+      - LOG_LEVEL=5
+      - UNLYNX_GROUP_FILE_IDX=0
     networks:
       - medco-srv0
       - medco-network
-    volumes:
-      - ../../configuration-profiles/dev-local-3nodes:/medco-configuration
+      - keycloak-network
 
-  i2b2-medco-srv1:
+  i2b2-srv1:
     extends:
       file: ../docker-compose-common.yml
-      service: i2b2-medco
-    image: medco/i2b2-medco:dev
+      service: i2b2
+    image: medco/i2b2:v1.7.10.0001-MedCo-dev
     environment:
       - I2B2_DB_NAME=i2b2medcosrv1
       - I2B2_DOMAIN_NAME=i2b2medcosrv1
-      - NODE_IDX=1
-      - UNLYNX_DEBUG_LEVEL=2
       - AXIS2_LOGLEVEL=DEBUG
     ports:
       - "8091:8080"
@@ -58,8 +68,6 @@ services:
           - i2b2
       medco-network:
       keycloak-network:
-    volumes:
-      - ../../configuration-profiles/dev-local-3nodes:/medco-configuration
 
   medco-unlynx-srv1:
     extends:
@@ -71,23 +79,37 @@ services:
       - "2003:2003"
     environment:
       - NODE_IDX=1
-      - UNLYNX_DEBUG_LEVEL=2
+      - UNLYNX_DEBUG_LEVEL=3
+    networks:
+      medco-srv1:
+      medco-network:
+        ipv4_address: 172.31.0.11
+
+  medco-connector-srv1:
+    extends:
+      file: ../docker-compose-common.yml
+      service: medco-connector
+    image: medco/medco-connector:dev
+    ports:
+      - "1991:1999"
+    environment:
+      - I2B2_HIVE_URL=http://i2b2-srv1:8080/i2b2/services
+      - I2B2_LOGIN_DOMAIN=i2b2medcosrv1
+      - LOG_LEVEL=5
+      - UNLYNX_GROUP_FILE_IDX=1
     networks:
       - medco-srv1
       - medco-network
-    volumes:
-      - ../../configuration-profiles/dev-local-3nodes:/medco-configuration
+      - keycloak-network
 
-  i2b2-medco-srv2:
+  i2b2-srv2:
     extends:
       file: ../docker-compose-common.yml
-      service: i2b2-medco
-    image: medco/i2b2-medco:dev
+      service: i2b2
+    image: medco/i2b2:v1.7.10.0001-MedCo-dev
     environment:
       - I2B2_DB_NAME=i2b2medcosrv2
       - I2B2_DOMAIN_NAME=i2b2medcosrv2
-      - NODE_IDX=2
-      - UNLYNX_DEBUG_LEVEL=2
       - AXIS2_LOGLEVEL=DEBUG
     ports:
       - "8092:8080"
@@ -97,8 +119,6 @@ services:
           - i2b2
       medco-network:
       keycloak-network:
-    volumes:
-      - ../../configuration-profiles/dev-local-3nodes:/medco-configuration
 
   medco-unlynx-srv2:
     extends:
@@ -110,12 +130,28 @@ services:
       - "2005:2005"
     environment:
       - NODE_IDX=2
-      - UNLYNX_DEBUG_LEVEL=2
+      - UNLYNX_DEBUG_LEVEL=3
+    networks:
+      medco-srv2:
+      medco-network:
+        ipv4_address: 172.31.0.12
+
+  medco-connector-srv2:
+    extends:
+      file: ../docker-compose-common.yml
+      service: medco-connector
+    image: medco/medco-connector:dev
+    ports:
+      - "1992:1999"
+    environment:
+      - I2B2_HIVE_URL=http://i2b2-srv2:8080/i2b2/services
+      - I2B2_LOGIN_DOMAIN=i2b2medcosrv2
+      - LOG_LEVEL=5
+      - UNLYNX_GROUP_FILE_IDX=2
     networks:
       - medco-srv2
       - medco-network
-    volumes:
-      - ../../configuration-profiles/dev-local-3nodes:/medco-configuration
+      - keycloak-network
 
   nginx:
     extends:
@@ -128,8 +164,6 @@ services:
     networks:
     - medco-srv0
     - keycloak-network
-    volumes:
-    - ../../configuration-profiles/dev-local-3nodes/group.toml:/medco-configuration/group.toml
 
   php-fpm:
     extends:
@@ -176,9 +210,27 @@ services:
     networks:
       - keycloak-network
 
+  picsure:
+    extends:
+      file: ../docker-compose-common.yml
+      service: picsure
+    ports:
+      - "8082:8080"
+      - "9992:9990"
+    depends_on:
+      - postgresql
+    networks:
+      - medco-srv0
+      - medco-srv1
+      - medco-srv2
+      - keycloak-network
+
 networks:
   medco-network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.31.0.0/24
 
   keycloak-network:
     driver: bridge
