@@ -1,0 +1,16 @@
+diff --git a/edu.harvard.i2b2.ontology/src/core/edu/harvard/i2b2/ontology/dao/OntProcessStatusDao.java b/edu.harvard.i2b2.ontology/src/core/edu/harvard/i2b2/ontology/dao/OntProcessStatusDao.java
+index 8ac6901..38ca6bd 100755
+--- a/edu.harvard.i2b2.ontology/src/core/edu/harvard/i2b2/ontology/dao/OntProcessStatusDao.java
++++ b/edu.harvard.i2b2.ontology/src/core/edu/harvard/i2b2/ontology/dao/OntProcessStatusDao.java
+@@ -496,8 +496,9 @@ public class OntProcessStatusDao extends JdbcDaoSupport {
+ 						+ "ONT_PROCESS_STATUS"
+ 						+ "(process_type_cd,  start_date, changedby_char, process_status_cd, status_cd, end_date, entry_date) values (?,?,?,?,?,?,?)";
+ 				numRowsAdded = jt.update(addSql, ontProcessType,  today, userId, "COMPLETED", "C", today, today);
+-						
+-				processId = jt.queryForInt("SELECT @@IDENTITY");
++
++				// commented out (SQL valid for sqlserver only)
++				//processId = jt.queryForInt("SELECT @@IDENTITY");
+ 
+ 			}
+ 			
