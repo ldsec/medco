@@ -1,7 +1,7 @@
 version: '2.4'
 services:
   i2b2:
-    image: medco/i2b2:v1.7.10.0001-MedCo-v0.2.0
+    image: medco/i2b2:MedCo-v0.2.0
     build:
       context: ../docker-images/i2b2
     environment:
@@ -28,7 +28,7 @@ services:
     - ../configuration-profiles/dev-local-3nodes:/medco-configuration
 
   nginx:
-    image: medco/nginx:1.15.10-MedCo-v0.2.0
+    image: medco/nginx:MedCo-v0.2.0
     build:
       context: ../docker-images/web
       dockerfile: nginx.Dockerfile
@@ -43,7 +43,7 @@ services:
       - ../configuration-profiles/dev-local-3nodes/group.toml:/medco-configuration/group.toml
 
   php-fpm:
-    image: medco/php:7.3.3-fpm-stretch-MedCo-v0.2.0
+    image: medco/php-fpm:MedCo-v0.2.0
     build:
       context: ../docker-images/web
       dockerfile: php-fpm.Dockerfile
@@ -69,7 +69,7 @@ services:
     - ../docker-images/postgresql/initdb-data:/docker-entrypoint-initdb.d
 
   pg-admin:
-    image: medco/pgadmin4:4.3-MedCo-v0.2.0
+    image: medco/pgadmin4:MedCo-v0.2.0
     build:
       context: ../docker-images/pgadmin
     environment:
@@ -77,9 +77,9 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=admin
 
   keycloak:
-    image: medco/keycloak:4.8.3.Final-MedCo-v0.2.0
+    image: medco/keycloak:MedCo-v0.2.0
     build:
-      context: https://github.com/jboss-dockerfiles/keycloak.git#4.8.3.Final:server
+      context: ../docker-images/keycloak/keycloak-dockerfiles/server
     environment:
       - KEYCLOAK_USER=keycloak
       - KEYCLOAK_PASSWORD=keycloak
@@ -108,7 +108,7 @@ services:
       - MEDCO_NODES_NAME=a,b,c
 
   picsure:
-    image: medco/picsure:2.0.0-7c3222318e-MedCo-v0.2.0
+    image: medco/picsure:MedCo-v0.2.0
     build:
       context: ../docker-images/picsure
     environment:
