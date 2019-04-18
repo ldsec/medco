@@ -1,3 +1,0 @@
-[submodule "docker-images/keycloak/keycloak-dockerfiles"]
-	path = docker-images/keycloak/keycloak-dockerfiles
-	url = https://github.com/jboss-dockerfiles/keycloak.git
