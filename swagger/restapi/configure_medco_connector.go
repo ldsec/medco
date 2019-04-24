@@ -24,7 +24,6 @@ func configureFlags(api *operations.MedcoConnectorAPI) {
 }
 
 func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
-	// todo: create handlers in medco package
 	api.ServeError = errors.ServeError
 	api.JSONConsumer = runtime.JSONConsumer()
 	api.JSONProducer = runtime.JSONProducer()
@@ -32,7 +31,7 @@ func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
 
 	// override goswagger authentication methods, to be handled manually in requests
 	// api.MedCoTokenAuth = ...
-	//api.APIAuthorizer = security.Authorized()
+	// api.APIAuthorizer = security.Authorized()
 	api.BearerAuthenticator = func(name string, authenticate security.ScopedTokenAuthentication) runtime.Authenticator {
 		return security.ScopedAuthenticator(func(r *security.ScopedAuthRequest) (bool, interface{}, error) {
 			return true, &models.User{}, nil
