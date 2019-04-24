@@ -118,6 +118,7 @@ func parseI2b2Concept(concept Concept) (result *models.SearchResultElement) {
 
 	// if genomic concept from data loader v0 (from concept code)
 	} else if splitCode[0] == "GEN" {
+		result.Name = splitCode[1]
 		result.Type = models.SearchResultElementTypeGenomicAnnotation
 	}
 
