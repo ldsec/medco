@@ -29,8 +29,8 @@ github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORN
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
-github.com/lca1/medco-unlynx v0.0.0-20190312131415-e12359a h1:k4CxlDw8MKxkWeQ2gmhSCBTtarshAxvyH2mZcWZtpnU=
-github.com/lca1/medco-unlynx v0.0.0-20190312131415-e12359a/go.mod h1:1684yL2mbYGMM5KG+ANuDQXq58tYq5kVJde9RI0iisY=
+github.com/lca1/medco-unlynx v0.0.0-20190418125826-3bf88f276877 h1:CgHQbn4JxUCnv+REh/XfZFUBF7wOujWDlwiVsABXx50=
+github.com/lca1/medco-unlynx v0.0.0-20190418125826-3bf88f276877/go.mod h1:397l5pVhU3a1jJ0emLIYX7idnZtI3/kzOSJDRZBJNhQ=
 github.com/lca1/unlynx v0.0.0-20190312131415-2e3533f65afe h1:WHc+KZi5aiGJJyNcADipOkaB+d1TWE7nVEwzDzFfi8A=
 github.com/lca1/unlynx v0.0.0-20190312131415-2e3533f65afe/go.mod h1:iVlai2WR/UbMOeozxL2uOuLK2AQ+pcEl0Hkepk1ub3g=
 github.com/lib/pq v1.0.0 h1:X5PMW56eZitiTeO7tKzZxFCSpbFZJtkMMooicw2us9A=
