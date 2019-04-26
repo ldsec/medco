@@ -5,7 +5,6 @@ services:
     build:
       context: ../
       dockerfile: deployment/Dockerfile
-      target: release
     volumes:
       - ~/medco-loader/data/genomic:/dataset
       - ~/medco-deployment/configuration-profiles/dev-local-3nodes/group.toml:/group.toml
