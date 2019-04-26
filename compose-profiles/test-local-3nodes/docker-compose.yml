@@ -1,25 +1,27 @@
-version: '2.2'
+version: '2.4'
 services:
-  i2b2-medco-srv0:
+  i2b2-srv0:
     extends:
-      file: ../docker-compose-common.yml
-      service: i2b2-medco
+      file: ../docker-compose-definitions.yml
+      service: i2b2
     environment:
       - I2B2_DB_NAME=i2b2medcosrv0
       - I2B2_DOMAIN_NAME=i2b2medcosrv0
       - NODE_IDX=0
+      - WILDFLY_ADMIN_PASSWORD=${I2B2_WILDFLY_PASSWORD}
+      - I2B2_SERVICE_PASSWORD=${I2B2_SERVICE_PASSWORD}
+      - DEFAULT_USER_PASSWORD=${I2B2_USER_PASSWORD}
     ports:
       - "8090:8080"
     networks:
-      - medco-srv0
-      - medco-network
-      - keycloak-network
-    volumes:
-      - ../../configuration-profiles/test-local-3nodes:/medco-configuration
+      intra-node-srv0:
+        aliases:
+          - i2b2
+      inter-nodes:
 
   medco-unlynx-srv0:
     extends:
-      file: ../docker-compose-common.yml
+      file: ../docker-compose-definitions.yml
       service: medco-unlynx
     ports:
       - "2000:2000"
@@ -27,31 +29,51 @@ services:
     environment:
       - NODE_IDX=0
     networks:
-      - medco-srv0
-      - medco-network
+      intra-node-srv0:
+      inter-nodes:
     volumes:
       - ../../configuration-profiles/test-local-3nodes:/medco-configuration
 
-  i2b2-medco-srv1:
+  medco-connector-srv0:
     extends:
-      file: ../docker-compose-common.yml
-      service: i2b2-medco
+      file: ../docker-compose-definitions.yml
+      service: medco-connector
+    ports:
+      - "1990:1999"
+    environment:
+      - I2B2_HIVE_URL=http://i2b2-srv0:8080/i2b2/services
+      - I2B2_LOGIN_DOMAIN=i2b2medcosrv0
+      - UNLYNX_GROUP_FILE_IDX=0
+      - OIDC_JWT_ISSUER=${MEDCO_NODE_URL}/auth/realms/master
+      - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD}
+    networks:
+      intra-node-srv0:
+      inter-nodes:
+    volumes:
+      - ../../configuration-profiles/test-local-3nodes/group.toml:/medco-configuration/group.toml
+
+  i2b2-srv1:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: i2b2
     environment:
       - I2B2_DB_NAME=i2b2medcosrv1
       - I2B2_DOMAIN_NAME=i2b2medcosrv1
       - NODE_IDX=1
+      - WILDFLY_ADMIN_PASSWORD=${I2B2_WILDFLY_PASSWORD}
+      - I2B2_SERVICE_PASSWORD=${I2B2_SERVICE_PASSWORD}
+      - DEFAULT_USER_PASSWORD=${I2B2_USER_PASSWORD}
     ports:
       - "8091:8080"
     networks:
-      - medco-srv1
-      - medco-network
-      - keycloak-network
-    volumes:
-      - ../../configuration-profiles/test-local-3nodes:/medco-configuration
+      intra-node-srv1:
+        aliases:
+          - i2b2
+      inter-nodes:
 
   medco-unlynx-srv1:
     extends:
-      file: ../docker-compose-common.yml
+      file: ../docker-compose-definitions.yml
       service: medco-unlynx
     ports:
       - "2002:2002"
@@ -59,31 +81,51 @@ services:
     environment:
       - NODE_IDX=1
     networks:
-      - medco-srv1
-      - medco-network
+      intra-node-srv1:
+      inter-nodes:
     volumes:
       - ../../configuration-profiles/test-local-3nodes:/medco-configuration
 
-  i2b2-medco-srv2:
+  medco-connector-srv1:
     extends:
-      file: ../docker-compose-common.yml
-      service: i2b2-medco
+      file: ../docker-compose-definitions.yml
+      service: medco-connector
+    ports:
+      - "1991:1999"
+    environment:
+      - I2B2_HIVE_URL=http://i2b2-srv1:8080/i2b2/services
+      - I2B2_LOGIN_DOMAIN=i2b2medcosrv1
+      - UNLYNX_GROUP_FILE_IDX=1
+      - OIDC_JWT_ISSUER=${MEDCO_NODE_URL}/auth/realms/master
+      - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD}
+    networks:
+      intra-node-srv1:
+      inter-nodes:
+    volumes:
+      - ../../configuration-profiles/test-local-3nodes/group.toml:/medco-configuration/group.toml
+
+  i2b2-srv2:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: i2b2
     environment:
       - I2B2_DB_NAME=i2b2medcosrv2
       - I2B2_DOMAIN_NAME=i2b2medcosrv2
       - NODE_IDX=2
+      - WILDFLY_ADMIN_PASSWORD=${I2B2_WILDFLY_PASSWORD}
+      - I2B2_SERVICE_PASSWORD=${I2B2_SERVICE_PASSWORD}
+      - DEFAULT_USER_PASSWORD=${I2B2_USER_PASSWORD}
     ports:
       - "8092:8080"
     networks:
-      - medco-srv2
-      - medco-network
-      - keycloak-network
-    volumes:
-      - ../../configuration-profiles/test-local-3nodes:/medco-configuration
+      intra-node-srv2:
+        aliases:
+          - i2b2
+      inter-nodes:
 
   medco-unlynx-srv2:
     extends:
-      file: ../docker-compose-common.yml
+      file: ../docker-compose-definitions.yml
       service: medco-unlynx
     ports:
       - "2004:2004"
@@ -91,32 +133,49 @@ services:
     environment:
       - NODE_IDX=2
     networks:
-      - medco-srv2
-      - medco-network
+      intra-node-srv2:
+      inter-nodes:
     volumes:
       - ../../configuration-profiles/test-local-3nodes:/medco-configuration
 
-  glowing-bear:
+  medco-connector-srv2:
     extends:
-      file: ../docker-compose-common.yml
-      service: glowing-bear
+      file: ../docker-compose-definitions.yml
+      service: medco-connector
+    ports:
+      - "1992:1999"
+    environment:
+      - I2B2_HIVE_URL=http://i2b2-srv2:8080/i2b2/services
+      - I2B2_LOGIN_DOMAIN=i2b2medcosrv2
+      - UNLYNX_GROUP_FILE_IDX=2
+      - OIDC_JWT_ISSUER=${MEDCO_NODE_URL}/auth/realms/master
+      - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD}
+    networks:
+      intra-node-srv2:
+      inter-nodes:
+    volumes:
+      - ../../configuration-profiles/test-local-3nodes/group.toml:/medco-configuration/group.toml
+
+  glowing-bear-medco:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: glowing-bear-medco
     ports:
     - "82:80"
     environment:
-    - GB_API_URL=${MEDCO_NODE_URL}/IRCT-CL/rest
+    - GB_API_URL=${MEDCO_NODE_URL}/pic-sure-api-2/PICSURE
     - GB_URL=${MEDCO_NODE_URL}/glowing-bear
     - GB_OIDC_URL=${MEDCO_NODE_URL}/auth/realms/master/protocol/openid-connect
-    - GB_OIDC_CLIENT_ID=i2b2-local
-    - GB_PICSURE_RES_NAME=i2b2-medco-local
+    - GB_OIDC_CLIENT_ID=medco
     - GB_COTHORITY_KEY_URL=${MEDCO_NODE_URL}/cothority-key.pub.toml
     - GB_GENOMIC_ANNOTATIONS_URL=${MEDCO_NODE_URL}/genomicAnnotations
     - GB_MEDCO_RESULTS_RANDOMIZATION=0
     networks:
-      - keycloak-network
+      inter-nodes:
 
   nginx:
     extends:
-      file: ../docker-compose-common.yml
+      file: ../docker-compose-definitions.yml
       service: nginx
     ports:
     - "80:80"
@@ -124,8 +183,8 @@ services:
     environment:
     - HTTP_SCHEME=${HTTP_SCHEME}
     networks:
-    - medco-srv0
-    - keycloak-network
+      intra-node-srv0:
+      inter-nodes:
     volumes:
     - ../../configuration-profiles/test-local-3nodes/group.toml:/medco-configuration/group.toml
     - ../../configuration-profiles/test-local-3nodes/certificate.crt:/medco-configuration/certificate.crt
@@ -133,7 +192,7 @@ services:
 
   php-fpm:
     extends:
-      file: ../docker-compose-common.yml
+      file: ../docker-compose-definitions.yml
       service: php-fpm
     environment:
     - I2B2_DB_NAME=i2b2medcosrv0
@@ -141,52 +200,63 @@ services:
     - I2B2_URL=http://i2b2-medco-srv0:8080/i2b2/services
     - CORS_ALLOW_ORIGIN=${MEDCO_NODE_URL}
     networks:
-    - medco-srv0
+      intra-node-srv0:
+      inter-nodes:
 
   postgresql:
     extends:
-      file: ../docker-compose-common.yml
+      file: ../docker-compose-definitions.yml
       service: postgresql
     ports:
       - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     networks:
-      - medco-srv0
-      - medco-srv1
-      - medco-srv2
-      - keycloak-network
+      inter-nodes:
 
   pg-admin:
     extends:
-      file: ../docker-compose-common.yml
+      file: ../docker-compose-definitions.yml
       service: pg-admin
     ports:
       - "81:80"
+    environment:
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
     networks:
-      - medco-srv0
-      - medco-srv1
-      - medco-srv2
+      inter-nodes:
 
   keycloak:
     extends:
-      file: ../docker-compose-common.yml
+      file: ../docker-compose-definitions.yml
       service: keycloak
     ports:
       - "8081:8080"
+    environment:
+      - KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD}
     depends_on:
       - postgresql
     networks:
-      - keycloak-network
+      inter-nodes:
+
+  picsure:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: picsure
+    ports:
+      - "8082:8080"
+      - "9992:9990"
+    depends_on:
+      - postgresql
+    networks:
+      inter-nodes:
 
 networks:
-  medco-network:
+  inter-nodes:
     driver: bridge
 
-  keycloak-network:
+  intra-node-srv0:
     driver: bridge
-
-  medco-srv0:
+  intra-node-srv1:
     driver: bridge
-  medco-srv1:
-    driver: bridge
-  medco-srv2:
+  intra-node-srv2:
     driver: bridge
