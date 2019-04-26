@@ -1,7 +1,7 @@
 version: '2.4'
 services:
   i2b2:
-    image: medco/i2b2:MedCo-v0.2.0
+    image: medco/i2b2:MedCo-v0.2.0-rc1
     build:
       context: ../docker-images/i2b2
     environment:
@@ -17,7 +17,7 @@ services:
       - AXIS2_LOGLEVEL=INFO
 
   medco-unlynx:
-    image: medco/medco-unlynx:v0.2.0
+    image: medco/medco-unlynx:v0.2.0-rc1
     ports:
     - "2000"
     - "2001"
@@ -28,7 +28,7 @@ services:
     - ../configuration-profiles/dev-local-3nodes:/medco-configuration
 
   nginx:
-    image: medco/nginx:MedCo-v0.2.0
+    image: medco/nginx:MedCo-v0.2.0-rc1
     build:
       context: ../docker-images/web
       dockerfile: nginx.Dockerfile
@@ -43,7 +43,7 @@ services:
       - ../configuration-profiles/dev-local-3nodes/group.toml:/medco-configuration/group.toml
 
   php-fpm:
-    image: medco/php-fpm:MedCo-v0.2.0
+    image: medco/php-fpm:MedCo-v0.2.0-rc1
     build:
       context: ../docker-images/web
       dockerfile: php-fpm.Dockerfile
@@ -54,7 +54,7 @@ services:
     - I2B2_DB_PW=i2b2
     - I2B2_DB_NAME=i2b2medco
     - I2B2_DOMAIN_NAME=i2b2medco
-    - I2B2_URL=http://i2b2-medco:8080/i2b2/services
+    - I2B2_URL=http://i2b2:8080/i2b2/services
     - CORS_ALLOW_ORIGIN=http://localhost:4200
     volumes:
     - ../docker-images/web/www-data:/www-data
@@ -69,7 +69,7 @@ services:
     - ../docker-images/postgresql/initdb-data:/docker-entrypoint-initdb.d
 
   pg-admin:
-    image: medco/pgadmin4:MedCo-v0.2.0
+    image: medco/pgadmin4:MedCo-v0.2.0-rc1
     build:
       context: ../docker-images/pgadmin
     environment:
@@ -77,9 +77,9 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=admin
 
   keycloak:
-    image: medco/keycloak:MedCo-v0.2.0
+    image: medco/keycloak:MedCo-v0.2.0-rc1
     build:
-      context: ../docker-images/keycloak/keycloak-dockerfiles/server
+      context: ../docker-images/keycloak
     environment:
       - KEYCLOAK_USER=keycloak
       - KEYCLOAK_PASSWORD=keycloak
@@ -89,10 +89,9 @@ services:
       - DB_DATABASE=keycloak
       - DB_USER=keycloak
       - DB_PASSWORD=keycloak
-      - PROXY_ADDRESS_FORWARDING=true
 
   glowing-bear-medco:
-    image: medco/glowing-bear-medco:v0.2.0
+    image: medco/glowing-bear-medco:v0.2.0-rc1
     ports:
       - "80"
     environment:
@@ -108,7 +107,7 @@ services:
       - MEDCO_NODES_NAME=a,b,c
 
   picsure:
-    image: medco/picsure:MedCo-v0.2.0
+    image: medco/picsure:MedCo-v0.2.0-rc1
     build:
       context: ../docker-images/picsure
     environment:
@@ -127,15 +126,15 @@ services:
       - MEDCO_NODES_CONNECTOR_URL=http://medco-connector-srv0:1999/medco-connector/picsure2,http://medco-connector-srv1:1999/medco-connector/picsure2,http://medco-connector-srv2:1999/medco-connector/picsure2
 
   medco-connector:
-    image: medco/medco-connector:v0.2.0
+    image: medco/medco-connector:v0.2.0-rc1
     ports:
       - "1999"
     environment:
       - I2B2_HIVE_URL=http://i2b2:8080/i2b2/services
       - I2B2_LOGIN_DOMAIN=i2b2medco
       - I2B2_LOGIN_PROJECT=MedCo
-      - I2B2_LOGIN_USER=e2etest
-      - I2B2_LOGIN_PASSWORD=e2etest
+      - I2B2_LOGIN_USER=medcouser
+      - I2B2_LOGIN_PASSWORD=demouser
       - LOG_LEVEL=3
       - UNLYNX_GROUP_FILE_PATH=/medco-configuration/group.toml
       - UNLYNX_GROUP_FILE_IDX=0
