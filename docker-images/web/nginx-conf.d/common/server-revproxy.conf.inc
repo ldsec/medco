@@ -54,12 +54,12 @@ location /pic-sure-api-2 {
 }
 
 location /i2b2 {
-    set $upstream_host i2b2-medco;
+    set $upstream_host i2b2;
     proxy_pass http://$upstream_host:8080;
 }
 
 location /glowing-bear {
-    set $upstream_host glowing-bear;
+    set $upstream_host glowing-bear-medco;
     proxy_pass http://$upstream_host;
 }
 
