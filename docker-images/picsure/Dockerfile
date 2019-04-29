@@ -30,9 +30,14 @@ RUN yum update -y && yum -y install postgresql wget && yum clean all && \
     chmod a+x /usr/local/bin/docker-entrypoint.sh
 USER jboss
 
+# trust store variables
+ENV TRUSTSTORE_PATH="/medco-configuration/truststore" \
+    TRUSTSTORE_PASSWORD="truststore"
+
 # set up postgresql database and CORS configuration
-COPY conf/postgresql.cli conf/jwks.cli /
+COPY conf/postgresql.cli conf/jwks.cli conf/truststore.cli /
 RUN wget https://jdbc.postgresql.org/download/postgresql-42.2.5.jar -O /modules/postgresql-jdbc.jar && \
+    /opt/jboss/wildfly/bin/jboss-cli.sh --file=/truststore.cli && \
     /opt/jboss/wildfly/bin/jboss-cli.sh --file=/postgresql.cli && \
     /opt/jboss/wildfly/bin/jboss-cli.sh --file=/jwks.cli && \
     rm -rf /opt/jboss/wildfly/standalone/configuration/standalone_xml_history/current

@@ -41,5 +41,7 @@ services:
       - MEDCO_NETWORK_NAME=${MEDCO_NETWORK_NAME}
       - MEDCO_NODES_NAME=${MEDCO_NODES_NAME}
       - MEDCO_NODES_CONNECTOR_URL=${MEDCO_NODES_CONNECTOR_URL}
+    volumes:
+      - ../../configuration-profiles/${MEDCO_PROFILE_NAME}:/medco-configuration
     depends_on:
       - postgresql
