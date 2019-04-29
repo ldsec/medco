@@ -65,5 +65,5 @@ location /glowing-bear {
 
 location /medco-connector {
     set $upstream_host medco-connector;
-    proxy_pass http://$upstream_host;
+    proxy_pass http://$upstream_host:1999;
 }
