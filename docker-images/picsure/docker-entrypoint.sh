@@ -48,9 +48,4 @@ for (( IDX=0; ; IDX++ )); do
 EOSQL
 done
 
-# generate token as HTTP Basic authentication mechanism (if client ID is set)
-if [[ ! -z ${PICSURE2_CLIENT_ID} ]]; then
-    export TOKEN_INTROSPECTION_TOKEN="$(echo -n ${PICSURE2_CLIENT_ID}:${PICSURE2_CLIENT_SECRET} | base64)"
-fi
-
 exec /opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0 -bmanagement 0.0.0.0
