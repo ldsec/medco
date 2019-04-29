@@ -14,6 +14,13 @@ services:
       - ../../configuration-profiles/${MEDCO_PROFILE_NAME}/certificate.crt:/medco-configuration/certificate.crt
       - ../../configuration-profiles/${MEDCO_PROFILE_NAME}/certificate.key:/medco-configuration/certificate.key
 
+  php-fpm:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: php-fpm
+    environment:
+      - CORS_ALLOW_ORIGIN=${MEDCO_NODE_URL}
+
   postgresql:
     extends:
       file: ../docker-compose-definitions.yml

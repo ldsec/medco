@@ -14,13 +14,6 @@ services:
       - MEDCO_NETWORK_NAME=${MEDCO_NETWORK_NAME}
       - MEDCO_NODES_NAME=${MEDCO_NODES_NAME}
 
-  php-fpm:
-    extends:
-      file: ../docker-compose-definitions.yml
-      service: php-fpm
-    environment:
-      - CORS_ALLOW_ORIGIN=${MEDCO_NODE_URL}
-
   keycloak:
     extends:
       file: ../docker-compose-definitions.yml
