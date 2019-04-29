@@ -4,3 +4,4 @@ data-source remove --name=PicsureDS
 module add --name=org.postgresql --resources=/modules/postgresql-jdbc.jar --dependencies=javax.api,javax.transaction.api
 /subsystem=datasources/jdbc-driver=postgres:add(driver-name="postgres",driver-module-name="org.postgresql",driver-class-name=org.postgresql.Driver)
 data-source add --jndi-name=java:jboss/datasources/PicsureDS --name=PicsureDS --connection-url=jdbc:postgresql://${env.PICSURE2_PGDB_ADDRESS}:${env.PICSURE2_PGDB_PORT}/${env.PICSURE2_PGDB_DB} --driver-name=postgres --user-name=${env.PICSURE2_PGDB_USER} --password=${env.PICSURE2_PGDB_PW}
+stop-embedded-server
