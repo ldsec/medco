@@ -30,7 +30,7 @@ var nbrTerms = 50
 func testRemoteSetup() {
 	log.SetDebugVisible(1)
 
-	log.LLvl1("***************************************************************************************************")
+	log.Lvl1("***************************************************************************************************")
 	os.Remove("pre_compute_multiplications.gob")
 
 	keys := key.NewKeyPair(libunlynx.SuiTe)
@@ -59,7 +59,7 @@ func testRemoteSetup() {
 func testLocalSetup() {
 	log.SetDebugVisible(1)
 
-	log.LLvl1("***************************************************************************************************")
+	log.Lvl1("***************************************************************************************************")
 	os.Remove("pre_compute_multiplications.gob")
 
 	clientSecKey, clientPubKey = libunlynx.GenKey()
@@ -92,7 +92,8 @@ func getXMLReaderDDTRequest(t *testing.T, variant int) io.Reader {
 	encDDTTermsXML := ""
 
 	for i := 0; i < nbrTerms; i++ {
-		val, _ := (*libunlynx.EncryptInt(el.Aggregate, int64(i))).Serialize()
+		val, err := (*libunlynx.EncryptInt(el.Aggregate, int64(i))).Serialize()
+		assert.NoError(t, err)
 		encDDTTermsSlice = append(encDDTTermsSlice, val)
 		encDDTTermsXML += "<enc_value>" + val + "</enc_value>"
 	}
@@ -106,12 +107,12 @@ func getXMLReaderDDTRequest(t *testing.T, variant int) io.Reader {
 		`</enc_values>
 					</unlynx_ddt_request>`)
 
-	log.LLvl1("Generated DDTRequest XML:", xmlReader)
+	log.Lvl1("Generated DDTRequest XML:", xmlReader)
 
 	return xmlReader
 }
 
-func getXMLReaderDDTRequestV2(variant int) io.Reader {
+func getXMLReaderDDTRequestV2(t *testing.T, variant int) io.Reader {
 
 	/*
 		<unlynx_ddt_request>
@@ -128,7 +129,8 @@ func getXMLReaderDDTRequestV2(variant int) io.Reader {
 	encDDTTermsXML := ""
 
 	for i := 0; i < nbrTerms; i++ {
-		val, _ := (*libunlynx.EncryptInt(el.Aggregate, int64(i))).Serialize()
+		val, err := (*libunlynx.EncryptInt(el.Aggregate, int64(i))).Serialize()
+		assert.NoError(t, err)
 		encDDTTermsSlice = append(encDDTTermsSlice, val)
 		encDDTTermsXML += "<enc_value>" + val + "</enc_value>"
 	}
@@ -142,7 +144,7 @@ func getXMLReaderDDTRequestV2(variant int) io.Reader {
 				<enc_values>` + encDDTTermsXML + `</enc_values>
 			       </unlynx_ddt_request>`)
 
-	log.LLvl1("Generated DDTRequest XML v2:", stringBuf.String())
+	log.Lvl1("Generated DDTRequest XML v2:", stringBuf.String())
 	return strings.NewReader(stringBuf.String())
 }
 
@@ -168,7 +170,8 @@ func getXMLReaderAggRequest(t *testing.T, nbrFlags int) io.Reader {
 	encFlagsXML := ""
 
 	for i := 0; i < nbrFlags; i++ {
-		val, _ := (*libunlynx.EncryptInt(el.Aggregate, int64(1))).Serialize()
+		val, err := (*libunlynx.EncryptInt(el.Aggregate, int64(1))).Serialize()
+		assert.NoError(t, err)
 		encFlagsSlice = append(encFlagsSlice, val)
 		encFlagsXML += "<enc_dummy_flag>" + val + "</enc_dummy_flag>"
 	}
@@ -183,7 +186,7 @@ func getXMLReaderAggRequest(t *testing.T, nbrFlags int) io.Reader {
 		`</enc_dummy_flags>
 					</unlynx_agg_request>`)
 
-	log.LLvl1("Generated AggRequest XML:", xmlReader)
+	log.Lvl1("Generated AggRequest XML:", xmlReader)
 
 	return xmlReader
 }
@@ -210,7 +213,8 @@ func getXMLReaderAggRequestV2(t *testing.T, nbrFlags int) io.Reader {
 	encFlagsXML := ""
 
 	for i := 0; i < nbrFlags; i++ {
-		val, _ := (*libunlynx.EncryptInt(el.Aggregate, int64(1))).Serialize()
+		val, err := (*libunlynx.EncryptInt(el.Aggregate, int64(1))).Serialize()
+		assert.NoError(t, err)
 		encFlagsSlice = append(encFlagsSlice, val)
 		encFlagsXML += "<enc_dummy_flag>" + val + "</enc_dummy_flag>"
 	}
@@ -225,7 +229,7 @@ func getXMLReaderAggRequestV2(t *testing.T, nbrFlags int) io.Reader {
 					<enc_dummy_flags>` + encFlagsXML + `</enc_dummy_flags>
 			       </unlynx_agg_request>`)
 
-	log.LLvl1("Generated AggRequest XML v2:", stringBuf.String())
+	log.Lvl1("Generated AggRequest XML v2:", stringBuf.String())
 	return strings.NewReader(stringBuf.String())
 }
 
@@ -307,19 +311,19 @@ func TestMedCoDDTRequestV2(t *testing.T) {
 
 	go func() {
 		defer wg.Done()
-		input, err1 := readRequestXMLFrom(getXMLReaderDDTRequestV2(1))
+		input, err1 := readRequestXMLFrom(getXMLReaderDDTRequestV2(t, 1))
 		assert.True(t, err1 == nil)
 		err1 = unlynxDDTRequest(input, &writer1, el, 1, false, true)
 		assert.True(t, err1 == nil)
 	}()
 	go func() {
 		defer wg.Done()
-		input, err2 := readRequestXMLFrom(getXMLReaderDDTRequestV2(2))
+		input, err2 := readRequestXMLFrom(getXMLReaderDDTRequestV2(t, 2))
 		assert.True(t, err2 == nil)
 		err2 = unlynxDDTRequest(input, &writer2, el, 2, false, true)
 		assert.True(t, err2 == nil)
 	}()
-	input, err := readRequestXMLFrom(getXMLReaderDDTRequestV2(0))
+	input, err := readRequestXMLFrom(getXMLReaderDDTRequestV2(t, 0))
 	assert.True(t, err == nil)
 	err = unlynxDDTRequest(input, &writer, el, 0, false, true)
 	assert.True(t, err == nil)

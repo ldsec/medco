@@ -28,7 +28,10 @@ func decryptIntFromApp(c *cli.Context) error {
 
 	// value to decrypt
 	toDecryptSerialized := c.Args().Get(0)
-	toDecrypt, _ := libunlynx.NewCipherTextFromBase64(toDecryptSerialized)
+	toDecrypt, err := libunlynx.NewCipherTextFromBase64(toDecryptSerialized)
+	if err != nil {
+		return err
+	}
 
 	// decryption
 	decVal := libunlynx.DecryptInt(secKey, *toDecrypt)

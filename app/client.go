@@ -97,8 +97,6 @@ func parserDDTRequestXML(input []byte) (*libmedco.XMLMedCoDTTRequest, error) {
 	return &parsedXML, nil
 }
 
-// TODO: no log.Fatal in general (this stops immediately)
-// TODO: handle errors in to/from bytes in crypto.go
 // run DDT of query parameters, all errors will be sent to the output
 func unlynxDDTRequest(input []byte, output io.Writer, el *onet.Roster, entryPointIdx int, proofs, testing bool) error {
 	start := time.Now()
@@ -237,8 +235,6 @@ func parseAggRequestXML(input []byte) (*libmedco.XMLMedCoAggRequest, error) {
 	return &parsedXML, nil
 }
 
-// TODO: no log.Fatal in general (this stops immediately)
-// TODO: handle errors in to/from bytes in crypto.go
 // run aggregation of the results (and remaining protocols), all errors will be sent to the output
 func unlynxAggRequest(input []byte, output io.Writer, el *onet.Roster, entryPointIdx int, proofs bool) error {
 	start := time.Now()
@@ -342,7 +338,10 @@ func writeAggResponseXML(output io.Writer, xmlQuery *libmedco.XMLMedCoAggRequest
 
 	resultString := ""
 	if err == nil && xmlQuery != nil {
-		aggrSerial, _ := aggregate.Serialize()
+		aggrSerial, err := aggregate.Serialize()
+		if err != nil {
+			return err
+		}
 		resultString = `<unlynx_agg_response>
 					<id>` + (*xmlQuery).QueryID + `</id>
 					<times unit="ms">{"AggRequest execution time":` + strconv.FormatInt(int64(tr.AggRequestTimeExec.Nanoseconds()/1000000.0), 10) +

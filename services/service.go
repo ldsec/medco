@@ -241,7 +241,7 @@ func (s *Service) Process(msg *network.Envelope) {
 			log.Error(err)
 		}
 	} else {
-		log.Fatal("Cannot identify the intra-message")
+		log.Error("Cannot identify the intra-message")
 	}
 }
 
@@ -626,12 +626,12 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance, conf *onet.GenericConfi
 		if surveyTag.Request.Testing {
 			aux, err = CheckDDTSecrets(DDTSecretsPath+"_"+s.ServerIdentity().Address.Host()+":"+s.ServerIdentity().Address.Port()+".toml", serverIDMap.Address)
 			if err != nil || aux == nil {
-				log.Fatal("Error while reading the DDT secrets from file", err)
+				return nil, errors.New("Error while reading the DDT secrets from file")
 			}
 		} else {
 			aux, err = CheckDDTSecrets(os.Getenv("UNLYNX_DDT_SECRETS_FILE_PATH"), serverIDMap.Address)
 			if err != nil || aux == nil {
-				log.Fatal("Error while reading the DDT secrets from file", err)
+				return nil, errors.New("Error while reading the DDT secrets from file")
 			}
 		}
 
