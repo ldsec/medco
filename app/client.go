@@ -112,8 +112,10 @@ func unlynxDDTRequest(input []byte, output io.Writer, el *onet.Roster, entryPoin
 	// get formatted data
 	encQueryTerms, id, err := xmlQuery.DDTRequestToUnlynxFormat()
 	if err != nil {
-		log.Error("Error extracing patients data.", err)
-		writeDDTResponseXML(output, nil, nil, nil, err)
+		log.Error("Error extracting patients data.", err)
+		if errXML := writeDDTResponseXML(output, nil, nil, nil, err); err != nil {
+			return errXML
+		}
 		return err
 	}
 
@@ -134,8 +136,10 @@ func unlynxDDTRequest(input []byte, output io.Writer, el *onet.Roster, entryPoin
 	totalTime := time.Since(start)
 
 	if err != nil {
-		log.Error("Error during the DDTRequest service.", err)
-		writeDDTResponseXML(output, nil, nil, nil, err)
+		log.Error("Error during the DDTRequest service:", err)
+		if errXML := writeDDTResponseXML(output, nil, nil, nil, err); err != nil {
+			return errXML
+		}
 		return err
 	}
 
@@ -151,7 +155,9 @@ func unlynxDDTRequest(input []byte, output io.Writer, el *onet.Roster, entryPoin
 	err = writeDDTResponseXML(output, xmlQuery, result, &tr, nil)
 	if err != nil {
 		log.Error("Error while writing result.", err)
-		writeDDTResponseXML(output, nil, nil, nil, err)
+		if errXML := writeDDTResponseXML(output, nil, nil, nil, err); err != nil {
+			return errXML
+		}
 		return err
 	}
 	return nil
@@ -190,14 +196,14 @@ func writeDDTResponseXML(output io.Writer, xmlQuery *libmedco.XMLMedCoDTTRequest
 					<tagged_values>` + resultTags + `</tagged_values>
 					<error></error>
 				</unlynx_ddt_response>`
-	} else if xmlQuery != nil {
+	} else if xmlQuery != nil && err != nil {
 		resultString = `<unlynx_ddt_response>
 					<id>` + (*xmlQuery).QueryID + `</id>
 					<times unit="ms"></times>
 					<tagged_values></tagged_values>
 					<error>` + err.Error() + `</error>
 				</unlynx_ddt_response>`
-	} else {
+	} else if err != nil {
 		resultString = `<unlynx_ddt_response>
 					<id>unknown</id>
 					<times unit="ms"></times>
@@ -246,8 +252,10 @@ func unlynxAggRequest(input []byte, output io.Writer, el *onet.Roster, entryPoin
 	// get formatted data
 	encDummyFlags, id, err := xmlQuery.AggRequestToUnlynxFormat()
 	if err != nil {
-		log.Error("Error extracing patients data.", err)
-		writeAggResponseXML(output, nil, nil, nil, err)
+		log.Error("Error extracting patients data.", err)
+		if errXML := writeAggResponseXML(output, nil, nil, nil, err); err != nil {
+			return errXML
+		}
 		return err
 	}
 
@@ -264,7 +272,9 @@ func unlynxAggRequest(input []byte, output io.Writer, el *onet.Roster, entryPoin
 	cPK, err := libunlynx.DeserializePoint(xmlQuery.ClientPubKey)
 	if err != nil {
 		log.Error("Error decoding client public key.", err)
-		writeAggResponseXML(output, nil, nil, nil, err)
+		if errXML := writeAggResponseXML(output, nil, nil, nil, err); err != nil {
+			return errXML
+		}
 		return err
 	}
 
@@ -281,7 +291,9 @@ func unlynxAggRequest(input []byte, output io.Writer, el *onet.Roster, entryPoin
 
 	if err != nil {
 		log.Error("Error during the DDTRequest service.", err)
-		writeAggResponseXML(output, nil, nil, nil, err)
+		if errXML := writeAggResponseXML(output, nil, nil, nil, err); err != nil {
+			return errXML
+		}
 		return err
 	}
 
@@ -293,7 +305,9 @@ func unlynxAggRequest(input []byte, output io.Writer, el *onet.Roster, entryPoin
 	err = writeAggResponseXML(output, xmlQuery, &result, &tr, nil)
 	if err != nil {
 		log.Error("Error while writing result.", err)
-		writeAggResponseXML(output, nil, nil, nil, err)
+		if errXML := writeAggResponseXML(output, nil, nil, nil, err); err != nil {
+			return errXML
+		}
 		return err
 	}
 	return nil
@@ -339,14 +353,14 @@ func writeAggResponseXML(output io.Writer, xmlQuery *libmedco.XMLMedCoAggRequest
 					<aggregate>` + aggrSerial + `</aggregate>
 					<error></error>
 				</unlynx_agg_response>`
-	} else if xmlQuery != nil {
+	} else if xmlQuery != nil && err != nil {
 		resultString = `<unlynx_agg_response>
 					<id>` + (*xmlQuery).QueryID + `</id>
 					<times></times>
 		    			<aggregate></aggregate>
 					<error>` + err.Error() + `</error>
 				</unlynx_agg_response>`
-	} else {
+	} else if err != nil {
 		resultString = `<unlynx_agg_response>
 					<id>unknown</id>
 					<times></times>

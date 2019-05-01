@@ -181,7 +181,9 @@ func main() {
 			Name:  "server",
 			Usage: "Start UnLynx MedCo server",
 			Action: func(c *cli.Context) error {
-				runServer(c)
+				if err := runServer(c); err != nil {
+					return err
+				}
 				return nil
 			},
 			Flags: serverFlags,
