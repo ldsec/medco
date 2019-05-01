@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
+set -Eeuo pipefail
 
 apt-get -y update
+apt-get -y install software-properties-common
 add-apt-repository ppa:git-core/ppa -y
 curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash
-apt-get install git-lfs
+apt-get -y install git-lfs
 
 apt-get -y install git apt-transport-https curl software-properties-common screen nano
 
@@ -17,13 +19,14 @@ add-apt-repository \
    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
    $(lsb_release -cs) \
    stable"
-add-apt-repository "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main"
+add-apt-repository "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main"
 
 apt-get -y update
 apt-get -y install docker-ce postgresql-client-10
 
 docker run hello-world
 
-curl -L "https://github.com/docker/compose/releases/download/1.23.0-rc3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose
-git clone https://github.com/lca1/medco-deployment.git
+mkdir /opt/medco
+git clone https://github.com/lca1/medco-deployment.git /opt/medco/medco-deployment
