@@ -49,7 +49,8 @@ func encryptIntFromApp(c *cli.Context) error {
 	encryptedInt := libunlynx.EncryptInt(el.Roster.Aggregate, toEncryptInt)
 
 	// output in xml format on stdout
-	resultString := "<encrypted>" + (*encryptedInt).Serialize() + "</encrypted>\n"
+	encIntSerial, _ := (*encryptedInt).Serialize()
+	resultString := "<encrypted>" + encIntSerial + "</encrypted>\n"
 	_, err = io.WriteString(os.Stdout, resultString)
 	if err != nil {
 		log.Error("Error while writing result.", err)

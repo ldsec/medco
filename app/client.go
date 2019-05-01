@@ -328,6 +328,7 @@ func writeAggResponseXML(output io.Writer, xmlQuery *libmedco.XMLMedCoAggRequest
 
 	resultString := ""
 	if err == nil && xmlQuery != nil {
+		aggrSerial, _ := aggregate.Serialize()
 		resultString = `<unlynx_agg_response>
 					<id>` + (*xmlQuery).QueryID + `</id>
 					<times unit="ms">{"AggRequest execution time":` + strconv.FormatInt(int64(tr.AggRequestTimeExec.Nanoseconds()/1000000.0), 10) +
@@ -335,7 +336,7 @@ func writeAggResponseXML(output io.Writer, xmlQuery *libmedco.XMLMedCoAggRequest
 			`,"AggRequest parsing time":` + strconv.FormatInt(int64(tr.AggParsingTime.Nanoseconds()/1000000.0), 10) +
 			`,"AggRequest aggregation time":` + strconv.FormatInt(int64(tr.LocalAggregationTime.Nanoseconds()/1000000.0), 10) +
 			`}</times>
-					<aggregate>` + aggregate.Serialize() + `</aggregate>
+					<aggregate>` + aggrSerial + `</aggregate>
 					<error></error>
 				</unlynx_agg_response>`
 	} else if xmlQuery != nil {

@@ -104,9 +104,9 @@ func TestServiceAgg(t *testing.T) {
 	//results2 := make([]libunlynx.CipherText, nbHosts)
 
 	for i := 0; i < nbHosts; i++ {
-		sK, pK := libunlynx.GenKey()
-		secKeys = append(secKeys, sK)
-		pubKeys = append(pubKeys, pK)
+		_, sK, pK := libunlynx.GenKeys(1)
+		secKeys = append(secKeys, sK[0])
+		pubKeys = append(pubKeys, pK[0])
 
 		aggregates1 = append(aggregates1, *libunlynx.EncryptInt(el.Aggregate, int64(i)))
 		aggregates2 = append(aggregates2, *libunlynx.EncryptInt(el.Aggregate, int64(i)))

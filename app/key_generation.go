@@ -10,7 +10,6 @@ import (
 )
 
 func keyGenerationFromApp(c *cli.Context) error {
-
 	if c.NArg() != 0 {
 		err := errors.New("wrong number of arguments (none allowed, except for the flags)")
 		log.Error(err)

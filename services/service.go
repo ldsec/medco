@@ -553,7 +553,7 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance, conf *onet.GenericConfi
 
 		if tn.IsRoot() {
 			dataToShuffle := protocolsunlynx.AdaptCipherTextArray(survey.Request.Aggregate)
-			shuffle.TargetOfShuffle = &dataToShuffle
+			shuffle.ShuffleTarget = &dataToShuffle
 		}
 		return pi, nil
 	case protocolsunlynx.KeySwitchingProtocolName:

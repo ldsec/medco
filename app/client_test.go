@@ -92,7 +92,7 @@ func getXMLReaderDDTRequest(t *testing.T, variant int) io.Reader {
 	encDDTTermsXML := ""
 
 	for i := 0; i < nbrTerms; i++ {
-		val := (*libunlynx.EncryptInt(el.Aggregate, int64(i))).Serialize()
+		val, _ := (*libunlynx.EncryptInt(el.Aggregate, int64(i))).Serialize()
 		encDDTTermsSlice = append(encDDTTermsSlice, val)
 		encDDTTermsXML += "<enc_value>" + val + "</enc_value>"
 	}
@@ -128,7 +128,7 @@ func getXMLReaderDDTRequestV2(t *testing.T, variant int) io.Reader {
 	encDDTTermsXML := ""
 
 	for i := 0; i < nbrTerms; i++ {
-		val := (*libunlynx.EncryptInt(el.Aggregate, int64(i))).Serialize()
+		val, _ := (*libunlynx.EncryptInt(el.Aggregate, int64(i))).Serialize()
 		encDDTTermsSlice = append(encDDTTermsSlice, val)
 		encDDTTermsXML += "<enc_value>" + val + "</enc_value>"
 	}
@@ -168,7 +168,7 @@ func getXMLReaderAggRequest(t *testing.T, nbrFlags int) io.Reader {
 	encFlagsXML := ""
 
 	for i := 0; i < nbrFlags; i++ {
-		val := (*libunlynx.EncryptInt(el.Aggregate, int64(1))).Serialize()
+		val, _ := (*libunlynx.EncryptInt(el.Aggregate, int64(1))).Serialize()
 		encFlagsSlice = append(encFlagsSlice, val)
 		encFlagsXML += "<enc_dummy_flag>" + val + "</enc_dummy_flag>"
 	}
@@ -210,7 +210,7 @@ func getXMLReaderAggRequestV2(t *testing.T, nbrFlags int) io.Reader {
 	encFlagsXML := ""
 
 	for i := 0; i < nbrFlags; i++ {
-		val := (*libunlynx.EncryptInt(el.Aggregate, int64(1))).Serialize()
+		val, _ := (*libunlynx.EncryptInt(el.Aggregate, int64(1))).Serialize()
 		encFlagsSlice = append(encFlagsSlice, val)
 		encFlagsXML += "<enc_dummy_flag>" + val + "</enc_dummy_flag>"
 	}
