@@ -1,4 +1,4 @@
-FROM golang:1.11 as build
+FROM golang:1.12 as build
 
 COPY ./ /src
 WORKDIR /src
@@ -21,7 +21,7 @@ RUN CGO_ENABLED=0 go build -v ./... && \
     mv /go/bin/app /go/bin/medco-unlynx
 
 # -------------------------------------------
-FROM golang:1.11-alpine as release
+FROM golang:1.12-alpine as release
 
 # run time environment variables
 ENV NODE_IDX="0" \
