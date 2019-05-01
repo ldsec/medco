@@ -24,9 +24,14 @@ fi
 read -p "### About to finalize the configuration of node $NODE_IDX for profile $PROFILE_NAME, <Enter> to continue, <Ctrl+C> to abort."
 
 # ===================== archive extraction ==================
-echo "### Extracting archives from other nodes"
+echo "### Extracting archives from other nodes and generating trust store"
 pushd "${CONF_FOLDER}"
-for archive in $(ls -1 srv*-public.tar.gz); do tar -zxvf ${archive}; done
+for archive in $(ls -1 srv*-public.tar.gz); do
+    tar -zxvf ${archive}
+done
+for cert in $(ls -1 srv*-certificate.crt); do
+    keytool -importcert -noprompt -keystore truststore -storepass "truststore" -alias "$(basename ${cert})" -file "${cert}"
+done
 popd
 echo "### Archives extracted"
 

@@ -34,4 +34,4 @@ services:
       - OIDC_JWT_USER_ID_CLAIM=${KEYCLOAK_USER_CLAIM}
       - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD}
     volumes:
-      - ../../configuration-profiles/${MEDCO_PROFILE_NAME}/group.toml:/medco-configuration/group.toml
+      - ../../configuration-profiles/${MEDCO_PROFILE_NAME}:/medco-configuration

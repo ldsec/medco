@@ -7,6 +7,10 @@ if [[ $# -ne 3 ]]; then
     echo "Wrong number of arguments, usage: bash $0 <network_name> <node index> <node DNS name>"
     exit 1
 fi
+if [[ ! $1 =~ ^[a-zA-Z0-9-]+$ ]]; then
+    echo "Network name must only contain basic characters (a-z, A-Z, 0-9, -)"
+    exit 1
+fi
 NETWORK_NAME="$1"
 NODE_IDX="$2"
 NODE_DNS_NAME="$3"
@@ -25,7 +29,7 @@ fi
 read -p "### About to generate configuration of node $NODE_IDX ($NODE_DNS_NAME) for profile $PROFILE_NAME, <Enter> to continue, <Ctrl+C> to abort."
 
 echo "### Dependencies check, script will abort if dependency if not found"
-which docker openssl
+which docker openssl keytool
 
 # ===================== pre-requisites ======================
 mkdir "$CONF_FOLDER" "$COMPOSE_FOLDER"
@@ -92,7 +96,7 @@ I2B2_WILDFLY_PASSWORD=admin
 I2B2_SERVICE_PASSWORD=pFjy3EjDVwLfT2rB9xkK
 I2B2_USER_PASSWORD=demouser
 POSTGRES_PASSWORD=postgres1
-PGADMIN_DEFAULT_PASSWORD=admin
+PGADMIN_PASSWORD=admin
 
 KEYCLOAK_CLIENT_ID=medco
 KEYCLOAK_USER_CLAIM=preferred_username

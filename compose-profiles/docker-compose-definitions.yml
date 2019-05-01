@@ -143,4 +143,4 @@ services:
       - OIDC_CLIENT_ID=medco
       - OIDC_JWT_USER_ID_CLAIM=preferred_username
     volumes:
-      - ../configuration-profiles/dev-local-3nodes/group.toml:/medco-configuration/group.toml
+      - ../configuration-profiles/dev-local-3nodes:/medco-configuration
