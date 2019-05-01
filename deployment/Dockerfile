@@ -10,6 +10,10 @@ RUN CGO_ENABLED=0 go build -v ./... && \
 # -------------------------------------------
 FROM golang:1.11-alpine as release
 
+COPY deployment/docker-entrypoint.sh /usr/local/bin/
+RUN apk update && apk add bash && rm -rf /var/cache/apk/* && \
+    chmod a+x /usr/local/bin/docker-entrypoint.sh
+
 COPY --from=build /go/bin/medco-connector-server /go/bin/
 
 # swagger server configuration
@@ -31,4 +35,4 @@ ENV I2B2_HIVE_URL=http://i2b2:8080/i2b2/services \
     OIDC_JWT_USER_ID_CLAIM=preferred_username
 
 EXPOSE 1999
-ENTRYPOINT ["medco-connector-server"]
+ENTRYPOINT ["docker-entrypoint.sh"]

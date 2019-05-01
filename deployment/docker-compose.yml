@@ -20,3 +20,5 @@ services:
       - OIDC_JWT_ISSUER=http://keycloak:8080/auth/realms/master
       - OIDC_CLIENT_ID=medco
       - OIDC_JWT_USER_ID_CLAIM=preferred_username
+    volumes:
+      - ./configuration-profile:/medco-configuration
