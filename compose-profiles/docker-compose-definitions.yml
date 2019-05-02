@@ -1,7 +1,7 @@
 version: '2.4'
 services:
   i2b2:
-    image: medco/i2b2:MedCo-v0.2.0-rc1
+    image: medco/i2b2:MedCo-v0.2.0
     build:
       context: ../docker-images/i2b2
     environment:
@@ -17,7 +17,7 @@ services:
       - AXIS2_LOGLEVEL=INFO
 
   medco-unlynx:
-    image: medco/medco-unlynx:v0.2.0-rc1
+    image: medco/medco-unlynx:v0.2.0
     ports:
     - "2000"
     - "2001"
@@ -28,7 +28,7 @@ services:
     - ../configuration-profiles/dev-local-3nodes:/medco-configuration
 
   nginx:
-    image: medco/nginx:MedCo-v0.2.0-rc1
+    image: medco/nginx:MedCo-v0.2.0
     build:
       context: ../docker-images/web
       dockerfile: nginx.Dockerfile
@@ -43,7 +43,7 @@ services:
       - ../configuration-profiles/dev-local-3nodes/group.toml:/medco-configuration/group.toml
 
   php-fpm:
-    image: medco/php-fpm:MedCo-v0.2.0-rc1
+    image: medco/php-fpm:MedCo-v0.2.0
     build:
       context: ../docker-images/web
       dockerfile: php-fpm.Dockerfile
@@ -69,7 +69,7 @@ services:
     - ../docker-images/postgresql/initdb-data:/docker-entrypoint-initdb.d
 
   pg-admin:
-    image: medco/pgadmin4:MedCo-v0.2.0-rc1
+    image: medco/pgadmin4:MedCo-v0.2.0
     build:
       context: ../docker-images/pgadmin
     environment:
@@ -77,7 +77,7 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=admin
 
   keycloak:
-    image: medco/keycloak:MedCo-v0.2.0-rc1
+    image: medco/keycloak:MedCo-v0.2.0
     build:
       context: ../docker-images/keycloak
     environment:
@@ -91,7 +91,7 @@ services:
       - DB_PASSWORD=keycloak
 
   glowing-bear-medco:
-    image: medco/glowing-bear-medco:v0.2.0-rc1
+    image: medco/glowing-bear-medco:v0.2.0
     ports:
       - "80"
     environment:
@@ -107,7 +107,7 @@ services:
       - MEDCO_NODES_NAME=a,b,c
 
   picsure:
-    image: medco/picsure:MedCo-v0.2.0-rc1
+    image: medco/picsure:MedCo-v0.2.0
     build:
       context: ../docker-images/picsure
     environment:
@@ -126,7 +126,7 @@ services:
       - MEDCO_NODES_CONNECTOR_URL=http://medco-connector-srv0:1999/medco-connector/picsure2,http://medco-connector-srv1:1999/medco-connector/picsure2,http://medco-connector-srv2:1999/medco-connector/picsure2
 
   medco-connector:
-    image: medco/medco-connector:v0.2.0-rc1
+    image: medco/medco-connector:v0.2.0
     ports:
       - "1999"
     environment:
