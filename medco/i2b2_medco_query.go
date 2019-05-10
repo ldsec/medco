@@ -17,7 +17,7 @@ func I2b2MedCoQuery(queryName string, query *models.QueryI2b2Medco) (result *mod
 	// todo: put user + query type + unique ID in query name
 
 	// tag query terms
-	taggedQueryTerms, err := unlynx.GetQueryTermsDDT(queryName, extractEncryptedQueryTerms(query.Panels))
+	taggedQueryTerms, err := unlynx.DDTagValues(queryName, extractEncryptedQueryTerms(query.Panels))
 	if err != nil {
 		return
 	}
@@ -42,8 +42,17 @@ func I2b2MedCoQuery(queryName string, query *models.QueryI2b2Medco) (result *mod
 	}
 	logrus.Info(queryName, ": got ", len(patientIDs), " patient IDs and ", len(patientDummyFlags), " dummy flags with i2b2")
 
-	// aggregate and key-switch the result
-	encCount, err := unlynx.AggregateAndKeySwitchDummyFlags(queryName, patientDummyFlags, query.UserPublicKey)
+	// aggregate patient dummy flags
+	aggPatientFlags, err := unlynx.AggregateValues(patientDummyFlags)
+	if err != nil {
+		return
+	}
+
+	// key switch aggregated flags
+	encCount, err := unlynx.KeySwitchValue(queryName, aggPatientFlags, query.UserPublicKey)
+	if err != nil {
+		return
+	}
 
 	result = &models.QueryResultElement{
 		EncryptedCount: encCount,

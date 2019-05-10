@@ -13,19 +13,18 @@ import (
 	"time"
 )
 
-// GetQueryTermsDDT makes request through unlynx to compute distributed deterministic tags
-func GetQueryTermsDDT(queryName string, encQueryTerms []string) (taggedQueryTerms map[string]string, err error) {
+// DDTagValues makes request through unlynx to compute distributed deterministic tags of encrypted values
+func DDTagValues(queryName string, values []string) (taggedValues map[string]string, err error) {
 	unlynxClient, cothorityRoster := newUnlynxClient()
 
-	// todo: wrap ddt in go routine, have channel for result + error, select with result / error / timeout
 	// todo: get time measurements
 	// 	tr.DDTRequestTimeCommunication = totalTime - tr.DDTRequestTimeExec
 	//	tr.DDTParsingTime = parsingTime
 	//	tr.DDTRequestTimeExec += tr.DDTParsingTime
 	//  totalTime = around request
 
-	// deserialize query terms
-	deserializedEncQueryTerms, err := deserializeCipherVector(encQueryTerms)
+	// deserialize values
+	desValues, err := deserializeCipherVector(values)
 	if err != nil {
 		return
 	}
@@ -37,14 +36,14 @@ func GetQueryTermsDDT(queryName string, encQueryTerms []string) (taggedQueryTerm
 		_, ddtResults, _, ddtErr := unlynxClient.SendSurveyDDTRequestTerms(
 			cothorityRoster,
 			servicesmedco.SurveyID(queryName + "_DDT"),
-			deserializedEncQueryTerms,
+			desValues,
 			false,
 			false,
 		)
 		if ddtErr != nil {
 			ddtErrChan <- ddtErr
-		} else if len(ddtResults) == 0 || len(ddtResults) != len(encQueryTerms) {
-			ddtErrChan <- errors.New("unlynx inconsistent DDT results: #results=" + strconv.Itoa(len(ddtResults)) + ", #terms=" + strconv.Itoa(len(encQueryTerms)))
+		} else if len(ddtResults) == 0 || len(ddtResults) != len(values) {
+			ddtErrChan <- errors.New("unlynx inconsistent DDT results: #results=" + strconv.Itoa(len(ddtResults)) + ", #terms=" + strconv.Itoa(len(values)))
 		} else {
 			ddtResultsChan <- ddtResults
 		}
@@ -52,9 +51,9 @@ func GetQueryTermsDDT(queryName string, encQueryTerms []string) (taggedQueryTerm
 
 	select {
 	case ddtResults := <-ddtResultsChan:
-		taggedQueryTerms = make(map[string]string)
+		taggedValues = make(map[string]string)
 		for i, result := range ddtResults {
-			taggedQueryTerms[encQueryTerms[i]] = string(result)
+			taggedValues[values[i]] = string(result)
 		}
 
 	case err = <-ddtErrChan:
@@ -67,10 +66,27 @@ func GetQueryTermsDDT(queryName string, encQueryTerms []string) (taggedQueryTerm
 	return
 }
 
-// AggregateAndKeySwitchDummyFlags makes request through unlynx to aggregate and key switch encrypted values
-func AggregateAndKeySwitchDummyFlags(queryName string, dummyFlags []string, clientPubKey string) (agg string, err error) {
-	unlynxClient, cothorityRoster := newUnlynxClient()
+// AggregateValues adds together several encrypted values homomorphically
+func AggregateValues(values []string) (agg string, err error) {
 
+	// deserialize values
+	deserialized, err := deserializeCipherVector(values)
+	if err != nil {
+		return
+	}
+
+	// local aggregation
+	aggregate :=  &deserialized[0]
+	for i := 1; i < len(deserialized); i++ {
+		aggregate.Add(*aggregate, deserialized[i])
+	}
+
+	return aggregate.Serialize(), nil
+}
+
+// KeySwitchValue makes request through unlynx to key switch encrypted values
+func KeySwitchValue(queryName string, value string, targetPubKey string) (keySwitchedValue string, err error) {
+	unlynxClient, cothorityRoster := newUnlynxClient()
 
 	// todo: get time measurements
 	// 	tr.AggRequestTimeCommunication = totalTime - tr.DDTRequestTimeExec
@@ -78,47 +94,44 @@ func AggregateAndKeySwitchDummyFlags(queryName string, dummyFlags []string, clie
 	//	tr.AggParsingTime = parsingTime
 	//	tr.AggRequestTimeExec += tr.AggParsingTime + tr.LocalAggregationTime
 
-	// deserialize dummy flags and client public key
-	deserializedDummyFlags, err := deserializeCipherVector(dummyFlags)
+	// deserialize value and target public key
+	desValue := libunlynx.CipherText{}
+	err = desValue.Deserialize(value)
 	if err != nil {
-		return
-	}
-	deserializedClientPubKey, err := libunlynx.DeserializePoint(clientPubKey)
-	if err != nil {
-		logrus.Error("unlynx error deserializing client public key: ", err)
+		logrus.Error("unlynx error deserializing cipher text: ", err)
 		return
 	}
 
-	// local aggregation
-	aggregate :=  &deserializedDummyFlags[0]
-	for i := 1; i < len(deserializedDummyFlags); i++ {
-		aggregate.Add(*aggregate, deserializedDummyFlags[i])
+	desTargetKey, err := libunlynx.DeserializePoint(targetPubKey)
+	if err != nil {
+		logrus.Error("unlynx error deserializing target public key: ", err)
+		return
 	}
 
-	// execute aggregate request
-	aggResultChan := make(chan libunlynx.CipherText)
-	aggErrChan := make(chan error)
+	// execute key switching request
+	ksResultChan := make(chan libunlynx.CipherText)
+	ksErrChan := make(chan error)
 	go func() {
-		_, aggResult, _, aggErr := unlynxClient.SendSurveyAggRequest(
+		_, ksResult, _, ksErr := unlynxClient.SendSurveyAggRequest(
 			cothorityRoster,
-			servicesmedco.SurveyID(queryName + "_AGG"),
-			deserializedClientPubKey,
-			*aggregate,
+			servicesmedco.SurveyID(queryName + "_KS"),
+			desTargetKey,
+			desValue,
 			false,
 		)
-		if aggErr != nil {
-			aggErrChan <- aggErr
+		if ksErr != nil {
+			ksErrChan <- ksErr
 		} else {
-			aggResultChan <- aggResult
+			ksResultChan <- ksResult
 		}
 	}()
 
 	select {
-	case aggResult := <-aggResultChan:
-		agg = aggResult.Serialize()
+	case ksResult := <-ksResultChan:
+		keySwitchedValue = ksResult.Serialize()
 
-	case err = <-aggErrChan:
-		logrus.Error("unlynx error executing aggregation: ", err)
+	case err = <-ksErrChan:
+		logrus.Error("unlynx error executing key switching: ", err)
 
 	case <-time.After(time.Duration(util.UnlynxTimeoutSeconds) * time.Second):
 		err = errors.New("unlynx timeout")

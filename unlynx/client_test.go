@@ -41,7 +41,7 @@ func TestGetQueryTermsDDT(t *testing.T) {
 	encryptedInt1 := libunlynx.EncryptInt(cothorityRoster.Aggregate, 2).Serialize()
 	t.Log(encryptedInt0, encryptedInt1)
 
-	tags, err := GetQueryTermsDDT("test query " + time.Now().Format(time.RFC3339Nano), []string{
+	tags, err := DDTagValues("test query " + time.Now().Format(time.RFC3339Nano), []string{
 		encryptedInt0,
 		encryptedInt1,
 	})
