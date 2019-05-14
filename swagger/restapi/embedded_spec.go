@@ -385,19 +385,14 @@ func init() {
         "encryptedCount": {
           "type": "string"
         },
-        "encryptionKey": {
-          "type": "string"
-        },
-        "patientList": {
+        "encryptedPatientList": {
           "type": "array",
           "items": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string"
-              }
-            }
+            "type": "string"
           }
+        },
+        "encryptionKey": {
+          "type": "string"
         }
       }
     },
@@ -1121,19 +1116,14 @@ func init() {
         "encryptedCount": {
           "type": "string"
         },
-        "encryptionKey": {
-          "type": "string"
-        },
-        "patientList": {
+        "encryptedPatientList": {
           "type": "array",
           "items": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string"
-              }
-            }
+            "type": "string"
           }
+        },
+        "encryptionKey": {
+          "type": "string"
         }
       }
     },

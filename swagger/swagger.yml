@@ -378,13 +378,10 @@ definitions:
         type: "string"
       encryptionKey:
         type: "string"
-      patientList:
+      encryptedPatientList:
         type: "array"
         items:
-          type: "object"
-          properties:
-            id:
-              type: "string"
+          type: "string"
 
   queryStatus:
     type: "object"
