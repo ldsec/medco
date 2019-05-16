@@ -1,4 +1,5 @@
 package medco
+
 import(
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/lca1/medco-connector/i2b2"
@@ -57,6 +58,7 @@ func SearchHandlerFunc(params picsure2.SearchParams, principal *models.User) mid
 // QuerySyncHandlerFunc handles /query/sync API endpoint
 func QuerySyncHandlerFunc(params picsure2.QuerySyncParams, principal *models.User) middleware.Responder {
 
+	// authentication / authorization
 	err := util.Authorize(params.Body.ResourceCredentials, principal)
 	if err != nil {
 		return picsure2.NewQuerySyncDefault(401).WithPayload(&picsure2.QuerySyncDefaultBody{
@@ -64,12 +66,26 @@ func QuerySyncHandlerFunc(params picsure2.QuerySyncParams, principal *models.Use
 		})
 	}
 
-	queryResult, err := I2b2MedCoQuery(params.Body.Query.Name, params.Body.Query.I2b2Medco)
+	// resolve authorizations
+	queryType := resolveQueryType(params.Body.Query.I2b2Medco, principal)
+
+	// execute query
+	query, err := NewI2b2MedCoQuery(params.Body.Query.Name, params.Body.Query.I2b2Medco)
+	if err != nil {
+		return picsure2.NewQuerySyncDefault(400).WithPayload(&picsure2.QuerySyncDefaultBody{
+			Message: "Bad query: " + err.Error(),
+		})
+	}
+	err = query.Execute(queryType)
 	if err != nil {
 		return picsure2.NewQuerySyncDefault(500).WithPayload(&picsure2.QuerySyncDefaultBody{
-			Message: err.Error(),
+			Message: "Query execution error: " + err.Error(),
 		})
 	}
 
-	return picsure2.NewQuerySyncOK().WithPayload(queryResult)
+	return picsure2.NewQuerySyncOK().WithPayload(&models.QueryResultElement{
+		EncryptedCount: query.queryResult.encCount,
+		EncryptionKey: query.query.UserPublicKey,
+		EncryptedPatientList: query.queryResult.encPatientList,
+	})
 }
