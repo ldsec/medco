@@ -66,7 +66,7 @@ func TestServiceDDT(t *testing.T) {
 		go func(i int, client *servicesmedco.API) {
 			defer wg.Done()
 
-			_, res, _, err := client.SendSurveyDDTRequestTerms(el, servicesmedco.SurveyID("testDDTSurvey_"+client.ClientID), qt, proofs, true)
+			_, res, err := client.SendSurveyDDTRequestTerms(el, servicesmedco.SurveyID("testDDTSurvey_"+client.ClientID), qt, proofs, true)
 			mutex.Lock()
 			results["testDDTSurvey_"+client.ClientID] = res
 			mutex.Unlock()
@@ -84,89 +84,149 @@ func TestServiceDDT(t *testing.T) {
 	assert.Equal(t, results["testDDTSurvey_"+clients[0].ClientID], results["testDDTSurvey_"+clients[1].ClientID])
 }
 
-func TestServiceAgg(t *testing.T) {
+func TestServiceKS(t *testing.T) {
 	// test with 10 servers
 	el, local := getParam(10)
 	// test with 10 concurrent clients
 	nbHosts := 10
-	clients1 := getClients(nbHosts, el)
-	//clients2 := getClients(nbHosts, el)
+	clients := getClients(nbHosts, el)
 	defer local.CloseAll()
 
 	proofs := false
 
 	secKeys := make([]kyber.Scalar, 0)
 	pubKeys := make([]kyber.Point, 0)
-	aggregates1 := make([]libunlynx.CipherText, 0)
-	aggregates2 := make([]libunlynx.CipherText, 0)
-
-	results1 := make([]libunlynx.CipherText, nbHosts)
-	//results2 := make([]libunlynx.CipherText, nbHosts)
+	targetData := make(libunlynx.CipherVector, 0)
+	results := make([][]int64, nbHosts)
 
 	for i := 0; i < nbHosts; i++ {
 		_, sK, pK := libunlynx.GenKeys(1)
 		secKeys = append(secKeys, sK[0])
 		pubKeys = append(pubKeys, pK[0])
 
-		aggregates1 = append(aggregates1, *libunlynx.EncryptInt(el.Aggregate, int64(i)))
-		aggregates2 = append(aggregates2, *libunlynx.EncryptInt(el.Aggregate, int64(i)))
+		targetData = append(targetData, *libunlynx.EncryptInt(el.Aggregate, int64(i)))
 	}
 
 	wg := libunlynx.StartParallelize(nbHosts)
 	var mutex = sync.Mutex{}
-	for i, client := range clients1 {
+	for i, client := range clients {
 		go func(i int, client *servicesmedco.API) {
 			defer wg.Done()
 
-			_, res, _, err := client.SendSurveyAggRequest(el, servicesmedco.SurveyID("testAggSurvey1"), pubKeys[i], aggregates1[i], proofs)
-			mutex.Lock()
-			results1[i] = res
-			mutex.Unlock()
-
+			_, res, err := client.SendSurveyKSRequest(el, servicesmedco.SurveyID("testKSRequest_"+client.ClientID), pubKeys[i], targetData, proofs)
 			if err != nil {
 				t.Fatal("Client", client.ClientID, " service did not start: ", err)
 			}
-		}(i, client)
 
+			decRes := make([]int64, 0)
+			for _, val := range res {
+				decRes = append(decRes, libunlynx.DecryptInt(secKeys[i], val))
+			}
+			mutex.Lock()
+			results[i] = decRes
+			mutex.Unlock()
+		}(i, client)
 	}
-
-	/*for i,client := range clients2 {
-		go func(i int, client *servicesmedco.API) {
-			defer wg.Done()
-
-			_, res, _, err := client.SendSurveyAggRequest(el, servicesmedco.SurveyID("testAggSurvey2"), pubKeys[i], aggregates2[i], proofs)
-			mutex.Lock()
-			results2[i]=res
-			mutex.Unlock()
-
-			if err != nil {
-				t.Fatal("Client", client.ClientID, " service did not start: ", err)
-			}
-		}(i, client)
-
-	}*/
-
 	libunlynx.EndParallelize(wg)
 
 	// Check result
-	listResults1 := make([]int64, 0)
-	for i, res := range results1 {
-		listResults1 = append(listResults1, libunlynx.DecryptInt(secKeys[i], res))
+	for _, res := range results {
+		for i := 0; i < nbHosts; i++ {
+			assert.Equal(t, res[i], int64(i))
+		}
+	}
+}
+
+func TestServiceAgg(t *testing.T) {
+	// test with 10 servers
+	el, local := getParam(10)
+	// test with 10 concurrent clients
+	nbHosts := 10
+	clients := getClients(nbHosts, el)
+	defer local.CloseAll()
+
+	proofs := false
+
+	secKeys := make([]kyber.Scalar, 0)
+	pubKeys := make([]kyber.Point, 0)
+	targetData := *libunlynx.EncryptInt(el.Aggregate, int64(1))
+	results := make([]int64, nbHosts)
+
+	for i := 0; i < nbHosts; i++ {
+		_, sK, pK := libunlynx.GenKeys(1)
+		secKeys = append(secKeys, sK[0])
+		pubKeys = append(pubKeys, pK[0])
 	}
 
-	assert.Contains(t, listResults1, int64(0))
-	assert.Contains(t, listResults1, int64(1))
-	assert.Contains(t, listResults1, int64(2))
+	wg := libunlynx.StartParallelize(nbHosts)
+	var mutex = sync.Mutex{}
+	for i, client := range clients {
+		go func(i int, client *servicesmedco.API) {
+			defer wg.Done()
 
-	/*listResults2:= make([]int64, 0)
-	for i,res := range results2 {
-		listResults2 = append(listResults2, libunlynx.DecryptInt(secKeys[i], res))
+			_, res, err := client.SendSurveyAggRequest(el, servicesmedco.SurveyID("testAggRequest"), pubKeys[i], targetData, proofs)
+			if err != nil {
+				t.Fatal("Client", client.ClientID, " service did not start: ", err)
+			}
+
+			mutex.Lock()
+			results[i] = libunlynx.DecryptInt(secKeys[i], res)
+			mutex.Unlock()
+		}(i, client)
+	}
+	libunlynx.EndParallelize(wg)
+
+	// Check result
+	for _, res := range results {
+		assert.Equal(t, res, int64(10))
+	}
+}
+
+func TestServiceShuffle(t *testing.T) {
+	// test with 10 servers
+	el, local := getParam(10)
+	// test with 10 concurrent clients
+	nbHosts := 10
+	clients := getClients(nbHosts, el)
+	defer local.CloseAll()
+
+	proofs := false
+
+	secKeys := make([]kyber.Scalar, 0)
+	pubKeys := make([]kyber.Point, 0)
+	targetData := make(libunlynx.CipherVector, 0)
+	results := make([]int64, nbHosts)
+
+	for i := 0; i < nbHosts; i++ {
+		_, sK, pK := libunlynx.GenKeys(1)
+		secKeys = append(secKeys, sK[0])
+		pubKeys = append(pubKeys, pK[0])
+
+		targetData = append(targetData, *libunlynx.EncryptInt(el.Aggregate, int64(i)))
 	}
 
-	assert.Contains(t, listResults2, int64(0))
-	assert.Contains(t, listResults2, int64(1))
-	assert.Contains(t, listResults2, int64(2))*/
+	wg := libunlynx.StartParallelize(nbHosts)
+	var mutex = sync.Mutex{}
+	for i, client := range clients {
+		go func(i int, client *servicesmedco.API) {
+			defer wg.Done()
 
+			_, res, err := client.SendSurveyShuffleRequest(el, servicesmedco.SurveyID("testShuffleRequest"), pubKeys[i], targetData[i], proofs)
+			if err != nil {
+				t.Fatal("Client", client.ClientID, " service did not start: ", err)
+			}
+
+			mutex.Lock()
+			results[i] = libunlynx.DecryptInt(secKeys[i], res)
+			mutex.Unlock()
+		}(i, client)
+	}
+	libunlynx.EndParallelize(wg)
+
+	// Check result
+	for i := 0; i < nbHosts; i++ {
+		assert.Contains(t, results, int64(i))
+	}
 }
 
 func TestCheckDDTSecrets(t *testing.T) {

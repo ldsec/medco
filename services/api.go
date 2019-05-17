@@ -36,8 +36,8 @@ func NewMedCoClient(entryPoint *network.ServerIdentity, clientID string) *API {
 //______________________________________________________________________________________________________________________
 
 // SendSurveyDDTRequestTerms sends the encrypted query terms and DDT tags those terms (the array of terms is ordered).
-func (c *API) SendSurveyDDTRequestTerms(entities *onet.Roster, surveyID SurveyID, terms libunlynx.CipherVector, proofs bool, testing bool) (*SurveyID, []libunlynx.GroupingKey, TimeResults, error) {
-	log.Lvl1("Client", c.ClientID, "is creating a DDT survey with ID:", surveyID)
+func (c *API) SendSurveyDDTRequestTerms(entities *onet.Roster, surveyID SurveyID, terms libunlynx.CipherVector, proofs bool, testing bool) (*SurveyID, []libunlynx.GroupingKey, error) {
+	log.Lvl2("Client", c.ClientID, "is creating a DDT survey with ID:", surveyID)
 
 	rndUUID := uuid.NewV4()
 	sdq := SurveyDDTRequest{
@@ -55,35 +55,72 @@ func (c *API) SendSurveyDDTRequestTerms(entities *onet.Roster, surveyID SurveyID
 	resp := ResultDDT{}
 	err := c.SendProtobuf(c.entryPoint, &sdq, &resp)
 	if err != nil {
-		return nil, resp.Result, TimeResults{}, err
+		return nil, nil, err
 	}
-	return &surveyID, resp.Result, resp.TR, nil
+	return &surveyID, resp.Result, nil
 }
 
-// SendSurveyAggRequest sends the encrypted aggregate local results at each node and expects a shuffling and a key switching of these data.
-func (c *API) SendSurveyAggRequest(entities *onet.Roster, surveyID SurveyID, cPK kyber.Point, aggregate libunlynx.CipherText, proofs bool) (*SurveyID, libunlynx.CipherText, TimeResults, error) {
-	log.Lvl1("Client", c.ClientID, "is creating a Agg survey with ID:", surveyID)
+// SendSurveyKSRequest performs key switching in a list of values
+func (c *API) SendSurveyKSRequest(entities *onet.Roster, surveyID SurveyID, cPK kyber.Point, values libunlynx.CipherVector, proofs bool) (*SurveyID, libunlynx.CipherVector, error) {
+	log.Lvl2("Client", c.ClientID, "is creating a KS survey with ID:", surveyID)
 
-	listAggregate := make([]libunlynx.CipherText, 0)
-	listAggregate = append(listAggregate, aggregate)
-
-	sar := SurveyAggRequest{
+	skr := SurveyKSRequest{
 		SurveyID:     surveyID,
 		Roster:       *entities,
 		Proofs:       proofs,
 		ClientPubKey: cPK,
-
-		Aggregate:         listAggregate,
-		AggregateShuffled: make(libunlynx.CipherVector, 0),
-
-		IntraMessage: false,
+		KSTarget:     values,
 	}
 
-	resp := ResultAgg{}
+	resp := Result{}
+	err := c.SendProtobuf(c.entryPoint, &skr, &resp)
+	if err != nil {
+		return nil, nil, err
+	}
+	return &surveyID, resp.Result, nil
+}
+
+// SendSurveyShuffleRequest performs shuffling + key switching on a list of values
+func (c *API) SendSurveyShuffleRequest(entities *onet.Roster, surveyID SurveyID, cPK kyber.Point, value libunlynx.CipherText, proofs bool) (*SurveyID, libunlynx.CipherText, error) {
+	log.Lvl2("Client", c.ClientID, "is creating a Shuffle survey with ID:", surveyID)
+
+	target := make(libunlynx.CipherVector, 0)
+	target = append(target, value)
+	ssr := SurveyShuffleRequest{
+		SurveyID:      surveyID,
+		Roster:        *entities,
+		Proofs:        proofs,
+		ClientPubKey:  cPK,
+		ShuffleTarget: target,
+	}
+
+	resp := Result{}
+	err := c.SendProtobuf(c.entryPoint, &ssr, &resp)
+	if err != nil {
+		return nil, libunlynx.CipherText{}, err
+	}
+	return &surveyID, resp.Result[0], nil
+}
+
+// SendSurveyAggRequest sends the encrypted aggregate local results at each node and aggregates these values (result is the same for all nodes)
+func (c *API) SendSurveyAggRequest(entities *onet.Roster, surveyID SurveyID, cPK kyber.Point, value libunlynx.CipherText, proofs bool) (*SurveyID, libunlynx.CipherText, error) {
+	log.Lvl2("Client", c.ClientID, "is creating a Agg survey with ID:", surveyID)
+
+	sar := SurveyAggRequest{
+		SurveyID:        surveyID,
+		Roster:          *entities,
+		Proofs:          proofs,
+		ClientPubKey:    cPK,
+		AggregateTarget: value,
+		IntraMessage:    false,
+	}
+
+	resp := Result{}
 	err := c.SendProtobuf(c.entryPoint, &sar, &resp)
 	if err != nil {
 
-		return nil, resp.Result, TimeResults{}, err
+		return nil, libunlynx.CipherText{}, err
 	}
-	return &surveyID, resp.Result, resp.TR, nil
+	return &surveyID, resp.Result[0], nil
+
 }

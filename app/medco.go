@@ -27,10 +27,6 @@ const (
 	optionGroupFile      = "file"
 	optionGroupFileShort = "f"
 
-	optionEntryPointIdx = "entryPointIdx"
-
-	optionProofs = "proofs"
-
 	optionDecryptKey      = "key"
 	optionDecryptKeyShort = "k"
 
@@ -83,23 +79,6 @@ func main() {
 		cli.StringFlag{
 			Name:  optionDecryptKey + ", " + optionDecryptKeyShort,
 			Usage: "Base64-encoded key to decrypt a value",
-		},
-	}
-
-	querierFlags := []cli.Flag{
-		cli.StringFlag{
-			Name:  optionGroupFile + ", " + optionGroupFileShort,
-			Value: DefaultGroupFile,
-			Usage: "Unlynx group definition file",
-		},
-		cli.IntFlag{
-			Name:  optionEntryPointIdx,
-			Usage: "Index (relative to the group definition file) of the collective authority server to send the query.",
-		},
-		cli.IntFlag{
-			Name:  optionProofs,
-			Value: 0,
-			Usage: "Enable/Disable proofs",
 		},
 	}
 
@@ -167,16 +146,6 @@ func main() {
 		},
 		// CLIENT END: KEY GENERATION ------------
 
-		// BEGIN CLIENT: QUERIER ----------
-		{
-			Name:    "run",
-			Aliases: []string{"r"},
-			Usage:   "Execute a DDT or Aggregation request using UnLynx. Feed the query XML (UTF-8 encoded) to stdin and close it.",
-			Action:  unlynxRequestFromApp,
-			Flags:   querierFlags,
-		},
-		// CLIENT END: QUERIER ----------
-
 		// BEGIN SERVER --------
 		{
 			Name:  "server",
@@ -214,7 +183,7 @@ func main() {
 				{
 					Name:    "getAggregateKey",
 					Aliases: []string{"gak"},
-					Usage:   "Get Aggregate Key from group.toml",
+					Usage:   "Get AggregateTarget Key from group.toml",
 					Action:  getAggregateKey,
 					Flags:   getAggregateKeyFlags,
 				},
