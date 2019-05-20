@@ -30,7 +30,7 @@ func DDTagValues(queryName string, values []string) (taggedValues map[string]str
 	ddtResultsChan := make(chan []libunlynx.GroupingKey)
 	ddtErrChan := make(chan error)
 	go func() {
-		_, ddtResults, _, ddtErr := unlynxClient.SendSurveyDDTRequestTerms(
+		_, ddtResults, ddtErr := unlynxClient.SendSurveyDDTRequestTerms(
 			cothorityRoster,
 			servicesmedco.SurveyID(queryName + "_DDT"),
 			desValues,
@@ -89,7 +89,7 @@ func KeySwitchValues(queryName string, values []string, targetPubKey string) (ke
 	ksResultsChan := make(chan libunlynx.CipherVector)
 	ksErrChan := make(chan error)
 	go func() {
-		_, ksResult, _, ksErr := unlynxClient.SendSurveyKSRequest(
+		_, ksResult, ksErr := unlynxClient.SendSurveyKSRequest(
 			cothorityRoster,
 			servicesmedco.SurveyID(queryName + "_KS"),
 			desTargetKey,
@@ -105,7 +105,10 @@ func KeySwitchValues(queryName string, values []string, targetPubKey string) (ke
 
 	select {
 	case ksResult := <-ksResultsChan:
-		keySwitchedValues = serializeCipherVector(ksResult)
+		keySwitchedValues, err = serializeCipherVector(ksResult)
+		if err != nil {
+			logrus.Error("unlynx error serializing: ", err)
+		}
 
 	case err = <-ksErrChan:
 		logrus.Error("unlynx error executing key switching: ", err)
@@ -138,7 +141,7 @@ func ShuffleAndKeySwitchValue(queryName string, value string, targetPubKey strin
 	shuffleKsResultsChan := make(chan libunlynx.CipherText)
 	shuffleKsErrChan := make(chan error)
 	go func() {
-		_, shuffleKsResult, _, shuffleKsErr := unlynxClient.SendSurveyShuffleRequest(
+		_, shuffleKsResult, shuffleKsErr := unlynxClient.SendSurveyShuffleRequest(
 			cothorityRoster,
 			servicesmedco.SurveyID(queryName + "_SHUFFLE"),
 			desTargetKey,
@@ -154,7 +157,10 @@ func ShuffleAndKeySwitchValue(queryName string, value string, targetPubKey strin
 
 	select {
 	case shuffleKsResult := <-shuffleKsResultsChan:
-		shuffledKsValue = shuffleKsResult.Serialize()
+		shuffledKsValue, err = shuffleKsResult.Serialize()
+		if err != nil {
+			logrus.Error("unlynx error serializing: ", err)
+		}
 
 	case err = <-shuffleKsErrChan:
 		logrus.Error("unlynx error executing shuffle and key switching: ", err)
@@ -187,7 +193,7 @@ func AggregateAndKeySwitchValue(queryName string, value string, targetPubKey str
 	aggKsResultsChan := make(chan libunlynx.CipherText)
 	aggKsErrChan := make(chan error)
 	go func() {
-		_, aggKsResult, _, aggKsErr := unlynxClient.SendSurveyAggRequest(
+		_, aggKsResult, aggKsErr := unlynxClient.SendSurveyAggRequest(
 			cothorityRoster,
 			servicesmedco.SurveyID(queryName + "_AGG"),
 			desTargetKey,
@@ -203,7 +209,10 @@ func AggregateAndKeySwitchValue(queryName string, value string, targetPubKey str
 
 	select {
 	case aggKsResult := <-aggKsResultsChan:
-		aggValue = aggKsResult.Serialize()
+		aggValue, err = aggKsResult.Serialize()
+		if err != nil {
+			logrus.Error("unlynx error serializing: ", err)
+		}
 
 	case err = <-aggKsErrChan:
 		logrus.Error("unlynx error executing aggregate and key switching: ", err)

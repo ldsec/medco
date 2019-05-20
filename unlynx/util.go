@@ -12,9 +12,16 @@ import (
 )
 
 // serializeCipherVector serializes a vector of cipher texts into a string-encoded slice
-func serializeCipherVector(cipherVector libunlynx.CipherVector) (serializedVector []string) {
+func serializeCipherVector(cipherVector libunlynx.CipherVector) (serializedVector []string, err error) {
 	for _, cipherText := range cipherVector {
-		serializedVector = append(serializedVector, cipherText.Serialize())
+
+		serialized, err := cipherText.Serialize()
+		if err != nil {
+			logrus.Error("unlynx error serializing: ", err)
+			return nil, err
+		}
+
+		serializedVector = append(serializedVector, serialized)
 	}
 	return
 }
