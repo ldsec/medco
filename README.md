@@ -6,12 +6,6 @@
 MedCo documentation is centralized on the following website: 
 [MedCo Unlynx](https://medco.epfl.ch/documentation/developer/components/medco-unlynx.html).
 
-## Version
-
-We have a development and a stable version. The `master`-branch in `github.com/lca1/medco-unlynx` is the development version that works but can have incompatible changes.
-
-Use one of the latest tags `v0.1.3` that are stable and have no incompatible changes.
-
 ## License
 *medco-unlynx* is licensed under a End User Software License Agreement ('EULA') for non-commercial use. 
 If you need more information, please contact us.
