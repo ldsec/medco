@@ -315,6 +315,15 @@ func init() {
           "description": "i2b2-medco query",
           "type": "object",
           "properties": {
+            "differentialPrivacy": {
+              "description": "differential privacy query parameters (todo)",
+              "type": "object",
+              "properties": {
+                "queryBudget": {
+                  "type": "number"
+                }
+              }
+            },
             "panels": {
               "description": "i2b2 panels (linked by an AND)",
               "type": "array",
@@ -359,15 +368,8 @@ func init() {
                 }
               }
             },
-            "select": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": [
-                  "count",
-                  "patient_list"
-                ]
-              }
+            "queryType": {
+              "$ref": "#/definitions/queryType"
             },
             "userPublicKey": {
               "type": "string"
@@ -441,6 +443,18 @@ func init() {
           ]
         }
       }
+    },
+    "queryType": {
+      "type": "string",
+      "enum": [
+        "patient_list",
+        "count_per_site",
+        "count_per_site_obfuscated",
+        "count_per_site_shuffled",
+        "count_per_site_shuffled_obfuscated",
+        "count_global",
+        "count_global_obfuscated"
+      ]
     },
     "resourceCredentials": {
       "type": "object",
@@ -528,6 +542,17 @@ func init() {
     "user": {
       "type": "object",
       "properties": {
+        "authorizations": {
+          "type": "object",
+          "properties": {
+            "queryType": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/queryType"
+              }
+            }
+          }
+        },
         "id": {
           "type": "string"
         },
@@ -1046,6 +1071,15 @@ func init() {
           "description": "i2b2-medco query",
           "type": "object",
           "properties": {
+            "differentialPrivacy": {
+              "description": "differential privacy query parameters (todo)",
+              "type": "object",
+              "properties": {
+                "queryBudget": {
+                  "type": "number"
+                }
+              }
+            },
             "panels": {
               "description": "i2b2 panels (linked by an AND)",
               "type": "array",
@@ -1090,15 +1124,8 @@ func init() {
                 }
               }
             },
-            "select": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": [
-                  "count",
-                  "patient_list"
-                ]
-              }
+            "queryType": {
+              "$ref": "#/definitions/queryType"
             },
             "userPublicKey": {
               "type": "string"
@@ -1172,6 +1199,18 @@ func init() {
           ]
         }
       }
+    },
+    "queryType": {
+      "type": "string",
+      "enum": [
+        "patient_list",
+        "count_per_site",
+        "count_per_site_obfuscated",
+        "count_per_site_shuffled",
+        "count_per_site_shuffled_obfuscated",
+        "count_global",
+        "count_global_obfuscated"
+      ]
     },
     "resourceCredentials": {
       "type": "object",
@@ -1259,6 +1298,17 @@ func init() {
     "user": {
       "type": "object",
       "properties": {
+        "authorizations": {
+          "type": "object",
+          "properties": {
+            "queryType": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/queryType"
+              }
+            }
+          }
+        },
         "id": {
           "type": "string"
         },

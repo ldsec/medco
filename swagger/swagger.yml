@@ -330,13 +330,14 @@ definitions:
         type: "object"
         description: "i2b2-medco query"
         properties:
-          select:
-            type: "array"
-            items:
-              type: "string"
-              enum:
-                - count
-                - patient_list
+          queryType:
+            $ref: "#/definitions/queryType"
+          differentialPrivacy:
+            type: "object"
+            description: "differential privacy query parameters (todo)"
+            properties:
+              queryBudget:
+                type: "number"
           panels:
             type: "array"
             description: "i2b2 panels (linked by an AND)"
@@ -370,6 +371,17 @@ definitions:
       genomic-annotations:
         type: "object"
         description: "genomic annotations query (todo)"
+
+  queryType:
+    type: "string"
+    enum:
+      - patient_list
+      - count_per_site
+      - count_per_site_obfuscated
+      - count_per_site_shuffled
+      - count_per_site_shuffled_obfuscated
+      - count_global
+      - count_global_obfuscated
 
   queryResultElement:
     type: "object"
@@ -424,3 +436,10 @@ definitions:
         type: "string"
       token:
         type: "string"
+      authorizations:
+        type: "object"
+        properties:
+          queryType:
+            type: "array"
+            items:
+              $ref: "#/definitions/queryType"

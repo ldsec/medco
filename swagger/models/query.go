@@ -84,11 +84,14 @@ func (m *Query) UnmarshalBinary(b []byte) error {
 // swagger:model QueryI2b2Medco
 type QueryI2b2Medco struct {
 
+	// differential privacy
+	DifferentialPrivacy *QueryI2b2MedcoDifferentialPrivacy `json:"differentialPrivacy,omitempty"`
+
 	// i2b2 panels (linked by an AND)
 	Panels []*QueryI2b2MedcoPanelsItems0 `json:"panels"`
 
-	// select
-	Select []string `json:"select"`
+	// query type
+	QueryType QueryType `json:"queryType,omitempty"`
 
 	// user public key
 	UserPublicKey string `json:"userPublicKey,omitempty"`
@@ -98,17 +101,39 @@ type QueryI2b2Medco struct {
 func (m *QueryI2b2Medco) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateDifferentialPrivacy(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validatePanels(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateSelect(formats); err != nil {
+	if err := m.validateQueryType(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *QueryI2b2Medco) validateDifferentialPrivacy(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.DifferentialPrivacy) { // not required
+		return nil
+	}
+
+	if m.DifferentialPrivacy != nil {
+		if err := m.DifferentialPrivacy.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("i2b2-medco" + "." + "differentialPrivacy")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -137,38 +162,17 @@ func (m *QueryI2b2Medco) validatePanels(formats strfmt.Registry) error {
 	return nil
 }
 
-var queryI2b2MedcoSelectItemsEnum []interface{}
+func (m *QueryI2b2Medco) validateQueryType(formats strfmt.Registry) error {
 
-func init() {
-	var res []string
-	if err := json.Unmarshal([]byte(`["count","patient_list"]`), &res); err != nil {
-		panic(err)
-	}
-	for _, v := range res {
-		queryI2b2MedcoSelectItemsEnum = append(queryI2b2MedcoSelectItemsEnum, v)
-	}
-}
-
-func (m *QueryI2b2Medco) validateSelectItemsEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, queryI2b2MedcoSelectItemsEnum); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *QueryI2b2Medco) validateSelect(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Select) { // not required
+	if swag.IsZero(m.QueryType) { // not required
 		return nil
 	}
 
-	for i := 0; i < len(m.Select); i++ {
-
-		// value enum
-		if err := m.validateSelectItemsEnum("i2b2-medco"+"."+"select"+"."+strconv.Itoa(i), "body", m.Select[i]); err != nil {
-			return err
+	if err := m.QueryType.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("i2b2-medco" + "." + "queryType")
 		}
-
+		return err
 	}
 
 	return nil
@@ -185,6 +189,37 @@ func (m *QueryI2b2Medco) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (m *QueryI2b2Medco) UnmarshalBinary(b []byte) error {
 	var res QueryI2b2Medco
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
+// QueryI2b2MedcoDifferentialPrivacy differential privacy query parameters (todo)
+// swagger:model QueryI2b2MedcoDifferentialPrivacy
+type QueryI2b2MedcoDifferentialPrivacy struct {
+
+	// query budget
+	QueryBudget float64 `json:"queryBudget,omitempty"`
+}
+
+// Validate validates this query i2b2 medco differential privacy
+func (m *QueryI2b2MedcoDifferentialPrivacy) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *QueryI2b2MedcoDifferentialPrivacy) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *QueryI2b2MedcoDifferentialPrivacy) UnmarshalBinary(b []byte) error {
+	var res QueryI2b2MedcoDifferentialPrivacy
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
