@@ -1,4 +1,4 @@
-FROM golang:1.11 as build
+FROM golang:1.12 as build
 
 COPY ./ /src
 
@@ -8,7 +8,7 @@ RUN CGO_ENABLED=0 go build -v ./... && \
     CGO_ENABLED=0 go install -v ./...
 
 # -------------------------------------------
-FROM golang:1.11-alpine as release
+FROM golang:1.12-alpine as release
 
 COPY deployment/docker-entrypoint.sh /usr/local/bin/
 RUN apk update && apk add bash && rm -rf /var/cache/apk/* && \

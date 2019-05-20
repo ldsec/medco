@@ -1,27 +1,32 @@
 module github.com/lca1/medco-connector
 
 require (
-	github.com/PuerkitoBio/purell v1.1.1 // indirect
-	github.com/go-openapi/analysis v0.18.0 // indirect
-	github.com/go-openapi/errors v0.18.0
-	github.com/go-openapi/jsonpointer v0.18.0 // indirect
-	github.com/go-openapi/jsonreference v0.18.0 // indirect
-	github.com/go-openapi/loads v0.18.0
-	github.com/go-openapi/runtime v0.18.0
-	github.com/go-openapi/spec v0.18.0
-	github.com/go-openapi/strfmt v0.18.0
-	github.com/go-openapi/swag v0.18.0
-	github.com/go-openapi/validate v0.18.0
-	github.com/google/uuid v1.1.1 // indirect
+	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a // indirect
+	github.com/docker/go-units v0.4.0 // indirect
+	github.com/go-openapi/analysis v0.19.0 // indirect
+	github.com/go-openapi/errors v0.19.0
+	github.com/go-openapi/jsonpointer v0.19.0 // indirect
+	github.com/go-openapi/jsonreference v0.19.0 // indirect
+	github.com/go-openapi/loads v0.19.0
+	github.com/go-openapi/runtime v0.19.0
+	github.com/go-openapi/spec v0.19.0
+	github.com/go-openapi/strfmt v0.19.0
+	github.com/go-openapi/swag v0.19.0
+	github.com/go-openapi/validate v0.19.0
+	github.com/gopherjs/gopherjs v0.0.0-20190430165422-3e4dfb77656c // indirect
 	github.com/jessevdk/go-flags v1.4.0
-	github.com/lca1/medco-unlynx v0.0.0-20190326092154-e12359adb567
-	github.com/lca1/unlynx v0.0.0-20190312131415-2e3533f65afe
-	github.com/lestrrat-go/jwx v0.0.0-20190415045601-bee008e7f2ee
-	github.com/lestrrat-go/pdebug v0.0.0-20180220043849-39f9a71bcabe // indirect
-	github.com/mailru/easyjson v0.0.0-20190221075403-6243d8e04c3f // indirect
-	github.com/pkg/errors v0.8.1 // indirect
-	github.com/sirupsen/logrus v1.4.0
-	github.com/smartystreets/goconvey v0.0.0-20190330032615-68dc04aab96a // indirect
-	go.dedis.ch/onet/v3 v3.0.0
-	golang.org/x/net v0.0.0-20190311183353-d8887717615a
+	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
+	github.com/lca1/medco-unlynx v0.0.0-20190520135023-7273e0cd4409
+	github.com/lca1/unlynx v1.3.1
+	github.com/lestrrat-go/jwx v0.0.0-20190520025545-5d60d87d07dd
+	github.com/mailru/easyjson v0.0.0-20190403194419-1ea4449da983 // indirect
+	github.com/pkg/errors v0.8.1
+	github.com/sirupsen/logrus v1.4.2
+	github.com/smartystreets/assertions v0.0.0-20190401211740-f487f9de1cd3 // indirect
+	go.dedis.ch/kyber/v3 v3.0.3 // indirect
+	go.dedis.ch/onet/v3 v3.0.12
+	golang.org/x/crypto v0.0.0-20190513172903-22d7a77e9e5f // indirect
+	golang.org/x/net v0.0.0-20190514140710-3ec191127204
+	golang.org/x/sys v0.0.0-20190516110030-61b9204099cb // indirect
+	golang.org/x/text v0.3.2 // indirect
 )
