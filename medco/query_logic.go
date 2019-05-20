@@ -99,14 +99,14 @@ func (q *I2b2MedCoQuery) Execute(queryType I2b2MedCoQueryType) (err error) {
 		// mask patient IDs
 		maskedPatientIDs, err := q.maskPatientIDs(patientIDs, patientDummyFlags)
 		if err != nil {
-			return
+			return err
 		}
 		logrus.Info(q.name, ": masked ", len(maskedPatientIDs), " patient IDs")
 
 		// key switch the masked patient IDs
 		ksMaskedPatientIDs, err := unlynx.KeySwitchValues(q.name, maskedPatientIDs, q.query.UserPublicKey)
 		if err != nil {
-			return
+			return err
 		}
 		q.queryResult.encPatientList = ksMaskedPatientIDs
 		logrus.Info(q.name, ": key switched patient IDs")
@@ -129,12 +129,12 @@ func (q *I2b2MedCoQuery) maskPatientIDs(patientIDs []string, patientDummyFlags [
 		patientIDInt, err := strconv.ParseInt(patientID, 10, 64)
 		if err != nil {
 			logrus.Error("error parsing patient ID " + patientID + " as an integer")
-			return
+			return nil, err
 		}
 
 		maskedPatientID, err := unlynx.LocallyMultiplyScalar(patientDummyFlags[idx], patientIDInt)
 		if err != nil {
-			return
+			return nil, err
 		}
 
 		maskedPatientIDs = append(maskedPatientIDs, maskedPatientID)
