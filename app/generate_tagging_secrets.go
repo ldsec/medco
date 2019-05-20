@@ -42,7 +42,10 @@ func generateTaggingSecrets(c *cli.Context) error {
 		dir, _ := path.Split(groupTomlPath)
 
 		for _, dest := range el.Roster.List {
-			servicesmedco.CheckDDTSecrets(dir+"srv"+strconv.FormatInt(int64(i), 10)+"-ddtsecrets.toml", dest.Address)
+			_, err := servicesmedco.CheckDDTSecrets(dir+"srv"+strconv.FormatInt(int64(i), 10)+"-ddtsecrets.toml", dest.Address)
+			if err != nil {
+				return err
+			}
 		}
 	}
 

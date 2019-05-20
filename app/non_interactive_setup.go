@@ -28,9 +28,21 @@ func NonInteractiveSetup(c *cli.Context) error {
 
 	kp := key.NewKeyPair(libunlynx.SuiTe)
 
-	privStr, _ := encoding.ScalarToStringHex(libunlynx.SuiTe, kp.Private)
-	pubStr, _ := encoding.PointToStringHex(libunlynx.SuiTe, kp.Public)
-	public, _ := encoding.StringHexToPoint(libunlynx.SuiTe, pubStr)
+	privStr, err := encoding.ScalarToStringHex(libunlynx.SuiTe, kp.Private)
+	if err != nil {
+		log.Error("failed to convert scalar to hexadecimal")
+		return cli.NewExitError(err, 3)
+	}
+	pubStr, err := encoding.PointToStringHex(libunlynx.SuiTe, kp.Public)
+	if err != nil {
+		log.Error("failed to convert point to hexadecimal")
+		return cli.NewExitError(err, 3)
+	}
+	public, err := encoding.StringHexToPoint(libunlynx.SuiTe, pubStr)
+	if err != nil {
+		log.Error("failed to convert hexadecimal to point")
+		return cli.NewExitError(err, 3)
+	}
 
 	serverBinding := network.NewTLSAddress(serverBindingStr)
 	services := app.GenerateServiceKeyPairs()
