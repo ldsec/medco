@@ -112,7 +112,6 @@ func (c *API) SendSurveyAggRequest(entities *onet.Roster, surveyID SurveyID, cPK
 		Proofs:          proofs,
 		ClientPubKey:    cPK,
 		AggregateTarget: value,
-		IntraMessage:    false,
 	}
 
 	resp := Result{}

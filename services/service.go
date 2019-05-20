@@ -74,15 +74,19 @@ func NewService(c *onet.Context) (onet.Service, error) {
 
 	if cerr := newUnLynxInstance.RegisterHandler(newUnLynxInstance.HandleSurveyDDTRequestTerms); cerr != nil {
 		log.Error("Wrong Handler.", cerr)
+		return nil, cerr
 	}
 	if cerr := newUnLynxInstance.RegisterHandler(newUnLynxInstance.HandleSurveyKSRequest); cerr != nil {
 		log.Error("Wrong Handler.", cerr)
+		return nil, cerr
 	}
 	if cerr := newUnLynxInstance.RegisterHandler(newUnLynxInstance.HandleSurveyShuffleRequest); cerr != nil {
 		log.Error("Wrong Handler.", cerr)
+		return nil, cerr
 	}
 	if cerr := newUnLynxInstance.RegisterHandler(newUnLynxInstance.HandleSurveyAggRequest); cerr != nil {
 		log.Error("Wrong Handler.", cerr)
+		return nil, cerr
 	}
 
 	c.RegisterProcessor(newUnLynxInstance, msgTypes.msgSurveyDDTRequestTerms)
@@ -155,6 +159,7 @@ func (s *Service) Process(msg *network.Envelope) {
 func (s *Service) HandleSurveyTagGenerated(recq *SurveyTagGenerated) (network.Message, error) {
 	surveyTag, err := s.getSurveyTag(recq.SurveyID)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 	surveyTag.SurveyChannel <- 1
@@ -166,10 +171,10 @@ func (s *Service) HandleSurveyDDTRequestTerms(sdq *SurveyDDTRequest) (network.Me
 
 	// if this server is the one receiving the request from the client
 	if !sdq.IntraMessage {
-		log.Lvl1(s.ServerIdentity().String(), " received a SurveyDDTRequestTerms:", sdq.SurveyID)
+		log.Lvl2(s.ServerIdentity().String(), " received a SurveyDDTRequestTerms:", sdq.SurveyID)
 
 		if len(sdq.Terms) == 0 {
-			log.Lvl1(s.ServerIdentity(), " for survey", sdq.SurveyID, "has no data to det tag")
+			log.Lvl2(s.ServerIdentity(), " for survey", sdq.SurveyID, "has no data to det tag")
 			return &ResultDDT{}, nil
 		}
 
@@ -181,6 +186,7 @@ func (s *Service) HandleSurveyDDTRequestTerms(sdq *SurveyDDTRequest) (network.Me
 				SurveyChannel: make(chan int, 100),
 			})
 		if err != nil {
+			log.Error(err)
 			return nil, err
 		}
 
@@ -196,11 +202,13 @@ func (s *Service) HandleSurveyDDTRequestTerms(sdq *SurveyDDTRequest) (network.Me
 				Testing:       sdq.Testing,
 			})
 		if err != nil {
+			log.Error(err)
 			return nil, err
 		}
 
 		surveyTag, err := s.getSurveyTag(sdq.SurveyID)
 		if err != nil {
+			log.Error(err)
 			return nil, err
 		}
 
@@ -212,6 +220,7 @@ func (s *Service) HandleSurveyDDTRequestTerms(sdq *SurveyDDTRequest) (network.Me
 
 		deterministicTaggingResult, err := s.TaggingPhase(sdq.SurveyID, &sdq.Roster)
 		if err != nil {
+			log.Error(err)
 			return nil, err
 		}
 
@@ -224,39 +233,49 @@ func (s *Service) HandleSurveyDDTRequestTerms(sdq *SurveyDDTRequest) (network.Me
 
 		surveyTag, err = s.getSurveyTag(sdq.SurveyID)
 		if err != nil {
+			log.Error(err)
 			return nil, err
 		}
 		return &ResultDDT{Result: listTaggedTerms}, nil
 	}
 
-	log.Lvl1(s.ServerIdentity().String(), " is notified of survey:", sdq.SurveyID)
+	log.Lvl2(s.ServerIdentity().String(), " is notified of survey:", sdq.SurveyID)
 
 	err := s.putSurveyTag(sdq.SurveyID, SurveyTag{
 		SurveyID: sdq.SurveyID,
 		Request:  *sdq,
 	})
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
 
 	// sends a signal to unlock waiting channel
 	err = s.SendRaw(sdq.MessageSource, &SurveyTagGenerated{SurveyID: sdq.SurveyID})
 	if err != nil {
 		log.Error("sending error ", err)
+		return nil, err
 	}
 
 	return nil, nil
 }
 
-// HandleSurveyKSRequest handles the reception of the aggregate local result to be key /switched
+// HandleSurveyKSRequest handles the reception of the aggregate local result to be key switched
 func (s *Service) HandleSurveyKSRequest(skr *SurveyKSRequest) (network.Message, error) {
-	log.Lvl1(s.ServerIdentity().String(), " received a SurveyKSRequest:", skr.SurveyID)
+	log.Lvl2(s.ServerIdentity().String(), " received a SurveyKSRequest:", skr.SurveyID)
 
 	err := s.putSurveyKS(skr.SurveyID, SurveyKS{
 		SurveyID: skr.SurveyID,
 		Request:  *skr})
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
 
 	// key switch the results
 	keySwitchingResult, err := s.KeySwitchingPhase(skr.SurveyID, KSRequestName, &skr.Roster)
 	if err != nil {
-		log.Error("key switching error", err)
+		log.Error("key switching error:", err)
 		return nil, err
 	}
 
@@ -272,7 +291,7 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 		root = false
 	}
 
-	log.Lvl1(s.ServerIdentity().String(), " received a SurveyShuffleRequest:", ssr.SurveyID, "(root =", root, "- intra =", ssr.IntraMessage, ")")
+	log.Lvl2(s.ServerIdentity().String(), " received a SurveyShuffleRequest:", ssr.SurveyID, "(root =", root, "- intra =", ssr.IntraMessage, ")")
 
 	// (root = true - intra = false )
 	if !ssr.IntraMessage && root {
@@ -281,11 +300,16 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 			SurveyID:      ssr.SurveyID,
 			Request:       *ssr,
 			SurveyChannel: make(chan int, 100)})
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
 
 		// send signal to unlock the other nodes
 		err = libunlynxtools.SendISMOthers(s.ServiceProcessor, &ssr.Roster, &SurveyShuffleGenerated{SurveyID: ssr.SurveyID})
 		if err != nil {
 			log.Error("broadcasting error ", err)
+			return nil, err
 		}
 
 		surveyShuffle, err := s.getSurveyShuffle(ssr.SurveyID)
@@ -303,7 +327,6 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 		if err != nil {
 			return nil, err
 		}
-
 		if len(surveyShuffle.Request.ShuffleTarget) <= 1 {
 			return nil, errors.New("no data to shuffle")
 		}
@@ -325,6 +348,7 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 
 		err = s.putSurveyShuffle(ssr.SurveyID, surveyShuffle)
 		if err != nil {
+			log.Error(err)
 			return nil, err
 		}
 
@@ -362,6 +386,7 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 
 		surveyShuffle, err = s.getSurveyShuffle(ssr.SurveyID)
 		if err != nil {
+			log.Error(err)
 			return nil, err
 		}
 
@@ -375,24 +400,33 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 			SurveyChannel:       make(chan int, 100),
 			FinalResultsChannel: make(chan int, 100),
 		})
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
 
 		ssr.IntraMessage = true
 		ssr.MessageSource = s.ServerIdentity()
 
 		surveyShuffle, err := s.getSurveyShuffle(ssr.SurveyID)
 		if err != nil {
+			log.Error(err)
 			return nil, err
 		}
+
+		// wait for root to be ready to send the local aggregate result
 		<-surveyShuffle.SurveyChannel
 
 		// send your local aggregate result to the root server (index 0)
 		err = s.SendRaw(ssr.Roster.List[0], ssr)
 		if err != nil {
 			log.Error(s.ServerIdentity().String()+"could not send its aggregate value", err)
+			return nil, err
 		}
 
 		surveyShuffle, err = s.getSurveyShuffle(ssr.SurveyID)
 		if err != nil {
+			log.Error(err)
 			return nil, err
 		}
 		//waits for the final results to be ready
@@ -409,6 +443,7 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 
 		surveyShuffle, err = s.getSurveyShuffle(ssr.SurveyID)
 		if err != nil {
+			log.Error(err)
 			return nil, err
 		}
 
@@ -416,35 +451,43 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 
 		// (root = true - intra = true )
 	} else if ssr.IntraMessage && root { // if message sent by another node and is root
+
+		// the other nodes sent their local aggregation values
 		s.Mutex.Lock()
 		surveyShuffle, err := s.getSurveyShuffle(ssr.SurveyID)
 		if err != nil {
+			log.Error(err)
 			return nil, err
 		}
 		surveyShuffle.Request.ShuffleTarget = append(surveyShuffle.Request.ShuffleTarget, ssr.ShuffleTarget...)
 		err = s.putSurveyShuffle(ssr.SurveyID, surveyShuffle)
 		if err != nil {
+			log.Error(err)
 			return nil, err
 		}
 		s.Mutex.Unlock()
 
-		// get the request from the other non-root nodes
 		surveyShuffle, err = s.getSurveyShuffle(ssr.SurveyID)
 		if err != nil {
+			log.Error(err)
 			return nil, err
 		}
 		surveyShuffle.SurveyChannel <- 1
+
 		// (root = false - intra = true )
 	} else { // if message sent by another node and not root
+
 		// update the local survey with the shuffled results
 		s.Mutex.Lock()
 		surveyShuffle, err := s.getSurveyShuffle(ssr.SurveyID)
 		if err != nil {
+			log.Error(err)
 			return nil, err
 		}
 		surveyShuffle.Request.KSTarget = ssr.KSTarget
 		err = s.putSurveyShuffle(ssr.SurveyID, surveyShuffle)
 		if err != nil {
+			log.Error(err)
 			return nil, err
 		}
 		s.Mutex.Unlock()
@@ -459,20 +502,23 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 		s.Mutex.Lock()
 		surveyShuffle, err = s.getSurveyShuffle(ssr.SurveyID)
 		if err != nil {
+			log.Error(err)
 			return nil, err
 		}
 		surveyShuffle.Request.KSTarget = keySwitchingResult
 		err = s.putSurveyShuffle(ssr.SurveyID, surveyShuffle)
 		if err != nil {
+			log.Error(err)
 			return nil, err
 		}
 		s.Mutex.Unlock()
+
 		surveyShuffle.FinalResultsChannel <- 1
 	}
 	return nil, nil
 }
 
-// HandleSurveyShuffleGenerated handles triggers the SurveyChannel
+// HandleSurveyShuffleGenerated handles triggers the SurveyChannel in the Shuffle Request
 func (s *Service) HandleSurveyShuffleGenerated(recq *SurveyShuffleGenerated) (network.Message, error) {
 	var el interface{}
 	el = nil
@@ -486,6 +532,7 @@ func (s *Service) HandleSurveyShuffleGenerated(recq *SurveyShuffleGenerated) (ne
 
 	surveyShuffle, err := s.getSurveyShuffle(recq.SurveyID)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 	surveyShuffle.SurveyChannel <- 1
@@ -494,7 +541,7 @@ func (s *Service) HandleSurveyShuffleGenerated(recq *SurveyShuffleGenerated) (ne
 
 // HandleSurveyAggRequest handles the reception of the aggregate local result to be shared/shuffled/switched
 func (s *Service) HandleSurveyAggRequest(sar *SurveyAggRequest) (network.Message, error) {
-	log.Lvl1(s.ServerIdentity().String(), " received a SurveyAggRequest:", sar.SurveyID)
+	log.Lvl2(s.ServerIdentity().String(), " received a SurveyAggRequest:", sar.SurveyID)
 
 	err := s.putSurveyAgg(sar.SurveyID, SurveyAgg{
 		SurveyID:      sar.SurveyID,
@@ -502,6 +549,7 @@ func (s *Service) HandleSurveyAggRequest(sar *SurveyAggRequest) (network.Message
 		SurveyChannel: make(chan int, 100)})
 
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 
@@ -609,7 +657,7 @@ func (s *Service) whatRequest(target string) (bool, libunlynx.CipherVector, kybe
 		cPubKey = surveyAgg.Request.ClientPubKey
 
 	default:
-		return false, nil, nil, errors.New("Could not identify request:" + typeQ)
+		return false, nil, nil, errors.New("Could not identify the request:" + typeQ)
 	}
 	return proofs, data, cPubKey, nil
 }
@@ -628,11 +676,13 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance, conf *onet.GenericConfi
 	case protocolsunlynx.DeterministicTaggingProtocolName:
 		surveyTag, err := s.getSurveyTag(target)
 		if err != nil {
+			log.Error(err)
 			return nil, err
 		}
 
 		pi, err = protocolsunlynx.NewDeterministicTaggingProtocol(tn)
 		if err != nil {
+			log.Error(err)
 			return nil, err
 		}
 		hashCreation := pi.(*protocolsunlynx.DeterministicTaggingProtocol)
@@ -649,7 +699,6 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance, conf *onet.GenericConfi
 		}
 
 		s.Mutex.Lock()
-
 		var aux kyber.Scalar
 		if surveyTag.Request.Testing {
 			aux, err = CheckDDTSecrets(DDTSecretsPath+"_"+s.ServerIdentity().Address.Host()+":"+s.ServerIdentity().Address.Port()+".toml", serverIDMap.Address)
@@ -662,18 +711,20 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance, conf *onet.GenericConfi
 				return nil, errors.New("Error while reading the DDT secrets from file")
 			}
 		}
-
 		hashCreation.SurveySecretKey = &aux
 		hashCreation.Proofs = surveyTag.Request.Proofs
 		s.Mutex.Unlock()
+
 	case protocolsunlynx.ShufflingProtocolName:
 		surveyShuffle, err := s.getSurveyShuffle(target)
 		if err != nil {
+			log.Error(err)
 			return nil, err
 		}
 
 		pi, err = protocolsunlynx.NewShufflingProtocol(tn)
 		if err != nil {
+			log.Error(err)
 			return nil, err
 		}
 
@@ -688,7 +739,8 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance, conf *onet.GenericConfi
 		}
 	case protocolsunlynx.KeySwitchingProtocolName:
 		pi, err = protocolsunlynx.NewKeySwitchingProtocol(tn)
-		if err != nil || pi == nil {
+		if err != nil {
+			log.Error(err)
 			return nil, err
 		}
 
@@ -698,6 +750,7 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance, conf *onet.GenericConfi
 			//define which map to retrieve the values to key switch
 			proofs, data, cPubKey, err := s.whatRequest(string(target))
 			if err != nil {
+				log.Error(err)
 				return nil, err
 			}
 
@@ -710,11 +763,13 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance, conf *onet.GenericConfi
 	case protocolsunlynx.CollectiveAggregationProtocolName:
 		surveyAgg, err := s.getSurveyAgg(target)
 		if err != nil {
+			log.Error(err)
 			return nil, err
 		}
 
 		pi, err = protocolsunlynx.NewCollectiveAggregationProtocol(tn)
 		if err != nil {
+			log.Error(err)
 			return nil, err
 		}
 
@@ -751,6 +806,7 @@ func (s *Service) StartProtocol(name, typeQ string, targetSurvey SurveyID, roste
 
 	err = s.RegisterProtocolInstance(pi)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 
@@ -848,6 +904,7 @@ func createTOMLSecrets(path string, id network.Address) (kyber.Scalar, error) {
 	b, err := secret.MarshalBinary()
 
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 
@@ -857,6 +914,7 @@ func createTOMLSecrets(path string, id network.Address) (kyber.Scalar, error) {
 
 	err = encoder.Encode(&endR)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 
@@ -873,6 +931,7 @@ func addTOMLSecret(path string, content privateTOML) error {
 
 	err = encoder.Encode(&content)
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
@@ -889,6 +948,7 @@ func CheckDDTSecrets(path string, id network.Address) (kyber.Scalar, error) {
 
 	contents := privateTOML{}
 	if _, err := toml.DecodeFile(path, &contents); err != nil {
+		log.Error(err)
 		return nil, err
 	}
 
@@ -898,11 +958,13 @@ func CheckDDTSecrets(path string, id network.Address) (kyber.Scalar, error) {
 
 			b, err := base64.StdEncoding.DecodeString(el.Secret)
 			if err != nil {
+				log.Error(err)
 				return nil, err
 			}
 
 			err = secret.UnmarshalBinary(b)
 			if err != nil {
+				log.Error(err)
 				return nil, err
 			}
 
@@ -915,6 +977,7 @@ func CheckDDTSecrets(path string, id network.Address) (kyber.Scalar, error) {
 	b, err := secret.MarshalBinary()
 
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 
