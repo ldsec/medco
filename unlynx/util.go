@@ -63,3 +63,14 @@ func newUnlynxClient() (unlynxClient *servicesmedco.API, cothorityRoster *onet.R
 
 	return
 }
+
+// getEncryptedZero returns an encrypted zero
+func getEncryptedZero() (serializedZero string, err error) {
+	_, cothorityRoster := newUnlynxClient()
+	encZero := libunlynx.EncryptInt(cothorityRoster.Aggregate, 0)
+	serializedZero, err = encZero.Serialize()
+	if err != nil {
+		logrus.Error("unlynx failed serializing zero: ", err)
+	}
+	return
+}

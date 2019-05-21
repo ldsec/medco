@@ -6,7 +6,12 @@ import (
 )
 
 // LocallyAggregateValues adds together several encrypted values homomorphically
+// if there are no values, the value zero encrypted is returned
 func LocallyAggregateValues(values []string) (agg string, err error) {
+
+	if len(values) == 0 {
+		return getEncryptedZero()
+	}
 
 	// deserialize values
 	deserialized, err := deserializeCipherVector(values)
