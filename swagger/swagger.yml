@@ -386,6 +386,8 @@ definitions:
   queryResultElement:
     type: "object"
     properties:
+      queryType:
+        $ref: "#/definitions/queryType"
       encryptedCount:
         type: "string"
       encryptionKey:

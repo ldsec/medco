@@ -8,6 +8,7 @@ package models
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
@@ -23,10 +24,38 @@ type QueryResultElement struct {
 
 	// encryption key
 	EncryptionKey string `json:"encryptionKey,omitempty"`
+
+	// query type
+	QueryType QueryType `json:"queryType,omitempty"`
 }
 
 // Validate validates this query result element
 func (m *QueryResultElement) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateQueryType(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *QueryResultElement) validateQueryType(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.QueryType) { // not required
+		return nil
+	}
+
+	if err := m.QueryType.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("queryType")
+		}
+		return err
+	}
+
 	return nil
 }
 

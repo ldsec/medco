@@ -395,6 +395,9 @@ func init() {
         },
         "encryptionKey": {
           "type": "string"
+        },
+        "queryType": {
+          "$ref": "#/definitions/queryType"
         }
       }
     },
@@ -1151,6 +1154,9 @@ func init() {
         },
         "encryptionKey": {
           "type": "string"
+        },
+        "queryType": {
+          "$ref": "#/definitions/queryType"
         }
       }
     },

@@ -84,6 +84,7 @@ func QuerySyncHandlerFunc(params picsure2.QuerySyncParams, principal *models.Use
 	}
 
 	return picsure2.NewQuerySyncOK().WithPayload(&models.QueryResultElement{
+		QueryType: query.query.QueryType,
 		EncryptedCount: query.queryResult.encCount,
 		EncryptionKey: query.query.UserPublicKey,
 		EncryptedPatientList: query.queryResult.encPatientList,
