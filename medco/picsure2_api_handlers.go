@@ -11,7 +11,7 @@ import(
 // GetInfoHandlerFunc handles /info API endpoint
 func GetInfoHandlerFunc(params picsure2.GetInfoParams, principal *models.User) middleware.Responder {
 
-	err := util.Authorize(params.Body.ResourceCredentials, principal)
+	err := util.AuthorizeUser(*params.Body.ResourceCredentials, principal)
 	if err != nil {
 		return picsure2.NewGetInfoDefault(401).WithPayload(&picsure2.GetInfoDefaultBody{
 			Message: "Authorization failed: " + err.Error(),
@@ -35,7 +35,7 @@ func GetInfoHandlerFunc(params picsure2.GetInfoParams, principal *models.User) m
 // SearchHandlerFunc handles /search API endpoint
 func SearchHandlerFunc(params picsure2.SearchParams, principal *models.User) middleware.Responder {
 
-	err := util.Authorize(params.Body.ResourceCredentials, principal)
+	err := util.AuthorizeUser(*params.Body.ResourceCredentials, principal)
 	if err != nil {
 		return picsure2.NewSearchDefault(401).WithPayload(&picsure2.SearchDefaultBody{
 			Message: "Authorization failed: " + err.Error(),
@@ -58,24 +58,39 @@ func SearchHandlerFunc(params picsure2.SearchParams, principal *models.User) mid
 // QuerySyncHandlerFunc handles /query/sync API endpoint
 func QuerySyncHandlerFunc(params picsure2.QuerySyncParams, principal *models.User) middleware.Responder {
 
-	// authentication / authorization
-	err := util.Authorize(params.Body.ResourceCredentials, principal)
+	// authentication / authorization of user
+	err := util.AuthorizeUser(*params.Body.ResourceCredentials, principal)
 	if err != nil {
 		return picsure2.NewQuerySyncDefault(401).WithPayload(&picsure2.QuerySyncDefaultBody{
-			Message: "Authorization failed: " + err.Error(),
+			Message: "Authorization of user failed: " + err.Error(),
 		})
 	}
 
-	// resolve authorizations
-	queryType := resolveQueryType(params.Body.Query.I2b2Medco, principal)
+	// authorizations of query
+	err = util.AuthorizeQueryType(*principal, params.Body.Query.I2b2Medco.QueryType)
+	if err != nil {
+		return picsure2.NewQuerySyncDefault(401).WithPayload(&picsure2.QuerySyncDefaultBody{
+			Message: "Authorization of query failed: " + err.Error(),
+		})
+	}
 
-	// execute query
+	// create query
 	query, err := NewI2b2MedCoQuery(params.Body.Query.Name, params.Body.Query.I2b2Medco)
 	if err != nil {
 		return picsure2.NewQuerySyncDefault(400).WithPayload(&picsure2.QuerySyncDefaultBody{
 			Message: "Bad query: " + err.Error(),
 		})
 	}
+
+	// parse query type
+	queryType, err := NewI2b2MedCoQueryType(params.Body.Query.I2b2Medco.QueryType)
+	if err != nil {
+		return picsure2.NewQuerySyncDefault(400).WithPayload(&picsure2.QuerySyncDefaultBody{
+			Message: "Bad query type: " + err.Error(),
+		})
+	}
+
+	// execute query
 	err = query.Execute(queryType)
 	if err != nil {
 		return picsure2.NewQuerySyncDefault(500).WithPayload(&picsure2.QuerySyncDefaultBody{

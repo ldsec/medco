@@ -16,11 +16,9 @@ var cachedKeySet struct {
 	expirationTime time.Time
 }
 
-// --- JWT-based MedCo user authentication
-
-// Authorize authorizes user and populate principal with user information
+// AuthorizeUser authorizes user and populate principal with user information, including its authorizations
 // returns error if user is not authorized
-func Authorize(credentials *models.ResourceCredentials, user *models.User) (err error) {
+func AuthorizeUser(credentials models.ResourceCredentials, user *models.User) (err error) {
 
 	// get JWT signing keys
 	keySet, err := retrieveJWKSet()
@@ -62,6 +60,34 @@ func Authorize(credentials *models.ResourceCredentials, user *models.User) (err 
 		err = errors.New("authentication failed (user ID claim not present)")
 		logrus.Warn(err)
 	}
+
+	// extract user authorizations
+	// todo: implement the extraction
+	user.Authorizations = &models.UserAuthorizations{
+		QueryType: []models.QueryType{
+			models.QueryTypePatientList,
+			models.QueryTypeCountPerSite,
+			models.QueryTypeCountPerSiteObfuscated,
+			models.QueryTypeCountPerSiteShuffled,
+			models.QueryTypeCountPerSiteShuffledObfuscated,
+			models.QueryTypeCountGlobal,
+			models.QueryTypeCountGlobalObfuscated,
+		},
+	}
+	return
+}
+
+// AuthorizeQueryType authorizes the query type requested by the user
+func AuthorizeQueryType(user models.User, requestedQueryType models.QueryType) (err error) {
+	for _, userQueryType := range user.Authorizations.QueryType {
+		if userQueryType == requestedQueryType {
+			logrus.Info("user is authorized to execute the query type " + string(requestedQueryType))
+			return nil
+		}
+	}
+
+	err = errors.New("user is not authorized to execute the query type " + string(requestedQueryType))
+	logrus.Warn(err)
 	return
 }
 
