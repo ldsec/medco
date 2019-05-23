@@ -26,8 +26,7 @@ type SearchResultElement struct {
 	DisplayName string `json:"displayName,omitempty"`
 
 	// leaf
-	// Required: true
-	Leaf *bool `json:"leaf"`
+	Leaf bool `json:"leaf,omitempty"`
 
 	// medco encryption
 	MedcoEncryption *SearchResultElementMedcoEncryption `json:"medcoEncryption,omitempty"`
@@ -50,10 +49,6 @@ type SearchResultElement struct {
 func (m *SearchResultElement) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateLeaf(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if err := m.validateMedcoEncryption(formats); err != nil {
 		res = append(res, err)
 	}
@@ -65,15 +60,6 @@ func (m *SearchResultElement) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *SearchResultElement) validateLeaf(formats strfmt.Registry) error {
-
-	if err := validate.Required("leaf", "body", m.Leaf); err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -176,8 +162,7 @@ type SearchResultElementMedcoEncryption struct {
 	ChildrenIds []int64 `json:"childrenIds"`
 
 	// encrypted
-	// Required: true
-	Encrypted *bool `json:"encrypted"`
+	Encrypted bool `json:"encrypted,omitempty"`
 
 	// id
 	ID int64 `json:"id,omitempty"`
@@ -185,24 +170,6 @@ type SearchResultElementMedcoEncryption struct {
 
 // Validate validates this search result element medco encryption
 func (m *SearchResultElementMedcoEncryption) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateEncrypted(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *SearchResultElementMedcoEncryption) validateEncrypted(formats strfmt.Registry) error {
-
-	if err := validate.Required("medcoEncryption"+"."+"encrypted", "body", m.Encrypted); err != nil {
-		return err
-	}
-
 	return nil
 }
 

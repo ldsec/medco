@@ -329,18 +329,12 @@ func init() {
               "type": "array",
               "items": {
                 "type": "object",
-                "required": [
-                  "not"
-                ],
                 "properties": {
                   "items": {
                     "description": "i2b2 items (linked by an OR)",
                     "type": "array",
                     "items": {
                       "type": "object",
-                      "required": [
-                        "encrypted"
-                      ],
                       "properties": {
                         "encrypted": {
                           "type": "boolean"
@@ -485,9 +479,6 @@ func init() {
     },
     "searchResultElement": {
       "type": "object",
-      "required": [
-        "leaf"
-      ],
       "properties": {
         "code": {
           "type": "string"
@@ -500,9 +491,6 @@ func init() {
         },
         "medcoEncryption": {
           "type": "object",
-          "required": [
-            "encrypted"
-          ],
           "properties": {
             "childrenIds": {
               "type": "array",
@@ -1088,18 +1076,12 @@ func init() {
               "type": "array",
               "items": {
                 "type": "object",
-                "required": [
-                  "not"
-                ],
                 "properties": {
                   "items": {
                     "description": "i2b2 items (linked by an OR)",
                     "type": "array",
                     "items": {
                       "type": "object",
-                      "required": [
-                        "encrypted"
-                      ],
                       "properties": {
                         "encrypted": {
                           "type": "boolean"
@@ -1244,9 +1226,6 @@ func init() {
     },
     "searchResultElement": {
       "type": "object",
-      "required": [
-        "leaf"
-      ],
       "properties": {
         "code": {
           "type": "string"
@@ -1259,9 +1238,6 @@ func init() {
         },
         "medcoEncryption": {
           "type": "object",
-          "required": [
-            "encrypted"
-          ],
           "properties": {
             "childrenIds": {
               "type": "array",

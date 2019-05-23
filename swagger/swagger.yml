@@ -283,7 +283,6 @@ definitions:
 
   searchResultElement:
     type: "object"
-    required: [leaf]
     properties:
       path:
         type: "string"
@@ -306,7 +305,6 @@ definitions:
         type: "boolean"
       medcoEncryption:
         type: "object"
-        required: [encrypted]
         properties:
           encrypted:
             type: "boolean"
@@ -343,7 +341,6 @@ definitions:
             description: "i2b2 panels (linked by an AND)"
             items:
               type: "object"
-              required: [not]
               properties:
                 not:
                   type: "boolean"
@@ -353,7 +350,6 @@ definitions:
                   description: "i2b2 items (linked by an OR)"
                   items:
                     type: "object"
-                    required: [encrypted]
                     properties:
                       queryTerm:
                         type: "string"
