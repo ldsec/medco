@@ -63,7 +63,7 @@ func DDTagValues(queryName string, values []string) (taggedValues map[string]str
 	return
 }
 
-// KeySwitchValues makes request through unlynx to key switch a single encrypted value (convenience function)
+// KeySwitchValue makes request through unlynx to key switch a single encrypted value (convenience function)
 func KeySwitchValue(queryName string, value string, targetPubKey string) (string, error) {
 	results, err := KeySwitchValues(queryName, []string{value}, targetPubKey)
 	return results[0], err

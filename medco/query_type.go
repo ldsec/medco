@@ -23,9 +23,13 @@ type I2b2MedCoQueryType struct {
 	// todo: include differential privacy requested
 }
 
+// CountType encodes the type of count, either global or per site
 type CountType int
 const (
+	// PerSite represents the count broken down per site
 	PerSite = iota
+
+	// Global represents the count globally aggregated over all sites
 	Global
 )
 

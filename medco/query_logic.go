@@ -33,10 +33,10 @@ func NewI2b2MedCoQuery(queryName string, query *models.QueryI2b2Medco) (new I2b2
 	return new, new.isValid()
 }
 
-// todo: breakdown in i2b2 / count / patient list
-// todo: implement obfuscation
 // Execute implements the I2b2 MedCo query logic
 func (q *I2b2MedCoQuery) Execute(queryType I2b2MedCoQueryType) (err error) {
+	// todo: breakdown in i2b2 / count / patient list
+	// todo: implement obfuscation
 
 	err = q.isValid()
 	if err != nil {
