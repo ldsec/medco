@@ -8,6 +8,13 @@ swagger-gen:
 		--target=./swagger/ \
 		--spec=./swagger/swagger.yml \
 		--name=medco-connector
+	swagger generate client \
+		--principal=models.User \
+		--target=./swagger/ \
+		--spec=./swagger/swagger.yml \
+		--name=medco-cli-client \
+		--existing-models=github.com/lca1/medco-connector/swagger/models \
+		--default-scheme=https
 
 test_lint:
 	@echo Checking linting of files
