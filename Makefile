@@ -4,16 +4,20 @@ EXCLUDE_LINT = "_test.go"
 swagger-gen:
 	swagger validate ./swagger.yml
 	swagger generate server \
+		--server-package=restapi/server \
+		--model-package=restapi/models \
 		--principal=models.User \
 		--target=./ \
 		--spec=./swagger.yml \
 		--name=medco-connector
 	swagger generate client \
+		--client-package=restapi/client \
+		--existing-models=github.com/lca1/medco-connector/restapi/models \
+		--skip-models \
 		--principal=models.User \
 		--target=./ \
 		--spec=./swagger.yml \
-		--name=medco-cli-client \
-		--existing-models=github.com/lca1/medco-connector/models \
+		--name=medco-cli \
 		--default-scheme=https
 
 test_lint:
