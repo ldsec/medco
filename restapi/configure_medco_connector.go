@@ -9,12 +9,11 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/runtime/security"
 	"github.com/lca1/medco-connector/medco"
-	"github.com/lca1/medco-connector/swagger/models"
+	"github.com/lca1/medco-connector/models"
+	"github.com/lca1/medco-connector/restapi/operations"
+	picsure22 "github.com/lca1/medco-connector/restapi/operations/picsure2"
 	"github.com/sirupsen/logrus"
 	"net/http"
-
-	"github.com/lca1/medco-connector/swagger/restapi/operations"
-	"github.com/lca1/medco-connector/swagger/restapi/operations/picsure2"
 )
 
 //go:generate swagger generate server --target ../../swagger --name MedcoConnector --spec ../swagger.yml
@@ -39,28 +38,28 @@ func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
 	}
 
 	// /medco/picsure2/info
-	api.Picsure2GetInfoHandler = picsure2.GetInfoHandlerFunc(medco.GetInfoHandlerFunc)
+	api.Picsure2GetInfoHandler = picsure22.GetInfoHandlerFunc(medco.GetInfoHandlerFunc)
 
 	// /medco/picsure2/query
-	api.Picsure2QueryHandler = picsure2.QueryHandlerFunc(func(params picsure2.QueryParams, principal *models.User) middleware.Responder {
+	api.Picsure2QueryHandler = picsure22.QueryHandlerFunc(func(params picsure22.QueryParams, principal *models.User) middleware.Responder {
 		return middleware.NotImplemented("operation picsure2.Query has not yet been implemented")
 	})
 
 	// /medco/picsure2/query/{id}/result
-	api.Picsure2QueryResultHandler = picsure2.QueryResultHandlerFunc(func(params picsure2.QueryResultParams, principal *models.User) middleware.Responder {
+	api.Picsure2QueryResultHandler = picsure22.QueryResultHandlerFunc(func(params picsure22.QueryResultParams, principal *models.User) middleware.Responder {
 		return middleware.NotImplemented("operation picsure2.QueryResult has not yet been implemented")
 	})
 
 	// /medco/picsure2/query/{id}/status
-	api.Picsure2QueryStatusHandler = picsure2.QueryStatusHandlerFunc(func(params picsure2.QueryStatusParams, principal *models.User) middleware.Responder {
+	api.Picsure2QueryStatusHandler = picsure22.QueryStatusHandlerFunc(func(params picsure22.QueryStatusParams, principal *models.User) middleware.Responder {
 		return middleware.NotImplemented("operation picsure2.QueryStatus has not yet been implemented")
 	})
 
 	// /medco/picsure2/query/sync
-	api.Picsure2QuerySyncHandler = picsure2.QuerySyncHandlerFunc(medco.QuerySyncHandlerFunc)
+	api.Picsure2QuerySyncHandler = picsure22.QuerySyncHandlerFunc(medco.QuerySyncHandlerFunc)
 
 	// /medco/picsure2/search
-	api.Picsure2SearchHandler = picsure2.SearchHandlerFunc(medco.SearchHandlerFunc)
+	api.Picsure2SearchHandler = picsure22.SearchHandlerFunc(medco.SearchHandlerFunc)
 
 	api.ServerShutdown = func() {}
 

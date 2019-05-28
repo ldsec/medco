@@ -2,7 +2,7 @@ package medco
 
 import (
 	"errors"
-	"github.com/lca1/medco-connector/swagger/models"
+	"github.com/lca1/medco-connector/models"
 )
 
 // I2b2MedCoQueryType encodes the requested results from the query

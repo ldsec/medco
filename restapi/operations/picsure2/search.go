@@ -14,7 +14,7 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 	swag "github.com/go-openapi/swag"
 
-	models "github.com/lca1/medco-connector/swagger/models"
+	models "github.com/lca1/medco-connector/models"
 )
 
 // SearchHandlerFunc turns a function with the right signature into a search handler

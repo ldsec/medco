@@ -16,7 +16,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/lca1/medco-connector/swagger/models"
+	"github.com/lca1/medco-connector/models"
 )
 
 // SearchReader is a Reader for the Search structure.

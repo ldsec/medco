@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/lca1/medco-connector/swagger/models"
+	models "github.com/lca1/medco-connector/models"
 )
 
 // QueryStatusOKCode is the HTTP code returned for type QueryStatusOK

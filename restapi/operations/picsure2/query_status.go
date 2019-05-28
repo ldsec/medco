@@ -13,43 +13,43 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 	swag "github.com/go-openapi/swag"
 
-	models "github.com/lca1/medco-connector/swagger/models"
+	models "github.com/lca1/medco-connector/models"
 )
 
-// QueryHandlerFunc turns a function with the right signature into a query handler
-type QueryHandlerFunc func(QueryParams, *models.User) middleware.Responder
+// QueryStatusHandlerFunc turns a function with the right signature into a query status handler
+type QueryStatusHandlerFunc func(QueryStatusParams, *models.User) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn QueryHandlerFunc) Handle(params QueryParams, principal *models.User) middleware.Responder {
+func (fn QueryStatusHandlerFunc) Handle(params QueryStatusParams, principal *models.User) middleware.Responder {
 	return fn(params, principal)
 }
 
-// QueryHandler interface for that can handle valid query params
-type QueryHandler interface {
-	Handle(QueryParams, *models.User) middleware.Responder
+// QueryStatusHandler interface for that can handle valid query status params
+type QueryStatusHandler interface {
+	Handle(QueryStatusParams, *models.User) middleware.Responder
 }
 
-// NewQuery creates a new http.Handler for the query operation
-func NewQuery(ctx *middleware.Context, handler QueryHandler) *Query {
-	return &Query{Context: ctx, Handler: handler}
+// NewQueryStatus creates a new http.Handler for the query status operation
+func NewQueryStatus(ctx *middleware.Context, handler QueryStatusHandler) *QueryStatus {
+	return &QueryStatus{Context: ctx, Handler: handler}
 }
 
-/*Query swagger:route POST /picsure2/query picsure2 query
+/*QueryStatus swagger:route POST /picsure2/{queryId}/status picsure2 queryStatus
 
-Query MedCo node.
+Get status of query.
 
 */
-type Query struct {
+type QueryStatus struct {
 	Context *middleware.Context
-	Handler QueryHandler
+	Handler QueryStatusHandler
 }
 
-func (o *Query) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+func (o *QueryStatus) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	route, rCtx, _ := o.Context.RouteInfo(r)
 	if rCtx != nil {
 		r = rCtx
 	}
-	var Params = NewQueryParams()
+	var Params = NewQueryStatusParams()
 
 	uprinc, aCtx, err := o.Context.Authorize(r, route)
 	if err != nil {
@@ -75,27 +75,17 @@ func (o *Query) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 }
 
-// QueryBody query body
-// swagger:model QueryBody
-type QueryBody struct {
-
-	// query
-	Query *models.Query `json:"query,omitempty"`
+// QueryStatusBody query status body
+// swagger:model QueryStatusBody
+type QueryStatusBody struct {
 
 	// resource credentials
 	ResourceCredentials *models.ResourceCredentials `json:"resourceCredentials,omitempty"`
-
-	// resource UUID
-	ResourceUUID string `json:"resourceUUID,omitempty"`
 }
 
-// Validate validates this query body
-func (o *QueryBody) Validate(formats strfmt.Registry) error {
+// Validate validates this query status body
+func (o *QueryStatusBody) Validate(formats strfmt.Registry) error {
 	var res []error
-
-	if err := o.validateQuery(formats); err != nil {
-		res = append(res, err)
-	}
 
 	if err := o.validateResourceCredentials(formats); err != nil {
 		res = append(res, err)
@@ -107,25 +97,7 @@ func (o *QueryBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *QueryBody) validateQuery(formats strfmt.Registry) error {
-
-	if swag.IsZero(o.Query) { // not required
-		return nil
-	}
-
-	if o.Query != nil {
-		if err := o.Query.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("body" + "." + "query")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (o *QueryBody) validateResourceCredentials(formats strfmt.Registry) error {
+func (o *QueryStatusBody) validateResourceCredentials(formats strfmt.Registry) error {
 
 	if swag.IsZero(o.ResourceCredentials) { // not required
 		return nil
@@ -144,7 +116,7 @@ func (o *QueryBody) validateResourceCredentials(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (o *QueryBody) MarshalBinary() ([]byte, error) {
+func (o *QueryStatusBody) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -152,8 +124,8 @@ func (o *QueryBody) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *QueryBody) UnmarshalBinary(b []byte) error {
-	var res QueryBody
+func (o *QueryStatusBody) UnmarshalBinary(b []byte) error {
+	var res QueryStatusBody
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -161,21 +133,21 @@ func (o *QueryBody) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-// QueryDefaultBody query default body
-// swagger:model QueryDefaultBody
-type QueryDefaultBody struct {
+// QueryStatusDefaultBody query status default body
+// swagger:model QueryStatusDefaultBody
+type QueryStatusDefaultBody struct {
 
 	// message
 	Message string `json:"message,omitempty"`
 }
 
-// Validate validates this query default body
-func (o *QueryDefaultBody) Validate(formats strfmt.Registry) error {
+// Validate validates this query status default body
+func (o *QueryStatusDefaultBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (o *QueryDefaultBody) MarshalBinary() ([]byte, error) {
+func (o *QueryStatusDefaultBody) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -183,8 +155,8 @@ func (o *QueryDefaultBody) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *QueryDefaultBody) UnmarshalBinary(b []byte) error {
-	var res QueryDefaultBody
+func (o *QueryStatusDefaultBody) UnmarshalBinary(b []byte) error {
+	var res QueryStatusDefaultBody
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

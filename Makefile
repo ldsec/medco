@@ -2,18 +2,18 @@ EXCLUDE_LINT = "_test.go"
 
 # generate/update go server based on swagger specifications
 swagger-gen:
-	swagger validate ./swagger/swagger.yml
+	swagger validate ./swagger.yml
 	swagger generate server \
 		--principal=models.User \
-		--target=./swagger/ \
-		--spec=./swagger/swagger.yml \
+		--target=./ \
+		--spec=./swagger.yml \
 		--name=medco-connector
 	swagger generate client \
 		--principal=models.User \
-		--target=./swagger/ \
-		--spec=./swagger/swagger.yml \
+		--target=./ \
+		--spec=./swagger.yml \
 		--name=medco-cli-client \
-		--existing-models=github.com/lca1/medco-connector/swagger/models \
+		--existing-models=github.com/lca1/medco-connector/models \
 		--default-scheme=https
 
 test_lint:

@@ -11,7 +11,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/lca1/medco-connector/swagger/client/picsure2"
+	"github.com/lca1/medco-connector/client/picsure2"
 )
 
 // Default medco cli client HTTP client.
