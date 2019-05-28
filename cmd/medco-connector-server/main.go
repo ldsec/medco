@@ -3,12 +3,12 @@
 package main
 
 import (
-	server2 "github.com/lca1/medco-connector/restapi/server"
 	"log"
 	"os"
 
-	"github.com/go-openapi/loads"
-	"github.com/jessevdk/go-flags"
+	loads "github.com/go-openapi/loads"
+	flags "github.com/jessevdk/go-flags"
+	"github.com/lca1/medco-connector/restapi/server"
 	"github.com/lca1/medco-connector/restapi/server/operations"
 )
 
@@ -17,13 +17,13 @@ import (
 
 func main() {
 
-	swaggerSpec, err := loads.Embedded(server2.SwaggerJSON, server2.FlatSwaggerJSON)
+	swaggerSpec, err := loads.Embedded(server.SwaggerJSON, server.FlatSwaggerJSON)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	api := operations.NewMedcoConnectorAPI(swaggerSpec)
-	server := server2.NewServer(api)
+	server := server.NewServer(api)
 	defer server.Shutdown()
 
 	parser := flags.NewParser(server, flags.Default)

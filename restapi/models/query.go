@@ -9,7 +9,7 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/go-openapi/strfmt"
+	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
@@ -168,7 +168,7 @@ func (m *QueryI2b2Medco) validateQueryType(formats strfmt.Registry) error {
 		return nil
 	}
 
-	if err := Validate(formats); err != nil {
+	if err := m.QueryType.Validate(formats); err != nil {
 		if ve, ok := err.(*errors.Validation); ok {
 			return ve.ValidateName("i2b2-medco" + "." + "queryType")
 		}

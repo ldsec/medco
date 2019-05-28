@@ -6,7 +6,7 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"github.com/go-openapi/strfmt"
+	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
@@ -49,7 +49,7 @@ func (m *QueryResultElement) validateQueryType(formats strfmt.Registry) error {
 		return nil
 	}
 
-	if err := Validate(formats); err != nil {
+	if err := m.QueryType.Validate(formats); err != nil {
 		if ve, ok := err.(*errors.Validation); ok {
 			return ve.ValidateName("queryType")
 		}

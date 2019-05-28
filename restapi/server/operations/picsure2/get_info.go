@@ -9,12 +9,12 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/go-openapi/errors"
-	"github.com/go-openapi/runtime/middleware"
-	"github.com/go-openapi/strfmt"
-	"github.com/go-openapi/swag"
+	errors "github.com/go-openapi/errors"
+	middleware "github.com/go-openapi/runtime/middleware"
+	strfmt "github.com/go-openapi/strfmt"
+	swag "github.com/go-openapi/swag"
 
-	"github.com/lca1/medco-connector/restapi/models"
+	models "github.com/lca1/medco-connector/restapi/models"
 )
 
 // GetInfoHandlerFunc turns a function with the right signature into a get info handler

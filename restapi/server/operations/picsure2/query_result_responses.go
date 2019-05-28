@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/lca1/medco-connector/restapi/models"
+	models "github.com/lca1/medco-connector/restapi/models"
 )
 
 // QueryResultOKCode is the HTTP code returned for type QueryResultOK

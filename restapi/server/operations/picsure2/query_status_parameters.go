@@ -13,7 +13,7 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 
-	"github.com/go-openapi/strfmt"
+	strfmt "github.com/go-openapi/strfmt"
 )
 
 // NewQueryStatusParams creates a new QueryStatusParams object
@@ -64,7 +64,7 @@ func (o *QueryStatusParams) BindRequest(r *http.Request, route *middleware.Match
 			}
 		} else {
 			// validate body object
-			if err := Validate(route.Formats); err != nil {
+			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)
 			}
 

@@ -8,7 +8,7 @@ package picsure2
 import (
 	"github.com/go-openapi/runtime"
 
-	"github.com/go-openapi/strfmt"
+	strfmt "github.com/go-openapi/strfmt"
 )
 
 // New creates a new picsure2 API client.
@@ -43,8 +43,8 @@ func (a *Client) GetInfo(params *GetInfoParams, authInfo runtime.ClientAuthInfoW
 		Params:             params,
 		Reader:             &GetInfoReader{formats: a.formats},
 		AuthInfo:           authInfo,
-		Context:            Context,
-		Client:             HTTPClient,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
@@ -72,8 +72,8 @@ func (a *Client) Query(params *QueryParams, authInfo runtime.ClientAuthInfoWrite
 		Params:             params,
 		Reader:             &QueryReader{formats: a.formats},
 		AuthInfo:           authInfo,
-		Context:            Context,
-		Client:             HTTPClient,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
@@ -101,8 +101,8 @@ func (a *Client) QueryResult(params *QueryResultParams, authInfo runtime.ClientA
 		Params:             params,
 		Reader:             &QueryResultReader{formats: a.formats},
 		AuthInfo:           authInfo,
-		Context:            Context,
-		Client:             HTTPClient,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
@@ -130,8 +130,8 @@ func (a *Client) QueryStatus(params *QueryStatusParams, authInfo runtime.ClientA
 		Params:             params,
 		Reader:             &QueryStatusReader{formats: a.formats},
 		AuthInfo:           authInfo,
-		Context:            Context,
-		Client:             HTTPClient,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
@@ -159,8 +159,8 @@ func (a *Client) QuerySync(params *QuerySyncParams, authInfo runtime.ClientAuthI
 		Params:             params,
 		Reader:             &QuerySyncReader{formats: a.formats},
 		AuthInfo:           authInfo,
-		Context:            Context,
-		Client:             HTTPClient,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
@@ -188,8 +188,8 @@ func (a *Client) Search(params *SearchParams, authInfo runtime.ClientAuthInfoWri
 		Params:             params,
 		Reader:             &SearchReader{formats: a.formats},
 		AuthInfo:           authInfo,
-		Context:            Context,
-		Client:             HTTPClient,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err

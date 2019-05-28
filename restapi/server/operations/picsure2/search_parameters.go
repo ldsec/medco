@@ -57,7 +57,7 @@ func (o *SearchParams) BindRequest(r *http.Request, route *middleware.MatchedRou
 			}
 		} else {
 			// validate body object
-			if err := Validate(route.Formats); err != nil {
+			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)
 			}
 

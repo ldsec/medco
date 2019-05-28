@@ -7,20 +7,21 @@ package operations
 
 import (
 	"fmt"
-	picsure22 "github.com/lca1/medco-connector/restapi/server/operations/picsure2"
 	"net/http"
 	"strings"
 
-	"github.com/go-openapi/errors"
-	"github.com/go-openapi/loads"
-	"github.com/go-openapi/runtime"
-	"github.com/go-openapi/runtime/middleware"
-	"github.com/go-openapi/runtime/security"
-	"github.com/go-openapi/spec"
-	"github.com/go-openapi/strfmt"
+	errors "github.com/go-openapi/errors"
+	loads "github.com/go-openapi/loads"
+	runtime "github.com/go-openapi/runtime"
+	middleware "github.com/go-openapi/runtime/middleware"
+	security "github.com/go-openapi/runtime/security"
+	spec "github.com/go-openapi/spec"
+	strfmt "github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
-	"github.com/lca1/medco-connector/restapi/models"
+	"github.com/lca1/medco-connector/restapi/server/operations/picsure2"
+
+	models "github.com/lca1/medco-connector/restapi/models"
 )
 
 // NewMedcoConnectorAPI creates a new MedcoConnector instance
@@ -40,22 +41,22 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 		BearerAuthenticator: security.BearerAuth,
 		JSONConsumer:        runtime.JSONConsumer(),
 		JSONProducer:        runtime.JSONProducer(),
-		Picsure2GetInfoHandler: picsure22.GetInfoHandlerFunc(func(params picsure22.GetInfoParams, principal *models.User) middleware.Responder {
+		Picsure2GetInfoHandler: picsure2.GetInfoHandlerFunc(func(params picsure2.GetInfoParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation Picsure2GetInfo has not yet been implemented")
 		}),
-		Picsure2QueryHandler: picsure22.QueryHandlerFunc(func(params picsure22.QueryParams, principal *models.User) middleware.Responder {
+		Picsure2QueryHandler: picsure2.QueryHandlerFunc(func(params picsure2.QueryParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation Picsure2Query has not yet been implemented")
 		}),
-		Picsure2QueryResultHandler: picsure22.QueryResultHandlerFunc(func(params picsure22.QueryResultParams, principal *models.User) middleware.Responder {
+		Picsure2QueryResultHandler: picsure2.QueryResultHandlerFunc(func(params picsure2.QueryResultParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation Picsure2QueryResult has not yet been implemented")
 		}),
-		Picsure2QueryStatusHandler: picsure22.QueryStatusHandlerFunc(func(params picsure22.QueryStatusParams, principal *models.User) middleware.Responder {
+		Picsure2QueryStatusHandler: picsure2.QueryStatusHandlerFunc(func(params picsure2.QueryStatusParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation Picsure2QueryStatus has not yet been implemented")
 		}),
-		Picsure2QuerySyncHandler: picsure22.QuerySyncHandlerFunc(func(params picsure22.QuerySyncParams, principal *models.User) middleware.Responder {
+		Picsure2QuerySyncHandler: picsure2.QuerySyncHandlerFunc(func(params picsure2.QuerySyncParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation Picsure2QuerySync has not yet been implemented")
 		}),
-		Picsure2SearchHandler: picsure22.SearchHandlerFunc(func(params picsure22.SearchParams, principal *models.User) middleware.Responder {
+		Picsure2SearchHandler: picsure2.SearchHandlerFunc(func(params picsure2.SearchParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation Picsure2Search has not yet been implemented")
 		}),
 
@@ -104,17 +105,17 @@ type MedcoConnectorAPI struct {
 	APIAuthorizer runtime.Authorizer
 
 	// Picsure2GetInfoHandler sets the operation handler for the get info operation
-	Picsure2GetInfoHandler picsure22.GetInfoHandler
+	Picsure2GetInfoHandler picsure2.GetInfoHandler
 	// Picsure2QueryHandler sets the operation handler for the query operation
-	Picsure2QueryHandler picsure22.QueryHandler
+	Picsure2QueryHandler picsure2.QueryHandler
 	// Picsure2QueryResultHandler sets the operation handler for the query result operation
-	Picsure2QueryResultHandler picsure22.QueryResultHandler
+	Picsure2QueryResultHandler picsure2.QueryResultHandler
 	// Picsure2QueryStatusHandler sets the operation handler for the query status operation
-	Picsure2QueryStatusHandler picsure22.QueryStatusHandler
+	Picsure2QueryStatusHandler picsure2.QueryStatusHandler
 	// Picsure2QuerySyncHandler sets the operation handler for the query sync operation
-	Picsure2QuerySyncHandler picsure22.QuerySyncHandler
+	Picsure2QuerySyncHandler picsure2.QuerySyncHandler
 	// Picsure2SearchHandler sets the operation handler for the search operation
-	Picsure2SearchHandler picsure22.SearchHandler
+	Picsure2SearchHandler picsure2.SearchHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -319,32 +320,32 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/picsure2/info"] = picsure22.NewGetInfo(o.context, o.Picsure2GetInfoHandler)
+	o.handlers["POST"]["/picsure2/info"] = picsure2.NewGetInfo(o.context, o.Picsure2GetInfoHandler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/picsure2/query"] = picsure22.NewQuery(o.context, o.Picsure2QueryHandler)
+	o.handlers["POST"]["/picsure2/query"] = picsure2.NewQuery(o.context, o.Picsure2QueryHandler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/picsure2/{queryId}/result"] = picsure22.NewQueryResult(o.context, o.Picsure2QueryResultHandler)
+	o.handlers["POST"]["/picsure2/{queryId}/result"] = picsure2.NewQueryResult(o.context, o.Picsure2QueryResultHandler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/picsure2/{queryId}/status"] = picsure22.NewQueryStatus(o.context, o.Picsure2QueryStatusHandler)
+	o.handlers["POST"]["/picsure2/{queryId}/status"] = picsure2.NewQueryStatus(o.context, o.Picsure2QueryStatusHandler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/picsure2/query/sync"] = picsure22.NewQuerySync(o.context, o.Picsure2QuerySyncHandler)
+	o.handlers["POST"]["/picsure2/query/sync"] = picsure2.NewQuerySync(o.context, o.Picsure2QuerySyncHandler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/picsure2/search"] = picsure22.NewSearch(o.context, o.Picsure2SearchHandler)
+	o.handlers["POST"]["/picsure2/search"] = picsure2.NewSearch(o.context, o.Picsure2SearchHandler)
 
 }
 

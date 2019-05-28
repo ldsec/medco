@@ -8,7 +8,7 @@ package models
 import (
 	"strconv"
 
-	"github.com/go-openapi/strfmt"
+	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
@@ -108,7 +108,7 @@ func (m *UserAuthorizations) validateQueryType(formats strfmt.Registry) error {
 
 	for i := 0; i < len(m.QueryType); i++ {
 
-		if err := Validate(formats); err != nil {
+		if err := m.QueryType[i].Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("authorizations" + "." + "queryType" + "." + strconv.Itoa(i))
 			}

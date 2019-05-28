@@ -8,12 +8,13 @@ package client
 import (
 	"github.com/go-openapi/runtime"
 	httptransport "github.com/go-openapi/runtime/client"
-	picsure22 "github.com/lca1/medco-connector/restapi/client/picsure2"
 
-	"github.com/go-openapi/strfmt"
+	strfmt "github.com/go-openapi/strfmt"
+
+	"github.com/lca1/medco-connector/restapi/client/picsure2"
 )
 
-// Default medco cli client HTTP client.
+// Default medco cli HTTP client.
 var Default = NewHTTPClient(nil)
 
 const (
@@ -28,14 +29,14 @@ const (
 // DefaultSchemes are the default schemes found in Meta (info) section of spec file
 var DefaultSchemes = []string{"http"}
 
-// NewHTTPClient creates a new medco cli client HTTP client.
-func NewHTTPClient(formats strfmt.Registry) *MedcoCliClient {
+// NewHTTPClient creates a new medco cli HTTP client.
+func NewHTTPClient(formats strfmt.Registry) *MedcoCli {
 	return NewHTTPClientWithConfig(formats, nil)
 }
 
-// NewHTTPClientWithConfig creates a new medco cli client HTTP client,
+// NewHTTPClientWithConfig creates a new medco cli HTTP client,
 // using a customizable transport config.
-func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *MedcoCliClient {
+func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *MedcoCli {
 	// ensure nullable parameters have default
 	if cfg == nil {
 		cfg = DefaultTransportConfig()
@@ -46,17 +47,17 @@ func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *Med
 	return New(transport, formats)
 }
 
-// New creates a new medco cli client client
-func New(transport runtime.ClientTransport, formats strfmt.Registry) *MedcoCliClient {
+// New creates a new medco cli client
+func New(transport runtime.ClientTransport, formats strfmt.Registry) *MedcoCli {
 	// ensure nullable parameters have default
 	if formats == nil {
 		formats = strfmt.Default
 	}
 
-	cli := new(MedcoCliClient)
+	cli := new(MedcoCli)
 	cli.Transport = transport
 
-	cli.Picsure2 = picsure22.New(transport, formats)
+	cli.Picsure2 = picsure2.New(transport, formats)
 
 	return cli
 }
@@ -100,15 +101,15 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 	return cfg
 }
 
-// MedcoCliClient is a client for medco cli client
-type MedcoCliClient struct {
-	Picsure2 *picsure22.Client
+// MedcoCli is a client for medco cli
+type MedcoCli struct {
+	Picsure2 *picsure2.Client
 
 	Transport runtime.ClientTransport
 }
 
 // SetTransport changes the transport on the client and all its subresources
-func (c *MedcoCliClient) SetTransport(transport runtime.ClientTransport) {
+func (c *MedcoCli) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
 
 	c.Picsure2.SetTransport(transport)
