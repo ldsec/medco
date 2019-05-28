@@ -3,8 +3,8 @@ package medco
 import(
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/lca1/medco-connector/i2b2"
-	"github.com/lca1/medco-connector/models"
-	"github.com/lca1/medco-connector/restapi/operations/picsure2"
+	"github.com/lca1/medco-connector/restapi/models"
+	"github.com/lca1/medco-connector/restapi/server/operations/picsure2"
 	"github.com/lca1/medco-connector/util"
 )
 

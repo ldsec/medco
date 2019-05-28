@@ -3,7 +3,7 @@ package util
 import (
 	"encoding/json"
 	"errors"
-	"github.com/lca1/medco-connector/models"
+	"github.com/lca1/medco-connector/restapi/models"
 	"github.com/lestrrat-go/jwx/jwk"
 	"github.com/lestrrat-go/jwx/jws"
 	"github.com/lestrrat-go/jwx/jwt"

@@ -2,7 +2,7 @@ package i2b2
 
 import (
 	"errors"
-	"github.com/lca1/medco-connector/models"
+	"github.com/lca1/medco-connector/restapi/models"
 	"github.com/lca1/medco-connector/util"
 	"github.com/sirupsen/logrus"
 	"strconv"
