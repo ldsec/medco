@@ -33,19 +33,19 @@ type TimeResults struct {
 
 // timer constant names
 const (
-	TaggingTimeExec = "TaggingTimeExec"
+	TaggingTimeExec          = "TaggingTimeExec"
 	TaggingTimeCommunication = "TaggingTimeCommunication"
-	DDTRequestTime = "DDTRequestTime"
+	DDTRequestTime           = "DDTRequestTime"
 
-	KSTimeExec = "KSTimeExec"
+	KSTimeExec          = "KSTimeExec"
 	KSTimeCommunication = "KSTimeCommunication"
-	KSRequestTime = "KSRequestTime"
+	KSRequestTime       = "KSRequestTime"
 
-	ShuffleTimeExec = "ShuffleTimeExec"
+	ShuffleTimeExec          = "ShuffleTimeExec"
 	ShuffleTimeCommunication = "ShuffleTimeCommunication"
-	ShuffleRequestTime = "ShuffleRequestTime"
+	ShuffleRequestTime       = "ShuffleRequestTime"
 
-	AggrTime = "AggrTime"
+	AggrTime        = "AggrTime"
 	AggrRequestTime = "AggrRequestTime"
 )
 
@@ -119,14 +119,14 @@ type SurveyTag struct {
 	SurveyID      SurveyID
 	Request       SurveyDDTRequest
 	SurveyChannel chan int // To wait for the survey to be created before the DDT protocol
-	TR 			  TimeResults
+	TR            TimeResults
 }
 
 // SurveyKS is the struct that we persist in the service that contains all the data for the Key Switch request phase
 type SurveyKS struct {
 	SurveyID SurveyID
 	Request  SurveyKSRequest
-	TR 	     TimeResults
+	TR       TimeResults
 }
 
 // SurveyShuffle is the struct that we persist in the service that contains all the data for the Shuffle (+KS) request phase
@@ -135,7 +135,7 @@ type SurveyShuffle struct {
 	Request             SurveyShuffleRequest
 	SurveyChannel       chan int // To wait for all the aggregate results to be received by the root node
 	FinalResultsChannel chan int
-	TR 	     			TimeResults
+	TR                  TimeResults
 }
 
 // SurveyAgg is the struct that we persist in the service that contains all the data for the Aggregation request phase
@@ -143,7 +143,7 @@ type SurveyAgg struct {
 	SurveyID      SurveyID
 	Request       SurveyAggRequest
 	SurveyChannel chan int // To wait for all the aggregate results to be received by the root node
-	TR 			  TimeResults
+	TR            TimeResults
 }
 
 // SurveyTagGenerated is used to ensure that all servers get the survey before starting the DDT protocol

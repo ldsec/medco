@@ -126,7 +126,7 @@ func (c *API) SendSurveyAggRequest(entities *onet.Roster, surveyID SurveyID, cPK
 	err := c.SendProtobuf(c.entryPoint, &sar, &resp)
 	if err != nil {
 
-		return nil, libunlynx.CipherText{},TimeResults{}, err
+		return nil, libunlynx.CipherText{}, TimeResults{}, err
 	}
 	resp.TR.MapTR[AggrRequestTime] = time.Since(start)
 	return &surveyID, resp.Result[0], resp.TR, nil

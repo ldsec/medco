@@ -19,6 +19,7 @@ require (
 	go.dedis.ch/kyber/v3 v3.0.3
 	go.dedis.ch/onet/v3 v3.0.14
 	golang.org/x/crypto v0.0.0-20190513172903-22d7a77e9e5f // indirect
+	golang.org/x/lint v0.0.0-20190409202823-959b441ac422 // indirect
 	golang.org/x/net v0.0.0-20190522155817-f3200d17e092 // indirect
 	golang.org/x/sys v0.0.0-20190528183647-3626398d7749 // indirect
 	golang.org/x/text v0.3.2 // indirect

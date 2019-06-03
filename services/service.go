@@ -271,7 +271,7 @@ func (s *Service) HandleSurveyKSRequest(skr *SurveyKSRequest) (network.Message, 
 	err := s.putSurveyKS(skr.SurveyID, SurveyKS{
 		SurveyID: skr.SurveyID,
 		Request:  *skr,
-		TR: TimeResults{MapTR: mapTR},
+		TR:       TimeResults{MapTR: mapTR},
 	})
 	if err != nil {
 		log.Error(err)
@@ -314,7 +314,7 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 			SurveyID:      ssr.SurveyID,
 			Request:       *ssr,
 			SurveyChannel: make(chan int, 100),
-			TR: TimeResults{MapTR: mapTR}})
+			TR:            TimeResults{MapTR: mapTR}})
 		if err != nil {
 			log.Error(err)
 			return nil, err
@@ -420,7 +420,7 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 			Request:             *ssr,
 			SurveyChannel:       make(chan int, 100),
 			FinalResultsChannel: make(chan int, 100),
-			TR: TimeResults{MapTR: mapTR}})
+			TR:                  TimeResults{MapTR: mapTR}})
 		if err != nil {
 			log.Error(err)
 			return nil, err
@@ -571,7 +571,7 @@ func (s *Service) HandleSurveyAggRequest(sar *SurveyAggRequest) (network.Message
 		SurveyID:      sar.SurveyID,
 		Request:       *sar,
 		SurveyChannel: make(chan int, 100),
-		TR: TimeResults{MapTR: mapTR}})
+		TR:            TimeResults{MapTR: mapTR}})
 
 	if err != nil {
 		log.Error(err)
@@ -863,7 +863,7 @@ func (s *Service) TaggingPhase(targetSurvey SurveyID, roster *onet.Roster) ([]li
 	deterministicTaggingResult := <-pi.(*protocolsunlynx.DeterministicTaggingProtocol).FeedbackChannel
 
 	execTime := pi.(*protocolsunlynx.DeterministicTaggingProtocol).ExecTime
-	return deterministicTaggingResult, execTime, time.Since(start)-execTime, nil
+	return deterministicTaggingResult, execTime, time.Since(start) - execTime, nil
 }
 
 // CollectiveAggregationPhase performs a collective aggregation between the participating nodes
@@ -894,7 +894,7 @@ func (s *Service) ShufflingPhase(targetSurvey SurveyID, roster *onet.Roster) ([]
 	shufflingResult := <-pi.(*protocolsunlynx.ShufflingProtocol).FeedbackChannel
 
 	execTime := pi.(*protocolsunlynx.ShufflingProtocol).ExecTime
-	return shufflingResult, execTime, time.Since(start)-execTime, nil
+	return shufflingResult, execTime, time.Since(start) - execTime, nil
 }
 
 // KeySwitchingPhase performs the switch to the querier key on the currently aggregated data.
@@ -907,7 +907,7 @@ func (s *Service) KeySwitchingPhase(targetSurvey SurveyID, typeQ string, roster 
 	keySwitchedAggregatedResponses := <-pi.(*protocolsunlynx.KeySwitchingProtocol).FeedbackChannel
 
 	execTime := pi.(*protocolsunlynx.KeySwitchingProtocol).ExecTime
-	return keySwitchedAggregatedResponses, execTime, time.Since(start)-execTime, nil
+	return keySwitchedAggregatedResponses, execTime, time.Since(start) - execTime, nil
 }
 
 // Support functions
