@@ -179,11 +179,13 @@ func (s *Service) HandleSurveyDDTRequestTerms(sdq *SurveyDDTRequest) (network.Me
 		}
 
 		// initialize timers
+		mapTR := make(map[string]time.Duration)
 		err := s.putSurveyTag(sdq.SurveyID,
 			SurveyTag{
 				SurveyID:      sdq.SurveyID,
 				Request:       *sdq,
 				SurveyChannel: make(chan int, 100),
+				TR:            TimeResults{mapTR},
 			})
 		if err != nil {
 			log.Error(err)
@@ -218,15 +220,14 @@ func (s *Service) HandleSurveyDDTRequestTerms(sdq *SurveyDDTRequest) (network.Me
 			counter = counter - <-surveyTag.SurveyChannel
 		}
 
-		deterministicTaggingResult, err := s.TaggingPhase(sdq.SurveyID, &sdq.Roster)
+		deterministicTaggingResult, execTime, communicationTime, err := s.TaggingPhase(sdq.SurveyID, &sdq.Roster)
 		if err != nil {
 			log.Error(err)
 			return nil, err
 		}
 
-		// convert the result to of the tagging for something close to the XML response of i2b2 (array of tagged terms)
+		// convert the result to of the tagging for something close to the response of i2b2 (array of tagged terms)
 		listTaggedTerms := make([]libunlynx.GroupingKey, 0)
-
 		for _, el := range deterministicTaggingResult {
 			listTaggedTerms = append(listTaggedTerms, libunlynx.GroupingKey(el.String()))
 		}
@@ -236,7 +237,9 @@ func (s *Service) HandleSurveyDDTRequestTerms(sdq *SurveyDDTRequest) (network.Me
 			log.Error(err)
 			return nil, err
 		}
-		return &ResultDDT{Result: listTaggedTerms}, nil
+		surveyTag.TR.MapTR[TaggingTimeExec] = execTime
+		surveyTag.TR.MapTR[TaggingTimeCommunication] = communicationTime
+		return &ResultDDT{Result: listTaggedTerms, TR: surveyTag.TR}, nil
 	}
 
 	log.Lvl2(s.ServerIdentity().String(), " is notified of survey:", sdq.SurveyID)
@@ -264,22 +267,32 @@ func (s *Service) HandleSurveyDDTRequestTerms(sdq *SurveyDDTRequest) (network.Me
 func (s *Service) HandleSurveyKSRequest(skr *SurveyKSRequest) (network.Message, error) {
 	log.Lvl2(s.ServerIdentity().String(), " received a SurveyKSRequest:", skr.SurveyID)
 
+	mapTR := make(map[string]time.Duration)
 	err := s.putSurveyKS(skr.SurveyID, SurveyKS{
 		SurveyID: skr.SurveyID,
-		Request:  *skr})
+		Request:  *skr,
+		TR:       TimeResults{MapTR: mapTR},
+	})
 	if err != nil {
 		log.Error(err)
 		return nil, err
 	}
 
 	// key switch the results
-	keySwitchingResult, err := s.KeySwitchingPhase(skr.SurveyID, KSRequestName, &skr.Roster)
+	keySwitchingResult, execTime, communicationTime, err := s.KeySwitchingPhase(skr.SurveyID, KSRequestName, &skr.Roster)
 	if err != nil {
 		log.Error("key switching error:", err)
 		return nil, err
 	}
 
-	return &Result{Result: keySwitchingResult}, nil
+	surveyKS, err := s.getSurveyKS(skr.SurveyID)
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	surveyKS.TR.MapTR[KSTimeExec] = execTime
+	surveyKS.TR.MapTR[KSTimeCommunication] = communicationTime
+	return &Result{Result: keySwitchingResult, TR: surveyKS.TR}, nil
 }
 
 // HandleSurveyShuffleRequest handles the reception of the aggregate local result to be shared/shuffled/switched
@@ -296,10 +309,12 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 	// (root = true - intra = false )
 	if !ssr.IntraMessage && root {
 
+		mapTR := make(map[string]time.Duration)
 		err := s.putSurveyShuffle(ssr.SurveyID, SurveyShuffle{
 			SurveyID:      ssr.SurveyID,
 			Request:       *ssr,
-			SurveyChannel: make(chan int, 100)})
+			SurveyChannel: make(chan int, 100),
+			TR:            TimeResults{MapTR: mapTR}})
 		if err != nil {
 			log.Error(err)
 			return nil, err
@@ -332,7 +347,7 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 		}
 
 		// shuffle the results
-		shufflingResult, err := s.ShufflingPhase(ssr.SurveyID, &ssr.Roster)
+		shufflingResult, execTime, communicationTime, err := s.ShufflingPhase(ssr.SurveyID, &ssr.Roster)
 
 		if err != nil {
 			log.Error("shuffling error", err)
@@ -345,6 +360,8 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 		}
 
 		surveyShuffle.Request.KSTarget = shufflingFinalResult
+		surveyShuffle.TR.MapTR[ShuffleTimeExec] = execTime
+		surveyShuffle.TR.MapTR[ShuffleTimeCommunication] = communicationTime
 
 		err = s.putSurveyShuffle(ssr.SurveyID, surveyShuffle)
 		if err != nil {
@@ -369,7 +386,7 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 		}
 
 		// key switch the results
-		keySwitchingResult, err := s.KeySwitchingPhase(ssr.SurveyID, ShuffleRequestName, &ssr.Roster)
+		keySwitchingResult, execTime, communicationTime, err := s.KeySwitchingPhase(ssr.SurveyID, ShuffleRequestName, &ssr.Roster)
 		if err != nil {
 			log.Error("key switching error", err)
 			return nil, err
@@ -389,17 +406,21 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 			log.Error(err)
 			return nil, err
 		}
+		surveyShuffle.TR.MapTR[KSTimeExec] = execTime
+		surveyShuffle.TR.MapTR[KSTimeCommunication] = communicationTime
 
-		return &Result{Result: libunlynx.CipherVector{keySwitchingResult[index]}}, nil
+		return &Result{Result: libunlynx.CipherVector{keySwitchingResult[index]}, TR: surveyShuffle.TR}, nil
 
 		//(root = false - intra = false )
 	} else if !ssr.IntraMessage && !root { // if message sent by client and not a root node
+
+		mapTR := make(map[string]time.Duration)
 		err := s.putSurveyShuffle(ssr.SurveyID, SurveyShuffle{
 			SurveyID:            ssr.SurveyID,
 			Request:             *ssr,
 			SurveyChannel:       make(chan int, 100),
 			FinalResultsChannel: make(chan int, 100),
-		})
+			TR:                  TimeResults{MapTR: mapTR}})
 		if err != nil {
 			log.Error(err)
 			return nil, err
@@ -447,7 +468,7 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 			return nil, err
 		}
 
-		return &Result{Result: libunlynx.CipherVector{surveyShuffle.Request.KSTarget[index]}}, nil
+		return &Result{Result: libunlynx.CipherVector{surveyShuffle.Request.KSTarget[index]}, TR: surveyShuffle.TR}, nil
 
 		// (root = true - intra = true )
 	} else if ssr.IntraMessage && root { // if message sent by another node and is root
@@ -493,7 +514,7 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 		s.Mutex.Unlock()
 
 		// key switch the results
-		keySwitchingResult, err := s.KeySwitchingPhase(ssr.SurveyID, ShuffleRequestName, &ssr.Roster)
+		keySwitchingResult, execTime, communicationTime, err := s.KeySwitchingPhase(ssr.SurveyID, ShuffleRequestName, &ssr.Roster)
 		if err != nil {
 			log.Error("key switching error", err)
 			return nil, err
@@ -506,6 +527,8 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 			return nil, err
 		}
 		surveyShuffle.Request.KSTarget = keySwitchingResult
+		surveyShuffle.TR.MapTR[KSTimeExec] = execTime
+		surveyShuffle.TR.MapTR[KSTimeCommunication] = communicationTime
 		err = s.putSurveyShuffle(ssr.SurveyID, surveyShuffle)
 		if err != nil {
 			log.Error(err)
@@ -543,10 +566,12 @@ func (s *Service) HandleSurveyShuffleGenerated(recq *SurveyShuffleGenerated) (ne
 func (s *Service) HandleSurveyAggRequest(sar *SurveyAggRequest) (network.Message, error) {
 	log.Lvl2(s.ServerIdentity().String(), " received a SurveyAggRequest:", sar.SurveyID)
 
+	mapTR := make(map[string]time.Duration)
 	err := s.putSurveyAgg(sar.SurveyID, SurveyAgg{
 		SurveyID:      sar.SurveyID,
 		Request:       *sar,
-		SurveyChannel: make(chan int, 100)})
+		SurveyChannel: make(chan int, 100),
+		TR:            TimeResults{MapTR: mapTR}})
 
 	if err != nil {
 		log.Error(err)
@@ -571,13 +596,14 @@ func (s *Service) HandleSurveyAggRequest(sar *SurveyAggRequest) (network.Message
 	}
 
 	// collectively aggregate the results
-	aggregationResult, err := s.CollectiveAggregationPhase(sar.SurveyID, &sar.Roster)
+	aggregationResult, aggrTime, err := s.CollectiveAggregationPhase(sar.SurveyID, &sar.Roster)
 	if err != nil {
 		log.Error("aggregation error", err)
 		return nil, err
 	}
 
 	surveyAgg.Request.KSTarget = aggregationResult
+	surveyAgg.TR.MapTR[AggrTime] = aggrTime
 
 	err = s.putSurveyAgg(sar.SurveyID, surveyAgg)
 	if err != nil {
@@ -585,14 +611,14 @@ func (s *Service) HandleSurveyAggRequest(sar *SurveyAggRequest) (network.Message
 	}
 
 	// key switch the results
-	keySwitchingResult, err := s.KeySwitchingPhase(sar.SurveyID, AggRequestName, &sar.Roster)
-
+	keySwitchingResult, execTime, communicationTime, err := s.KeySwitchingPhase(sar.SurveyID, AggRequestName, &sar.Roster)
 	if err != nil {
 		log.Error("key switching error", err)
 		return nil, err
 	}
-
-	return &Result{Result: keySwitchingResult}, nil
+	surveyAgg.TR.MapTR[KSTimeExec] = execTime
+	surveyAgg.TR.MapTR[KSTimeCommunication] = communicationTime
+	return &Result{Result: keySwitchingResult, TR: surveyAgg.TR}, nil
 }
 
 // HandleSurveyAggGenerated handles triggers the SurveyChannel
@@ -828,20 +854,24 @@ func (s *Service) StartProtocol(name, typeQ string, targetSurvey SurveyID, roste
 //______________________________________________________________________________________________________________________
 
 // TaggingPhase performs the private grouping on the currently collected data.
-func (s *Service) TaggingPhase(targetSurvey SurveyID, roster *onet.Roster) ([]libunlynx.DeterministCipherText, error) {
+func (s *Service) TaggingPhase(targetSurvey SurveyID, roster *onet.Roster) ([]libunlynx.DeterministCipherText, time.Duration, time.Duration, error) {
+	start := time.Now()
 	pi, err := s.StartProtocol(protocolsunlynx.DeterministicTaggingProtocolName, "", targetSurvey, roster)
 	if err != nil {
-		return nil, err
+		return nil, 0, 0, err
 	}
 	deterministicTaggingResult := <-pi.(*protocolsunlynx.DeterministicTaggingProtocol).FeedbackChannel
-	return deterministicTaggingResult, nil
+
+	execTime := pi.(*protocolsunlynx.DeterministicTaggingProtocol).ExecTime
+	return deterministicTaggingResult, execTime, time.Since(start) - execTime, nil
 }
 
 // CollectiveAggregationPhase performs a collective aggregation between the participating nodes
-func (s *Service) CollectiveAggregationPhase(targetSurvey SurveyID, roster *onet.Roster) (libunlynx.CipherText, error) {
+func (s *Service) CollectiveAggregationPhase(targetSurvey SurveyID, roster *onet.Roster) (libunlynx.CipherText, time.Duration, error) {
+	start := time.Now()
 	pi, err := s.StartProtocol(protocolsunlynx.CollectiveAggregationProtocolName, "", targetSurvey, roster)
 	if err != nil {
-		return libunlynx.CipherText{}, err
+		return libunlynx.CipherText{}, 0, err
 	}
 	aggregationResult := <-pi.(*protocolsunlynx.CollectiveAggregationProtocol).FeedbackChannel
 
@@ -851,28 +881,33 @@ func (s *Service) CollectiveAggregationPhase(targetSurvey SurveyID, roster *onet
 		finalResult = v.AggregatingAttributes[0]
 		break
 	}
-
-	return finalResult, nil
+	return finalResult, time.Since(start), nil
 }
 
 // ShufflingPhase performs the shuffling aggregated results from each of the nodes
-func (s *Service) ShufflingPhase(targetSurvey SurveyID, roster *onet.Roster) ([]libunlynx.CipherVector, error) {
+func (s *Service) ShufflingPhase(targetSurvey SurveyID, roster *onet.Roster) ([]libunlynx.CipherVector, time.Duration, time.Duration, error) {
+	start := time.Now()
 	pi, err := s.StartProtocol(protocolsunlynx.ShufflingProtocolName, "", targetSurvey, roster)
 	if err != nil {
-		return nil, err
+		return nil, 0, 0, err
 	}
 	shufflingResult := <-pi.(*protocolsunlynx.ShufflingProtocol).FeedbackChannel
-	return shufflingResult, nil
+
+	execTime := pi.(*protocolsunlynx.ShufflingProtocol).ExecTime
+	return shufflingResult, execTime, time.Since(start) - execTime, nil
 }
 
 // KeySwitchingPhase performs the switch to the querier key on the currently aggregated data.
-func (s *Service) KeySwitchingPhase(targetSurvey SurveyID, typeQ string, roster *onet.Roster) (libunlynx.CipherVector, error) {
+func (s *Service) KeySwitchingPhase(targetSurvey SurveyID, typeQ string, roster *onet.Roster) (libunlynx.CipherVector, time.Duration, time.Duration, error) {
+	start := time.Now()
 	pi, err := s.StartProtocol(protocolsunlynx.KeySwitchingProtocolName, typeQ, targetSurvey, roster)
 	if err != nil {
-		return nil, err
+		return nil, 0, 0, err
 	}
 	keySwitchedAggregatedResponses := <-pi.(*protocolsunlynx.KeySwitchingProtocol).FeedbackChannel
-	return keySwitchedAggregatedResponses, nil
+
+	execTime := pi.(*protocolsunlynx.KeySwitchingProtocol).ExecTime
+	return keySwitchedAggregatedResponses, execTime, time.Since(start) - execTime, nil
 }
 
 // Support functions

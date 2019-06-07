@@ -6,6 +6,7 @@ import (
 	"go.dedis.ch/kyber/v3"
 	"go.dedis.ch/onet/v3"
 	"go.dedis.ch/onet/v3/network"
+	"time"
 )
 
 // Name is the registered name for the medco service.
@@ -25,14 +26,39 @@ const ShuffleRequestName = "ShuffleRequestName"
 // AggRequestName the name of this type of query
 const AggRequestName = "AggRequestName"
 
+// TimeResults includes all variables that will store the durations (to collect the execution/communication time)
+type TimeResults struct {
+	MapTR map[string]time.Duration
+}
+
+// timer constant names
+const (
+	TaggingTimeExec          = "TaggingTimeExec"
+	TaggingTimeCommunication = "TaggingTimeCommunication"
+	DDTRequestTime           = "DDTRequestTime"
+
+	KSTimeExec          = "KSTimeExec"
+	KSTimeCommunication = "KSTimeCommunication"
+	KSRequestTime       = "KSRequestTime"
+
+	ShuffleTimeExec          = "ShuffleTimeExec"
+	ShuffleTimeCommunication = "ShuffleTimeCommunication"
+	ShuffleRequestTime       = "ShuffleRequestTime"
+
+	AggrTime        = "AggrTime"
+	AggrRequestTime = "AggrRequestTime"
+)
+
 // ResultDDT will contain final results of the DDT of the query terms.
 type ResultDDT struct {
 	Result []libunlynx.GroupingKey
+	TR     TimeResults
 }
 
 // Result will contain the final results for the other queries
 type Result struct {
 	Result libunlynx.CipherVector
+	TR     TimeResults
 }
 
 // SurveyID unique ID for each survey.
@@ -93,12 +119,14 @@ type SurveyTag struct {
 	SurveyID      SurveyID
 	Request       SurveyDDTRequest
 	SurveyChannel chan int // To wait for the survey to be created before the DDT protocol
+	TR            TimeResults
 }
 
 // SurveyKS is the struct that we persist in the service that contains all the data for the Key Switch request phase
 type SurveyKS struct {
 	SurveyID SurveyID
 	Request  SurveyKSRequest
+	TR       TimeResults
 }
 
 // SurveyShuffle is the struct that we persist in the service that contains all the data for the Shuffle (+KS) request phase
@@ -107,6 +135,7 @@ type SurveyShuffle struct {
 	Request             SurveyShuffleRequest
 	SurveyChannel       chan int // To wait for all the aggregate results to be received by the root node
 	FinalResultsChannel chan int
+	TR                  TimeResults
 }
 
 // SurveyAgg is the struct that we persist in the service that contains all the data for the Aggregation request phase
@@ -114,6 +143,7 @@ type SurveyAgg struct {
 	SurveyID      SurveyID
 	Request       SurveyAggRequest
 	SurveyChannel chan int // To wait for all the aggregate results to be received by the root node
+	TR            TimeResults
 }
 
 // SurveyTagGenerated is used to ensure that all servers get the survey before starting the DDT protocol

@@ -66,7 +66,7 @@ func TestServiceDDT(t *testing.T) {
 		go func(i int, client *servicesmedco.API) {
 			defer wg.Done()
 
-			_, res, err := client.SendSurveyDDTRequestTerms(el, servicesmedco.SurveyID("testDDTSurvey_"+client.ClientID), qt, proofs, true)
+			_, res, tr, err := client.SendSurveyDDTRequestTerms(el, servicesmedco.SurveyID("testDDTSurvey_"+client.ClientID), qt, proofs, true)
 			mutex.Lock()
 			results["testDDTSurvey_"+client.ClientID] = res
 			mutex.Unlock()
@@ -74,6 +74,7 @@ func TestServiceDDT(t *testing.T) {
 			if err != nil {
 				t.Fatal("Client", client.ClientID, " service did not start: ", err)
 			}
+			log.Lvl1("Time:", tr.MapTR)
 		}(i, client)
 	}
 	libunlynx.EndParallelize(wg)
@@ -113,7 +114,7 @@ func TestServiceKS(t *testing.T) {
 		go func(i int, client *servicesmedco.API) {
 			defer wg.Done()
 
-			_, res, err := client.SendSurveyKSRequest(el, servicesmedco.SurveyID("testKSRequest_"+client.ClientID), pubKeys[i], targetData, proofs)
+			_, res, tr, err := client.SendSurveyKSRequest(el, servicesmedco.SurveyID("testKSRequest_"+client.ClientID), pubKeys[i], targetData, proofs)
 			if err != nil {
 				t.Fatal("Client", client.ClientID, " service did not start: ", err)
 			}
@@ -125,6 +126,7 @@ func TestServiceKS(t *testing.T) {
 			mutex.Lock()
 			results[i] = decRes
 			mutex.Unlock()
+			log.Lvl1("Time:", tr.MapTR)
 		}(i, client)
 	}
 	libunlynx.EndParallelize(wg)
@@ -164,7 +166,7 @@ func TestServiceAgg(t *testing.T) {
 		go func(i int, client *servicesmedco.API) {
 			defer wg.Done()
 
-			_, res, err := client.SendSurveyAggRequest(el, servicesmedco.SurveyID("testAggRequest"), pubKeys[i], targetData, proofs)
+			_, res, tr, err := client.SendSurveyAggRequest(el, servicesmedco.SurveyID("testAggRequest"), pubKeys[i], targetData, proofs)
 			if err != nil {
 				t.Fatal("Client", client.ClientID, " service did not start: ", err)
 			}
@@ -172,6 +174,7 @@ func TestServiceAgg(t *testing.T) {
 			mutex.Lock()
 			results[i] = libunlynx.DecryptInt(secKeys[i], res)
 			mutex.Unlock()
+			log.Lvl1("Time:", tr.MapTR)
 		}(i, client)
 	}
 	libunlynx.EndParallelize(wg)
@@ -211,7 +214,7 @@ func TestServiceShuffle(t *testing.T) {
 		go func(i int, client *servicesmedco.API) {
 			defer wg.Done()
 
-			_, res, err := client.SendSurveyShuffleRequest(el, servicesmedco.SurveyID("testShuffleRequest"), pubKeys[i], targetData[i], proofs)
+			_, res, tr, err := client.SendSurveyShuffleRequest(el, servicesmedco.SurveyID("testShuffleRequest"), pubKeys[i], targetData[i], proofs)
 			if err != nil {
 				t.Fatal("Client", client.ClientID, " service did not start: ", err)
 			}
@@ -219,6 +222,7 @@ func TestServiceShuffle(t *testing.T) {
 			mutex.Lock()
 			results[i] = libunlynx.DecryptInt(secKeys[i], res)
 			mutex.Unlock()
+			log.Lvl1("Time:", tr.MapTR)
 		}(i, client)
 	}
 	libunlynx.EndParallelize(wg)
