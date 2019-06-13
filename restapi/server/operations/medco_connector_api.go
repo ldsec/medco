@@ -330,12 +330,12 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/picsure2/{queryId}/result"] = picsure2.NewQueryResult(o.context, o.Picsure2QueryResultHandler)
+	o.handlers["POST"]["/picsure2/query/{queryId}/result"] = picsure2.NewQueryResult(o.context, o.Picsure2QueryResultHandler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/picsure2/{queryId}/status"] = picsure2.NewQueryStatus(o.context, o.Picsure2QueryStatusHandler)
+	o.handlers["POST"]["/picsure2/query/{queryId}/status"] = picsure2.NewQueryStatus(o.context, o.Picsure2QueryStatusHandler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)

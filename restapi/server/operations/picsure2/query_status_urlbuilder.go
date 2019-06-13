@@ -40,7 +40,7 @@ func (o *QueryStatusURL) SetBasePath(bp string) {
 func (o *QueryStatusURL) Build() (*url.URL, error) {
 	var _result url.URL
 
-	var _path = "/picsure2/{queryId}/status"
+	var _path = "/picsure2/query/{queryId}/status"
 
 	queryID := o.QueryID
 	if queryID != "" {

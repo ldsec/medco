@@ -137,7 +137,7 @@ paths:
         default:
           $ref: "#/responses/error"
 
-  /picsure2/{queryId}/status:
+  /picsure2/query/{queryId}/status:
     post:
       tags:
         - "picsure2"
@@ -168,7 +168,7 @@ paths:
         default:
           $ref: "#/responses/error"
 
-  /picsure2/{queryId}/result:
+  /picsure2/query/{queryId}/result:
     post:
       tags:
         - "picsure2"

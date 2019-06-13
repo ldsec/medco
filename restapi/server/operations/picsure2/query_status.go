@@ -34,7 +34,7 @@ func NewQueryStatus(ctx *middleware.Context, handler QueryStatusHandler) *QueryS
 	return &QueryStatus{Context: ctx, Handler: handler}
 }
 
-/*QueryStatus swagger:route POST /picsure2/{queryId}/status picsure2 queryStatus
+/*QueryStatus swagger:route POST /picsure2/query/{queryId}/status picsure2 queryStatus
 
 Get status of query.
 

@@ -165,52 +165,7 @@ func init() {
         }
       }
     },
-    "/picsure2/search": {
-      "post": {
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "picsure2"
-        ],
-        "summary": "Search through the ontology.",
-        "operationId": "search",
-        "parameters": [
-          {
-            "description": "Search request.",
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "query": {
-                  "$ref": "#/definitions/searchQuery"
-                },
-                "resourceCredentials": {
-                  "$ref": "#/definitions/resourceCredentials"
-                },
-                "resourceUUID": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/responses/searchResult"
-          },
-          "default": {
-            "$ref": "#/responses/error"
-          }
-        }
-      }
-    },
-    "/picsure2/{queryId}/result": {
+    "/picsure2/query/{queryId}/result": {
       "post": {
         "consumes": [
           "application/json"
@@ -256,7 +211,7 @@ func init() {
         }
       }
     },
-    "/picsure2/{queryId}/status": {
+    "/picsure2/query/{queryId}/status": {
       "post": {
         "consumes": [
           "application/json"
@@ -295,6 +250,51 @@ func init() {
         "responses": {
           "200": {
             "$ref": "#/responses/queryStatus"
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        }
+      }
+    },
+    "/picsure2/search": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "picsure2"
+        ],
+        "summary": "Search through the ontology.",
+        "operationId": "search",
+        "parameters": [
+          {
+            "description": "Search request.",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "query": {
+                  "$ref": "#/definitions/searchQuery"
+                },
+                "resourceCredentials": {
+                  "$ref": "#/definitions/resourceCredentials"
+                },
+                "resourceUUID": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/searchResult"
           },
           "default": {
             "$ref": "#/responses/error"
@@ -880,74 +880,7 @@ func init() {
         }
       }
     },
-    "/picsure2/search": {
-      "post": {
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "picsure2"
-        ],
-        "summary": "Search through the ontology.",
-        "operationId": "search",
-        "parameters": [
-          {
-            "description": "Search request.",
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "query": {
-                  "$ref": "#/definitions/searchQuery"
-                },
-                "resourceCredentials": {
-                  "$ref": "#/definitions/resourceCredentials"
-                },
-                "resourceUUID": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Search results.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "results": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/searchResultElement"
-                  }
-                },
-                "searchQuery": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Error response",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/picsure2/{queryId}/result": {
+    "/picsure2/query/{queryId}/result": {
       "post": {
         "consumes": [
           "application/json"
@@ -1004,7 +937,7 @@ func init() {
         }
       }
     },
-    "/picsure2/{queryId}/status": {
+    "/picsure2/query/{queryId}/status": {
       "post": {
         "consumes": [
           "application/json"
@@ -1045,6 +978,73 @@ func init() {
             "description": "Query status.",
             "schema": {
               "$ref": "#/definitions/queryStatus"
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/picsure2/search": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "picsure2"
+        ],
+        "summary": "Search through the ontology.",
+        "operationId": "search",
+        "parameters": [
+          {
+            "description": "Search request.",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "query": {
+                  "$ref": "#/definitions/searchQuery"
+                },
+                "resourceCredentials": {
+                  "$ref": "#/definitions/resourceCredentials"
+                },
+                "resourceUUID": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search results.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/searchResultElement"
+                  }
+                },
+                "searchQuery": {
+                  "type": "string"
+                }
+              }
             }
           },
           "default": {

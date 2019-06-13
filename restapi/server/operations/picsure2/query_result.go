@@ -34,7 +34,7 @@ func NewQueryResult(ctx *middleware.Context, handler QueryResultHandler) *QueryR
 	return &QueryResult{Context: ctx, Handler: handler}
 }
 
-/*QueryResult swagger:route POST /picsure2/{queryId}/result picsure2 queryResult
+/*QueryResult swagger:route POST /picsure2/query/{queryId}/result picsure2 queryResult
 
 Get result of query.
 
