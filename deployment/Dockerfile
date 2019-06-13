@@ -2,10 +2,9 @@ FROM golang:1.12 as build
 
 COPY ./ /src
 
-# compile and install medco-connector
+# compile and install medco-connector-server
 WORKDIR /src
-RUN CGO_ENABLED=0 go build -v ./... && \
-    CGO_ENABLED=0 go install -v ./...
+RUN CGO_ENABLED=0 go install -v ./cmd/medco-connector-server/...
 
 # -------------------------------------------
 FROM golang:1.12-alpine as release
@@ -35,4 +34,4 @@ ENV I2B2_HIVE_URL=http://i2b2:8080/i2b2/services \
     OIDC_JWT_USER_ID_CLAIM=preferred_username
 
 EXPOSE 1999
-ENTRYPOINT ["docker-entrypoint.sh"]
+ENTRYPOINT ["docker-entrypoint.sh", "medco-connector-server"]
