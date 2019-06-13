@@ -84,5 +84,4 @@ func SetLogLevel(lvl string) {
 	LogLevel = int(intLvl)
 	logrus.SetLevel(logrus.Level(LogLevel + 1))
 	onetLog.SetDebugVisible(LogLevel)
-
 }
