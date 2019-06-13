@@ -60,7 +60,7 @@ type QueryOK struct {
 }
 
 func (o *QueryOK) Error() string {
-	return fmt.Sprintf("[POST /picsure2/query][%d] queryOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[POST /query][%d] queryOK  %+v", 200, o.Payload)
 }
 
 func (o *QueryOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -98,7 +98,7 @@ func (o *QueryDefault) Code() int {
 }
 
 func (o *QueryDefault) Error() string {
-	return fmt.Sprintf("[POST /picsure2/query][%d] query default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[POST /query][%d] query default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *QueryDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

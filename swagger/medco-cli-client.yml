@@ -1,0 +1,107 @@
+swagger: "2.0"
+info:
+  description: "This is the PIC-SURE 2 API exposed by MedCo, and used by the MedCo CLI client."
+  version: "0.2.0"
+  title: "MedCo CLI Client (PIC-SURE 2 API)"
+  contact:
+    email: "medco-dev@listes.epfl.ch"
+  license:
+    name: "EULA"
+    url: "https://raw.githubusercontent.com/lca1/medco-connector/master/LICENSE"
+basePath: "/pic-sure-api-2/PICSURE"
+tags:
+  - name: "picsure2"
+    description: "PIC-SURE 2 API"
+schemes:
+  - "http"
+externalDocs:
+  description: "MedCo Technical Documentation"
+  url: "https://medco.epfl.ch/documentation"
+security:
+  - MedCoToken: []
+
+securityDefinitions:
+  MedCoToken:
+    type: "oauth2"
+    flow: "application"
+    tokenUrl: "https://medco-demo.epfl.ch/auth"
+    description: "MedCo JWT token."
+
+paths:
+  /resource:
+    get:
+      tags:
+        - "picsure2"
+      summary: "Returns the list of PIC-SURE resources."
+      operationId: "getResources"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          $ref: "#/responses/resources"
+        default:
+          $ref: "medco-connector-server.yml#/responses/error"
+
+  /info:
+    $ref: "medco-connector-server.yml#/paths/~1picsure2~1info"
+
+  /search:
+    $ref: "medco-connector-server.yml#/paths/~1picsure2~1search"
+
+  /query:
+    $ref: "medco-connector-server.yml#/paths/~1picsure2~1query"
+
+  /query/sync:
+    $ref: "medco-connector-server.yml#/paths/~1picsure2~1query~1sync"
+
+  /query/{queryId}/status:
+    $ref: "medco-connector-server.yml#/paths/~1picsure2~1query~1{queryId}~1status"
+
+  /query/{queryId}/result:
+    $ref: "medco-connector-server.yml#/paths/~1picsure2~1query~1{queryId}~1result"
+
+responses:
+  resources:
+    description: "PIC-SURE 2 list of resources."
+    schema:
+      type: "array"
+      items:
+        type: "object"
+        properties:
+          uuid:
+            type: "string"
+          name:
+            type: "string"
+          description:
+            type: "string"
+          targetURL:
+            type: "string"
+          resourceRSPath:
+            type: "string"
+
+definitions:
+  resourceCredentials:
+    $ref: "medco-connector-server.yml#/definitions/resourceCredentials"
+
+  searchQuery:
+    $ref: "medco-connector-server.yml#/definitions/searchQuery"
+
+  searchResultElement:
+    $ref: "medco-connector-server.yml#/definitions/searchResultElement"
+
+  query:
+    $ref: "medco-connector-server.yml#/definitions/query"
+
+  queryType:
+    $ref: "medco-connector-server.yml#/definitions/queryType"
+
+  queryResultElement:
+    $ref: "medco-connector-server.yml#/definitions/queryResultElement"
+
+  queryStatus:
+    $ref: "medco-connector-server.yml#/definitions/queryStatus"
+
+  user:
+    $ref: "medco-connector-server.yml#/definitions/user"

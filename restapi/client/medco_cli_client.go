@@ -23,7 +23,7 @@ const (
 	DefaultHost string = "localhost"
 	// DefaultBasePath is the default BasePath
 	// found in Meta (info) section of spec file
-	DefaultBasePath string = "/medco-connector"
+	DefaultBasePath string = "/pic-sure-api-2/PICSURE"
 )
 
 // DefaultSchemes are the default schemes found in Meta (info) section of spec file

@@ -61,7 +61,7 @@ type SearchOK struct {
 }
 
 func (o *SearchOK) Error() string {
-	return fmt.Sprintf("[POST /picsure2/search][%d] searchOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[POST /search][%d] searchOK  %+v", 200, o.Payload)
 }
 
 func (o *SearchOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -99,7 +99,7 @@ func (o *SearchDefault) Code() int {
 }
 
 func (o *SearchDefault) Error() string {
-	return fmt.Sprintf("[POST /picsure2/search][%d] search default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[POST /search][%d] search default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *SearchDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

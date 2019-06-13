@@ -61,7 +61,7 @@ type GetInfoOK struct {
 }
 
 func (o *GetInfoOK) Error() string {
-	return fmt.Sprintf("[POST /picsure2/info][%d] getInfoOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[POST /info][%d] getInfoOK  %+v", 200, o.Payload)
 }
 
 func (o *GetInfoOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -99,7 +99,7 @@ func (o *GetInfoDefault) Code() int {
 }
 
 func (o *GetInfoDefault) Error() string {
-	return fmt.Sprintf("[POST /picsure2/info][%d] getInfo default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[POST /info][%d] getInfo default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *GetInfoDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

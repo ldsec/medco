@@ -36,7 +36,7 @@ func (a *Client) GetInfo(params *GetInfoParams, authInfo runtime.ClientAuthInfoW
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getInfo",
 		Method:             "POST",
-		PathPattern:        "/picsure2/info",
+		PathPattern:        "/info",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
@@ -54,6 +54,35 @@ func (a *Client) GetInfo(params *GetInfoParams, authInfo runtime.ClientAuthInfoW
 }
 
 /*
+GetResources returns the list of p i c s u r e resources
+*/
+func (a *Client) GetResources(params *GetResourcesParams, authInfo runtime.ClientAuthInfoWriter) (*GetResourcesOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetResourcesParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getResources",
+		Method:             "GET",
+		PathPattern:        "/resource",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &GetResourcesReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetResourcesOK), nil
+
+}
+
+/*
 Query queries med co node
 */
 func (a *Client) Query(params *QueryParams, authInfo runtime.ClientAuthInfoWriter) (*QueryOK, error) {
@@ -65,7 +94,7 @@ func (a *Client) Query(params *QueryParams, authInfo runtime.ClientAuthInfoWrite
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "query",
 		Method:             "POST",
-		PathPattern:        "/picsure2/query",
+		PathPattern:        "/query",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
@@ -94,7 +123,7 @@ func (a *Client) QueryResult(params *QueryResultParams, authInfo runtime.ClientA
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "queryResult",
 		Method:             "POST",
-		PathPattern:        "/picsure2/{queryId}/result",
+		PathPattern:        "/query/{queryId}/result",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
@@ -123,7 +152,7 @@ func (a *Client) QueryStatus(params *QueryStatusParams, authInfo runtime.ClientA
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "queryStatus",
 		Method:             "POST",
-		PathPattern:        "/picsure2/{queryId}/status",
+		PathPattern:        "/query/{queryId}/status",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
@@ -152,7 +181,7 @@ func (a *Client) QuerySync(params *QuerySyncParams, authInfo runtime.ClientAuthI
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "querySync",
 		Method:             "POST",
-		PathPattern:        "/picsure2/query/sync",
+		PathPattern:        "/query/sync",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
@@ -181,7 +210,7 @@ func (a *Client) Search(params *SearchParams, authInfo runtime.ClientAuthInfoWri
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "search",
 		Method:             "POST",
-		PathPattern:        "/picsure2/search",
+		PathPattern:        "/search",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},

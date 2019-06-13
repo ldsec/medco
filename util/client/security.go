@@ -1,0 +1,52 @@
+package utilclient
+
+import (
+	"encoding/json"
+	"errors"
+	"github.com/lca1/medco-connector/util"
+	"github.com/sirupsen/logrus"
+	"io/ioutil"
+	"net/http"
+	"net/url"
+)
+
+// oidcTokenResp contains the response to an OIDC token request
+type oidcTokenResp struct {
+	AccessToken string `json:"access_token"`
+	TokenType string `json:"token_type"`
+	Scope string `json:"scope"`
+}
+
+// RetrieveAccessToken requests JWT from OIDC provider
+func RetrieveAccessToken(username string, password string) (token string, err error) {
+
+	httpResp, err := http.PostForm(OidcReqTokenURL, url.Values{
+		"grant_type": {"password"},
+		"client_id": {util.OidcClientID},
+		"username": {username},
+		"password": {password},
+	})
+
+	if err != nil {
+		logrus.Error("OIDC request token error: ", err)
+		return
+	}
+
+	if httpResp.StatusCode != 200 {
+		err = errors.New("OIDC request token error (code " + string(httpResp.StatusCode) + ")")
+		logrus.Error(err)
+		return
+	}
+
+	bodyBytes, err := ioutil.ReadAll(httpResp.Body)
+	parsedResp := &oidcTokenResp{}
+	err = json.Unmarshal(bodyBytes, parsedResp)
+	if err != nil {
+		logrus.Error("OIDC request token error unmarshalling: ", err)
+		return
+	}
+
+	logrus.Info("OIDC request token successfully authenticated")
+	logrus.Debug("OIDC request token: " + parsedResp.AccessToken)
+	return parsedResp.AccessToken, nil
+}
