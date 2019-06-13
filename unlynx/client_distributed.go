@@ -30,7 +30,7 @@ func DDTagValues(queryName string, values []string) (taggedValues map[string]str
 	ddtResultsChan := make(chan []libunlynx.GroupingKey)
 	ddtErrChan := make(chan error)
 	go func() {
-		_, ddtResults, ddtErr := unlynxClient.SendSurveyDDTRequestTerms(
+		_, ddtResults, _, ddtErr := unlynxClient.SendSurveyDDTRequestTerms(
 			cothorityRoster,
 			servicesmedco.SurveyID(queryName + "_DDT"),
 			desValues,
@@ -89,7 +89,7 @@ func KeySwitchValues(queryName string, values []string, targetPubKey string) (ke
 	ksResultsChan := make(chan libunlynx.CipherVector)
 	ksErrChan := make(chan error)
 	go func() {
-		_, ksResult, ksErr := unlynxClient.SendSurveyKSRequest(
+		_, ksResult, _, ksErr := unlynxClient.SendSurveyKSRequest(
 			cothorityRoster,
 			servicesmedco.SurveyID(queryName + "_KS"),
 			desTargetKey,
@@ -141,7 +141,7 @@ func ShuffleAndKeySwitchValue(queryName string, value string, targetPubKey strin
 	shuffleKsResultsChan := make(chan libunlynx.CipherText)
 	shuffleKsErrChan := make(chan error)
 	go func() {
-		_, shuffleKsResult, shuffleKsErr := unlynxClient.SendSurveyShuffleRequest(
+		_, shuffleKsResult, _, shuffleKsErr := unlynxClient.SendSurveyShuffleRequest(
 			cothorityRoster,
 			servicesmedco.SurveyID(queryName + "_SHUFFLE"),
 			desTargetKey,
@@ -193,7 +193,7 @@ func AggregateAndKeySwitchValue(queryName string, value string, targetPubKey str
 	aggKsResultsChan := make(chan libunlynx.CipherText)
 	aggKsErrChan := make(chan error)
 	go func() {
-		_, aggKsResult, aggKsErr := unlynxClient.SendSurveyAggRequest(
+		_, aggKsResult, _, aggKsErr := unlynxClient.SendSurveyAggRequest(
 			cothorityRoster,
 			servicesmedco.SurveyID(queryName + "_AGG"),
 			desTargetKey,
