@@ -1,6 +1,7 @@
 package utilclient
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"github.com/lca1/medco-connector/util"
@@ -18,9 +19,17 @@ type oidcTokenResp struct {
 }
 
 // RetrieveAccessToken requests JWT from OIDC provider
-func RetrieveAccessToken(username string, password string) (token string, err error) {
+func RetrieveAccessToken(username string, password string, disableTLSCheck bool) (token string, err error) {
 
-	httpResp, err := http.PostForm(OidcReqTokenURL, url.Values{
+	httpClient := http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: disableTLSCheck,
+			},
+		},
+	}
+
+	httpResp, err := httpClient.PostForm(OidcReqTokenURL, url.Values{
 		"grant_type": {"password"},
 		"client_id": {util.OidcClientID},
 		"username": {username},

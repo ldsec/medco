@@ -32,6 +32,10 @@ func main() {
 			Name:  "token, t",
 			Usage: "OIDC token",
 		},
+		cli.BoolFlag{
+			Name:  "disableTLSCheck",
+			Usage: "Disable check of TLS certificates",
+		},
 	}
 
 	// --- search command flags
@@ -78,6 +82,7 @@ func main() {
 					c.Args().First(),
 					strings.Join(c.Args().Tail(), " "),
 					c.String("resultFile"),
+					c.GlobalBool("disableTLSCheck"),
 				)
 			},
 		},

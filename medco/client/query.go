@@ -1,6 +1,7 @@
 package medcoclient
 
 import (
+	"crypto/tls"
 	"errors"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/lca1/medco-connector/restapi/client"
@@ -9,6 +10,7 @@ import (
 	"github.com/lca1/medco-connector/unlynx"
 	utilclient "github.com/lca1/medco-connector/util/client"
 	"github.com/sirupsen/logrus"
+	"net/http"
 	"time"
 )
 
@@ -40,8 +42,11 @@ type Query struct {
 }
 
 // NewQuery creates a new MedCo client query
-func NewQuery(authToken string, queryType models.QueryType, encPanelsItemKeys [][]string, panelsIsNot []bool) (q *Query, err error) {
+func NewQuery(authToken string, queryType models.QueryType, encPanelsItemKeys [][]string, panelsIsNot []bool, disableTLSCheck bool) (q *Query, err error) {
+
 	transport := httptransport.New(utilclient.Picsure2APIHost, utilclient.Picsure2APIBasePath, []string{utilclient.Picsure2APIScheme})
+	transport.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: disableTLSCheck}
+
 	q = &Query{
 
 		httpMedcoClient: client.New(transport, nil),

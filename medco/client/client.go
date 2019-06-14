@@ -17,14 +17,15 @@ import (
 )
 
 // ExecuteClientQuery execute and display the results of the MedCo client query
-func ExecuteClientQuery(token, username, password, queryType, queryString, resultOutputFilePath string) (err error) {
+func ExecuteClientQuery(token, username, password, queryType, queryString, resultOutputFilePath string, disableTLSCheck bool) (err error) {
 
 	// get token
 	var accessToken string
 	if len(token) > 0 {
 		accessToken = token
 	} else {
-		accessToken, err = utilclient.RetrieveAccessToken(username, password)
+		logrus.Debug("No token provided, requesting token for user ", username, ", disable TLS check: ", disableTLSCheck)
+		accessToken, err = utilclient.RetrieveAccessToken(username, password, disableTLSCheck)
 		if err != nil {
 			return
 		}
@@ -56,7 +57,7 @@ func ExecuteClientQuery(token, username, password, queryType, queryString, resul
 	}
 
 	// execute query
-	clientQuery, err := NewQuery(accessToken, queryTypeParsed, encPanelsItemKeys, panelsIsNot)
+	clientQuery, err := NewQuery(accessToken, queryTypeParsed, encPanelsItemKeys, panelsIsNot, disableTLSCheck)
 	if err != nil {
 		return
 	}
