@@ -31,7 +31,8 @@ ENV I2B2_HIVE_URL=http://i2b2:8080/i2b2/services \
     JWKS_URL=http://keycloak:8080/auth/realms/master/protocol/openid-connect/certs \
     OIDC_JWT_ISSUER=http://keycloak:8080/auth/realms/master \
     OIDC_CLIENT_ID=medco \
-    OIDC_JWT_USER_ID_CLAIM=preferred_username
+    OIDC_JWT_USER_ID_CLAIM=preferred_username \
+    MEDCO_OBFUSCATION_MIN_VARIANCE=5
 
 EXPOSE 1999
 ENTRYPOINT ["docker-entrypoint.sh", "medco-connector-server"]

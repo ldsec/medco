@@ -1,7 +1,9 @@
 package unlynx
 
 import (
+	"github.com/lca1/medco-connector/util"
 	libunlynx "github.com/lca1/unlynx/lib"
+	stats "github.com/r0fls/gostats"
 	"github.com/sirupsen/logrus"
 )
 
@@ -49,6 +51,32 @@ func LocallyMultiplyScalar(encValue string, scalar int64) (res string, err error
 	if err != nil {
 		logrus.Error("unlynx error serializing: ", err)
 	}
+	return
+}
+
+// LocallyObfuscateValue adds random noise homomorphically to an encrypted value
+func LocallyObfuscateValue(encValue string, obfuscationVariance int) (res string, err error) {
+
+	if obfuscationVariance < util.MedCoObfuscationMinVariance {
+		obfuscationVariance = util.MedCoObfuscationMinVariance
+		logrus.Info("Obfuscation variance set to the minimum of ", obfuscationVariance)
+	}
+
+	distribution := stats.Laplace(0, float64(obfuscationVariance))
+	noise := distribution.Random()
+
+	// encrypt the noise
+	encNoise, err := EncryptWithCothorityKey(int64(noise))
+	if err != nil {
+		return
+	}
+
+	// add together value and noise
+	res, err = LocallyAggregateValues([]string{encValue, encNoise})
+	if err != nil {
+		return
+	}
+
 	return
 }
 

@@ -42,6 +42,8 @@ var OidcClientID string
 // OidcJwtUserIDClaim is the JWT claim containing the user ID
 var OidcJwtUserIDClaim string
 
+// MedCoObfuscationMinVariance is the minimum variance passed to the random distribution for the obfuscation
+var MedCoObfuscationMinVariance int
 
 func init() {
 	SetLogLevel(os.Getenv("LOG_LEVEL"))
@@ -50,8 +52,9 @@ func init() {
 	UnlynxTimeoutSeconds = 3 * 60 // 3 minutes
 
 	idx, err := strconv.ParseInt(os.Getenv("UNLYNX_GROUP_FILE_IDX"), 10, 64)
-	if err != nil || UnlynxGroupFileIdx < 0 {
+	if err != nil || idx < 0 {
 		logrus.Warn("invalid UnlynxGroupFileIdx")
+		idx = 0
 	}
 	UnlynxGroupFileIdx = int(idx)
 
@@ -67,6 +70,14 @@ func init() {
 	OidcJwtIssuer = os.Getenv("OIDC_JWT_ISSUER")
 	OidcClientID = os.Getenv("OIDC_CLIENT_ID")
 	OidcJwtUserIDClaim = os.Getenv("OIDC_JWT_USER_ID_CLAIM")
+
+	obf, err := strconv.ParseInt(os.Getenv("MEDCO_OBFUSCATION_MIN_VARIANCE"), 10, 64)
+	if err != nil || obf < 0 {
+		logrus.Warn("invalid MedCoObfuscationMinVariance, defaulted")
+		obf = 5
+	}
+	MedCoObfuscationMinVariance = int(obf)
+
 }
 
 // SetLogLevel initializes the log levels of all loggers

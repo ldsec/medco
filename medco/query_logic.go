@@ -116,6 +116,20 @@ func (q *I2b2MedCoQuery) Execute(queryType I2b2MedCoQueryType) (err error) {
 	if err != nil {
 		return
 	}
+	q.addTimers("medco-connector-unlynx-key-switch-count", timer, ksCountTimers)
+
+	// optionally obfuscate the count
+	if queryType.Obfuscated {
+		logrus.Info(q.name, ": (local) obfuscation requested")
+		timer = time.Now()
+		encCount, err = unlynx.LocallyObfuscateValue(encCount, 4) // todo: fixed distribution to make dynamic
+		if err != nil {
+			return
+		}
+		q.addTimers("medco-connector-local-obfuscation", timer, nil)
+	}
+
+	logrus.Info(q.name, ": processed count")
 	q.queryResult.encCount = encCount
 
 	// optionally prepare the patient list
