@@ -82,9 +82,10 @@ func (clientQuery *Query) Execute() (nodesResult map [string]*QueryResult, err e
 
 	// execute requests on all nodes
 	for idx := range clientQuery.picsureResourceUUIDs {
+		idxLocal := idx
 		go func() {
 
-			queryResult, err := clientQuery.submitToNode(idx)
+			queryResult, err := clientQuery.submitToNode(idxLocal)
 			if err != nil {
 				queryErrChan <- err
 			} else {
@@ -163,6 +164,7 @@ func (clientQuery *Query) loadResourceUUIDs() (err error) {
 
 // submitToNode sends a query to a node of the network, from the list of PIC-SURE resources
 func (clientQuery *Query) submitToNode(picsureResourceUUIDIdx int) (result *models.QueryResultElement, err error) {
+	logrus.Debug("Submitting query to resource ", clientQuery.picsureResourceNames[picsureResourceUUIDIdx])
 
 	queryParams := picsure2.NewQuerySyncParamsWithTimeout(time.Duration(utilclient.QueryTimeoutSeconds) * time.Second)
 	queryParams.Body = picsure2.QuerySyncBody{
