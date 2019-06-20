@@ -396,6 +396,16 @@ definitions:
         type: "array"
         items:
           type: "string"
+      timers:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            name:
+              type: "string"
+            milliseconds:
+              type: "integer"
+              format: "int64"
 
   queryStatus:
     type: "object"

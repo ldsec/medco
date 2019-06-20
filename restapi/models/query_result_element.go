@@ -6,6 +6,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -27,6 +29,9 @@ type QueryResultElement struct {
 
 	// query type
 	QueryType QueryType `json:"queryType,omitempty"`
+
+	// timers
+	Timers []*QueryResultElementTimersItems0 `json:"timers"`
 }
 
 // Validate validates this query result element
@@ -34,6 +39,10 @@ func (m *QueryResultElement) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateQueryType(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateTimers(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -59,6 +68,31 @@ func (m *QueryResultElement) validateQueryType(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *QueryResultElement) validateTimers(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Timers) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Timers); i++ {
+		if swag.IsZero(m.Timers[i]) { // not required
+			continue
+		}
+
+		if m.Timers[i] != nil {
+			if err := m.Timers[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("timers" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
 // MarshalBinary interface implementation
 func (m *QueryResultElement) MarshalBinary() ([]byte, error) {
 	if m == nil {
@@ -70,6 +104,40 @@ func (m *QueryResultElement) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (m *QueryResultElement) UnmarshalBinary(b []byte) error {
 	var res QueryResultElement
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
+// QueryResultElementTimersItems0 query result element timers items0
+// swagger:model QueryResultElementTimersItems0
+type QueryResultElementTimersItems0 struct {
+
+	// milliseconds
+	Milliseconds int64 `json:"milliseconds,omitempty"`
+
+	// name
+	Name string `json:"name,omitempty"`
+}
+
+// Validate validates this query result element timers items0
+func (m *QueryResultElementTimersItems0) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *QueryResultElementTimersItems0) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *QueryResultElementTimersItems0) UnmarshalBinary(b []byte) error {
+	var res QueryResultElementTimersItems0
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

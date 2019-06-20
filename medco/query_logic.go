@@ -7,11 +7,10 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"strconv"
+	"time"
 )
 
-// todo: timers
 // todo: log query (with associated status)
-// todo: query type obfuscated (DP)
 // todo: put user + query type + unique ID in query name
 
 // I2b2MedCoQuery represents an i2b2-MedCo query to be executed
@@ -21,6 +20,7 @@ type I2b2MedCoQuery struct {
 	queryResult struct {
 		encCount string
 		encPatientList []string
+		timers map[string]time.Duration
 	}
 }
 
@@ -30,13 +30,29 @@ func NewI2b2MedCoQuery(queryName string, query *models.QueryI2b2Medco) (new I2b2
 		name: queryName,
 		query: query,
 	}
+	new.queryResult.timers = make(map[string]time.Duration)
 	return new, new.isValid()
+}
+
+// addTimers adds timers to the query results
+func (q *I2b2MedCoQuery) addTimers(timerName string, since time.Time, additionalTimers map[string]time.Duration) {
+	if timerName != "" {
+		q.queryResult.timers[timerName] = time.Since(since)
+	}
+
+	if additionalTimers != nil {
+		for k, v := range additionalTimers {
+			q.queryResult.timers[k] = v
+		}
+	}
 }
 
 // Execute implements the I2b2 MedCo query logic
 func (q *I2b2MedCoQuery) Execute(queryType I2b2MedCoQueryType) (err error) {
+	overallTimer := time.Now()
+	var timer time.Time
+
 	// todo: breakdown in i2b2 / count / patient list
-	// todo: implement obfuscation
 
 	err = q.isValid()
 	if err != nil {
@@ -44,13 +60,16 @@ func (q *I2b2MedCoQuery) Execute(queryType I2b2MedCoQueryType) (err error) {
 	}
 
 	// tag query terms
-	taggedQueryTerms, err := unlynx.DDTagValues(q.name, q.getEncQueryTerms())
+	timer = time.Now()
+	taggedQueryTerms, ddtTimers, err := unlynx.DDTagValues(q.name, q.getEncQueryTerms())
 	if err != nil {
 		return
 	}
+	q.addTimers("medco-connector-DDT", timer, ddtTimers)
 	logrus.Info(q.name, ": tagged ", len(taggedQueryTerms), " elements with unlynx")
 
 	// i2b2 PSM query with tagged items
+	timer = time.Now()
 	panelsItemKeys, panelsIsNot, err := q.getI2b2PsmQueryTerms(taggedQueryTerms)
 	if err != nil {
 		return
@@ -60,59 +79,71 @@ func (q *I2b2MedCoQuery) Execute(queryType I2b2MedCoQueryType) (err error) {
 	if err != nil {
 		return
 	}
+	q.addTimers("medco-connector-i2b2-PSM", timer, nil)
 	logrus.Info(q.name, ": got ", patientCount, " in patient set ", patientSetID, " with i2b2")
 
 	// i2b2 PDO query to get the dummy flags
+	timer = time.Now()
 	patientIDs, patientDummyFlags, err := i2b2.GetPatientSet(patientSetID)
 	if err != nil {
 		return
 	}
+	q.addTimers("medco-connector-i2b2-PDO", timer, nil)
 	logrus.Info(q.name, ": got ", len(patientIDs), " patient IDs and ", len(patientDummyFlags), " dummy flags with i2b2")
 
 	// aggregate patient dummy flags
+	timer = time.Now()
 	aggPatientFlags, err := unlynx.LocallyAggregateValues(patientDummyFlags)
 	if err != nil {
 		return
 	}
+	q.addTimers("medco-connector-local-agg", timer, nil)
 
 	// compute and key switch count (returns optionally global aggregate or shuffled results)
+	timer = time.Now()
 	var encCount string
+	var ksCountTimers map[string]time.Duration
 	if queryType.CountType == Global {
 		logrus.Info(q.name, ": global aggregate requested")
-		encCount, err = unlynx.AggregateAndKeySwitchValue(q.name, aggPatientFlags, q.query.UserPublicKey)
+		encCount, ksCountTimers, err = unlynx.AggregateAndKeySwitchValue(q.name, aggPatientFlags, q.query.UserPublicKey)
 	} else if queryType.Shuffled {
 		logrus.Info(q.name, ": count per site requested, shuffle enabled")
-		encCount, err = unlynx.ShuffleAndKeySwitchValue(q.name, aggPatientFlags, q.query.UserPublicKey)
+		encCount, ksCountTimers, err = unlynx.ShuffleAndKeySwitchValue(q.name, aggPatientFlags, q.query.UserPublicKey)
 	} else {
 		logrus.Info(q.name, ": count per site requested, shuffle disabled")
-		encCount, err = unlynx.KeySwitchValue(q.name, aggPatientFlags, q.query.UserPublicKey)
+		encCount, ksCountTimers, err = unlynx.KeySwitchValue(q.name, aggPatientFlags, q.query.UserPublicKey)
 	}
 	if err != nil {
 		return
 	}
 	q.queryResult.encCount = encCount
-	logrus.Info(q.name, ": key switched count")
 
 	// optionally prepare the patient list
 	if queryType.PatientList {
 		logrus.Info(q.name, ": patient list requested")
 
 		// mask patient IDs
+		timer = time.Now()
 		maskedPatientIDs, err := q.maskPatientIDs(patientIDs, patientDummyFlags)
 		if err != nil {
 			return err
 		}
+
 		logrus.Info(q.name, ": masked ", len(maskedPatientIDs), " patient IDs")
+		q.addTimers("medco-connector-local-patient-list-masking", timer, nil)
 
 		// key switch the masked patient IDs
-		ksMaskedPatientIDs, err := unlynx.KeySwitchValues(q.name, maskedPatientIDs, q.query.UserPublicKey)
+		timer = time.Now()
+		ksMaskedPatientIDs, ksPatientListTimers, err := unlynx.KeySwitchValues(q.name, maskedPatientIDs, q.query.UserPublicKey)
 		if err != nil {
 			return err
 		}
+		q.addTimers("medco-connector-unlynx-key-switch-patient-list", timer, ksPatientListTimers)
 		q.queryResult.encPatientList = ksMaskedPatientIDs
 		logrus.Info(q.name, ": key switched patient IDs")
 	}
 
+	q.addTimers("medco-connector-overall", overallTimer, nil)
 	return
 }
 

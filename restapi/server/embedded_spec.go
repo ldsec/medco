@@ -398,6 +398,21 @@ func init() {
         },
         "queryType": {
           "$ref": "#/definitions/queryType"
+        },
+        "timers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "milliseconds": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          }
         }
       }
     },
@@ -1157,6 +1172,21 @@ func init() {
         },
         "queryType": {
           "$ref": "#/definitions/queryType"
+        },
+        "timers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "milliseconds": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          }
         }
       }
     },

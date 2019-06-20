@@ -6,6 +6,7 @@ import(
 	"github.com/lca1/medco-connector/restapi/models"
 	"github.com/lca1/medco-connector/restapi/server/operations/picsure2"
 	"github.com/lca1/medco-connector/util"
+	"time"
 )
 
 // GetInfoHandlerFunc handles /info API endpoint
@@ -98,10 +99,20 @@ func QuerySyncHandlerFunc(params picsure2.QuerySyncParams, principal *models.Use
 		})
 	}
 
+	// parse timers
+	timers := make([]*models.QueryResultElementTimersItems0, 0)
+	for timerName, timerDuration := range query.queryResult.timers {
+		timers = append(timers, &models.QueryResultElementTimersItems0{
+			Name: timerName,
+			Milliseconds: int64(timerDuration / time.Millisecond),
+		})
+	}
+
 	return picsure2.NewQuerySyncOK().WithPayload(&models.QueryResultElement{
 		QueryType: query.query.QueryType,
 		EncryptedCount: query.queryResult.encCount,
 		EncryptionKey: query.query.UserPublicKey,
 		EncryptedPatientList: query.queryResult.encPatientList,
+		Timers: timers,
 	})
 }

@@ -4,18 +4,21 @@ import (
 	"github.com/lca1/medco-connector/restapi/models"
 	"github.com/lca1/medco-connector/unlynx"
 	"github.com/sirupsen/logrus"
+	"time"
 )
 
 // QueryResult contains the decrypted results of a node
 type QueryResult struct {
 	Count int64
 	PatientList []int64
-	Times map[string]string
+	Times map[string]time.Duration
 }
 
 // newQueryResult parses a query result from a node and decrypts its fields
 func newQueryResult(nodeResult *models.QueryResultElement, privateKey string) (parsedResult *QueryResult, err error) {
-	parsedResult = &QueryResult{}
+	parsedResult = &QueryResult{
+		Times: make( map[string]time.Duration),
+	}
 
 	// decrypt count
 	parsedResult.Count, err = unlynx.Decrypt(nodeResult.EncryptedCount, privateKey)
@@ -38,7 +41,9 @@ func newQueryResult(nodeResult *models.QueryResultElement, privateKey string) (p
 	}
 
 	// parse times
-	// todo: nodeResult.
+	for _, timer := range nodeResult.Timers {
+		parsedResult.Times[timer.Name] = time.Duration(timer.Milliseconds) * time.Millisecond
+	}
 
 	logrus.Info("Node result: count=", parsedResult.Count, ", # patient IDs decrypted=",
 		len(nodeResult.EncryptedPatientList), ", # non dummy patients=", len(parsedResult.PatientList))

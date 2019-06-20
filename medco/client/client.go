@@ -14,6 +14,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // ExecuteClientQuery execute and display the results of the MedCo client query
@@ -41,6 +42,9 @@ func ExecuteClientQuery(token, username, password, queryType, queryString, resul
 
 	// parse query string
 	panelsItemKeys, panelsIsNot, err := parseQueryString(queryString)
+	if err != nil {
+		return
+	}
 
 	// encrypt the item keys
 	encPanelsItemKeys := make([][]string, 0)
@@ -112,7 +116,8 @@ func printResultsCSV(nodesResult map[string]*QueryResult, output io.Writer) (err
 			timerName := csvHeaders[timerNameIdx]
 			timerValue := nodesResult[nodeName].Times[timerName]
 
-			csvNodesResults[csvNodeResultsIdx] = append(csvNodesResults[csvNodeResultsIdx], timerValue)
+			csvNodesResults[csvNodeResultsIdx] = append(csvNodesResults[csvNodeResultsIdx],
+				strconv.FormatInt(int64(timerValue / time.Millisecond), 10))
 		}
 	}
 
