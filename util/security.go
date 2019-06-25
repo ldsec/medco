@@ -62,18 +62,78 @@ func AuthorizeUser(credentials models.ResourceCredentials, user *models.User) (e
 	}
 
 	// extract user authorizations
-	// todo: implement the extraction
-	user.Authorizations = &models.UserAuthorizations{
-		QueryType: []models.QueryType{
-			models.QueryTypePatientList,
-			models.QueryTypeCountPerSite,
-			models.QueryTypeCountPerSiteObfuscated,
-			models.QueryTypeCountPerSiteShuffled,
-			models.QueryTypeCountPerSiteShuffledObfuscated,
-			models.QueryTypeCountGlobal,
-			models.QueryTypeCountGlobalObfuscated,
-		},
+	authorizedQueryTypes, err := extractAuthorizationsFromToken(&token)
+	if err != nil {
+		return
 	}
+	logrus.Info("User ", user.ID, " has authorizations for ", len(authorizedQueryTypes), " query types")
+
+	user.Authorizations = &models.UserAuthorizations{
+		QueryType: authorizedQueryTypes,
+	}
+	return
+}
+
+// extractAuthorizationsFromToken parsed the token to extract the user's authorizations
+func extractAuthorizationsFromToken(token *jwt.Token) (queryTypes []models.QueryType, err error) {
+
+	// retrieve roles, within the keycloak pre-determined structure (this is ugly)
+	var extractedRoles []string
+	if tokenResourceAccess, ok := token.Get("resource_access"); ok {
+		logrus.Trace("1 OK")
+		if tokenResourceAccessTyped, ok := tokenResourceAccess.(map[string]interface{}); ok {
+			logrus.Trace("2 OK")
+			if clientId, ok := tokenResourceAccessTyped[OidcClientID]; ok {
+				logrus.Trace("3 OK")
+				if clientIdTyped, ok := clientId.(map[string]interface{}); ok {
+					logrus.Trace("4 OK")
+					if roles, ok := clientIdTyped["roles"]; ok {
+						logrus.Trace("5 OK")
+						if extractedRolesUntyped, ok := roles.([]interface{}); ok {
+							logrus.Trace("6 OK")
+							for _, extractedRoleUntyped := range extractedRolesUntyped {
+								if extractedRole, ok := extractedRoleUntyped.(string); ok {
+									extractedRoles = append(extractedRoles, extractedRole)
+								} else {
+									logrus.Warn("could not parse authorization", extractedRole)
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if len(extractedRoles) == 0 {
+		err = errors.New("error retrieving roles from token, or user has no authorizations")
+		logrus.Error(err)
+		return
+	}
+
+	// match roles to query types
+	for _, extractedRole := range extractedRoles {
+		switch string(extractedRole) {
+		case string(models.QueryTypePatientList):
+			queryTypes = append(queryTypes, models.QueryTypePatientList)
+		case string(models.QueryTypeCountPerSite):
+			queryTypes = append(queryTypes, models.QueryTypeCountPerSite)
+		case string(models.QueryTypeCountPerSiteObfuscated):
+			queryTypes = append(queryTypes, models.QueryTypeCountPerSiteObfuscated)
+		case string(models.QueryTypeCountPerSiteShuffled):
+			queryTypes = append(queryTypes, models.QueryTypeCountPerSiteShuffled)
+		case string(models.QueryTypeCountPerSiteShuffledObfuscated):
+			queryTypes = append(queryTypes, models.QueryTypeCountPerSiteShuffledObfuscated)
+		case string(models.QueryTypeCountGlobal):
+			queryTypes = append(queryTypes, models.QueryTypeCountGlobal)
+		case string(models.QueryTypeCountGlobalObfuscated):
+			queryTypes = append(queryTypes, models.QueryTypeCountGlobalObfuscated)
+
+		default:
+			logrus.Debug("ignored role ", extractedRole)
+		}
+	}
+
 	return
 }
 
