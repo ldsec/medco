@@ -55,35 +55,45 @@ func LocallyMultiplyScalar(encValue string, scalar int64) (res string, err error
 }
 
 // LocallyObfuscateValue adds random noise homomorphically to an encrypted value
-func LocallyObfuscateValue(encValue string, obfuscationVariance int) (res string, err error) {
+func LocallyObfuscateValue(encValue string, obfuscationParam int, pubKey string) (res string, err error) {
 
-	if obfuscationVariance < util.MedCoObfuscationMinVariance {
-		obfuscationVariance = util.MedCoObfuscationMinVariance
-		logrus.Info("Obfuscation variance set to the minimum of ", obfuscationVariance)
+	if obfuscationParam < util.MedCoObfuscationMin {
+		obfuscationParam = util.MedCoObfuscationMin
+		logrus.Info("Obfuscation variance set to the minimum of ", obfuscationParam)
 	}
 
-	distribution := stats.Laplace(0, float64(obfuscationVariance))
+	distribution := stats.Laplace(0, float64(obfuscationParam))
 	noise := distribution.Random()
 
 	// encrypt the noise
-	encNoise, err := EncryptWithCothorityKey(int64(noise))
+	encNoise, err := Encrypt(int64(noise), pubKey)
 	if err != nil {
 		return
 	}
 
 	// add together value and noise
-	res, err = LocallyAggregateValues([]string{encValue, encNoise})
-	if err != nil {
-		return
-	}
-
-	return
+	return LocallyAggregateValues([]string{encValue, encNoise})
 }
 
 // EncryptWithCothorityKey encrypts an integer with the public key of the cothority
 func EncryptWithCothorityKey(value int64) (encrypted string, err error) {
 	_, cothorityRoster := newUnlynxClient()
 	encrypted, err = libunlynx.EncryptInt(cothorityRoster.Aggregate, value).Serialize()
+	if err != nil {
+		logrus.Error("unlynx failed serializing encrypted value: ", err)
+	}
+	return
+}
+
+// Encrypt encrypts an integer with a public key
+func Encrypt(value int64, pubKey string) (encrypted string, err error) {
+	pubKeyDes, err := libunlynx.DeserializePoint(pubKey)
+	if err != nil {
+		logrus.Error("unlynx failed deserializing public key: ", err)
+		return
+	}
+
+	encrypted, err = libunlynx.EncryptInt(pubKeyDes, value).Serialize()
 	if err != nil {
 		logrus.Error("unlynx failed serializing encrypted value: ", err)
 	}

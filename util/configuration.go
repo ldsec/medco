@@ -42,8 +42,8 @@ var OidcClientID string
 // OidcJwtUserIDClaim is the JWT claim containing the user ID
 var OidcJwtUserIDClaim string
 
-// MedCoObfuscationMinVariance is the minimum variance passed to the random distribution for the obfuscation
-var MedCoObfuscationMinVariance int
+// MedCoObfuscationMin is the minimum variance passed to the random distribution for the obfuscation
+var MedCoObfuscationMin int
 
 func init() {
 	SetLogLevel(os.Getenv("LOG_LEVEL"))
@@ -71,12 +71,12 @@ func init() {
 	OidcClientID = os.Getenv("OIDC_CLIENT_ID")
 	OidcJwtUserIDClaim = os.Getenv("OIDC_JWT_USER_ID_CLAIM")
 
-	obf, err := strconv.ParseInt(os.Getenv("MEDCO_OBFUSCATION_MIN_VARIANCE"), 10, 64)
+	obf, err := strconv.ParseInt(os.Getenv("MEDCO_OBFUSCATION_MIN"), 10, 64)
 	if err != nil || obf < 0 {
-		logrus.Warn("invalid MedCoObfuscationMinVariance, defaulted")
+		logrus.Warn("invalid MedCoObfuscationMin, defaulted")
 		obf = 5
 	}
-	MedCoObfuscationMinVariance = int(obf)
+	MedCoObfuscationMin = int(obf)
 
 }
 

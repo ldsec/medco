@@ -122,7 +122,7 @@ func (q *I2b2MedCoQuery) Execute(queryType I2b2MedCoQueryType) (err error) {
 	if queryType.Obfuscated {
 		logrus.Info(q.name, ": (local) obfuscation requested")
 		timer = time.Now()
-		encCount, err = unlynx.LocallyObfuscateValue(encCount, 4) // todo: fixed distribution to make dynamic
+		encCount, err = unlynx.LocallyObfuscateValue(encCount, 5, q.query.UserPublicKey) // todo: fixed distribution to make dynamic
 		if err != nil {
 			return
 		}
