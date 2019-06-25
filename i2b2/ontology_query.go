@@ -47,6 +47,7 @@ func GetOntologyChildren(path string) (results []*models.SearchResultElement, er
 
 	// generate result from response
 	i2b2Concepts := xmlResponse.MessageBody.(*OntRespConceptsMessageBody).Concepts
+	results = make([]*models.SearchResultElement, 0)
 	for _, concept := range i2b2Concepts {
 		results = append(results, parseI2b2Concept(concept))
 	}
