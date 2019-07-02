@@ -13,9 +13,11 @@ services:
       - I2B2_LOGIN_PROJECT=MedCo
       - I2B2_LOGIN_USER=e2etest
       - I2B2_LOGIN_PASSWORD=e2etest
+      - I2B2_WAIT_TIME_SECONDS=180
       - LOG_LEVEL=5
       - UNLYNX_GROUP_FILE_PATH=/medco-configuration/group.toml
       - UNLYNX_GROUP_FILE_IDX=0
+      - UNLYNX_TIMEOUT_SECONDS=180
       - JWKS_URL=http://keycloak:8080/auth/realms/master/protocol/openid-connect/certs
       - OIDC_JWT_ISSUER=http://keycloak:8080/auth/realms/master
       - OIDC_CLIENT_ID=medco
