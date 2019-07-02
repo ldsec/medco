@@ -12,6 +12,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"io"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -80,6 +81,10 @@ func ExecuteClientQuery(token, username, password, queryType, queryString, resul
 		if err != nil {
 			logrus.Error("error opening file: ", err)
 		}
+		err = os.Chmod(resultOutputFilePath, 0777)
+		if err != nil {
+			logrus.Error("error setting permissions on file: ", err)
+		}
 	}
 	err = printResultsCSV(nodesResult, output)
 	return
@@ -91,7 +96,7 @@ func printResultsCSV(nodesResult map[string]*QueryResult, output io.Writer) (err
 	csvHeaders := []string{"node_name", "count", "patient_list"}
 	csvNodesResults := make([][]string, 0)
 
-	// results lines
+	// CSV values: results
 	for nodeName, queryResult := range nodesResult {
 		csvNodesResults = append(csvNodesResults, []string{
 			nodeName,
@@ -100,15 +105,24 @@ func printResultsCSV(nodesResult map[string]*QueryResult, output io.Writer) (err
 		})
 	}
 
-	// timers name
+	// CSV headers: timers
 	for _, queryResult := range nodesResult {
+
+		// sort the timers by name for deterministic output
+		timerNames := make([]string, 0)
 		for timerName := range queryResult.Times {
+			timerNames = append(timerNames, timerName)
+		}
+		sort.Strings(timerNames)
+
+		// add to headers
+		for _, timerName := range timerNames {
 			csvHeaders = append(csvHeaders, timerName)
 		}
 		break
 	}
 
-	// timers value: iter over results, then iter over timer names from csvHeaders
+	// CSV values: timers: iter over results, then iter over timer names from csvHeaders
 	for csvNodeResultsIdx, csvNodeResults := range csvNodesResults {
 		nodeName := csvNodeResults[0]
 
