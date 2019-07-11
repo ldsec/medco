@@ -166,8 +166,6 @@ services:
     image: medco/nginx:dev
     ports:
     - "80:80"
-    environment:
-      - HTTP_SCHEME=http
     networks:
       intra-node-srv0:
       inter-nodes:

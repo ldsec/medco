@@ -37,6 +37,7 @@ services:
       - "443"
     environment:
       - HTTP_SCHEME=http
+      - ALL_TIMEOUTS_SECONDS=600
     volumes:
       - ../docker-images/web/www-data:/www-data
       - ../docker-images/web/nginx-conf.d:/etc/nginx/conf.d

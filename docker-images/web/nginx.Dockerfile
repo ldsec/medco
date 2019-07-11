@@ -1,7 +1,10 @@
 FROM nginx:1.15.10
 
 # run-time variables
-ENV HTTP_SCHEME="http"
+ENV HTTP_SCHEME="http" \
+    ALL_TIMEOUTS_SECONDS="600"
 
-# run
-CMD /bin/bash -c "envsubst < /etc/nginx/conf.d/servers.conf.template > /etc/nginx/conf.d/servers.conf && exec nginx -g 'daemon off;'"
+COPY nginx.docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod a+x /usr/local/bin/docker-entrypoint.sh
+
+CMD docker-entrypoint.sh
