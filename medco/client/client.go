@@ -168,23 +168,56 @@ func parseQueryString(queryString string) (panelsItemKeys [][]int64, panelsIsNot
 		// parse query items
 		itemKeys := make([]int64, 0)
 		for _, queryItem := range strings.Split(queryPanel, " OR ") {
+			// 3 cases: simple integer, integer to be repeated, query file
 
-			parsedInt, parsedErr := strconv.ParseInt(queryItem, 10, 64)
-			if parsedErr == nil {
-				logrus.Debug("Client query integer item: ", queryItem)
+			// case 1: integer to be repeated
+			if strings.Contains(queryItem, "^") {
+				logrus.Debug("Client query integer repeated item: ", queryItem)
 
-				// if a parsable integer: use as is
-				itemKeys = append(itemKeys, parsedInt)
+				elements := strings.Split(queryItem, "^")
+				if len(elements) != 2 {
+					err = errors.New("query item contains more than one ^")
+					logrus.Error(err)
+					return
+				}
+
+				queryInt, queryIntErr := strconv.ParseInt(elements[0], 10, 64)
+				if queryIntErr != nil {
+					logrus.Error("could not parse query integer: ", queryIntErr)
+					return nil, nil, queryIntErr
+				}
+
+				intMultiplier, intMultiplierErr := strconv.ParseInt(elements[1], 10, 64)
+				if intMultiplierErr != nil {
+					logrus.Error("could not parse query integer multiplier: ", intMultiplierErr)
+					return nil, nil, intMultiplierErr
+				}
+
+				for i := 0 ; i < int(intMultiplier) ; i++ {
+					itemKeys = append(itemKeys, queryInt)
+				}
 
 			} else {
-				logrus.Debug("Client query file item: ", queryItem)
+				parsedInt, parsedErr := strconv.ParseInt(queryItem, 10, 64)
 
-				// else assume it is a file
-				itemKeysFromFile, err := loadQueryFile(queryItem)
-				if err != nil {
-					return nil, nil, err
+				// case 2: simple integer
+				if parsedErr == nil {
+					logrus.Debug("Client query integer item: ", queryItem)
+
+					// if a parsable integer: use as is
+					itemKeys = append(itemKeys, parsedInt)
+
+				// case 3: query file
+				} else {
+					logrus.Debug("Client query file item: ", queryItem)
+
+					// else assume it is a file
+					itemKeysFromFile, err := loadQueryFile(queryItem)
+					if err != nil {
+						return nil, nil, err
+					}
+					itemKeys = append(itemKeys, itemKeysFromFile...)
 				}
-				itemKeys = append(itemKeys, itemKeysFromFile...)
 			}
 		}
 		panelsItemKeys = append(panelsItemKeys, itemKeys)
@@ -192,7 +225,7 @@ func parseQueryString(queryString string) (panelsItemKeys [][]int64, panelsIsNot
 	return
 }
 
-// todo: might fail if alleles of queries are too big, what to do? ignore
+// todo: might fail if alleles of queries are too big, what to do? ignore or fail?
 // loadQueryFile load and parse a query file (either simple integer or genomic) into integers
 func loadQueryFile(queryFilePath string) (queryTerms []int64, err error) {
 	logrus.Debug("Client query: loading file ", queryFilePath)
