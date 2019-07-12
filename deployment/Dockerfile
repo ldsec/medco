@@ -17,7 +17,8 @@ COPY --from=build /go/bin/medco-connector-server /go/bin/
 
 # swagger server configuration
 ENV HOST=0.0.0.0 \
-    PORT=1999
+    PORT=1999 \
+    SERVER_HTTP_WRITE_TIMEOUT_SECONDS=600
 
 # run-time environment
 ENV I2B2_HIVE_URL=http://i2b2:8080/i2b2/services \
@@ -25,11 +26,11 @@ ENV I2B2_HIVE_URL=http://i2b2:8080/i2b2/services \
     I2B2_LOGIN_PROJECT=MedCo \
     I2B2_LOGIN_USER=e2etest \
     I2B2_LOGIN_PASSWORD=e2etest \
-    I2B2_WAIT_TIME_SECONDS=180 \
+    I2B2_WAIT_TIME_SECONDS=300 \
     LOG_LEVEL=5 \
     UNLYNX_GROUP_FILE_PATH=/medco-configuration/group.toml \
     UNLYNX_GROUP_FILE_IDX=0 \
-    UNLYNX_TIMEOUT_SECONDS=180 \
+    UNLYNX_TIMEOUT_SECONDS=300 \
     JWKS_URL=http://keycloak:8080/auth/realms/master/protocol/openid-connect/certs \
     OIDC_JWT_ISSUER=http://keycloak:8080/auth/realms/master \
     OIDC_CLIENT_ID=medco \
@@ -37,4 +38,4 @@ ENV I2B2_HIVE_URL=http://i2b2:8080/i2b2/services \
     MEDCO_OBFUSCATION_MIN=5
 
 EXPOSE 1999
-ENTRYPOINT ["docker-entrypoint.sh", "medco-connector-server"]
+ENTRYPOINT docker-entrypoint.sh medco-connector-server --write-timeout=${SERVER_HTTP_WRITE_TIMEOUT_SECONDS}s
