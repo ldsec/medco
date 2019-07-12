@@ -1,6 +1,6 @@
 package medco
 
-import(
+import (
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/lca1/medco-connector/i2b2"
 	"github.com/lca1/medco-connector/restapi/models"

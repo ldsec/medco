@@ -54,6 +54,10 @@ func main() {
 			Usage: "Output file for the result CSV. Printed to stdout if omitted.",
 			Value: "",
 		},
+		cli.BoolFlag{
+			Name:  "bypassPicsure",
+			Usage: "Bypass PIC-SURE and query directly the MedCo connectors",
+		},
 	}
 
 	// --- app commands
@@ -83,6 +87,7 @@ func main() {
 					strings.Join(c.Args().Tail(), " "),
 					c.String("resultFile"),
 					c.GlobalBool("disableTLSCheck"),
+					c.Bool("bypassPicsure"),
 				)
 			},
 		},

@@ -11,22 +11,25 @@ import (
 	utilclient "github.com/lca1/medco-connector/util/client"
 	"github.com/sirupsen/logrus"
 	"net/http"
+	"net/url"
 	"time"
 )
-
-// todo: times should be parsed
 
 // Query is a MedCo client query
 type Query struct {
 
-	// httpMedcoClient is the HTTP client for the MedCo connectors through PIC-SURE
-	httpMedcoClient *client.MedcoCli
+	// httpMedCoClients are the HTTP clients for the MedCo connectors
+	httpMedCoClients []*client.MedcoCli
+	// httpPicsureClient is the HTTP client for the MedCo connectors through PIC-SURE
+	httpPicsureClient *client.MedcoCli
 	// picsureResourceNames is the list of PIC-SURE resources names corresponding to the MedCo connector of each node
 	picsureResourceNames []string
 	// picsureResourceUUIDs is the list of PIC-SURE resources UUIDs corresponding to the MedCo connector of each node
 	picsureResourceUUIDs []string
 	// authToken is the OIDC authentication JWT
 	authToken string
+	// bypassPicsure instructs to query directly directly the medco connectors
+	bypassPicsure bool
 
 	// userPublicKey is the user public key
 	userPublicKey string
@@ -42,25 +45,26 @@ type Query struct {
 }
 
 // NewQuery creates a new MedCo client query
-func NewQuery(authToken string, queryType models.QueryType, encPanelsItemKeys [][]string, panelsIsNot []bool, disableTLSCheck bool) (q *Query, err error) {
+func NewQuery(authToken string, queryType models.QueryType, encPanelsItemKeys [][]string, panelsIsNot []bool, disableTLSCheck bool, bypassPicsure bool) (q *Query, err error) {
 
 	transport := httptransport.New(utilclient.Picsure2APIHost, utilclient.Picsure2APIBasePath, []string{utilclient.Picsure2APIScheme})
 	transport.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: disableTLSCheck}
 
 	q = &Query{
 
-		httpMedcoClient: client.New(transport, nil),
+		httpPicsureClient:    client.New(transport, nil),
 		picsureResourceNames: utilclient.Picsure2Resources,
 		picsureResourceUUIDs: []string{},
-		authToken: authToken,
+		authToken:            authToken,
+		bypassPicsure:	      bypassPicsure,
 
 		queryType: queryType,
 		encPanelsItemKeys: encPanelsItemKeys,
 		panelsIsNot: panelsIsNot,
 	}
 
-	// retrieve resource UUIDs
-	err = q.loadResourceUUIDs()
+	// retrieve resources information
+	err = q.loadResources(disableTLSCheck)
 	if err != nil {
 		return
 	}
@@ -134,10 +138,10 @@ func (clientQuery *Query) Execute() (nodesResult map [string]*QueryResult, err e
 	return nil, err
 }
 
-// loadResourceUUIDs requests the list of PIC-SURE resources, and retrieves their UUID from the names configured
-func (clientQuery *Query) loadResourceUUIDs() (err error) {
+// loadResources requests the list of PIC-SURE resources, and retrieves their UUID from the names configured, and their URL
+func (clientQuery *Query) loadResources(disableTLSCheck bool) (err error) {
 	getResourcesParams := picsure2.NewGetResourcesParamsWithTimeout(30 * time.Second)
-	resp, err := clientQuery.httpMedcoClient.Picsure2.GetResources(getResourcesParams, httptransport.BearerToken(clientQuery.authToken))
+	resp, err := clientQuery.httpPicsureClient.Picsure2.GetResources(getResourcesParams, httptransport.BearerToken(clientQuery.authToken))
 	if err != nil {
 		logrus.Error("query error: ", err)
 		return
@@ -148,12 +152,23 @@ func (clientQuery *Query) loadResourceUUIDs() (err error) {
 		for _, respResource := range resp.Payload {
 			if resourceName == respResource.Name {
 				clientQuery.picsureResourceUUIDs = append(clientQuery.picsureResourceUUIDs, respResource.UUID)
+
+				resourceUrl, err := url.Parse(respResource.ResourceRSPath)
+				if err != nil {
+					logrus.Error("error parsing URL: ", err)
+					return err
+				}
+
+				resourceTransport := httptransport.New(resourceUrl.Host, resourceUrl.Path, []string{resourceUrl.Scheme})
+				resourceTransport.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: disableTLSCheck}
+				clientQuery.httpMedCoClients = append(clientQuery.httpMedCoClients, client.New(resourceTransport, nil))
 			}
 		}
 	}
 
 	// check all resources were indeed present
-	if len(clientQuery.picsureResourceUUIDs) != len(clientQuery.picsureResourceNames) {
+	if len(clientQuery.picsureResourceUUIDs) != len(clientQuery.picsureResourceNames) ||
+		len(clientQuery.httpMedCoClients) != len(clientQuery.picsureResourceNames) {
 		err = errors.New("some resources were not found")
 		logrus.Error(err)
 		return
@@ -163,25 +178,32 @@ func (clientQuery *Query) loadResourceUUIDs() (err error) {
 }
 
 // submitToNode sends a query to a node of the network, from the list of PIC-SURE resources
-func (clientQuery *Query) submitToNode(picsureResourceUUIDIdx int) (result *models.QueryResultElement, err error) {
-	logrus.Debug("Submitting query to resource ", clientQuery.picsureResourceNames[picsureResourceUUIDIdx])
+func (clientQuery *Query) submitToNode(picsureResourceIdx int) (result *models.QueryResultElement, err error) {
+	logrus.Debug("Submitting query to resource ", clientQuery.picsureResourceNames[picsureResourceIdx],
+		", bypass PIC-SURE: ", clientQuery.bypassPicsure)
 
 	queryParams := picsure2.NewQuerySyncParamsWithTimeout(time.Duration(utilclient.QueryTimeoutSeconds) * time.Second)
 	queryParams.Body = picsure2.QuerySyncBody{
 		ResourceCredentials: &models.ResourceCredentials{
 			MEDCOTOKEN: clientQuery.authToken,
 		},
-		ResourceUUID: clientQuery.picsureResourceUUIDs[picsureResourceUUIDIdx],
+		ResourceUUID: clientQuery.picsureResourceUUIDs[picsureResourceIdx],
 		Query: clientQuery.generateModel(),
 	}
 
-	resp, err := clientQuery.httpMedcoClient.Picsure2.QuerySync(queryParams, httptransport.BearerToken(clientQuery.authToken))
+	var response *picsure2.QuerySyncOK
+	if clientQuery.bypassPicsure {
+		response, err = clientQuery.httpMedCoClients[picsureResourceIdx].Picsure2.QuerySync(queryParams, httptransport.BearerToken(clientQuery.authToken))
+	} else {
+		response, err = clientQuery.httpPicsureClient.Picsure2.QuerySync(queryParams, httptransport.BearerToken(clientQuery.authToken))
+	}
+
 	if err != nil {
 		logrus.Error("query error: ", err)
 		return
 	}
 
-	return resp.Payload, nil
+	return response.Payload, nil
 }
 
 // generateModel parses the query terms and generate the model to be sent

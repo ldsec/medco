@@ -19,7 +19,7 @@ import (
 )
 
 // ExecuteClientQuery execute and display the results of the MedCo client query
-func ExecuteClientQuery(token, username, password, queryType, queryString, resultOutputFilePath string, disableTLSCheck bool) (err error) {
+func ExecuteClientQuery(token, username, password, queryType, queryString, resultOutputFilePath string, disableTLSCheck bool, bypassPicsure bool) (err error) {
 
 	// get token
 	var accessToken string
@@ -62,7 +62,7 @@ func ExecuteClientQuery(token, username, password, queryType, queryString, resul
 	}
 
 	// execute query
-	clientQuery, err := NewQuery(accessToken, queryTypeParsed, encPanelsItemKeys, panelsIsNot, disableTLSCheck)
+	clientQuery, err := NewQuery(accessToken, queryTypeParsed, encPanelsItemKeys, panelsIsNot, disableTLSCheck, bypassPicsure)
 	if err != nil {
 		return
 	}
