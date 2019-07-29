@@ -43,9 +43,9 @@ const (
 	optionPublicTomlPath      = "publicTomlPath"
 	optionPublicTomlPathShort = "pub"
 
-	optionProvidedPubKey      = "pubKey"
+	optionProvidedPubKey = "pubKey"
 
-	optionProvidedPrivKey     = "privKey"
+	optionProvidedPrivKey = "privKey"
 
 	optionProvidedSecrets      = "secrets"
 	optionProvidedSecretsShort = "s"
