@@ -727,12 +727,12 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance, conf *onet.GenericConfi
 		s.Mutex.Lock()
 		var aux kyber.Scalar
 		if surveyTag.Request.Testing {
-			aux, err = CheckDDTSecrets(DDTSecretsPath+"_"+s.ServerIdentity().Address.Host()+":"+s.ServerIdentity().Address.Port()+".toml", serverIDMap.Address)
+			aux, err = CheckDDTSecrets(DDTSecretsPath+"_"+s.ServerIdentity().Address.Host()+":"+s.ServerIdentity().Address.Port()+".toml", serverIDMap.Address, nil)
 			if err != nil || aux == nil {
 				return nil, errors.New("Error while reading the DDT secrets from file")
 			}
 		} else {
-			aux, err = CheckDDTSecrets(os.Getenv("UNLYNX_DDT_SECRETS_FILE_PATH"), serverIDMap.Address)
+			aux, err = CheckDDTSecrets(os.Getenv("UNLYNX_DDT_SECRETS_FILE_PATH"), serverIDMap.Address, nil)
 			if err != nil || aux == nil {
 				return nil, errors.New("Error while reading the DDT secrets from file")
 			}
@@ -926,7 +926,7 @@ type privateTOML struct {
 	Secrets     []secretDDT
 }
 
-func createTOMLSecrets(path string, id network.Address) (kyber.Scalar, error) {
+func createTOMLSecrets(path string, id network.Address, secret kyber.Scalar) (kyber.Scalar, error) {
 	var fileHandle *os.File
 	var err error
 	defer fileHandle.Close()
@@ -935,7 +935,10 @@ func createTOMLSecrets(path string, id network.Address) (kyber.Scalar, error) {
 
 	encoder := toml.NewEncoder(fileHandle)
 
-	secret := libunlynx.SuiTe.Scalar().Pick(random.New())
+	// generate random secret if not provided
+	if secret == nil {
+		secret = libunlynx.SuiTe.Scalar().Pick(random.New())
+	}
 	b, err := secret.MarshalBinary()
 
 	if err != nil {
@@ -974,11 +977,11 @@ func addTOMLSecret(path string, content privateTOML) error {
 }
 
 // CheckDDTSecrets checks for the existence of the DDT secrets on the private_*.toml (we need to ensure that we use the same secrets always)
-func CheckDDTSecrets(path string, id network.Address) (kyber.Scalar, error) {
+func CheckDDTSecrets(path string, id network.Address, secret kyber.Scalar) (kyber.Scalar, error) {
 	var err error
 
 	if _, err = os.Stat(path); os.IsNotExist(err) {
-		return createTOMLSecrets(path, id)
+		return createTOMLSecrets(path, id, secret)
 	}
 
 	contents := privateTOML{}
@@ -1007,8 +1010,11 @@ func CheckDDTSecrets(path string, id network.Address) (kyber.Scalar, error) {
 		}
 	}
 
-	// no secret for this 'source' server
-	secret := libunlynx.SuiTe.Scalar().Pick(random.New())
+	// no secret for this 'source' server; set to the provided one or generate a random one
+	if secret == nil {
+		secret = libunlynx.SuiTe.Scalar().Pick(random.New())
+	}
+
 	b, err := secret.MarshalBinary()
 
 	if err != nil {
