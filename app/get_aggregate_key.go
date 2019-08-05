@@ -47,7 +47,7 @@ func getAggregateKey(c *cli.Context) error {
 	}
 	defer fWrite.Close()
 
-	_, err = fWrite.WriteString(base64.StdEncoding.EncodeToString(b))
+	_, err = fWrite.WriteString(base64.URLEncoding.EncodeToString(b))
 	if err != nil {
 		return err
 	}

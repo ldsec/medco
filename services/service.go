@@ -947,7 +947,7 @@ func createTOMLSecrets(path string, id network.Address, secret kyber.Scalar) (ky
 	}
 
 	aux := make([]secretDDT, 0)
-	aux = append(aux, secretDDT{ServerID: id.String(), Secret: base64.StdEncoding.EncodeToString(b)})
+	aux = append(aux, secretDDT{ServerID: id.String(), Secret: base64.URLEncoding.EncodeToString(b)})
 	endR := privateTOML{Public: "", Private: "", Address: "", Description: "", Secrets: aux}
 
 	err = encoder.Encode(&endR)
@@ -994,7 +994,7 @@ func CheckDDTSecrets(path string, id network.Address, secret kyber.Scalar) (kybe
 		if el.ServerID == id.String() {
 			secret := libunlynx.SuiTe.Scalar()
 
-			b, err := base64.StdEncoding.DecodeString(el.Secret)
+			b, err := base64.URLEncoding.DecodeString(el.Secret)
 			if err != nil {
 				log.Error(err)
 				return nil, err
@@ -1022,7 +1022,7 @@ func CheckDDTSecrets(path string, id network.Address, secret kyber.Scalar) (kybe
 		return nil, err
 	}
 
-	contents.Secrets = append(contents.Secrets, secretDDT{ServerID: id.String(), Secret: base64.StdEncoding.EncodeToString(b)})
+	contents.Secrets = append(contents.Secrets, secretDDT{ServerID: id.String(), Secret: base64.URLEncoding.EncodeToString(b)})
 
 	err = addTOMLSecret(path, contents)
 	if err != nil {
