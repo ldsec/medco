@@ -235,14 +235,14 @@ func TestServiceShuffle(t *testing.T) {
 
 func TestCheckDDTSecrets(t *testing.T) {
 	addr := network.NewLocalAddress("local://127.0.0.1:2020")
-	_, err := servicesmedco.CheckDDTSecrets("secrets.toml", addr)
+	_, err := servicesmedco.CheckDDTSecrets("secrets.toml", addr, nil)
 	assert.Nil(t, err, "Error while writing the secrets to the TOML file")
 
 	addr = network.NewLocalAddress("local://127.0.0.1:2010")
-	_, err = servicesmedco.CheckDDTSecrets("secrets.toml", addr)
+	_, err = servicesmedco.CheckDDTSecrets("secrets.toml", addr, nil)
 	assert.Nil(t, err, "Error while writing the secrets to the TOML file")
 
 	addr = network.NewLocalAddress("local://127.0.0.1:2000")
-	_, err = servicesmedco.CheckDDTSecrets("secrets.toml", addr)
+	_, err = servicesmedco.CheckDDTSecrets("secrets.toml", addr, nil)
 	assert.Nil(t, err, "Error while writing the secrets to the TOML file")
 }

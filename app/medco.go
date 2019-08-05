@@ -42,6 +42,16 @@ const (
 
 	optionPublicTomlPath      = "publicTomlPath"
 	optionPublicTomlPathShort = "pub"
+
+	optionProvidedPubKey = "pubKey"
+
+	optionProvidedPrivKey = "privKey"
+
+	optionProvidedSecrets      = "secrets"
+	optionProvidedSecretsShort = "s"
+
+	optionNodeIndex      = "nodeIndex"
+	optionNodeIndexShort = "i"
 )
 
 /*
@@ -106,6 +116,14 @@ func main() {
 			Name:  optionPublicTomlPath + ", " + optionPublicTomlPathShort,
 			Usage: "Public toml file path",
 		},
+		cli.StringFlag{
+			Name:  optionProvidedPubKey,
+			Usage: "Provided public key (optional)",
+		},
+		cli.StringFlag{
+			Name:  optionProvidedPrivKey,
+			Usage: "Provided private key (optional)",
+		},
 	}
 
 	getAggregateKeyFlags := []cli.Flag{
@@ -113,6 +131,14 @@ func main() {
 			Name:  optionGroupFile + ", " + optionGroupFileShort,
 			Value: DefaultGroupFile,
 			Usage: "Unlynx group definition file",
+		},
+		cli.StringFlag{
+			Name:  optionProvidedSecrets + ", " + optionProvidedSecretsShort,
+			Usage: "Provided secrets (optional). Repeat the option to put several.",
+		},
+		cli.IntFlag{
+			Name:  optionNodeIndex + ", " + optionNodeIndexShort,
+			Usage: "Node index of the server for which the secrets are generated",
 		},
 	}
 
