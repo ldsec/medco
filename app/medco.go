@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"os"
 
 	"github.com/lca1/unlynx/lib"
@@ -26,10 +27,6 @@ const (
 	optionGroupFile      = "file"
 	optionGroupFileShort = "f"
 
-	optionEntryPointIdx = "entryPointIdx"
-
-	optionProofs = "proofs"
-
 	optionDecryptKey      = "key"
 	optionDecryptKeyShort = "k"
 
@@ -45,6 +42,16 @@ const (
 
 	optionPublicTomlPath      = "publicTomlPath"
 	optionPublicTomlPathShort = "pub"
+
+	optionProvidedPubKey = "pubKey"
+
+	optionProvidedPrivKey = "privKey"
+
+	optionProvidedSecrets      = "secrets"
+	optionProvidedSecretsShort = "s"
+
+	optionNodeIndex      = "nodeIndex"
+	optionNodeIndexShort = "i"
 )
 
 /*
@@ -85,23 +92,6 @@ func main() {
 		},
 	}
 
-	querierFlags := []cli.Flag{
-		cli.StringFlag{
-			Name:  optionGroupFile + ", " + optionGroupFileShort,
-			Value: DefaultGroupFile,
-			Usage: "Unlynx group definition file",
-		},
-		cli.IntFlag{
-			Name:  optionEntryPointIdx,
-			Usage: "Index (relative to the group definition file) of the collective authority server to send the query.",
-		},
-		cli.IntFlag{
-			Name:  optionProofs,
-			Value: 0,
-			Usage: "Enable/Disable proofs",
-		},
-	}
-
 	serverFlags := []cli.Flag{
 		cli.StringFlag{
 			Name:  optionConfig + ", " + optionConfigShort,
@@ -126,6 +116,14 @@ func main() {
 			Name:  optionPublicTomlPath + ", " + optionPublicTomlPathShort,
 			Usage: "Public toml file path",
 		},
+		cli.StringFlag{
+			Name:  optionProvidedPubKey,
+			Usage: "Provided public key (optional)",
+		},
+		cli.StringFlag{
+			Name:  optionProvidedPrivKey,
+			Usage: "Provided private key (optional)",
+		},
 	}
 
 	getAggregateKeyFlags := []cli.Flag{
@@ -133,6 +131,14 @@ func main() {
 			Name:  optionGroupFile + ", " + optionGroupFileShort,
 			Value: DefaultGroupFile,
 			Usage: "Unlynx group definition file",
+		},
+		cli.StringFlag{
+			Name:  optionProvidedSecrets + ", " + optionProvidedSecretsShort,
+			Usage: "Provided secrets (optional). Repeat the option to put several.",
+		},
+		cli.IntFlag{
+			Name:  optionNodeIndex + ", " + optionNodeIndexShort,
+			Usage: "Node index of the server for which the secrets are generated",
 		},
 	}
 
@@ -166,22 +172,14 @@ func main() {
 		},
 		// CLIENT END: KEY GENERATION ------------
 
-		// BEGIN CLIENT: QUERIER ----------
-		{
-			Name:    "run",
-			Aliases: []string{"r"},
-			Usage:   "Execute a DDT or Aggregation request using UnLynx. Feed the query XML (UTF-8 encoded) to stdin and close it.",
-			Action:  unlynxRequestFromApp,
-			Flags:   querierFlags,
-		},
-		// CLIENT END: QUERIER ----------
-
 		// BEGIN SERVER --------
 		{
 			Name:  "server",
 			Usage: "Start UnLynx MedCo server",
 			Action: func(c *cli.Context) error {
-				runServer(c)
+				if err := runServer(c); err != nil {
+					return err
+				}
 				return nil
 			},
 			Flags: serverFlags,
@@ -192,10 +190,10 @@ func main() {
 					Usage:   "Setup server configuration (interactive)",
 					Action: func(c *cli.Context) error {
 						if c.String(optionConfig) != "" {
-							log.Fatal("[-] Configuration file option cannot be used for the 'setup' command")
+							return errors.New("[-] Configuration file option cannot be used for the 'setup' command")
 						}
 						if c.GlobalIsSet("debug") {
-							log.Fatal("[-] Debug option cannot be used for the 'setup' command")
+							return errors.New("[-] Debug option cannot be used for the 'setup' command")
 						}
 						app.InteractiveConfig(libunlynx.SuiTe, BinaryName)
 						return nil
@@ -211,7 +209,7 @@ func main() {
 				{
 					Name:    "getAggregateKey",
 					Aliases: []string{"gak"},
-					Usage:   "Get Aggregate Key from group.toml",
+					Usage:   "Get AggregateTarget Key from group.toml",
 					Action:  getAggregateKey,
 					Flags:   getAggregateKeyFlags,
 				},

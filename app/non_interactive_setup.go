@@ -20,17 +20,41 @@ func NonInteractiveSetup(c *cli.Context) error {
 	privateTomlPath := c.String("privateTomlPath")
 	publicTomlPath := c.String("publicTomlPath")
 
+	// provided keys (optional)
+	providedPubKey := c.String("pubKey")
+	providedPrivKey := c.String("privKey")
+
 	if serverBindingStr == "" || description == "" || privateTomlPath == "" || publicTomlPath == "" {
 		err := errors.New("arguments not OK")
 		log.Error(err)
 		return cli.NewExitError(err, 3)
 	}
 
-	kp := key.NewKeyPair(libunlynx.SuiTe)
+	var privStr, pubStr string
+	var err error
+	if providedPubKey != "" {
+		privStr = providedPrivKey
+		pubStr = providedPubKey
+	} else {
+		kp := key.NewKeyPair(libunlynx.SuiTe)
 
-	privStr, _ := encoding.ScalarToStringHex(libunlynx.SuiTe, kp.Private)
-	pubStr, _ := encoding.PointToStringHex(libunlynx.SuiTe, kp.Public)
-	public, _ := encoding.StringHexToPoint(libunlynx.SuiTe, pubStr)
+		privStr, err = encoding.ScalarToStringHex(libunlynx.SuiTe, kp.Private)
+		if err != nil {
+			log.Error("failed to convert scalar to hexadecimal")
+			return cli.NewExitError(err, 3)
+		}
+		pubStr, err = encoding.PointToStringHex(libunlynx.SuiTe, kp.Public)
+		if err != nil {
+			log.Error("failed to convert point to hexadecimal")
+			return cli.NewExitError(err, 3)
+		}
+	}
+
+	public, err := encoding.StringHexToPoint(libunlynx.SuiTe, pubStr)
+	if err != nil {
+		log.Error("failed to convert hexadecimal to point")
+		return cli.NewExitError(err, 3)
+	}
 
 	serverBinding := network.NewTLSAddress(serverBindingStr)
 	services := app.GenerateServiceKeyPairs()
