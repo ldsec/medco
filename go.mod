@@ -15,12 +15,13 @@ require (
 	github.com/go-openapi/validate v0.19.0
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
-	github.com/lca1/medco-loader v0.0.0-20190607142358-eb601905cd14
-	github.com/lca1/medco-unlynx v0.0.0-20190607122735-0645e9b99b36
+	github.com/lca1/medco-loader v0.2.1
+	github.com/lca1/medco-unlynx v0.2.1
 	github.com/lca1/unlynx v1.3.1
 	github.com/lestrrat-go/jwx v0.9.0
 	github.com/mailru/easyjson v0.0.0-20190403194419-1ea4449da983 // indirect
 	github.com/pkg/errors v0.8.1
+	github.com/r0fls/gostats v0.0.0-20180711082619-e793b1fda35c
 	github.com/sirupsen/logrus v1.4.2
 	github.com/smartystreets/assertions v1.0.0 // indirect
 	github.com/urfave/cli v1.20.0
