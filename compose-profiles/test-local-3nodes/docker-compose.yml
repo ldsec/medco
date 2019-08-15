@@ -8,9 +8,9 @@ services:
       - I2B2_DB_NAME=i2b2medcosrv0
       - I2B2_DOMAIN_NAME=i2b2medcosrv0
       - NODE_IDX=0
-      - WILDFLY_ADMIN_PASSWORD=${I2B2_WILDFLY_PASSWORD}
-      - I2B2_SERVICE_PASSWORD=${I2B2_SERVICE_PASSWORD}
-      - DEFAULT_USER_PASSWORD=${I2B2_USER_PASSWORD}
+      - WILDFLY_ADMIN_PASSWORD=${I2B2_WILDFLY_PASSWORD:?}
+      - I2B2_SERVICE_PASSWORD=${I2B2_SERVICE_PASSWORD:?}
+      - DEFAULT_USER_PASSWORD=${I2B2_USER_PASSWORD:?}
     ports:
       - "8090:8080"
     networks:
@@ -31,6 +31,7 @@ services:
     networks:
       intra-node-srv0:
       inter-nodes:
+        ipv4_address: 172.31.1.101
     volumes:
       - ../../configuration-profiles/test-local-3nodes:/medco-configuration
 
@@ -44,8 +45,8 @@ services:
       - I2B2_HIVE_URL=http://i2b2-srv0:8080/i2b2/services
       - I2B2_LOGIN_DOMAIN=i2b2medcosrv0
       - UNLYNX_GROUP_FILE_IDX=0
-      - OIDC_JWT_ISSUER=${MEDCO_NODE_URL}/auth/realms/master
-      - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD}
+      - OIDC_JWT_ISSUER=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/auth/realms/master
+      - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD:?}
     networks:
       intra-node-srv0:
       inter-nodes:
@@ -60,9 +61,9 @@ services:
       - I2B2_DB_NAME=i2b2medcosrv1
       - I2B2_DOMAIN_NAME=i2b2medcosrv1
       - NODE_IDX=1
-      - WILDFLY_ADMIN_PASSWORD=${I2B2_WILDFLY_PASSWORD}
-      - I2B2_SERVICE_PASSWORD=${I2B2_SERVICE_PASSWORD}
-      - DEFAULT_USER_PASSWORD=${I2B2_USER_PASSWORD}
+      - WILDFLY_ADMIN_PASSWORD=${I2B2_WILDFLY_PASSWORD:?}
+      - I2B2_SERVICE_PASSWORD=${I2B2_SERVICE_PASSWORD:?}
+      - DEFAULT_USER_PASSWORD=${I2B2_USER_PASSWORD:?}
     ports:
       - "8091:8080"
     networks:
@@ -83,6 +84,7 @@ services:
     networks:
       intra-node-srv1:
       inter-nodes:
+        ipv4_address: 172.31.1.111
     volumes:
       - ../../configuration-profiles/test-local-3nodes:/medco-configuration
 
@@ -96,8 +98,8 @@ services:
       - I2B2_HIVE_URL=http://i2b2-srv1:8080/i2b2/services
       - I2B2_LOGIN_DOMAIN=i2b2medcosrv1
       - UNLYNX_GROUP_FILE_IDX=1
-      - OIDC_JWT_ISSUER=${MEDCO_NODE_URL}/auth/realms/master
-      - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD}
+      - OIDC_JWT_ISSUER=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/auth/realms/master
+      - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD:?}
     networks:
       intra-node-srv1:
       inter-nodes:
@@ -112,9 +114,9 @@ services:
       - I2B2_DB_NAME=i2b2medcosrv2
       - I2B2_DOMAIN_NAME=i2b2medcosrv2
       - NODE_IDX=2
-      - WILDFLY_ADMIN_PASSWORD=${I2B2_WILDFLY_PASSWORD}
-      - I2B2_SERVICE_PASSWORD=${I2B2_SERVICE_PASSWORD}
-      - DEFAULT_USER_PASSWORD=${I2B2_USER_PASSWORD}
+      - WILDFLY_ADMIN_PASSWORD=${I2B2_WILDFLY_PASSWORD:?}
+      - I2B2_SERVICE_PASSWORD=${I2B2_SERVICE_PASSWORD:?}
+      - DEFAULT_USER_PASSWORD=${I2B2_USER_PASSWORD:?}
     ports:
       - "8092:8080"
     networks:
@@ -135,6 +137,7 @@ services:
     networks:
       intra-node-srv2:
       inter-nodes:
+        ipv4_address: 172.31.1.121
     volumes:
       - ../../configuration-profiles/test-local-3nodes:/medco-configuration
 
@@ -148,8 +151,8 @@ services:
       - I2B2_HIVE_URL=http://i2b2-srv2:8080/i2b2/services
       - I2B2_LOGIN_DOMAIN=i2b2medcosrv2
       - UNLYNX_GROUP_FILE_IDX=2
-      - OIDC_JWT_ISSUER=${MEDCO_NODE_URL}/auth/realms/master
-      - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD}
+      - OIDC_JWT_ISSUER=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/auth/realms/master
+      - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD:?}
     networks:
       intra-node-srv2:
       inter-nodes:
@@ -163,12 +166,12 @@ services:
     ports:
     - "82:80"
     environment:
-    - GB_API_URL=${MEDCO_NODE_URL}/pic-sure-api-2/PICSURE
-    - GB_URL=${MEDCO_NODE_URL}/glowing-bear
-    - GB_OIDC_URL=${MEDCO_NODE_URL}/auth/realms/master/protocol/openid-connect
+    - GB_API_URL=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/pic-sure-api-2/PICSURE
+    - GB_URL=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/glowing-bear
+    - GB_OIDC_URL=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/auth/realms/master/protocol/openid-connect
     - GB_OIDC_CLIENT_ID=medco
-    - GB_COTHORITY_KEY_URL=${MEDCO_NODE_URL}/cothority-key.pub.toml
-    - GB_GENOMIC_ANNOTATIONS_URL=${MEDCO_NODE_URL}/genomicAnnotations
+    - GB_COTHORITY_KEY_URL=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/cothority-key.pub.toml
+    - GB_GENOMIC_ANNOTATIONS_URL=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/genomicAnnotations
     - GB_MEDCO_RESULTS_RANDOMIZATION=0
     networks:
       inter-nodes:
@@ -181,7 +184,7 @@ services:
     - "80:80"
     - "443:443"
     environment:
-    - HTTP_SCHEME=${HTTP_SCHEME}
+    - HTTP_SCHEME=${MEDCO_NODE_HTTP_SCHEME:?}
     networks:
       intra-node-srv0:
       inter-nodes:
@@ -198,7 +201,7 @@ services:
     - I2B2_DB_NAME=i2b2medcosrv0
     - I2B2_DOMAIN_NAME=i2b2medcosrv0
     - I2B2_URL=http://i2b2-medco-srv0:8080/i2b2/services
-    - CORS_ALLOW_ORIGIN=${MEDCO_NODE_URL}
+    - CORS_ALLOW_ORIGIN=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}
     networks:
       intra-node-srv0:
       inter-nodes:
@@ -210,7 +213,7 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?}
     networks:
       inter-nodes:
 
@@ -221,7 +224,7 @@ services:
     ports:
       - "81:80"
     environment:
-      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD:?}
     networks:
       inter-nodes:
 
@@ -232,7 +235,7 @@ services:
     ports:
       - "8081:8080"
     environment:
-      - KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD}
+      - KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD:?}
     depends_on:
       - postgresql
     networks:
@@ -253,6 +256,9 @@ services:
 networks:
   inter-nodes:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.31.1.0/24
 
   intra-node-srv0:
     driver: bridge

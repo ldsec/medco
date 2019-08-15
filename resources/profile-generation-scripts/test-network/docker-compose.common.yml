@@ -10,23 +10,23 @@ services:
     environment:
       - HTTP_SCHEME=https
     volumes:
-      - ../../configuration-profiles/${MEDCO_PROFILE_NAME}/group.toml:/medco-configuration/group.toml
-      - ../../configuration-profiles/${MEDCO_PROFILE_NAME}/certificate.crt:/medco-configuration/certificate.crt
-      - ../../configuration-profiles/${MEDCO_PROFILE_NAME}/certificate.key:/medco-configuration/certificate.key
+      - ../../configuration-profiles/${MEDCO_PROFILE_NAME:?}/group.toml:/medco-configuration/group.toml
+      - ../../configuration-profiles/${MEDCO_PROFILE_NAME:?}/certificate.crt:/medco-configuration/certificate.crt
+      - ../../configuration-profiles/${MEDCO_PROFILE_NAME:?}/certificate.key:/medco-configuration/certificate.key
 
   php-fpm:
     extends:
       file: ../docker-compose-definitions.yml
       service: php-fpm
     environment:
-      - CORS_ALLOW_ORIGIN=${MEDCO_NODE_URL}
+      - CORS_ALLOW_ORIGIN=${MEDCO_NODE_URL:?}
 
   postgresql:
     extends:
       file: ../docker-compose-definitions.yml
       service: postgresql
     environment:
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?}
     ports:
       - "5432:5432"
 
@@ -35,4 +35,4 @@ services:
       file: ../docker-compose-definitions.yml
       service: pg-admin
     environment:
-      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD:?}
