@@ -1,0 +1,35 @@
+version: '2.4'
+services:
+  medco-cli-client:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: medco-cli-client
+    environment:
+      - LOG_LEVEL=5
+
+  medco-loader-srv0:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: medco-loader
+    environment:
+      - LOG_LEVEL=5
+      - DB_NAME=i2b2medcosrv0
+      - UNLYNX_GROUP_FILE_IDX=0
+
+  medco-loader-srv1:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: medco-loader
+    environment:
+      - LOG_LEVEL=5
+      - DB_NAME=i2b2medcosrv1
+      - UNLYNX_GROUP_FILE_IDX=1
+
+  medco-loader-srv2:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: medco-loader
+    environment:
+      - LOG_LEVEL=5
+      - DB_NAME=i2b2medcosrv2
+      - UNLYNX_GROUP_FILE_IDX=2
