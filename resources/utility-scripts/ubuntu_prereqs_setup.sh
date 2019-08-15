@@ -30,3 +30,6 @@ curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compo
 chmod +x /usr/local/bin/docker-compose
 mkdir /opt/medco
 git clone https://github.com/lca1/medco-deployment.git /opt/medco/medco-deployment
+
+mkdir /disk
+mount /dev/sdb /disk
