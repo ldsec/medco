@@ -3,8 +3,8 @@ set -Eeuo pipefail
 shopt -s nullglob
 
 # command-line arguments
-if [[ $# -ne 3 ]]; then
-    echo "Wrong number of arguments, usage: bash $0 <network_name> <node index> <node DNS name>"
+if [[ $# -ne 3 && $# -ne 5 ]]; then
+    echo "Wrong number of arguments, usage: bash $0 <network name> <node index> <node DNS name> [<public key> <private key>]"
     exit 1
 fi
 if [[ ! $1 =~ ^[a-zA-Z0-9-]+$ ]]; then
@@ -14,11 +14,13 @@ fi
 NETWORK_NAME="$1"
 NODE_IDX="$2"
 NODE_DNS_NAME="$3"
+PUB_KEY="${4-}"
+PRIV_KEY="${5-}"
 
 # convenience variables
 PROFILE_NAME="test-network-$NETWORK_NAME-node$NODE_IDX"
 SCRIPT_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-MEDCO_UNLYNX_VER="v0.2.0-rc1"
+MEDCO_UNLYNX_VER="v0.2.1"
 CONF_FOLDER="$SCRIPT_FOLDER/../../../configuration-profiles/$PROFILE_NAME"
 COMPOSE_FOLDER="$SCRIPT_FOLDER/../../../compose-profiles/$PROFILE_NAME"
 if [[ -d ${CONF_FOLDER} ]] || [[ -d ${COMPOSE_FOLDER} ]]; then
@@ -38,10 +40,18 @@ echo -n "$NODE_DNS_NAME" > "$CONF_FOLDER/srv$NODE_IDX-nodednsname.txt"
 
 # ===================== unlynx keys =========================
 echo "### Generating unlynx keys"
-docker run -v "$CONF_FOLDER":/medco-configuration -u $(id -u):$(id -g) medco/medco-unlynx:${MEDCO_UNLYNX_VER} \
-    server setupNonInteractive --serverBinding "$NODE_DNS_NAME:2000" --description "${PROFILE_NAME}_medco_unlynx_server" \
-    --privateTomlPath "/medco-configuration/srv$NODE_IDX-private.toml" \
-    --publicTomlPath "/medco-configuration/srv$NODE_IDX-public.toml"
+if [[ -z ${PUB_KEY} ]]; then
+    docker run -v "$CONF_FOLDER":/medco-configuration -u $(id -u):$(id -g) medco/medco-unlynx:${MEDCO_UNLYNX_VER} \
+        server setupNonInteractive --serverBinding "$NODE_DNS_NAME:2000" --description "${PROFILE_NAME}_medco_unlynx_server" \
+        --privateTomlPath "/medco-configuration/srv$NODE_IDX-private.toml" \
+        --publicTomlPath "/medco-configuration/srv$NODE_IDX-public.toml"
+else
+    docker run -v "$CONF_FOLDER":/medco-configuration -u $(id -u):$(id -g) medco/medco-unlynx:${MEDCO_UNLYNX_VER} \
+        server setupNonInteractive --serverBinding "$NODE_DNS_NAME:2000" --description "${PROFILE_NAME}_medco_unlynx_server" \
+        --privateTomlPath "/medco-configuration/srv$NODE_IDX-private.toml" \
+        --publicTomlPath "/medco-configuration/srv$NODE_IDX-public.toml" \
+        --pubKey "${PUB_KEY}" --privKey "${PRIV_KEY}"
+fi
 echo "### Unlynx keys generated!"
 
 
