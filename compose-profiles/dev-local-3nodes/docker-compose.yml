@@ -4,7 +4,6 @@ services:
     extends:
       file: ../docker-compose-definitions.yml
       service: i2b2
-    image: medco/i2b2:dev
     environment:
       - I2B2_DB_NAME=i2b2medcosrv0
       - I2B2_DOMAIN_NAME=i2b2medcosrv0
@@ -22,7 +21,6 @@ services:
     extends:
       file: ../docker-compose-definitions.yml
       service: medco-unlynx
-    image: medco/medco-unlynx:dev
     ports:
       - "2000:2000"
       - "2001:2001"
@@ -38,7 +36,6 @@ services:
     extends:
       file: ../docker-compose-definitions.yml
       service: medco-connector
-    image: medco/medco-connector:dev
     ports:
       - "1990:1999"
     environment:
@@ -57,7 +54,6 @@ services:
     extends:
       file: ../docker-compose-definitions.yml
       service: i2b2
-    image: medco/i2b2:dev
     environment:
       - I2B2_DB_NAME=i2b2medcosrv1
       - I2B2_DOMAIN_NAME=i2b2medcosrv1
@@ -75,7 +71,6 @@ services:
     extends:
       file: ../docker-compose-definitions.yml
       service: medco-unlynx
-    image: medco/medco-unlynx:dev
     ports:
       - "2002:2002"
       - "2003:2003"
@@ -91,7 +86,6 @@ services:
     extends:
       file: ../docker-compose-definitions.yml
       service: medco-connector
-    image: medco/medco-connector:dev
     ports:
       - "1991:1999"
     environment:
@@ -110,7 +104,6 @@ services:
     extends:
       file: ../docker-compose-definitions.yml
       service: i2b2
-    image: medco/i2b2:dev
     environment:
       - I2B2_DB_NAME=i2b2medcosrv2
       - I2B2_DOMAIN_NAME=i2b2medcosrv2
@@ -128,7 +121,6 @@ services:
     extends:
       file: ../docker-compose-definitions.yml
       service: medco-unlynx
-    image: medco/medco-unlynx:dev
     ports:
       - "2004:2004"
       - "2005:2005"
@@ -144,7 +136,6 @@ services:
     extends:
       file: ../docker-compose-definitions.yml
       service: medco-connector
-    image: medco/medco-connector:dev
     ports:
       - "1992:1999"
     environment:
@@ -163,7 +154,6 @@ services:
     extends:
       file: ../docker-compose-definitions.yml
       service: nginx
-    image: medco/nginx:dev
     ports:
     - "80:80"
     networks:
@@ -175,7 +165,6 @@ services:
     extends:
       file: ../docker-compose-definitions.yml
       service: php-fpm
-    image: medco/php-fpm:dev
     environment:
       - I2B2_DB_NAME=i2b2medcosrv0
       - I2B2_DOMAIN_NAME=i2b2medcosrv0
@@ -199,7 +188,6 @@ services:
     extends:
       file: ../docker-compose-definitions.yml
       service: pg-admin
-    image: medco/pgadmin4:dev
     ports:
       - "81:80"
     networks:
@@ -210,7 +198,6 @@ services:
     extends:
       file: ../docker-compose-definitions.yml
       service: keycloak
-    image: medco/keycloak:dev
     ports:
       - "8081:8080"
     depends_on:
@@ -223,7 +210,6 @@ services:
     extends:
       file: ../docker-compose-definitions.yml
       service: picsure
-    image: medco/picsure:dev
     ports:
       - "8082:8080"
       - "9992:9990"
