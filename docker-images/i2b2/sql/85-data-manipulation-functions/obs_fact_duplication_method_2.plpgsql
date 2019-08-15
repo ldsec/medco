@@ -1,0 +1,33 @@
+-- pl/pgsql function to duplicate observation_fact table (temp table method)
+
+SET search_path TO i2b2demodata_i2b2;
+CREATE FUNCTION obs_fact_duplication_method_2(nb_repetitions integer) RETURNS VOID AS $$
+DECLARE
+  instance_num_max bigint;
+  max_search_idx bigint;
+BEGIN
+  SET search_path TO i2b2demodata_i2b2;
+
+  -- get highest instance_num
+  select max(instance_num) into instance_num_max from observation_fact;
+
+  -- update text_search_index sequence
+  select max(text_search_index) into max_search_idx from observation_fact;
+  max_search_idx = max_search_idx + 1;
+  PERFORM setval('observation_fact_text_search_index_seq', max_search_idx);
+
+  -- add data
+  CREATE TABLE observation_fact_tmp AS SELECT * FROM observation_fact;
+
+  FOR i IN 1..nb_repetitions LOOP
+    RAISE NOTICE 'observation fact update %', i;
+    UPDATE observation_fact_tmp SET instance_num = observation_fact_tmp.instance_num + instance_num_max + i;
+
+    RAISE NOTICE 'observation fact insert %', i;
+    --INSERT INTO observation_fact SELECT * FROM observation_fact_tmp ON CONFLICT (text_search_index) DO UPDATE SET text_search_index = DEFAULT;
+    INSERT INTO observation_fact SELECT * FROM observation_fact_tmp;
+  END LOOP;
+  DROP TABLE observation_fact_tmp;
+
+END;
+$$ LANGUAGE plpgsql;

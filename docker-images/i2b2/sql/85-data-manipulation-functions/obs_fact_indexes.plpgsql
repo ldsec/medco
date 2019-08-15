@@ -1,0 +1,40 @@
+-- pl/pgsql function to delete rows from observation_fact table
+
+SET search_path TO i2b2demodata_i2b2;
+CREATE FUNCTION obs_fact_indexes() RETURNS VOID AS $$
+BEGIN
+  SET search_path TO i2b2demodata_i2b2;
+
+  ALTER TABLE observation_fact ADD CONSTRAINT observation_fact_pk
+    PRIMARY KEY (patient_num, concept_cd, modifier_cd, start_date, encounter_num, instance_num, provider_id);
+
+  CREATE INDEX of_idx_allobservation_fact ON observation_fact USING btree
+    (patient_num, encounter_num, concept_cd COLLATE pg_catalog."default", start_date,
+     provider_id COLLATE pg_catalog."default", modifier_cd COLLATE pg_catalog."default", instance_num,
+     valtype_cd COLLATE pg_catalog."default", tval_char COLLATE pg_catalog."default", nval_num,
+     valueflag_cd COLLATE pg_catalog."default", quantity_num, units_cd COLLATE pg_catalog."default", end_date,
+     location_cd COLLATE pg_catalog."default", confidence_num) TABLESPACE pg_default;
+
+  CREATE INDEX of_idx_clusteredconcept ON observation_fact USING btree
+    (concept_cd COLLATE pg_catalog."default") TABLESPACE pg_default;
+
+  CREATE INDEX of_idx_encounter_patient ON observation_fact USING btree
+    (encounter_num, patient_num, instance_num) TABLESPACE pg_default;
+
+--  CREATE INDEX of_idx_modifier ON observation_fact USING btree
+--    (modifier_cd COLLATE pg_catalog."default") TABLESPACE pg_default;
+
+--  CREATE INDEX of_idx_sourcesystem_cd ON observation_fact USING btree
+--    (sourcesystem_cd COLLATE pg_catalog."default") TABLESPACE pg_default;
+
+--  CREATE INDEX of_idx_start_date ON observation_fact USING btree
+--    (start_date, patient_num) TABLESPACE pg_default;
+
+--  CREATE INDEX of_idx_uploadid ON observation_fact USING btree
+--    (upload_id) TABLESPACE pg_default;
+
+--  CREATE UNIQUE INDEX of_text_search_unique ON observation_fact USING btree
+--    (text_search_index) TABLESPACE pg_default;
+
+END;
+$$ LANGUAGE plpgsql;

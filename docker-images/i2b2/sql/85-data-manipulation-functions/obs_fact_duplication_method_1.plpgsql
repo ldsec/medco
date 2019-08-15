@@ -1,0 +1,39 @@
+-- pl/pgsql function to duplicate observation_fact table (double for loop method)
+
+SET search_path TO i2b2demodata_i2b2;
+CREATE FUNCTION obs_fact_duplication_method_1(nb_repetitions integer) RETURNS VOID AS $$
+DECLARE
+  i_num_seq bigint;
+  observation_row RECORD;
+  max_search_idx bigint;
+BEGIN
+  SET search_path TO i2b2demodata_i2b2;
+
+  -- get highest instance_num
+  select max(instance_num) into i_num_seq from observation_fact;
+  i_num_seq = i_num_seq + 1;
+
+  -- update text_search_index sequence
+  select max(text_search_index) into max_search_idx from observation_fact;
+  max_search_idx = max_search_idx + 1;
+  PERFORM setval('observation_fact_text_search_index_seq', max_search_idx);
+
+  -- add data
+  FOR observation_row IN select * from observation_fact LOOP
+
+    IF i_num_seq % 100000 = 0 THEN
+        RAISE NOTICE 'observation fact nb is %', i_num_seq;
+    END IF;
+
+    FOR i IN 1..nb_repetitions LOOP
+
+      insert into observation_fact (encounter_num, patient_num, concept_cd, provider_id, start_date, modifier_cd, instance_num, location_cd, import_date, upload_id)
+        values (observation_row.encounter_num, observation_row.patient_num, observation_row.concept_cd, observation_row.provider_id, observation_row.start_date, observation_row.modifier_cd, i_num_seq, observation_row.location_cd, observation_row.import_date, observation_row.upload_id);
+
+      i_num_seq = i_num_seq + 1;
+
+    END LOOP;
+  END LOOP;
+
+END;
+$$ LANGUAGE plpgsql;
