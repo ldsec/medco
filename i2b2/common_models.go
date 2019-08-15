@@ -45,7 +45,7 @@ func NewRequest() Request {
 			ProjectID: util.I2b2LoginProject,
 		},
 		RequestHeader: RequestHeader{
-			ResultWaittimeMs: strconv.Itoa(util.I2b2TimeoutSeconds* 1000),
+			ResultWaittimeMs: strconv.Itoa(util.I2b2WaitTimeSeconds * 1000),
 		},
 	}
 }

@@ -2,7 +2,7 @@ package i2b2
 
 import (
 	"errors"
-	"github.com/lca1/medco-connector/swagger/models"
+	"github.com/lca1/medco-connector/restapi/models"
 	"github.com/lca1/medco-connector/util"
 	"github.com/sirupsen/logrus"
 	"strconv"
@@ -47,6 +47,7 @@ func GetOntologyChildren(path string) (results []*models.SearchResultElement, er
 
 	// generate result from response
 	i2b2Concepts := xmlResponse.MessageBody.(*OntRespConceptsMessageBody).Concepts
+	results = make([]*models.SearchResultElement, 0)
 	for _, concept := range i2b2Concepts {
 		results = append(results, parseI2b2Concept(concept))
 	}
@@ -64,6 +65,7 @@ func parseI2b2Concept(concept Concept) (result *models.SearchResultElement) {
 	//              - CONCEPT_LEAF
 	true := true
 	false := false
+
 	result = &models.SearchResultElement{
 		Name: concept.Name,
 		DisplayName: concept.Name,

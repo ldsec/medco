@@ -7,4 +7,4 @@ if [[ `ls -1 /medco-configuration/srv*-certificate.crt 2>/dev/null | wc -l` != 0
     update-ca-certificates
 fi
 
-exec medco-connector-server
+exec $@

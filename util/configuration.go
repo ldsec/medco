@@ -28,8 +28,8 @@ var I2b2LoginProject string
 var I2b2LoginUser string
 // I2b2LoginPassword is the i2b2 login password
 var I2b2LoginPassword string
-// I2b2TimeoutSeconds is the i2b2 timeout (seconds)
-var I2b2TimeoutSeconds int
+// I2b2WaitTimeSeconds is the i2b2 timeout (seconds)
+var I2b2WaitTimeSeconds int
 
 // JwksURL is the URL from which the JWT signing keys are retrieved
 var JwksURL string
@@ -42,16 +42,25 @@ var OidcClientID string
 // OidcJwtUserIDClaim is the JWT claim containing the user ID
 var OidcJwtUserIDClaim string
 
+// MedCoObfuscationMin is the minimum variance passed to the random distribution for the obfuscation
+var MedCoObfuscationMin int
 
 func init() {
 	SetLogLevel(os.Getenv("LOG_LEVEL"))
 
 	UnlynxGroupFilePath = os.Getenv("UNLYNX_GROUP_FILE_PATH")
-	UnlynxTimeoutSeconds = 3 * 60 // 3 minutes
+
+	unlynxto, err := strconv.ParseInt(os.Getenv("UNLYNX_TIMEOUT_SECONDS"), 10, 64)
+	if err != nil || unlynxto < 0 {
+		logrus.Warn("invalid UnlynxTimeoutSeconds, defaulted")
+		unlynxto = 3 * 60 // 3 minutes
+	}
+	UnlynxTimeoutSeconds = int(unlynxto)
 
 	idx, err := strconv.ParseInt(os.Getenv("UNLYNX_GROUP_FILE_IDX"), 10, 64)
-	if err != nil || UnlynxGroupFileIdx < 0 {
+	if err != nil || idx < 0 {
 		logrus.Warn("invalid UnlynxGroupFileIdx")
+		idx = 0
 	}
 	UnlynxGroupFileIdx = int(idx)
 
@@ -60,13 +69,27 @@ func init() {
 	I2b2LoginProject = os.Getenv("I2B2_LOGIN_PROJECT")
 	I2b2LoginUser = os.Getenv("I2B2_LOGIN_USER")
 	I2b2LoginPassword = os.Getenv("I2B2_LOGIN_PASSWORD")
-	I2b2TimeoutSeconds = 3 * 60 // 3 minutes
+
+	i2b2to, err := strconv.ParseInt(os.Getenv("I2B2_WAIT_TIME_SECONDS"), 10, 64)
+	if err != nil || i2b2to < 0 {
+		logrus.Warn("invalid I2b2WaitTimeSeconds, defaulted")
+		i2b2to = 3 * 60 // 3 minutes
+	}
+	I2b2WaitTimeSeconds = int(i2b2to)
 
 	JwksURL = os.Getenv("JWKS_URL")
 	JwksTTLSeconds = 60 * 60 // 1 hour
 	OidcJwtIssuer = os.Getenv("OIDC_JWT_ISSUER")
 	OidcClientID = os.Getenv("OIDC_CLIENT_ID")
 	OidcJwtUserIDClaim = os.Getenv("OIDC_JWT_USER_ID_CLAIM")
+
+	obf, err := strconv.ParseInt(os.Getenv("MEDCO_OBFUSCATION_MIN"), 10, 64)
+	if err != nil || obf < 0 {
+		logrus.Warn("invalid MedCoObfuscationMin, defaulted")
+		obf = 5
+	}
+	MedCoObfuscationMin = int(obf)
+
 }
 
 // SetLogLevel initializes the log levels of all loggers
@@ -84,5 +107,4 @@ func SetLogLevel(lvl string) {
 	LogLevel = int(intLvl)
 	logrus.SetLevel(logrus.Level(LogLevel + 1))
 	onetLog.SetDebugVisible(LogLevel)
-
 }
