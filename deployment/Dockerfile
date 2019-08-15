@@ -1,4 +1,4 @@
-FROM golang:1.11 as build
+FROM golang:1.12 as build
 
 COPY ./ /src
 WORKDIR /src
@@ -21,8 +21,19 @@ RUN CGO_ENABLED=0 go build -v ./... && \
     mv /go/bin/app /go/bin/medco-loader
 
 # -------------------------------------------
-FROM golang:1.11-alpine as release
+FROM golang:1.12-alpine as release
 
 COPY --from=build /go/bin/medco-loader /go/bin/
 RUN apk add --no-cache postgresql-client
+
+# run-time environment
+ENV LOG_LEVEL=5 \
+    UNLYNX_GROUP_FILE_PATH=/medco-configuration/group.toml \
+    UNLYNX_GROUP_FILE_IDX=0 \
+    DB_HOST=localhost \
+    DB_PORT=5432 \
+    DB_NAME=i2b2medco \
+    DB_USER=i2b2 \
+    DB_PASSWORD=i2b2
+
 ENTRYPOINT ["medco-loader"]

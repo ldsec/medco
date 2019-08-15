@@ -92,40 +92,48 @@ func main() {
 
 	binaryFlags := []cli.Flag{
 		cli.IntFlag{
-			Name:  "debug, d",
-			Value: 0,
-			Usage: "debug-level: 1 for terse, 5 for maximal",
+			Name:   "debug, d",
+			Value:  0,
+			Usage:  "debug-level: 1 for terse, 5 for maximal",
+			EnvVar: "LOG_LEVEL",
 		},
 	}
 
 	loaderFlagsCommon := []cli.Flag{
 		cli.StringFlag{
-			Name:  optionGroupFile + ", " + optionGroupFileShort,
-			Usage: "UnLynx group definition file",
+			Name:   optionGroupFile + ", " + optionGroupFileShort,
+			Usage:  "UnLynx group definition file",
+			EnvVar: "UNLYNX_GROUP_FILE_PATH",
 		},
 		cli.IntFlag{
-			Name:  optionEntryPointIdx + ", " + optionEntryPointIdxShort,
-			Usage: "Index (relative to the group definition file) of the collective authority server to load the data",
+			Name:   optionEntryPointIdx + ", " + optionEntryPointIdxShort,
+			Usage:  "Index (relative to the group definition file) of the collective authority server to load the data",
+			EnvVar: "UNLYNX_GROUP_FILE_IDX",
 		},
 		cli.StringFlag{
-			Name:  optionDBhost + ", " + optionDBhostShort,
-			Usage: "Database hostname",
+			Name:   optionDBhost + ", " + optionDBhostShort,
+			Usage:  "Database hostname",
+			EnvVar: "DB_HOST",
 		},
 		cli.IntFlag{
-			Name:  optionDBport + ", " + optionDBportShort,
-			Usage: "Database port",
+			Name:   optionDBport + ", " + optionDBportShort,
+			Usage:  "Database port",
+			EnvVar: "DB_PORT",
 		},
 		cli.StringFlag{
-			Name:  optionDBname + ", " + optionDBnameShort,
-			Usage: "Database name",
+			Name:   optionDBname + ", " + optionDBnameShort,
+			Usage:  "Database name",
+			EnvVar: "DB_NAME",
 		},
 		cli.StringFlag{
-			Name:  optionDBuser + ", " + optionDBuserShort,
-			Usage: "Database user",
+			Name:   optionDBuser + ", " + optionDBuserShort,
+			Usage:  "Database user",
+			EnvVar: "DB_USER",
 		},
 		cli.StringFlag{
-			Name:  optionDBpassword + ", " + optionDBpasswordShort,
-			Usage: "Database password",
+			Name:   optionDBpassword + ", " + optionDBpasswordShort,
+			Usage:  "Database password",
+			EnvVar: "DB_PASSWORD",
 		},
 	}
 

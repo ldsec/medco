@@ -335,7 +335,11 @@ func (pdk PatientDimensionPK) ToCSVText() string {
 
 // ToCSVText writes the PatientDimension struct in a way that can be added to a .csv file - "","","", etc.
 func (pd PatientDimension) ToCSVText(empty bool) string {
-	encryptedFlagString := pd.EncryptedFlag.Serialize()
+	encryptedFlagString, err := pd.EncryptedFlag.Serialize()
+	if err != nil {
+		log.Error("Error during serialization:", err)
+		return ""
+	}
 	encodedEncryptedFlag := "\"" + encryptedFlagString + "\""
 
 	of := pd.OptionalFields

@@ -856,9 +856,7 @@ func EncryptAndTag(list []int64, group *onet.Roster, entryPointIdx int) ([]libun
 
 	totalTime := time.Since(start)
 
-	tr.DDTRequestTimeCommunication = totalTime - tr.DDTRequestTimeExec
-
-	log.Lvl2("DDT took: execution -", tr.DDTRequestTimeExec, "communication -", tr.DDTRequestTimeCommunication)
+	log.Lvl2("DDT took: execution -", tr.MapTR[servicesmedco.TaggingTimeExec], "communication -", tr.MapTR[servicesmedco.TaggingTimeCommunication])
 
 	log.Lvl2("Finished tagging the sensitive data... (", totalTime, ")")
 
