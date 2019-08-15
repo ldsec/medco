@@ -16,9 +16,9 @@ psql $PSQL_PARAMS -d "$I2B2_DB_NAME" <<-EOSQL
 
     -- hive & users data
     insert into i2b2pm.pm_project_data (project_id, project_name, project_wiki, project_path, status_cd) values
-        ('MedCo', 'MedCo', 'https://lca1.github.io/medco-documentation', '/MedCo', 'A');
+        ('MedCo', 'MedCo', 'https://medco.epfl.ch/documentation', '/MedCo', 'A');
     insert into i2b2pm.pm_project_data (project_id, project_name, project_wiki, project_path, status_cd) values
-        ('e2etest', 'e2etest', 'https://lca1.github.io/medco-documentation', '/e2etest', 'A');
+        ('e2etest', 'e2etest', 'https://medco.epfl.ch/documentation', '/e2etest', 'A');
 
     -- cell URLs
     UPDATE i2b2pm.PM_CELL_DATA SET URL = 'http://i2b2-medco:8080/i2b2/services/QueryToolService/' WHERE CELL_ID = 'CRC';
