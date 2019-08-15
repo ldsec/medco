@@ -10,6 +10,8 @@ REPO_URL="https://github.com/lca1/medco-loader/blob/master"
 mkdir -p ${SCRIPT_FOLDER}/genomic/tcga_cbio/
 wget -O ${SCRIPT_FOLDER}/genomic/tcga_cbio/mutation_data.csv ${REPO_URL}/data/genomic/tcga_cbio/mutation_data.csv?raw=true
 wget -O ${SCRIPT_FOLDER}/genomic/tcga_cbio/clinical_data.csv ${REPO_URL}/data/genomic/tcga_cbio/clinical_data.csv?raw=true
+wget -O ${SCRIPT_FOLDER}/genomic/tcga_cbio/8_mutation_data.csv ${REPO_URL}/data/genomic/tcga_cbio/8_mutation_data.csv?raw=true
+wget -O ${SCRIPT_FOLDER}/genomic/tcga_cbio/8_clinical_data.csv ${REPO_URL}/data/genomic/tcga_cbio/8_clinical_data.csv?raw=true
 wget -O ${SCRIPT_FOLDER}/genomic/sensitive.txt ${REPO_URL}/data/genomic/sensitive.txt?raw=true
 
 # i2b2 demo (v1) dataset
