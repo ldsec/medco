@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
   description: "This is the PIC-SURE 2 API exposed by MedCo, and used by the MedCo CLI client."
-  version: "0.2.0"
+  version: "0.2.1"
   title: "MedCo CLI Client (PIC-SURE 2 API)"
   contact:
     email: "medco-dev@listes.epfl.ch"

@@ -32,7 +32,7 @@ func init() {
       "name": "EULA",
       "url": "https://raw.githubusercontent.com/lca1/medco-connector/master/LICENSE"
     },
-    "version": "0.2.0"
+    "version": "0.2.1"
   },
   "basePath": "/medco-connector",
   "paths": {
@@ -698,7 +698,7 @@ func init() {
       "name": "EULA",
       "url": "https://raw.githubusercontent.com/lca1/medco-connector/master/LICENSE"
     },
-    "version": "0.2.0"
+    "version": "0.2.1"
   },
   "basePath": "/medco-connector",
   "paths": {
