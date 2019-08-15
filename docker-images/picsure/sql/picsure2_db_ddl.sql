@@ -34,7 +34,7 @@ SET default_with_oids = false;
 CREATE TABLE public.picsure_query (
     uuid uuid NOT NULL,
     metadata bytea,
-    query character varying(8192),
+    query text,
     readytime date,
     resourceresultid character varying(255),
     starttime date,
