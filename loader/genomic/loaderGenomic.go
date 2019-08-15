@@ -1205,9 +1205,13 @@ func generateMedCoOntologyGenomicAnnotation(fields []string, record []string) st
 func writeMedCoOntologyGenomicAnnotations(listEncryptedElements *libunlynx.CipherVector, annotations []string) error {
 	for i, annotation := range annotations {
 		if annotation != "NA" && annotation != "" {
-			ciphertextStr := (*listEncryptedElements)[i].Serialize()
-			_, err := FileHandlers[2].WriteString(`"` + ciphertextStr + `",` + annotation)
+			ciphertextStr, err := (*listEncryptedElements)[i].Serialize()
+			if err != nil {
+				log.Fatal("Serialization error in the writeMedCoOntologyGenomicAnnotations():", err)
+				return err
+			}
 
+			_, err = FileHandlers[2].WriteString(`"` + ciphertextStr + `",` + annotation)
 			if err != nil {
 				log.Fatal("Error in the writeMedCoOntologyGenomicAnnotations():", err)
 				return err
@@ -1284,9 +1288,7 @@ func TagElements(listEncryptedElements *libunlynx.CipherVector, group *onet.Rost
 
 	totalTime := time.Since(start)
 
-	tr.DDTRequestTimeCommunication = totalTime - tr.DDTRequestTimeExec
-
-	log.LLvl1("DDT took: exec -", tr.DDTRequestTimeExec, "commun -", tr.DDTRequestTimeCommunication)
+	log.LLvl1("DDT took: exec -", tr.MapTR[servicesmedco.TaggingTimeExec], "commun -", tr.MapTR[servicesmedco.TaggingTimeCommunication])
 
 	log.LLvl1("Finished tagging the sensitive data... (", totalTime, ")")
 
@@ -1419,13 +1421,17 @@ func writeDemodataPatientMapping(el string, id int64) error {
 func writeDemodataPatientDimension(group *onet.Roster, id int64) error {
 
 	encryptedFlag := libunlynx.EncryptInt(group.Aggregate, 1)
-	encryptedFlagString := encryptedFlag.Serialize()
+	encryptedFlagString, err := encryptedFlag.Serialize()
+	if err != nil {
+		log.Fatal("Serialization error in the writeDemodataPatientDimension():", err)
+		return err
+	}
 
 	/*patientDimension := `INSERT INTO i2b2demodata.patient_dimension VALUES (` + strconv.FormatInt(id, 10) + `, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'NOW()', NULL, 1, '` + base64.StdEncoding.EncodeToString(b) + `');` + "\n"*/
 
 	patientDimension := `"` + strconv.FormatInt(id, 10) + `",,,,,,,,,,,,,,,,"NOW()",,"1","` + encryptedFlagString + `"` + "\n"
 
-	_, err := FileHandlers[6].WriteString(patientDimension)
+	_, err = FileHandlers[6].WriteString(patientDimension)
 
 	if err != nil {
 		log.Fatal("Error in the writeDemodataPatientDimension()-Hive:", err)
