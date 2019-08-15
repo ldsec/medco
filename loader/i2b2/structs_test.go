@@ -179,7 +179,8 @@ func TestPatientDimension_ToCSVText(t *testing.T) {
 		EncryptedFlag:  *enc,
 	}
 
-	encryptedFlagString := pd.EncryptedFlag.Serialize()
+	encryptedFlagString, err := pd.EncryptedFlag.Serialize()
+	assert.NoError(t, err)
 	encodedEncryptedFlag := "\"" + encryptedFlagString + "\""
 
 	assert.Equal(t, pd.ToCSVText(false), `"1000000001","D","1985-11-17 00:00:00",,"F","24","english","black","married","roman catholic","02140","Zip codes\Massachusetts\Cambridge\02140\","Low","","2010-11-04 10:43:00","2010-08-18 09:50:00","2010-11-04 10:43:00","DEMO",,`+encodedEncryptedFlag)
