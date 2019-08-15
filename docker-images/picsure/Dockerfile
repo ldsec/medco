@@ -54,7 +54,8 @@ ENV PICSURE2_PGDB_ADDRESS="postgresql" \
     PICSURE2_USER_ID_CLAIM="email" \
     PICSURE2_CLIENT_SECRET="none" \
     PICSURE_2_TOKEN="none" \
-    PICSURE2_JWKS_URL="http://keycloak:8080/auth/realms/master/protocol/openid-connect/certs"
+    PICSURE2_JWKS_URL="http://keycloak:8080/auth/realms/master/protocol/openid-connect/certs" \
+    HTTP_CLIENT_TIMEOUT_SECONDS="600"
 
 # additional run-time variables
 ENV PICSURE2_CLIENT_ID="picsure" \
