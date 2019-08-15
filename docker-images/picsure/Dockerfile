@@ -1,7 +1,7 @@
 FROM maven:3.6 AS build
 
 ENV GIT_REPO="https://github.com/hms-dbmi/pic-sure.git" \
-    VERSION=7c3222318e97db72418d96e44b6eda2d491934eb
+    VERSION=61331e1bf8c085ce608627e9b94a835c9655fc7a
 
 # get dependencies and sources
 WORKDIR /src

@@ -1,4 +1,4 @@
-FROM dpage/pgadmin4:4.3
+FROM dpage/pgadmin4:4.11
 
 ENV SCRIPT_NAME="/pgadmin"
 COPY reverseproxyfix.sh /
