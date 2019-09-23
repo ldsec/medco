@@ -2,9 +2,9 @@ package main
 
 import (
 	"errors"
-	"github.com/lca1/unlynx/lib"
+	"github.com/ldsec/unlynx/lib"
+	"github.com/urfave/cli"
 	"go.dedis.ch/onet/v3/log"
-	"gopkg.in/urfave/cli.v1"
 	"io"
 	"os"
 	"strconv"

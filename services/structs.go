@@ -2,7 +2,7 @@ package servicesmedco
 
 import (
 	"github.com/btcsuite/goleveldb/leveldb/errors"
-	"github.com/lca1/unlynx/lib"
+	"github.com/ldsec/unlynx/lib"
 	"go.dedis.ch/kyber/v3"
 	"go.dedis.ch/onet/v3"
 	"go.dedis.ch/onet/v3/network"

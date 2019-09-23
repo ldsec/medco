@@ -2,12 +2,12 @@ package main
 
 import (
 	"errors"
-	"github.com/lca1/medco-unlynx/services"
-	libunlynx "github.com/lca1/unlynx/lib"
+	"github.com/ldsec/medco-unlynx/services"
+	libunlynx "github.com/ldsec/unlynx/lib"
+	"github.com/urfave/cli"
 	"go.dedis.ch/kyber/v3"
 	"go.dedis.ch/onet/v3/app"
 	"go.dedis.ch/onet/v3/log"
-	"gopkg.in/urfave/cli.v1"
 	"os"
 	"path"
 	"strconv"
