@@ -1,12 +1,11 @@
 package main
 
 import (
-	"gopkg.in/urfave/cli.v1"
-
 	// Empty imports to have the init-functions called which should
 	// register the protocol
-	_ "github.com/lca1/medco-unlynx/services"
-	_ "github.com/lca1/unlynx/protocols"
+	_ "github.com/ldsec/medco-unlynx/services"
+	_ "github.com/ldsec/unlynx/protocols"
+	"github.com/urfave/cli"
 	"go.dedis.ch/onet/v3/app"
 )
 

@@ -1,7 +1,7 @@
 package servicesmedco
 
 import (
-	"github.com/lca1/unlynx/lib"
+	"github.com/ldsec/unlynx/lib"
 	"github.com/satori/go.uuid"
 	"go.dedis.ch/kyber/v3"
 	"go.dedis.ch/kyber/v3/util/key"

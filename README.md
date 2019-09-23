@@ -1,6 +1,6 @@
-[![Build Status](https://travis-ci.org/lca1/medco-unlynx.svg?branch=master)](https://travis-ci.org/lca1/medco-unlynx) 
-[![Go Report Card](https://goreportcard.com/badge/github.com/lca1/medco-unlynx)](https://goreportcard.com/report/github.com/lca1/medco-unlynx) 
-[![Coverage Status](https://coveralls.io/repos/github/lca1/medco-unlynx/badge.svg?branch=master)](https://coveralls.io/github/lca1/medco-unlynx?branch=master)
+[![Build Status](https://travis-ci.org/ldsec/medco-unlynx.svg?branch=master)](https://travis-ci.org/ldsec/medco-unlynx) 
+[![Go Report Card](https://goreportcard.com/badge/github.com/ldsec/medco-unlynx)](https://goreportcard.com/report/github.com/ldsec/medco-unlynx) 
+[![Coverage Status](https://coveralls.io/repos/github/lca1/medco-unlynx/badge.svg?branch=master)](https://coveralls.io/github/ldsec/medco-unlynx?branch=master)
 
 ## Documentation
 MedCo documentation is centralized on the following website: 
