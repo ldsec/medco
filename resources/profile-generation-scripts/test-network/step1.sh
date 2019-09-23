@@ -69,8 +69,8 @@ stateOrProvinceName = Vaud
 stateOrProvinceName_default = Vaud
 localityName = Lausanne
 localityName_default = Lausanne
-organizationalUnitName = EPFL LCA1
-organizationalUnitName_default = EPFL LCA1
+organizationalUnitName = EPFL LDS
+organizationalUnitName_default = EPFL LDS
 commonName = ${NODE_DNS_NAME}
 commonName_max = 64
 
