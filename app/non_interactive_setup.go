@@ -2,13 +2,13 @@ package main
 
 import (
 	"errors"
-	"github.com/lca1/unlynx/lib"
+	"github.com/ldsec/unlynx/lib"
+	"github.com/urfave/cli"
 	"go.dedis.ch/kyber/v3/util/encoding"
 	"go.dedis.ch/kyber/v3/util/key"
 	"go.dedis.ch/onet/v3/app"
 	"go.dedis.ch/onet/v3/log"
 	"go.dedis.ch/onet/v3/network"
-	"gopkg.in/urfave/cli.v1"
 )
 
 // NonInteractiveSetup is used to setup the cothority node for unlynx in a non-interactive way (and without error checks)

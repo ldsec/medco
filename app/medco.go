@@ -4,11 +4,11 @@ import (
 	"errors"
 	"os"
 
-	"github.com/lca1/unlynx/lib"
+	"github.com/ldsec/unlynx/lib"
+	"github.com/urfave/cli"
 	"go.dedis.ch/onet/v3/app"
 	"go.dedis.ch/onet/v3/log"
 	"go.dedis.ch/onet/v3/network"
-	"gopkg.in/urfave/cli.v1"
 )
 
 const (
