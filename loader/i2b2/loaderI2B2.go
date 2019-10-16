@@ -2,9 +2,9 @@ package loaderi2b2
 
 import (
 	"encoding/csv"
-	"github.com/lca1/medco-loader/loader"
-	"github.com/lca1/medco-unlynx/services"
-	"github.com/lca1/unlynx/lib"
+	"github.com/ldsec/medco-loader/loader"
+	"github.com/ldsec/medco-unlynx/services"
+	"github.com/ldsec/unlynx/lib"
 	"go.dedis.ch/kyber/v3"
 	"go.dedis.ch/onet/v3"
 	"go.dedis.ch/onet/v3/log"
