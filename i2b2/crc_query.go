@@ -2,7 +2,7 @@ package i2b2
 
 import (
 	"errors"
-	"github.com/lca1/medco-connector/util"
+	"github.com/ldsec/medco-connector/util"
 	"github.com/sirupsen/logrus"
 )
 

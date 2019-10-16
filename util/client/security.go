@@ -4,7 +4,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
-	"github.com/lca1/medco-connector/util"
+	"github.com/ldsec/medco-connector/util"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"

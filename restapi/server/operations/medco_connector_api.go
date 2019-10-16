@@ -19,9 +19,9 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
-	"github.com/lca1/medco-connector/restapi/server/operations/picsure2"
+	"github.com/ldsec/medco-connector/restapi/server/operations/picsure2"
 
-	models "github.com/lca1/medco-connector/restapi/models"
+	models "github.com/ldsec/medco-connector/restapi/models"
 )
 
 // NewMedcoConnectorAPI creates a new MedcoConnector instance
@@ -223,12 +223,12 @@ func (o *MedcoConnectorAPI) ServeErrorFor(operationID string) func(http.Response
 func (o *MedcoConnectorAPI) AuthenticatorsFor(schemes map[string]spec.SecurityScheme) map[string]runtime.Authenticator {
 
 	result := make(map[string]runtime.Authenticator)
-	for name, scheme := range schemes {
+	for name := range schemes {
 		switch name {
 
 		case "MedCoToken":
 
-			result[name] = o.BearerAuthenticator(scheme.Name, func(token string, scopes []string) (interface{}, error) {
+			result[name] = o.BearerAuthenticator(name, func(token string, scopes []string) (interface{}, error) {
 				return o.MedCoTokenAuth(token, scopes)
 			})
 

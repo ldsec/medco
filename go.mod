@@ -1,4 +1,4 @@
-module github.com/lca1/medco-connector
+module github.com/ldsec/medco-connector
 
 require (
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a // indirect
@@ -15,17 +15,17 @@ require (
 	github.com/go-openapi/validate v0.19.0
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
-	github.com/lca1/medco-loader v0.2.1
-	github.com/lca1/medco-unlynx v0.2.1
-	github.com/lca1/unlynx v1.3.1
+	github.com/ldsec/medco-loader v0.0.0-20191016120146-c4c149e9616b
+	github.com/ldsec/medco-unlynx v0.0.0-20190924143202-01a0d7dedbe4
+	github.com/ldsec/unlynx v1.4.0
 	github.com/lestrrat-go/jwx v0.9.0
 	github.com/mailru/easyjson v0.0.0-20190403194419-1ea4449da983 // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/r0fls/gostats v0.0.0-20180711082619-e793b1fda35c
 	github.com/sirupsen/logrus v1.4.2
 	github.com/smartystreets/assertions v1.0.0 // indirect
-	github.com/urfave/cli v1.20.0
-	go.dedis.ch/onet/v3 v3.0.14
+	github.com/urfave/cli v1.22.1
+	go.dedis.ch/onet/v3 v3.0.24
 	golang.org/x/crypto v0.0.0-20190605123033-f99c8df09eb5 // indirect
 	golang.org/x/net v0.0.0-20190606173856-1492cefac77f
 	golang.org/x/sys v0.0.0-20190606203320-7fc4e5ec1444 // indirect

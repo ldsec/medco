@@ -15,7 +15,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/lca1/medco-connector/restapi/models"
+	"github.com/ldsec/medco-connector/restapi/models"
 )
 
 // QuerySyncReader is a Reader for the QuerySync structure.
@@ -26,14 +26,12 @@ type QuerySyncReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *QuerySyncReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewQuerySyncOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
 		return result, nil
-
 	default:
 		result := NewQuerySyncDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -61,6 +59,10 @@ type QuerySyncOK struct {
 
 func (o *QuerySyncOK) Error() string {
 	return fmt.Sprintf("[POST /query/sync][%d] querySyncOK  %+v", 200, o.Payload)
+}
+
+func (o *QuerySyncOK) GetPayload() *models.QueryResultElement {
+	return o.Payload
 }
 
 func (o *QuerySyncOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -99,6 +101,10 @@ func (o *QuerySyncDefault) Code() int {
 
 func (o *QuerySyncDefault) Error() string {
 	return fmt.Sprintf("[POST /query/sync][%d] querySync default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *QuerySyncDefault) GetPayload() *QuerySyncDefaultBody {
+	return o.Payload
 }
 
 func (o *QuerySyncDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

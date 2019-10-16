@@ -2,9 +2,9 @@ package unlynx
 
 import (
 	"errors"
-	"github.com/lca1/medco-connector/util"
-	"github.com/lca1/medco-unlynx/services"
-	"github.com/lca1/unlynx/lib"
+	"github.com/ldsec/medco-connector/util"
+	"github.com/ldsec/medco-unlynx/services"
+	"github.com/ldsec/unlynx/lib"
 	"github.com/sirupsen/logrus"
 	"strconv"
 	"time"

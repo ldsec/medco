@@ -1,8 +1,8 @@
 package unlynx
 
 import (
-	"github.com/lca1/medco-connector/util"
-	"github.com/lca1/unlynx/lib"
+	"github.com/ldsec/medco-connector/util"
+	libunlynx "github.com/ldsec/unlynx/lib"
 	"github.com/sirupsen/logrus"
 	"go.dedis.ch/onet/v3"
 	"go.dedis.ch/onet/v3/app"

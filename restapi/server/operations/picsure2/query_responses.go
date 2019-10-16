@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/lca1/medco-connector/restapi/models"
+	models "github.com/ldsec/medco-connector/restapi/models"
 )
 
 // QueryOKCode is the HTTP code returned for type QueryOK

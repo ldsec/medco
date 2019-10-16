@@ -10,7 +10,7 @@ This is the API of the MedCo connector, that orchestrates the query at the MedCo
     Host: localhost
     BasePath: /medco-connector
     Version: 0.2.1
-    License: EULA https://raw.githubusercontent.com/lca1/medco-connector/master/LICENSE
+    License: EULA https://raw.githubusercontent.com/ldsec/medco-connector/master/LICENSE
     Contact: <medco-dev@listes.epfl.ch>
 
     Consumes:

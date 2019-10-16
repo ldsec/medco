@@ -23,14 +23,12 @@ type GetResourcesReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *GetResourcesReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewGetResourcesOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
 		return result, nil
-
 	default:
 		result := NewGetResourcesDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -58,6 +56,10 @@ type GetResourcesOK struct {
 
 func (o *GetResourcesOK) Error() string {
 	return fmt.Sprintf("[GET /resource][%d] getResourcesOK  %+v", 200, o.Payload)
+}
+
+func (o *GetResourcesOK) GetPayload() []*GetResourcesOKBodyItems0 {
+	return o.Payload
 }
 
 func (o *GetResourcesOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -94,6 +96,10 @@ func (o *GetResourcesDefault) Code() int {
 
 func (o *GetResourcesDefault) Error() string {
 	return fmt.Sprintf("[GET /resource][%d] getResources default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *GetResourcesDefault) GetPayload() *GetResourcesDefaultBody {
+	return o.Payload
 }
 
 func (o *GetResourcesDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

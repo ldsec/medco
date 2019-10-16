@@ -30,7 +30,7 @@ func init() {
     },
     "license": {
       "name": "EULA",
-      "url": "https://raw.githubusercontent.com/lca1/medco-connector/master/LICENSE"
+      "url": "https://raw.githubusercontent.com/ldsec/medco-connector/master/LICENSE"
     },
     "version": "0.2.1"
   },
@@ -669,7 +669,7 @@ func init() {
   },
   "security": [
     {
-      "MedCoToken": null
+      "MedCoToken": []
     }
   ],
   "tags": [
@@ -696,7 +696,7 @@ func init() {
     },
     "license": {
       "name": "EULA",
-      "url": "https://raw.githubusercontent.com/lca1/medco-connector/master/LICENSE"
+      "url": "https://raw.githubusercontent.com/ldsec/medco-connector/master/LICENSE"
     },
     "version": "0.2.1"
   },

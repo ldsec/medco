@@ -7,7 +7,7 @@ info:
     email: "medco-dev@listes.epfl.ch"
   license:
     name: "EULA"
-    url: "https://raw.githubusercontent.com/lca1/medco-connector/master/LICENSE"
+    url: "https://raw.githubusercontent.com/ldsec/medco-connector/master/LICENSE"
 basePath: "/pic-sure-api-2/PICSURE"
 tags:
   - name: "picsure2"

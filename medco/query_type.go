@@ -2,7 +2,7 @@ package medco
 
 import (
 	"errors"
-	"github.com/lca1/medco-connector/restapi/models"
+	"github.com/ldsec/medco-connector/restapi/models"
 )
 
 // I2b2MedCoQueryType encodes the requested results from the query

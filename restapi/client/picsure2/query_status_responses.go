@@ -15,7 +15,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/lca1/medco-connector/restapi/models"
+	"github.com/ldsec/medco-connector/restapi/models"
 )
 
 // QueryStatusReader is a Reader for the QueryStatus structure.
@@ -26,14 +26,12 @@ type QueryStatusReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *QueryStatusReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewQueryStatusOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
 		return result, nil
-
 	default:
 		result := NewQueryStatusDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -61,6 +59,10 @@ type QueryStatusOK struct {
 
 func (o *QueryStatusOK) Error() string {
 	return fmt.Sprintf("[POST /query/{queryId}/status][%d] queryStatusOK  %+v", 200, o.Payload)
+}
+
+func (o *QueryStatusOK) GetPayload() *models.QueryStatus {
+	return o.Payload
 }
 
 func (o *QueryStatusOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -99,6 +101,10 @@ func (o *QueryStatusDefault) Code() int {
 
 func (o *QueryStatusDefault) Error() string {
 	return fmt.Sprintf("[POST /query/{queryId}/status][%d] queryStatus default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *QueryStatusDefault) GetPayload() *QueryStatusDefaultBody {
+	return o.Payload
 }
 
 func (o *QueryStatusDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

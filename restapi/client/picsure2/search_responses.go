@@ -16,7 +16,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/lca1/medco-connector/restapi/models"
+	"github.com/ldsec/medco-connector/restapi/models"
 )
 
 // SearchReader is a Reader for the Search structure.
@@ -27,14 +27,12 @@ type SearchReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *SearchReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewSearchOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
 		return result, nil
-
 	default:
 		result := NewSearchDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -62,6 +60,10 @@ type SearchOK struct {
 
 func (o *SearchOK) Error() string {
 	return fmt.Sprintf("[POST /search][%d] searchOK  %+v", 200, o.Payload)
+}
+
+func (o *SearchOK) GetPayload() *SearchOKBody {
+	return o.Payload
 }
 
 func (o *SearchOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -100,6 +102,10 @@ func (o *SearchDefault) Code() int {
 
 func (o *SearchDefault) Error() string {
 	return fmt.Sprintf("[POST /search][%d] search default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *SearchDefault) GetPayload() *SearchDefaultBody {
+	return o.Payload
 }
 
 func (o *SearchDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

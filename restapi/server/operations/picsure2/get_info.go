@@ -14,7 +14,7 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 	swag "github.com/go-openapi/swag"
 
-	models "github.com/lca1/medco-connector/restapi/models"
+	models "github.com/ldsec/medco-connector/restapi/models"
 )
 
 // GetInfoHandlerFunc turns a function with the right signature into a get info handler

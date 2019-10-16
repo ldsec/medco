@@ -1,8 +1,8 @@
 package unlynx
 
 import (
-	"github.com/lca1/medco-connector/util"
-	libunlynx "github.com/lca1/unlynx/lib"
+	"github.com/ldsec/medco-connector/util"
+	libunlynx "github.com/ldsec/unlynx/lib"
 	stats "github.com/r0fls/gostats"
 	"github.com/sirupsen/logrus"
 )

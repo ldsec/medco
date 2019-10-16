@@ -13,7 +13,7 @@ swagger-gen:
 	swagger validate ./swagger/medco-cli-client.yml
 	swagger generate client \
 		--client-package=restapi/client \
-		--existing-models=github.com/lca1/medco-connector/restapi/models \
+		--existing-models=github.com/ldsec/medco-connector/restapi/models \
 		--skip-models \
 		--principal=models.User \
 		--target=./ \
