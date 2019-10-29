@@ -1,276 +1,273 @@
 swagger: "2.0"
 info:
-  description: "This is the API of the MedCo connector, that orchestrates the query at the MedCo node. It implements the PIC-SURE 2 API."
-  version: "0.2.1"
+  description: "API of the MedCo connector, that orchestrates the query at the MedCo node and provides information about the MedCo network."
+  version: "1.0.0"
   title: "MedCo Connector"
   contact:
     email: "medco-dev@listes.epfl.ch"
   license:
     name: "EULA"
     url: "https://raw.githubusercontent.com/ldsec/medco-connector/master/LICENSE"
-basePath: "/medco-connector"
+basePath: "/medco"
 tags:
-  - name: "picsure2"
-    description: "PIC-SURE 2 Resource Service API"
+  - name: "medco-network"
+    description: "MedCo Network API"
+  - name: "medco-node"
+    description: "MedCo Node API"
+  - name: "genomic-annotations"
+    description: "Genomic Annotations Query API"
 schemes:
   - "http"
+consumes:
+  - "application/json"
+produces:
+  - "application/json"
 externalDocs:
   description: "MedCo Technical Documentation"
   url: "https://medco.epfl.ch/documentation"
 security:
-  - MedCoToken: []
+  - medco-jwt: []
 
 paths:
-  /picsure2/info:
-    post:
+  /network:
+    get:
       tags:
-        - "picsure2"
-      summary: "Returns information on how to interact with this PIC-SURE endpoint."
-      operationId: "getInfo"
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
-      parameters:
-        - in: "body"
-          name: "body"
-          description: "Credentials to be used."
-          required: true
-          schema:
-            type: "object"
-            properties:
-              resourceCredentials:
-                $ref: "#/definitions/resourceCredentials"
+        - "medco-network"
+      summary: "Get network metadata."
+      operationId: "getMetadata"
       responses:
         200:
-          $ref: "#/responses/resourceInfo"
+          $ref: "#/responses/networkMetadataResponse"
         default:
-          $ref: "#/responses/error"
+          $ref: "#/responses/errorResponse"
+      security:
+       - medco-jwt: ["medco-network"]
 
-  /picsure2/search:
+
+  /node/explore/search:
     post:
       tags:
-        - "picsure2"
-      summary: "Search through the ontology."
-      operationId: "search"
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
+        - "medco-node"
+      summary: "Search through the ontology for MedCo-Explore query terms."
+      operationId: "exploreSearch"
       parameters:
-        - in: "body"
-          name: "body"
-          description: "Search request."
-          required: true
-          schema:
-            type: "object"
-            properties:
-              resourceCredentials:
-                $ref: "#/definitions/resourceCredentials"
-              query:
-                $ref: "#/definitions/searchQuery"
-              resourceUUID:
-                type: "string"
+        - $ref: "#/parameters/exploreSearchRequest"
       responses:
         200:
-          $ref: "#/responses/searchResult"
+          $ref: "#/responses/exploreSearchResponse"
         default:
-          $ref: "#/responses/error"
+          $ref: "#/responses/errorResponse"
+      security:
+        - medco-jwt: ["medco-explore"]
 
-  /picsure2/query:
+  /node/explore/query:
     post:
       tags:
-        - "picsure2"
-      summary: "Query MedCo node."
-      operationId: "query"
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
+        - "medco-node"
+      summary: "MedCo-Explore query to the node."
+      operationId: "exploreQuery"
       parameters:
-        - in: "body"
-          name: "body"
-          description: "Query request."
-          required: true
-          schema:
-            type: "object"
-            properties:
-              resourceCredentials:
-                $ref: "#/definitions/resourceCredentials"
-              query:
-                $ref: "#/definitions/query"
-              resourceUUID:
-                type: "string"
+        - in: "query"
+          name: "sync"
+          description: "Request synchronous query (defaults to true)."
+          type: "boolean"
+          default: true
+        - $ref: "#/parameters/exploreQueryRequest"
       responses:
         200:
-          $ref: "#/responses/queryStatus"
+          $ref: "#/responses/exploreQueryResponse"
         default:
-          $ref: "#/responses/error"
+          $ref: "#/responses/errorResponse"
+      security:
+        - medco-jwt: ["medco-explore"]
 
-  /picsure2/query/sync:
-    post:
+  /node/explore/query/{queryId}:
+    get:
       tags:
-        - "picsure2"
-      summary: "Query MedCo node synchronously."
-      operationId: "querySync"
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
-      parameters:
-        - in: "body"
-          name: "body"
-          description: "Query request."
-          required: true
-          schema:
-            type: "object"
-            properties:
-              resourceCredentials:
-                $ref: "#/definitions/resourceCredentials"
-              query:
-                $ref: "#/definitions/query"
-              resourceUUID:
-                type: "string"
-      responses:
-        200:
-          $ref: "#/responses/queryResult"
-        default:
-          $ref: "#/responses/error"
-
-  /picsure2/query/{queryId}/status:
-    post:
-      tags:
-        - "picsure2"
-      summary: "Get status of query."
-      operationId: "queryStatus"
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
+        - "medco-node"
+      summary: "Get status and result of a MedCo-Explore query."
+      operationId: "getExploreQuery"
       parameters:
         - in: "path"
           name: "queryId"
           description: "Query ID"
           required: true
           type: "string"
-        - in: "body"
-          name: "body"
-          description: "Credentials to be used."
-          required: true
-          schema:
-            type: "object"
-            properties:
-              resourceCredentials:
-                $ref: "#/definitions/resourceCredentials"
       responses:
         200:
-          $ref: "#/responses/queryStatus"
+          $ref: "#/responses/exploreQueryResponse"
+        404:
+          description: "Query ID not found."
         default:
-          $ref: "#/responses/error"
+          $ref: "#/responses/errorResponse"
+      security:
+        - medco-jwt: ["medco-explore"]
 
-  /picsure2/query/{queryId}/result:
-    post:
+  /genomic-annotations/{annotation}:
+    get:
       tags:
-        - "picsure2"
-      summary: "Get result of query."
-      operationId: "queryResult"
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
+        - "genomic-annotations"
+      summary: "Get genomic annotations values."
+      operationId: "getValues"
       parameters:
         - in: "path"
-          name: "queryId"
-          description: "Query ID"
+          name: "annotation"
+          description: "Genomic annotation name."
           required: true
           type: "string"
-        - in: "body"
-          name: "body"
-          description: "Credentials to be used."
+        - in: "query"
+          name: "value"
+          description: "Genomic annotation value."
           required: true
-          schema:
-            type: "object"
-            properties:
-              resourceCredentials:
-                $ref: "#/definitions/resourceCredentials"
+          type: "string"
+        - in: "query"
+          name: "limit"
+          description: "Limits the number of records retrieved."
+          type: "integer"
+          default: 10
       responses:
         200:
-          $ref: "#/responses/queryResult"
+          description: "Queried annotation values."
+          schema:
+            type: "array"
+            items:
+              type: "string"
+        404:
+          description: "Annotation not found."
         default:
-          $ref: "#/responses/error"
+          $ref: "#/responses/errorResponse"
+      security:
+        - medco-jwt: ["medco-genomic-annotations"]
+
+  /genomic-annotations/{annotation}/{value}:
+    get:
+      tags:
+        - "genomic-annotations"
+      summary: "Get variants corresponding to a genomic annotation value."
+      operationId: "getVariants"
+      parameters:
+        - in: "path"
+          name: "annotation"
+          description: "Genomic annotation name."
+          required: true
+          type: "string"
+        - in: "path"
+          name: "value"
+          description: "Genomic annotation value."
+          required: true
+          type: "string"
+        - in: "query"
+          name: "zygosity"
+          description: "Genomic annotation zygosity."
+          type: "array"
+          items:
+            type: "string"
+            enum:
+              - "heterozygous"
+              - "homozygous"
+              - "unknown"
+          default:
+            - "heterozygous"
+            - "homozygous"
+            - "unknown"
+      responses:
+        200:
+          description: "Queried variants."
+          schema:
+            type: "array"
+            items:
+              type: "string"
+        404:
+          description: "Annotation or annotation value not found."
+        default:
+          $ref: "#/responses/errorResponse"
+      security:
+        - medco-jwt: ["medco-genomic-annotations"]
 
 securityDefinitions:
-  MedCoToken:
+  medco-jwt:
     type: "oauth2"
     flow: "application"
     tokenUrl: "https://medco-demo.epfl.ch/auth"
     description: "MedCo JWT token."
 
+parameters:
+  exploreSearchRequest:
+    in: "body"
+    name: "searchRequest"
+    description: "MedCo-Explore ontology search request."
+    required: true
+    schema:
+      $ref: "#/definitions/exploreSearch"
+
+  exploreQueryRequest:
+    in: "body"
+    name: "queryRequest"
+    description: "MedCo-Explore query request."
+    required: true
+    schema:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+        query:
+          $ref: "#/definitions/exploreQuery"
+
 responses:
-  error:
-    description: "Error response"
+  errorResponse:
+    description: "Error response."
     schema:
       type: "object"
       properties:
         message:
           type: "string"
 
-  resourceInfo:
-    description: "PIC-SURE 2 resource information."
+  networkMetadataResponse:
+    description: "Network metadata (public key and nodes list)."
+    schema:
+      type: "object"
+      properties:
+        public-key:
+          type: "string"
+          description: "Aggregated public key of the collective authority."
+        nodes:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              index:
+                type: "integer"
+              url:
+                type: "string"
+        nodeIndex:
+          type: "integer"
+
+  exploreSearchResponse:
+    description: "MedCo-Explore search query response."
+    schema:
+      type: "object"
+      properties:
+        search:
+          $ref: "#/definitions/exploreSearch"
+        results:
+          type: "array"
+          items:
+            $ref: "#/definitions/exploreSearchResultElement"
+
+  exploreQueryResponse:
+    description: "MedCo-Explore query response."
     schema:
       type: "object"
       properties:
         id:
           type: "string"
-        name:
-          type: "string"
-        queryFormats:
-          type: "array"
-          items:
-            type: "object"
-            properties:
-              name:
-                type: "string"
-              description:
-                type: "string"
-              examples:
-                type: "array"
-                items:
-                  type: "object"
-              specifications:
-                type: "object"
-
-  searchResult:
-    description: "Search results."
-    schema:
-      type: "object"
-      properties:
-        searchQuery:
-          type: "string"
-        results:
-          type: "array"
-          items:
-            $ref: "#/definitions/searchResultElement"
-
-  queryStatus:
-    description: "Query status."
-    schema:
-      $ref: "#/definitions/queryStatus"
-
-  queryResult:
-    description: "Query result."
-    schema:
-      $ref: "#/definitions/queryResultElement"
+        query:
+          $ref: "#/definitions/exploreQuery"
+        result:
+          $ref: "#/definitions/exploreQueryResultElement"
 
 definitions:
-  resourceCredentials:
-    type: "object"
-    properties:
-      MEDCO_TOKEN:
-        type: "string"
-        description: "MedCo authorization token."
-
-  searchQuery:
+  exploreSearch:
     type: "object"
     properties:
       type:
@@ -281,7 +278,7 @@ definitions:
       path:
         type: "string"
 
-  searchResultElement:
+  exploreSearchResultElement:
     type: "object"
     required: [leaf]
     properties:
@@ -321,58 +318,49 @@ definitions:
       metadata:
         type: "object"
 
-  query:
-    type: "object"
+  exploreQuery:
+    description: "MedCo-Explore query"
     properties:
-      name:
-        type: "string"
-      i2b2-medco:
+      type:
+        $ref: "#/definitions/exploreQueryType"
+      differentialPrivacy:
         type: "object"
-        description: "i2b2-medco query"
+        description: "differential privacy query parameters (todo)"
         properties:
-          queryType:
-            $ref: "#/definitions/queryType"
-          differentialPrivacy:
-            type: "object"
-            description: "differential privacy query parameters (todo)"
-            properties:
-              queryBudget:
-                type: "number"
-          panels:
-            type: "array"
-            description: "i2b2 panels (linked by an AND)"
+          queryBudget:
+            type: "number"
+      userPublicKey:
+        type: "string"
+      panels:
+        type: "array"
+        description: "i2b2 panels (linked by an AND)"
+        items:
+          type: "object"
+          required: [not]
+          properties:
+            not:
+              type: "boolean"
+              description: "exclude the i2b2 panel"
             items:
-              type: "object"
-              required: [not]
-              properties:
-                not:
-                  type: "boolean"
-                  description: "exclude the i2b2 panel"
-                items:
-                  type: "array"
-                  description: "i2b2 items (linked by an OR)"
-                  items:
-                    type: "object"
-                    required: [encrypted]
-                    properties:
-                      queryTerm:
-                        type: "string"
-                      operator:
-                        type: "string"
-                        enum:
-                          - exists
-                          - equals
-                      value:
-                        type: "string"
-                      encrypted:
-                        type: "boolean"
-          userPublicKey:
-            type: "string"
-      genomic-annotations:
-        type: "object"
-        description: "genomic annotations query (todo)"
+              type: "array"
+              description: "i2b2 items (linked by an OR)"
+              items:
+                type: "object"
+                required: [encrypted]
+                properties:
+                  queryTerm:
+                    type: "string"
+                  operator:
+                    type: "string"
+                    enum:
+                      - exists
+                      - equals
+                  value:
+                    type: "string"
+                  encrypted:
+                    type: "boolean"
 
-  queryType:
+  exploreQueryType:
     type: "string"
     enum:
       - patient_list
@@ -383,14 +371,17 @@ definitions:
       - count_global
       - count_global_obfuscated
 
-  queryResultElement:
+  exploreQueryResultElement:
     type: "object"
     properties:
-      queryType:
-        $ref: "#/definitions/queryType"
-      encryptedCount:
+      status:
         type: "string"
-      encryptionKey:
+        enum:
+          - queued
+          - pending
+          - error
+          - available
+      encryptedCount:
         type: "string"
       encryptedPatientList:
         type: "array"
@@ -407,39 +398,12 @@ definitions:
               type: "integer"
               format: "int64"
 
-  queryStatus:
-    type: "object"
-    properties:
-      status:
-        type: "string"
-        enum:
-          - QUEUED
-          - PENDING
-          - ERROR
-          - AVAILABLE
-      resourceID:
-        type: "string"
-      resourceStatus:
-        type: "string"
-      picsureResultId:
-        type: "string"
-      resourceResultId:
-        type: "string"
-      resultMetadata:
-        type: "string"
-        format: "byte"
-      sizeInBytes:
-        type: "integer"
-        format: "int64"
-      startTime:
-        type: "integer"
-        format: "int64"
-      duration:
-        type: "integer"
-        format: "int64"
-      expiration:
-        type: "integer"
-        format: "int64"
+  restApiAuthorization:
+    type: "string"
+    enum:
+      - medco-network
+      - medco-explore
+      - medco-genomic-annotations
 
   user:
     type: "object"
@@ -451,7 +415,11 @@ definitions:
       authorizations:
         type: "object"
         properties:
-          queryType:
+          restApi:
             type: "array"
             items:
-              $ref: "#/definitions/queryType"
+              $ref: "#/definitions/restApiAuthorization"
+          exploreQuery:
+            type: "array"
+            items:
+              $ref: "#/definitions/exploreQueryType"

@@ -4,19 +4,24 @@ package server
 
 import (
 	"crypto/tls"
+	"github.com/ldsec/medco-connector/server/handlers"
+	"github.com/ldsec/medco-connector/util/server"
+	"github.com/sirupsen/logrus"
+	"net/http"
+
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
-	"github.com/go-openapi/runtime/security"
-	"github.com/ldsec/medco-connector/medco"
-	"github.com/ldsec/medco-connector/restapi/models"
+
 	"github.com/ldsec/medco-connector/restapi/server/operations"
-	"github.com/ldsec/medco-connector/restapi/server/operations/picsure2"
-	"github.com/sirupsen/logrus"
-	"net/http"
+	"github.com/ldsec/medco-connector/restapi/server/operations/genomic_annotations"
+	"github.com/ldsec/medco-connector/restapi/server/operations/medco_network"
+	"github.com/ldsec/medco-connector/restapi/server/operations/medco_node"
+
+	"github.com/ldsec/medco-connector/restapi/models"
 )
 
-//go:generate swagger generate server --target ../../swagger --name MedcoConnector --spec ../swagger.yml
+//go:generate swagger generate server --target ../../../medco-connector --name MedcoConnector --spec ../../swagger/medco-connector-server.yml --model-package restapi/models --server-package restapi/server --principal models.User
 
 func configureFlags(api *operations.MedcoConnectorAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }
@@ -28,38 +33,49 @@ func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
 	api.JSONProducer = runtime.JSONProducer()
 	api.Logger = logrus.Printf
 
-	// override goswagger authentication methods, to be handled manually in requests
-	// api.MedCoTokenAuth = ...
-	// api.APIAuthorizer = security.Authorized()
-	api.BearerAuthenticator = func(name string, authenticate security.ScopedTokenAuthentication) runtime.Authenticator {
-		return security.ScopedAuthenticator(func(r *security.ScopedAuthRequest) (bool, interface{}, error) {
-			return true, &models.User{}, nil
-		})
+	// validate identity and generate principal, check endpoint-based authorizations
+	api.MedcoJwtAuth = func(token string, requiredAuthorizations []string) (principal *models.User, err error) {
+
+		// authenticate user
+		principal, err = utilserver.AuthenticateUser(token)
+		if err != nil {
+			return
+		}
+
+		// check rest api authorizations
+		for _, requiredAuthorization := range requiredAuthorizations {
+			err = utilserver.AuthorizeRestApiEndpoint(principal, models.RestAPIAuthorization(requiredAuthorization))
+			if err != nil {
+				return
+			}
+		}
+
+		return
 	}
 
-	// /medco/picsure2/info
-	api.Picsure2GetInfoHandler = picsure2.GetInfoHandlerFunc(medco.GetInfoHandlerFunc)
+	// /medco/network
+	api.MedcoNetworkGetMetadataHandler = medco_network.GetMetadataHandlerFunc(handlers.MedCoNetworkGetMetadataHandler)
 
-	// /medco/picsure2/query
-	api.Picsure2QueryHandler = picsure2.QueryHandlerFunc(func(params picsure2.QueryParams, principal *models.User) middleware.Responder {
-		return middleware.NotImplemented("operation picsure2.Query has not yet been implemented")
+	// /medco/node/explore/search
+	api.MedcoNodeExploreSearchHandler = medco_node.ExploreSearchHandlerFunc(handlers.MedCoNodeExploreSearchHandler)
+
+	// /medco/node/explore/query
+	api.MedcoNodeExploreQueryHandler = medco_node.ExploreQueryHandlerFunc(handlers.MedCoNodeExploreQueryHandler)
+
+	// /medco/node/explore/query/{queryId}
+	api.MedcoNodeGetExploreQueryHandler = medco_node.GetExploreQueryHandlerFunc(func(params medco_node.GetExploreQueryParams, principal *models.User) middleware.Responder {
+		return middleware.NotImplemented("operation medco_node.GetQueryResult has not yet been implemented")
 	})
 
-	// /medco/picsure2/query/{id}/result
-	api.Picsure2QueryResultHandler = picsure2.QueryResultHandlerFunc(func(params picsure2.QueryResultParams, principal *models.User) middleware.Responder {
-		return middleware.NotImplemented("operation picsure2.QueryResult has not yet been implemented")
+	// /medco/genomic-annotations/{annotation}
+	api.GenomicAnnotationsGetValuesHandler = genomic_annotations.GetValuesHandlerFunc(func(params genomic_annotations.GetValuesParams, principal *models.User) middleware.Responder {
+		return middleware.NotImplemented("operation genomic_annotations.GetValues has not yet been implemented")
 	})
 
-	// /medco/picsure2/query/{id}/status
-	api.Picsure2QueryStatusHandler = picsure2.QueryStatusHandlerFunc(func(params picsure2.QueryStatusParams, principal *models.User) middleware.Responder {
-		return middleware.NotImplemented("operation picsure2.QueryStatus has not yet been implemented")
+	// /genomic-annotations/{annotation}/{value}
+	api.GenomicAnnotationsGetVariantsHandler = genomic_annotations.GetVariantsHandlerFunc(func(params genomic_annotations.GetVariantsParams, principal *models.User) middleware.Responder {
+		return middleware.NotImplemented("operation genomic_annotations.GetVariants has not yet been implemented")
 	})
-
-	// /medco/picsure2/query/sync
-	api.Picsure2QuerySyncHandler = picsure2.QuerySyncHandlerFunc(medco.QuerySyncHandlerFunc)
-
-	// /medco/picsure2/search
-	api.Picsure2SearchHandler = picsure2.SearchHandlerFunc(medco.SearchHandlerFunc)
 
 	api.ServerShutdown = func() {}
 

@@ -82,15 +82,22 @@ func (m *User) UnmarshalBinary(b []byte) error {
 // swagger:model UserAuthorizations
 type UserAuthorizations struct {
 
-	// query type
-	QueryType []QueryType `json:"queryType"`
+	// explore query
+	ExploreQuery []ExploreQueryType `json:"exploreQuery"`
+
+	// rest Api
+	RestAPI []RestAPIAuthorization `json:"restApi"`
 }
 
 // Validate validates this user authorizations
 func (m *UserAuthorizations) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateQueryType(formats); err != nil {
+	if err := m.validateExploreQuery(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateRestAPI(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -100,17 +107,37 @@ func (m *UserAuthorizations) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *UserAuthorizations) validateQueryType(formats strfmt.Registry) error {
+func (m *UserAuthorizations) validateExploreQuery(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.QueryType) { // not required
+	if swag.IsZero(m.ExploreQuery) { // not required
 		return nil
 	}
 
-	for i := 0; i < len(m.QueryType); i++ {
+	for i := 0; i < len(m.ExploreQuery); i++ {
 
-		if err := m.QueryType[i].Validate(formats); err != nil {
+		if err := m.ExploreQuery[i].Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("authorizations" + "." + "queryType" + "." + strconv.Itoa(i))
+				return ve.ValidateName("authorizations" + "." + "exploreQuery" + "." + strconv.Itoa(i))
+			}
+			return err
+		}
+
+	}
+
+	return nil
+}
+
+func (m *UserAuthorizations) validateRestAPI(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.RestAPI) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.RestAPI); i++ {
+
+		if err := m.RestAPI[i].Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("authorizations" + "." + "restApi" + "." + strconv.Itoa(i))
 			}
 			return err
 		}

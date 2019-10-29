@@ -2,14 +2,14 @@
 
 /*
 Package server MedCo Connector
-This is the API of the MedCo connector, that orchestrates the query at the MedCo node. It implements the PIC-SURE 2 API.
+API of the MedCo connector, that orchestrates the query at the MedCo node and provides information about the MedCo network.
 
 
     Schemes:
       http
     Host: localhost
-    BasePath: /medco-connector
-    Version: 0.2.1
+    BasePath: /medco
+    Version: 1.0.0
     License: EULA https://raw.githubusercontent.com/ldsec/medco-connector/master/LICENSE
     Contact: <medco-dev@listes.epfl.ch>
 
