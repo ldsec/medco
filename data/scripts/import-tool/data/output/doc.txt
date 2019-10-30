@@ -1,3 +1,0 @@
-This folder stores the output of the using_clustering.py python script:
--> dummy_to_patient.csv: maps dummy UIDs to 'real' patients UIDs
--> observation_fact.csv: observation fact table with some cluster information for each observation
