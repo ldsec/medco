@@ -1,6 +1,7 @@
 package utilserver
 
 import (
+	"database/sql"
 	"github.com/sirupsen/logrus"
 	onetLog "go.dedis.ch/onet/v3/log"
 	"os"
@@ -49,6 +50,19 @@ var OidcJwtUserIDClaim string
 // MedCoObfuscationMin is the minimum variance passed to the random distribution for the obfuscation
 var MedCoObfuscationMin int
 
+// DBMSAddress is the host of the DBMS
+var DBMSHost string
+// DBMSPort is the number of the port used by the DBMS
+var DBMSPort int
+// DBName is the name of the database
+var DBName string
+// DBLoginUser is the database login user
+var DBLoginUser string
+// DBLoginPassword is the database login password
+var DBLoginPassword string
+// DBConnection is the connection to the database
+var DBConnection *sql.DB
+
 func init() {
 	SetLogLevel(os.Getenv("LOG_LEVEL"))
 
@@ -95,6 +109,24 @@ func init() {
 		obf = 5
 	}
 	MedCoObfuscationMin = int(obf)
+
+	DBMSHost = os.Getenv("I2B2_DB_HOST")
+	DBName = os.Getenv("I2B2_DB_NAME")
+	DBLoginUser = os.Getenv("I2B2_DB_USER")
+	DBLoginPassword = os.Getenv("I2B2_DB_PW")
+
+	dbmsPort, err := strconv.ParseInt(os.Getenv("I2B2_DB_PORT"), 10, 64)
+	if err != nil || dbmsPort < 0 || dbmsPort > 65535 {
+		logrus.Warn("invalid DBMS port, defaulted")
+		dbmsPort = 5432
+	}
+	DBMSPort = int(dbmsPort)
+
+	DBConnection, err = InitializeConnectionToDB(DBMSHost, DBMSPort, DBName, DBLoginUser, DBLoginPassword)
+	if err != nil {
+		logrus.Error("Impossible to initialize connection to DB")
+		return
+	}
 
 }
 
