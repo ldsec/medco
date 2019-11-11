@@ -60,6 +60,18 @@ func TestServiceDDT(t *testing.T) {
 
 	results := make(map[string][]libunlynx.GroupingKey)
 
+	// sanitization tests
+	// no SurveyID
+	_, _, _, err := clients[0].SendSurveyDDTRequestTerms(el, "", qt, proofs, true)
+	assert.Error(t, err)
+	// no Roster
+	emptyRoster := *el
+	emptyRoster.List = nil
+	_, _, _, err = clients[0].SendSurveyDDTRequestTerms(&emptyRoster, "testDDTSurvey_", qt, proofs, true)
+	assert.Error(t, err)
+	// no terms to tag
+	_, _, _, err = clients[0].SendSurveyDDTRequestTerms(el, "testDDTSurvey_", nil, proofs, true)
+
 	wg := libunlynx.StartParallelize(len(clients))
 	var mutex = sync.Mutex{}
 	for i, client := range clients {
@@ -108,6 +120,22 @@ func TestServiceKS(t *testing.T) {
 		targetData = append(targetData, *libunlynx.EncryptInt(el.Aggregate, int64(i)))
 	}
 
+	// sanitization tests
+	// no SurveyID
+	_, _, _, err := clients[0].SendSurveyKSRequest(el, "", pubKeys[0], targetData, proofs)
+	assert.Error(t, err)
+	// no Roster
+	emptyRoster := *el
+	emptyRoster.List = nil
+	_, _, _, err = clients[0].SendSurveyKSRequest(&emptyRoster, "testKSRequest", pubKeys[0], targetData, proofs)
+	assert.Error(t, err)
+	// no target pubKey
+	_, _, _, err = clients[0].SendSurveyKSRequest(el, "testKSRequest", nil, targetData, proofs)
+	assert.Error(t, err)
+	// no terms to key switch
+	_, _, _, err = clients[0].SendSurveyKSRequest(el, "testKSRequest", pubKeys[0], nil, proofs)
+	assert.Error(t, err)
+
 	wg := libunlynx.StartParallelize(nbHosts)
 	var mutex = sync.Mutex{}
 	for i, client := range clients {
@@ -151,14 +179,31 @@ func TestServiceAgg(t *testing.T) {
 
 	secKeys := make([]kyber.Scalar, 0)
 	pubKeys := make([]kyber.Point, 0)
-	targetData := *libunlynx.EncryptInt(el.Aggregate, int64(1))
 	results := make([]int64, nbHosts)
 
+	targetData := *libunlynx.EncryptInt(el.Aggregate, int64(1))
 	for i := 0; i < nbHosts; i++ {
 		_, sK, pK := libunlynx.GenKeys(1)
 		secKeys = append(secKeys, sK[0])
 		pubKeys = append(pubKeys, pK[0])
 	}
+
+	// sanitization tests
+	// no SurveyID
+	_, _, _, err := clients[0].SendSurveyAggRequest(el, "", pubKeys[0], targetData, proofs)
+	assert.Error(t, err)
+	// no Roster
+	emptyRoster := *el
+	emptyRoster.List = nil
+	_, _, _, err = clients[0].SendSurveyAggRequest(&emptyRoster, "testAggRequest", pubKeys[0], targetData, proofs)
+	assert.Error(t, err)
+	// no target pubKey
+	_, _, _, err = clients[0].SendSurveyAggRequest(el, "testAggRequest", nil, targetData, proofs)
+	assert.Error(t, err)
+	// no terms to aggregate
+	emptyData := libunlynx.CipherText{}
+	_, _, _, err = clients[0].SendSurveyAggRequest(el, "testAggRequest", pubKeys[0], emptyData, proofs)
+	assert.Error(t, err)
 
 	wg := libunlynx.StartParallelize(nbHosts)
 	var mutex = sync.Mutex{}
@@ -166,7 +211,7 @@ func TestServiceAgg(t *testing.T) {
 		go func(i int, client *servicesmedco.API) {
 			defer wg.Done()
 
-			_, res, tr, err := client.SendSurveyAggRequest(el, servicesmedco.SurveyID("testAggRequest"), pubKeys[i], targetData, proofs)
+			_, res, tr, err := client.SendSurveyAggRequest(el, "testAggRequest", pubKeys[i], targetData, proofs)
 			if err != nil {
 				t.Fatal("Client", client.ClientID, " service did not start: ", err)
 			}
@@ -208,13 +253,29 @@ func TestServiceShuffle(t *testing.T) {
 		targetData = append(targetData, *libunlynx.EncryptInt(el.Aggregate, int64(i)))
 	}
 
+	// sanitization tests
+	// no SurveyID
+	_, _, _, err := clients[0].SendSurveyShuffleRequest(el, "", pubKeys[0], &targetData[0], proofs)
+	assert.Error(t, err)
+	// no Roster
+	emptyRoster := *el
+	emptyRoster.List = nil
+	_, _, _, err = clients[0].SendSurveyShuffleRequest(&emptyRoster, "testShuffleRequest", pubKeys[0], &targetData[0], proofs)
+	assert.Error(t, err)
+	// no target pubKey
+	_, _, _, err = clients[0].SendSurveyShuffleRequest(el, "testShuffleRequest", nil, &targetData[0], proofs)
+	assert.Error(t, err)
+	// no terms to aggregate
+	_, _, _, err = clients[0].SendSurveyShuffleRequest(el, "testShuffleRequest", pubKeys[0], nil, proofs)
+	assert.Error(t, err)
+
 	wg := libunlynx.StartParallelize(nbHosts)
 	var mutex = sync.Mutex{}
 	for i, client := range clients {
 		go func(i int, client *servicesmedco.API) {
 			defer wg.Done()
 
-			_, res, tr, err := client.SendSurveyShuffleRequest(el, servicesmedco.SurveyID("testShuffleRequest"), pubKeys[i], targetData[i], proofs)
+			_, res, tr, err := client.SendSurveyShuffleRequest(el, "testShuffleRequest", pubKeys[i], &targetData[i], proofs)
 			if err != nil {
 				t.Fatal("Client", client.ClientID, " service did not start: ", err)
 			}

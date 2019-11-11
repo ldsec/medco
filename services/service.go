@@ -155,8 +155,30 @@ func (s *Service) Process(msg *network.Envelope) {
 // Request Handlers
 //______________________________________________________________________________________________________________________
 
+func emptySurveyID(id SurveyID) error {
+	if id == "" {
+		err := errors.New("surveyID is empty")
+		return err
+	}
+	return nil
+}
+
+func emptyRoster(roster onet.Roster) error {
+	if len(roster.List) == 0 {
+		err := errors.New("roster is empty")
+		return err
+	}
+	return nil
+}
+
 // HandleSurveyTagGenerated handles triggers the SurveyDDTChannel
 func (s *Service) HandleSurveyTagGenerated(recq *SurveyTagGenerated) (network.Message, error) {
+	// sanitize params
+	if err := emptySurveyID(recq.SurveyID); err != nil {
+		log.Error(err)
+		return nil, err
+	}
+
 	surveyTag, err := s.getSurveyTag(recq.SurveyID)
 	if err != nil {
 		log.Error(err)
@@ -168,14 +190,30 @@ func (s *Service) HandleSurveyTagGenerated(recq *SurveyTagGenerated) (network.Me
 
 // HandleSurveyDDTRequestTerms handles the reception of the query terms to be deterministically tagged
 func (s *Service) HandleSurveyDDTRequestTerms(sdq *SurveyDDTRequest) (network.Message, error) {
+	// sanitize params
+	if err := emptySurveyID(sdq.SurveyID); err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	if err := emptyRoster(sdq.Roster); err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	if sdq.IntraMessage == true && sdq.MessageSource == nil {
+		err := errors.New("missing message source")
+		log.Error(err)
+		return nil, err
+	}
 
 	// if this server is the one receiving the request from the client
 	if !sdq.IntraMessage {
 		log.Lvl2(s.ServerIdentity().String(), " received a SurveyDDTRequestTerms:", sdq.SurveyID)
 
 		if len(sdq.Terms) == 0 {
-			log.Lvl2(s.ServerIdentity(), " for survey", sdq.SurveyID, "has no data to det tag")
-			return &ResultDDT{}, nil
+			errStr := s.ServerIdentity().String() + " for survey" + string(sdq.SurveyID) + "has no data to det tag"
+			err := errors.New(errStr)
+			log.Error(err)
+			return nil, err
 		}
 
 		// initialize timers
@@ -265,6 +303,26 @@ func (s *Service) HandleSurveyDDTRequestTerms(sdq *SurveyDDTRequest) (network.Me
 
 // HandleSurveyKSRequest handles the reception of the aggregate local result to be key switched
 func (s *Service) HandleSurveyKSRequest(skr *SurveyKSRequest) (network.Message, error) {
+	// sanitize params
+	if err := emptySurveyID(skr.SurveyID); err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	if err := emptyRoster(skr.Roster); err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	if skr.ClientPubKey == nil {
+		err := errors.New("no target public key")
+		log.Error(err)
+		return nil, err
+	}
+	if skr.KSTarget == nil && len(skr.KSTarget) == 0 {
+		errStr := s.ServerIdentity().String() + " for survey" + string(skr.SurveyID) + "has no data to key switch"
+		err := errors.New(errStr)
+		return nil, err
+	}
+
 	log.Lvl2(s.ServerIdentity().String(), " received a SurveyKSRequest:", skr.SurveyID)
 
 	mapTR := make(map[string]time.Duration)
@@ -297,6 +355,21 @@ func (s *Service) HandleSurveyKSRequest(skr *SurveyKSRequest) (network.Message, 
 
 // HandleSurveyShuffleRequest handles the reception of the aggregate local result to be shared/shuffled/switched
 func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network.Message, error) {
+	// sanitize params
+	if err := emptySurveyID(ssr.SurveyID); err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	if err := emptyRoster(ssr.Roster); err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	if ssr.ClientPubKey == nil {
+		err := errors.New("no target public key")
+		log.Error(err)
+		return nil, err
+	}
+
 	var root bool
 	if s.ServerIdentity().String() == ssr.Roster.List[0].String() {
 		root = true
@@ -308,6 +381,11 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 
 	// (root = true - intra = false )
 	if !ssr.IntraMessage && root {
+		if ssr.ShuffleTarget == nil || len(ssr.ShuffleTarget) == 0 {
+			errStr := s.ServerIdentity().String() + " for survey" + string(ssr.SurveyID) + "has no data to shuffle"
+			err := errors.New(errStr)
+			return nil, err
+		}
 
 		mapTR := make(map[string]time.Duration)
 		err := s.putSurveyShuffle(ssr.SurveyID, SurveyShuffle{
@@ -341,9 +419,6 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 		surveyShuffle, err = s.getSurveyShuffle(ssr.SurveyID)
 		if err != nil {
 			return nil, err
-		}
-		if len(surveyShuffle.Request.ShuffleTarget) <= 1 {
-			return nil, errors.New("no data to shuffle")
 		}
 
 		// shuffle the results
@@ -413,6 +488,11 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 
 		//(root = false - intra = false )
 	} else if !ssr.IntraMessage && !root { // if message sent by client and not a root node
+		if ssr.ShuffleTarget == nil || len(ssr.ShuffleTarget) == 0 {
+			errStr := s.ServerIdentity().String() + " for survey" + string(ssr.SurveyID) + "has no data to shuffle"
+			err := errors.New(errStr)
+			return nil, err
+		}
 
 		mapTR := make(map[string]time.Duration)
 		err := s.putSurveyShuffle(ssr.SurveyID, SurveyShuffle{
@@ -472,6 +552,16 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 
 		// (root = true - intra = true )
 	} else if ssr.IntraMessage && root { // if message sent by another node and is root
+		if ssr.MessageSource == nil {
+			err := errors.New("missing message source")
+			log.Error(err)
+			return nil, err
+		}
+		if ssr.ShuffleTarget == nil || len(ssr.ShuffleTarget) == 0 {
+			errStr := s.ServerIdentity().String() + " for survey" + string(ssr.SurveyID) + "has no data to shuffle"
+			err := errors.New(errStr)
+			return nil, err
+		}
 
 		// the other nodes sent their local aggregation values
 		s.Mutex.Lock()
@@ -497,6 +587,16 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 
 		// (root = false - intra = true )
 	} else { // if message sent by another node and not root
+		if ssr.MessageSource == nil {
+			err := errors.New("missing message source")
+			log.Error(err)
+			return nil, err
+		}
+		if ssr.KSTarget == nil || len(ssr.KSTarget) == 0 {
+			errStr := s.ServerIdentity().String() + " for survey" + string(ssr.SurveyID) + "has no data to key switch"
+			err := errors.New(errStr)
+			return nil, err
+		}
 
 		// update the local survey with the shuffled results
 		s.Mutex.Lock()
@@ -543,6 +643,12 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 
 // HandleSurveyShuffleGenerated handles triggers the SurveyChannel in the Shuffle Request
 func (s *Service) HandleSurveyShuffleGenerated(recq *SurveyShuffleGenerated) (network.Message, error) {
+	// sanitize params
+	if err := emptySurveyID(recq.SurveyID); err != nil {
+		log.Error(err)
+		return nil, err
+	}
+
 	var el interface{}
 	el = nil
 	for el == nil {
@@ -564,6 +670,26 @@ func (s *Service) HandleSurveyShuffleGenerated(recq *SurveyShuffleGenerated) (ne
 
 // HandleSurveyAggRequest handles the reception of the aggregate local result to be shared/shuffled/switched
 func (s *Service) HandleSurveyAggRequest(sar *SurveyAggRequest) (network.Message, error) {
+	// sanitize params
+	if err := emptyRoster(sar.Roster); err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	if err := emptySurveyID(sar.SurveyID); err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	if sar.AggregateTarget.K == nil || sar.AggregateTarget.C == nil {
+		errStr := s.ServerIdentity().String() + " for survey" + string(sar.SurveyID) + "has no data to aggregate"
+		err := errors.New(errStr)
+		return nil, err
+	}
+	if sar.ClientPubKey == nil {
+		err := errors.New("no target public key")
+		log.Error(err)
+		return nil, err
+	}
+
 	log.Lvl2(s.ServerIdentity().String(), " received a SurveyAggRequest:", sar.SurveyID)
 
 	mapTR := make(map[string]time.Duration)
@@ -623,6 +749,12 @@ func (s *Service) HandleSurveyAggRequest(sar *SurveyAggRequest) (network.Message
 
 // HandleSurveyAggGenerated handles triggers the SurveyChannel
 func (s *Service) HandleSurveyAggGenerated(recq *SurveyAggGenerated) (network.Message, error) {
+	// sanitize params
+	if err := emptySurveyID(recq.SurveyID); err != nil {
+		log.Error(err)
+		return nil, err
+	}
+
 	var el interface{}
 	el = nil
 	for el == nil {
