@@ -87,6 +87,27 @@ func main() {
 			},
 		},
 
+		{
+			Name:    "genomic-annotations-query",
+			Aliases: []string{"gaq"},
+			Usage:   "Get genomic annotations values",
+			Flags: queryCommandFlags,
+			ArgsUsage: "[patient_list|count_per_site|count_per_site_obfuscated|count_per_site_shuffled|" +
+				"count_per_site_shuffled_obfuscated|count_global|count_global_obfuscated] [query string]",
+			Action:  func(c *cli.Context) error {
+				return medcoclient.ExecuteClientQuery(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.Args().First(),
+					strings.Join(c.Args().Tail(), " "),
+					c.String("resultFile"),
+					c.GlobalBool("disableTLSCheck"),
+					c.Bool("bypassPicsure"),
+				)
+			},
+		},
+
 	}
 
 	//cliApp.Before = func(c *cli.Context) error {

@@ -98,7 +98,7 @@ func NewExploreQuery(authToken string, queryType models.ExploreQueryType, encPan
 // Execute executes the MedCo client query synchronously on all the nodes
 func (clientQuery *ExploreQuery) Execute() (nodesResult map [int]*ExploreQueryResult, err error) {
 
-	queryResultsChan := make(chan *models.ExploreQueryResultElement)
+	queryResultsChan := make(chan *models.QueryResultElement)
 	queryErrChan := make(chan error)
 
 	// execute requests on all nodes
