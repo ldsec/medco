@@ -5,68 +5,85 @@ import (
 	"errors"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/ldsec/medco-connector/restapi/client"
-	"github.com/ldsec/medco-connector/restapi/client/picsure2"
+	"github.com/ldsec/medco-connector/restapi/client/medco_network"
+	"github.com/ldsec/medco-connector/restapi/client/medco_node"
 	"github.com/ldsec/medco-connector/restapi/models"
-	"github.com/ldsec/medco-connector/unlynx"
-	utilclient "github.com/ldsec/medco-connector/util/client"
+	"github.com/ldsec/medco-connector/util/client"
+	"github.com/ldsec/medco-connector/wrappers/unlynx"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"net/url"
 	"time"
 )
 
-// Query is a MedCo client query
-type Query struct {
+// ExploreQuery is a MedCo client explore query
+type ExploreQuery struct {
 
 	// httpMedCoClients are the HTTP clients for the MedCo connectors
 	httpMedCoClients []*client.MedcoCli
-	// httpPicsureClient is the HTTP client for the MedCo connectors through PIC-SURE
-	httpPicsureClient *client.MedcoCli
-	// picsureResourceNames is the list of PIC-SURE resources names corresponding to the MedCo connector of each node
-	picsureResourceNames []string
-	// picsureResourceUUIDs is the list of PIC-SURE resources UUIDs corresponding to the MedCo connector of each node
-	picsureResourceUUIDs []string
 	// authToken is the OIDC authentication JWT
 	authToken string
-	// bypassPicsure instructs to query directly directly the medco connectors
-	bypassPicsure bool
 
 	// userPublicKey is the user public key
 	userPublicKey string
 	// userPrivateKey is the user private key
 	userPrivateKey string
 
-	// queryType is the type of query requested
-	queryType models.QueryType
+	// queryType is the type of explore query requested
+	queryType models.ExploreQueryType
 	// encPanelsItemKeys is part of the query: contains the encrypted item keys organized by panel
 	encPanelsItemKeys [][]string
 	// panelsIsNot is part of the query: indicates which panels are negated
 	panelsIsNot       []bool
 }
 
-// NewQuery creates a new MedCo client query
-func NewQuery(authToken string, queryType models.QueryType, encPanelsItemKeys [][]string, panelsIsNot []bool, disableTLSCheck bool, bypassPicsure bool) (q *Query, err error) {
+// NewExploreQuery creates a new MedCo client query
+func NewExploreQuery(authToken string, queryType models.ExploreQueryType, encPanelsItemKeys [][]string, panelsIsNot []bool, disableTLSCheck bool) (q *ExploreQuery, err error) {
 
-	transport := httptransport.New(utilclient.Picsure2APIHost, utilclient.Picsure2APIBasePath, []string{utilclient.Picsure2APIScheme})
-	transport.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: disableTLSCheck}
-
-	q = &Query{
-
-		httpPicsureClient:    client.New(transport, nil),
-		picsureResourceNames: utilclient.Picsure2Resources,
-		picsureResourceUUIDs: []string{},
+	q = &ExploreQuery{
 		authToken:            authToken,
-		bypassPicsure:	      bypassPicsure,
-
 		queryType: queryType,
 		encPanelsItemKeys: encPanelsItemKeys,
 		panelsIsNot: panelsIsNot,
 	}
 
-	// retrieve resources information
-	err = q.loadResources(disableTLSCheck)
+	// retrieve network information
+	parsedUrl, err := url.Parse(utilclient.MedCoConnectorURL)
 	if err != nil {
+		logrus.Error("cannot parse MedCo connector URL: ", err)
 		return
+	}
+
+	transport := httptransport.New(parsedUrl.Host, parsedUrl.Path, []string{parsedUrl.Scheme})
+	transport.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: disableTLSCheck}
+
+	getMetadataResp, err := client.New(transport, nil).MedcoNetwork.GetMetadata(
+		medco_network.NewGetMetadataParamsWithTimeout(30 * time.Second),
+		httptransport.BearerToken(authToken),
+	)
+	if err != nil {
+		logrus.Error("get network metadata request error: ", err)
+		return
+	}
+
+	// parse network information
+	q.httpMedCoClients = make([]*client.MedcoCli, len(getMetadataResp.Payload.Nodes))
+	for _, node := range getMetadataResp.Payload.Nodes {
+		if q.httpMedCoClients[node.Index] != nil {
+			err = errors.New("duplicated node index in network metadata")
+			logrus.Error(err)
+			return
+		}
+
+		nodeUrl, err := url.Parse(node.URL)
+		if err != nil {
+			logrus.Error("cannot parse MedCo connector URL: ", err)
+			return nil, err
+		}
+
+		nodeTransport := httptransport.New(nodeUrl.Host, nodeUrl.Path, []string{nodeUrl.Scheme})
+		nodeTransport.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: disableTLSCheck}
+		q.httpMedCoClients[node.Index] = client.New(nodeTransport, nil)
 	}
 
 	// generate ephemeral pair of user keys
@@ -78,14 +95,14 @@ func NewQuery(authToken string, queryType models.QueryType, encPanelsItemKeys []
 	return
 }
 
-// Execute executes the MedCo client query synchronously on all the nodes through PIC-SURE
-func (clientQuery *Query) Execute() (nodesResult map [string]*QueryResult, err error) {
+// Execute executes the MedCo client query synchronously on all the nodes
+func (clientQuery *ExploreQuery) Execute() (nodesResult map [int]*ExploreQueryResult, err error) {
 
-	queryResultsChan := make(chan *models.QueryResultElement)
+	queryResultsChan := make(chan *models.ExploreQueryResultElement)
 	queryErrChan := make(chan error)
 
 	// execute requests on all nodes
-	for idx := range clientQuery.picsureResourceUUIDs {
+	for idx := range clientQuery.httpMedCoClients {
 		idxLocal := idx
 		go func() {
 
@@ -101,8 +118,8 @@ func (clientQuery *Query) Execute() (nodesResult map [string]*QueryResult, err e
 
 	// parse the results as they come, or interrupt if one of them errors, or if a timeout occurs
 	timeout := time.After(time.Duration(utilclient.QueryTimeoutSeconds) * time.Second)
-	nodesResult = make(map [string]*QueryResult)
-	forLoop: for _, picsureResourceName := range clientQuery.picsureResourceNames {
+	nodesResult = make(map [int]*ExploreQueryResult)
+	forLoop: for nodeIdx := range clientQuery.httpMedCoClients {
 		select {
 		case queryResult := <-queryResultsChan:
 			parsedQueryResult, err := newQueryResult(queryResult, clientQuery.userPrivateKey)
@@ -110,20 +127,20 @@ func (clientQuery *Query) Execute() (nodesResult map [string]*QueryResult, err e
 				return nil, err
 			}
 
-			nodesResult[picsureResourceName] = parsedQueryResult
-			logrus.Info("MedCo client query successful for resource ", picsureResourceName)
+			nodesResult[nodeIdx] = parsedQueryResult
+			logrus.Info("MedCo client explore query successful for node ", nodeIdx)
 
-			if len(nodesResult) == len(clientQuery.picsureResourceUUIDs) {
-				logrus.Info("MedCo client query successful for all resources")
+			if len(nodesResult) == len(clientQuery.httpMedCoClients) {
+				logrus.Info("MedCo client explore query successful for all resources")
 				return nodesResult, nil
 			}
 
 		case err = <- queryErrChan:
-			logrus.Error("MedCo client query error: ", err)
+			logrus.Error("MedCo client explore query error: ", err)
 			break forLoop
 
 		case <-timeout:
-			err = errors.New("MedCo client query timeout")
+			err = errors.New("MedCo client explore query timeout")
 			logrus.Error(err)
 			break forLoop
 		}
@@ -138,98 +155,46 @@ func (clientQuery *Query) Execute() (nodesResult map [string]*QueryResult, err e
 	return nil, err
 }
 
-// loadResources requests the list of PIC-SURE resources, and retrieves their UUID from the names configured, and their URL
-func (clientQuery *Query) loadResources(disableTLSCheck bool) (err error) {
-	getResourcesParams := picsure2.NewGetResourcesParamsWithTimeout(30 * time.Second)
-	resp, err := clientQuery.httpPicsureClient.Picsure2.GetResources(getResourcesParams, httptransport.BearerToken(clientQuery.authToken))
-	if err != nil {
-		logrus.Error("query error: ", err)
-		return
-	}
-
-	// add in the same order the resources
-	for _, resourceName := range clientQuery.picsureResourceNames {
-		for _, respResource := range resp.Payload {
-			if resourceName == respResource.Name {
-				clientQuery.picsureResourceUUIDs = append(clientQuery.picsureResourceUUIDs, respResource.UUID)
-
-				resourceUrl, err := url.Parse(respResource.ResourceRSPath)
-				if err != nil {
-					logrus.Error("error parsing URL: ", err)
-					return err
-				}
-
-				resourceTransport := httptransport.New(resourceUrl.Host, resourceUrl.Path, []string{resourceUrl.Scheme})
-				resourceTransport.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: disableTLSCheck}
-				clientQuery.httpMedCoClients = append(clientQuery.httpMedCoClients, client.New(resourceTransport, nil))
-			}
-		}
-	}
-
-	// check all resources were indeed present
-	if len(clientQuery.picsureResourceUUIDs) != len(clientQuery.picsureResourceNames) ||
-		len(clientQuery.httpMedCoClients) != len(clientQuery.picsureResourceNames) {
-		err = errors.New("some resources were not found")
-		logrus.Error(err)
-		return
-	}
-
-	return
-}
-
 // submitToNode sends a query to a node of the network, from the list of PIC-SURE resources
-func (clientQuery *Query) submitToNode(picsureResourceIdx int) (result *models.QueryResultElement, err error) {
-	logrus.Debug("Submitting query to resource ", clientQuery.picsureResourceNames[picsureResourceIdx],
-		", bypass PIC-SURE: ", clientQuery.bypassPicsure)
+func (clientQuery *ExploreQuery) submitToNode(nodeIdx int) (result *models.ExploreQueryResultElement, err error) {
+	logrus.Debug("Submitting query to node #", nodeIdx)
 
-	queryParams := picsure2.NewQuerySyncParamsWithTimeout(time.Duration(utilclient.QueryTimeoutSeconds) * time.Second)
-	queryParams.Body = picsure2.QuerySyncBody{
-		ResourceCredentials: &models.ResourceCredentials{
-			MEDCOTOKEN: clientQuery.authToken,
-		},
-		ResourceUUID: clientQuery.picsureResourceUUIDs[picsureResourceIdx],
+	params := medco_node.NewExploreQueryParamsWithTimeout(time.Duration(utilclient.QueryTimeoutSeconds) * time.Second)
+	params.QueryRequest = medco_node.ExploreQueryBody{
+		ID	 : "MedCo_CLI_Query_" + time.Now().Format(time.RFC3339),
 		Query: clientQuery.generateModel(),
 	}
 
-	var response *picsure2.QuerySyncOK
-	if clientQuery.bypassPicsure {
-		response, err = clientQuery.httpMedCoClients[picsureResourceIdx].Picsure2.QuerySync(queryParams, httptransport.BearerToken(clientQuery.authToken))
-	} else {
-		response, err = clientQuery.httpPicsureClient.Picsure2.QuerySync(queryParams, httptransport.BearerToken(clientQuery.authToken))
-	}
-
+	response, err := clientQuery.httpMedCoClients[nodeIdx].MedcoNode.ExploreQuery(params, httptransport.BearerToken(clientQuery.authToken))
 	if err != nil {
-		logrus.Error("query error: ", err)
+		logrus.Error("explore query error: ", err)
 		return
 	}
 
-	return response.Payload, nil
+	return response.Payload.Result, nil
 }
 
 // generateModel parses the query terms and generate the model to be sent
-func (clientQuery *Query) generateModel() (queryModel *models.Query) {
+func (clientQuery *ExploreQuery) generateModel() (queryModel *models.ExploreQuery) {
 
 	// query model
-	queryModel = &models.Query{
-		Name: "MedCo_CLI_Query_" + time.Now().Format(time.RFC3339),
-		I2b2Medco: &models.QueryI2b2Medco{
-			UserPublicKey: clientQuery.userPublicKey,
-			QueryType: clientQuery.queryType,
-			Panels: []*models.QueryI2b2MedcoPanelsItems0{},
-		},
+	queryModel = &models.ExploreQuery{
+		Type: clientQuery.queryType,
+		UserPublicKey: clientQuery.userPublicKey,
+		Panels: []*models.ExploreQueryPanelsItems0{},
 	}
 
 	// query terms
 	for panelIdx, panel := range clientQuery.encPanelsItemKeys {
 
-		panelModel := &models.QueryI2b2MedcoPanelsItems0{
-			Items: []*models.QueryI2b2MedcoPanelsItems0ItemsItems0{},
+		panelModel := &models.ExploreQueryPanelsItems0{
+			Items: []*models.ExploreQueryPanelsItems0ItemsItems0{},
 			Not: &clientQuery.panelsIsNot[panelIdx],
 		}
 
 		true := true
 		for _, encItem := range panel {
-			panelModel.Items = append(panelModel.Items, &models.QueryI2b2MedcoPanelsItems0ItemsItems0{
+			panelModel.Items = append(panelModel.Items, &models.ExploreQueryPanelsItems0ItemsItems0{
 				Encrypted: &true,
 				Operator:  "exists",
 				QueryTerm: encItem,
@@ -238,7 +203,7 @@ func (clientQuery *Query) generateModel() (queryModel *models.Query) {
 
 		}
 
-		queryModel.I2b2Medco.Panels = append(queryModel.I2b2Medco.Panels, panelModel)
+		queryModel.Panels = append(queryModel.Panels, panelModel)
 	}
 
 	return

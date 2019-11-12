@@ -103,8 +103,8 @@ github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORN
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
-github.com/ldsec/medco-loader v0.0.0-20191016120146-c4c149e9616b h1:pdF8e0nhc/nl9+Qo8bqfKq2lKJz7lU2Ew+W8GwbCkKc=
-github.com/ldsec/medco-loader v0.0.0-20191016120146-c4c149e9616b/go.mod h1:9BidBqkYZettEgSCthhfmhjG3xfhNonmJJ3FzsiC5tQ=
+github.com/ldsec/medco-loader v0.0.0-20191030143333-816484fce907 h1:xNQdZYO2UQ0nJV7hxJ8TVE8G/YNuSzyhvZ2S2FzDuSY=
+github.com/ldsec/medco-loader v0.0.0-20191030143333-816484fce907/go.mod h1:9BidBqkYZettEgSCthhfmhjG3xfhNonmJJ3FzsiC5tQ=
 github.com/ldsec/medco-unlynx v0.0.0-20190924143202-01a0d7dedbe4 h1:jLZaFjY1C3jA6BA2ihSHsKJHBusEroq72CDtw+Swr3o=
 github.com/ldsec/medco-unlynx v0.0.0-20190924143202-01a0d7dedbe4/go.mod h1:qvIPw8h3dKWuNwjrlTUHuR80skT1vxJRfVZ0cz54HdY=
 github.com/ldsec/unlynx v1.4.0 h1:z4HIW4fPhvmext9ZyOQvXJvCTSw0wqPXoH/Q2541kfU=

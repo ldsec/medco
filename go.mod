@@ -15,7 +15,7 @@ require (
 	github.com/go-openapi/validate v0.19.0
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
-	github.com/ldsec/medco-loader v0.0.0-20191016120146-c4c149e9616b
+	github.com/ldsec/medco-loader v0.0.0-20191030143333-816484fce907
 	github.com/ldsec/medco-unlynx v0.0.0-20190924143202-01a0d7dedbe4
 	github.com/ldsec/unlynx v1.4.0
 	github.com/lestrrat-go/jwx v0.9.0

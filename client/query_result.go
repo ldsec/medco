@@ -2,21 +2,21 @@ package medcoclient
 
 import (
 	"github.com/ldsec/medco-connector/restapi/models"
-	"github.com/ldsec/medco-connector/unlynx"
+	"github.com/ldsec/medco-connector/wrappers/unlynx"
 	"github.com/sirupsen/logrus"
 	"time"
 )
 
-// QueryResult contains the decrypted results of a node
-type QueryResult struct {
+// ExploreQueryResult contains the decrypted results of a node
+type ExploreQueryResult struct {
 	Count int64
 	PatientList []int64
 	Times map[string]time.Duration
 }
 
 // newQueryResult parses a query result from a node and decrypts its fields
-func newQueryResult(nodeResult *models.QueryResultElement, privateKey string) (parsedResult *QueryResult, err error) {
-	parsedResult = &QueryResult{
+func newQueryResult(nodeResult *models.ExploreQueryResultElement, privateKey string) (parsedResult *ExploreQueryResult, err error) {
+	parsedResult = &ExploreQueryResult{
 		Times: make( map[string]time.Duration),
 	}
 

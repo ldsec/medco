@@ -6,8 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ldsec/medco-connector/restapi/models"
-	"github.com/ldsec/medco-connector/unlynx"
 	utilclient "github.com/ldsec/medco-connector/util/client"
+	"github.com/ldsec/medco-connector/wrappers/unlynx"
 	"github.com/ldsec/medco-loader/loader/identifiers"
 	"github.com/sirupsen/logrus"
 	"io"
@@ -19,7 +19,7 @@ import (
 )
 
 // ExecuteClientQuery execute and display the results of the MedCo client query
-func ExecuteClientQuery(token, username, password, queryType, queryString, resultOutputFilePath string, disableTLSCheck bool, bypassPicsure bool) (err error) {
+func ExecuteClientQuery(token, username, password, queryType, queryString, resultOutputFilePath string, disableTLSCheck bool) (err error) {
 
 	// get token
 	var accessToken string
@@ -34,7 +34,7 @@ func ExecuteClientQuery(token, username, password, queryType, queryString, resul
 	}
 
 	// parse query type
-	queryTypeParsed := models.QueryType(queryType)
+	queryTypeParsed := models.ExploreQueryType(queryType)
 	err = queryTypeParsed.Validate(nil)
 	if err != nil {
 		logrus.Error("invalid query type")
@@ -62,7 +62,7 @@ func ExecuteClientQuery(token, username, password, queryType, queryString, resul
 	}
 
 	// execute query
-	clientQuery, err := NewQuery(accessToken, queryTypeParsed, encPanelsItemKeys, panelsIsNot, disableTLSCheck, bypassPicsure)
+	clientQuery, err := NewExploreQuery(accessToken, queryTypeParsed, encPanelsItemKeys, panelsIsNot, disableTLSCheck)
 	if err != nil {
 		return
 	}
@@ -91,15 +91,15 @@ func ExecuteClientQuery(token, username, password, queryType, queryString, resul
 }
 
 // printResultsCSV prints on a specified output in a CSV format the results, each node being one line
-func printResultsCSV(nodesResult map[string]*QueryResult, output io.Writer) (err error) {
+func printResultsCSV(nodesResult map[int]*ExploreQueryResult, output io.Writer) (err error) {
 
 	csvHeaders := []string{"node_name", "count", "patient_list"}
 	csvNodesResults := make([][]string, 0)
 
 	// CSV values: results
-	for nodeName, queryResult := range nodesResult {
+	for nodeIdx, queryResult := range nodesResult {
 		csvNodesResults = append(csvNodesResults, []string{
-			nodeName,
+			string(nodeIdx),
 			strconv.FormatInt(queryResult.Count, 10),
 			fmt.Sprint(queryResult.PatientList),
 		})
@@ -124,11 +124,15 @@ func printResultsCSV(nodesResult map[string]*QueryResult, output io.Writer) (err
 
 	// CSV values: timers: iter over results, then iter over timer names from csvHeaders
 	for csvNodeResultsIdx, csvNodeResults := range csvNodesResults {
-		nodeName := csvNodeResults[0]
+		nodeIdx, err := strconv.Atoi(csvNodeResults[0])
+		if err != nil {
+			logrus.Error("error parsing node number: ", err)
+			return err
+		}
 
 		for timerNameIdx := 3 ; timerNameIdx < len(csvHeaders) ; timerNameIdx++ {
 			timerName := csvHeaders[timerNameIdx]
-			timerValue := nodesResult[nodeName].Times[timerName]
+			timerValue := nodesResult[nodeIdx].Times[timerName]
 
 			csvNodesResults[csvNodeResultsIdx] = append(csvNodesResults[csvNodeResultsIdx],
 				strconv.FormatInt(int64(timerValue / time.Millisecond), 10))

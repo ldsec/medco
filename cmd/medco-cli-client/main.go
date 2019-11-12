@@ -1,7 +1,7 @@
 package main
 
 import (
-	medcoclient "github.com/ldsec/medco-connector/medco/client"
+	medcoclient "github.com/ldsec/medco-connector/client"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 	"os"
@@ -13,7 +13,7 @@ func main() {
 	cliApp := cli.NewApp()
 	cliApp.Name = "medco-cli-client"
 	cliApp.Usage = "Command-line query tool for MedCo."
-	cliApp.Version = "0.2.1" // todo: dynamically get version from build process
+	cliApp.Version = "1.0.0" // todo: dynamically get version from build process
 
 	// from env / config: whatever is in the config of GB : debug,
 	// cli: whatever is user input
@@ -54,10 +54,6 @@ func main() {
 			Usage: "Output file for the result CSV. Printed to stdout if omitted.",
 			Value: "",
 		},
-		cli.BoolFlag{
-			Name:  "bypassPicsure",
-			Usage: "Bypass PIC-SURE and query directly the MedCo connectors",
-		},
 	}
 
 	// --- app commands
@@ -87,7 +83,6 @@ func main() {
 					strings.Join(c.Args().Tail(), " "),
 					c.String("resultFile"),
 					c.GlobalBool("disableTLSCheck"),
-					c.Bool("bypassPicsure"),
 				)
 			},
 		},
