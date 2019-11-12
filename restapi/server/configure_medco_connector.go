@@ -21,7 +21,7 @@ import (
 	"github.com/ldsec/medco-connector/restapi/models"
 )
 
-//go:generate swagger generate server --target ../../../medco-connector --name MedcoConnector --spec ../../swagger/medco-connector-server.yml --model-package restapi/models --server-package restapi/server --principal models.User
+//go:generate swagger generate server --target ../../../medco-connector --name MedcoConnector --spec ../../swagger/medco-connector.yml --model-package restapi/models --server-package restapi/server --principal models.User
 
 func configureFlags(api *operations.MedcoConnectorAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }

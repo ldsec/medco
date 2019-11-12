@@ -19,18 +19,10 @@ import (
 )
 
 // NewGetVariantsParams creates a new GetVariantsParams object
-// with the default values initialized.
+// no default values defined in spec.
 func NewGetVariantsParams() GetVariantsParams {
 
-	var (
-		// initialize parameters with default values
-
-		zygosityDefault = []string{"heterozygous", "homozygous", "unknown"}
-	)
-
-	return GetVariantsParams{
-		Zygosity: zygosityDefault,
-	}
+	return GetVariantsParams{}
 }
 
 // GetVariantsParams contains all the bound params for the get variants operation
@@ -52,9 +44,8 @@ type GetVariantsParams struct {
 	  In: path
 	*/
 	Value string
-	/*Genomic annotation zygosity.
+	/*Genomic annotation zygosity, if null defaults to all.
 	  In: query
-	  Default: []interface {}{"heterozygous", "homozygous", "unknown"}
 	*/
 	Zygosity []string
 }
@@ -134,7 +125,6 @@ func (o *GetVariantsParams) bindZygosity(rawData []string, hasKey bool, formats 
 	// CollectionFormat:
 	zygosityIC := swag.SplitByFormat(qvZygosity, "")
 	if len(zygosityIC) == 0 {
-		// Default values have been previously initialized by NewGetVariantsParams()
 		return nil
 	}
 

@@ -4,7 +4,7 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/ldsec/medco-connector/restapi/models"
 	"github.com/ldsec/medco-connector/restapi/server/operations/medco_network"
-	utilserver "github.com/ldsec/medco-connector/util/server"
+	"github.com/ldsec/medco-connector/util/server"
 	"github.com/ldsec/medco-connector/wrappers/unlynx"
 )
 
@@ -15,6 +15,7 @@ func MedCoNetworkGetMetadataHandler(params medco_network.GetMetadataParams, prin
 	for idx, url := range utilserver.MedCoNodesURL {
 		nodes = append(nodes, &medco_network.NodesItems0{
 			Index: int64(idx),
+			Name: "Node " + string(idx), // todo: config to specify node name
 			URL: url,
 		})
 	}

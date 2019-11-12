@@ -185,6 +185,9 @@ type NodesItems0 struct {
 	// index
 	Index int64 `json:"index,omitempty"`
 
+	// name
+	Name string `json:"name,omitempty"`
+
 	// url
 	URL string `json:"url,omitempty"`
 }

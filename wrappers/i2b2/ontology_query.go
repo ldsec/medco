@@ -10,7 +10,7 @@ import (
 )
 
 // GetOntologyChildren makes request to browse the i2b2 ontology
-func GetOntologyChildren(path string) (results []*models.SearchResultElement, err error) {
+func GetOntologyChildren(path string) (results []*models.ExploreSearchResultElement, err error) {
 
 	// craft and make request
 	path = strings.TrimSpace(path)
@@ -47,7 +47,7 @@ func GetOntologyChildren(path string) (results []*models.SearchResultElement, er
 
 	// generate result from response
 	i2b2Concepts := xmlResponse.MessageBody.(*OntRespConceptsMessageBody).Concepts
-	results = make([]*models.SearchResultElement, 0)
+	results = make([]*models.ExploreSearchResultElement, 0)
 	for _, concept := range i2b2Concepts {
 		results = append(results, parseI2b2Concept(concept))
 	}
@@ -55,7 +55,7 @@ func GetOntologyChildren(path string) (results []*models.SearchResultElement, er
 	return
 }
 
-func parseI2b2Concept(concept Concept) (result *models.SearchResultElement) {
+func parseI2b2Concept(concept Concept) (result *models.ExploreSearchResultElement) {
 	// todo: add leaf, ensure type OK
 	//          type:
 	//            type: "string"
@@ -66,11 +66,11 @@ func parseI2b2Concept(concept Concept) (result *models.SearchResultElement) {
 	true := true
 	false := false
 
-	result = &models.SearchResultElement{
+	result = &models.ExploreSearchResultElement{
 		Name: concept.Name,
 		DisplayName: concept.Name,
 		Code: concept.Basecode,
-		MedcoEncryption: &models.SearchResultElementMedcoEncryption{
+		MedcoEncryption: &models.ExploreSearchResultElementMedcoEncryption{
 			Encrypted: &false,
 			ID: -1,
 			ChildrenIds: []int64{},
@@ -85,19 +85,19 @@ func parseI2b2Concept(concept Concept) (result *models.SearchResultElement) {
 	// i2b2 leaf
 	case 'L':
 		result.Leaf = &true
-		result.Type = models.SearchResultElementTypeConcept
+		result.Type = models.ExploreSearchResultElementTypeConcept
 
 	// i2b2 container
 	case 'C':
 		result.Leaf = &false
-		result.Type = models.SearchResultElementTypeContainer
+		result.Type = models.ExploreSearchResultElementTypeContainer
 
 	// i2b2 folder (& default)
 	default:
 		fallthrough
 	case 'F':
 		result.Leaf = &false
-		result.Type = models.SearchResultElementTypeConcept
+		result.Type = models.ExploreSearchResultElementTypeConcept
 
 	}
 
@@ -121,7 +121,7 @@ func parseI2b2Concept(concept Concept) (result *models.SearchResultElement) {
 	// if genomic concept from data loader v0 (from concept code)
 	} else if splitCode[0] == "GEN" {
 		result.Name = splitCode[1]
-		result.Type = models.SearchResultElementTypeGenomicAnnotation
+		result.Type = models.ExploreSearchResultElementTypeGenomicAnnotation
 	}
 
 	return

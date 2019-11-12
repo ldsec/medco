@@ -5,6 +5,7 @@ import (
 	onetLog "go.dedis.ch/onet/v3/log"
 	"os"
 	"strconv"
+	"strings"
 )
 
 // LogLevel is the log level, assuming the same convention as the cothority / unlynx log levels:
@@ -13,13 +14,11 @@ var LogLevel int
 
 // MedCoNodesURL is the slice of the URL of all the MedCo nodes, with the order matching the position in the slice
 var MedCoNodesURL []string
-// MedCoNodeIdx is the index of this node in the list of nodes, it is equal to UnlynxGroupFileIdx
+// MedCoNodeIdx is the index of this node in the list of nodes
 var MedCoNodeIdx int
 
 // UnlynxGroupFilePath is the path of the unlynx group file from which is derived the cothority public key
 var UnlynxGroupFilePath string
-// UnlynxGroupFileIdx is the index (in the group file) of this node, it is equal to MedCoNodeIdx
-var UnlynxGroupFileIdx int
 // UnlynxTimeoutSeconds is the unlynx communication timeout (seconds)
 var UnlynxTimeoutSeconds int
 
@@ -53,6 +52,15 @@ var MedCoObfuscationMin int
 func init() {
 	SetLogLevel(os.Getenv("LOG_LEVEL"))
 
+	MedCoNodesURL = strings.Split(os.Getenv("MEDCO_NODES_URL"), ",")
+
+	idx, err := strconv.ParseInt(os.Getenv("MEDCO_NODE_IDX"), 10, 64)
+	if err != nil || idx < 0 {
+		logrus.Warn("invalid MedCoNodeIdx")
+		idx = 0
+	}
+	MedCoNodeIdx = int(idx)
+
 	UnlynxGroupFilePath = os.Getenv("UNLYNX_GROUP_FILE_PATH")
 
 	unlynxto, err := strconv.ParseInt(os.Getenv("UNLYNX_TIMEOUT_SECONDS"), 10, 64)
@@ -61,13 +69,6 @@ func init() {
 		unlynxto = 3 * 60 // 3 minutes
 	}
 	UnlynxTimeoutSeconds = int(unlynxto)
-
-	idx, err := strconv.ParseInt(os.Getenv("UNLYNX_GROUP_FILE_IDX"), 10, 64)
-	if err != nil || idx < 0 {
-		logrus.Warn("invalid UnlynxGroupFileIdx")
-		idx = 0
-	}
-	UnlynxGroupFileIdx = int(idx)
 
 	I2b2HiveURL = os.Getenv("I2B2_HIVE_URL")
 	I2b2LoginDomain = os.Getenv("I2B2_LOGIN_DOMAIN")

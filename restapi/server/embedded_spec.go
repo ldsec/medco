@@ -137,12 +137,7 @@ func init() {
               ],
               "type": "string"
             },
-            "default": [
-              "heterozygous",
-              "homozygous",
-              "unknown"
-            ],
-            "description": "Genomic annotation zygosity.",
+            "description": "Genomic annotation zygosity, if null defaults to all.",
             "name": "zygosity",
             "in": "query"
           }
@@ -608,6 +603,9 @@ func init() {
                 "index": {
                   "type": "integer"
                 },
+                "name": {
+                  "type": "string"
+                },
                 "url": {
                   "type": "string"
                 }
@@ -782,12 +780,7 @@ func init() {
               ],
               "type": "string"
             },
-            "default": [
-              "heterozygous",
-              "homozygous",
-              "unknown"
-            ],
-            "description": "Genomic annotation zygosity.",
+            "description": "Genomic annotation zygosity, if null defaults to all.",
             "name": "zygosity",
             "in": "query"
           }
@@ -849,6 +842,9 @@ func init() {
                     "properties": {
                       "index": {
                         "type": "integer"
+                      },
+                      "name": {
+                        "type": "string"
                       },
                       "url": {
                         "type": "string"
@@ -1380,6 +1376,9 @@ func init() {
               "properties": {
                 "index": {
                   "type": "integer"
+                },
+                "name": {
+                  "type": "string"
                 },
                 "url": {
                   "type": "string"

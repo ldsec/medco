@@ -29,13 +29,14 @@ ENV I2B2_HIVE_URL=http://i2b2:8080/i2b2/services \
     I2B2_WAIT_TIME_SECONDS=300 \
     LOG_LEVEL=5 \
     UNLYNX_GROUP_FILE_PATH=/medco-configuration/group.toml \
-    UNLYNX_GROUP_FILE_IDX=0 \
     UNLYNX_TIMEOUT_SECONDS=300 \
     JWKS_URL=http://keycloak:8080/auth/realms/master/protocol/openid-connect/certs \
     OIDC_JWT_ISSUER=http://keycloak:8080/auth/realms/master \
     OIDC_CLIENT_ID=medco \
     OIDC_JWT_USER_ID_CLAIM=preferred_username \
-    MEDCO_OBFUSCATION_MIN=5
+    MEDCO_OBFUSCATION_MIN=5 \
+    MEDCO_NODES_URL="http://medco-connector-srv0/medco,http://medco-connector-srv1/medco,http://medco-connector-srv2/medco" \
+    MEDCO_NODE_IDX=0
 
 EXPOSE 1999
 ENTRYPOINT docker-entrypoint.sh medco-connector-server --write-timeout=${SERVER_HTTP_WRITE_TIMEOUT_SECONDS}s

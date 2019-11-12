@@ -57,8 +57,8 @@ func newUnlynxClient() (unlynxClient *servicesmedco.API, cothorityRoster *onet.R
 
 	cothorityRoster = group.Roster
 	unlynxClient = servicesmedco.NewMedCoClient(
-		cothorityRoster.List[utilserver.UnlynxGroupFileIdx],
-		strconv.Itoa(utilserver.UnlynxGroupFileIdx),
+		cothorityRoster.List[utilserver.MedCoNodeIdx],
+		strconv.Itoa(utilserver.MedCoNodeIdx),
 	)
 
 	return
