@@ -30,6 +30,7 @@ type ExploreQuery struct {
 	Type ExploreQueryType `json:"type,omitempty"`
 
 	// user public key
+	// Pattern: ^[\w=-]+$
 	UserPublicKey string `json:"userPublicKey,omitempty"`
 }
 
@@ -46,6 +47,10 @@ func (m *ExploreQuery) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateType(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateUserPublicKey(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -114,6 +119,19 @@ func (m *ExploreQuery) validateType(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *ExploreQuery) validateUserPublicKey(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.UserPublicKey) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("userPublicKey", "body", string(m.UserPublicKey), `^[\w=-]+$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // MarshalBinary interface implementation
 func (m *ExploreQuery) MarshalBinary() ([]byte, error) {
 	if m == nil {
@@ -137,11 +155,39 @@ func (m *ExploreQuery) UnmarshalBinary(b []byte) error {
 type ExploreQueryDifferentialPrivacy struct {
 
 	// query budget
-	QueryBudget float64 `json:"queryBudget,omitempty"`
+	// Maximum: 0
+	// Minimum: 0
+	QueryBudget *float64 `json:"queryBudget,omitempty"`
 }
 
 // Validate validates this explore query differential privacy
 func (m *ExploreQueryDifferentialPrivacy) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateQueryBudget(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *ExploreQueryDifferentialPrivacy) validateQueryBudget(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.QueryBudget) { // not required
+		return nil
+	}
+
+	if err := validate.Minimum("differentialPrivacy"+"."+"queryBudget", "body", float64(*m.QueryBudget), 0, false); err != nil {
+		return err
+	}
+
+	if err := validate.Maximum("differentialPrivacy"+"."+"queryBudget", "body", float64(*m.QueryBudget), 0, false); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -258,9 +304,11 @@ type ExploreQueryPanelsItems0ItemsItems0 struct {
 	Operator string `json:"operator,omitempty"`
 
 	// query term
+	// Pattern: ^([\w=-]+|(\/[^\/]+){2}\/?)$
 	QueryTerm string `json:"queryTerm,omitempty"`
 
 	// value
+	// Max Length: 0
 	Value string `json:"value,omitempty"`
 }
 
@@ -273,6 +321,14 @@ func (m *ExploreQueryPanelsItems0ItemsItems0) Validate(formats strfmt.Registry) 
 	}
 
 	if err := m.validateOperator(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateQueryTerm(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateValue(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -328,6 +384,32 @@ func (m *ExploreQueryPanelsItems0ItemsItems0) validateOperator(formats strfmt.Re
 
 	// value enum
 	if err := m.validateOperatorEnum("operator", "body", m.Operator); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *ExploreQueryPanelsItems0ItemsItems0) validateQueryTerm(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.QueryTerm) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("queryTerm", "body", string(m.QueryTerm), `^([\w=-]+|(\/[^\/]+){2}\/?)$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *ExploreQueryPanelsItems0ItemsItems0) validateValue(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Value) { // not required
+		return nil
+	}
+
+	if err := validate.MaxLength("value", "body", string(m.Value), 0); err != nil {
 		return err
 	}
 

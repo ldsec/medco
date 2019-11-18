@@ -36,11 +36,13 @@ type GetVariantsParams struct {
 
 	/*Genomic annotation name.
 	  Required: true
+	  Pattern: ^\w+$
 	  In: path
 	*/
 	Annotation string
 	/*Genomic annotation value.
 	  Required: true
+	  Min Length: 1
 	  In: path
 	*/
 	Value string
@@ -94,6 +96,20 @@ func (o *GetVariantsParams) bindAnnotation(rawData []string, hasKey bool, format
 
 	o.Annotation = raw
 
+	if err := o.validateAnnotation(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateAnnotation carries on validations for parameter Annotation
+func (o *GetVariantsParams) validateAnnotation(formats strfmt.Registry) error {
+
+	if err := validate.Pattern("annotation", "path", o.Annotation, `^\w+$`); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -108,6 +124,20 @@ func (o *GetVariantsParams) bindValue(rawData []string, hasKey bool, formats str
 	// Parameter is provided by construction from the route
 
 	o.Value = raw
+
+	if err := o.validateValue(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateValue carries on validations for parameter Value
+func (o *GetVariantsParams) validateValue(formats strfmt.Registry) error {
+
+	if err := validate.MinLength("value", "path", o.Value, 1); err != nil {
+		return err
+	}
 
 	return nil
 }

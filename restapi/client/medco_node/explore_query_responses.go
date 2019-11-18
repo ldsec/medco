@@ -12,6 +12,7 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 
 	strfmt "github.com/go-openapi/strfmt"
 
@@ -125,6 +126,7 @@ swagger:model ExploreQueryBody
 type ExploreQueryBody struct {
 
 	// id
+	// Pattern: ^[\w:-]+$
 	ID string `json:"id,omitempty"`
 
 	// query
@@ -135,6 +137,10 @@ type ExploreQueryBody struct {
 func (o *ExploreQueryBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := o.validateID(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := o.validateQuery(formats); err != nil {
 		res = append(res, err)
 	}
@@ -142,6 +148,19 @@ func (o *ExploreQueryBody) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (o *ExploreQueryBody) validateID(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.ID) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("queryRequest"+"."+"id", "body", string(o.ID), `^[\w:-]+$`); err != nil {
+		return err
+	}
+
 	return nil
 }
 

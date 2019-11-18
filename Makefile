@@ -1,7 +1,7 @@
 EXCLUDE_LINT = "_test.go"
 
 # generate/update go server based on swagger specifications
-swagger-gen:
+swagger-gen: swagger
 	swagger validate ./swagger/medco-connector.yml
 	swagger generate server \
 		--server-package=restapi/server \
@@ -19,6 +19,11 @@ swagger-gen:
 		--spec=./swagger/medco-connector.yml \
 		--name=medco-cli \
 		--default-scheme=https
+
+swagger:
+	if ! which swagger; then \
+		go install github.com/go-swagger/go-swagger/cmd/swagger; \
+	fi
 
 test_lint:
 	@echo Checking linting of files
