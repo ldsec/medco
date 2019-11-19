@@ -17,6 +17,7 @@ require (
 	github.com/ldsec/medco-unlynx v0.0.0-20190924143202-01a0d7dedbe4
 	github.com/ldsec/unlynx v1.4.0
 	github.com/lestrrat-go/jwx v0.9.0
+	github.com/lib/pq v1.1.1
 	github.com/mailru/easyjson v0.0.0-20190403194419-1ea4449da983 // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/r0fls/gostats v0.0.0-20180711082619-e793b1fda35c

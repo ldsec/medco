@@ -280,3 +280,71 @@ func loadQueryFile(queryFilePath string) (queryTerms []int64, err error) {
 
 	return
 }
+
+// ExecuteClientGenomicAnnotationsGetValues displays the genomic annotations values matching the "annotation" parameter
+func ExecuteClientGenomicAnnotationsGetValues(token, username, password, annotation, value string, limit int64, disableTLSCheck bool) (err error) {
+
+	// get token
+	var accessToken string
+	if len(token) > 0 {
+		accessToken = token
+	} else {
+		logrus.Debug("No token provided, requesting token for user ", username, ", disable TLS check: ", disableTLSCheck)
+		accessToken, err = utilclient.RetrieveAccessToken(username, password, disableTLSCheck)
+		if err != nil {
+			return
+		}
+	}
+
+	// execute query
+	clientGenomicAnnotationsGetValues, err := NewGenomicAnnotationsGetValues(accessToken, annotation, value, &limit, disableTLSCheck)
+	if err != nil {
+		return
+	}
+
+	result, err := clientGenomicAnnotationsGetValues.Execute()
+	if err != nil {
+		return
+	}
+
+	for _, annotation := range result {
+		fmt.Printf("%s\n", annotation)
+	}
+
+	return
+
+}
+
+// ExecuteClientGenomicAnnotationsGetVariants displays the variant ids corresponding to the annotation and value parameters
+func ExecuteClientGenomicAnnotationsGetVariants(token, username, password, annotation, value string, zygosity []string, disableTLSCheck bool) (err error) {
+
+	// get token
+	var accessToken string
+	if len(token) > 0 {
+		accessToken = token
+	} else {
+		logrus.Debug("No token provided, requesting token for user ", username, ", disable TLS check: ", disableTLSCheck)
+		accessToken, err = utilclient.RetrieveAccessToken(username, password, disableTLSCheck)
+		if err != nil {
+			return
+		}
+	}
+
+	// execute query
+	clientGenomicAnnotationsGetVariants, err := NewGenomicAnnotationsGetVariants(accessToken, annotation, value, zygosity, disableTLSCheck)
+	if err != nil {
+		return
+	}
+
+	result, err := clientGenomicAnnotationsGetVariants.Execute()
+	if err != nil {
+		return
+	}
+
+	for _, variant := range result {
+		fmt.Printf("%s\n", variant)
+	}
+
+	return
+
+}

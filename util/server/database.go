@@ -3,6 +3,7 @@ package utilserver
 import (
 	"database/sql"
 	"fmt"
+	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 )
 

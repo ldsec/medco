@@ -56,25 +56,43 @@ func main() {
 		},
 	}
 
+	//--- genomic annotations get values command flags
+	genomicAnnotationsGetValuesFlag := []cli.Flag{
+		cli.Int64Flag{
+			Name:  "limit, l",
+			Usage: "Maximum number of returned values",
+			Value: 0,
+		},
+	}
+
+	//--- genomic annotations get variants command flags
+	genomicAnnotationsGetVariantsFlag := []cli.Flag{
+		cli.StringSliceFlag{
+			Name:  "zygosity, z",
+			Usage: "Variant zygosysty",
+			Value: nil,
+		},
+	}
+
 	// --- app commands
 	cliApp.Commands = []cli.Command{
-	//{
-	//	Name:    "search",
-	//	Aliases: []string{"s"},
-	//	Usage:   "Browse the MedCo tree ontology",
-	//	Action:  encryptIntFromApp,
-	//	Flags:   searchCommandFlags,
-	//	ArgsUsage: "",
-	//
-	//},
+		//{
+		//	Name:    "search",
+		//	Aliases: []string{"s"},
+		//	Usage:   "Browse the MedCo tree ontology",
+		//	Action:  encryptIntFromApp,
+		//	Flags:   searchCommandFlags,
+		//	ArgsUsage: "",
+		//
+		//},
 		{
 			Name:    "query",
 			Aliases: []string{"q"},
 			Usage:   "Query the MedCo network",
-			Flags: queryCommandFlags,
+			Flags:   queryCommandFlags,
 			ArgsUsage: "[patient_list|count_per_site|count_per_site_obfuscated|count_per_site_shuffled|" +
 				"count_per_site_shuffled_obfuscated|count_global|count_global_obfuscated] [query string]",
-			Action:  func(c *cli.Context) error {
+			Action: func(c *cli.Context) error {
 				return medcoclient.ExecuteClientQuery(
 					c.GlobalString("token"),
 					c.GlobalString("user"),
@@ -88,26 +106,42 @@ func main() {
 		},
 
 		{
-			Name:    "genomic-annotations-query",
-			Aliases: []string{"gaq"},
-			Usage:   "Get genomic annotations values",
-			Flags: queryCommandFlags,
-			ArgsUsage: "[patient_list|count_per_site|count_per_site_obfuscated|count_per_site_shuffled|" +
-				"count_per_site_shuffled_obfuscated|count_global|count_global_obfuscated] [query string]",
-			Action:  func(c *cli.Context) error {
-				return medcoclient.ExecuteClientQuery(
+			Name:      "genomic-annotations-get-values",
+			Aliases:   []string{"gval"},
+			Usage:     "Get genomic annotations values",
+			Flags:     genomicAnnotationsGetValuesFlag,
+			ArgsUsage: "[-l limit] [annotation] [value]",
+			Action: func(c *cli.Context) error {
+				return medcoclient.ExecuteClientGenomicAnnotationsGetValues(
 					c.GlobalString("token"),
 					c.GlobalString("user"),
 					c.GlobalString("password"),
-					c.Args().First(),
-					strings.Join(c.Args().Tail(), " "),
-					c.String("resultFile"),
+					c.Args().Get(0),
+					c.Args().Get(1),
+					c.Int64("limit"),
 					c.GlobalBool("disableTLSCheck"),
-					c.Bool("bypassPicsure"),
 				)
 			},
 		},
 
+		{
+			Name:      "genomic-annotations-get-variants",
+			Aliases:   []string{"gvar"},
+			Usage:     "Get genomic annotations variants",
+			Flags:     genomicAnnotationsGetVariantsFlag,
+			ArgsUsage: "[-z zygosity] [annotation] [value]",
+			Action: func(c *cli.Context) error {
+				return medcoclient.ExecuteClientGenomicAnnotationsGetVariants(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.Args().Get(0),
+					c.Args().Get(1),
+					c.StringSlice("zygosity"),
+					c.GlobalBool("disableTLSCheck"),
+				)
+			},
+		},
 	}
 
 	//cliApp.Before = func(c *cli.Context) error {

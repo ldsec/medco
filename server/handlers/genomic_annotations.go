@@ -18,7 +18,8 @@ func MedCoGenomicAnnotationsGetValuesHandler(params genomic_annotations.GetValue
 		})
 	}
 
-	rows, err := utilserver.DBConnection.Query("SELECT annotation_value FROM genomic_annotations.? WHERE annotation_value = ~* ? LIMIT ?", params.Annotation, params.Value, *params.Limit)
+	query := "SELECT annotation_value FROM genomic_annotations." + params.Annotation + " WHERE annotation_value ~* $1 LIMIT $2"
+	rows, err := utilserver.DBConnection.Query(query, params.Value, *params.Limit)
 	if err != nil {
 		logrus.Error("Query execution error")
 		return genomic_annotations.NewGetValuesDefault(500).WithPayload(&genomic_annotations.GetValuesDefaultBody{
@@ -57,8 +58,17 @@ func MedCoGenomicAnnotationsGetVariantsHandler(params genomic_annotations.GetVar
 			Message: "Impossible to connect to DB " + err.Error(),
 		})
 	}
+	zygosity := ""
+	if len(params.Zygosity) > 0 {
+		zygosity = params.Zygosity[0]
 
-	rows, err := utilserver.DBConnection.Query("SELECT variant_id FROM genomic_annotations.genomic_annotations WHERE ? = ? AND  annotations = ~* ?", params.Annotation, params.Value, params.Zygosity)
+		for i := 1; i < len(params.Zygosity); i++ {
+			zygosity += "|" + params.Zygosity[i]
+		}
+	}
+
+	query := "SELECT variant_id FROM genomic_annotations.genomic_annotations WHERE " + params.Annotation + " = $1 AND annotations ~* $2"
+	rows, err := utilserver.DBConnection.Query(query, params.Value, zygosity)
 	if err != nil {
 		logrus.Error("Query execution error")
 		return genomic_annotations.NewGetVariantsDefault(500).WithPayload(&genomic_annotations.GetVariantsDefaultBody{

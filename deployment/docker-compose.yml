@@ -27,8 +27,8 @@ services:
       - MEDCO_NODE_IDX=0
       - I2B2_DB_HOST=postgresql
       - I2B2_DB_PORT=5432
-      - I2B2_DB_USER=i2b2
-      - I2B2_DB_PW=i2b2
+      - I2B2_DB_USER=postgres
+      - I2B2_DB_PW=postgres
       - I2B2_DB_NAME=i2b2medco
     volumes:
       - ./configuration-profile:/medco-configuration
