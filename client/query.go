@@ -69,7 +69,7 @@ func NewExploreQuery(authToken string, queryType models.ExploreQueryType, encPan
 	// parse network information
 	q.httpMedCoClients = make([]*client.MedcoCli, len(getMetadataResp.Payload.Nodes))
 	for _, node := range getMetadataResp.Payload.Nodes {
-		if q.httpMedCoClients[node.Index] != nil {
+		if q.httpMedCoClients[*node.Index] != nil {
 			err = errors.New("duplicated node index in network metadata")
 			logrus.Error(err)
 			return
@@ -83,7 +83,7 @@ func NewExploreQuery(authToken string, queryType models.ExploreQueryType, encPan
 
 		nodeTransport := httptransport.New(nodeUrl.Host, nodeUrl.Path, []string{nodeUrl.Scheme})
 		nodeTransport.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: disableTLSCheck}
-		q.httpMedCoClients[node.Index] = client.New(nodeTransport, nil)
+		q.httpMedCoClients[*node.Index] = client.New(nodeTransport, nil)
 	}
 
 	// generate ephemeral pair of user keys
@@ -185,6 +185,7 @@ func (clientQuery *ExploreQuery) generateModel() (queryModel *models.ExploreQuer
 	}
 
 	// query terms
+	true := true
 	for panelIdx, panel := range clientQuery.encPanelsItemKeys {
 
 		panelModel := &models.ExploreQueryPanelsItems0{
@@ -192,7 +193,6 @@ func (clientQuery *ExploreQuery) generateModel() (queryModel *models.ExploreQuer
 			Not: &clientQuery.panelsIsNot[panelIdx],
 		}
 
-		true := true
 		for _, encItem := range panel {
 			panelModel.Items = append(panelModel.Items, &models.ExploreQueryPanelsItems0ItemsItems0{
 				Encrypted: &true,

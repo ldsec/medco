@@ -99,7 +99,7 @@ func printResultsCSV(nodesResult map[int]*ExploreQueryResult, output io.Writer) 
 	// CSV values: results
 	for nodeIdx, queryResult := range nodesResult {
 		csvNodesResults = append(csvNodesResults, []string{
-			string(nodeIdx),
+			strconv.Itoa(nodeIdx),
 			strconv.FormatInt(queryResult.Count, 10),
 			fmt.Sprint(queryResult.PatientList),
 		})

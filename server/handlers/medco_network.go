@@ -6,6 +6,7 @@ import (
 	"github.com/ldsec/medco-connector/restapi/server/operations/medco_network"
 	"github.com/ldsec/medco-connector/util/server"
 	"github.com/ldsec/medco-connector/wrappers/unlynx"
+	"strconv"
 )
 
 // MedCoNetworkGetMetadataHandler handles /medco/network API endpoint
@@ -13,9 +14,10 @@ func MedCoNetworkGetMetadataHandler(params medco_network.GetMetadataParams, prin
 
 	nodes := make([]*medco_network.NodesItems0, 0)
 	for idx, url := range utilserver.MedCoNodesURL {
+		idxInt64 := int64(idx)
 		nodes = append(nodes, &medco_network.NodesItems0{
-			Index: int64(idx),
-			Name: "Node " + string(idx), // todo: config to specify node name
+			Index: &idxInt64,
+			Name: "Node " + strconv.Itoa(idx), // todo: config to specify node name
 			URL: url,
 		})
 	}
@@ -27,8 +29,9 @@ func MedCoNetworkGetMetadataHandler(params medco_network.GetMetadataParams, prin
 		})
 	}
 
+	medcoNodeIdxInt64 := int64(utilserver.MedCoNodeIdx)
 	return medco_network.NewGetMetadataOK().WithPayload(&medco_network.GetMetadataOKBody{
-		NodeIndex: int64(utilserver.MedCoNodeIdx),
+		NodeIndex: &medcoNodeIdxInt64,
 		Nodes: nodes,
 		PublicKey: pubKey,
 	})

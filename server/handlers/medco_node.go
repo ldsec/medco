@@ -64,9 +64,10 @@ func MedCoNodeExploreQueryHandler(params medco_node.ExploreQueryParams, principa
 	// parse timers
 	timers := make([]*models.ExploreQueryResultElementTimersItems0, 0)
 	for timerName, timerDuration := range query.Result.Timers {
+		milliseconds := int64(timerDuration / time.Millisecond)
 		timers = append(timers, &models.ExploreQueryResultElementTimersItems0{
 			Name: timerName,
-			Milliseconds: int64(timerDuration / time.Millisecond),
+			Milliseconds: &milliseconds,
 		})
 	}
 

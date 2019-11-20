@@ -13,6 +13,7 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -156,7 +157,8 @@ swagger:model GetMetadataOKBody
 type GetMetadataOKBody struct {
 
 	// node index
-	NodeIndex int64 `json:"nodeIndex,omitempty"`
+	// Required: true
+	NodeIndex *int64 `json:"nodeIndex"`
 
 	// nodes
 	Nodes []*NodesItems0 `json:"nodes"`
@@ -169,6 +171,10 @@ type GetMetadataOKBody struct {
 func (o *GetMetadataOKBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := o.validateNodeIndex(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := o.validateNodes(formats); err != nil {
 		res = append(res, err)
 	}
@@ -176,6 +182,15 @@ func (o *GetMetadataOKBody) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (o *GetMetadataOKBody) validateNodeIndex(formats strfmt.Registry) error {
+
+	if err := validate.Required("getMetadataOK"+"."+"nodeIndex", "body", o.NodeIndex); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -228,7 +243,8 @@ swagger:model NodesItems0
 type NodesItems0 struct {
 
 	// index
-	Index int64 `json:"index,omitempty"`
+	// Required: true
+	Index *int64 `json:"index"`
 
 	// name
 	Name string `json:"name,omitempty"`
@@ -239,6 +255,24 @@ type NodesItems0 struct {
 
 // Validate validates this nodes items0
 func (o *NodesItems0) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateIndex(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *NodesItems0) validateIndex(formats strfmt.Registry) error {
+
+	if err := validate.Required("index", "body", o.Index); err != nil {
+		return err
+	}
+
 	return nil
 }
 

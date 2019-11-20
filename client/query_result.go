@@ -42,7 +42,7 @@ func newQueryResult(nodeResult *models.ExploreQueryResultElement, privateKey str
 
 	// parse times
 	for _, timer := range nodeResult.Timers {
-		parsedResult.Times[timer.Name] = time.Duration(timer.Milliseconds) * time.Millisecond
+		parsedResult.Times[timer.Name] = time.Duration(*timer.Milliseconds) * time.Millisecond
 	}
 
 	logrus.Info("Node result: count=", parsedResult.Count, ", # patient IDs decrypted=",

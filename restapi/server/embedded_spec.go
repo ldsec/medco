@@ -377,6 +377,9 @@ func init() {
           "type": "array",
           "items": {
             "type": "object",
+            "required": [
+              "milliseconds"
+            ],
             "properties": {
               "milliseconds": {
                 "type": "integer",
@@ -435,7 +438,8 @@ func init() {
         "medcoEncryption": {
           "type": "object",
           "required": [
-            "encrypted"
+            "encrypted",
+            "id"
           ],
           "properties": {
             "childrenIds": {
@@ -591,6 +595,9 @@ func init() {
       "description": "Network metadata (public key and nodes list).",
       "schema": {
         "type": "object",
+        "required": [
+          "nodeIndex"
+        ],
         "properties": {
           "nodeIndex": {
             "type": "integer"
@@ -599,6 +606,9 @@ func init() {
             "type": "array",
             "items": {
               "type": "object",
+              "required": [
+                "index"
+              ],
               "properties": {
                 "index": {
                   "type": "integer"
@@ -831,6 +841,9 @@ func init() {
             "description": "Network metadata (public key and nodes list).",
             "schema": {
               "type": "object",
+              "required": [
+                "nodeIndex"
+              ],
               "properties": {
                 "nodeIndex": {
                   "type": "integer"
@@ -839,6 +852,9 @@ func init() {
                   "type": "array",
                   "items": {
                     "type": "object",
+                    "required": [
+                      "index"
+                    ],
                     "properties": {
                       "index": {
                         "type": "integer"
@@ -1151,6 +1167,9 @@ func init() {
           "type": "array",
           "items": {
             "type": "object",
+            "required": [
+              "milliseconds"
+            ],
             "properties": {
               "milliseconds": {
                 "type": "integer",
@@ -1209,7 +1228,8 @@ func init() {
         "medcoEncryption": {
           "type": "object",
           "required": [
-            "encrypted"
+            "encrypted",
+            "id"
           ],
           "properties": {
             "childrenIds": {
@@ -1365,6 +1385,9 @@ func init() {
       "description": "Network metadata (public key and nodes list).",
       "schema": {
         "type": "object",
+        "required": [
+          "nodeIndex"
+        ],
         "properties": {
           "nodeIndex": {
             "type": "integer"
@@ -1373,6 +1396,9 @@ func init() {
             "type": "array",
             "items": {
               "type": "object",
+              "required": [
+                "index"
+              ],
               "properties": {
                 "index": {
                   "type": "integer"

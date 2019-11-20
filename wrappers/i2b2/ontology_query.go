@@ -72,7 +72,6 @@ func parseI2b2Concept(concept Concept) (result *models.ExploreSearchResultElemen
 		Code: concept.Basecode,
 		MedcoEncryption: &models.ExploreSearchResultElementMedcoEncryption{
 			Encrypted: &false,
-			ID: -1,
 			ChildrenIds: []int64{},
 		},
 		Metadata: nil,
@@ -106,12 +105,12 @@ func parseI2b2Concept(concept Concept) (result *models.ExploreSearchResultElemen
 	// if clinical concept from data loader v0 (from concept code)
 	if splitCode[0] == "ENC_ID" {
 		result.MedcoEncryption.Encrypted = &true
-		result.MedcoEncryption.ID, _ = strconv.ParseInt(splitCode[1], 10, 64)
+		*result.MedcoEncryption.ID, _ = strconv.ParseInt(splitCode[1], 10, 64)
 
 	// if concept from loader v1 encrypted (from metadata xml)
 	} else if concept.Metadataxml.ValueMetadata.EncryptedType != "" {
 		result.MedcoEncryption.Encrypted = &true
-		result.MedcoEncryption.ID, _ = strconv.ParseInt(concept.Metadataxml.ValueMetadata.NodeEncryptID, 10, 64)
+		*result.MedcoEncryption.ID, _ = strconv.ParseInt(concept.Metadataxml.ValueMetadata.NodeEncryptID, 10, 64)
 
 		for _, childEncryptIDString := range strings.Split(concept.Metadataxml.ValueMetadata.ChildrenEncryptIDs, ",") {
 			childEncryptID, _ := strconv.ParseInt(childEncryptIDString, 10, 64)

@@ -149,7 +149,8 @@ func (m *ExploreQueryResultElement) UnmarshalBinary(b []byte) error {
 type ExploreQueryResultElementTimersItems0 struct {
 
 	// milliseconds
-	Milliseconds int64 `json:"milliseconds,omitempty"`
+	// Required: true
+	Milliseconds *int64 `json:"milliseconds"`
 
 	// name
 	Name string `json:"name,omitempty"`
@@ -157,6 +158,24 @@ type ExploreQueryResultElementTimersItems0 struct {
 
 // Validate validates this explore query result element timers items0
 func (m *ExploreQueryResultElementTimersItems0) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateMilliseconds(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *ExploreQueryResultElementTimersItems0) validateMilliseconds(formats strfmt.Registry) error {
+
+	if err := validate.Required("milliseconds", "body", m.Milliseconds); err != nil {
+		return err
+	}
+
 	return nil
 }
 

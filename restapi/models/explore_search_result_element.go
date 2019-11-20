@@ -180,7 +180,8 @@ type ExploreSearchResultElementMedcoEncryption struct {
 	Encrypted *bool `json:"encrypted"`
 
 	// id
-	ID int64 `json:"id,omitempty"`
+	// Required: true
+	ID *int64 `json:"id"`
 }
 
 // Validate validates this explore search result element medco encryption
@@ -188,6 +189,10 @@ func (m *ExploreSearchResultElementMedcoEncryption) Validate(formats strfmt.Regi
 	var res []error
 
 	if err := m.validateEncrypted(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateID(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -200,6 +205,15 @@ func (m *ExploreSearchResultElementMedcoEncryption) Validate(formats strfmt.Regi
 func (m *ExploreSearchResultElementMedcoEncryption) validateEncrypted(formats strfmt.Registry) error {
 
 	if err := validate.Required("medcoEncryption"+"."+"encrypted", "body", m.Encrypted); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *ExploreSearchResultElementMedcoEncryption) validateID(formats strfmt.Registry) error {
+
+	if err := validate.Required("medcoEncryption"+"."+"id", "body", m.ID); err != nil {
 		return err
 	}
 
