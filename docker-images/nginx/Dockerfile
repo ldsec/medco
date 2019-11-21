@@ -4,7 +4,7 @@ FROM nginx:1.15.10
 ENV HTTP_SCHEME="http" \
     ALL_TIMEOUTS_SECONDS="600"
 
-COPY nginx.docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod a+x /usr/local/bin/docker-entrypoint.sh
 
 CMD docker-entrypoint.sh

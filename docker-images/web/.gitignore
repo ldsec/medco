@@ -1,2 +1,0 @@
-nginx-conf.d/servers.conf
-nginx-conf.d/common/server-revproxy.conf.inc

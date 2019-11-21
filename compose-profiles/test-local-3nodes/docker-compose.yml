@@ -44,7 +44,7 @@ services:
     environment:
       - I2B2_HIVE_URL=http://i2b2-srv0:8080/i2b2/services
       - I2B2_LOGIN_DOMAIN=i2b2medcosrv0
-      - UNLYNX_GROUP_FILE_IDX=0
+      - MEDCO_NODE_IDX=0
       - OIDC_JWT_ISSUER=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/auth/realms/master
       - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD:?}
     networks:
@@ -97,7 +97,7 @@ services:
     environment:
       - I2B2_HIVE_URL=http://i2b2-srv1:8080/i2b2/services
       - I2B2_LOGIN_DOMAIN=i2b2medcosrv1
-      - UNLYNX_GROUP_FILE_IDX=1
+      - MEDCO_NODE_IDX=1
       - OIDC_JWT_ISSUER=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/auth/realms/master
       - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD:?}
     networks:
@@ -150,7 +150,7 @@ services:
     environment:
       - I2B2_HIVE_URL=http://i2b2-srv2:8080/i2b2/services
       - I2B2_LOGIN_DOMAIN=i2b2medcosrv2
-      - UNLYNX_GROUP_FILE_IDX=2
+      - MEDCO_NODE_IDX=2
       - OIDC_JWT_ISSUER=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/auth/realms/master
       - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD:?}
     networks:
@@ -193,19 +193,6 @@ services:
     - ../../configuration-profiles/test-local-3nodes/certificate.crt:/medco-configuration/certificate.crt
     - ../../configuration-profiles/test-local-3nodes/certificate.key:/medco-configuration/certificate.key
 
-  php-fpm:
-    extends:
-      file: ../docker-compose-definitions.yml
-      service: php-fpm
-    environment:
-    - I2B2_DB_NAME=i2b2medcosrv0
-    - I2B2_DOMAIN_NAME=i2b2medcosrv0
-    - I2B2_URL=http://i2b2-medco-srv0:8080/i2b2/services
-    - CORS_ALLOW_ORIGIN=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}
-    networks:
-      intra-node-srv0:
-      inter-nodes:
-
   postgresql:
     extends:
       file: ../docker-compose-definitions.yml
@@ -236,18 +223,6 @@ services:
       - "8081:8080"
     environment:
       - KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD:?}
-    depends_on:
-      - postgresql
-    networks:
-      inter-nodes:
-
-  picsure:
-    extends:
-      file: ../docker-compose-definitions.yml
-      service: picsure
-    ports:
-      - "8082:8080"
-      - "9992:9990"
     depends_on:
       - postgresql
     networks:

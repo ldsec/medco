@@ -44,7 +44,7 @@ services:
       - I2B2_LOGIN_USER=e2etest
       - I2B2_LOGIN_PASSWORD=e2etest
       - LOG_LEVEL=5
-      - UNLYNX_GROUP_FILE_IDX=0
+      - MEDCO_NODE_IDX=0
     networks:
       intra-node-srv0:
       inter-nodes:
@@ -94,7 +94,7 @@ services:
       - I2B2_LOGIN_USER=e2etest
       - I2B2_LOGIN_PASSWORD=e2etest
       - LOG_LEVEL=5
-      - UNLYNX_GROUP_FILE_IDX=1
+      - MEDCO_NODE_IDX=1
     networks:
       intra-node-srv1:
       inter-nodes:
@@ -144,7 +144,7 @@ services:
       - I2B2_LOGIN_USER=e2etest
       - I2B2_LOGIN_PASSWORD=e2etest
       - LOG_LEVEL=5
-      - UNLYNX_GROUP_FILE_IDX=2
+      - MEDCO_NODE_IDX=2
     networks:
       intra-node-srv2:
       inter-nodes:
@@ -160,19 +160,6 @@ services:
       intra-node-srv0:
       inter-nodes:
         ipv4_address: 172.31.0.200
-
-  php-fpm:
-    extends:
-      file: ../docker-compose-definitions.yml
-      service: php-fpm
-    environment:
-      - I2B2_DB_NAME=i2b2medcosrv0
-      - I2B2_DOMAIN_NAME=i2b2medcosrv0
-      - I2B2_URL=http://i2b2-medco-srv0:8080/i2b2/services
-    networks:
-      intra-node-srv0:
-      inter-nodes:
-        ipv4_address: 172.31.0.201
 
   postgresql:
     extends:
@@ -205,19 +192,6 @@ services:
     networks:
       inter-nodes:
         ipv4_address: 172.31.0.204
-
-  picsure:
-    extends:
-      file: ../docker-compose-definitions.yml
-      service: picsure
-    ports:
-      - "8082:8080"
-      - "9992:9990"
-    depends_on:
-      - postgresql
-    networks:
-      inter-nodes:
-        ipv4_address: 172.31.0.205
 
 networks:
   inter-nodes:

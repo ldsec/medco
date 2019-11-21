@@ -10,7 +10,7 @@ until psql $PSQL_PARAMS -d postgres -c '\q'; do
 done
 
 # load initial data if database does not exist (credentials must be valid and have create database right)
-DB_CHECK=`psql ${PSQL_PARAMS} -d postgres -X -A -t -c "select count(*) from pg_database where datname = '${I2B2_DB_NAME}';"`
+DB_CHECK=$(psql ${PSQL_PARAMS} -d postgres -X -A -t -c "select count(*) from pg_database where datname = '${I2B2_DB_NAME}';")
 if [[ "$DB_CHECK" -ne "1" ]]; then
 echo "Initialising i2b2 database"
     psql $PSQL_PARAMS -d postgres <<-EOSQL
@@ -19,7 +19,7 @@ EOSQL
 
     # get the i2b2 data
     pushd "$I2B2_DATA_DIR"
-    git clone --depth 1 --branch $I2B2_DATA_VERSION https://github.com/i2b2/i2b2-data.git .
+    git clone --depth 1 --branch "$I2B2_DATA_VERSION" https://github.com/i2b2/i2b2-data.git .
     popd
 
     # run loading scripts

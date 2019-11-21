@@ -30,8 +30,7 @@ services:
   nginx:
     image: medco/nginx:${NGINX_VERSION:-MedCo-v0.2.1}
     build:
-      context: ../docker-images/web
-      dockerfile: nginx.Dockerfile
+      context: ../docker-images/nginx
     ports:
       - "80"
       - "443"
@@ -39,26 +38,9 @@ services:
       - HTTP_SCHEME=http
       - ALL_TIMEOUTS_SECONDS=600
     volumes:
-      - ../docker-images/web/www-data:/www-data
-      - ../docker-images/web/nginx-conf.d:/etc/nginx/conf.d
+      - ../docker-images/nginx/www-data:/www-data
+      - ../docker-images/nginx/conf.d:/etc/nginx/conf.d
       - ../configuration-profiles/dev-local-3nodes/group.toml:/medco-configuration/group.toml
-
-  php-fpm:
-    image: medco/php-fpm:${PHP_FPM_VERSION:-MedCo-v0.2.1}
-    build:
-      context: ../docker-images/web
-      dockerfile: php-fpm.Dockerfile
-    environment:
-    - I2B2_DB_HOST=postgresql
-    - I2B2_DB_PORT=5432
-    - I2B2_DB_USER=i2b2
-    - I2B2_DB_PW=i2b2
-    - I2B2_DB_NAME=i2b2medco
-    - I2B2_DOMAIN_NAME=i2b2medco
-    - I2B2_URL=http://i2b2:8080/i2b2/services
-    - CORS_ALLOW_ORIGIN=http://localhost:4200
-    volumes:
-    - ../docker-images/web/www-data:/www-data
 
   postgresql:
     image: postgres:9.6
@@ -107,26 +89,6 @@ services:
       - MEDCO_NETWORK_NAME=testnetwork
       - MEDCO_NODES_NAME=a,b,c
 
-  picsure:
-    image: medco/picsure:${PICSURE_VERSION:-MedCo-v0.2.1}
-    build:
-      context: ../docker-images/picsure
-    environment:
-      - PICSURE2_PGDB_ADDRESS=postgresql
-      - PICSURE2_PGDB_PORT=5432
-      - PICSURE2_PGDB_DB=picsure
-      - PICSURE2_PGDB_USER=picsure
-      - PICSURE2_PGDB_PW=picsure
-      - VERIFY_USER_METHOD=local_jwks
-      - PICSURE2_USER_ID_CLAIM=preferred_username
-      - PICSURE2_CLIENT_SECRET=none
-      - PICSURE2_JWKS_URL=http://keycloak:8080/auth/realms/master/protocol/openid-connect/certs
-      - PICSURE2_CLIENT_ID=medco
-      - MEDCO_NETWORK_NAME=testnetwork
-      - MEDCO_NODES_NAME=a,b,c
-      - MEDCO_NODES_CONNECTOR_URL=http://medco-connector-srv0:1999/medco-connector/picsure2,http://medco-connector-srv1:1999/medco-connector/picsure2,http://medco-connector-srv2:1999/medco-connector/picsure2
-      - HTTP_CLIENT_TIMEOUT_SECONDS=600
-
   medco-connector:
     image: medco/medco-connector:${MEDCO_CONNECTOR_VERSION:-v0.2.1}
     ports:
@@ -141,13 +103,14 @@ services:
       - I2B2_WAIT_TIME_SECONDS=450
       - LOG_LEVEL=3
       - UNLYNX_GROUP_FILE_PATH=/medco-configuration/group.toml
-      - UNLYNX_GROUP_FILE_IDX=0
       - UNLYNX_TIMEOUT_SECONDS=150
       - JWKS_URL=http://keycloak:8080/auth/realms/master/protocol/openid-connect/certs
       - OIDC_JWT_ISSUER=http://localhost/auth/realms/master
       - OIDC_CLIENT_ID=medco
       - OIDC_JWT_USER_ID_CLAIM=preferred_username
       - MEDCO_OBFUSCATION_MIN=5
+      - MEDCO_NODES_URL=http://localhost:1990/medco,http://localhost:1991/medco,http://localhost:1992/medco
+      - MEDCO_NODE_IDX=0
     volumes:
       - ../configuration-profiles/dev-local-3nodes:/medco-configuration
 
@@ -156,13 +119,10 @@ services:
     environment:
       - LOG_LEVEL=3
       - UNLYNX_GROUP_FILE_PATH=/medco-configuration/group.toml
-      - UNLYNX_GROUP_FILE_IDX=0
+      - MEDCO_NODE_IDX=0
       - OIDC_CLIENT_ID=medco
       - CLIENT_QUERY_TIMEOUT_SECONDS=660
-      - PICSURE2_API_HOST=localhost
-      - PICSURE2_API_BASE_PATH=/pic-sure-api-2/PICSURE
-      - PICSURE2_API_SCHEME=http
-      - PICSURE2_RESOURCES=MEDCO_testnetwork_0_a,MEDCO_testnetwork_1_b,MEDCO_testnetwork_2_c
+      - MEDCO_CONNECTOR_URL=http://localhost:1990/medco
       - OIDC_REQ_TOKEN_URL=http://localhost/auth/realms/master/protocol/openid-connect/token
     volumes:
       - ../configuration-profiles/dev-local-3nodes:/medco-configuration

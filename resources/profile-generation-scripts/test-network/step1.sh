@@ -31,7 +31,7 @@ fi
 read -p "### About to generate configuration of node $NODE_IDX ($NODE_DNS_NAME) for profile $PROFILE_NAME, <Enter> to continue, <Ctrl+C> to abort."
 
 echo "### Dependencies check, script will abort if dependency if not found"
-which docker openssl keytool
+which docker openssl
 
 # ===================== pre-requisites ======================
 mkdir "$CONF_FOLDER" "$COMPOSE_FOLDER"

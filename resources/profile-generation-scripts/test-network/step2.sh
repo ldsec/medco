@@ -30,9 +30,6 @@ pushd "${CONF_FOLDER}"
 for archive in $(ls -1 srv*-public.tar.gz); do
     tar -zxvf ${archive}
 done
-for cert in $(ls -1 srv*-certificate.crt); do
-    keytool -importcert -noprompt -keystore truststore -storepass "truststore" -alias "$(basename ${cert})" -file "${cert}"
-done
 popd
 echo "### Archives extracted"
 

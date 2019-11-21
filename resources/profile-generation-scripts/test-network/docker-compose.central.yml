@@ -22,19 +22,3 @@ services:
       - KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD:?}
     depends_on:
       - postgresql
-
-  picsure:
-    extends:
-      file: ../docker-compose-definitions.yml
-      service: picsure
-    environment:
-      - PICSURE2_USER_ID_CLAIM=${KEYCLOAK_USER_CLAIM:?}
-      - PICSURE2_JWKS_URL=${KEYCLOAK_REALM_URL:?}/protocol/openid-connect/certs
-      - PICSURE2_CLIENT_ID=${KEYCLOAK_CLIENT_ID:?}
-      - MEDCO_NETWORK_NAME=${MEDCO_NETWORK_NAME:?}
-      - MEDCO_NODES_NAME=${MEDCO_NODES_NAME:?}
-      - MEDCO_NODES_CONNECTOR_URL=${MEDCO_NODES_CONNECTOR_URL:?}
-    volumes:
-      - ../../configuration-profiles/${MEDCO_PROFILE_NAME:?}:/medco-configuration
-    depends_on:
-      - postgresql

@@ -1,4 +1,0 @@
-embed-server
-/system-property=javax.net.ssl.trustStore:add(value="${env.TRUSTSTORE_PATH}")
-/system-property=javax.net.ssl.trustStorePassword:add(value="${env.TRUSTSTORE_PASSWORD}")
-stop-embedded-server
