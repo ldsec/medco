@@ -18,7 +18,7 @@ func MedCoGenomicAnnotationsGetValuesHandler(params genomic_annotations.GetValue
 		})
 	}
 
-	query := "SELECT annotation_value FROM genomic_annotations." + params.Annotation + " WHERE annotation_value ~* $1 LIMIT $2"
+	query := "SELECT annotation_value FROM genomic_annotations." + params.Annotation + " WHERE annotation_value ~* $1 ORDER BY annotation_value LIMIT $2"
 	rows, err := utilserver.DBConnection.Query(query, params.Value, *params.Limit)
 	if err != nil {
 		logrus.Error("Query execution error")

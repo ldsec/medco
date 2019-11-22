@@ -142,6 +142,25 @@ func main() {
 				)
 			},
 		},
+
+		{
+			Name:      "genomic-annotations-get-variants",
+			Aliases:   []string{"gvar"},
+			Usage:     "Get genomic annotations variants",
+			Flags:     genomicAnnotationsGetVariantsFlag,
+			ArgsUsage: "[-z zygosity] [annotation] [value]",
+			Action: func(c *cli.Context) error {
+				return medcoclient.ExecuteClientGenomicAnnotationsGetVariants(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.Args().Get(0),
+					c.Args().Get(1),
+					c.StringSlice("zygosity"),
+					c.GlobalBool("disableTLSCheck"),
+				)
+			},
+		},
 	}
 
 	//cliApp.Before = func(c *cli.Context) error {
