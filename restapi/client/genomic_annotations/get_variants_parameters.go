@@ -21,8 +21,11 @@ import (
 // NewGetVariantsParams creates a new GetVariantsParams object
 // with the default values initialized.
 func NewGetVariantsParams() *GetVariantsParams {
-	var ()
+	var (
+		encryptedDefault = bool(true)
+	)
 	return &GetVariantsParams{
+		Encrypted: &encryptedDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -31,8 +34,11 @@ func NewGetVariantsParams() *GetVariantsParams {
 // NewGetVariantsParamsWithTimeout creates a new GetVariantsParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewGetVariantsParamsWithTimeout(timeout time.Duration) *GetVariantsParams {
-	var ()
+	var (
+		encryptedDefault = bool(true)
+	)
 	return &GetVariantsParams{
+		Encrypted: &encryptedDefault,
 
 		timeout: timeout,
 	}
@@ -41,8 +47,11 @@ func NewGetVariantsParamsWithTimeout(timeout time.Duration) *GetVariantsParams {
 // NewGetVariantsParamsWithContext creates a new GetVariantsParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewGetVariantsParamsWithContext(ctx context.Context) *GetVariantsParams {
-	var ()
+	var (
+		encryptedDefault = bool(true)
+	)
 	return &GetVariantsParams{
+		Encrypted: &encryptedDefault,
 
 		Context: ctx,
 	}
@@ -51,8 +60,11 @@ func NewGetVariantsParamsWithContext(ctx context.Context) *GetVariantsParams {
 // NewGetVariantsParamsWithHTTPClient creates a new GetVariantsParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewGetVariantsParamsWithHTTPClient(client *http.Client) *GetVariantsParams {
-	var ()
+	var (
+		encryptedDefault = bool(true)
+	)
 	return &GetVariantsParams{
+		Encrypted:  &encryptedDefault,
 		HTTPClient: client,
 	}
 }
@@ -67,6 +79,11 @@ type GetVariantsParams struct {
 
 	*/
 	Annotation string
+	/*Encrypted
+	  Request pre-encrypted variant identifiers (defaults to true).
+
+	*/
+	Encrypted *bool
 	/*Value
 	  Genomic annotation value.
 
@@ -127,6 +144,17 @@ func (o *GetVariantsParams) SetAnnotation(annotation string) {
 	o.Annotation = annotation
 }
 
+// WithEncrypted adds the encrypted to the get variants params
+func (o *GetVariantsParams) WithEncrypted(encrypted *bool) *GetVariantsParams {
+	o.SetEncrypted(encrypted)
+	return o
+}
+
+// SetEncrypted adds the encrypted to the get variants params
+func (o *GetVariantsParams) SetEncrypted(encrypted *bool) {
+	o.Encrypted = encrypted
+}
+
 // WithValue adds the value to the get variants params
 func (o *GetVariantsParams) WithValue(value string) *GetVariantsParams {
 	o.SetValue(value)
@@ -160,6 +188,22 @@ func (o *GetVariantsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 	// path param annotation
 	if err := r.SetPathParam("annotation", o.Annotation); err != nil {
 		return err
+	}
+
+	if o.Encrypted != nil {
+
+		// query param encrypted
+		var qrEncrypted bool
+		if o.Encrypted != nil {
+			qrEncrypted = *o.Encrypted
+		}
+		qEncrypted := swag.FormatBool(qrEncrypted)
+		if qEncrypted != "" {
+			if err := r.SetQueryParam("encrypted", qEncrypted); err != nil {
+				return err
+			}
+		}
+
 	}
 
 	// path param value

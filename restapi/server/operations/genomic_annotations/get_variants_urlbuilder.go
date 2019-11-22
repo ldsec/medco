@@ -19,7 +19,8 @@ type GetVariantsURL struct {
 	Annotation string
 	Value      string
 
-	Zygosity []string
+	Encrypted *bool
+	Zygosity  []string
 
 	_basePath string
 	// avoid unkeyed usage
@@ -68,6 +69,14 @@ func (o *GetVariantsURL) Build() (*url.URL, error) {
 	_result.Path = golangswaggerpaths.Join(_basePath, _path)
 
 	qs := make(url.Values)
+
+	var encryptedQ string
+	if o.Encrypted != nil {
+		encryptedQ = swag.FormatBool(*o.Encrypted)
+	}
+	if encryptedQ != "" {
+		qs.Set("encrypted", encryptedQ)
+	}
 
 	var zygosityIR []string
 	for _, zygosityI := range o.Zygosity {

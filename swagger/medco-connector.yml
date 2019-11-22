@@ -171,6 +171,11 @@ paths:
               - heterozygous
               - homozygous
               - unknown
+        - in: "query"
+          name: "encrypted"
+          description: "Request pre-encrypted variant identifiers (defaults to true)."
+          type: "boolean"
+          default: true
       responses:
         200:
           description: "Queried variants."

@@ -19,10 +19,18 @@ import (
 )
 
 // NewGetVariantsParams creates a new GetVariantsParams object
-// no default values defined in spec.
+// with the default values initialized.
 func NewGetVariantsParams() GetVariantsParams {
 
-	return GetVariantsParams{}
+	var (
+		// initialize parameters with default values
+
+		encryptedDefault = bool(true)
+	)
+
+	return GetVariantsParams{
+		Encrypted: &encryptedDefault,
+	}
 }
 
 // GetVariantsParams contains all the bound params for the get variants operation
@@ -40,6 +48,11 @@ type GetVariantsParams struct {
 	  In: path
 	*/
 	Annotation string
+	/*Request pre-encrypted variant identifiers (defaults to true).
+	  In: query
+	  Default: true
+	*/
+	Encrypted *bool
 	/*Genomic annotation value.
 	  Required: true
 	  Min Length: 1
@@ -65,6 +78,11 @@ func (o *GetVariantsParams) BindRequest(r *http.Request, route *middleware.Match
 
 	rAnnotation, rhkAnnotation, _ := route.Params.GetOK("annotation")
 	if err := o.bindAnnotation(rAnnotation, rhkAnnotation, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qEncrypted, qhkEncrypted, _ := qs.GetOK("encrypted")
+	if err := o.bindEncrypted(qEncrypted, qhkEncrypted, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -109,6 +127,29 @@ func (o *GetVariantsParams) validateAnnotation(formats strfmt.Registry) error {
 	if err := validate.Pattern("annotation", "path", o.Annotation, `^\w+$`); err != nil {
 		return err
 	}
+
+	return nil
+}
+
+// bindEncrypted binds and validates parameter Encrypted from query.
+func (o *GetVariantsParams) bindEncrypted(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+	if raw == "" { // empty values pass all other validations
+		// Default values have been previously initialized by NewGetVariantsParams()
+		return nil
+	}
+
+	value, err := swag.ConvertBool(raw)
+	if err != nil {
+		return errors.InvalidType("encrypted", "query", "bool", raw)
+	}
+	o.Encrypted = &value
 
 	return nil
 }

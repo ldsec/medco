@@ -144,6 +144,13 @@ func init() {
             "description": "Genomic annotation zygosity, if null defaults to all.",
             "name": "zygosity",
             "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": true,
+            "description": "Request pre-encrypted variant identifiers (defaults to true).",
+            "name": "encrypted",
+            "in": "query"
           }
         ],
         "responses": {
@@ -805,6 +812,13 @@ func init() {
             },
             "description": "Genomic annotation zygosity, if null defaults to all.",
             "name": "zygosity",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": true,
+            "description": "Request pre-encrypted variant identifiers (defaults to true).",
+            "name": "encrypted",
             "in": "query"
           }
         ],
