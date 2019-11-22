@@ -21,6 +21,7 @@ require (
 	github.com/r0fls/gostats v0.0.0-20180711082619-e793b1fda35c
 	github.com/sirupsen/logrus v1.4.2
 	github.com/smartystreets/assertions v1.0.0 // indirect
+	github.com/stretchr/testify v1.4.0
 	github.com/urfave/cli v1.22.1
 	go.dedis.ch/kyber/v3 v3.0.9 // indirect
 	go.dedis.ch/onet/v3 v3.0.27

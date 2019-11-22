@@ -43,16 +43,19 @@ type GetValuesParams struct {
 
 	/*Genomic annotation name.
 	  Required: true
+	  Pattern: ^\w+$
 	  In: path
 	*/
 	Annotation string
 	/*Limits the number of records retrieved.
+	  Minimum: 0
 	  In: query
 	  Default: 10
 	*/
 	Limit *int64
 	/*Genomic annotation value.
 	  Required: true
+	  Max Length: 255
 	  In: query
 	*/
 	Value string
@@ -102,6 +105,20 @@ func (o *GetValuesParams) bindAnnotation(rawData []string, hasKey bool, formats 
 
 	o.Annotation = raw
 
+	if err := o.validateAnnotation(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateAnnotation carries on validations for parameter Annotation
+func (o *GetValuesParams) validateAnnotation(formats strfmt.Registry) error {
+
+	if err := validate.Pattern("annotation", "path", o.Annotation, `^\w+$`); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -125,6 +142,20 @@ func (o *GetValuesParams) bindLimit(rawData []string, hasKey bool, formats strfm
 	}
 	o.Limit = &value
 
+	if err := o.validateLimit(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateLimit carries on validations for parameter Limit
+func (o *GetValuesParams) validateLimit(formats strfmt.Registry) error {
+
+	if err := validate.MinimumInt("limit", "query", int64(*o.Limit), 0, false); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -145,6 +176,20 @@ func (o *GetValuesParams) bindValue(rawData []string, hasKey bool, formats strfm
 	}
 
 	o.Value = raw
+
+	if err := o.validateValue(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateValue carries on validations for parameter Value
+func (o *GetValuesParams) validateValue(formats strfmt.Registry) error {
+
+	if err := validate.MaxLength("value", "query", o.Value, 255); err != nil {
+		return err
+	}
 
 	return nil
 }

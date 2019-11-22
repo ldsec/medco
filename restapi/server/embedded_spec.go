@@ -58,6 +58,7 @@ func init() {
         "operationId": "getValues",
         "parameters": [
           {
+            "pattern": "^\\w+$",
             "type": "string",
             "description": "Genomic annotation name.",
             "name": "annotation",
@@ -65,6 +66,7 @@ func init() {
             "required": true
           },
           {
+            "maxLength": 255,
             "type": "string",
             "description": "Genomic annotation value.",
             "name": "value",
@@ -114,6 +116,7 @@ func init() {
         "operationId": "getVariants",
         "parameters": [
           {
+            "pattern": "^\\w+$",
             "type": "string",
             "description": "Genomic annotation name.",
             "name": "annotation",
@@ -121,6 +124,7 @@ func init() {
             "required": true
           },
           {
+            "minLength": 1,
             "type": "string",
             "description": "Genomic annotation value.",
             "name": "value",
@@ -329,7 +333,8 @@ func init() {
                       ]
                     },
                     "queryTerm": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^([\\w=-]+|(\\/[^\\/]+){2}\\/?)$"
                     },
                     "value": {
                       "type": "string"
@@ -348,7 +353,8 @@ func init() {
           "$ref": "#/definitions/exploreQueryType"
         },
         "userPublicKey": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^[\\w=-]+$"
         }
       }
     },
@@ -409,7 +415,8 @@ func init() {
       "type": "object",
       "properties": {
         "path": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^(\\/[^\\/]+){2}\\/?$"
         },
         "type": {
           "type": "string",
@@ -527,7 +534,8 @@ func init() {
         "type": "object",
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^[\\w:-]+$"
           },
           "query": {
             "$ref": "#/definitions/exploreQuery"
@@ -703,6 +711,7 @@ func init() {
         "operationId": "getValues",
         "parameters": [
           {
+            "pattern": "^\\w+$",
             "type": "string",
             "description": "Genomic annotation name.",
             "name": "annotation",
@@ -710,6 +719,7 @@ func init() {
             "required": true
           },
           {
+            "maxLength": 255,
             "type": "string",
             "description": "Genomic annotation value.",
             "name": "value",
@@ -717,6 +727,7 @@ func init() {
             "required": true
           },
           {
+            "minimum": 0,
             "type": "integer",
             "default": 10,
             "description": "Limits the number of records retrieved.",
@@ -767,6 +778,7 @@ func init() {
         "operationId": "getVariants",
         "parameters": [
           {
+            "pattern": "^\\w+$",
             "type": "string",
             "description": "Genomic annotation name.",
             "name": "annotation",
@@ -774,6 +786,7 @@ func init() {
             "required": true
           },
           {
+            "minLength": 1,
             "type": "string",
             "description": "Genomic annotation value.",
             "name": "value",
@@ -920,7 +933,8 @@ func init() {
               "type": "object",
               "properties": {
                 "id": {
-                  "type": "string"
+                  "type": "string",
+                  "pattern": "^[\\w:-]+$"
                 },
                 "query": {
                   "$ref": "#/definitions/exploreQuery"
@@ -1086,7 +1100,9 @@ func init() {
           "type": "object",
           "properties": {
             "queryBudget": {
-              "type": "number"
+              "type": "number",
+              "maximum": 0,
+              "minimum": 0
             }
           }
         },
@@ -1119,10 +1135,12 @@ func init() {
                       ]
                     },
                     "queryTerm": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^([\\w=-]+|(\\/[^\\/]+){2}\\/?)$"
                     },
                     "value": {
-                      "type": "string"
+                      "type": "string",
+                      "maxLength": 0
                     }
                   }
                 }
@@ -1138,7 +1156,8 @@ func init() {
           "$ref": "#/definitions/exploreQueryType"
         },
         "userPublicKey": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^[\\w=-]+$"
         }
       }
     },
@@ -1199,7 +1218,8 @@ func init() {
       "type": "object",
       "properties": {
         "path": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^(\\/[^\\/]+){2}\\/?$"
         },
         "type": {
           "type": "string",
@@ -1317,7 +1337,8 @@ func init() {
         "type": "object",
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^[\\w:-]+$"
           },
           "query": {
             "$ref": "#/definitions/exploreQuery"

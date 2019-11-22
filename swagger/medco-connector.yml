@@ -115,16 +115,19 @@ paths:
           description: "Genomic annotation name."
           required: true
           type: "string"
+          pattern: '^\w+$'
         - in: "query"
           name: "value"
           description: "Genomic annotation value."
           required: true
           type: "string"
+          maxLength: 255
         - in: "query"
           name: "limit"
           description: "Limits the number of records retrieved."
           type: "integer"
           default: 10
+          minimum: 0
       responses:
         200:
           description: "Queried annotation values."
@@ -151,11 +154,13 @@ paths:
           description: "Genomic annotation name."
           required: true
           type: "string"
+          pattern: '^\w+$'
         - in: "path"
           name: "value"
           description: "Genomic annotation value."
           required: true
           type: "string"
+          minLength: 1
         - in: "query"
           name: "zygosity"
           description: "Genomic annotation zygosity, if null defaults to all."
@@ -163,9 +168,9 @@ paths:
           items:
             type: "string"
             enum:
-              - "heterozygous"
-              - "homozygous"
-              - "unknown"
+              - heterozygous
+              - homozygous
+              - unknown
       responses:
         200:
           description: "Queried variants."
@@ -206,6 +211,7 @@ parameters:
       properties:
         id:
           type: "string"
+          pattern: '^[\w:-]+$'
         query:
           $ref: "#/definitions/exploreQuery"
 
@@ -277,6 +283,7 @@ definitions:
           - metadata
       path:
         type: "string"
+        pattern: '^(\/[^\/]+){2}\/?$'
 
   exploreSearchResultElement:
     type: "object"
@@ -329,8 +336,11 @@ definitions:
         properties:
           queryBudget:
             type: "number"
+            minimum: 0
+            maximum: 0
       userPublicKey:
         type: "string"
+        pattern: '^[\w=-]+$'
       panels:
         type: "array"
         description: "i2b2 panels (linked by an AND)"
@@ -350,6 +360,7 @@ definitions:
                 properties:
                   queryTerm:
                     type: "string"
+                    pattern: '^([\w=-]+|(\/[^\/]+){2}\/?)$'
                   operator:
                     type: "string"
                     enum:
@@ -357,6 +368,7 @@ definitions:
                       - equals
                   value:
                     type: "string"
+                    maxLength: 0
                   encrypted:
                     type: "boolean"
 

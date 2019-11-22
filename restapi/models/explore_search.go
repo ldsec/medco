@@ -20,6 +20,7 @@ import (
 type ExploreSearch struct {
 
 	// path
+	// Pattern: ^(\/[^\/]+){2}\/?$
 	Path string `json:"path,omitempty"`
 
 	// type
@@ -31,6 +32,10 @@ type ExploreSearch struct {
 func (m *ExploreSearch) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validatePath(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateType(formats); err != nil {
 		res = append(res, err)
 	}
@@ -38,6 +43,19 @@ func (m *ExploreSearch) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *ExploreSearch) validatePath(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Path) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("path", "body", string(m.Path), `^(\/[^\/]+){2}\/?$`); err != nil {
+		return err
+	}
+
 	return nil
 }
 
