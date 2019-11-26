@@ -465,6 +465,7 @@ func GenerateLoadingOntologyScript(databaseS loader.DBSettings) error {
 
 	loading += `CREATE TABLE IF NOT EXISTS genomic_annotations.genomic_annotations(
         		variant_id character varying(255) NOT NULL,
+				variant_id_enc character varying(255) NOT NULL,
         		variant_name character varying(255) NOT NULL,
         		protein_change character varying(255) NOT NULL,
         		hugo_gene_symbol character varying(255) NOT NULL,
@@ -763,7 +764,7 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 
 	// encrypt sensitive ids
 	listEncryptedElements := EncryptElements(listSensitiveIDs, group)
-	if err := writeMedCoOntologyGenomicAnnotations(listEncryptedElements, annotations); err != nil {
+	if err := writeMedCoOntologyGenomicAnnotations(listSensitiveIDs, listEncryptedElements, annotations); err != nil {
 		return err
 	}
 
@@ -1202,7 +1203,7 @@ func generateMedCoOntologyGenomicAnnotation(fields []string, record []string) st
 	return annotation
 }
 
-func writeMedCoOntologyGenomicAnnotations(listEncryptedElements *libunlynx.CipherVector, annotations []string) error {
+func writeMedCoOntologyGenomicAnnotations(listSensitiveIDs []int64, listEncryptedElements *libunlynx.CipherVector, annotations []string) error {
 	for i, annotation := range annotations {
 		if annotation != "NA" && annotation != "" {
 			ciphertextStr, err := (*listEncryptedElements)[i].Serialize()
@@ -1211,7 +1212,7 @@ func writeMedCoOntologyGenomicAnnotations(listEncryptedElements *libunlynx.Ciphe
 				return err
 			}
 
-			_, err = FileHandlers[2].WriteString(`"` + ciphertextStr + `",` + annotation)
+			_, err = FileHandlers[2].WriteString(`"` + strconv.FormatInt(listSensitiveIDs[i], 10) + `","` + ciphertextStr + `",` + annotation)
 			if err != nil {
 				log.Fatal("Error in the writeMedCoOntologyGenomicAnnotations():", err)
 				return err
