@@ -7,18 +7,18 @@ import (
 	"testing"
 )
 
-var variant_name_get_values_value = "5238"
-var variant_name_get_values_result = []string{"16:75238144:C>C", "6:52380882:G>G"}
-var protein_change_get_values_value = "g32"
-var protein_change_get_values_result = []string{"G325R", "G32E"}
-var hugo_gene_symbol_get_values_value = "f22"
-var hugo_gene_symbol_get_values_result = []string{"C1ORF226", "RNF222", "ZNF221"}
+var variantNameGetValuesValue = "5238"
+var variantNameGetValuesResult = []string{"16:75238144:C>C", "6:52380882:G>G"}
+var proteinChangeGetValuesValue = "g32"
+var proteinChangeGetValuesResult = []string{"G325R", "G32E"}
+var proteinChangeGetValuesValue2 = "7cfs*"
+var proteinChangeGetValuesResult2 = []string{"S137Cfs*28"}
+var hugoGeneSymbolGetValuesValue = "tr5"
+var hugoGeneSymbolGetValuesResult = []string{"HTR5A"}
 
-var variant_name_get_variants_result = []string{"qiaK9Vu2h49eGbtTPhRBOj_KdwZRpfdHNn8U8G8rry7rMeHSa9Ipooiog8fAdFGLrE_rCSTv2I9c4jwtebULQg=="}
-var protein_change_get_variants_result = []string{"nrHv8spIGMZEGLn3GY5niuPD7U8z2E0FPcNcDJOCjCMoLLS86M5HE46PkpjttmY4rop5ugTojIjBsWBLuXmqMQ=="}
-var hugo_gene_symbol_get_variants_result = []string{"uvrEA3sLdzG9x5vysj6SuGlWV2BCHVREAtxBT7GzE_3LKuczCzL3tfA2mRYnq3JrgTv8FZXKjk7-RcCq4PGppg==",
-	"6mmVnBWNiAF3BaSDLEHihdpB4Atc68XTXakFJXDBoc9TEl_GXyQ9Bx-joN4g3izS11GSElZmNnzt0lAtni7p3w==",
-	"MyPkqzW1cv1BqMhQe578veTRnQG3gPrifoQPR0sKKG-VO0wVC7dQ1M5qA9l1LCaS5IIAQFE7jJKi2vfOfJyRTw=="}
+var variantNameGetVariantsResult = []string{"-4530899676219565056"}
+var proteinChangeGetVariantsResult = []string{"-2429151887266669568"}
+var hugoGeneSymbolGetVariantsResult = []string{"-7039476204566471680", "-7039476580443220992", "-7039476780159200256"}
 
 func init() {
 	utilserver.DBMSHost = "localhost"
@@ -43,36 +43,40 @@ func TestDBConnection(t *testing.T) {
 	}
 }
 
+// warning: this test needs the dev-local-3nodes medco deployment running locally, loaded with default data
 func TestGenomicAnnotationsGetValues(t *testing.T) {
 
 	//testing variant_name type get values
-	testGenomicAnnotationsGetValues("variant_name", variant_name_get_values_value, variant_name_get_values_result, t)
+	testGenomicAnnotationsGetValues("variant_name", variantNameGetValuesValue, variantNameGetValuesResult, t)
 	//testing protein_change type get values
-	testGenomicAnnotationsGetValues("protein_change", protein_change_get_values_value, protein_change_get_values_result, t)
+	testGenomicAnnotationsGetValues("protein_change", proteinChangeGetValuesValue, proteinChangeGetValuesResult, t)
+	//testing protein_change type get values with value containing *
+	testGenomicAnnotationsGetValues("protein_change", proteinChangeGetValuesValue2, proteinChangeGetValuesResult2, t)
 	//testing hugo_gene_symbol type get values
-	testGenomicAnnotationsGetValues("hugo_gene_symbol", hugo_gene_symbol_get_values_value, hugo_gene_symbol_get_values_result, t)
+	testGenomicAnnotationsGetValues("hugo_gene_symbol", hugoGeneSymbolGetValuesValue, hugoGeneSymbolGetValuesResult, t)
 	//testing get values with empty result
 	testGenomicAnnotationsGetValues("hugo_gene_symbol", "aaa", nil, t)
 
 }
 
+// warning: this test needs the dev-local-3nodes medco deployment running locally, loaded with default data
 func TestGenomicAnnotationsGetVariants(t *testing.T) {
 
 	//testing variant_name type get variants
-	testGenomicAnnotationsGetVariants("variant_name", variant_name_get_values_result[0], nil, variant_name_get_variants_result, t)
+	testGenomicAnnotationsGetVariants("variant_name", variantNameGetValuesResult[0], nil, variantNameGetVariantsResult, t)
 	//testing protein_change type get variants
-	testGenomicAnnotationsGetVariants("protein_change", protein_change_get_values_result[0], nil, protein_change_get_variants_result, t)
+	testGenomicAnnotationsGetVariants("protein_change", proteinChangeGetValuesResult[0], nil, proteinChangeGetVariantsResult, t)
 	//testing hugo_gene_symbol type get variants
-	testGenomicAnnotationsGetVariants("hugo_gene_symbol", hugo_gene_symbol_get_values_result[0], nil, hugo_gene_symbol_get_variants_result, t)
+	testGenomicAnnotationsGetVariants("hugo_gene_symbol", hugoGeneSymbolGetValuesResult[0], nil, hugoGeneSymbolGetVariantsResult, t)
 
 	//testing get variants with different zygosity parameters
-	testGenomicAnnotationsGetVariants("hugo_gene_symbol", hugo_gene_symbol_get_values_result[0], []string{"heterozygous"}, hugo_gene_symbol_get_variants_result[1:3], t)
-	testGenomicAnnotationsGetVariants("hugo_gene_symbol", hugo_gene_symbol_get_values_result[0], []string{"homozygous"}, nil, t)
-	testGenomicAnnotationsGetVariants("hugo_gene_symbol", hugo_gene_symbol_get_values_result[0], []string{"unknown"}, hugo_gene_symbol_get_variants_result[0:1], t)
-	testGenomicAnnotationsGetVariants("hugo_gene_symbol", hugo_gene_symbol_get_values_result[0], []string{"heterozygous", "homozygous"}, hugo_gene_symbol_get_variants_result[1:3], t)
-	testGenomicAnnotationsGetVariants("hugo_gene_symbol", hugo_gene_symbol_get_values_result[0], []string{"heterozygous", "unknown"}, hugo_gene_symbol_get_variants_result, t)
-	testGenomicAnnotationsGetVariants("hugo_gene_symbol", hugo_gene_symbol_get_values_result[0], []string{"homozygous", "unknown"}, hugo_gene_symbol_get_variants_result[0:1], t)
-	testGenomicAnnotationsGetVariants("hugo_gene_symbol", hugo_gene_symbol_get_values_result[0], []string{"heterozygous", "homozygous", "unknown"}, hugo_gene_symbol_get_variants_result, t)
+	testGenomicAnnotationsGetVariants("hugo_gene_symbol", hugoGeneSymbolGetValuesResult[0], []string{"heterozygous"}, hugoGeneSymbolGetVariantsResult[0:2], t)
+	testGenomicAnnotationsGetVariants("hugo_gene_symbol", hugoGeneSymbolGetValuesResult[0], []string{"homozygous"}, nil, t)
+	testGenomicAnnotationsGetVariants("hugo_gene_symbol", hugoGeneSymbolGetValuesResult[0], []string{"unknown"}, hugoGeneSymbolGetVariantsResult[2:3], t)
+	testGenomicAnnotationsGetVariants("hugo_gene_symbol", hugoGeneSymbolGetValuesResult[0], []string{"heterozygous", "homozygous"}, hugoGeneSymbolGetVariantsResult[0:2], t)
+	testGenomicAnnotationsGetVariants("hugo_gene_symbol", hugoGeneSymbolGetValuesResult[0], []string{"heterozygous", "unknown"}, hugoGeneSymbolGetVariantsResult, t)
+	testGenomicAnnotationsGetVariants("hugo_gene_symbol", hugoGeneSymbolGetValuesResult[0], []string{"homozygous", "unknown"}, hugoGeneSymbolGetVariantsResult[2:3], t)
+	testGenomicAnnotationsGetVariants("hugo_gene_symbol", hugoGeneSymbolGetValuesResult[0], []string{"heterozygous", "homozygous", "unknown"}, hugoGeneSymbolGetVariantsResult, t)
 
 }
 

@@ -67,10 +67,14 @@ func main() {
 
 	//--- genomic annotations get variants command flags
 	genomicAnnotationsGetVariantsFlag := []cli.Flag{
-		cli.StringSliceFlag{
+		cli.StringFlag{
 			Name:  "zygosity, z",
 			Usage: "Variant zygosysty",
-			Value: nil,
+			Value: "",
+		},
+		cli.BoolFlag{
+			Name:  "encrypted, e",
+			Usage: "Return encrypted variant id",
 		},
 	}
 
@@ -129,7 +133,9 @@ func main() {
 			Aliases:   []string{"gvar"},
 			Usage:     "Get genomic annotations variants",
 			Flags:     genomicAnnotationsGetVariantsFlag,
-			ArgsUsage: "[-z zygosity] [annotation] [value]",
+			ArgsUsage: "[-z zygosity] [-e] [annotation] [value]",
+			Description: "zygosity can be either heterozygous, homozygous, unknown or a combination of the three separated by |\n" +
+				"If omitted, the command will execute as if zygosity was equal to \"heterozygous|homozygous|unknown|\"",
 			Action: func(c *cli.Context) error {
 				return medcoclient.ExecuteClientGenomicAnnotationsGetVariants(
 					c.GlobalString("token"),
@@ -137,26 +143,8 @@ func main() {
 					c.GlobalString("password"),
 					c.Args().Get(0),
 					c.Args().Get(1),
-					c.StringSlice("zygosity"),
-					c.GlobalBool("disableTLSCheck"),
-				)
-			},
-		},
-
-		{
-			Name:      "genomic-annotations-get-variants",
-			Aliases:   []string{"gvar"},
-			Usage:     "Get genomic annotations variants",
-			Flags:     genomicAnnotationsGetVariantsFlag,
-			ArgsUsage: "[-z zygosity] [annotation] [value]",
-			Action: func(c *cli.Context) error {
-				return medcoclient.ExecuteClientGenomicAnnotationsGetVariants(
-					c.GlobalString("token"),
-					c.GlobalString("user"),
-					c.GlobalString("password"),
-					c.Args().Get(0),
-					c.Args().Get(1),
-					c.StringSlice("zygosity"),
+					c.String("zygosity"),
+					c.Bool("encrypted"),
 					c.GlobalBool("disableTLSCheck"),
 				)
 			},

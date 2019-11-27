@@ -316,7 +316,7 @@ func ExecuteClientGenomicAnnotationsGetValues(token, username, password, annotat
 }
 
 // ExecuteClientGenomicAnnotationsGetVariants displays the variant ids corresponding to the annotation and value parameters
-func ExecuteClientGenomicAnnotationsGetVariants(token, username, password, annotation, value string, zygosity []string, disableTLSCheck bool) (err error) {
+func ExecuteClientGenomicAnnotationsGetVariants(token, username, password, annotation, value string, zygosity string, encrypted bool, disableTLSCheck bool) (err error) {
 
 	// get token
 	var accessToken string
@@ -331,7 +331,7 @@ func ExecuteClientGenomicAnnotationsGetVariants(token, username, password, annot
 	}
 
 	// execute query
-	clientGenomicAnnotationsGetVariants, err := NewGenomicAnnotationsGetVariants(accessToken, annotation, value, zygosity, disableTLSCheck)
+	clientGenomicAnnotationsGetVariants, err := NewGenomicAnnotationsGetVariants(accessToken, annotation, value, zygosity, &encrypted, disableTLSCheck)
 	if err != nil {
 		return
 	}

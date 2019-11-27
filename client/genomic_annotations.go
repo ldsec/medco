@@ -9,6 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -40,6 +41,8 @@ type GenomicAnnotationsGetVariants struct {
 	value string
 
 	zygosity []string
+
+	encrypted *bool
 }
 
 // NewGenomicAnnotationsGetValues creates a new MedCo client genomic-annotations get-values request
@@ -67,13 +70,14 @@ func NewGenomicAnnotationsGetValues(authToken, annotation, value string, limit *
 }
 
 // NewGenomicAnnotationsGetVariants creates a new MedCo client genomic-annotations get-variants request
-func NewGenomicAnnotationsGetVariants(authToken, annotation, value string, zygosity []string, disableTLSCheck bool) (q *GenomicAnnotationsGetVariants, err error) {
+func NewGenomicAnnotationsGetVariants(authToken, annotation, value string, zygosity string, encrypted *bool, disableTLSCheck bool) (q *GenomicAnnotationsGetVariants, err error) {
 
 	q = &GenomicAnnotationsGetVariants{
 		authToken:  authToken,
 		annotation: annotation,
 		value:      value,
-		zygosity:   zygosity,
+		zygosity:   strings.Split(zygosity, "|"),
+		encrypted:  encrypted,
 	}
 
 	parsedUrl, err := url.Parse(utilclient.MedCoConnectorURL)
@@ -106,8 +110,7 @@ func (clientGenomicAnnotationsGetVariants *GenomicAnnotationsGetVariants) Execut
 
 func (clientGenomicAnnotationsGetValues *GenomicAnnotationsGetValues) submitToNode() (result []string, err error) {
 
-	//TODO: DEFINE TIMEOUT PARAMETER
-	params := genomic_annotations.NewGetValuesParamsWithTimeout(time.Duration(utilclient.QueryTimeoutSeconds) * time.Second)
+	params := genomic_annotations.NewGetValuesParamsWithTimeout(time.Duration(utilclient.GenomicAnnotationsQueryTimeoutSeconds) * time.Second)
 	params.Annotation = clientGenomicAnnotationsGetValues.annotation
 	params.Value = clientGenomicAnnotationsGetValues.value
 	if *clientGenomicAnnotationsGetValues.limit != 0 {
@@ -127,11 +130,11 @@ func (clientGenomicAnnotationsGetValues *GenomicAnnotationsGetValues) submitToNo
 
 func (clientGenomicAnnotationsGetVariants *GenomicAnnotationsGetVariants) submitToNode() (result []string, err error) {
 
-	//TODO: DEFINE TIMEOUT PARAMETER
-	params := genomic_annotations.NewGetVariantsParamsWithTimeout(time.Duration(utilclient.QueryTimeoutSeconds) * time.Second)
+	params := genomic_annotations.NewGetVariantsParamsWithTimeout(time.Duration(utilclient.GenomicAnnotationsQueryTimeoutSeconds) * time.Second)
 	params.Annotation = clientGenomicAnnotationsGetVariants.annotation
 	params.Value = clientGenomicAnnotationsGetVariants.value
 	params.Zygosity = clientGenomicAnnotationsGetVariants.zygosity
+	params.Encrypted = clientGenomicAnnotationsGetVariants.encrypted
 
 	response, err := clientGenomicAnnotationsGetVariants.httpMedCoClient.GenomicAnnotations.GetVariants(params, httptransport.BearerToken(clientGenomicAnnotationsGetVariants.authToken))
 

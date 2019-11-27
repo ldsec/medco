@@ -8,6 +8,10 @@ import (
 
 // QueryTimeoutSeconds is the timeout for the client query in seconds (default to 3 minutes)
 var QueryTimeoutSeconds int64
+
+// QueryTimeoutSeconds is the timeout for the client query in seconds (default to 10 seconds)
+var GenomicAnnotationsQueryTimeoutSeconds int64
+
 // MedCoConnectorURL is the URL of the MedCo connector this client is attached to
 var MedCoConnectorURL string
 
@@ -21,6 +25,12 @@ func init() {
 	if err != nil || QueryTimeoutSeconds < 0 {
 		logrus.Warn("invalid client query timeout")
 		QueryTimeoutSeconds = 3 * 60
+	}
+
+	GenomicAnnotationsQueryTimeoutSeconds, err = strconv.ParseInt(os.Getenv("CLIENT_GENOMIC_ANNOTATIONS_QUERY_TIMEOUT_SECONDS"), 10, 64)
+	if err != nil || GenomicAnnotationsQueryTimeoutSeconds < 0 {
+		logrus.Warn("invalid client genomic annotations query timeout")
+		GenomicAnnotationsQueryTimeoutSeconds = 10
 	}
 
 	MedCoConnectorURL = os.Getenv("MEDCO_CONNECTOR_URL")
