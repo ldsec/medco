@@ -10,8 +10,7 @@ import (
 	"strings"
 )
 
-var genomicAnnotationsTypes = []string{"variant_name", "protein_change", "hugo_gene_symbol"}
-
+// MedCoGenomicAnnotationsGetValuesHandler handles /medco/genomic-annotations/{annotation} API endpoint
 func MedCoGenomicAnnotationsGetValuesHandler(params genomic_annotations.GetValuesParams, principal *models.User) middleware.Responder {
 
 	err := utilserver.DBConnection.Ping()
@@ -26,10 +25,8 @@ func MedCoGenomicAnnotationsGetValuesHandler(params genomic_annotations.GetValue
 
 	query, err = buildGetValuesQuery(params)
 	if err != nil {
-		logrus.Error("Query execution error " + err.Error())
-		return genomic_annotations.NewGetValuesDefault(500).WithPayload(&genomic_annotations.GetValuesDefaultBody{
-			Message: "Query execution error: " + err.Error(),
-		})
+		logrus.Error("Query execution error: " + err.Error())
+		return genomic_annotations.NewGetVariantsNotFound()
 	}
 
 	//escaping * characters
@@ -56,13 +53,11 @@ func MedCoGenomicAnnotationsGetValuesHandler(params genomic_annotations.GetValue
 		annotations = append(annotations, annotation)
 	}
 
-	if len(annotations) > 0 {
-		return genomic_annotations.NewGetValuesOK().WithPayload(annotations)
-	} else {
-		return genomic_annotations.NewGetValuesNotFound()
-	}
+	return genomic_annotations.NewGetValuesOK().WithPayload(annotations)
+
 }
 
+// MedCoGenomicAnnotationsGetVariantsHandler handles /medco/genomic-annotations/{annotation}/{value} API endpoint
 func MedCoGenomicAnnotationsGetVariantsHandler(params genomic_annotations.GetVariantsParams, principal *models.User) middleware.Responder {
 
 	err := utilserver.DBConnection.Ping()
@@ -93,10 +88,8 @@ func MedCoGenomicAnnotationsGetVariantsHandler(params genomic_annotations.GetVar
 
 	rows, err := utilserver.DBConnection.Query(query, params.Value, zygosity)
 	if err != nil {
-		logrus.Error("Query execution error" + err.Error())
-		return genomic_annotations.NewGetVariantsDefault(500).WithPayload(&genomic_annotations.GetVariantsDefaultBody{
-			Message: "Query execution error " + err.Error(),
-		})
+		logrus.Error("Query execution error: " + err.Error())
+		return genomic_annotations.NewGetVariantsNotFound()
 	}
 	defer rows.Close()
 
@@ -106,9 +99,9 @@ func MedCoGenomicAnnotationsGetVariantsHandler(params genomic_annotations.GetVar
 	for rows.Next() {
 		err := rows.Scan(&variant)
 		if err != nil {
-			logrus.Error("Query result reading error" + err.Error())
+			logrus.Error("Query result reading error: " + err.Error())
 			return genomic_annotations.NewGetVariantsDefault(500).WithPayload(&genomic_annotations.GetVariantsDefaultBody{
-				Message: "Query result reading error " + err.Error(),
+				Message: "Query result reading error: " + err.Error(),
 			})
 		}
 		variants = append(variants, variant)
@@ -116,32 +109,30 @@ func MedCoGenomicAnnotationsGetVariantsHandler(params genomic_annotations.GetVar
 
 	if len(variants) > 0 {
 		return genomic_annotations.NewGetVariantsOK().WithPayload(variants)
-	} else {
-		return genomic_annotations.NewGetVariantsNotFound()
 	}
+	return genomic_annotations.NewGetVariantsNotFound()
+
 }
 
 func buildGetValuesQuery(params genomic_annotations.GetValuesParams) (string, error) {
 
-	if contains(genomicAnnotationsTypes, params.Annotation) {
+	if contains(utilserver.GenomicAnnotationTypes, params.Annotation) {
 		return "SELECT annotation_value FROM genomic_annotations." + params.Annotation + " WHERE annotation_value ~* $1 ORDER BY annotation_value LIMIT $2", nil
-	} else {
-		return "", errors.New("Requested invalid annotation type: " + params.Annotation)
 	}
+	return "", errors.New("Requested invalid annotation type: " + params.Annotation)
 
 }
 
 func buildGetVariantsQuery(params genomic_annotations.GetVariantsParams) (string, error) {
 
-	if contains(genomicAnnotationsTypes, params.Annotation) {
+	if contains(utilserver.GenomicAnnotationTypes, params.Annotation) {
 		if *params.Encrypted {
 			return "SELECT variant_id_enc FROM genomic_annotations.genomic_annotations WHERE lower(" + params.Annotation + ") = lower($1) AND annotations ~* $2 ORDER BY variant_id", nil
-		} else {
-			return "SELECT variant_id FROM genomic_annotations.genomic_annotations WHERE lower(" + params.Annotation + ") = lower($1) AND annotations ~* $2 ORDER BY variant_id", nil
 		}
-	} else {
-		return "", errors.New("Requested invalid annotation type: " + params.Annotation)
+		return "SELECT variant_id FROM genomic_annotations.genomic_annotations WHERE lower(" + params.Annotation + ") = lower($1) AND annotations ~* $2 ORDER BY variant_id", nil
+
 	}
+	return "", errors.New("Requested invalid annotation type: " + params.Annotation)
 
 }
 

@@ -28,7 +28,7 @@ type GenomicAnnotationsGetValues struct {
 	limit *int64
 }
 
-// GenomicAnnotationsGetValues is a MedCo client genomic-annotations get-variants request
+// GenomicAnnotationsGetVariants is a MedCo client genomic-annotations get-variants request
 type GenomicAnnotationsGetVariants struct {
 
 	// httpMedCoClient is the HTTP client for the MedCo connector
@@ -55,13 +55,13 @@ func NewGenomicAnnotationsGetValues(authToken, annotation, value string, limit *
 		limit:      limit,
 	}
 
-	parsedUrl, err := url.Parse(utilclient.MedCoConnectorURL)
+	parsedURL, err := url.Parse(utilclient.MedCoConnectorURL)
 	if err != nil {
 		logrus.Error("cannot parse MedCo connector URL: ", err)
 		return
 	}
 
-	transport := httptransport.New(parsedUrl.Host, parsedUrl.Path, []string{parsedUrl.Scheme})
+	transport := httptransport.New(parsedURL.Host, parsedURL.Path, []string{parsedURL.Scheme})
 	transport.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: disableTLSCheck}
 
 	q.httpMedCoClient = client.New(transport, nil)
@@ -80,13 +80,13 @@ func NewGenomicAnnotationsGetVariants(authToken, annotation, value string, zygos
 		encrypted:  encrypted,
 	}
 
-	parsedUrl, err := url.Parse(utilclient.MedCoConnectorURL)
+	parsedURL, err := url.Parse(utilclient.MedCoConnectorURL)
 	if err != nil {
 		logrus.Error("cannot parse MedCo connector URL: ", err)
 		return
 	}
 
-	transport := httptransport.New(parsedUrl.Host, parsedUrl.Path, []string{parsedUrl.Scheme})
+	transport := httptransport.New(parsedURL.Host, parsedURL.Path, []string{parsedURL.Scheme})
 	transport.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: disableTLSCheck}
 
 	q.httpMedCoClient = client.New(transport, nil)
@@ -94,6 +94,7 @@ func NewGenomicAnnotationsGetVariants(authToken, annotation, value string, zygos
 	return
 }
 
+// Execute executes the MedCo client get-values query
 func (clientGenomicAnnotationsGetValues *GenomicAnnotationsGetValues) Execute() (result []string, err error) {
 
 	result, err = clientGenomicAnnotationsGetValues.submitToNode()
@@ -101,6 +102,7 @@ func (clientGenomicAnnotationsGetValues *GenomicAnnotationsGetValues) Execute() 
 
 }
 
+// Execute executes the MedCo client get-variants query
 func (clientGenomicAnnotationsGetVariants *GenomicAnnotationsGetVariants) Execute() (result []string, err error) {
 
 	result, err = clientGenomicAnnotationsGetVariants.submitToNode()

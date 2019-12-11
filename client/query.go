@@ -48,13 +48,13 @@ func NewExploreQuery(authToken string, queryType models.ExploreQueryType, encPan
 	}
 
 	// retrieve network information
-	parsedUrl, err := url.Parse(utilclient.MedCoConnectorURL)
+	parsedURL, err := url.Parse(utilclient.MedCoConnectorURL)
 	if err != nil {
 		logrus.Error("cannot parse MedCo connector URL: ", err)
 		return
 	}
 
-	transport := httptransport.New(parsedUrl.Host, parsedUrl.Path, []string{parsedUrl.Scheme})
+	transport := httptransport.New(parsedURL.Host, parsedURL.Path, []string{parsedURL.Scheme})
 	transport.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: disableTLSCheck}
 
 	getMetadataResp, err := client.New(transport, nil).MedcoNetwork.GetMetadata(
@@ -75,13 +75,13 @@ func NewExploreQuery(authToken string, queryType models.ExploreQueryType, encPan
 			return
 		}
 
-		nodeUrl, err := url.Parse(node.URL)
+		nodeURL, err := url.Parse(node.URL)
 		if err != nil {
 			logrus.Error("cannot parse MedCo connector URL: ", err)
 			return nil, err
 		}
 
-		nodeTransport := httptransport.New(nodeUrl.Host, nodeUrl.Path, []string{nodeUrl.Scheme})
+		nodeTransport := httptransport.New(nodeURL.Host, nodeURL.Path, []string{nodeURL.Scheme})
 		nodeTransport.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: disableTLSCheck}
 		q.httpMedCoClients[*node.Index] = client.New(nodeTransport, nil)
 	}

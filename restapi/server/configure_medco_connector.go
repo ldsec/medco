@@ -44,7 +44,7 @@ func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
 
 		// check rest api authorizations
 		for _, requiredAuthorization := range requiredAuthorizations {
-			err = utilserver.AuthorizeRestApiEndpoint(principal, models.RestAPIAuthorization(requiredAuthorization))
+			err = utilserver.AuthorizeRestAPIEndpoint(principal, models.RestAPIAuthorization(requiredAuthorization))
 			if err != nil {
 				return
 			}

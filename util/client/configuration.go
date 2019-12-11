@@ -9,7 +9,7 @@ import (
 // QueryTimeoutSeconds is the timeout for the client query in seconds (default to 3 minutes)
 var QueryTimeoutSeconds int64
 
-// QueryTimeoutSeconds is the timeout for the client query in seconds (default to 10 seconds)
+// GenomicAnnotationsQueryTimeoutSeconds is the timeout for the client query in seconds (default to 10 seconds)
 var GenomicAnnotationsQueryTimeoutSeconds int64
 
 // MedCoConnectorURL is the URL of the MedCo connector this client is attached to

@@ -38,11 +38,11 @@ ENV I2B2_HIVE_URL=http://i2b2:8080/i2b2/services \
     MEDCO_NODES_URL="http://medco-connector-srv0/medco,http://medco-connector-srv1/medco,http://medco-connector-srv2/medco" \
     MEDCO_NODE_IDX=0 \
     MEDCO_OBFUSCATION_MIN=5 \
-    I2B2_DB_HOST=postgresql \
-    I2B2_DB_PORT=5432 \
-    I2B2_DB_USER=postgres \
-    I2B2_DB_PW=postgres \
-    I2B2_DB_NAME=i2b2medco
+    PG_DBMS_HOST=postgresql \
+    PG_DBMS_PORT=5432 \
+    PG_DB_USER=postgres \
+    PG_DB_PW=postgres \
+    PG_DB_NAME=i2b2medco
 
 EXPOSE 1999
 ENTRYPOINT docker-entrypoint.sh medco-connector-server --write-timeout=${SERVER_HTTP_WRITE_TIMEOUT_SECONDS}s
