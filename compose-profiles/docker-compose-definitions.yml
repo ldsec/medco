@@ -113,8 +113,8 @@ services:
       - MEDCO_NODE_IDX=0
       - PG_DBMS_HOST=postgresql
       - PG_DBMS_PORT=5432
-      - PG_DB_USER=postgres
-      - PG_DB_PW=postgres
+      - PG_DB_USER=i2b2
+      - PG_DB_PW=i2b2
       - PG_DB_NAME=i2b2medco
     volumes:
       - ../configuration-profiles/dev-local-3nodes:/medco-configuration
