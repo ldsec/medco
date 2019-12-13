@@ -80,16 +80,16 @@ func MedCoGenomicAnnotationsGetVariantsHandler(params genomic_annotations.GetVar
 
 	query, err = buildGetVariantsQuery(params)
 	if err != nil {
-		logrus.Error("Query execution error " + err.Error())
-		return genomic_annotations.NewGetValuesDefault(500).WithPayload(&genomic_annotations.GetValuesDefaultBody{
-			Message: "Query execution error: " + err.Error(),
-		})
+		logrus.Error("Query execution error: " + err.Error())
+		return genomic_annotations.NewGetVariantsNotFound()
 	}
 
 	rows, err := utilserver.DBConnection.Query(query, params.Value, zygosity)
 	if err != nil {
 		logrus.Error("Query execution error: " + err.Error())
-		return genomic_annotations.NewGetVariantsNotFound()
+		return genomic_annotations.NewGetValuesDefault(500).WithPayload(&genomic_annotations.GetValuesDefaultBody{
+			Message: "Query execution error: " + err.Error(),
+		})
 	}
 	defer rows.Close()
 
