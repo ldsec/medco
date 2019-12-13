@@ -24,8 +24,8 @@ func init() {
 	utilserver.DBMSHost = "localhost"
 	utilserver.DBMSPort = 5432
 	utilserver.DBName = "i2b2medcosrv0"
-	utilserver.DBLoginUser = "postgres"
-	utilserver.DBLoginPassword = "postgres"
+	utilserver.DBLoginUser = "i2b2"
+	utilserver.DBLoginPassword = "i2b2"
 	utilserver.SetLogLevel("5")
 }
 
