@@ -130,12 +130,12 @@ func printResultsCSV(nodesResult map[int]*ExploreQueryResult, output io.Writer) 
 			return err
 		}
 
-		for timerNameIdx := 3 ; timerNameIdx < len(csvHeaders) ; timerNameIdx++ {
+		for timerNameIdx := 3; timerNameIdx < len(csvHeaders); timerNameIdx++ {
 			timerName := csvHeaders[timerNameIdx]
 			timerValue := nodesResult[nodeIdx].Times[timerName]
 
 			csvNodesResults[csvNodeResultsIdx] = append(csvNodesResults[csvNodeResultsIdx],
-				strconv.FormatInt(int64(timerValue / time.Millisecond), 10))
+				strconv.FormatInt(int64(timerValue/time.Millisecond), 10))
 		}
 	}
 
@@ -197,7 +197,7 @@ func parseQueryString(queryString string) (panelsItemKeys [][]int64, panelsIsNot
 					return nil, nil, intMultiplierErr
 				}
 
-				for i := 0 ; i < int(intMultiplier) ; i++ {
+				for i := 0; i < int(intMultiplier); i++ {
 					itemKeys = append(itemKeys, queryInt)
 				}
 
@@ -211,7 +211,7 @@ func parseQueryString(queryString string) (panelsItemKeys [][]int64, panelsIsNot
 					// if a parsable integer: use as is
 					itemKeys = append(itemKeys, parsedInt)
 
-				// case 3: query file
+					// case 3: query file
 				} else {
 					logrus.Debug("Client query file item: ", queryItem)
 
@@ -270,7 +270,7 @@ func loadQueryFile(queryFilePath string) (queryTerms []int64, err error) {
 			}
 
 		} else {
-			err = errors.New("dataset with "+ string(len(queryTermFields)) + " fields is not supported")
+			err = errors.New("dataset with " + string(len(queryTermFields)) + " fields is not supported")
 			logrus.Error(err)
 			return
 		}
@@ -279,4 +279,72 @@ func loadQueryFile(queryFilePath string) (queryTerms []int64, err error) {
 	}
 
 	return
+}
+
+// ExecuteClientGenomicAnnotationsGetValues displays the genomic annotations values matching the "annotation" parameter
+func ExecuteClientGenomicAnnotationsGetValues(token, username, password, annotation, value string, limit int64, disableTLSCheck bool) (err error) {
+
+	// get token
+	var accessToken string
+	if len(token) > 0 {
+		accessToken = token
+	} else {
+		logrus.Debug("No token provided, requesting token for user ", username, ", disable TLS check: ", disableTLSCheck)
+		accessToken, err = utilclient.RetrieveAccessToken(username, password, disableTLSCheck)
+		if err != nil {
+			return
+		}
+	}
+
+	// execute query
+	clientGenomicAnnotationsGetValues, err := NewGenomicAnnotationsGetValues(accessToken, annotation, value, &limit, disableTLSCheck)
+	if err != nil {
+		return
+	}
+
+	result, err := clientGenomicAnnotationsGetValues.Execute()
+	if err != nil {
+		return
+	}
+
+	for _, annotation := range result {
+		fmt.Printf("%s\n", annotation)
+	}
+
+	return
+
+}
+
+// ExecuteClientGenomicAnnotationsGetVariants displays the variant ids corresponding to the annotation and value parameters
+func ExecuteClientGenomicAnnotationsGetVariants(token, username, password, annotation, value string, zygosity string, encrypted bool, disableTLSCheck bool) (err error) {
+
+	// get token
+	var accessToken string
+	if len(token) > 0 {
+		accessToken = token
+	} else {
+		logrus.Debug("No token provided, requesting token for user ", username, ", disable TLS check: ", disableTLSCheck)
+		accessToken, err = utilclient.RetrieveAccessToken(username, password, disableTLSCheck)
+		if err != nil {
+			return
+		}
+	}
+
+	// execute query
+	clientGenomicAnnotationsGetVariants, err := NewGenomicAnnotationsGetVariants(accessToken, annotation, value, zygosity, &encrypted, disableTLSCheck)
+	if err != nil {
+		return
+	}
+
+	result, err := clientGenomicAnnotationsGetVariants.Execute()
+	if err != nil {
+		return
+	}
+
+	for _, variant := range result {
+		fmt.Printf("%s\n", variant)
+	}
+
+	return
+
 }

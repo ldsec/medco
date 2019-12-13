@@ -44,7 +44,7 @@ func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
 
 		// check rest api authorizations
 		for _, requiredAuthorization := range requiredAuthorizations {
-			err = utilserver.AuthorizeRestApiEndpoint(principal, models.RestAPIAuthorization(requiredAuthorization))
+			err = utilserver.AuthorizeRestAPIEndpoint(principal, models.RestAPIAuthorization(requiredAuthorization))
 			if err != nil {
 				return
 			}
@@ -68,14 +68,10 @@ func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
 	})
 
 	// /medco/genomic-annotations/{annotation}
-	api.GenomicAnnotationsGetValuesHandler = genomic_annotations.GetValuesHandlerFunc(func(params genomic_annotations.GetValuesParams, principal *models.User) middleware.Responder {
-		return middleware.NotImplemented("operation genomic_annotations.GetValues has not yet been implemented")
-	})
+	api.GenomicAnnotationsGetValuesHandler = genomic_annotations.GetValuesHandlerFunc(handlers.MedCoGenomicAnnotationsGetValuesHandler)
 
 	// /genomic-annotations/{annotation}/{value}
-	api.GenomicAnnotationsGetVariantsHandler = genomic_annotations.GetVariantsHandlerFunc(func(params genomic_annotations.GetVariantsParams, principal *models.User) middleware.Responder {
-		return middleware.NotImplemented("operation genomic_annotations.GetVariants has not yet been implemented")
-	})
+	api.GenomicAnnotationsGetVariantsHandler = genomic_annotations.GetVariantsHandlerFunc(handlers.MedCoGenomicAnnotationsGetVariantsHandler)
 
 	api.ServerShutdown = func() {}
 

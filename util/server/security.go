@@ -12,7 +12,7 @@ import (
 )
 
 var cachedKeySet struct {
-	keySet *jwk.Set
+	keySet         *jwk.Set
 	expirationTime time.Time
 }
 
@@ -44,7 +44,7 @@ func AuthenticateUser(token string) (user *models.User, err error) {
 	err = parsedToken.Verify(
 		jwt.WithIssuer(OidcJwtIssuer),
 		jwt.WithAudience(OidcClientID),
-		jwt.WithAcceptableSkew(30 * time.Second),
+		jwt.WithAcceptableSkew(30*time.Second),
 	)
 	if err != nil {
 		logrus.Warn("authentication failed (invalid claim): ", err)
@@ -76,11 +76,11 @@ func extractAuthorizationsFromToken(token *jwt.Token) (ua *models.UserAuthorizat
 		logrus.Trace("1 OK")
 		if tokenResourceAccessTyped, ok := tokenResourceAccess.(map[string]interface{}); ok {
 			logrus.Trace("2 OK")
-			if clientId, ok := tokenResourceAccessTyped[OidcClientID]; ok {
+			if clientID, ok := tokenResourceAccessTyped[OidcClientID]; ok {
 				logrus.Trace("3 OK")
-				if clientIdTyped, ok := clientId.(map[string]interface{}); ok {
+				if clientIDTyped, ok := clientID.(map[string]interface{}); ok {
 					logrus.Trace("4 OK")
-					if roles, ok := clientIdTyped["roles"]; ok {
+					if roles, ok := clientIDTyped["roles"]; ok {
 						logrus.Trace("5 OK")
 						if extractedRolesUntyped, ok := roles.([]interface{}); ok {
 							logrus.Trace("6 OK")
@@ -144,8 +144,8 @@ func extractAuthorizationsFromToken(token *jwt.Token) (ua *models.UserAuthorizat
 	return
 }
 
-// AuthorizeRestApiEndpoint authorizes the REST API endpoint requested by the user
-func AuthorizeRestApiEndpoint(user *models.User, requiredAuthorization models.RestAPIAuthorization) (err error) {
+// AuthorizeRestAPIEndpoint authorizes the REST API endpoint requested by the user
+func AuthorizeRestAPIEndpoint(user *models.User, requiredAuthorization models.RestAPIAuthorization) (err error) {
 	for _, userAuth := range user.Authorizations.RestAPI {
 		if userAuth == requiredAuthorization {
 			logrus.Info("user is authorized to request the endpoint with authorization " + string(requiredAuthorization))

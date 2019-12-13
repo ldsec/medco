@@ -1,6 +1,7 @@
 package utilserver
 
 import (
+	"database/sql"
 	"github.com/sirupsen/logrus"
 	onetLog "go.dedis.ch/onet/v3/log"
 	"os"
@@ -14,40 +15,72 @@ var LogLevel int
 
 // MedCoNodesURL is the slice of the URL of all the MedCo nodes, with the order matching the position in the slice
 var MedCoNodesURL []string
+
 // MedCoNodeIdx is the index of this node in the list of nodes
 var MedCoNodeIdx int
 
 // UnlynxGroupFilePath is the path of the unlynx group file from which is derived the cothority public key
 var UnlynxGroupFilePath string
+
 // UnlynxTimeoutSeconds is the unlynx communication timeout (seconds)
 var UnlynxTimeoutSeconds int
 
 // I2b2HiveURL is the URL of the i2b2 hive this connector is using
 var I2b2HiveURL string
+
 // I2b2LoginDomain is the i2b2 login domain
 var I2b2LoginDomain string
+
 // I2b2LoginProject is the i2b2 login project
 var I2b2LoginProject string
+
 // I2b2LoginUser is the i2b2 login user
 var I2b2LoginUser string
+
 // I2b2LoginPassword is the i2b2 login password
 var I2b2LoginPassword string
+
 // I2b2WaitTimeSeconds is the i2b2 timeout (seconds)
 var I2b2WaitTimeSeconds int
 
 // JwksURL is the URL from which the JWT signing keys are retrieved
 var JwksURL string
+
 // JwksTTLSeconds is the TTL of JWKS requests
 var JwksTTLSeconds int64
+
 // OidcJwtIssuer is the token issuer (for JWT validation)
 var OidcJwtIssuer string
+
 // OidcClientID is the OIDC client ID
 var OidcClientID string
+
 // OidcJwtUserIDClaim is the JWT claim containing the user ID
 var OidcJwtUserIDClaim string
 
 // MedCoObfuscationMin is the minimum variance passed to the random distribution for the obfuscation
 var MedCoObfuscationMin int
+
+// DBMSHost is the host of the DBMS
+var DBMSHost string
+
+// DBMSPort is the number of the port used by the DBMS
+var DBMSPort int
+
+// DBName is the name of the database
+var DBName string
+
+// DBLoginUser is the database login user
+var DBLoginUser string
+
+// DBLoginPassword is the database login password
+var DBLoginPassword string
+
+// DBConnection is the connection to the database
+var DBConnection *sql.DB
+
+// GenomicAnnotationTypes are the genomic annotation types available in the database
+var GenomicAnnotationTypes []string
 
 func init() {
 	SetLogLevel(os.Getenv("LOG_LEVEL"))
@@ -95,6 +128,26 @@ func init() {
 		obf = 5
 	}
 	MedCoObfuscationMin = int(obf)
+
+	DBMSHost = os.Getenv("PG_DBMS_HOST")
+	DBName = os.Getenv("PG_DB_NAME")
+	DBLoginUser = os.Getenv("PG_DB_USER")
+	DBLoginPassword = os.Getenv("PG_DB_PW")
+
+	dbmsPort, err := strconv.ParseInt(os.Getenv("PG_DBMS_PORT"), 10, 64)
+	if err != nil || dbmsPort < 0 || dbmsPort > 65535 {
+		logrus.Warn("invalid DBMS port, defaulted")
+		dbmsPort = 5432
+	}
+	DBMSPort = int(dbmsPort)
+
+	DBConnection, err = InitializeConnectionToDB(DBMSHost, DBMSPort, DBName, DBLoginUser, DBLoginPassword)
+	if err != nil {
+		logrus.Error("Impossible to initialize connection to DB")
+		return
+	}
+
+	GenomicAnnotationTypes = GetGenomicAnnotationTypes()
 
 }
 

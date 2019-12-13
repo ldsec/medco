@@ -17,6 +17,7 @@ require (
 	github.com/ldsec/medco-unlynx v0.0.0-20190924143202-01a0d7dedbe4
 	github.com/ldsec/unlynx v1.4.0
 	github.com/lestrrat-go/jwx v0.9.0
+	github.com/lib/pq v1.1.1
 	github.com/pkg/errors v0.8.1
 	github.com/r0fls/gostats v0.0.0-20180711082619-e793b1fda35c
 	github.com/sirupsen/logrus v1.4.2
@@ -30,6 +31,7 @@ require (
 	golang.org/x/crypto v0.0.0-20191119213627-4f8c1d86b1ba // indirect
 	golang.org/x/net v0.0.0-20191119073136-fc4aabc6c914
 	golang.org/x/sys v0.0.0-20191120130536-6bfc516c8699 // indirect
+	golang.org/x/tools v0.0.0-20190617190820-da514acc4774 // indirect
 	golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898 // indirect
 	gopkg.in/yaml.v2 v2.2.7 // indirect
 )

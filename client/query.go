@@ -34,31 +34,31 @@ type ExploreQuery struct {
 	// encPanelsItemKeys is part of the query: contains the encrypted item keys organized by panel
 	encPanelsItemKeys [][]string
 	// panelsIsNot is part of the query: indicates which panels are negated
-	panelsIsNot       []bool
+	panelsIsNot []bool
 }
 
 // NewExploreQuery creates a new MedCo client query
 func NewExploreQuery(authToken string, queryType models.ExploreQueryType, encPanelsItemKeys [][]string, panelsIsNot []bool, disableTLSCheck bool) (q *ExploreQuery, err error) {
 
 	q = &ExploreQuery{
-		authToken:            authToken,
-		queryType: queryType,
+		authToken:         authToken,
+		queryType:         queryType,
 		encPanelsItemKeys: encPanelsItemKeys,
-		panelsIsNot: panelsIsNot,
+		panelsIsNot:       panelsIsNot,
 	}
 
 	// retrieve network information
-	parsedUrl, err := url.Parse(utilclient.MedCoConnectorURL)
+	parsedURL, err := url.Parse(utilclient.MedCoConnectorURL)
 	if err != nil {
 		logrus.Error("cannot parse MedCo connector URL: ", err)
 		return
 	}
 
-	transport := httptransport.New(parsedUrl.Host, parsedUrl.Path, []string{parsedUrl.Scheme})
+	transport := httptransport.New(parsedURL.Host, parsedURL.Path, []string{parsedURL.Scheme})
 	transport.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: disableTLSCheck}
 
 	getMetadataResp, err := client.New(transport, nil).MedcoNetwork.GetMetadata(
-		medco_network.NewGetMetadataParamsWithTimeout(30 * time.Second),
+		medco_network.NewGetMetadataParamsWithTimeout(30*time.Second),
 		httptransport.BearerToken(authToken),
 	)
 	if err != nil {
@@ -75,13 +75,13 @@ func NewExploreQuery(authToken string, queryType models.ExploreQueryType, encPan
 			return
 		}
 
-		nodeUrl, err := url.Parse(node.URL)
+		nodeURL, err := url.Parse(node.URL)
 		if err != nil {
 			logrus.Error("cannot parse MedCo connector URL: ", err)
 			return nil, err
 		}
 
-		nodeTransport := httptransport.New(nodeUrl.Host, nodeUrl.Path, []string{nodeUrl.Scheme})
+		nodeTransport := httptransport.New(nodeURL.Host, nodeURL.Path, []string{nodeURL.Scheme})
 		nodeTransport.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: disableTLSCheck}
 		q.httpMedCoClients[*node.Index] = client.New(nodeTransport, nil)
 	}
@@ -96,7 +96,7 @@ func NewExploreQuery(authToken string, queryType models.ExploreQueryType, encPan
 }
 
 // Execute executes the MedCo client query synchronously on all the nodes
-func (clientQuery *ExploreQuery) Execute() (nodesResult map [int]*ExploreQueryResult, err error) {
+func (clientQuery *ExploreQuery) Execute() (nodesResult map[int]*ExploreQueryResult, err error) {
 
 	queryResultsChan := make(chan *models.ExploreQueryResultElement)
 	queryErrChan := make(chan error)
@@ -118,8 +118,9 @@ func (clientQuery *ExploreQuery) Execute() (nodesResult map [int]*ExploreQueryRe
 
 	// parse the results as they come, or interrupt if one of them errors, or if a timeout occurs
 	timeout := time.After(time.Duration(utilclient.QueryTimeoutSeconds) * time.Second)
-	nodesResult = make(map [int]*ExploreQueryResult)
-	forLoop: for nodeIdx := range clientQuery.httpMedCoClients {
+	nodesResult = make(map[int]*ExploreQueryResult)
+forLoop:
+	for nodeIdx := range clientQuery.httpMedCoClients {
 		select {
 		case queryResult := <-queryResultsChan:
 			parsedQueryResult, err := newQueryResult(queryResult, clientQuery.userPrivateKey)
@@ -135,7 +136,7 @@ func (clientQuery *ExploreQuery) Execute() (nodesResult map [int]*ExploreQueryRe
 				return nodesResult, nil
 			}
 
-		case err = <- queryErrChan:
+		case err = <-queryErrChan:
 			logrus.Error("MedCo client explore query error: ", err)
 			break forLoop
 
@@ -161,7 +162,7 @@ func (clientQuery *ExploreQuery) submitToNode(nodeIdx int) (result *models.Explo
 
 	params := medco_node.NewExploreQueryParamsWithTimeout(time.Duration(utilclient.QueryTimeoutSeconds) * time.Second)
 	params.QueryRequest = medco_node.ExploreQueryBody{
-		ID	 : "MedCo_CLI_Query_" + time.Now().Format(time.RFC3339),
+		ID:    "MedCo_CLI_Query_" + time.Now().Format(time.RFC3339),
 		Query: clientQuery.generateModel(),
 	}
 
@@ -179,9 +180,9 @@ func (clientQuery *ExploreQuery) generateModel() (queryModel *models.ExploreQuer
 
 	// query model
 	queryModel = &models.ExploreQuery{
-		Type: clientQuery.queryType,
+		Type:          clientQuery.queryType,
 		UserPublicKey: clientQuery.userPublicKey,
-		Panels: []*models.ExploreQueryPanelsItems0{},
+		Panels:        []*models.ExploreQueryPanelsItems0{},
 	}
 
 	// query terms
@@ -190,7 +191,7 @@ func (clientQuery *ExploreQuery) generateModel() (queryModel *models.ExploreQuer
 
 		panelModel := &models.ExploreQueryPanelsItems0{
 			Items: []*models.ExploreQueryPanelsItems0ItemsItems0{},
-			Not: &clientQuery.panelsIsNot[panelIdx],
+			Not:   &clientQuery.panelsIsNot[panelIdx],
 		}
 
 		for _, encItem := range panel {
