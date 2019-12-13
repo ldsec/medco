@@ -111,6 +111,11 @@ services:
       - MEDCO_OBFUSCATION_MIN=5
       - MEDCO_NODES_URL=http://localhost:1990/medco,http://localhost:1991/medco,http://localhost:1992/medco
       - MEDCO_NODE_IDX=0
+      - PG_DBMS_HOST=postgresql
+      - PG_DBMS_PORT=5432
+      - PG_DB_USER=i2b2
+      - PG_DB_PW=i2b2
+      - PG_DB_NAME=i2b2medco
     volumes:
       - ../configuration-profiles/dev-local-3nodes:/medco-configuration
 
@@ -122,6 +127,7 @@ services:
       - MEDCO_NODE_IDX=0
       - OIDC_CLIENT_ID=medco
       - CLIENT_QUERY_TIMEOUT_SECONDS=660
+      - CLIENT_GENOMIC_ANNOTATIONS_QUERY_TIMEOUT_SECONDS=10
       - MEDCO_CONNECTOR_URL=http://localhost:1990/medco
       - OIDC_REQ_TOKEN_URL=http://localhost/auth/realms/master/protocol/openid-connect/token
     volumes:
