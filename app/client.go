@@ -36,20 +36,38 @@ func loadV0(c *cli.Context) error {
 	replaySize := c.Int("replay")
 	outputPath := c.String("output")
 
-	// db settings
-	dbHost := c.String("dbHost")
-	dbPort := c.Int("dbPort")
-	dbName := c.String("dbName")
-	dbUser := c.String("dbUser")
-	dbPassword := c.String("dbPassword")
+	// i2b2 db settings
+	i2b2DbHost := c.String("i2b2DbHost")
+	i2b2DbPort := c.Int("i2b2DbPort")
+	i2b2DbName := c.String("i2b2DbName")
+	i2b2DbUser := c.String("i2b2DbUser")
+	i2b2DbPassword := c.String("i2b2DbPassword")
 
-	databaseS := loader.DBSettings{DBhost: dbHost, DBport: dbPort, DBname: dbName, DBuser: dbUser, DBpassword: dbPassword}
+	// genomic annotations db settings
+	gaDbHost := c.String("gaDbHost")
+	gaDbPort := c.Int("gaDbPort")
+	gaDbName := c.String("gaDbName")
+	gaDbUser := c.String("gaDbUser")
+	gaDbPassword := c.String("gaDbPassword")
+
+	i2b2DB := loader.DBSettings{DBhost: i2b2DbHost, DBport: i2b2DbPort, DBname: i2b2DbName, DBuser: i2b2DbUser, DBpassword: i2b2DbPassword}
+	gaDB := loader.DBSettings{DBhost: gaDbHost, DBport: gaDbPort, DBname: gaDbName, DBuser: gaDbUser, DBpassword: gaDbPassword}
 
 	// check if db connection works
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", dbHost, dbPort, dbUser, dbPassword, dbName)
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", i2b2DbHost, i2b2DbPort, i2b2DbUser, i2b2DbPassword, i2b2DbName)
 	db, err := sql.Open("postgres", psqlInfo)
+	err = db.Ping()
 	if err != nil {
-		log.Error("Error while opening database", err)
+		log.Error("Error while connecting to i2b2 database", err)
+		return cli.NewExitError(err, 1)
+	}
+	db.Close()
+
+	psqlInfo = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", gaDbHost, gaDbPort, gaDbUser, gaDbPassword, gaDbName)
+	db, err = sql.Open("postgres", psqlInfo)
+	err = db.Ping()
+	if err != nil {
+		log.Error("Error while connecting to genomic annotations database", err)
 		return cli.NewExitError(err, 1)
 	}
 	db.Close()
@@ -128,7 +146,7 @@ func loadV0(c *cli.Context) error {
 		}
 	}
 
-	err = loadergenomic.LoadGenomicData(el.Roster, entryPointIdx, fOntClinical, fOntGenomic, fClinical, fGenomic, outputPath, allSensitive, mapSensitive, databaseS, false)
+	err = loadergenomic.LoadGenomicData(el.Roster, entryPointIdx, fOntClinical, fOntGenomic, fClinical, fGenomic, outputPath, allSensitive, mapSensitive, i2b2DB, gaDB, false)
 	if err != nil {
 		log.Fatal("Error while loading client data:", err)
 	}
@@ -145,19 +163,20 @@ func loadV1(c *cli.Context) error {
 	empty := c.Bool("empty")
 
 	// db settings
-	dbHost := c.String("dbHost")
-	dbPort := c.Int("dbPort")
-	dbName := c.String("dbName")
-	dbUser := c.String("dbUser")
-	dbPassword := c.String("dbPassword")
+	i2b2DbHost := c.String("i2b2DbHost")
+	i2b2DbPort := c.Int("i2b2DbPort")
+	i2b2DbName := c.String("i2b2DbName")
+	i2b2DbUser := c.String("i2b2DbUser")
+	i2b2DbPassword := c.String("i2b2DbPassword")
 
-	databaseS := loader.DBSettings{DBhost: dbHost, DBport: dbPort, DBname: dbName, DBuser: dbUser, DBpassword: dbPassword}
+	i2b2DB := loader.DBSettings{DBhost: i2b2DbHost, DBport: i2b2DbPort, DBname: i2b2DbName, DBuser: i2b2DbUser, DBpassword: i2b2DbPassword}
 
 	// check if db connection works
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", dbHost, dbPort, dbUser, dbPassword, dbName)
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", i2b2DbHost, i2b2DbPort, i2b2DbUser, i2b2DbPassword, i2b2DbName)
 	db, err := sql.Open("postgres", psqlInfo)
+	err = db.Ping()
 	if err != nil {
-		log.Error("Error while opening database", err)
+		log.Error("Error while connecting to i2b2 database", err)
 		return cli.NewExitError(err, 1)
 	}
 	db.Close()
@@ -207,7 +226,7 @@ func loadV1(c *cli.Context) error {
 		mapSensitive[line] = struct{}{}
 	}
 
-	err = loaderi2b2.LoadI2B2Data(el.Roster, entryPointIdx, directory, files, allSensitive, mapSensitive, databaseS, empty)
+	err = loaderi2b2.LoadI2B2Data(el.Roster, entryPointIdx, directory, files, allSensitive, mapSensitive, i2b2DB, empty)
 	if err != nil {
 		log.Error("Error while converting I2B2 data:", err)
 		return cli.NewExitError(err, 1)

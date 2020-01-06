@@ -30,10 +30,15 @@ RUN apk add --no-cache postgresql-client
 ENV LOG_LEVEL=5 \
     UNLYNX_GROUP_FILE_PATH=/medco-configuration/group.toml \
     UNLYNX_GROUP_FILE_IDX=0 \
-    DB_HOST=localhost \
-    DB_PORT=5432 \
-    DB_NAME=i2b2medco \
-    DB_USER=i2b2 \
-    DB_PASSWORD=i2b2
+    I2B2_DB_HOST=localhost \
+    I2B2_DB_PORT=5432 \
+    I2B2_DB_NAME=i2b2medco \
+    I2B2_DB_USER=i2b2 \
+    I2B2_DB_PASSWORD=i2b2 \
+    GA_DB_HOST=localhost \
+    GA_DB_PORT=5432 \
+    GA_DB_NAME=gamedcosrv \
+    GA_DB_USER=genomicannotations \
+    GA_DB_PASSWORD=genomicannotations
 
 ENTRYPOINT ["medco-loader"]
