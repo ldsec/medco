@@ -21,17 +21,17 @@ var proteinChangeGetVariantsResult = []string{"-2429151887266669568"}
 var hugoGeneSymbolGetVariantsResult = []string{"-7039476204566471680", "-7039476580443220992", "-7039476780159200256"}
 
 func init() {
-	utilserver.DBMSHost = "localhost"
-	utilserver.DBMSPort = 5432
-	utilserver.DBName = "i2b2medcosrv0"
-	utilserver.DBLoginUser = "i2b2"
-	utilserver.DBLoginPassword = "i2b2"
+	utilserver.DBHost = "localhost"
+	utilserver.DBPort = 5432
+	utilserver.DBName = "gamedcosrv0"
+	utilserver.DBLoginUser = "genomicannotations"
+	utilserver.DBLoginPassword = "genomicannotations"
 	utilserver.SetLogLevel("5")
 }
 
 func TestDBConnection(t *testing.T) {
 	var err error
-	utilserver.DBConnection, err = utilserver.InitializeConnectionToDB(utilserver.DBMSHost, utilserver.DBMSPort, utilserver.DBName, utilserver.DBLoginUser, utilserver.DBLoginPassword)
+	utilserver.DBConnection, err = utilserver.InitializeConnectionToDB(utilserver.DBHost, utilserver.DBPort, utilserver.DBName, utilserver.DBLoginUser, utilserver.DBLoginPassword)
 	if err != nil {
 		t.Fail()
 	}
@@ -82,21 +82,12 @@ func TestGenomicAnnotationsGetVariants(t *testing.T) {
 
 func testGenomicAnnotationsGetValues(query_type string, query_value string, query_result []string, t *testing.T) {
 
+	TestDBConnection(t)
+
 	var annotations []string
 	var annotation string
 	params := genomic_annotations.NewGetValuesParams()
-
 	var err error
-	utilserver.DBConnection, err = utilserver.InitializeConnectionToDB(utilserver.DBMSHost, utilserver.DBMSPort, utilserver.DBName, utilserver.DBLoginUser, utilserver.DBLoginPassword)
-	if err != nil {
-		t.Fail()
-	}
-
-	err = utilserver.DBConnection.Ping()
-	if err != nil {
-		logrus.Error("Impossible to connect to DB " + err.Error())
-		t.Fail()
-	}
 
 	params.Annotation = query_type
 	params.Value = query_value
