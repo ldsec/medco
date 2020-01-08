@@ -522,6 +522,37 @@ func GenerateLoadingOntologyScript(i2b2DB loader.DBSettings, gaDB loader.DBSetti
 	loading += `DROP TABLE IF EXISTS genomic_annotations.variant_name;` + "\n"
 	loading += `CREATE TABLE genomic_annotations.variant_name as select distinct variant_name as annotation_value from genomic_annotations.genomic_annotations;` + "\n"
 
+	loading += `CREATE OR REPLACE FUNCTION ga_getvalues(annotation varchar, val varchar, lim int) RETURNS SETOF varchar AS \$\$
+				BEGIN
+    				RETURN QUERY EXECUTE
+					format('SELECT annotation_value
+					FROM genomic_annotations.%I
+					WHERE annotation_value ~* \$1
+           			ORDER BY annotation_value LIMIT \$2',annotation)
+    				USING val, lim;
+				END;
+				\$\$ LANGUAGE plpgsql;` + "\n"
+
+	loading += `CREATE OR REPLACE FUNCTION ga_getvariants(annotation varchar, val varchar, zygosity varchar, enc bool) RETURNS SETOF varchar AS \$\$
+				DECLARE
+				col varchar;
+				BEGIN
+					IF enc
+					THEN
+						col := 'variant_id_enc';
+					ELSE
+						col := 'variant_id';
+					END IF;
+    				RETURN QUERY EXECUTE
+					format('SELECT %I
+					FROM genomic_annotations.genomic_annotations
+					WHERE lower(%I) = lower(\$1)
+					AND annotations ~* \$2
+           			ORDER BY variant_id',col,annotation)
+    				USING val, zygosity;
+				END;
+				\$\$ LANGUAGE plpgsql;` + "\n"
+
 	loading += "COMMIT;\n"
 	loading += "EOSQL"
 
