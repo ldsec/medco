@@ -155,7 +155,7 @@ services:
       - MEDCO_NODE_IDX=2
       - OIDC_JWT_ISSUER=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/auth/realms/master
       - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD:?}
-      - GA_DB_NAME=gamedcosrv0
+      - GA_DB_NAME=gamedcosrv2
     networks:
       intra-node-srv2:
       inter-nodes:

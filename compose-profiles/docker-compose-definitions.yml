@@ -124,6 +124,10 @@ services:
     environment:
       - LOG_LEVEL=3
       - UNLYNX_GROUP_FILE_PATH=/medco-configuration/group.toml
+      - UNLYNX_TIMEOUT_SECONDS=180
+      - I2B2_WAIT_TIME_SECONDS=180
+      - MEDCO_OBFUSCATION_MIN=5
+      - GA_DB_PORT=5432
       - MEDCO_NODE_IDX=0
       - OIDC_CLIENT_ID=medco
       - CLIENT_QUERY_TIMEOUT_SECONDS=660
