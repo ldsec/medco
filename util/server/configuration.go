@@ -61,10 +61,10 @@ var OidcJwtUserIDClaim string
 // MedCoObfuscationMin is the minimum variance passed to the random distribution for the obfuscation
 var MedCoObfuscationMin int
 
-// DBHost is the host of the DBMS
+// DBHost is the host of the DB
 var DBHost string
 
-// DBPort is the number of the port used by the DBMS
+// DBPort is the number of the port used by the DB
 var DBPort int
 
 // DBName is the name of the database

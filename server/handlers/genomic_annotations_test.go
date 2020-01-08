@@ -1,4 +1,4 @@
-package tests
+package handlers
 
 import (
 	"github.com/ldsec/medco-connector/restapi/server/operations/genomic_annotations"
@@ -92,8 +92,8 @@ func testGenomicAnnotationsGetValues(query_type string, query_value string, quer
 	params.Annotation = query_type
 	params.Value = query_value
 
-	query := "SELECT annotation_value FROM genomic_annotations." + params.Annotation + " WHERE annotation_value ~* $1 ORDER BY annotation_value LIMIT $2"
-	rows, err := utilserver.DBConnection.Query(query, params.Value, *params.Limit)
+	query, _ := buildGetValuesQuery(params)
+	rows, err := utilserver.DBConnection.Query(query, params.Annotation, params.Value, *params.Limit)
 	if err != nil {
 		logrus.Error("Query execution error " + err.Error())
 		t.Fail()
@@ -140,8 +140,8 @@ func testGenomicAnnotationsGetVariants(query_type string, query_value string, zy
 		}
 	}
 
-	query := "SELECT variant_id FROM genomic_annotations.genomic_annotations WHERE " + params.Annotation + " = $1 AND annotations ~* $2 ORDER BY variant_id"
-	rows, err := utilserver.DBConnection.Query(query, params.Value, zygosityStr)
+	query, _ := buildGetVariantsQuery(params)
+	rows, err := utilserver.DBConnection.Query(query, params.Annotation, params.Value, zygosityStr, false)
 	if err != nil {
 		logrus.Error("Query execution error " + err.Error())
 		t.Fail()
