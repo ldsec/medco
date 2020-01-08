@@ -2,11 +2,17 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"path"
 	"strings"
 	"testing"
+
+	"github.com/go-openapi/runtime/security"
+
+	"github.com/ldsec/medco-connector/restapi/models"
+	"github.com/ldsec/medco-connector/util/server"
 
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/runtime"
@@ -214,10 +220,93 @@ func TestGenomicVariants(t *testing.T) {
 	}
 }
 
+func TestAuthorizations(t *testing.T) {
+	spec, api := getApi()
+	api.Init()
+	var authorized bool
+
+	// Shortcut jwt authorization method to not authenticate.
+	api.MedcoJwtAuth = func(token string, requiredAuthorizations []string) (principal *models.User, err error) {
+		authorized = false
+		// Don't check authentication, only authorization.
+		rapia := models.RestAPIAuthorization(token)
+		principal = &models.User{
+			ID:    "userID",
+			Token: "some_token",
+			Authorizations: &models.UserAuthorizations{
+				RestAPI: []models.RestAPIAuthorization{rapia}}}
+
+		// check rest api authorizations
+		for _, requiredAuthorization := range requiredAuthorizations {
+			err = utilserver.AuthorizeRestAPIEndpoint(principal, models.RestAPIAuthorization(requiredAuthorization))
+			if err != nil {
+				return
+			}
+		}
+		authorized = true
+		return nil, errors.New("only checking authorizations")
+	}
+
+	// Replace BearerAuth to only take the proposed authentication.
+	api.BearerAuthenticator = func(name string,
+		authenticate security.ScopedTokenAuthentication) runtime.Authenticator {
+		return security.ScopedAuthenticator(func(r *security.
+			ScopedAuthRequest) (bool, interface{}, error) {
+			token := r.Request.Header.Get("Authorization")
+			p, err := authenticate(token, r.RequiredScopes)
+			return true, p, err
+		})
+	}
+
+	for _, test := range []struct {
+		authorized bool
+		method     string
+		path       string
+		restAPI    models.RestAPIAuthorization
+	}{
+		{true, "", "/network", models.RestAPIAuthorizationMedcoNetwork},
+		{false, "", "/network", models.RestAPIAuthorizationMedcoExplore},
+		{false, "", "/network", models.RestAPIAuthorizationMedcoGenomicAnnotations},
+		{false, "POST", "/node/explore/search",
+			models.RestAPIAuthorizationMedcoNetwork},
+		{true, "POST", "/node/explore/search",
+			models.RestAPIAuthorizationMedcoExplore},
+		{false, "POST", "/node/explore/search",
+			models.RestAPIAuthorizationMedcoGenomicAnnotations},
+		{false, "", "/genomic-annotations/abc",
+			models.RestAPIAuthorizationMedcoNetwork},
+		{false, "", "/genomic-annotations/abc",
+			models.RestAPIAuthorizationMedcoExplore},
+		{true, "", "/genomic-annotations/abc",
+			models.RestAPIAuthorizationMedcoGenomicAnnotations},
+		{false, "", "/genomic-annotations/abc/123",
+			models.RestAPIAuthorizationMedcoNetwork},
+		{false, "", "/genomic-annotations/abc/123",
+			models.RestAPIAuthorizationMedcoExplore},
+		{true, "", "/genomic-annotations/abc/123",
+			models.RestAPIAuthorizationMedcoGenomicAnnotations},
+	} {
+		ctx, req := getContextRequestFromApi(t, spec, api,
+			test.method, test.path, "")
+		req.Header.Set("Authorization", string(test.restAPI))
+		route, ok := ctx.LookupRoute(req)
+		require.True(t, ok)
+		_, _, err := ctx.Authorize(req, route)
+		require.Error(t, err)
+		require.Equal(t, test.authorized, authorized)
+	}
+}
+
 func getContextRequest(t *testing.T,
 	method, p, str string) (*middleware.Context, *http.Request) {
 	spec, api := getApi()
 	api.Init()
+	return getContextRequestFromApi(t, spec, api, method, p, str)
+}
+
+func getContextRequestFromApi(t *testing.T, spec *loads.Document,
+	api *operations.MedcoConnectorAPI, method, p,
+	str string) (*middleware.Context, *http.Request) {
 	ctx := middleware.NewContext(spec, nil,
 		middleware.DefaultRouter(spec, api))
 	req, err := http.NewRequest(method,

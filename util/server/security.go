@@ -3,12 +3,13 @@ package utilserver
 import (
 	"encoding/json"
 	"errors"
+	"time"
+
 	"github.com/ldsec/medco-connector/restapi/models"
 	"github.com/lestrrat-go/jwx/jwk"
 	"github.com/lestrrat-go/jwx/jws"
 	"github.com/lestrrat-go/jwx/jwt"
 	"github.com/sirupsen/logrus"
-	"time"
 )
 
 var cachedKeySet struct {
