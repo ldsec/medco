@@ -61,11 +61,11 @@ var OidcJwtUserIDClaim string
 // MedCoObfuscationMin is the minimum variance passed to the random distribution for the obfuscation
 var MedCoObfuscationMin int
 
-// DBMSHost is the host of the DBMS
-var DBMSHost string
+// DBHost is the host of the DB
+var DBHost string
 
-// DBMSPort is the number of the port used by the DBMS
-var DBMSPort int
+// DBPort is the number of the port used by the DB
+var DBPort int
 
 // DBName is the name of the database
 var DBName string
@@ -129,19 +129,19 @@ func init() {
 	}
 	MedCoObfuscationMin = int(obf)
 
-	DBMSHost = os.Getenv("PG_DBMS_HOST")
-	DBName = os.Getenv("PG_DB_NAME")
-	DBLoginUser = os.Getenv("PG_DB_USER")
-	DBLoginPassword = os.Getenv("PG_DB_PW")
+	DBHost = os.Getenv("GA_DB_HOST")
+	DBName = os.Getenv("GA_DB_NAME")
+	DBLoginUser = os.Getenv("GA_DB_USER")
+	DBLoginPassword = os.Getenv("GA_DB_PW")
 
-	dbmsPort, err := strconv.ParseInt(os.Getenv("PG_DBMS_PORT"), 10, 64)
-	if err != nil || dbmsPort < 0 || dbmsPort > 65535 {
-		logrus.Warn("invalid DBMS port, defaulted")
-		dbmsPort = 5432
+	dbPort, err := strconv.ParseInt(os.Getenv("GA_DB_PORT"), 10, 64)
+	if err != nil || dbPort < 0 || dbPort > 65535 {
+		logrus.Warn("invalid DB port, defaulted")
+		dbPort = 5432
 	}
-	DBMSPort = int(dbmsPort)
+	DBPort = int(dbPort)
 
-	DBConnection, err = InitializeConnectionToDB(DBMSHost, DBMSPort, DBName, DBLoginUser, DBLoginPassword)
+	DBConnection, err = InitializeConnectionToDB(DBHost, DBPort, DBName, DBLoginUser, DBLoginPassword)
 	if err != nil {
 		logrus.Error("Impossible to initialize connection to DB")
 		return

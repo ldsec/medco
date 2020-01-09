@@ -1,4 +1,4 @@
-package tests
+package handlers
 
 import (
 	"github.com/ldsec/medco-connector/restapi/server/operations/genomic_annotations"
@@ -21,17 +21,17 @@ var proteinChangeGetVariantsResult = []string{"-2429151887266669568"}
 var hugoGeneSymbolGetVariantsResult = []string{"-7039476204566471680", "-7039476580443220992", "-7039476780159200256"}
 
 func init() {
-	utilserver.DBMSHost = "localhost"
-	utilserver.DBMSPort = 5432
-	utilserver.DBName = "i2b2medcosrv0"
-	utilserver.DBLoginUser = "i2b2"
-	utilserver.DBLoginPassword = "i2b2"
+	utilserver.DBHost = "localhost"
+	utilserver.DBPort = 5432
+	utilserver.DBName = "gamedcosrv0"
+	utilserver.DBLoginUser = "genomicannotations"
+	utilserver.DBLoginPassword = "genomicannotations"
 	utilserver.SetLogLevel("5")
 }
 
 func TestDBConnection(t *testing.T) {
 	var err error
-	utilserver.DBConnection, err = utilserver.InitializeConnectionToDB(utilserver.DBMSHost, utilserver.DBMSPort, utilserver.DBName, utilserver.DBLoginUser, utilserver.DBLoginPassword)
+	utilserver.DBConnection, err = utilserver.InitializeConnectionToDB(utilserver.DBHost, utilserver.DBPort, utilserver.DBName, utilserver.DBLoginUser, utilserver.DBLoginPassword)
 	if err != nil {
 		t.Fail()
 	}
@@ -82,27 +82,18 @@ func TestGenomicAnnotationsGetVariants(t *testing.T) {
 
 func testGenomicAnnotationsGetValues(query_type string, query_value string, query_result []string, t *testing.T) {
 
+	TestDBConnection(t)
+
 	var annotations []string
 	var annotation string
 	params := genomic_annotations.NewGetValuesParams()
-
 	var err error
-	utilserver.DBConnection, err = utilserver.InitializeConnectionToDB(utilserver.DBMSHost, utilserver.DBMSPort, utilserver.DBName, utilserver.DBLoginUser, utilserver.DBLoginPassword)
-	if err != nil {
-		t.Fail()
-	}
-
-	err = utilserver.DBConnection.Ping()
-	if err != nil {
-		logrus.Error("Impossible to connect to DB " + err.Error())
-		t.Fail()
-	}
 
 	params.Annotation = query_type
 	params.Value = query_value
 
-	query := "SELECT annotation_value FROM genomic_annotations." + params.Annotation + " WHERE annotation_value ~* $1 ORDER BY annotation_value LIMIT $2"
-	rows, err := utilserver.DBConnection.Query(query, params.Value, *params.Limit)
+	query, _ := buildGetValuesQuery(params)
+	rows, err := utilserver.DBConnection.Query(query, params.Annotation, params.Value, *params.Limit)
 	if err != nil {
 		logrus.Error("Query execution error " + err.Error())
 		t.Fail()
@@ -149,8 +140,8 @@ func testGenomicAnnotationsGetVariants(query_type string, query_value string, zy
 		}
 	}
 
-	query := "SELECT variant_id FROM genomic_annotations.genomic_annotations WHERE " + params.Annotation + " = $1 AND annotations ~* $2 ORDER BY variant_id"
-	rows, err := utilserver.DBConnection.Query(query, params.Value, zygosityStr)
+	query, _ := buildGetVariantsQuery(params)
+	rows, err := utilserver.DBConnection.Query(query, params.Annotation, params.Value, zygosityStr, false)
 	if err != nil {
 		logrus.Error("Query execution error " + err.Error())
 		t.Fail()

@@ -30,7 +30,7 @@ func MedCoGenomicAnnotationsGetValuesHandler(params genomic_annotations.GetValue
 	}
 
 	//escaping * characters
-	rows, err := utilserver.DBConnection.Query(query, strings.ReplaceAll(params.Value, "*", "\\*"), *params.Limit)
+	rows, err := utilserver.DBConnection.Query(query, params.Annotation, strings.ReplaceAll(params.Value, "*", "\\*"), *params.Limit)
 	if err != nil {
 		logrus.Error("Query execution error: " + err.Error())
 		return genomic_annotations.NewGetValuesDefault(500).WithPayload(&genomic_annotations.GetValuesDefaultBody{
@@ -67,12 +67,12 @@ func MedCoGenomicAnnotationsGetVariantsHandler(params genomic_annotations.GetVar
 			Message: "Impossible to connect to DB: " + err.Error(),
 		})
 	}
-	zygosity := ""
+	zygosityStr := ""
 	if len(params.Zygosity) > 0 {
-		zygosity = params.Zygosity[0]
+		zygosityStr = params.Zygosity[0]
 
 		for i := 1; i < len(params.Zygosity); i++ {
-			zygosity += "|" + params.Zygosity[i]
+			zygosityStr += "|" + params.Zygosity[i]
 		}
 	}
 
@@ -84,7 +84,7 @@ func MedCoGenomicAnnotationsGetVariantsHandler(params genomic_annotations.GetVar
 		return genomic_annotations.NewGetVariantsNotFound()
 	}
 
-	rows, err := utilserver.DBConnection.Query(query, params.Value, zygosity)
+	rows, err := utilserver.DBConnection.Query(query, params.Annotation, params.Value, zygosityStr, *params.Encrypted)
 	if err != nil {
 		logrus.Error("Query execution error: " + err.Error())
 		return genomic_annotations.NewGetValuesDefault(500).WithPayload(&genomic_annotations.GetValuesDefaultBody{
@@ -117,7 +117,7 @@ func MedCoGenomicAnnotationsGetVariantsHandler(params genomic_annotations.GetVar
 func buildGetValuesQuery(params genomic_annotations.GetValuesParams) (string, error) {
 
 	if contains(utilserver.GenomicAnnotationTypes, params.Annotation) {
-		return "SELECT annotation_value FROM genomic_annotations." + params.Annotation + " WHERE annotation_value ~* $1 ORDER BY annotation_value LIMIT $2", nil
+		return "SELECT \"ga_getvalues\"($1,$2,$3)", nil
 	}
 	return "", errors.New("Requested invalid annotation type: " + params.Annotation)
 
@@ -126,11 +126,7 @@ func buildGetValuesQuery(params genomic_annotations.GetValuesParams) (string, er
 func buildGetVariantsQuery(params genomic_annotations.GetVariantsParams) (string, error) {
 
 	if contains(utilserver.GenomicAnnotationTypes, params.Annotation) {
-		if *params.Encrypted {
-			return "SELECT variant_id_enc FROM genomic_annotations.genomic_annotations WHERE lower(" + params.Annotation + ") = lower($1) AND annotations ~* $2 ORDER BY variant_id", nil
-		}
-		return "SELECT variant_id FROM genomic_annotations.genomic_annotations WHERE lower(" + params.Annotation + ") = lower($1) AND annotations ~* $2 ORDER BY variant_id", nil
-
+		return "SELECT \"ga_getvariants\"($1,$2,$3,$4)", nil
 	}
 	return "", errors.New("Requested invalid annotation type: " + params.Annotation)
 
