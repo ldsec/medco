@@ -20,9 +20,11 @@ swagger-gen: swagger
 		--name=medco-cli \
 		--default-scheme=https
 
+.PHONY:	swagger
 swagger:
-	if ! which swagger; then \
-		go install github.com/go-swagger/go-swagger/cmd/swagger; \
+	@if ! which swagger >/dev/null; then \
+		go install github.com/go-swagger/go-swagger/cmd/swagger && \
+		echo "swagger installed"; \
 	fi
 
 test_lint:
