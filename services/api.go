@@ -48,8 +48,6 @@ func (c *API) SendSurveyDDTRequestTerms(entities *onet.Roster, surveyID SurveyID
 
 		// query parameters to DDT
 		Terms: terms,
-
-		IntraMessage: false,
 	}
 
 	resp := ResultDDT{}
@@ -57,8 +55,8 @@ func (c *API) SendSurveyDDTRequestTerms(entities *onet.Roster, surveyID SurveyID
 	if err != nil {
 		return nil, nil, TimeResults{}, err
 	}
-	resp.TR.MapTR[DDTRequestTime] = time.Since(start)
-	return &surveyID, resp.Result, resp.TR, nil
+	resp.TR[DDTRequestTime] = time.Since(start)
+	return &surveyID, resp.Result, TimeResults{resp.TR}, nil
 }
 
 // SendSurveyKSRequest performs key switching in a list of values

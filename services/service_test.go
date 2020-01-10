@@ -15,7 +15,7 @@ import (
 
 func getParam(nbServers int) (*onet.Roster, *onet.LocalTest) {
 
-	log.SetDebugVisible(1)
+	log.SetDebugVisible(2)
 	local := onet.NewLocalTest(libunlynx.SuiTe)
 	// generate 3 hosts, they don't connect, they process messages, and they
 	// don't register the tree or entity list
@@ -46,9 +46,10 @@ func getQueryParams(nbQp int, encKey kyber.Point) libunlynx.CipherVector {
 
 func TestServiceDDT(t *testing.T) {
 	// test with 10 servers
-	el, local := getParam(10)
-	// test with 10 concurrent clients
-	clients := getClients(10, el)
+	nbrServers := 3
+	el, local := getParam(nbrServers)
+	// test with as many clients as servers
+	clients := getClients(nbrServers, el)
 	// the first two threads execute the same operation (repetition) to check that in the end it yields the same result
 	clients[1] = clients[0]
 	// test the query DDT with 500 query terms
@@ -78,6 +79,7 @@ func TestServiceDDT(t *testing.T) {
 		go func(i int, client *servicesmedco.API) {
 			defer wg.Done()
 
+			var err error
 			_, res, tr, err := client.SendSurveyDDTRequestTerms(el, servicesmedco.SurveyID("testDDTSurvey_"+client.ClientID), qt, proofs, true)
 			mutex.Lock()
 			results["testDDTSurvey_"+client.ClientID] = res
@@ -99,10 +101,11 @@ func TestServiceDDT(t *testing.T) {
 
 func TestServiceKS(t *testing.T) {
 	// test with 10 servers
-	el, local := getParam(10)
-	// test with 10 concurrent clients
-	nbHosts := 10
-	clients := getClients(nbHosts, el)
+	nbrServers := 3
+	el, local := getParam(nbrServers)
+	// test with as many clients as servers
+	nbrClients := nbrServers
+	clients := getClients(nbrClients, el)
 	defer local.CloseAll()
 
 	proofs := false
@@ -110,9 +113,9 @@ func TestServiceKS(t *testing.T) {
 	secKeys := make([]kyber.Scalar, 0)
 	pubKeys := make([]kyber.Point, 0)
 	targetData := make(libunlynx.CipherVector, 0)
-	results := make([][]int64, nbHosts)
+	results := make([][]int64, nbrClients)
 
-	for i := 0; i < nbHosts; i++ {
+	for i := 0; i < nbrClients; i++ {
 		_, sK, pK := libunlynx.GenKeys(1)
 		secKeys = append(secKeys, sK[0])
 		pubKeys = append(pubKeys, pK[0])
@@ -136,7 +139,7 @@ func TestServiceKS(t *testing.T) {
 	_, _, _, err = clients[0].SendSurveyKSRequest(el, "testKSRequest", pubKeys[0], nil, proofs)
 	assert.Error(t, err)
 
-	wg := libunlynx.StartParallelize(nbHosts)
+	wg := libunlynx.StartParallelize(nbrClients)
 	var mutex = sync.Mutex{}
 	for i, client := range clients {
 		go func(i int, client *servicesmedco.API) {
@@ -161,7 +164,7 @@ func TestServiceKS(t *testing.T) {
 
 	// Check result
 	for _, res := range results {
-		for i := 0; i < nbHosts; i++ {
+		for i := 0; i < nbrClients; i++ {
 			assert.Equal(t, res[i], int64(i))
 		}
 	}
@@ -169,20 +172,21 @@ func TestServiceKS(t *testing.T) {
 
 func TestServiceAgg(t *testing.T) {
 	// test with 10 servers
-	el, local := getParam(10)
-	// test with 10 concurrent clients
-	nbHosts := 10
-	clients := getClients(nbHosts, el)
+	nbrServers := 3
+	el, local := getParam(nbrServers)
+	// test with as many clients as servers
+	nbrClients := nbrServers
+	clients := getClients(nbrClients, el)
 	defer local.CloseAll()
 
 	proofs := false
 
 	secKeys := make([]kyber.Scalar, 0)
 	pubKeys := make([]kyber.Point, 0)
-	results := make([]int64, nbHosts)
-
 	targetData := *libunlynx.EncryptInt(el.Aggregate, int64(1))
-	for i := 0; i < nbHosts; i++ {
+	results := make([]int64, nbrClients)
+
+	for i := 0; i < nbrClients; i++ {
 		_, sK, pK := libunlynx.GenKeys(1)
 		secKeys = append(secKeys, sK[0])
 		pubKeys = append(pubKeys, pK[0])
@@ -205,7 +209,7 @@ func TestServiceAgg(t *testing.T) {
 	_, _, _, err = clients[0].SendSurveyAggRequest(el, "testAggRequest", pubKeys[0], emptyData, proofs)
 	assert.Error(t, err)
 
-	wg := libunlynx.StartParallelize(nbHosts)
+	wg := libunlynx.StartParallelize(nbrClients)
 	var mutex = sync.Mutex{}
 	for i, client := range clients {
 		go func(i int, client *servicesmedco.API) {
@@ -226,15 +230,16 @@ func TestServiceAgg(t *testing.T) {
 
 	// Check result
 	for _, res := range results {
-		assert.Equal(t, res, int64(10))
+		assert.Equal(t, res, int64(nbrServers))
 	}
 }
 
 func TestServiceShuffle(t *testing.T) {
 	// test with 10 servers
-	el, local := getParam(10)
-	// test with 10 concurrent clients
-	nbHosts := 10
+	nbrServers := 3
+	el, local := getParam(nbrServers)
+	// test with as many clients as servers
+	nbHosts := nbrServers
 	clients := getClients(nbHosts, el)
 	defer local.CloseAll()
 
@@ -275,7 +280,9 @@ func TestServiceShuffle(t *testing.T) {
 		go func(i int, client *servicesmedco.API) {
 			defer wg.Done()
 
-			_, res, tr, err := client.SendSurveyShuffleRequest(el, "testShuffleRequest", pubKeys[i], &targetData[i], proofs)
+			var err error
+			_, res, tr, err := client.SendSurveyShuffleRequest(el,
+				servicesmedco.SurveyID("testShuffleRequest"), pubKeys[i], &targetData[i], proofs)
 			if err != nil {
 				t.Fatal("Client", client.ClientID, " service did not start: ", err)
 			}
@@ -283,7 +290,7 @@ func TestServiceShuffle(t *testing.T) {
 			mutex.Lock()
 			results[i] = libunlynx.DecryptInt(secKeys[i], res)
 			mutex.Unlock()
-			log.Lvl1("Time:", tr.MapTR)
+			log.Lvl1(i, "Time:", tr.MapTR)
 		}(i, client)
 	}
 	libunlynx.EndParallelize(wg)
