@@ -475,9 +475,9 @@ func GenerateLoadingOntologyScript(i2b2DB loader.DBSettings, gaDB loader.DBSetti
 
 	loading += `UPDATE medco_ont.table_access SET c_visualattributes = 'CH ' WHERE c_table_cd = 'E2ETEST';` + "\n"
 
-	loading += `ALTER TABLE medco_ont.genomic OWNER TO i2b2;
-    			ALTER TABLE medco_ont.clinical_sensitive OWNER TO i2b2;
-    			ALTER TABLE medco_ont.clinical_non_sensitive OWNER TO i2b2;` + "\n"
+	loading += `ALTER TABLE medco_ont.genomic OWNER TO $I2B2_DB_USER;
+    			ALTER TABLE medco_ont.clinical_sensitive OWNER TO $I2B2_DB_USER;
+    			ALTER TABLE medco_ont.clinical_non_sensitive OWNER TO $I2B2_DB_USER;` + "\n"
 
 	loading += "COMMIT;\n"
 	loading += "EOSQL"
@@ -502,11 +502,11 @@ func GenerateLoadingOntologyScript(i2b2DB loader.DBSettings, gaDB loader.DBSetti
 				gene_value character varying(255) NOT NULL PRIMARY KEY);
 		
 				-- permissions
-				ALTER TABLE genomic_annotations.genomic_annotations OWNER TO genomicannotations;
-				ALTER TABLE genomic_annotations.annotation_names OWNER TO genomicannotations;
-				ALTER TABLE genomic_annotations.gene_values OWNER TO genomicannotations;
-				GRANT ALL on schema genomic_annotations to genomicannotations;
-				GRANT ALL privileges on all tables in schema genomic_annotations to genomicannotations;` + "\n"
+				ALTER TABLE genomic_annotations.genomic_annotations OWNER TO $GA_DB_USER;
+				ALTER TABLE genomic_annotations.annotation_names OWNER TO $GA_DB_USER;
+				ALTER TABLE genomic_annotations.gene_values OWNER TO $GA_DB_USER;
+				GRANT ALL on schema genomic_annotations to $GA_DB_USER;
+				GRANT ALL privileges on all tables in schema genomic_annotations to $GA_DB_USER;` + "\n"
 
 	//TODO: Delete this please
 	loading += "TRUNCATE " + TablenamesOntology[2] + ";\n"
