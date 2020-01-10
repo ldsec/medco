@@ -168,8 +168,6 @@ services:
     extends:
       file: ../docker-compose-definitions.yml
       service: postgresql
-    environment:
-      - GA_DATABASES=gamedcosrv0 gamedcosrv1 gamedcosrv2
     ports:
       - "5432:5432"
     networks:
