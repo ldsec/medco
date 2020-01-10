@@ -11,7 +11,8 @@ FROM golang:1.12-alpine as release
 
 COPY deployment/docker-entrypoint.sh /usr/local/bin/
 RUN apk update && apk add bash && rm -rf /var/cache/apk/* && \
-    chmod a+x /usr/local/bin/docker-entrypoint.sh
+    chmod a+x /usr/local/bin/docker-entrypoint.sh && \
+    apk add postgresql
 
 COPY --from=build /go/bin/medco-connector-server /go/bin/
 
