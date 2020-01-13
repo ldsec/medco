@@ -10,9 +10,8 @@ RUN CGO_ENABLED=0 go install -v ./cmd/medco-connector-server/...
 FROM golang:1.12-alpine as release
 
 COPY deployment/docker-entrypoint.sh /usr/local/bin/
-RUN apk update && apk add bash && rm -rf /var/cache/apk/* && \
-    chmod a+x /usr/local/bin/docker-entrypoint.sh && \
-    apk add postgresql
+RUN apk update && apk add bash postgresql && rm -rf /var/cache/apk/* && \
+    chmod a+x /usr/local/bin/docker-entrypoint.sh &&
 
 COPY --from=build /go/bin/medco-connector-server /go/bin/
 
