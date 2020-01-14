@@ -353,8 +353,7 @@ func (s *Service) HandleSurveyAggRequest(sar *SurveyAggRequest) (network.Message
 	surveyAgg := SurveyAgg{
 		SurveyID: sar.SurveyID,
 		Request:  *sar,
-		//SurveyChannel: make(chan int, 100),
-		TR: TimeResults{MapTR: mapTR},
+		TR:       TimeResults{MapTR: mapTR},
 	}
 	err := s.putSurveyAgg(sar.SurveyID, surveyAgg)
 
@@ -553,11 +552,16 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance,
 
 	case protocolsunlynx.CollectiveAggregationProtocolName:
 		var surveyAgg SurveyAgg
-		for {
+		maxLoop := 10 * 60
+		for i := 1; i <= maxLoop; i++ {
 			surveyAgg, err = s.getSurveyAgg(target)
 			if err != nil {
-				log.LLvl3(s.ServerIdentity(), "Waiting for data to arrive")
-				time.Sleep(100 * time.Millisecond)
+				log.Lvl3(s.ServerIdentity(), "Waiting for data to arrive for survey", target)
+				if i == maxLoop {
+					return nil, xerrors.New(
+						"didn't get data within 10 minutes - aborting")
+				}
+				time.Sleep(1000 * time.Millisecond)
 			} else {
 				break
 			}
@@ -640,8 +644,7 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance,
 	}
 
 	if err := tn.SetConfig(conf); err != nil {
-		log.Fatal(err)
-		return nil, err
+		return nil, xerrors.Errorf("couldn't set config: %+v", err)
 	}
 
 	return pi, nil

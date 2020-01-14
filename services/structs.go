@@ -144,10 +144,9 @@ type SurveyShuffle struct {
 
 // SurveyAgg is the struct that we persist in the service that contains all the data for the Aggregation request phase
 type SurveyAgg struct {
-	SurveyID      SurveyID
-	Request       SurveyAggRequest
-	SurveyChannel chan int // To wait for all the aggregate results to be received by the root node
-	TR            TimeResults
+	SurveyID SurveyID
+	Request  SurveyAggRequest
+	TR       TimeResults
 }
 
 // SurveyShuffleGenerated is used to ensure that the root server creates the survey before all the other nodes send it their results

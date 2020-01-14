@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"sync"
 	"testing"
+	"time"
 )
 
 func getParam(nbServers int) (*onet.Roster, *onet.LocalTest) {
@@ -212,6 +213,9 @@ func TestServiceAgg(t *testing.T) {
 	wg := libunlynx.StartParallelize(nbrClients)
 	var mutex = sync.Mutex{}
 	for i, client := range clients {
+		// Need to wait. Once dedis/onet#611 is merged,
+		// this time.Sleep can be removed.
+		time.Sleep(100 * time.Millisecond)
 		go func(i int, client *servicesmedco.API) {
 			defer wg.Done()
 

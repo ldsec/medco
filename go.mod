@@ -19,7 +19,7 @@ require (
 	github.com/stretchr/testify v1.4.0
 	github.com/urfave/cli v1.22.2
 	go.dedis.ch/kyber/v3 v3.0.11
-	go.dedis.ch/onet/v3 v3.0.29
+	go.dedis.ch/onet/v3 v3.0.31
 	golang.org/x/crypto v0.0.0-20191202143827-86a70503ff7e // indirect
 	golang.org/x/lint v0.0.0-20191125180803-fdd1cda4f05f // indirect
 	golang.org/x/net v0.0.0-20191126235420-ef20fe5d7933 // indirect

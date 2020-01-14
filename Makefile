@@ -32,6 +32,13 @@ test_local:
 test_codecov:
 	./coveralls.sh
 
+test_loop:
+	for i in $$( seq 100 ); \
+		do echo "******* Run $$i"; echo; \
+		go test -v -short -p=1 -run Agg -count 10 ./services/ > run.log || \
+		( cat run.log; exit 1 ) || exit 1; \
+	done
+
 test: test_fmt test_lint test_codecov
 
 local: test_fmt test_lint test_local
