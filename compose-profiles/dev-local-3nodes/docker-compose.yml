@@ -45,7 +45,7 @@ services:
       - I2B2_LOGIN_PASSWORD=e2etest
       - LOG_LEVEL=5
       - MEDCO_NODE_IDX=0
-      - PG_DB_NAME=i2b2medcosrv0
+      - GA_DB_NAME=gamedcosrv0
     networks:
       intra-node-srv0:
       inter-nodes:
@@ -96,7 +96,7 @@ services:
       - I2B2_LOGIN_PASSWORD=e2etest
       - LOG_LEVEL=5
       - MEDCO_NODE_IDX=1
-      - PG_DB_NAME=i2b2medcosrv1
+      - GA_DB_NAME=gamedcosrv1
     networks:
       intra-node-srv1:
       inter-nodes:
@@ -147,7 +147,7 @@ services:
       - I2B2_LOGIN_PASSWORD=e2etest
       - LOG_LEVEL=5
       - MEDCO_NODE_IDX=2
-      - PG_DB_NAME=i2b2medcosrv2
+      - GA_DB_NAME=gamedcosrv2
     networks:
       intra-node-srv2:
       inter-nodes:

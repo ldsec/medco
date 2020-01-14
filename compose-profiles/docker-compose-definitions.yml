@@ -111,11 +111,11 @@ services:
       - MEDCO_OBFUSCATION_MIN=5
       - MEDCO_NODES_URL=http://localhost:1990/medco,http://localhost:1991/medco,http://localhost:1992/medco
       - MEDCO_NODE_IDX=0
-      - PG_DBMS_HOST=postgresql
-      - PG_DBMS_PORT=5432
-      - PG_DB_USER=i2b2
-      - PG_DB_PW=i2b2
-      - PG_DB_NAME=i2b2medco
+      - GA_DB_HOST=postgresql
+      - GA_DB_PORT=5432
+      - GA_DB_USER=genomicannotations
+      - GA_DB_PW=genomicannotations
+      - GA_DB_NAME=gamedcosrv
     volumes:
       - ../configuration-profiles/dev-local-3nodes:/medco-configuration
 
