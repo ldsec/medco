@@ -171,7 +171,7 @@ func TestReplayDataset(t *testing.T) {
 
 func TestGenerateLoadingScript(t *testing.T) {
 	dbSettings := loader.DBSettings{DBhost: "localhost", DBport: 5434, DBname: "medcodeployment", DBuser: "postgres", DBpassword: "prigen2017"}
-	err := loadergenomic.GenerateLoadingOntologyScript(dbSettings)
+	err := loadergenomic.GenerateLoadingOntologyScript(dbSettings, dbSettings)
 	assert.True(t, err == nil)
 	err = loadergenomic.GenerateLoadingDataScript(dbSettings)
 	assert.True(t, err == nil)
