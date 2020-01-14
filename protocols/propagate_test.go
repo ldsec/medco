@@ -2,8 +2,9 @@ package protocols
 
 import (
 	"bytes"
-	"errors"
+	"github.com/stretchr/testify/require"
 	"go.dedis.ch/kyber/v3/suites"
+	"golang.org/x/xerrors"
 	"reflect"
 	"sync"
 	"testing"
@@ -44,43 +45,38 @@ func propagate(t *testing.T, nbrNodes, nbrFailures []int) {
 		var err error
 		for n, server := range servers {
 			pc := &PC{server, local.Overlays[server.ServerIdentity.ID]}
-			propFuncs[n], err = NewPropagationFunc(pc,
-				"Propagate",
-				nbrFailures[i])
-			log.ErrFatal(err)
+			propFuncs[n], err = NewPropagationFuncTest(pc, "Propagate",
+				nbrFailures[i],
+				func(m network.Message) error {
+					if bytes.Equal(msg.Data, m.(*propagateMsg).Data) {
+						iMut.Lock()
+						recvCount++
+						iMut.Unlock()
+						return nil
+					}
+
+					t.Error("Didn't receive correct data")
+					return xerrors.New("Didn't receive correct data")
+				},
+				func() network.Message {
+					return &propagateMsg{Data: []byte{1, 2, 3}}
+				})
+			require.NoError(t, err)
 		}
 
 		// shut down some servers to simulate failure
 		for k := 0; k < nbrFailures[i]; k++ {
 			err = servers[len(servers)-1-k].Close()
-			log.ErrFatal(err)
+			require.NoError(t, err)
 		}
 
 		// start the propagation
 		log.Lvl2("Starting to propagate", reflect.TypeOf(msg))
 		datas, err := propFuncs[0](el, msg,
-			func(m network.Message) error {
-				if bytes.Equal(msg.Data, m.(*propagateMsg).Data) {
-					iMut.Lock()
-					recvCount++
-					iMut.Unlock()
-					return nil
-				}
-
-				t.Error("Didn't receive correct data")
-				return errors.New("Didn't receive correct data")
-			},
-			func() network.Message {
-				return &propagateMsg{Data: []byte{1, 2, 3}}
-			},
 			1*time.Second)
-		log.ErrFatal(err)
-		if recvCount+nbrFailures[i] != n {
-			t.Fatal("Didn't get data-request")
-		}
-		if len(datas)+nbrFailures[i] != n-1 {
-			t.Fatal("Not all nodes replied")
-		}
+		require.NoError(t, err)
+		require.Equal(t, n, recvCount+nbrFailures[i], "Didn't get data-request")
+		require.Equal(t, n-1, len(datas)+nbrFailures[i], "Not all nodes replied")
 
 		local.CloseAll()
 		log.AfterTest(t)

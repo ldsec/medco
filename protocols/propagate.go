@@ -82,6 +82,7 @@ type propagationContext interface {
 	CreateProtocol(name string, t *onet.Tree) (onet.ProtocolInstance, error)
 }
 
+// NewPropagationProtocol creates a new protocl for propagation.
 func NewPropagationProtocol(n *onet.TreeNodeInstance) (onet.ProtocolInstance, error) {
 	p := &Propagate{
 		sd:               &PropagateSendData{[]byte{}, initialWait},
@@ -102,8 +103,28 @@ func NewPropagationProtocol(n *onet.TreeNodeInstance) (onet.ProtocolInstance, er
 // The protocol will fail if more than thresh nodes per subtree fail to respond.
 // If thresh == -1, the threshold defaults to len(n.Roster().List-1)/3. Thus, for a roster of
 // 5, t = int(4/3) = 1, e.g. 1 node out of the 5 can fail.
-func NewPropagationFunc(c propagationContext, name string, thresh int) (PropagationFunc, error) {
-	pid, err := c.ProtocolRegister(name, NewPropagationProtocol)
+func NewPropagationFunc(c propagationContext, name string,
+	thresh int) (PropagationFunc, error) {
+	return NewPropagationFuncTest(c, name, thresh, nil, nil)
+}
+
+// NewPropagationFuncTest takes two callbacks for easier testing without
+// a `service.NewProtocl`
+func NewPropagationFuncTest(c propagationContext, name string, thresh int,
+	onDataToChildren PropagationOneMsg,
+	onDataToRoot PropagationOneMsgSend) (PropagationFunc, error) {
+	pid, err := c.ProtocolRegister(name, func(n *onet.TreeNodeInstance) (onet.
+		ProtocolInstance, error) {
+		pi, err := NewPropagationProtocol(n)
+		if err != nil {
+			return nil, xerrors.Errorf("couldn't create protocol: %+v", err)
+		}
+		proto := pi.(*Propagate)
+		proto.onDataToChildren = onDataToChildren
+		proto.onDataToRoot = onDataToRoot
+		return pi, err
+	})
+
 	log.Lvl3("Registering new propagation for", c.ServerIdentity(),
 		name, pid)
 	return func(el *onet.Roster, msg network.Message,
@@ -160,8 +181,7 @@ func NewPropagationFunc(c propagationContext, name string, thresh int) (Propagat
 // Start will contact everyone and make the connections
 func (p *Propagate) Start() error {
 	log.Lvl4("going to contact", p.Root().ServerIdentity)
-	p.SendTo(p.Root(), p.sd)
-	return nil
+	return p.SendTo(p.Root(), p.sd)
 }
 
 // Dispatch can handle timeouts
@@ -179,7 +199,7 @@ func (p *Propagate) Dispatch() error {
 					if data != nil && len(data) > 0 {
 						_, netMsg, err := network.Unmarshal(data, p.Suite())
 						if err != nil {
-							log.Errorf("Got error while unmarshaling: %+v", err)
+							log.Warnf("Got error while unmarshaling: %+v", err)
 						} else {
 							rcvNetMsgs = append(rcvNetMsgs, netMsg)
 						}
@@ -272,7 +292,8 @@ func (p *Propagate) Dispatch() error {
 		case <-time.After(timeout):
 			if received < subtreeCount-p.allowedFailures {
 				_, _, err := network.Unmarshal(p.sd.Data, p.Suite())
-				return xerrors.Errorf("Timeout of %s reached, got %v but need %v, err: %v",
+				return xerrors.Errorf("Timeout of %s reached, "+
+					"got %v but need %v, err: %+v",
 					timeout, received, subtreeCount-p.allowedFailures, err)
 			}
 			process = false

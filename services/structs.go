@@ -208,7 +208,7 @@ func (s *Service) putSurveyAgg(sid SurveyID, surv SurveyAgg) error {
 	return err
 }
 
-func UnmarshalProtocolConfig(buf []byte) (pc ProtocolConfig, err error) {
+func unmarshalProtocolConfig(buf []byte) (pc ProtocolConfig, err error) {
 	_, pcInt, err := network.Unmarshal(buf, libunlynx.SuiTe)
 	if err != nil {
 		return
@@ -217,7 +217,7 @@ func UnmarshalProtocolConfig(buf []byte) (pc ProtocolConfig, err error) {
 	return
 }
 
-func NewProtocolConfig(sid SurveyID, tq string, data interface{}) (
+func newProtocolConfig(sid SurveyID, tq string, data interface{}) (
 	pc ProtocolConfig, err error) {
 	pc.SurveyID = sid
 	pc.TypeQ = tq
@@ -225,12 +225,12 @@ func NewProtocolConfig(sid SurveyID, tq string, data interface{}) (
 	return
 }
 
-func (pc ProtocolConfig) GetConfig() (gc onet.GenericConfig, err error) {
+func (pc ProtocolConfig) getConfig() (gc onet.GenericConfig, err error) {
 	gc.Data, err = network.Marshal(&pc)
 	return
 }
 
-func (pc ProtocolConfig) GetTarget() SurveyID {
+func (pc ProtocolConfig) getTarget() SurveyID {
 	if pc.TypeQ == "" {
 		return pc.SurveyID
 	}
