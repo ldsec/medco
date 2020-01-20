@@ -420,10 +420,13 @@ func init() {
     },
     "exploreSearch": {
       "type": "object",
+      "required": [
+        "path"
+      ],
       "properties": {
         "path": {
           "type": "string",
-          "pattern": "^(\\/[^\\/]+){2}\\/?$"
+          "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
         },
         "type": {
           "type": "string",
@@ -1230,10 +1233,13 @@ func init() {
     },
     "exploreSearch": {
       "type": "object",
+      "required": [
+        "path"
+      ],
       "properties": {
         "path": {
           "type": "string",
-          "pattern": "^(\\/[^\\/]+){2}\\/?$"
+          "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
         },
         "type": {
           "type": "string",

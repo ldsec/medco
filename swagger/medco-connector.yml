@@ -280,6 +280,8 @@ responses:
 definitions:
   exploreSearch:
     type: "object"
+    required:
+      - path
     properties:
       type:
         type: "string"
@@ -288,7 +290,7 @@ definitions:
           - metadata
       path:
         type: "string"
-        pattern: '^(\/[^\/]+){2}\/?$'
+        pattern: '^\/$|^((\/[^\/]+)+\/?)$'
 
   exploreSearchResultElement:
     type: "object"
