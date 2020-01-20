@@ -20,8 +20,9 @@ import (
 type ExploreSearch struct {
 
 	// path
-	// Pattern: ^(\/[^\/]+){2}\/?$
-	Path string `json:"path,omitempty"`
+	// Required: true
+	// Pattern: ^\/$|^((\/[^\/]+)+\/?)$
+	Path *string `json:"path"`
 
 	// type
 	// Enum: [children metadata]
@@ -48,11 +49,11 @@ func (m *ExploreSearch) Validate(formats strfmt.Registry) error {
 
 func (m *ExploreSearch) validatePath(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Path) { // not required
-		return nil
+	if err := validate.Required("path", "body", m.Path); err != nil {
+		return err
 	}
 
-	if err := validate.Pattern("path", "body", string(m.Path), `^(\/[^\/]+){2}\/?$`); err != nil {
+	if err := validate.Pattern("path", "body", string(*m.Path), `^\/$|^((\/[^\/]+)+\/?)$`); err != nil {
 		return err
 	}
 

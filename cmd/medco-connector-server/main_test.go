@@ -45,9 +45,11 @@ func TestExploreSearch(t *testing.T) {
 		reqPath string
 	}{
 		{false, "child", ""},
-		{true, "children", ""},
+		{true, "children", "/"},
+		{false, "children", ""},
 		{true, "children", "/abc/def"},
 		{true, "children", "/abc/def/"},
+		{true, "children", "/abc/def/asdasdas"},
 		{false, "children", "abc/def/"},
 		{false, "children", "//def/"},
 		{false, "children", "///"},

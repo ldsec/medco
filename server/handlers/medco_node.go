@@ -13,7 +13,7 @@ import (
 // MedCoNodeExploreSearchHandler handles /medco/node/explore/search API endpoint
 func MedCoNodeExploreSearchHandler(params medco_node.ExploreSearchParams, principal *models.User) middleware.Responder {
 
-	searchResult, err := i2b2.GetOntologyChildren(params.SearchRequest.Path)
+	searchResult, err := i2b2.GetOntologyChildren(*params.SearchRequest.Path)
 	if err != nil {
 		return medco_node.NewExploreSearchDefault(500).WithPayload(&medco_node.ExploreSearchDefaultBody{
 			Message: err.Error(),
