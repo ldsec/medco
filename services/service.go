@@ -297,12 +297,7 @@ func (s *Service) HandleSurveyKSRequest(skr *SurveyKSRequest) (network.Message, 
 
 // HandleSurveyShuffleRequest handles the reception of the aggregate local result to be shared/shuffled/switched
 func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network.Message, error) {
-	var root bool
-	if s.ServerIdentity().String() == ssr.Roster.List[0].String() {
-		root = true
-	} else {
-		root = false
-	}
+	root := s.ServerIdentity().String() == ssr.Roster.List[0].String()
 
 	log.Lvl2(s.ServerIdentity().String(), " received a SurveyShuffleRequest:", ssr.SurveyID, "(root =", root, "- intra =", ssr.IntraMessage, ")")
 
