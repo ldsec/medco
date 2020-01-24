@@ -1,6 +1,7 @@
 package servicesmedco
 
 import (
+	"fmt"
 	"github.com/btcsuite/goleveldb/leveldb/errors"
 	"github.com/ldsec/unlynx/lib"
 	"go.dedis.ch/kyber/v3"
@@ -8,6 +9,11 @@ import (
 	"go.dedis.ch/onet/v3/network"
 	"time"
 )
+
+func init() {
+	network.RegisterMessage(ProtocolConfig{})
+	network.RegisterMessage(SurveyDDTRequest{})
+}
 
 // Name is the registered name for the medco service.
 const Name = "medco"
@@ -52,7 +58,7 @@ const (
 // ResultDDT will contain final results of the DDT of the query terms.
 type ResultDDT struct {
 	Result []libunlynx.GroupingKey
-	TR     TimeResults
+	TR     map[string]time.Duration
 }
 
 // Result will contain the final results for the other queries
@@ -64,6 +70,14 @@ type Result struct {
 // SurveyID unique ID for each survey.
 type SurveyID string
 
+// ProtocolConfig holds the configuration that will be passed from node to
+// node. It replaces the map and calling all nodes.
+type ProtocolConfig struct {
+	SurveyID SurveyID
+	TypeQ    string
+	Data     []byte
+}
+
 // SurveyDDTRequest is the message used trigger the DDT of the query parameters
 type SurveyDDTRequest struct {
 	SurveyID SurveyID
@@ -74,7 +88,6 @@ type SurveyDDTRequest struct {
 	Terms libunlynx.CipherVector // query terms
 
 	// message handling
-	IntraMessage  bool
 	MessageSource *network.ServerIdentity
 }
 
@@ -99,7 +112,6 @@ type SurveyShuffleRequest struct {
 	KSTarget      libunlynx.CipherVector // the final results to be key switched
 
 	// message handling
-	IntraMessage  bool
 	MessageSource *network.ServerIdentity
 }
 
@@ -112,14 +124,6 @@ type SurveyAggRequest struct {
 
 	AggregateTarget libunlynx.CipherText // target results to aggregate. the root node adds the results from the other nodes here
 	KSTarget        libunlynx.CipherText // the final aggregated result to be key switched
-}
-
-// SurveyTag is the struct that we persist in the service that contains all the data for the DDT protocol
-type SurveyTag struct {
-	SurveyID      SurveyID
-	Request       SurveyDDTRequest
-	SurveyChannel chan int // To wait for the survey to be created before the DDT protocol
-	TR            TimeResults
 }
 
 // SurveyKS is the struct that we persist in the service that contains all the data for the Key Switch request phase
@@ -140,15 +144,9 @@ type SurveyShuffle struct {
 
 // SurveyAgg is the struct that we persist in the service that contains all the data for the Aggregation request phase
 type SurveyAgg struct {
-	SurveyID      SurveyID
-	Request       SurveyAggRequest
-	SurveyChannel chan int // To wait for all the aggregate results to be received by the root node
-	TR            TimeResults
-}
-
-// SurveyTagGenerated is used to ensure that all servers get the survey before starting the DDT protocol
-type SurveyTagGenerated struct {
 	SurveyID SurveyID
+	Request  SurveyAggRequest
+	TR       TimeResults
 }
 
 // SurveyShuffleGenerated is used to ensure that the root server creates the survey before all the other nodes send it their results
@@ -159,17 +157,6 @@ type SurveyShuffleGenerated struct {
 // SurveyAggGenerated is used to ensure that the root server creates the survey before all the other nodes send it their results
 type SurveyAggGenerated struct {
 	SurveyID SurveyID
-}
-
-func (s *Service) getSurveyTag(sid SurveyID) (SurveyTag, error) {
-	surv, err := s.MapSurveyTag.Get(string(sid))
-	if err != nil {
-		return SurveyTag{}, errors.New("Error" + err.Error() + "while getting surveyID: " + string(sid))
-	}
-	if surv == nil {
-		return SurveyTag{}, errors.New("Empty map entry while getting surveyID: " + string(sid))
-	}
-	return surv.(SurveyTag), nil
 }
 
 func (s *Service) getSurveyKS(sid SurveyID) (SurveyKS, error) {
@@ -205,11 +192,6 @@ func (s *Service) getSurveyAgg(sid SurveyID) (SurveyAgg, error) {
 	return surv.(SurveyAgg), nil
 }
 
-func (s *Service) putSurveyTag(sid SurveyID, surv SurveyTag) error {
-	_, err := s.MapSurveyTag.Put(string(sid), surv)
-	return err
-}
-
 func (s *Service) putSurveyKS(sid SurveyID, surv SurveyKS) error {
 	_, err := s.MapSurveyKS.Put(string(sid), surv)
 	return err
@@ -223,4 +205,33 @@ func (s *Service) putSurveyShuffle(sid SurveyID, surv SurveyShuffle) error {
 func (s *Service) putSurveyAgg(sid SurveyID, surv SurveyAgg) error {
 	_, err := s.MapSurveyAgg.Put(string(sid), surv)
 	return err
+}
+
+func unmarshalProtocolConfig(buf []byte) (pc ProtocolConfig, err error) {
+	_, pcInt, err := network.Unmarshal(buf, libunlynx.SuiTe)
+	if err != nil {
+		return
+	}
+	pc = *pcInt.(*ProtocolConfig)
+	return
+}
+
+func newProtocolConfig(sid SurveyID, tq string, data interface{}) (
+	pc ProtocolConfig, err error) {
+	pc.SurveyID = sid
+	pc.TypeQ = tq
+	pc.Data, err = network.Marshal(data)
+	return
+}
+
+func (pc ProtocolConfig) getConfig() (gc onet.GenericConfig, err error) {
+	gc.Data, err = network.Marshal(&pc)
+	return
+}
+
+func (pc ProtocolConfig) getTarget() SurveyID {
+	if pc.TypeQ == "" {
+		return pc.SurveyID
+	}
+	return SurveyID(fmt.Sprintf("%s/%s", pc.SurveyID, pc.TypeQ))
 }
