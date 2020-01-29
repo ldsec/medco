@@ -47,6 +47,10 @@ services:
       - MEDCO_NODE_IDX=0
       - OIDC_JWT_ISSUER=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/auth/realms/master
       - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD:?}
+      - "MEDCO_NODES_URL=\
+      ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-0,\
+      ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-1,\
+      ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-2"
     networks:
       intra-node-srv0:
       inter-nodes:
@@ -100,6 +104,10 @@ services:
       - MEDCO_NODE_IDX=1
       - OIDC_JWT_ISSUER=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/auth/realms/master
       - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD:?}
+      - "MEDCO_NODES_URL=\
+      ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-0,\
+      ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-1,\
+      ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-2"
     networks:
       intra-node-srv1:
       inter-nodes:
@@ -153,6 +161,10 @@ services:
       - MEDCO_NODE_IDX=2
       - OIDC_JWT_ISSUER=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/auth/realms/master
       - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD:?}
+      - "MEDCO_NODES_URL=\
+      ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-0,\
+      ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-1,\
+      ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-2"
     networks:
       intra-node-srv2:
       inter-nodes:
