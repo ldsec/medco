@@ -4,7 +4,7 @@ set -Eeuo pipefail
 ### script to download the MedCo example datasets
 
 SCRIPT_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-REPO_URL="https://github.com/ldsec/projects-data/blob/master/medco/datasets/"
+REPO_URL="https://github.com/ldsec/projects-data/blob/master/medco/datasets"
 
 # genomic (v0) dataset
 mkdir -p ${SCRIPT_FOLDER}/genomic/tcga_cbio/
