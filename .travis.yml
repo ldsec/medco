@@ -1,0 +1,16 @@
+sudo: required
+language: minimal
+services:
+  - docker
+
+notifications:
+  email: false
+
+before_install:
+  - cd compose-profiles/dev-local-3nodes
+  - docker-compose pull medco-unlynx-srv0 medco-connector-srv0 medco-cli-client medco-loader-srv0
+
+install:
+  - docker-compose build
+  - docker-compose up -d
+  - docker ps -a
