@@ -2,16 +2,24 @@ sudo: required
 language: minimal
 services:
   - docker
+  - postgresql
 
 notifications:
   email: false
 
 before_install:
-  - cd compose-profiles/dev-local-3nodes
-  - docker-compose pull medco-unlynx-srv0 medco-connector-srv0
-  - docker-compose -f docker-compose.tools.yml pull medco-cli-client medco-loader-srv0
+  - cd ~/build/ldsec/medco-deployment/resources/data
+  - bash download.sh
 
 install:
+  - cd ~/build/ldsec/medco-deployment/compose-profiles/dev-local-3nodes
   - docker-compose build
+  - docker-compose -f docker-compose.tools.yml pull medco-cli-client
   - docker-compose up -d
-  - docker ps -a
+  - bash ~/build/ldsec/medco-deployment/resources/utility-scripts/wait_for_startup.sh
+  - docker-compose -f docker-compose.tools.yml run medco-loader-srv0 v0 --ont_clinical /data/genomic/tcga_cbio/8_clinical_data.csv --sen /data/genomic/sensitive.txt --ont_genomic /data/genomic/tcga_cbio/8_mutation_data.csv --clinical /data/genomic/tcga_cbio/8_clinical_data.csv --genomic /data/genomic/tcga_cbio/8_mutation_data.csv --output /data/
+  - docker-compose -f docker-compose.tools.yml run medco-loader-srv1 v0 --ont_clinical /data/genomic/tcga_cbio/8_clinical_data.csv --sen /data/genomic/sensitive.txt --ont_genomic /data/genomic/tcga_cbio/8_mutation_data.csv --clinical /data/genomic/tcga_cbio/8_clinical_data.csv --genomic /data/genomic/tcga_cbio/8_mutation_data.csv --output /data/
+  - docker-compose -f docker-compose.tools.yml run medco-loader-srv2 v0 --ont_clinical /data/genomic/tcga_cbio/8_clinical_data.csv --sen /data/genomic/sensitive.txt --ont_genomic /data/genomic/tcga_cbio/8_mutation_data.csv --clinical /data/genomic/tcga_cbio/8_clinical_data.csv --genomic /data/genomic/tcga_cbio/8_mutation_data.csv --output /data/
+
+script:
+  - bash ~/build/ldsec/medco-deployment/resources/utility-scripts/test_e2e.sh
