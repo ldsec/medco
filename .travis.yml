@@ -9,7 +9,7 @@ notifications:
 before_install:
   - cd compose-profiles/dev-local-3nodes
   - docker-compose pull medco-unlynx-srv0 medco-connector-srv0
-  - docker-compose -f docker-compose.tools.yml medco-cli-client medco-loader-srv0
+  - docker-compose -f docker-compose.tools.yml pull medco-cli-client medco-loader-srv0
 
 install:
   - docker-compose build
