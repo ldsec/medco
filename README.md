@@ -1,4 +1,15 @@
-# MedCo Connector
+# medco-connector
+*medco-connector* orchestrates the MedCo query at the clinical site. It communicates with [*medco-unlynx*](https://github.com/ldsec/medco-unlynx) to execute the distributed cryptographic protocols.
+
+## Getting started
+Run the following commands to download and build the *medco-connector* module.
+```shell
+git clone https://github.com/ldsec/medco-connector.git
+cd medco-connector/deployment/
+docker-compose build
+``` 
+## How to use it
+*medco-connector* is part of the MedCo stack. To use it, you need to have the whole MedCo stack up and running on your machine. To achieve that you can follow, for example, the [Local Development Deployment guide](https://ldsec.gitbook.io/medco-documentation/system-administrator-guide/deployment/local-development-deployment). 
 
 ## Source code organization
 - *client*: client logic
@@ -14,5 +25,17 @@
     - *server/handlers*: server REST API endpoints handlers
 - *swagger*: swagger REST API definitions
 - *util*: utility code (configuration, security, etc.)
-    - *util*:
+    - *client*: client-related utility code
+    - *server*: server-related utility code
 - *wrappers*: client library wrappers for external service (i2b2, unlynx, etc.)
+
+## Useful information
+*medco-connector* is part of the MedCo system.
+
+You can find more information about the MedCo project [here](https://medco.epfl.ch/).
+
+For further details, support, and contacts, you can check the [MedCo Technical Documentation](https://ldsec.gitbook.io/medco-documentation/).
+
+## License
+*medco-connector* is licensed under a End User Software License Agreement ('EULA') for non-commercial use.
+If you need more information, please contact us.
