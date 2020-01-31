@@ -92,6 +92,31 @@ func main() {
 		},
 	}
 
+	mappingTableGenFlags := []cli.Flag{
+		cli.StringFlag{
+			Name: "outputFile",
+			Usage: "Path to the file that will be generated.",
+			Required: true,
+		},
+		cli.StringFlag{
+			Name: "outputFormat",
+			Usage: "Format of the output file. Value: go|typescript. Default: typescript.",
+			Required: false,
+			Value: "typescript",
+		},
+		cli.Int64Flag{
+			Name: "nbMappings",
+			Usage: "Number of mappings to generate. Default: 1000.",
+			Required: false,
+			Value: 1000,
+		},
+		cli.BoolFlag{
+			Name: "checkNeg",
+			Usage: "Whether to check for negative values. Default: false.",
+			Required: false,
+		},
+	}
+
 	serverFlags := []cli.Flag{
 		cli.StringFlag{
 			Name:  optionConfig + ", " + optionConfigShort,
@@ -171,6 +196,16 @@ func main() {
 			Action:  keyGenerationFromApp,
 		},
 		// CLIENT END: KEY GENERATION ------------
+
+		// BEGIN CLIENT: MAPPING TABLE GENERATION ----------
+		{
+			Name:    "mappingtablegen",
+			Aliases: []string{"m"},
+			Usage:   "Generate a point-integer mapping table.",
+			Action:  mappingTableGenFromApp,
+			Flags:	 mappingTableGenFlags,
+		},
+		// CLIENT END: MAPPING TABLE GENERATION ------------
 
 		// BEGIN SERVER --------
 		{
