@@ -10,16 +10,16 @@ import (
 	"strconv"
 )
 
-var PointToInt = make(map[string]int64,0)
-var suite = suites.MustFind("Ed25519")
-
 func mappingTableGenFromApp(c *cli.Context) error {
 
+	var PointToInt = make(map[string]int64, 0)
+	var suite = suites.MustFind("Ed25519")
+
 	// cli arguments
-	outputFile := c.String("outputFile") // mandatory
+	outputFile := c.String("outputFile")     // mandatory
 	outputFormat := c.String("outputFormat") // typescript
-	nbMappings := c.Int64("nbMappings") // optional default to 1000
-	checkNeg := c.Bool("checkNeg") // optional default to false
+	nbMappings := c.Int64("nbMappings")      // optional default to 1000
+	checkNeg := c.Bool("checkNeg")           // optional default to false
 
 	var Bi kyber.Point
 	B := suite.Point().Base()
@@ -44,12 +44,12 @@ func mappingTableGenFromApp(c *cli.Context) error {
 
 	// write mapping to disk
 	switch outputFormat {
-		case "typescript":
-			err = writeMapToTSFile(file, PointToInt)
-		case "go":
-			err = writeMapToGoFile(file, PointToInt)
-		default:
-			err = errors.New("format selected is incorrect: " + outputFormat)
+	case "typescript":
+		err = writeMapToTSFile(file, PointToInt)
+	case "go":
+		err = writeMapToGoFile(file, PointToInt)
+	default:
+		err = errors.New("format selected is incorrect: " + outputFormat)
 	}
 
 	if err != nil {
