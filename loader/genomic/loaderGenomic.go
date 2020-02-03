@@ -447,13 +447,13 @@ func GenerateLoadingOntologyScript(i2b2DB loader.DBSettings, gaDB loader.DBSetti
             	INSERT INTO medco_ont.genomic (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum, c_basecode,
         		c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, update_date,
         		download_date, import_date, valuetype_cd, m_applied_path) values
-        		('2', '\medco\genomic\annotations_Hugo_Symbol\', 'Gene Name', 'N', 'LA', '0', 'GEN:Hugo_Gene_Symbol', 'concept_cd', 'concept_dimension', 'concept_path',
+        		('2', '\medco\genomic\annotations_Hugo_Symbol\', 'Gene Name', 'N', 'LA', '0', 'GEN:hugo_gene_symbol', 'concept_cd', 'concept_dimension', 'concept_path',
         		'T', 'LIKE', '\medco\genomic\annotations_Hugo_Symbol\', 'Gene Name', '\medco\genomic\annotations_Hugo_Symbol\',
         		'NOW()', 'NOW()', 'NOW()', 'GEN', '@') ON CONFLICT DO NOTHING;
     			INSERT INTO medco_ont.genomic (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum, c_basecode,
         		c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, update_date,
         		download_date, import_date, valuetype_cd, m_applied_path) values
-        		('2', '\medco\genomic\annotations_Protein_position\', 'Protein Position', 'N', 'LA', '0', 'GEN:Protein_Change', 'concept_cd', 'concept_dimension', 'concept_path',
+        		('2', '\medco\genomic\annotations_Protein_position\', 'Protein Position', 'N', 'LA', '0', 'GEN:protein_change', 'concept_cd', 'concept_dimension', 'concept_path',
         		'T', 'LIKE', '\medco\genomic\annotations_Protein_position\', 'Protein Position', '\medco\genomic\annotations_Protein_position\',
         		'NOW()', 'NOW()', 'NOW()', 'GEN', '@') ON CONFLICT DO NOTHING;
     			INSERT INTO medco_ont.genomic (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum, c_basecode,
@@ -522,7 +522,7 @@ func GenerateLoadingOntologyScript(i2b2DB loader.DBSettings, gaDB loader.DBSetti
 	loading += `DROP TABLE IF EXISTS genomic_annotations.variant_name;` + "\n"
 	loading += `CREATE TABLE genomic_annotations.variant_name as select distinct variant_name as annotation_value from genomic_annotations.genomic_annotations;` + "\n"
 
-	loading += `CREATE OR REPLACE FUNCTION ga_getvalues(annotation varchar, val varchar, lim int) RETURNS SETOF varchar AS \$\$
+	loading += `CREATE OR REPLACE FUNCTION genomic_annotations.ga_getvalues(annotation varchar, val varchar, lim int) RETURNS SETOF varchar AS \$\$
 				BEGIN
     				RETURN QUERY EXECUTE
 					format('SELECT annotation_value
@@ -533,7 +533,7 @@ func GenerateLoadingOntologyScript(i2b2DB loader.DBSettings, gaDB loader.DBSetti
 				END;
 				\$\$ LANGUAGE plpgsql;` + "\n"
 
-	loading += `CREATE OR REPLACE FUNCTION ga_getvariants(annotation varchar, val varchar, zygosity varchar, enc bool) RETURNS SETOF varchar AS \$\$
+	loading += `CREATE OR REPLACE FUNCTION genomic_annotations.ga_getvariants(annotation varchar, val varchar, zygosity varchar, enc bool) RETURNS SETOF varchar AS \$\$
 				DECLARE
 				col varchar;
 				BEGIN
@@ -550,6 +550,17 @@ func GenerateLoadingOntologyScript(i2b2DB loader.DBSettings, gaDB loader.DBSetti
 					AND annotations ~* \$2
            			ORDER BY variant_id',col,annotation)
     				USING val, zygosity;
+				END;
+				\$\$ LANGUAGE plpgsql;` + "\n"
+
+	loading += `CREATE OR REPLACE FUNCTION genomic_annotations.ga_annotationexists(annotation varchar)
+				RETURNS boolean AS \$\$
+				BEGIN
+				RETURN EXISTS(
+					SELECT 1 FROM pg_tables where
+						schemaname = 'genomic_annotations' and
+						tablename = annotation
+				);
 				END;
 				\$\$ LANGUAGE plpgsql;` + "\n"
 
