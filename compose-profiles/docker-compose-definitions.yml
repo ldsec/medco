@@ -115,7 +115,7 @@ services:
       - GA_DB_PORT=5432
       - GA_DB_USER=genomicannotations
       - GA_DB_PW=genomicannotations
-      - GA_DB_NAME=gamedcosrv
+      - GA_DB_NAME=gamedco
     volumes:
       - ../configuration-profiles/dev-local-3nodes:/medco-configuration
 
