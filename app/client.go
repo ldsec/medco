@@ -9,9 +9,9 @@ import (
 	"github.com/ldsec/medco-loader/loader/genomic"
 	"github.com/ldsec/medco-loader/loader/i2b2"
 	_ "github.com/lib/pq"
+	"github.com/urfave/cli"
 	"go.dedis.ch/onet/v3/app"
 	"go.dedis.ch/onet/v3/log"
-	"gopkg.in/urfave/cli.v1"
 	"os"
 	"path/filepath"
 )

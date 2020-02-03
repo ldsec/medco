@@ -1,11 +1,11 @@
 package main
 
 import (
+	"github.com/urfave/cli"
 	"os"
 
 	"go.dedis.ch/onet/v3/log"
 	"go.dedis.ch/onet/v3/network"
-	"gopkg.in/urfave/cli.v1"
 )
 
 const (
