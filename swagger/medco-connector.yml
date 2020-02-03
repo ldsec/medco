@@ -363,11 +363,11 @@ definitions:
               description: "i2b2 items (linked by an OR)"
               items:
                 type: "object"
-                required: [encrypted]
+                required: [encrypted, queryTerm]
                 properties:
                   queryTerm:
                     type: "string"
-                    pattern: '^([\w=-]+|(\/[^\/]+){2}\/?)$'
+                    pattern: '^([\w=-]+)$|^((\/[^\/]+)+\/?)$'
                   operator:
                     type: "string"
                     enum:

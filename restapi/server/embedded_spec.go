@@ -326,7 +326,8 @@ func init() {
                 "items": {
                   "type": "object",
                   "required": [
-                    "encrypted"
+                    "encrypted",
+                    "queryTerm"
                   ],
                   "properties": {
                     "encrypted": {
@@ -341,7 +342,7 @@ func init() {
                     },
                     "queryTerm": {
                       "type": "string",
-                      "pattern": "^([\\w=-]+|(\\/[^\\/]+){2}\\/?)$"
+                      "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/?)$"
                     },
                     "value": {
                       "type": "string"
@@ -1138,7 +1139,8 @@ func init() {
                 "items": {
                   "type": "object",
                   "required": [
-                    "encrypted"
+                    "encrypted",
+                    "queryTerm"
                   ],
                   "properties": {
                     "encrypted": {
@@ -1153,7 +1155,7 @@ func init() {
                     },
                     "queryTerm": {
                       "type": "string",
-                      "pattern": "^([\\w=-]+|(\\/[^\\/]+){2}\\/?)$"
+                      "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/?)$"
                     },
                     "value": {
                       "type": "string",

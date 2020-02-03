@@ -198,7 +198,7 @@ func (clientQuery *ExploreQuery) generateModel() (queryModel *models.ExploreQuer
 			panelModel.Items = append(panelModel.Items, &models.ExploreQueryPanelsItems0ItemsItems0{
 				Encrypted: &true,
 				Operator:  "exists",
-				QueryTerm: encItem,
+				QueryTerm: &encItem,
 				Value:     "",
 			})
 
