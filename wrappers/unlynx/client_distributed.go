@@ -156,7 +156,7 @@ func ShuffleAndKeySwitchValue(queryName string, value string, targetPubKey strin
 			cothorityRoster,
 			servicesmedco.SurveyID(queryName + "_SHUFFLE"),
 			desTargetKey,
-			desValue,
+			&desValue,
 			false,
 		)
 		shuffleKsResultsChan <- ShuffleKSResults{shuffleKsResult, shuffleKsTimes, shuffleKsErr}
