@@ -304,8 +304,9 @@ type ExploreQueryPanelsItems0ItemsItems0 struct {
 	Operator string `json:"operator,omitempty"`
 
 	// query term
-	// Pattern: ^([\w=-]+|(\/[^\/]+){2}\/?)$
-	QueryTerm string `json:"queryTerm,omitempty"`
+	// Required: true
+	// Pattern: ^([\w=-]+)$|^((\/[^\/]+)+\/?)$
+	QueryTerm *string `json:"queryTerm"`
 
 	// value
 	// Max Length: 0
@@ -392,11 +393,11 @@ func (m *ExploreQueryPanelsItems0ItemsItems0) validateOperator(formats strfmt.Re
 
 func (m *ExploreQueryPanelsItems0ItemsItems0) validateQueryTerm(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.QueryTerm) { // not required
-		return nil
+	if err := validate.Required("queryTerm", "body", m.QueryTerm); err != nil {
+		return err
 	}
 
-	if err := validate.Pattern("queryTerm", "body", string(m.QueryTerm), `^([\w=-]+|(\/[^\/]+){2}\/?)$`); err != nil {
+	if err := validate.Pattern("queryTerm", "body", string(*m.QueryTerm), `^([\w=-]+)$|^((\/[^\/]+)+\/?)$`); err != nil {
 		return err
 	}
 

@@ -193,7 +193,7 @@ func (q *ExploreQuery) getEncQueryTerms() (encQueryTerms []string) {
 	for _, panel := range q.Query.Panels {
 		for _, item := range panel.Items {
 			if *item.Encrypted {
-				encQueryTerms = append(encQueryTerms, item.QueryTerm)
+				encQueryTerms = append(encQueryTerms, *item.QueryTerm)
 			}
 		}
 	}
@@ -209,7 +209,7 @@ func (q *ExploreQuery) getI2b2PsmQueryTerms(taggedQueryTerms map[string]string) 
 			var itemKey string
 			if *item.Encrypted {
 
-				if tag, ok := taggedQueryTerms[item.QueryTerm]; ok {
+				if tag, ok := taggedQueryTerms[*item.QueryTerm]; ok {
 					itemKey = `\\SENSITIVE_TAGGED\medco\tagged\` + tag + `\`
 				} else {
 					err = errors.New("query error: encrypted term does not have corresponding tag")
@@ -218,7 +218,7 @@ func (q *ExploreQuery) getI2b2PsmQueryTerms(taggedQueryTerms map[string]string) 
 				}
 
 			} else {
-				itemKey =  item.QueryTerm
+				itemKey = *item.QueryTerm
 			}
 			panelsItemKeys[panelIdx] = append(panelsItemKeys[panelIdx], itemKey)
 		}
