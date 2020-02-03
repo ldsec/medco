@@ -24,9 +24,3 @@ func InitializeConnectionToDB(dbmsHost string, dbmsPort int, dbName string, dbLo
 	return db, nil
 
 }
-
-// GetGenomicAnnotationTypes get the genomic annotation types available in the database
-func GetGenomicAnnotationTypes() []string {
-	//TODO: Make this dynamic
-	return []string{"variant_name", "protein_change", "hugo_gene_symbol"}
-}

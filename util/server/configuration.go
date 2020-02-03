@@ -79,9 +79,6 @@ var DBLoginPassword string
 // DBConnection is the connection to the database
 var DBConnection *sql.DB
 
-// GenomicAnnotationTypes are the genomic annotation types available in the database
-var GenomicAnnotationTypes []string
-
 func init() {
 	SetLogLevel(os.Getenv("LOG_LEVEL"))
 
@@ -146,9 +143,6 @@ func init() {
 		logrus.Error("Impossible to initialize connection to DB")
 		return
 	}
-
-	GenomicAnnotationTypes = GetGenomicAnnotationTypes()
-
 }
 
 // SetLogLevel initializes the log levels of all loggers

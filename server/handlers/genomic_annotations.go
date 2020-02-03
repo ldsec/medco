@@ -114,22 +114,57 @@ func MedCoGenomicAnnotationsGetVariantsHandler(params genomic_annotations.GetVar
 
 }
 
+// annotationExists checks in the database if the annotation exists
+func annotationExists(annotationName string) (exists bool, err error) {
+	err = utilserver.DBConnection.Ping()
+	if err != nil {
+		logrus.Error("Impossible to connect to DB: " + err.Error())
+		return
+	}
+
+	res, err := utilserver.DBConnection.Query("SELECT genomic_annotations.ga_annotationexists($1)", annotationName)
+	if err != nil {
+		logrus.Error("Query execution error: " + err.Error())
+		return
+	}
+	defer res.Close()
+
+	if !res.Next() {
+		err = errors.New("No result available for annotationexists check")
+		logrus.Error(err)
+		return
+	}
+
+	err = res.Scan(&exists)
+	if err != nil {
+		logrus.Error("Query result reading error: " + err.Error())
+		return
+	}
+	return
+}
+
 func buildGetValuesQuery(params genomic_annotations.GetValuesParams) (string, error) {
 
-	if contains(utilserver.GenomicAnnotationTypes, params.Annotation) {
-		return "SELECT \"ga_getvalues\"($1,$2,$3)", nil
+	if ok, err := annotationExists(params.Annotation); err != nil {
+		logrus.Error("annotation exists check failed: ", err)
+		return "", err
+	} else if !ok {
+		return "", errors.New("Requested invalid annotation type: " + params.Annotation)
 	}
-	return "", errors.New("Requested invalid annotation type: " + params.Annotation)
 
+	return "SELECT genomic_annotations.ga_getvalues($1,$2,$3)", nil
 }
 
 func buildGetVariantsQuery(params genomic_annotations.GetVariantsParams) (string, error) {
 
-	if contains(utilserver.GenomicAnnotationTypes, params.Annotation) {
-		return "SELECT \"ga_getvariants\"($1,$2,$3,$4)", nil
+	if ok, err := annotationExists(params.Annotation); err != nil {
+		logrus.Error("annotation exists check failed: ", err)
+		return "", err
+	} else if !ok {
+		return "", errors.New("Requested invalid annotation type: " + params.Annotation)
 	}
-	return "", errors.New("Requested invalid annotation type: " + params.Annotation)
 
+	return "SELECT genomic_annotations.ga_getvariants($1,$2,$3,$4)", nil
 }
 
 func contains(slice []string, value string) bool {
