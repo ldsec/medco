@@ -8,8 +8,55 @@ git clone https://github.com/ldsec/medco-connector.git
 cd medco-connector/deployment/
 docker-compose build
 ``` 
+
 ## How to use it
 *medco-connector* is part of the MedCo stack. To use it, you need to have the whole MedCo stack up and running on your machine. To achieve that you can follow, for example, the [Local Development Deployment guide](https://ldsec.gitbook.io/medco-documentation/system-administrator-guide/deployment/local-development-deployment). 
+
+The *medco-connector* APIs are defined using [go-swagger](https://github.com/go-swagger/go-swagger). To modify them, you must modify the `swagger/medco-connector.yml` file. To re-generate the server and client code you can run:
+```shell
+make swagger-gen
+``` 
+
+## How to use the medco-cli-client
+
+*medco-connector* provides a client command-line interface to interact with the *medco-connector* APIs.
+
+To use it, you must first set the MEDCO_CONNECTOR_URL parameter in `deployment/docker-compose.yml` with the URL of the medco connector you want to interact with.
+
+To show the command line manual, run:
+```shell
+docker-compose -f docker-compose.yml run medco-cli-client --user [USERNAME] --password [PASSWORD] --help
+``` 
+
+```shell
+NAME:
+   medco-cli-client - Command-line query tool for MedCo.
+
+USAGE:
+   medco-cli-client [global options] command [command options] [arguments...]
+
+VERSION:
+   1.0.0
+
+COMMANDS:
+   query, q                                Query the MedCo network
+   genomic-annotations-get-values, gval    Get genomic annotations values
+   genomic-annotations-get-variants, gvar  Get genomic annotations variants
+   help, h                                 Shows a list of commands or help for one command
+
+GLOBAL OPTIONS:
+   --user value, -u value      OIDC user login
+   --password value, -p value  OIDC password login
+   --token value, -t value     OIDC token
+   --disableTLSCheck           Disable check of TLS certificates
+   --help, -h                  show help
+   --version, -v               print the version
+``` 
+
+For example, to execute the `genomic-annotations-get-values` command, you could run:
+```shell
+docker-compose -f docker-compose.yml run medco-cli-client --user test --password test genomic-annotations-get-values hugo_gene_symbol ac
+``` 
 
 ## Source code organization
 - *client*: client logic
