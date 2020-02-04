@@ -18,7 +18,6 @@ make swagger-gen
 ``` 
 
 ## How to use the medco-cli-client
-
 *medco-connector* provides a client command-line interface to interact with the *medco-connector* APIs.
 
 To learn how to use it, check the [CLI documentation](https://app.gitbook.com/@ldsec/s/medco-documentation/system-administrator-guide/command-line-interface-cli).
