@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // LogLevel is the log level, assuming the same convention as the cothority / unlynx log levels:
@@ -43,20 +44,11 @@ var I2b2LoginPassword string
 // I2b2WaitTimeSeconds is the i2b2 timeout (seconds)
 var I2b2WaitTimeSeconds int
 
-// JwksURL is the URL from which the JWT signing keys are retrieved
-var JwksURL string
+// OidcProviders are the OIDC providers this node trusts
+var OidcProviders []*oidcProvider
 
-// JwksTTLSeconds is the TTL of JWKS requests
-var JwksTTLSeconds int64
-
-// OidcJwtIssuer is the token issuer (for JWT validation)
-var OidcJwtIssuer string
-
-// OidcClientID is the OIDC client ID
-var OidcClientID string
-
-// OidcJwtUserIDClaim is the JWT claim containing the user ID
-var OidcJwtUserIDClaim string
+// JwksTimeout is the timeout for JWKS requests made to OIDC providers
+var JwksTimeout time.Duration
 
 // MedCoObfuscationMin is the minimum variance passed to the random distribution for the obfuscation
 var MedCoObfuscationMin int
@@ -113,11 +105,14 @@ func init() {
 	}
 	I2b2WaitTimeSeconds = int(i2b2to)
 
-	JwksURL = os.Getenv("JWKS_URL")
-	JwksTTLSeconds = 60 * 60 // 1 hour
-	OidcJwtIssuer = os.Getenv("OIDC_JWT_ISSUER")
-	OidcClientID = os.Getenv("OIDC_CLIENT_ID")
-	OidcJwtUserIDClaim = os.Getenv("OIDC_JWT_USER_ID_CLAIM")
+	parseOidcProviders()
+
+	jwksto, err := strconv.ParseInt(os.Getenv("JWKS_TIMEOUT_SECONDS"), 10, 64)
+	if err != nil || jwksto < 0 {
+		logrus.Warn("invalid JwksTimeoutSeconds, defaulted")
+		i2b2to = 30 // 30 seconds
+	}
+	JwksTimeout = time.Duration(jwksto) * time.Second
 
 	obf, err := strconv.ParseInt(os.Getenv("MEDCO_OBFUSCATION_MIN"), 10, 64)
 	if err != nil || obf < 0 {
@@ -142,6 +137,29 @@ func init() {
 	if err != nil {
 		logrus.Error("Impossible to initialize connection to DB")
 		return
+	}
+}
+
+func parseOidcProviders() {
+
+	jwksUrls := strings.Split(os.Getenv("OIDC_JWKS_URLS"), ",")
+	jwtIssuers := strings.Split(os.Getenv("OIDC_JWT_ISSUERS"), ",")
+	clientIds := strings.Split(os.Getenv("OIDC_CLIENT_IDS"), ",")
+	jwtUserIDClaims := strings.Split(os.Getenv("OIDC_JWT_USER_ID_CLAIMS"), ",")
+
+	if len(jwksUrls) != len(jwtIssuers) || len(jwksUrls) != len(clientIds) || len(jwksUrls) != len(jwtUserIDClaims) {
+		logrus.Fatal("inconsistent OIDC configuration")
+	}
+
+	for i := range jwksUrls {
+		OidcProviders = append(OidcProviders, &oidcProvider{
+			JwksURL:           jwksUrls[i],
+			JwtIssuer:         jwtIssuers[i],
+			ClientID:          clientIds[i],
+			JwtUserIDClaim:    jwtUserIDClaims[i],
+			JwksTTL:           time.Hour,
+			JwtAcceptableSkew: 30 * time.Second,
+		})
 	}
 }
 

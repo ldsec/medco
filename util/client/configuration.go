@@ -18,6 +18,9 @@ var MedCoConnectorURL string
 // OidcReqTokenURL is the URL from which the JWT is retrieved
 var OidcReqTokenURL string
 
+// OidcReqTokenClientID is the client ID used to retrieve the JWT
+var OidcReqTokenClientID string
+
 func init() {
 	var err error
 
@@ -36,4 +39,6 @@ func init() {
 	MedCoConnectorURL = os.Getenv("MEDCO_CONNECTOR_URL")
 
 	OidcReqTokenURL = os.Getenv("OIDC_REQ_TOKEN_URL")
+
+	OidcReqTokenClientID = os.Getenv("OIDC_REQ_TOKEN_CLIENT_ID")
 }

@@ -19,10 +19,10 @@ COPY --from=build /go/bin/medco-cli-client /go/bin/
 ENV LOG_LEVEL=5 \
     UNLYNX_GROUP_FILE_PATH=/medco-configuration/group.toml \
     MEDCO_NODE_IDX=0 \
-    OIDC_CLIENT_ID=medco \
     CLIENT_QUERY_TIMEOUT_SECONDS=660 \
     CLIENT_GENOMIC_ANNOTATIONS_QUERY_TIMEOUT_SECONDS=10 \
     MEDCO_CONNECTOR_URL=http://medco-connector-srv0/medco \
-    OIDC_REQ_TOKEN_URL=http://keycloak:8080/auth/realms/master/protocol/openid-connect/token
+    OIDC_REQ_TOKEN_URL=http://keycloak:8080/auth/realms/master/protocol/openid-connect/token \
+    OIDC_REQ_TOKEN_CLIENT_ID=medco
 
 ENTRYPOINT ["docker-entrypoint.sh", "medco-cli-client"]
