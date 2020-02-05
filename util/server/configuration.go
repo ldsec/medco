@@ -107,7 +107,7 @@ func init() {
 
 	parseOidcProviders()
 
-	jwksto, err := strconv.ParseInt(os.Getenv("JWKS_TIMEOUT_SECONDS"), 10, 64)
+	jwksto, err := strconv.ParseInt(os.Getenv("OIDC_JWKS_TIMEOUT_SECONDS"), 10, 64)
 	if err != nil || jwksto < 0 {
 		logrus.Warn("invalid JwksTimeoutSeconds, defaulted")
 		i2b2to = 30 // 30 seconds

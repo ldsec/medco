@@ -34,6 +34,7 @@ ENV I2B2_HIVE_URL=http://i2b2:8080/i2b2/services \
     OIDC_JWT_ISSUERS=http://keycloak:8080/auth/realms/master \
     OIDC_CLIENT_IDS=medco \
     OIDC_JWT_USER_ID_CLAIMS=preferred_username \
+    OIDC_JWKS_TIMEOUT_SECONDS=30 \
     MEDCO_OBFUSCATION_MIN=5 \
     MEDCO_NODES_URL="http://medco-connector-srv0/medco,http://medco-connector-srv1/medco,http://medco-connector-srv2/medco" \
     MEDCO_NODE_IDX=0 \
