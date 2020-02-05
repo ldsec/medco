@@ -6,6 +6,7 @@ import (
 	"github.com/lestrrat-go/jwx/jws"
 	"github.com/sirupsen/logrus"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -65,44 +66,41 @@ func (oidcProvider *oidcProvider) retrieveJWKSet() (keySet *jwk.Set, err error) 
 // verifyTokenWithJWKSets verifies a token against several OIDC providers. Verification passes if err is not nil.
 func verifyTokenWithJWKSets(token string) (tokenPayload []byte, matchingProvider *oidcProvider, err error) {
 
-	tokenPayloadChan := make(chan []byte)
-	matchingProviderChan := make(chan *oidcProvider)
-	sem := make(chan struct{}, len(OidcProviders))
+	wg := sync.WaitGroup{}
+	wg.Add(len(OidcProviders))
 
 	// check concurrently the different OIDC providers
 	for _, provider := range OidcProviders {
 		go func(provider *oidcProvider) {
+			defer wg.Done()
 
 			// get JWT signing keys
 			keySet, err := provider.retrieveJWKSet()
 			if err != nil {
 				logrus.Warn("Failed to retrieve key set for provider ", provider.JwksURL, ": ", err)
-				sem <- struct{}{}
 				return
 			}
 
 			// signature verification attempt
-			if attemptTokenPayload, err := jws.VerifyWithJWKSet([]byte(token), keySet, nil); err == nil {
+			if attemptedTokenPayload, err := jws.VerifyWithJWKSet([]byte(token), keySet, nil); err == nil {
 				logrus.Info("Token validation successful with provider: ", provider.JwksURL)
-				tokenPayloadChan <- attemptTokenPayload
-				matchingProviderChan <- provider
+				if tokenPayload != nil || matchingProvider != nil {
+					logrus.Warn("More than one OIDC provider matches")
+				}
+				tokenPayload = attemptedTokenPayload
+				matchingProvider = provider
 			} else {
 				logrus.Debug("Token validation with provider ", provider.JwksURL, " failed: ", err)
-				tokenPayloadChan <- nil
-				matchingProviderChan <- nil
 			}
 
-			sem <- struct{}{}
 		}(provider)
 	}
 
-	<-sem
-	tokenPayload = <-tokenPayloadChan
-	matchingProvider = <-matchingProviderChan
+	wg.Wait()
 	if tokenPayload == nil || matchingProvider == nil {
 		err = errors.New("authentication failed (signature validation) with all providers")
 		logrus.Warn(err)
 	}
 
-	return tokenPayload, matchingProvider, err
+	return
 }
