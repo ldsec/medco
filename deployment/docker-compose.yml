@@ -18,10 +18,10 @@ services:
       - LOG_LEVEL=5
       - UNLYNX_GROUP_FILE_PATH=/medco-configuration/group.toml
       - UNLYNX_TIMEOUT_SECONDS=300
-      - JWKS_URL=http://keycloak:8080/auth/realms/master/protocol/openid-connect/certs
-      - OIDC_JWT_ISSUER=http://keycloak:8080/auth/realms/master
-      - OIDC_CLIENT_ID=medco
-      - OIDC_JWT_USER_ID_CLAIM=preferred_username
+      - OIDC_JWKS_URLS=http://keycloak:8080/auth/realms/master/protocol/openid-connect/certs
+      - OIDC_JWT_ISSUERS=http://keycloak:8080/auth/realms/master
+      - OIDC_CLIENT_IDS=medco
+      - OIDC_JWT_USER_ID_CLAIMS=preferred_username
       - MEDCO_OBFUSCATION_MIN=5
       - MEDCO_NODES_URL=http://medco-connector-srv0/medco,http://medco-connector-srv1/medco,http://medco-connector-srv2/medco
       - MEDCO_NODE_IDX=0
@@ -42,11 +42,11 @@ services:
       - LOG_LEVEL=5
       - UNLYNX_GROUP_FILE_PATH=/medco-configuration/group.toml
       - MEDCO_NODE_IDX=0
-      - OIDC_CLIENT_ID=medco
       - CLIENT_QUERY_TIMEOUT_SECONDS=660
       - CLIENT_GENOMIC_ANNOTATIONS_QUERY_TIMEOUT_SECONDS=10
       - MEDCO_CONNECTOR_URL=http://medco-connector-srv0/medco
       - OIDC_REQ_TOKEN_URL=http://localhost/auth/realms/master/protocol/openid-connect/token
+      - OIDC_REQ_TOKEN_CLIENT_ID=medco
     volumes:
       - ~/MedCo/repositories/medco-deployment/configuration-profiles/dev-local-3nodes:/medco-configuration
     network_mode: host

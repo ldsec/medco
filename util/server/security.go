@@ -3,33 +3,17 @@ package utilserver
 import (
 	"encoding/json"
 	"errors"
-	"time"
-
 	"github.com/ldsec/medco-connector/restapi/models"
-	"github.com/lestrrat-go/jwx/jwk"
-	"github.com/lestrrat-go/jwx/jws"
 	"github.com/lestrrat-go/jwx/jwt"
 	"github.com/sirupsen/logrus"
 )
-
-var cachedKeySet struct {
-	keySet         *jwk.Set
-	expirationTime time.Time
-}
 
 // AuthenticateUser authenticates user and creates principal with user information, including its authorizations
 // returns error if user is not authorized
 func AuthenticateUser(token string) (user *models.User, err error) {
 
-	// get JWT signing keys
-	keySet, err := retrieveJWKSet()
-	if err != nil {
-		logrus.Warn("failed to retrieve key set: ", err)
-		return
-	}
-
-	// signature verification
-	tokenPayload, err := jws.VerifyWithJWKSet([]byte(token), keySet, nil)
+	// verify signature
+	tokenPayload, matchingProvider, err := verifyTokenWithJWKSets(token)
 	if err != nil {
 		logrus.Warn("authentication failed (signature validation): ", err)
 		return
@@ -43,9 +27,9 @@ func AuthenticateUser(token string) (user *models.User, err error) {
 	}
 
 	err = parsedToken.Verify(
-		jwt.WithIssuer(OidcJwtIssuer),
-		jwt.WithAudience(OidcClientID),
-		jwt.WithAcceptableSkew(30*time.Second),
+		jwt.WithIssuer(matchingProvider.JwtIssuer),
+		jwt.WithAudience(matchingProvider.ClientID),
+		jwt.WithAcceptableSkew(matchingProvider.JwtAcceptableSkew),
 	)
 	if err != nil {
 		logrus.Warn("authentication failed (invalid claim): ", err)
@@ -54,7 +38,7 @@ func AuthenticateUser(token string) (user *models.User, err error) {
 
 	// extract user name
 	user = &models.User{}
-	if userID, ok := parsedToken.Get(OidcJwtUserIDClaim); ok {
+	if userID, ok := parsedToken.Get(matchingProvider.JwtUserIDClaim); ok {
 		user.ID = userID.(string)
 		user.Token = token
 		logrus.Info("authenticated user " + user.ID)
@@ -64,12 +48,12 @@ func AuthenticateUser(token string) (user *models.User, err error) {
 	}
 
 	// extract user authorizations
-	user.Authorizations, err = extractAuthorizationsFromToken(&parsedToken)
+	user.Authorizations, err = extractAuthorizationsFromToken(&parsedToken, matchingProvider)
 	return
 }
 
 // extractAuthorizationsFromToken parsed the token to extract the user's authorizations
-func extractAuthorizationsFromToken(token *jwt.Token) (ua *models.UserAuthorizations, err error) {
+func extractAuthorizationsFromToken(token *jwt.Token, provider *oidcProvider) (ua *models.UserAuthorizations, err error) {
 
 	// retrieve roles, within the keycloak pre-determined structure (this is ugly)
 	var extractedRoles []string
@@ -77,7 +61,7 @@ func extractAuthorizationsFromToken(token *jwt.Token) (ua *models.UserAuthorizat
 		logrus.Trace("1 OK")
 		if tokenResourceAccessTyped, ok := tokenResourceAccess.(map[string]interface{}); ok {
 			logrus.Trace("2 OK")
-			if clientID, ok := tokenResourceAccessTyped[OidcClientID]; ok {
+			if clientID, ok := tokenResourceAccessTyped[provider.ClientID]; ok {
 				logrus.Trace("3 OK")
 				if clientIDTyped, ok := clientID.(map[string]interface{}); ok {
 					logrus.Trace("4 OK")
@@ -171,18 +155,4 @@ func AuthorizeExploreQueryType(user *models.User, requestedQueryType models.Expl
 	err = errors.New("user is not authorized to execute the query type " + string(requestedQueryType))
 	logrus.Warn(err)
 	return
-}
-
-// retrieveJWKSet retrieves the JWK set (live or from cache if TTL not expired) and cache it
-func retrieveJWKSet() (keySet *jwk.Set, err error) {
-
-	if cachedKeySet.keySet == nil || cachedKeySet.expirationTime.Before(time.Now()) {
-		cachedKeySet.keySet, err = jwk.Fetch(JwksURL)
-		if err != nil {
-			return
-		}
-
-		cachedKeySet.expirationTime = time.Now().Add(time.Duration(JwksTTLSeconds) * time.Second)
-	}
-	return cachedKeySet.keySet, nil
 }
