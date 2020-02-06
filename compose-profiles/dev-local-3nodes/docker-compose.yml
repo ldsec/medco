@@ -46,6 +46,10 @@ services:
       - LOG_LEVEL=5
       - MEDCO_NODE_IDX=0
       - GA_DB_NAME=gamedcosrv0
+      - OIDC_JWKS_URLS=http://keycloak:8080/auth/realms/master/protocol/openid-connect/certs,https://medco-demo.epfl.ch/auth/realms/master/protocol/openid-connect/certs
+      - OIDC_JWT_ISSUERS=http://localhost/auth/realms/master,https://medco-demo.epfl.ch/auth/realms/master
+      - OIDC_CLIENT_IDS=medco,medco
+      - OIDC_JWT_USER_ID_CLAIMS=preferred_username,preferred_username
     networks:
       intra-node-srv0:
       inter-nodes:
@@ -97,6 +101,10 @@ services:
       - LOG_LEVEL=5
       - MEDCO_NODE_IDX=1
       - GA_DB_NAME=gamedcosrv1
+      - OIDC_JWKS_URLS=http://keycloak:8080/auth/realms/master/protocol/openid-connect/certs,https://medco-demo.epfl.ch/auth/realms/master/protocol/openid-connect/certs
+      - OIDC_JWT_ISSUERS=http://localhost/auth/realms/master,https://medco-demo.epfl.ch/auth/realms/master
+      - OIDC_CLIENT_IDS=medco,medco
+      - OIDC_JWT_USER_ID_CLAIMS=preferred_username,preferred_username
     networks:
       intra-node-srv1:
       inter-nodes:
@@ -148,6 +156,10 @@ services:
       - LOG_LEVEL=5
       - MEDCO_NODE_IDX=2
       - GA_DB_NAME=gamedcosrv2
+      - OIDC_JWKS_URLS=http://keycloak:8080/auth/realms/master/protocol/openid-connect/certs,https://medco-demo.epfl.ch/auth/realms/master/protocol/openid-connect/certs
+      - OIDC_JWT_ISSUERS=http://localhost/auth/realms/master,https://medco-demo.epfl.ch/auth/realms/master
+      - OIDC_CLIENT_IDS=medco,medco
+      - OIDC_JWT_USER_ID_CLAIMS=preferred_username,preferred_username
     networks:
       intra-node-srv2:
       inter-nodes:

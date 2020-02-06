@@ -45,7 +45,7 @@ services:
       - I2B2_HIVE_URL=http://i2b2-srv0:8080/i2b2/services
       - I2B2_LOGIN_DOMAIN=i2b2medcosrv0
       - MEDCO_NODE_IDX=0
-      - OIDC_JWT_ISSUER=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/auth/realms/master
+      - OIDC_JWT_ISSUERS=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/auth/realms/master
       - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD:?}
       - GA_DB_NAME=gamedcosrv0
       - "MEDCO_NODES_URL=\
@@ -103,7 +103,7 @@ services:
       - I2B2_HIVE_URL=http://i2b2-srv1:8080/i2b2/services
       - I2B2_LOGIN_DOMAIN=i2b2medcosrv1
       - MEDCO_NODE_IDX=1
-      - OIDC_JWT_ISSUER=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/auth/realms/master
+      - OIDC_JWT_ISSUERS=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/auth/realms/master
       - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD:?}
       - GA_DB_NAME=gamedcosrv1
       - "MEDCO_NODES_URL=\
@@ -161,7 +161,7 @@ services:
       - I2B2_HIVE_URL=http://i2b2-srv2:8080/i2b2/services
       - I2B2_LOGIN_DOMAIN=i2b2medcosrv2
       - MEDCO_NODE_IDX=2
-      - OIDC_JWT_ISSUER=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/auth/realms/master
+      - OIDC_JWT_ISSUERS=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/auth/realms/master
       - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD:?}
       - GA_DB_NAME=gamedcosrv2
       - "MEDCO_NODES_URL=\
@@ -181,13 +181,9 @@ services:
     ports:
     - "82:80"
     environment:
-    - GB_API_URL=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/pic-sure-api-2/PICSURE
-    - GB_URL=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/glowing-bear
-    - GB_OIDC_URL=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/auth/realms/master/protocol/openid-connect
-    - GB_OIDC_CLIENT_ID=medco
-    - GB_COTHORITY_KEY_URL=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/cothority-key.pub.toml
-    - GB_GENOMIC_ANNOTATIONS_URL=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/genomicAnnotations
-    - GB_MEDCO_RESULTS_RANDOMIZATION=0
+      - GB_MEDCO_NODE_URL=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/medco
+      - GB_KEYCLOAK_URL=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/auth
+      - GB_FOOTER_TEXT=
     networks:
       inter-nodes:
 
