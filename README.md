@@ -21,42 +21,7 @@ make swagger-gen
 
 *medco-connector* provides a client command-line interface to interact with the *medco-connector* APIs.
 
-To use it, you must first set the MEDCO_CONNECTOR_URL parameter in `deployment/docker-compose.yml` with the URL of the medco connector you want to interact with.
-
-To show the command line manual, run:
-```shell
-docker-compose -f docker-compose.yml run medco-cli-client --user [USERNAME] --password [PASSWORD] --help
-``` 
-
-```shell
-NAME:
-   medco-cli-client - Command-line query tool for MedCo.
-
-USAGE:
-   medco-cli-client [global options] command [command options] [arguments...]
-
-VERSION:
-   1.0.0
-
-COMMANDS:
-   query, q                                Query the MedCo network
-   genomic-annotations-get-values, gval    Get genomic annotations values
-   genomic-annotations-get-variants, gvar  Get genomic annotations variants
-   help, h                                 Shows a list of commands or help for one command
-
-GLOBAL OPTIONS:
-   --user value, -u value      OIDC user login
-   --password value, -p value  OIDC password login
-   --token value, -t value     OIDC token
-   --disableTLSCheck           Disable check of TLS certificates
-   --help, -h                  show help
-   --version, -v               print the version
-``` 
-
-For example, to execute the `genomic-annotations-get-values` command, you could run:
-```shell
-docker-compose -f docker-compose.yml run medco-cli-client --user test --password test genomic-annotations-get-values hugo_gene_symbol ac
-``` 
+To learn how to use it, check the [CLI documentation](https://app.gitbook.com/@ldsec/s/medco-documentation/system-administrator-guide/command-line-interface-cli).
 
 ## Source code organization
 - *client*: client logic
