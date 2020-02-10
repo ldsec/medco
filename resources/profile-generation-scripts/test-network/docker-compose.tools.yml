@@ -20,6 +20,6 @@ services:
       service: medco-loader
     environment:
       - UNLYNX_GROUP_FILE_IDX=${MEDCO_NODE_IDX:?}
-      - DB_HOST=${MEDCO_NODE_HOST:?}
+      - I2B2_DB_HOST=${MEDCO_NODE_HOST:?}
     volumes:
       - ../../configuration-profiles/${MEDCO_PROFILE_NAME:?}:/medco-configuration

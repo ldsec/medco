@@ -9,7 +9,7 @@ services:
       - I2B2_DB_PORT=5432
       - I2B2_DB_USER=i2b2
       - I2B2_DB_PW=i2b2
-      - I2B2_DB_NAME=i2b2medco
+      - I2B2_DB_NAME=i2b2medcosrv
       - WILDFLY_ADMIN_PASSWORD=admin
       - I2B2_DOMAIN_NAME=i2b2medco
       - I2B2_SERVICE_PASSWORD=pFjy3EjDVwLfT2rB9xkK
@@ -136,11 +136,11 @@ services:
       - LOG_LEVEL=3
       - UNLYNX_GROUP_FILE_PATH=/medco-configuration/group.toml
       - UNLYNX_GROUP_FILE_IDX=0
-      - DB_HOST=localhost
-      - DB_PORT=5432
-      - DB_NAME=i2b2medco
-      - DB_USER=i2b2
-      - DB_PASSWORD=i2b2
+      - I2B2_DB_HOST=localhost
+      - I2B2_DB_PORT=5432
+      - I2B2_DB_NAME=i2b2medcosrv
+      - I2B2_DB_USER=i2b2
+      - I2B2_DB_PASSWORD=i2b2
     volumes:
       - ../resources/data:/data
       - ../configuration-profiles/dev-local-3nodes:/medco-configuration
