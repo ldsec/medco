@@ -164,6 +164,13 @@ func (s *Service) HandleSurveyKSRequest(skr *SurveyKSRequest) (network.Message, 
 	}
 	surveyKS.TR.MapTR[KSTimeExec] = execTime
 	surveyKS.TR.MapTR[KSTimeCommunication] = communicationTime
+
+	// remove query from map
+	_, err = s.deleteSurveyKS(skr.SurveyID)
+	if err != nil {
+		return nil, xerrors.Errorf("%+v", err)
+	}
+
 	return &Result{Result: keySwitchingResult, TR: surveyKS.TR}, nil
 }
 
@@ -274,6 +281,12 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 		surveyShuffle.TR.MapTR[KSTimeExec] = execTime
 		surveyShuffle.TR.MapTR[KSTimeCommunication] = communicationTime
 
+		// remove query from map
+		_, err = s.deleteSurveyShuffle(ssr.SurveyID)
+		if err != nil {
+			return nil, xerrors.Errorf("%+v", err)
+		}
+
 		return &Result{Result: libunlynx.CipherVector{keySwitchingResult[index]}, TR: surveyShuffle.TR}, nil
 
 	}
@@ -321,6 +334,12 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 	index, _ := ssr.Roster.Search(s.ServerIdentity().ID)
 	if index < 0 {
 		return nil, xerrors.New("couldn't find this node in the roster")
+	}
+
+	// remove query from map
+	_, err = s.deleteSurveyShuffle(ssr.SurveyID)
+	if err != nil {
+		return nil, xerrors.Errorf("%+v", err)
 	}
 
 	return &Result{Result: libunlynx.CipherVector{keySwitchingResult[index]},
@@ -378,6 +397,13 @@ func (s *Service) HandleSurveyAggRequest(sar *SurveyAggRequest) (network.Message
 	}
 	surveyAgg.TR.MapTR[KSTimeExec] = execTime
 	surveyAgg.TR.MapTR[KSTimeCommunication] = communicationTime
+
+	// remove query from map
+	_, err = s.deleteSurveyAgg(sar.SurveyID)
+	if err != nil {
+		return nil, xerrors.Errorf("%+v", err)
+	}
+
 	return &Result{Result: keySwitchingResult, TR: surveyAgg.TR}, nil
 }
 
