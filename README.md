@@ -5,8 +5,8 @@ A description of the available deployment profiles, along with a detailed guide 
 
 ## Source code organization
 - *compose-profiles*: docker-compose files and parameters for different deployment profiles
-    - *[dev-local-3nodes](https://app.gitbook.com/@ldsec/s/medco-documentation/system-administrator-guide/deployment/local-development-deployment)*: profile that deploys 3 MedCo nodes on a single machine for development purposes
-    - *[test-local-3nodes](https://app.gitbook.com/@ldsec/s/medco-documentation/system-administrator-guide/deployment/local-test-deployment)*: profile that deploys 3 MedCo nodes on a single machine for test purposes
+    - *[dev-local-3nodes](https://ldsec.gitbook.io/medco-documentation/system-administrator-guide/deployment/local-development-deployment)*: profile that deploys 3 MedCo nodes on a single machine for development purposes
+    - *[test-local-3nodes](https://ldsec.gitbook.io/medco-documentation/system-administrator-guide/deployment/local-test-deployment)*: profile that deploys 3 MedCo nodes on a single machine for test purposes
 - *configuration-profiles*: configuration files for the different deployment profiles (cryptographic keys, certificates, etc.)
     - *dev-local-3nodes*: configuration files for the *dev-local-3nodes* profile
     - *test-local-3nodes*: configuration files for the *test-local-3nodes* profile
@@ -20,7 +20,7 @@ A description of the available deployment profiles, along with a detailed guide 
     - *configuration*: keycloak configuration files
     - *data*: script to download the test datasets
     - *profile-generation-scripts*: scripts to generate various deployment profiles files
-        - *test-network*: scripts to generate the deployment profiles files for the [Network Test Deployment](https://app.gitbook.com/@ldsec/s/medco-documentation/system-administrator-guide/deployment/network-test-deployment) profile
+        - *test-network*: scripts to generate the deployment profiles files for the [Network Test Deployment](https://ldsec.gitbook.io/medco-documentation/system-administrator-guide/deployment/network-test-deployment) profile
     - *utility-scripts*: additional utility scripts
 
 ## Useful information

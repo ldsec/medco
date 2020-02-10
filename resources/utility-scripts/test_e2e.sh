@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+set -Eeuo pipefail
+
+USERNAME=${1:-test}
+PASSWORD=${2:-test}
 
 variantNameGetValuesValue="5238"
 variantNameGetValuesResult="$(printf "16:75238144:C>C\n6:52380882:G>G")"
@@ -30,7 +34,7 @@ query5="3 OR 6 AND 9 AND 12 OR 15"
 resultQuery5="$(printf -- "count\n2\n2\n2")"
 
 test1 () {
-  docker-compose -f docker-compose.tools.yml run medco-cli-client --user test --password test $1 $2
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD $1 $2
   result="$(awk -F "\"*,\"*" '{print $2}' ../result.csv)"
   if [ "${result}" != "${3}" ];
   then
@@ -41,7 +45,7 @@ test1 () {
 }
 
 test2 () {
-  result="$(docker-compose -f docker-compose.tools.yml run -e LOG_LEVEL=1 medco-cli-client --user test --password test $1 $2 | sed 's/.$//')"
+  result="$(docker-compose -f docker-compose.tools.yml run -e LOG_LEVEL=1 medco-cli-client --user $USERNAME --password $PASSWORD $1 $2 | sed 's/.$//')"
   if [ "${result}" != "${3}" ];
   then
   echo "$1 $2: test failed"
