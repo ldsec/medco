@@ -9,7 +9,8 @@ require (
 	github.com/stretchr/testify v1.4.0
 	github.com/urfave/cli v1.22.2
 	go.dedis.ch/kyber/v3 v3.0.12
-	go.dedis.ch/onet/v3 v3.0.32
+	go.dedis.ch/onet/v3 v3.1.0
+	golang.org/x/crypto v0.0.0-20200210222208-86ce3cb69678 // indirect
 	golang.org/x/sys v0.0.0-20200202164722-d101bd2416d5 // indirect
 )
 
