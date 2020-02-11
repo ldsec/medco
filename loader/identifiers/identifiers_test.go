@@ -1,7 +1,7 @@
 package identifiers_test
 
 import (
-	"github.com/lca1/medco-loader/loader/identifiers"
+	"github.com/ldsec/medco-loader/loader/identifiers"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

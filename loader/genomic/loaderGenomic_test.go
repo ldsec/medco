@@ -2,9 +2,9 @@ package loadergenomic_test
 
 import (
 	"encoding/base64"
-	"github.com/lca1/medco-loader/loader"
-	"github.com/lca1/medco-loader/loader/genomic"
-	"github.com/lca1/unlynx/lib"
+	"github.com/ldsec/medco-loader/loader"
+	"github.com/ldsec/medco-loader/loader/genomic"
+	"github.com/ldsec/unlynx/lib"
 	"github.com/stretchr/testify/assert"
 	"go.dedis.ch/onet/v3"
 	"go.dedis.ch/onet/v3/app"
@@ -171,7 +171,7 @@ func TestReplayDataset(t *testing.T) {
 
 func TestGenerateLoadingScript(t *testing.T) {
 	dbSettings := loader.DBSettings{DBhost: "localhost", DBport: 5434, DBname: "medcodeployment", DBuser: "postgres", DBpassword: "prigen2017"}
-	err := loadergenomic.GenerateLoadingOntologyScript(dbSettings)
+	err := loadergenomic.GenerateLoadingOntologyScript(dbSettings, dbSettings)
 	assert.True(t, err == nil)
 	err = loadergenomic.GenerateLoadingDataScript(dbSettings)
 	assert.True(t, err == nil)

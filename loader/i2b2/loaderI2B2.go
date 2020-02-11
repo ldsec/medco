@@ -2,9 +2,9 @@ package loaderi2b2
 
 import (
 	"encoding/csv"
-	"github.com/lca1/medco-loader/loader"
-	"github.com/lca1/medco-unlynx/services"
-	"github.com/lca1/unlynx/lib"
+	"github.com/ldsec/medco-loader/loader"
+	"github.com/ldsec/medco-unlynx/services"
+	"github.com/ldsec/unlynx/lib"
 	"go.dedis.ch/kyber/v3"
 	"go.dedis.ch/onet/v3"
 	"go.dedis.ch/onet/v3/log"
@@ -125,7 +125,7 @@ func generateOutputFiles(folderPath string) {
 }
 
 // LoadI2B2Data it's the main function that performs a full conversion and loading of the I2B2 data
-func LoadI2B2Data(el *onet.Roster, entryPointIdx int, directory string, files Files, allSensitive bool, mapSensitive map[string]struct{}, databaseS loader.DBSettings, empty bool) error {
+func LoadI2B2Data(el *onet.Roster, entryPointIdx int, directory string, files Files, allSensitive bool, mapSensitive map[string]struct{}, i2b2DB loader.DBSettings, empty bool) error {
 	InputFilePaths = make(map[string]string)
 	OutputFilePaths = make(map[string]FileInfo)
 	OntologyFilesPaths = make([]string, 0)
@@ -234,7 +234,7 @@ func LoadI2B2Data(el *onet.Roster, entryPointIdx int, directory string, files Fi
 
 	log.Lvl2("--- Finished converting OBSERVATION_FACT ---")
 
-	err = GenerateLoadingDataScript(databaseS)
+	err = GenerateLoadingDataScript(i2b2DB)
 	if err != nil {
 		log.Fatal("Error while generating the loading data .sh file", err)
 		return err
@@ -254,14 +254,14 @@ func LoadI2B2Data(el *onet.Roster, entryPointIdx int, directory string, files Fi
 }
 
 // GenerateLoadingDataScript creates a load dataset .sql script (deletes the data in the corresponding tables and reloads the new 'protected' data)
-func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
+func GenerateLoadingDataScript(i2b2DB loader.DBSettings) error {
 	fp, err := os.Create(FileBashPath)
 	if err != nil {
 		return err
 	}
 
-	loading := `#!/usr/bin/env bash` + "\n" + "\n" + `PGPASSWORD=` + databaseS.DBpassword + ` psql -v ON_ERROR_STOP=1 -h "` + databaseS.DBhost +
-		`" -U "` + databaseS.DBuser + `" -p ` + strconv.FormatInt(int64(databaseS.DBport), 10) + ` -d "` + databaseS.DBname + `" <<-EOSQL` + "\n"
+	loading := `#!/usr/bin/env bash` + "\n" + "\n" + `PGPASSWORD=` + i2b2DB.DBpassword + ` psql -v ON_ERROR_STOP=1 -h "` + i2b2DB.DBhost +
+		`" -U "` + i2b2DB.DBuser + `" -p ` + strconv.FormatInt(int64(i2b2DB.DBport), 10) + ` -d "` + i2b2DB.DBname + `" <<-EOSQL` + "\n"
 
 	loading += "BEGIN;\n"
 

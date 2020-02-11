@@ -13,11 +13,16 @@ services:
       - LOG_LEVEL=3
       - UNLYNX_GROUP_FILE_PATH=/medco-configuration/group.toml
       - UNLYNX_GROUP_FILE_IDX=0
-      - DB_HOST=localhost
-      - DB_PORT=5432
-      - DB_NAME=i2b2medcosrv0
-      - DB_USER=i2b2
-      - DB_PASSWORD=i2b2
+      - I2B2_DB_HOST=localhost
+      - I2B2_DB_PORT=5432
+      - I2B2_DB_NAME=i2b2medcosrv0
+      - I2B2_DB_USER=i2b2
+      - I2B2_DB_PASSWORD=i2b2
+      - GA_DB_HOST=localhost
+      - GA_DB_PORT=5432
+      - GA_DB_NAME=gamedcosrv0
+      - GA_DB_USER=genomicannotations
+      - GA_DB_PASSWORD=genomicannotations
     command: >-
       -debug 2 v0 --group /medco-configuration/group.toml --entryPointIdx 0
       --ont_clinical /dataset/tcga_cbio/clinical_data.csv --sen /dataset/sensitive.txt

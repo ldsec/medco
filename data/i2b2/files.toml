@@ -1,9 +1,0 @@
-TableAccess         = "original/table_access.csv"
-Ontology            = [ "original/i2b2.csv", "original/birn.csv", "original/custom_meta.csv", "original/icd10_icd9.csv"]
-DummyToPatient      = "original/dummy_to_patient.csv"
-PatientDimension    = "original/patient_dimension.csv"
-VisitDimension      = "original/visit_dimension.csv"
-ConceptDimension    = "original/concept_dimension.csv"
-ModifierDimension   = "original/modifier_dimension.csv"
-ObservationFact     = "original/observation_fact.csv"
-OutputFolder        = "converted/"

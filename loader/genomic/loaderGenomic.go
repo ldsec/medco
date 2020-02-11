@@ -6,10 +6,10 @@ import (
 	"encoding/binary"
 	"encoding/csv"
 	"errors"
-	"github.com/lca1/medco-loader/loader"
-	"github.com/lca1/medco-loader/loader/identifiers"
-	"github.com/lca1/medco-unlynx/services"
-	"github.com/lca1/unlynx/lib"
+	"github.com/ldsec/medco-loader/loader"
+	"github.com/ldsec/medco-loader/loader/identifiers"
+	"github.com/ldsec/medco-unlynx/services"
+	"github.com/ldsec/unlynx/lib"
 	"go.dedis.ch/onet/v3"
 	"go.dedis.ch/onet/v3/log"
 	"io"
@@ -207,7 +207,7 @@ func ReplayDataset(filename string, x int) error {
 }
 
 // LoadGenomicData initiates the loading process
-func LoadGenomicData(el *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic, fClinical, fGenomic *os.File, outputPath string, allSensitive bool, mapSensitive map[string]struct{}, databaseS loader.DBSettings, testing bool) error {
+func LoadGenomicData(el *onet.Roster, entryPointIdx int, fOntClinical, fOntGenomic, fClinical, fGenomic *os.File, outputPath string, allSensitive bool, mapSensitive map[string]struct{}, i2b2DB loader.DBSettings, gaDB loader.DBSettings, testing bool) error {
 	start := time.Now()
 
 	// init global variables
@@ -257,7 +257,7 @@ func LoadGenomicData(el *onet.Roster, entryPointIdx int, fOntClinical, fOntGenom
 
 	startLoadingOntology := time.Now()
 
-	err = GenerateLoadingOntologyScript(databaseS)
+	err = GenerateLoadingOntologyScript(i2b2DB, gaDB)
 	if err != nil {
 		log.Fatal("Error while generating the loading ontology .sh file", err)
 		return err
@@ -274,7 +274,7 @@ func LoadGenomicData(el *onet.Roster, entryPointIdx int, fOntClinical, fOntGenom
 
 	startLoadingData := time.Now()
 
-	err = GenerateLoadingDataScript(databaseS)
+	err = GenerateLoadingDataScript(i2b2DB)
 	if err != nil {
 		log.Fatal("Error while generating the loading dataset .sh file", err)
 		return err
@@ -307,14 +307,14 @@ func LoadGenomicData(el *onet.Roster, entryPointIdx int, fOntClinical, fOntGenom
 }
 
 // GenerateLoadingOntologyScript creates a load ontology .sql script
-func GenerateLoadingOntologyScript(databaseS loader.DBSettings) error {
+func GenerateLoadingOntologyScript(i2b2DB loader.DBSettings, gaDB loader.DBSettings) error {
 	fp, err := os.Create(FileBashPath[0])
 	if err != nil {
 		return err
 	}
 
-	loading := `#!/usr/bin/env bash` + "\n" + "\n" + `PGPASSWORD=` + databaseS.DBpassword + ` psql -v ON_ERROR_STOP=1 -h "` + databaseS.DBhost +
-		`" -U "` + databaseS.DBuser + `" -p ` + strconv.FormatInt(int64(databaseS.DBport), 10) + ` -d "` + databaseS.DBname + `" <<-EOSQL` + "\n"
+	loading := `#!/usr/bin/env bash` + "\n" + "\n" + `PGPASSWORD=` + i2b2DB.DBpassword + ` psql -v ON_ERROR_STOP=1 -h "` + i2b2DB.DBhost +
+		`" -U "` + i2b2DB.DBuser + `" -p ` + strconv.FormatInt(int64(i2b2DB.DBport), 10) + ` -d "` + i2b2DB.DBname + `" <<-EOSQL` + "\n"
 
 	loading += "BEGIN;\n"
 
@@ -447,13 +447,13 @@ func GenerateLoadingOntologyScript(databaseS loader.DBSettings) error {
             	INSERT INTO medco_ont.genomic (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum, c_basecode,
         		c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, update_date,
         		download_date, import_date, valuetype_cd, m_applied_path) values
-        		('2', '\medco\genomic\annotations_Hugo_Symbol\', 'Gene Name', 'N', 'LA', '0', 'GEN:Hugo_Gene_Symbol', 'concept_cd', 'concept_dimension', 'concept_path',
+        		('2', '\medco\genomic\annotations_Hugo_Symbol\', 'Gene Name', 'N', 'LA', '0', 'GEN:hugo_gene_symbol', 'concept_cd', 'concept_dimension', 'concept_path',
         		'T', 'LIKE', '\medco\genomic\annotations_Hugo_Symbol\', 'Gene Name', '\medco\genomic\annotations_Hugo_Symbol\',
         		'NOW()', 'NOW()', 'NOW()', 'GEN', '@') ON CONFLICT DO NOTHING;
     			INSERT INTO medco_ont.genomic (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum, c_basecode,
         		c_facttablecolumn, c_tablename, c_columnname, c_columndatatype, c_operator, c_dimcode, c_comment, c_tooltip, update_date,
         		download_date, import_date, valuetype_cd, m_applied_path) values
-        		('2', '\medco\genomic\annotations_Protein_position\', 'Protein Position', 'N', 'LA', '0', 'GEN:Protein_Change', 'concept_cd', 'concept_dimension', 'concept_path',
+        		('2', '\medco\genomic\annotations_Protein_position\', 'Protein Position', 'N', 'LA', '0', 'GEN:protein_change', 'concept_cd', 'concept_dimension', 'concept_path',
         		'T', 'LIKE', '\medco\genomic\annotations_Protein_position\', 'Protein Position', '\medco\genomic\annotations_Protein_position\',
         		'NOW()', 'NOW()', 'NOW()', 'GEN', '@') ON CONFLICT DO NOTHING;
     			INSERT INTO medco_ont.genomic (c_hlevel, c_fullname, c_name, c_synonym_cd, c_visualattributes, c_totalnum, c_basecode,
@@ -463,30 +463,10 @@ func GenerateLoadingOntologyScript(databaseS loader.DBSettings) error {
         		'T', 'LIKE', '\medco\genomic\variant\', 'Variant Name', '\medco\genomic\variant\',
         		'NOW()', 'NOW()', 'NOW()', 'GEN', '@') ON CONFLICT DO NOTHING;` + "\n"
 
-	loading += `CREATE TABLE IF NOT EXISTS genomic_annotations.genomic_annotations(
-        		variant_id character varying(255) NOT NULL,
-        		variant_name character varying(255) NOT NULL,
-        		protein_change character varying(255) NOT NULL,
-        		hugo_gene_symbol character varying(255) NOT NULL,
-        		annotations text NOT NULL);
-
-    			CREATE TABLE IF NOT EXISTS genomic_annotations.annotation_names(
-        		annotation_name character varying(255) NOT NULL PRIMARY KEY);
-    			
-				CREATE TABLE IF NOT EXISTS genomic_annotations.gene_values(
-        		gene_value character varying(255) NOT NULL PRIMARY KEY);
-
-    			-- permissions
-    			ALTER TABLE genomic_annotations.genomic_annotations OWNER TO i2b2;
-    			ALTER TABLE genomic_annotations.annotation_names OWNER TO i2b2;
-    			ALTER TABLE genomic_annotations.gene_values OWNER TO i2b2;
-    			GRANT ALL on schema genomic_annotations to i2b2;
-    			GRANT ALL privileges on all tables in schema genomic_annotations to i2b2;` + "\n"
-
 	for i := 0; i < len(TablenamesOntology); i++ {
 
 		//TODO: Delete this please
-		if TablenamesOntology[i] != ONT+"non_sensitive_clear" {
+		if TablenamesOntology[i] != ONT+"non_sensitive_clear" && TablenamesOntology[i] != ANNOTATIONS+"genomic_annotations" {
 			loading += "TRUNCATE " + TablenamesOntology[i] + ";\n"
 			loading += `\copy ` + TablenamesOntology[i] + ` FROM '` + FilePathsOntology[i] + `' ESCAPE '"' DELIMITER ',' CSV;` + "\n"
 		}
@@ -494,6 +474,43 @@ func GenerateLoadingOntologyScript(databaseS loader.DBSettings) error {
 	loading += "\n"
 
 	loading += `UPDATE medco_ont.table_access SET c_visualattributes = 'CH ' WHERE c_table_cd = 'E2ETEST';` + "\n"
+
+	loading += `ALTER TABLE medco_ont.genomic OWNER TO $I2B2_DB_USER;
+    			ALTER TABLE medco_ont.clinical_sensitive OWNER TO $I2B2_DB_USER;
+    			ALTER TABLE medco_ont.clinical_non_sensitive OWNER TO $I2B2_DB_USER;` + "\n"
+
+	loading += "COMMIT;\n"
+	loading += "EOSQL"
+
+	loading += "\n \n" + `PGPASSWORD=` + gaDB.DBpassword + ` psql -v ON_ERROR_STOP=1 -h "` + gaDB.DBhost +
+		`" -U "` + gaDB.DBuser + `" -p ` + strconv.FormatInt(int64(gaDB.DBport), 10) + ` -d "` + gaDB.DBname + `" <<-EOSQL` + "\n"
+
+	loading += "BEGIN;\n"
+
+	loading += `CREATE TABLE IF NOT EXISTS genomic_annotations.genomic_annotations(
+				variant_id character varying(255) NOT NULL,
+				variant_id_enc character varying(255) NOT NULL,
+				variant_name character varying(255) NOT NULL,
+				protein_change character varying(255) NOT NULL,
+				hugo_gene_symbol character varying(255) NOT NULL,
+				annotations text NOT NULL);
+		
+				CREATE TABLE IF NOT EXISTS genomic_annotations.annotation_names(
+				annotation_name character varying(255) NOT NULL PRIMARY KEY);
+		
+				CREATE TABLE IF NOT EXISTS genomic_annotations.gene_values(
+				gene_value character varying(255) NOT NULL PRIMARY KEY);
+		
+				-- permissions
+				ALTER TABLE genomic_annotations.genomic_annotations OWNER TO $GA_DB_USER;
+				ALTER TABLE genomic_annotations.annotation_names OWNER TO $GA_DB_USER;
+				ALTER TABLE genomic_annotations.gene_values OWNER TO $GA_DB_USER;
+				GRANT ALL on schema genomic_annotations to $GA_DB_USER;
+				GRANT ALL privileges on all tables in schema genomic_annotations to $GA_DB_USER;` + "\n"
+
+	//TODO: Delete this please
+	loading += "TRUNCATE " + TablenamesOntology[2] + ";\n"
+	loading += `\copy ` + TablenamesOntology[2] + ` FROM '` + FilePathsOntology[2] + `' ESCAPE '"' DELIMITER ',' CSV;` + "\n"
 
 	// create annotations table
 	loading += `DROP TABLE IF EXISTS genomic_annotations.hugo_gene_symbol;` + "\n"
@@ -505,9 +522,47 @@ func GenerateLoadingOntologyScript(databaseS loader.DBSettings) error {
 	loading += `DROP TABLE IF EXISTS genomic_annotations.variant_name;` + "\n"
 	loading += `CREATE TABLE genomic_annotations.variant_name as select distinct variant_name as annotation_value from genomic_annotations.genomic_annotations;` + "\n"
 
-	loading += `ALTER TABLE medco_ont.genomic OWNER TO i2b2;
-    			ALTER TABLE medco_ont.clinical_sensitive OWNER TO i2b2;
-    			ALTER TABLE medco_ont.clinical_non_sensitive OWNER TO i2b2;` + "\n"
+	loading += `CREATE OR REPLACE FUNCTION genomic_annotations.ga_getvalues(annotation varchar, val varchar, lim int) RETURNS SETOF varchar AS \$\$
+				BEGIN
+    				RETURN QUERY EXECUTE
+					format('SELECT annotation_value
+					FROM genomic_annotations.%I
+					WHERE annotation_value ~* \$1
+           			ORDER BY annotation_value LIMIT \$2',annotation)
+    				USING val, lim;
+				END;
+				\$\$ LANGUAGE plpgsql;` + "\n"
+
+	loading += `CREATE OR REPLACE FUNCTION genomic_annotations.ga_getvariants(annotation varchar, val varchar, zygosity varchar, enc bool) RETURNS SETOF varchar AS \$\$
+				DECLARE
+				col varchar;
+				BEGIN
+					IF enc
+					THEN
+						col := 'variant_id_enc';
+					ELSE
+						col := 'variant_id';
+					END IF;
+    				RETURN QUERY EXECUTE
+					format('SELECT %I
+					FROM genomic_annotations.genomic_annotations
+					WHERE lower(%I) = lower(\$1)
+					AND annotations ~* \$2
+           			ORDER BY variant_id',col,annotation)
+    				USING val, zygosity;
+				END;
+				\$\$ LANGUAGE plpgsql;` + "\n"
+
+	loading += `CREATE OR REPLACE FUNCTION genomic_annotations.ga_annotationexists(annotation varchar)
+				RETURNS boolean AS \$\$
+				BEGIN
+				RETURN EXISTS(
+					SELECT 1 FROM pg_tables where
+						schemaname = 'genomic_annotations' and
+						tablename = annotation
+				);
+				END;
+				\$\$ LANGUAGE plpgsql;` + "\n"
 
 	loading += "COMMIT;\n"
 	loading += "EOSQL"
@@ -524,14 +579,14 @@ func GenerateLoadingOntologyScript(databaseS loader.DBSettings) error {
 }
 
 // GenerateLoadingDataScript creates a load dataset .sql script
-func GenerateLoadingDataScript(databaseS loader.DBSettings) error {
+func GenerateLoadingDataScript(i2b2DB loader.DBSettings) error {
 	fp, err := os.Create(FileBashPath[1])
 	if err != nil {
 		return err
 	}
 
-	loading := `#!/usr/bin/env bash` + "\n" + "\n" + `PGPASSWORD=` + databaseS.DBpassword + ` psql -v ON_ERROR_STOP=1 -h "` + databaseS.DBhost +
-		`" -U "` + databaseS.DBuser + `" -p ` + strconv.FormatInt(int64(databaseS.DBport), 10) + ` -d "` + databaseS.DBname + `" <<-EOSQL` + "\n"
+	loading := `#!/usr/bin/env bash` + "\n" + "\n" + `PGPASSWORD=` + i2b2DB.DBpassword + ` psql -v ON_ERROR_STOP=1 -h "` + i2b2DB.DBhost +
+		`" -U "` + i2b2DB.DBuser + `" -p ` + strconv.FormatInt(int64(i2b2DB.DBport), 10) + ` -d "` + i2b2DB.DBname + `" <<-EOSQL` + "\n"
 
 	loading += "BEGIN;\n"
 	for i := 0; i < len(TablenamesData); i++ {
@@ -763,7 +818,7 @@ func GenerateOntologyFiles(group *onet.Roster, entryPointIdx int, fOntClinical, 
 
 	// encrypt sensitive ids
 	listEncryptedElements := EncryptElements(listSensitiveIDs, group)
-	if err := writeMedCoOntologyGenomicAnnotations(listEncryptedElements, annotations); err != nil {
+	if err := writeMedCoOntologyGenomicAnnotations(listSensitiveIDs, listEncryptedElements, annotations); err != nil {
 		return err
 	}
 
@@ -1202,7 +1257,7 @@ func generateMedCoOntologyGenomicAnnotation(fields []string, record []string) st
 	return annotation
 }
 
-func writeMedCoOntologyGenomicAnnotations(listEncryptedElements *libunlynx.CipherVector, annotations []string) error {
+func writeMedCoOntologyGenomicAnnotations(listSensitiveIDs []int64, listEncryptedElements *libunlynx.CipherVector, annotations []string) error {
 	for i, annotation := range annotations {
 		if annotation != "NA" && annotation != "" {
 			ciphertextStr, err := (*listEncryptedElements)[i].Serialize()
@@ -1211,7 +1266,7 @@ func writeMedCoOntologyGenomicAnnotations(listEncryptedElements *libunlynx.Ciphe
 				return err
 			}
 
-			_, err = FileHandlers[2].WriteString(`"` + ciphertextStr + `",` + annotation)
+			_, err = FileHandlers[2].WriteString(`"` + strconv.FormatInt(listSensitiveIDs[i], 10) + `","` + ciphertextStr + `",` + annotation)
 			if err != nil {
 				log.Fatal("Error in the writeMedCoOntologyGenomicAnnotations():", err)
 				return err

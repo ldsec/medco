@@ -1,11 +1,11 @@
 package main
 
 import (
+	"github.com/urfave/cli"
 	"os"
 
 	"go.dedis.ch/onet/v3/log"
 	"go.dedis.ch/onet/v3/network"
-	"gopkg.in/urfave/cli.v1"
 )
 
 const (
@@ -20,23 +20,39 @@ const (
 	optionEntryPointIdx      = "entryPointIdx"
 	optionEntryPointIdxShort = "entry"
 
-	// database settings
-	optionDBhost      = "dbHost"
-	optionDBhostShort = "dbH"
+	// i2b2 database settings
+	optionI2b2DBhost      = "i2b2DbHost"
+	optionI2b2DBhostShort = "i2b2H"
 
-	optionDBport      = "dbPort"
-	optionDBportShort = "dbP"
+	optionI2b2DBport      = "i2b2DbPort"
+	optionI2b2DBportShort = "i2b2P"
 
-	optionDBname      = "dbName"
-	optionDBnameShort = "dbN"
+	optionI2b2DBname      = "i2b2DbName"
+	optionI2b2DBnameShort = "i2b2N"
 
-	optionDBuser      = "dbUser"
-	optionDBuserShort = "dbU"
+	optionI2b2DBuser      = "i2b2DbUser"
+	optionI2b2DBuserShort = "i2b2U"
 
-	optionDBpassword      = "dbPassword"
-	optionDBpasswordShort = "dbPw"
+	optionI2b2DBpassword      = "i2b2DbPassword"
+	optionI2b2DBpasswordShort = "i2b2Pw"
 
 	// #---- V0 ----#
+
+	// genomic annotations database settings
+	optionGaDBhost      = "gaDbHost"
+	optionGaDBhostShort = "gaH"
+
+	optionGaDBport      = "gaDbPort"
+	optionGaDBportShort = "gaP"
+
+	optionGaDBname      = "gaDbName"
+	optionGaDBnameShort = "gaN"
+
+	optionGaDBuser      = "gaDbUser"
+	optionGaDBuserShort = "gaU"
+
+	optionGaDBpassword      = "gaDbPassword"
+	optionGaDBpasswordShort = "gaPw"
 
 	// DefaultOntologyClinical is the name of the default clinical file (dataset)
 	DefaultOntologyClinical = "../../data/genomic/tcga_cbio/clinical_data.csv"
@@ -111,29 +127,29 @@ func main() {
 			EnvVar: "UNLYNX_GROUP_FILE_IDX",
 		},
 		cli.StringFlag{
-			Name:   optionDBhost + ", " + optionDBhostShort,
-			Usage:  "Database hostname",
-			EnvVar: "DB_HOST",
+			Name:   optionI2b2DBhost + ", " + optionI2b2DBhostShort,
+			Usage:  "I2B2 database hostname",
+			EnvVar: "I2B2_DB_HOST",
 		},
 		cli.IntFlag{
-			Name:   optionDBport + ", " + optionDBportShort,
-			Usage:  "Database port",
-			EnvVar: "DB_PORT",
+			Name:   optionI2b2DBport + ", " + optionI2b2DBportShort,
+			Usage:  "I2B2 database port",
+			EnvVar: "I2B2_DB_PORT",
 		},
 		cli.StringFlag{
-			Name:   optionDBname + ", " + optionDBnameShort,
-			Usage:  "Database name",
-			EnvVar: "DB_NAME",
+			Name:   optionI2b2DBname + ", " + optionI2b2DBnameShort,
+			Usage:  "I2B2 database name",
+			EnvVar: "I2B2_DB_NAME",
 		},
 		cli.StringFlag{
-			Name:   optionDBuser + ", " + optionDBuserShort,
-			Usage:  "Database user",
-			EnvVar: "DB_USER",
+			Name:   optionI2b2DBuser + ", " + optionI2b2DBuserShort,
+			Usage:  "I2B2 database user",
+			EnvVar: "I2B2_DB_USER",
 		},
 		cli.StringFlag{
-			Name:   optionDBpassword + ", " + optionDBpasswordShort,
-			Usage:  "Database password",
-			EnvVar: "DB_PASSWORD",
+			Name:   optionI2b2DBpassword + ", " + optionI2b2DBpasswordShort,
+			Usage:  "I2B2 database password",
+			EnvVar: "I2B2_DB_PASSWORD",
 		},
 	}
 
@@ -166,6 +182,31 @@ func main() {
 			Name:  optionOutputPath + ", " + optionOuputPathShort,
 			Value: DefaultOutputPath,
 			Usage: "Output path for the .csv files",
+		},
+		cli.StringFlag{
+			Name:   optionGaDBhost + ", " + optionGaDBhostShort,
+			Usage:  "Genomic annotations database hostname",
+			EnvVar: "GA_DB_HOST",
+		},
+		cli.IntFlag{
+			Name:   optionGaDBport + ", " + optionGaDBportShort,
+			Usage:  "Genomic annotations database port",
+			EnvVar: "GA_DB_PORT",
+		},
+		cli.StringFlag{
+			Name:   optionGaDBname + ", " + optionGaDBnameShort,
+			Usage:  "Genomic annotations database name",
+			EnvVar: "GA_DB_NAME",
+		},
+		cli.StringFlag{
+			Name:   optionGaDBuser + ", " + optionGaDBuserShort,
+			Usage:  "Genomic annotations database user",
+			EnvVar: "GA_DB_USER",
+		},
+		cli.StringFlag{
+			Name:   optionGaDBpassword + ", " + optionGaDBpasswordShort,
+			Usage:  "Genomic annotations database password",
+			EnvVar: "GA_DB_PASSWORD",
 		},
 	}
 	loaderFlagsv0 = append(loaderFlagsCommon, loaderFlagsv0...)
