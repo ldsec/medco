@@ -1,4 +1,4 @@
-FROM golang:1.12.10 as build
+FROM golang:1.13 as build
 
 COPY ./ /src
 
@@ -7,7 +7,7 @@ WORKDIR /src
 RUN CGO_ENABLED=0 go install -v ./cmd/medco-cli-client/...
 
 # -------------------------------------------
-FROM golang:1.12.5-alpine as release
+FROM golang:1.13-alpine as release
 
 COPY deployment/docker-entrypoint.sh /usr/local/bin/
 RUN apk update && apk add bash && rm -rf /var/cache/apk/* && \

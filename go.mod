@@ -11,7 +11,6 @@ require (
 	github.com/go-openapi/swag v0.19.7
 	github.com/go-openapi/validate v0.19.6
 	github.com/jessevdk/go-flags v1.4.0
-	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/ldsec/medco-loader v0.2.1-0.20200114103207-ac7b644e857c
 	github.com/ldsec/medco-unlynx v0.2.2-0.20200131193353-88261e501a00
 	github.com/ldsec/unlynx v1.4.0
@@ -23,8 +22,9 @@ require (
 	github.com/smartystreets/assertions v1.0.0 // indirect
 	github.com/stretchr/testify v1.4.0
 	github.com/urfave/cli v1.22.2
-	go.dedis.ch/onet/v3 v3.0.32
-	go.mongodb.org/mongo-driver v1.2.1 // indirect
+	go.dedis.ch/onet/v3 v3.1.0
+	go.mongodb.org/mongo-driver v1.3.0 // indirect
+	golang.org/x/crypto v0.0.0-20200210222208-86ce3cb69678 // indirect
 	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
 	golang.org/x/sys v0.0.0-20200202164722-d101bd2416d5 // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
