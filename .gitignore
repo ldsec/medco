@@ -1,3 +1,5 @@
 .DS_Store
 configuration-profiles/dev/
 resources/data/
+compose-profiles/test-network-*
+configuration-profiles/test-network-*
