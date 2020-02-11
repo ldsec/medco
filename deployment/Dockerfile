@@ -1,4 +1,4 @@
-FROM golang:1.12 as build
+FROM golang:1.13 as build
 
 COPY ./ /src
 
@@ -7,10 +7,10 @@ WORKDIR /src
 RUN CGO_ENABLED=0 go install -v ./cmd/medco-connector-server/...
 
 # -------------------------------------------
-FROM golang:1.12-alpine as release
+FROM golang:1.13-alpine as release
 
 COPY deployment/docker-entrypoint.sh /usr/local/bin/
-RUN apk update && apk add bash && rm -rf /var/cache/apk/* && \
+RUN apk update && apk add bash postgresql && rm -rf /var/cache/apk/* && \
     chmod a+x /usr/local/bin/docker-entrypoint.sh
 
 COPY --from=build /go/bin/medco-connector-server /go/bin/
@@ -29,13 +29,21 @@ ENV I2B2_HIVE_URL=http://i2b2:8080/i2b2/services \
     I2B2_WAIT_TIME_SECONDS=300 \
     LOG_LEVEL=5 \
     UNLYNX_GROUP_FILE_PATH=/medco-configuration/group.toml \
-    UNLYNX_GROUP_FILE_IDX=0 \
     UNLYNX_TIMEOUT_SECONDS=300 \
-    JWKS_URL=http://keycloak:8080/auth/realms/master/protocol/openid-connect/certs \
-    OIDC_JWT_ISSUER=http://keycloak:8080/auth/realms/master \
-    OIDC_CLIENT_ID=medco \
-    OIDC_JWT_USER_ID_CLAIM=preferred_username \
-    MEDCO_OBFUSCATION_MIN=5
+    OIDC_JWKS_URLS=http://keycloak:8080/auth/realms/master/protocol/openid-connect/certs \
+    OIDC_JWT_ISSUERS=http://keycloak:8080/auth/realms/master \
+    OIDC_CLIENT_IDS=medco \
+    OIDC_JWT_USER_ID_CLAIMS=preferred_username \
+    OIDC_JWKS_TIMEOUT_SECONDS=30 \
+    MEDCO_OBFUSCATION_MIN=5 \
+    MEDCO_NODES_URL="http://medco-connector-srv0/medco,http://medco-connector-srv1/medco,http://medco-connector-srv2/medco" \
+    MEDCO_NODE_IDX=0 \
+    MEDCO_OBFUSCATION_MIN=5 \
+    GA_DB_HOST=postgresql \
+    GA_DB_PORT=5432 \
+    GA_DB_USER=genomicannotations \
+    GA_DB_PW=genomicannotations \
+    GA_DB_NAME=gamedcosrv
 
 EXPOSE 1999
 ENTRYPOINT docker-entrypoint.sh medco-connector-server --write-timeout=${SERVER_HTTP_WRITE_TIMEOUT_SECONDS}s

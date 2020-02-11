@@ -11,7 +11,9 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/lca1/medco-connector/restapi/client/picsure2"
+	"github.com/ldsec/medco-connector/restapi/client/genomic_annotations"
+	"github.com/ldsec/medco-connector/restapi/client/medco_network"
+	"github.com/ldsec/medco-connector/restapi/client/medco_node"
 )
 
 // Default medco cli HTTP client.
@@ -23,7 +25,7 @@ const (
 	DefaultHost string = "localhost"
 	// DefaultBasePath is the default BasePath
 	// found in Meta (info) section of spec file
-	DefaultBasePath string = "/pic-sure-api-2/PICSURE"
+	DefaultBasePath string = "/medco"
 )
 
 // DefaultSchemes are the default schemes found in Meta (info) section of spec file
@@ -57,7 +59,11 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *MedcoCli {
 	cli := new(MedcoCli)
 	cli.Transport = transport
 
-	cli.Picsure2 = picsure2.New(transport, formats)
+	cli.GenomicAnnotations = genomic_annotations.New(transport, formats)
+
+	cli.MedcoNetwork = medco_network.New(transport, formats)
+
+	cli.MedcoNode = medco_node.New(transport, formats)
 
 	return cli
 }
@@ -103,7 +109,11 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 
 // MedcoCli is a client for medco cli
 type MedcoCli struct {
-	Picsure2 *picsure2.Client
+	GenomicAnnotations *genomic_annotations.Client
+
+	MedcoNetwork *medco_network.Client
+
+	MedcoNode *medco_node.Client
 
 	Transport runtime.ClientTransport
 }
@@ -112,6 +122,10 @@ type MedcoCli struct {
 func (c *MedcoCli) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
 
-	c.Picsure2.SetTransport(transport)
+	c.GenomicAnnotations.SetTransport(transport)
+
+	c.MedcoNetwork.SetTransport(transport)
+
+	c.MedcoNode.SetTransport(transport)
 
 }

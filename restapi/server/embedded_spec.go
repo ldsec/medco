@@ -18,166 +18,234 @@ var (
 
 func init() {
 	SwaggerJSON = json.RawMessage([]byte(`{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
   "schemes": [
     "http"
   ],
   "swagger": "2.0",
   "info": {
-    "description": "This is the API of the MedCo connector, that orchestrates the query at the MedCo node. It implements the PIC-SURE 2 API.",
+    "description": "API of the MedCo connector, that orchestrates the query at the MedCo node and provides information about the MedCo network.",
     "title": "MedCo Connector",
     "contact": {
       "email": "medco-dev@listes.epfl.ch"
     },
     "license": {
       "name": "EULA",
-      "url": "https://raw.githubusercontent.com/lca1/medco-connector/master/LICENSE"
+      "url": "https://raw.githubusercontent.com/ldsec/medco-connector/master/LICENSE"
     },
-    "version": "0.2.1"
+    "version": "1.0.0"
   },
-  "basePath": "/medco-connector",
+  "basePath": "/medco",
   "paths": {
-    "/picsure2/info": {
-      "post": {
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
+    "/genomic-annotations/{annotation}": {
+      "get": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-genomic-annotations"
+            ]
+          }
         ],
         "tags": [
-          "picsure2"
+          "genomic-annotations"
         ],
-        "summary": "Returns information on how to interact with this PIC-SURE endpoint.",
-        "operationId": "getInfo",
+        "summary": "Get genomic annotations values.",
+        "operationId": "getValues",
         "parameters": [
           {
-            "description": "Credentials to be used.",
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "resourceCredentials": {
-                  "$ref": "#/definitions/resourceCredentials"
-                }
-              }
-            }
+            "pattern": "^\\w+$",
+            "type": "string",
+            "description": "Genomic annotation name.",
+            "name": "annotation",
+            "in": "path",
+            "required": true
+          },
+          {
+            "maxLength": 255,
+            "type": "string",
+            "description": "Genomic annotation value.",
+            "name": "value",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 10,
+            "description": "Limits the number of records retrieved.",
+            "name": "limit",
+            "in": "query"
           }
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/resourceInfo"
+            "description": "Queried annotation values.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "404": {
+            "description": "Annotation not found."
           },
           "default": {
-            "$ref": "#/responses/error"
+            "$ref": "#/responses/errorResponse"
           }
         }
       }
     },
-    "/picsure2/query": {
-      "post": {
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
+    "/genomic-annotations/{annotation}/{value}": {
+      "get": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-genomic-annotations"
+            ]
+          }
         ],
         "tags": [
-          "picsure2"
+          "genomic-annotations"
         ],
-        "summary": "Query MedCo node.",
-        "operationId": "query",
+        "summary": "Get variants corresponding to a genomic annotation value.",
+        "operationId": "getVariants",
         "parameters": [
           {
-            "description": "Query request.",
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "query": {
-                  "$ref": "#/definitions/query"
-                },
-                "resourceCredentials": {
-                  "$ref": "#/definitions/resourceCredentials"
-                },
-                "resourceUUID": {
-                  "type": "string"
-                }
-              }
-            }
+            "pattern": "^\\w+$",
+            "type": "string",
+            "description": "Genomic annotation name.",
+            "name": "annotation",
+            "in": "path",
+            "required": true
+          },
+          {
+            "minLength": 1,
+            "type": "string",
+            "description": "Genomic annotation value.",
+            "name": "value",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "array",
+            "items": {
+              "enum": [
+                "heterozygous",
+                "homozygous",
+                "unknown"
+              ],
+              "type": "string"
+            },
+            "description": "Genomic annotation zygosity, if null defaults to all.",
+            "name": "zygosity",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": true,
+            "description": "Request pre-encrypted variant identifiers (defaults to true).",
+            "name": "encrypted",
+            "in": "query"
           }
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/queryStatus"
+            "description": "Queried variants.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "404": {
+            "description": "Annotation or annotation value not found."
           },
           "default": {
-            "$ref": "#/responses/error"
+            "$ref": "#/responses/errorResponse"
           }
         }
       }
     },
-    "/picsure2/query/sync": {
-      "post": {
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
+    "/network": {
+      "get": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-network"
+            ]
+          }
         ],
         "tags": [
-          "picsure2"
+          "medco-network"
         ],
-        "summary": "Query MedCo node synchronously.",
-        "operationId": "querySync",
+        "summary": "Get network metadata.",
+        "operationId": "getMetadata",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/networkMetadataResponse"
+          },
+          "default": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      }
+    },
+    "/node/explore/query": {
+      "post": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
+        ],
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "MedCo-Explore query to the node.",
+        "operationId": "exploreQuery",
         "parameters": [
           {
-            "description": "Query request.",
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "query": {
-                  "$ref": "#/definitions/query"
-                },
-                "resourceCredentials": {
-                  "$ref": "#/definitions/resourceCredentials"
-                },
-                "resourceUUID": {
-                  "type": "string"
-                }
-              }
-            }
+            "type": "boolean",
+            "default": true,
+            "description": "Request synchronous query (defaults to true).",
+            "name": "sync",
+            "in": "query"
+          },
+          {
+            "$ref": "#/parameters/exploreQueryRequest"
           }
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/queryResult"
+            "$ref": "#/responses/exploreQueryResponse"
           },
           "default": {
-            "$ref": "#/responses/error"
+            "$ref": "#/responses/errorResponse"
           }
         }
       }
     },
-    "/picsure2/query/{queryId}/result": {
-      "post": {
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
+    "/node/explore/query/{queryId}": {
+      "get": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
         ],
         "tags": [
-          "picsure2"
+          "medco-node"
         ],
-        "summary": "Get result of query.",
-        "operationId": "queryResult",
+        "summary": "Get status and result of a MedCo-Explore query.",
+        "operationId": "getExploreQuery",
         "parameters": [
           {
             "type": "string",
@@ -185,203 +253,120 @@ func init() {
             "name": "queryId",
             "in": "path",
             "required": true
-          },
-          {
-            "description": "Credentials to be used.",
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "resourceCredentials": {
-                  "$ref": "#/definitions/resourceCredentials"
-                }
-              }
-            }
           }
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/queryResult"
+            "$ref": "#/responses/exploreQueryResponse"
+          },
+          "404": {
+            "description": "Query ID not found."
           },
           "default": {
-            "$ref": "#/responses/error"
+            "$ref": "#/responses/errorResponse"
           }
         }
       }
     },
-    "/picsure2/query/{queryId}/status": {
+    "/node/explore/search": {
       "post": {
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
         ],
         "tags": [
-          "picsure2"
+          "medco-node"
         ],
-        "summary": "Get status of query.",
-        "operationId": "queryStatus",
+        "summary": "Search through the ontology for MedCo-Explore query terms.",
+        "operationId": "exploreSearch",
         "parameters": [
           {
-            "type": "string",
-            "description": "Query ID",
-            "name": "queryId",
-            "in": "path",
-            "required": true
-          },
-          {
-            "description": "Credentials to be used.",
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "resourceCredentials": {
-                  "$ref": "#/definitions/resourceCredentials"
-                }
-              }
-            }
+            "$ref": "#/parameters/exploreSearchRequest"
           }
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/queryStatus"
+            "$ref": "#/responses/exploreSearchResponse"
           },
           "default": {
-            "$ref": "#/responses/error"
-          }
-        }
-      }
-    },
-    "/picsure2/search": {
-      "post": {
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "picsure2"
-        ],
-        "summary": "Search through the ontology.",
-        "operationId": "search",
-        "parameters": [
-          {
-            "description": "Search request.",
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "query": {
-                  "$ref": "#/definitions/searchQuery"
-                },
-                "resourceCredentials": {
-                  "$ref": "#/definitions/resourceCredentials"
-                },
-                "resourceUUID": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/responses/searchResult"
-          },
-          "default": {
-            "$ref": "#/responses/error"
+            "$ref": "#/responses/errorResponse"
           }
         }
       }
     }
   },
   "definitions": {
-    "query": {
-      "type": "object",
+    "exploreQuery": {
+      "description": "MedCo-Explore query",
       "properties": {
-        "genomic-annotations": {
-          "description": "genomic annotations query (todo)",
-          "type": "object"
-        },
-        "i2b2-medco": {
-          "description": "i2b2-medco query",
+        "differentialPrivacy": {
+          "description": "differential privacy query parameters (todo)",
           "type": "object",
           "properties": {
-            "differentialPrivacy": {
-              "description": "differential privacy query parameters (todo)",
-              "type": "object",
-              "properties": {
-                "queryBudget": {
-                  "type": "number"
-                }
-              }
-            },
-            "panels": {
-              "description": "i2b2 panels (linked by an AND)",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "required": [
-                  "not"
-                ],
-                "properties": {
-                  "items": {
-                    "description": "i2b2 items (linked by an OR)",
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "required": [
-                        "encrypted"
-                      ],
-                      "properties": {
-                        "encrypted": {
-                          "type": "boolean"
-                        },
-                        "operator": {
-                          "type": "string",
-                          "enum": [
-                            "exists",
-                            "equals"
-                          ]
-                        },
-                        "queryTerm": {
-                          "type": "string"
-                        },
-                        "value": {
-                          "type": "string"
-                        }
-                      }
-                    }
-                  },
-                  "not": {
-                    "description": "exclude the i2b2 panel",
-                    "type": "boolean"
-                  }
-                }
-              }
-            },
-            "queryType": {
-              "$ref": "#/definitions/queryType"
-            },
-            "userPublicKey": {
-              "type": "string"
+            "queryBudget": {
+              "type": "number"
             }
           }
         },
-        "name": {
-          "type": "string"
+        "panels": {
+          "description": "i2b2 panels (linked by an AND)",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "not"
+            ],
+            "properties": {
+              "items": {
+                "description": "i2b2 items (linked by an OR)",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "encrypted",
+                    "queryTerm"
+                  ],
+                  "properties": {
+                    "encrypted": {
+                      "type": "boolean"
+                    },
+                    "operator": {
+                      "type": "string",
+                      "enum": [
+                        "exists",
+                        "equals"
+                      ]
+                    },
+                    "queryTerm": {
+                      "type": "string",
+                      "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/?)$"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "not": {
+                "description": "exclude the i2b2 panel",
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "type": {
+          "$ref": "#/definitions/exploreQueryType"
+        },
+        "userPublicKey": {
+          "type": "string",
+          "pattern": "^[\\w=-]+$"
         }
       }
     },
-    "queryResultElement": {
+    "exploreQueryResultElement": {
       "type": "object",
       "properties": {
         "encryptedCount": {
@@ -393,16 +378,22 @@ func init() {
             "type": "string"
           }
         },
-        "encryptionKey": {
-          "type": "string"
-        },
-        "queryType": {
-          "$ref": "#/definitions/queryType"
+        "status": {
+          "type": "string",
+          "enum": [
+            "queued",
+            "pending",
+            "error",
+            "available"
+          ]
         },
         "timers": {
           "type": "array",
           "items": {
             "type": "object",
+            "required": [
+              "milliseconds"
+            ],
             "properties": {
               "milliseconds": {
                 "type": "integer",
@@ -416,53 +407,7 @@ func init() {
         }
       }
     },
-    "queryStatus": {
-      "type": "object",
-      "properties": {
-        "duration": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "expiration": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "picsureResultId": {
-          "type": "string"
-        },
-        "resourceID": {
-          "type": "string"
-        },
-        "resourceResultId": {
-          "type": "string"
-        },
-        "resourceStatus": {
-          "type": "string"
-        },
-        "resultMetadata": {
-          "type": "string",
-          "format": "byte"
-        },
-        "sizeInBytes": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "startTime": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "status": {
-          "type": "string",
-          "enum": [
-            "QUEUED",
-            "PENDING",
-            "ERROR",
-            "AVAILABLE"
-          ]
-        }
-      }
-    },
-    "queryType": {
+    "exploreQueryType": {
       "type": "string",
       "enum": [
         "patient_list",
@@ -474,20 +419,15 @@ func init() {
         "count_global_obfuscated"
       ]
     },
-    "resourceCredentials": {
+    "exploreSearch": {
       "type": "object",
-      "properties": {
-        "MEDCO_TOKEN": {
-          "description": "MedCo authorization token.",
-          "type": "string"
-        }
-      }
-    },
-    "searchQuery": {
-      "type": "object",
+      "required": [
+        "path"
+      ],
       "properties": {
         "path": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
         },
         "type": {
           "type": "string",
@@ -498,7 +438,7 @@ func init() {
         }
       }
     },
-    "searchResultElement": {
+    "exploreSearchResultElement": {
       "type": "object",
       "required": [
         "leaf"
@@ -516,7 +456,8 @@ func init() {
         "medcoEncryption": {
           "type": "object",
           "required": [
-            "encrypted"
+            "encrypted",
+            "id"
           ],
           "properties": {
             "childrenIds": {
@@ -557,16 +498,30 @@ func init() {
         }
       }
     },
+    "restApiAuthorization": {
+      "type": "string",
+      "enum": [
+        "medco-network",
+        "medco-explore",
+        "medco-genomic-annotations"
+      ]
+    },
     "user": {
       "type": "object",
       "properties": {
         "authorizations": {
           "type": "object",
           "properties": {
-            "queryType": {
+            "exploreQuery": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/queryType"
+                "$ref": "#/definitions/exploreQueryType"
+              }
+            },
+            "restApi": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/restApiAuthorization"
               }
             }
           }
@@ -580,9 +535,38 @@ func init() {
       }
     }
   },
+  "parameters": {
+    "exploreQueryRequest": {
+      "description": "MedCo-Explore query request.",
+      "name": "queryRequest",
+      "in": "body",
+      "required": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[\\w:-]+$"
+          },
+          "query": {
+            "$ref": "#/definitions/exploreQuery"
+          }
+        }
+      }
+    },
+    "exploreSearchRequest": {
+      "description": "MedCo-Explore ontology search request.",
+      "name": "searchRequest",
+      "in": "body",
+      "required": true,
+      "schema": {
+        "$ref": "#/definitions/exploreSearch"
+      }
+    }
+  },
   "responses": {
-    "error": {
-      "description": "Error response",
+    "errorResponse": {
+      "description": "Error response.",
       "schema": {
         "type": "object",
         "properties": {
@@ -592,67 +576,73 @@ func init() {
         }
       }
     },
-    "queryResult": {
-      "description": "Query result.",
-      "schema": {
-        "$ref": "#/definitions/queryResultElement"
-      }
-    },
-    "queryStatus": {
-      "description": "Query status.",
-      "schema": {
-        "$ref": "#/definitions/queryStatus"
-      }
-    },
-    "resourceInfo": {
-      "description": "PIC-SURE 2 resource information.",
+    "exploreQueryResponse": {
+      "description": "MedCo-Explore query response.",
       "schema": {
         "type": "object",
         "properties": {
           "id": {
             "type": "string"
           },
-          "name": {
-            "type": "string"
+          "query": {
+            "$ref": "#/definitions/exploreQuery"
           },
-          "queryFormats": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "description": {
-                  "type": "string"
-                },
-                "examples": {
-                  "type": "array",
-                  "items": {
-                    "type": "object"
-                  }
-                },
-                "name": {
-                  "type": "string"
-                },
-                "specifications": {
-                  "type": "object"
-                }
-              }
-            }
+          "result": {
+            "$ref": "#/definitions/exploreQueryResultElement"
           }
         }
       }
     },
-    "searchResult": {
-      "description": "Search results.",
+    "exploreSearchResponse": {
+      "description": "MedCo-Explore search query response.",
       "schema": {
         "type": "object",
         "properties": {
           "results": {
             "type": "array",
             "items": {
-              "$ref": "#/definitions/searchResultElement"
+              "$ref": "#/definitions/exploreSearchResultElement"
             }
           },
-          "searchQuery": {
+          "search": {
+            "$ref": "#/definitions/exploreSearch"
+          }
+        }
+      }
+    },
+    "networkMetadataResponse": {
+      "description": "Network metadata (public key and nodes list).",
+      "schema": {
+        "type": "object",
+        "required": [
+          "nodeIndex"
+        ],
+        "properties": {
+          "nodeIndex": {
+            "type": "integer"
+          },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "index"
+              ],
+              "properties": {
+                "index": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "public-key": {
+            "description": "Aggregated public key of the collective authority.",
             "type": "string"
           }
         }
@@ -660,7 +650,7 @@ func init() {
     }
   },
   "securityDefinitions": {
-    "MedCoToken": {
+    "medco-jwt": {
       "description": "MedCo JWT token.",
       "type": "oauth2",
       "flow": "application",
@@ -669,13 +659,21 @@ func init() {
   },
   "security": [
     {
-      "MedCoToken": null
+      "medco-jwt": []
     }
   ],
   "tags": [
     {
-      "description": "PIC-SURE 2 Resource Service API",
-      "name": "picsure2"
+      "description": "MedCo Network API",
+      "name": "medco-network"
+    },
+    {
+      "description": "MedCo Node API",
+      "name": "medco-node"
+    },
+    {
+      "description": "Genomic Annotations Query API",
+      "name": "genomic-annotations"
     }
   ],
   "externalDocs": {
@@ -684,48 +682,280 @@ func init() {
   }
 }`))
 	FlatSwaggerJSON = json.RawMessage([]byte(`{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
   "schemes": [
     "http"
   ],
   "swagger": "2.0",
   "info": {
-    "description": "This is the API of the MedCo connector, that orchestrates the query at the MedCo node. It implements the PIC-SURE 2 API.",
+    "description": "API of the MedCo connector, that orchestrates the query at the MedCo node and provides information about the MedCo network.",
     "title": "MedCo Connector",
     "contact": {
       "email": "medco-dev@listes.epfl.ch"
     },
     "license": {
       "name": "EULA",
-      "url": "https://raw.githubusercontent.com/lca1/medco-connector/master/LICENSE"
+      "url": "https://raw.githubusercontent.com/ldsec/medco-connector/master/LICENSE"
     },
-    "version": "0.2.1"
+    "version": "1.0.0"
   },
-  "basePath": "/medco-connector",
+  "basePath": "/medco",
   "paths": {
-    "/picsure2/info": {
-      "post": {
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
+    "/genomic-annotations/{annotation}": {
+      "get": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-genomic-annotations"
+            ]
+          }
         ],
         "tags": [
-          "picsure2"
+          "genomic-annotations"
         ],
-        "summary": "Returns information on how to interact with this PIC-SURE endpoint.",
-        "operationId": "getInfo",
+        "summary": "Get genomic annotations values.",
+        "operationId": "getValues",
         "parameters": [
           {
-            "description": "Credentials to be used.",
-            "name": "body",
+            "pattern": "^\\w+$",
+            "type": "string",
+            "description": "Genomic annotation name.",
+            "name": "annotation",
+            "in": "path",
+            "required": true
+          },
+          {
+            "maxLength": 255,
+            "type": "string",
+            "description": "Genomic annotation value.",
+            "name": "value",
+            "in": "query",
+            "required": true
+          },
+          {
+            "minimum": 0,
+            "type": "integer",
+            "default": 10,
+            "description": "Limits the number of records retrieved.",
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Queried annotation values.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "404": {
+            "description": "Annotation not found."
+          },
+          "default": {
+            "description": "Error response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/genomic-annotations/{annotation}/{value}": {
+      "get": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-genomic-annotations"
+            ]
+          }
+        ],
+        "tags": [
+          "genomic-annotations"
+        ],
+        "summary": "Get variants corresponding to a genomic annotation value.",
+        "operationId": "getVariants",
+        "parameters": [
+          {
+            "pattern": "^\\w+$",
+            "type": "string",
+            "description": "Genomic annotation name.",
+            "name": "annotation",
+            "in": "path",
+            "required": true
+          },
+          {
+            "minLength": 1,
+            "type": "string",
+            "description": "Genomic annotation value.",
+            "name": "value",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "array",
+            "items": {
+              "enum": [
+                "heterozygous",
+                "homozygous",
+                "unknown"
+              ],
+              "type": "string"
+            },
+            "description": "Genomic annotation zygosity, if null defaults to all.",
+            "name": "zygosity",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": true,
+            "description": "Request pre-encrypted variant identifiers (defaults to true).",
+            "name": "encrypted",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Queried variants.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "404": {
+            "description": "Annotation or annotation value not found."
+          },
+          "default": {
+            "description": "Error response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/network": {
+      "get": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-network"
+            ]
+          }
+        ],
+        "tags": [
+          "medco-network"
+        ],
+        "summary": "Get network metadata.",
+        "operationId": "getMetadata",
+        "responses": {
+          "200": {
+            "description": "Network metadata (public key and nodes list).",
+            "schema": {
+              "type": "object",
+              "required": [
+                "nodeIndex"
+              ],
+              "properties": {
+                "nodeIndex": {
+                  "type": "integer"
+                },
+                "nodes": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "index"
+                    ],
+                    "properties": {
+                      "index": {
+                        "type": "integer"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "url": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "public-key": {
+                  "description": "Aggregated public key of the collective authority.",
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/node/explore/query": {
+      "post": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
+        ],
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "MedCo-Explore query to the node.",
+        "operationId": "exploreQuery",
+        "parameters": [
+          {
+            "type": "boolean",
+            "default": true,
+            "description": "Request synchronous query (defaults to true).",
+            "name": "sync",
+            "in": "query"
+          },
+          {
+            "description": "MedCo-Explore query request.",
+            "name": "queryRequest",
             "in": "body",
             "required": true,
             "schema": {
               "type": "object",
               "properties": {
-                "resourceCredentials": {
-                  "$ref": "#/definitions/resourceCredentials"
+                "id": {
+                  "type": "string",
+                  "pattern": "^[\\w:-]+$"
+                },
+                "query": {
+                  "$ref": "#/definitions/exploreQuery"
                 }
               }
             }
@@ -733,100 +963,24 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "PIC-SURE 2 resource information.",
+            "description": "MedCo-Explore query response.",
             "schema": {
               "type": "object",
               "properties": {
                 "id": {
                   "type": "string"
                 },
-                "name": {
-                  "type": "string"
-                },
-                "queryFormats": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "description": {
-                        "type": "string"
-                      },
-                      "examples": {
-                        "type": "array",
-                        "items": {
-                          "type": "object"
-                        }
-                      },
-                      "name": {
-                        "type": "string"
-                      },
-                      "specifications": {
-                        "type": "object"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Error response",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/picsure2/query": {
-      "post": {
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "picsure2"
-        ],
-        "summary": "Query MedCo node.",
-        "operationId": "query",
-        "parameters": [
-          {
-            "description": "Query request.",
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
                 "query": {
-                  "$ref": "#/definitions/query"
+                  "$ref": "#/definitions/exploreQuery"
                 },
-                "resourceCredentials": {
-                  "$ref": "#/definitions/resourceCredentials"
-                },
-                "resourceUUID": {
-                  "type": "string"
+                "result": {
+                  "$ref": "#/definitions/exploreQueryResultElement"
                 }
               }
             }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Query status.",
-            "schema": {
-              "$ref": "#/definitions/queryStatus"
-            }
           },
           "default": {
-            "description": "Error response",
+            "description": "Error response.",
             "schema": {
               "type": "object",
               "properties": {
@@ -839,75 +993,20 @@ func init() {
         }
       }
     },
-    "/picsure2/query/sync": {
-      "post": {
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "picsure2"
-        ],
-        "summary": "Query MedCo node synchronously.",
-        "operationId": "querySync",
-        "parameters": [
+    "/node/explore/query/{queryId}": {
+      "get": {
+        "security": [
           {
-            "description": "Query request.",
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "query": {
-                  "$ref": "#/definitions/query"
-                },
-                "resourceCredentials": {
-                  "$ref": "#/definitions/resourceCredentials"
-                },
-                "resourceUUID": {
-                  "type": "string"
-                }
-              }
-            }
+            "medco-jwt": [
+              "medco-explore"
+            ]
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "Query result.",
-            "schema": {
-              "$ref": "#/definitions/queryResultElement"
-            }
-          },
-          "default": {
-            "description": "Error response",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/picsure2/query/{queryId}/result": {
-      "post": {
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
         ],
         "tags": [
-          "picsure2"
+          "medco-node"
         ],
-        "summary": "Get result of query.",
-        "operationId": "queryResult",
+        "summary": "Get status and result of a MedCo-Explore query.",
+        "operationId": "getExploreQuery",
         "parameters": [
           {
             "type": "string",
@@ -915,155 +1014,88 @@ func init() {
             "name": "queryId",
             "in": "path",
             "required": true
-          },
-          {
-            "description": "Credentials to be used.",
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "resourceCredentials": {
-                  "$ref": "#/definitions/resourceCredentials"
-                }
-              }
-            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Query result.",
-            "schema": {
-              "$ref": "#/definitions/queryResultElement"
-            }
-          },
-          "default": {
-            "description": "Error response",
+            "description": "MedCo-Explore query response.",
             "schema": {
               "type": "object",
               "properties": {
-                "message": {
+                "id": {
                   "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/picsure2/query/{queryId}/status": {
-      "post": {
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "picsure2"
-        ],
-        "summary": "Get status of query.",
-        "operationId": "queryStatus",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "Query ID",
-            "name": "queryId",
-            "in": "path",
-            "required": true
-          },
-          {
-            "description": "Credentials to be used.",
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "resourceCredentials": {
-                  "$ref": "#/definitions/resourceCredentials"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Query status.",
-            "schema": {
-              "$ref": "#/definitions/queryStatus"
-            }
-          },
-          "default": {
-            "description": "Error response",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/picsure2/search": {
-      "post": {
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "picsure2"
-        ],
-        "summary": "Search through the ontology.",
-        "operationId": "search",
-        "parameters": [
-          {
-            "description": "Search request.",
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
+                },
                 "query": {
-                  "$ref": "#/definitions/searchQuery"
+                  "$ref": "#/definitions/exploreQuery"
                 },
-                "resourceCredentials": {
-                  "$ref": "#/definitions/resourceCredentials"
-                },
-                "resourceUUID": {
+                "result": {
+                  "$ref": "#/definitions/exploreQueryResultElement"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Query ID not found."
+          },
+          "default": {
+            "description": "Error response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
                   "type": "string"
                 }
               }
             }
           }
+        }
+      }
+    },
+    "/node/explore/search": {
+      "post": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
+        ],
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Search through the ontology for MedCo-Explore query terms.",
+        "operationId": "exploreSearch",
+        "parameters": [
+          {
+            "description": "MedCo-Explore ontology search request.",
+            "name": "searchRequest",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/exploreSearch"
+            }
+          }
         ],
         "responses": {
           "200": {
-            "description": "Search results.",
+            "description": "MedCo-Explore search query response.",
             "schema": {
               "type": "object",
               "properties": {
                 "results": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/searchResultElement"
+                    "$ref": "#/definitions/exploreSearchResultElement"
                   }
                 },
-                "searchQuery": {
-                  "type": "string"
+                "search": {
+                  "$ref": "#/definitions/exploreSearch"
                 }
               }
             }
           },
           "default": {
-            "description": "Error response",
+            "description": "Error response.",
             "schema": {
               "type": "object",
               "properties": {
@@ -1078,84 +1110,77 @@ func init() {
     }
   },
   "definitions": {
-    "query": {
-      "type": "object",
+    "exploreQuery": {
+      "description": "MedCo-Explore query",
       "properties": {
-        "genomic-annotations": {
-          "description": "genomic annotations query (todo)",
-          "type": "object"
-        },
-        "i2b2-medco": {
-          "description": "i2b2-medco query",
+        "differentialPrivacy": {
+          "description": "differential privacy query parameters (todo)",
           "type": "object",
           "properties": {
-            "differentialPrivacy": {
-              "description": "differential privacy query parameters (todo)",
-              "type": "object",
-              "properties": {
-                "queryBudget": {
-                  "type": "number"
-                }
-              }
-            },
-            "panels": {
-              "description": "i2b2 panels (linked by an AND)",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "required": [
-                  "not"
-                ],
-                "properties": {
-                  "items": {
-                    "description": "i2b2 items (linked by an OR)",
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "required": [
-                        "encrypted"
-                      ],
-                      "properties": {
-                        "encrypted": {
-                          "type": "boolean"
-                        },
-                        "operator": {
-                          "type": "string",
-                          "enum": [
-                            "exists",
-                            "equals"
-                          ]
-                        },
-                        "queryTerm": {
-                          "type": "string"
-                        },
-                        "value": {
-                          "type": "string"
-                        }
-                      }
-                    }
-                  },
-                  "not": {
-                    "description": "exclude the i2b2 panel",
-                    "type": "boolean"
-                  }
-                }
-              }
-            },
-            "queryType": {
-              "$ref": "#/definitions/queryType"
-            },
-            "userPublicKey": {
-              "type": "string"
+            "queryBudget": {
+              "type": "number",
+              "maximum": 0,
+              "minimum": 0
             }
           }
         },
-        "name": {
-          "type": "string"
+        "panels": {
+          "description": "i2b2 panels (linked by an AND)",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "not"
+            ],
+            "properties": {
+              "items": {
+                "description": "i2b2 items (linked by an OR)",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "encrypted",
+                    "queryTerm"
+                  ],
+                  "properties": {
+                    "encrypted": {
+                      "type": "boolean"
+                    },
+                    "operator": {
+                      "type": "string",
+                      "enum": [
+                        "exists",
+                        "equals"
+                      ]
+                    },
+                    "queryTerm": {
+                      "type": "string",
+                      "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/?)$"
+                    },
+                    "value": {
+                      "type": "string",
+                      "maxLength": 0
+                    }
+                  }
+                }
+              },
+              "not": {
+                "description": "exclude the i2b2 panel",
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "type": {
+          "$ref": "#/definitions/exploreQueryType"
+        },
+        "userPublicKey": {
+          "type": "string",
+          "pattern": "^[\\w=-]+$"
         }
       }
     },
-    "queryResultElement": {
+    "exploreQueryResultElement": {
       "type": "object",
       "properties": {
         "encryptedCount": {
@@ -1167,16 +1192,22 @@ func init() {
             "type": "string"
           }
         },
-        "encryptionKey": {
-          "type": "string"
-        },
-        "queryType": {
-          "$ref": "#/definitions/queryType"
+        "status": {
+          "type": "string",
+          "enum": [
+            "queued",
+            "pending",
+            "error",
+            "available"
+          ]
         },
         "timers": {
           "type": "array",
           "items": {
             "type": "object",
+            "required": [
+              "milliseconds"
+            ],
             "properties": {
               "milliseconds": {
                 "type": "integer",
@@ -1190,53 +1221,7 @@ func init() {
         }
       }
     },
-    "queryStatus": {
-      "type": "object",
-      "properties": {
-        "duration": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "expiration": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "picsureResultId": {
-          "type": "string"
-        },
-        "resourceID": {
-          "type": "string"
-        },
-        "resourceResultId": {
-          "type": "string"
-        },
-        "resourceStatus": {
-          "type": "string"
-        },
-        "resultMetadata": {
-          "type": "string",
-          "format": "byte"
-        },
-        "sizeInBytes": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "startTime": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "status": {
-          "type": "string",
-          "enum": [
-            "QUEUED",
-            "PENDING",
-            "ERROR",
-            "AVAILABLE"
-          ]
-        }
-      }
-    },
-    "queryType": {
+    "exploreQueryType": {
       "type": "string",
       "enum": [
         "patient_list",
@@ -1248,20 +1233,15 @@ func init() {
         "count_global_obfuscated"
       ]
     },
-    "resourceCredentials": {
+    "exploreSearch": {
       "type": "object",
-      "properties": {
-        "MEDCO_TOKEN": {
-          "description": "MedCo authorization token.",
-          "type": "string"
-        }
-      }
-    },
-    "searchQuery": {
-      "type": "object",
+      "required": [
+        "path"
+      ],
       "properties": {
         "path": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
         },
         "type": {
           "type": "string",
@@ -1272,7 +1252,7 @@ func init() {
         }
       }
     },
-    "searchResultElement": {
+    "exploreSearchResultElement": {
       "type": "object",
       "required": [
         "leaf"
@@ -1290,7 +1270,8 @@ func init() {
         "medcoEncryption": {
           "type": "object",
           "required": [
-            "encrypted"
+            "encrypted",
+            "id"
           ],
           "properties": {
             "childrenIds": {
@@ -1331,16 +1312,30 @@ func init() {
         }
       }
     },
+    "restApiAuthorization": {
+      "type": "string",
+      "enum": [
+        "medco-network",
+        "medco-explore",
+        "medco-genomic-annotations"
+      ]
+    },
     "user": {
       "type": "object",
       "properties": {
         "authorizations": {
           "type": "object",
           "properties": {
-            "queryType": {
+            "exploreQuery": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/queryType"
+                "$ref": "#/definitions/exploreQueryType"
+              }
+            },
+            "restApi": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/restApiAuthorization"
               }
             }
           }
@@ -1354,9 +1349,38 @@ func init() {
       }
     }
   },
+  "parameters": {
+    "exploreQueryRequest": {
+      "description": "MedCo-Explore query request.",
+      "name": "queryRequest",
+      "in": "body",
+      "required": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[\\w:-]+$"
+          },
+          "query": {
+            "$ref": "#/definitions/exploreQuery"
+          }
+        }
+      }
+    },
+    "exploreSearchRequest": {
+      "description": "MedCo-Explore ontology search request.",
+      "name": "searchRequest",
+      "in": "body",
+      "required": true,
+      "schema": {
+        "$ref": "#/definitions/exploreSearch"
+      }
+    }
+  },
   "responses": {
-    "error": {
-      "description": "Error response",
+    "errorResponse": {
+      "description": "Error response.",
       "schema": {
         "type": "object",
         "properties": {
@@ -1366,67 +1390,73 @@ func init() {
         }
       }
     },
-    "queryResult": {
-      "description": "Query result.",
-      "schema": {
-        "$ref": "#/definitions/queryResultElement"
-      }
-    },
-    "queryStatus": {
-      "description": "Query status.",
-      "schema": {
-        "$ref": "#/definitions/queryStatus"
-      }
-    },
-    "resourceInfo": {
-      "description": "PIC-SURE 2 resource information.",
+    "exploreQueryResponse": {
+      "description": "MedCo-Explore query response.",
       "schema": {
         "type": "object",
         "properties": {
           "id": {
             "type": "string"
           },
-          "name": {
-            "type": "string"
+          "query": {
+            "$ref": "#/definitions/exploreQuery"
           },
-          "queryFormats": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "description": {
-                  "type": "string"
-                },
-                "examples": {
-                  "type": "array",
-                  "items": {
-                    "type": "object"
-                  }
-                },
-                "name": {
-                  "type": "string"
-                },
-                "specifications": {
-                  "type": "object"
-                }
-              }
-            }
+          "result": {
+            "$ref": "#/definitions/exploreQueryResultElement"
           }
         }
       }
     },
-    "searchResult": {
-      "description": "Search results.",
+    "exploreSearchResponse": {
+      "description": "MedCo-Explore search query response.",
       "schema": {
         "type": "object",
         "properties": {
           "results": {
             "type": "array",
             "items": {
-              "$ref": "#/definitions/searchResultElement"
+              "$ref": "#/definitions/exploreSearchResultElement"
             }
           },
-          "searchQuery": {
+          "search": {
+            "$ref": "#/definitions/exploreSearch"
+          }
+        }
+      }
+    },
+    "networkMetadataResponse": {
+      "description": "Network metadata (public key and nodes list).",
+      "schema": {
+        "type": "object",
+        "required": [
+          "nodeIndex"
+        ],
+        "properties": {
+          "nodeIndex": {
+            "type": "integer"
+          },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "index"
+              ],
+              "properties": {
+                "index": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "public-key": {
+            "description": "Aggregated public key of the collective authority.",
             "type": "string"
           }
         }
@@ -1434,7 +1464,7 @@ func init() {
     }
   },
   "securityDefinitions": {
-    "MedCoToken": {
+    "medco-jwt": {
       "description": "MedCo JWT token.",
       "type": "oauth2",
       "flow": "application",
@@ -1443,13 +1473,21 @@ func init() {
   },
   "security": [
     {
-      "MedCoToken": []
+      "medco-jwt": []
     }
   ],
   "tags": [
     {
-      "description": "PIC-SURE 2 Resource Service API",
-      "name": "picsure2"
+      "description": "MedCo Network API",
+      "name": "medco-network"
+    },
+    {
+      "description": "MedCo Node API",
+      "name": "medco-node"
+    },
+    {
+      "description": "Genomic Annotations Query API",
+      "name": "genomic-annotations"
     }
   ],
   "externalDocs": {

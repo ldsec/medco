@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
-	"github.com/lca1/medco-connector/util"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
@@ -31,7 +30,7 @@ func RetrieveAccessToken(username string, password string, disableTLSCheck bool)
 
 	httpResp, err := httpClient.PostForm(OidcReqTokenURL, url.Values{
 		"grant_type": {"password"},
-		"client_id": {util.OidcClientID},
+		"client_id": {OidcReqTokenClientID},
 		"username": {username},
 		"password": {password},
 	})

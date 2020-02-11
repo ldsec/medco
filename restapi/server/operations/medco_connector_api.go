@@ -19,9 +19,11 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
-	"github.com/lca1/medco-connector/restapi/server/operations/picsure2"
+	"github.com/ldsec/medco-connector/restapi/server/operations/genomic_annotations"
+	"github.com/ldsec/medco-connector/restapi/server/operations/medco_network"
+	"github.com/ldsec/medco-connector/restapi/server/operations/medco_node"
 
-	models "github.com/lca1/medco-connector/restapi/models"
+	models "github.com/ldsec/medco-connector/restapi/models"
 )
 
 // NewMedcoConnectorAPI creates a new MedcoConnector instance
@@ -41,27 +43,27 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 		BearerAuthenticator: security.BearerAuth,
 		JSONConsumer:        runtime.JSONConsumer(),
 		JSONProducer:        runtime.JSONProducer(),
-		Picsure2GetInfoHandler: picsure2.GetInfoHandlerFunc(func(params picsure2.GetInfoParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation Picsure2GetInfo has not yet been implemented")
+		MedcoNodeExploreQueryHandler: medco_node.ExploreQueryHandlerFunc(func(params medco_node.ExploreQueryParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation MedcoNodeExploreQuery has not yet been implemented")
 		}),
-		Picsure2QueryHandler: picsure2.QueryHandlerFunc(func(params picsure2.QueryParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation Picsure2Query has not yet been implemented")
+		MedcoNodeExploreSearchHandler: medco_node.ExploreSearchHandlerFunc(func(params medco_node.ExploreSearchParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation MedcoNodeExploreSearch has not yet been implemented")
 		}),
-		Picsure2QueryResultHandler: picsure2.QueryResultHandlerFunc(func(params picsure2.QueryResultParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation Picsure2QueryResult has not yet been implemented")
+		MedcoNodeGetExploreQueryHandler: medco_node.GetExploreQueryHandlerFunc(func(params medco_node.GetExploreQueryParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation MedcoNodeGetExploreQuery has not yet been implemented")
 		}),
-		Picsure2QueryStatusHandler: picsure2.QueryStatusHandlerFunc(func(params picsure2.QueryStatusParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation Picsure2QueryStatus has not yet been implemented")
+		MedcoNetworkGetMetadataHandler: medco_network.GetMetadataHandlerFunc(func(params medco_network.GetMetadataParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation MedcoNetworkGetMetadata has not yet been implemented")
 		}),
-		Picsure2QuerySyncHandler: picsure2.QuerySyncHandlerFunc(func(params picsure2.QuerySyncParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation Picsure2QuerySync has not yet been implemented")
+		GenomicAnnotationsGetValuesHandler: genomic_annotations.GetValuesHandlerFunc(func(params genomic_annotations.GetValuesParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation GenomicAnnotationsGetValues has not yet been implemented")
 		}),
-		Picsure2SearchHandler: picsure2.SearchHandlerFunc(func(params picsure2.SearchParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation Picsure2Search has not yet been implemented")
+		GenomicAnnotationsGetVariantsHandler: genomic_annotations.GetVariantsHandlerFunc(func(params genomic_annotations.GetVariantsParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation GenomicAnnotationsGetVariants has not yet been implemented")
 		}),
 
-		MedCoTokenAuth: func(token string, scopes []string) (*models.User, error) {
-			return nil, errors.NotImplemented("oauth2 bearer auth (MedCoToken) has not yet been implemented")
+		MedcoJwtAuth: func(token string, scopes []string) (*models.User, error) {
+			return nil, errors.NotImplemented("oauth2 bearer auth (medco-jwt) has not yet been implemented")
 		},
 
 		// default authorizer is authorized meaning no requests are blocked
@@ -69,7 +71,7 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 	}
 }
 
-/*MedcoConnectorAPI This is the API of the MedCo connector, that orchestrates the query at the MedCo node. It implements the PIC-SURE 2 API. */
+/*MedcoConnectorAPI API of the MedCo connector, that orchestrates the query at the MedCo node and provides information about the MedCo network. */
 type MedcoConnectorAPI struct {
 	spec            *loads.Document
 	context         *middleware.Context
@@ -97,25 +99,25 @@ type MedcoConnectorAPI struct {
 	// JSONProducer registers a producer for a "application/json" mime type
 	JSONProducer runtime.Producer
 
-	// MedCoTokenAuth registers a function that takes an access token and a collection of required scopes and returns a principal
+	// MedcoJwtAuth registers a function that takes an access token and a collection of required scopes and returns a principal
 	// it performs authentication based on an oauth2 bearer token provided in the request
-	MedCoTokenAuth func(string, []string) (*models.User, error)
+	MedcoJwtAuth func(string, []string) (*models.User, error)
 
 	// APIAuthorizer provides access control (ACL/RBAC/ABAC) by providing access to the request and authenticated principal
 	APIAuthorizer runtime.Authorizer
 
-	// Picsure2GetInfoHandler sets the operation handler for the get info operation
-	Picsure2GetInfoHandler picsure2.GetInfoHandler
-	// Picsure2QueryHandler sets the operation handler for the query operation
-	Picsure2QueryHandler picsure2.QueryHandler
-	// Picsure2QueryResultHandler sets the operation handler for the query result operation
-	Picsure2QueryResultHandler picsure2.QueryResultHandler
-	// Picsure2QueryStatusHandler sets the operation handler for the query status operation
-	Picsure2QueryStatusHandler picsure2.QueryStatusHandler
-	// Picsure2QuerySyncHandler sets the operation handler for the query sync operation
-	Picsure2QuerySyncHandler picsure2.QuerySyncHandler
-	// Picsure2SearchHandler sets the operation handler for the search operation
-	Picsure2SearchHandler picsure2.SearchHandler
+	// MedcoNodeExploreQueryHandler sets the operation handler for the explore query operation
+	MedcoNodeExploreQueryHandler medco_node.ExploreQueryHandler
+	// MedcoNodeExploreSearchHandler sets the operation handler for the explore search operation
+	MedcoNodeExploreSearchHandler medco_node.ExploreSearchHandler
+	// MedcoNodeGetExploreQueryHandler sets the operation handler for the get explore query operation
+	MedcoNodeGetExploreQueryHandler medco_node.GetExploreQueryHandler
+	// MedcoNetworkGetMetadataHandler sets the operation handler for the get metadata operation
+	MedcoNetworkGetMetadataHandler medco_network.GetMetadataHandler
+	// GenomicAnnotationsGetValuesHandler sets the operation handler for the get values operation
+	GenomicAnnotationsGetValuesHandler genomic_annotations.GetValuesHandler
+	// GenomicAnnotationsGetVariantsHandler sets the operation handler for the get variants operation
+	GenomicAnnotationsGetVariantsHandler genomic_annotations.GetVariantsHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -179,32 +181,32 @@ func (o *MedcoConnectorAPI) Validate() error {
 		unregistered = append(unregistered, "JSONProducer")
 	}
 
-	if o.MedCoTokenAuth == nil {
-		unregistered = append(unregistered, "MedCoTokenAuth")
+	if o.MedcoJwtAuth == nil {
+		unregistered = append(unregistered, "MedcoJwtAuth")
 	}
 
-	if o.Picsure2GetInfoHandler == nil {
-		unregistered = append(unregistered, "picsure2.GetInfoHandler")
+	if o.MedcoNodeExploreQueryHandler == nil {
+		unregistered = append(unregistered, "medco_node.ExploreQueryHandler")
 	}
 
-	if o.Picsure2QueryHandler == nil {
-		unregistered = append(unregistered, "picsure2.QueryHandler")
+	if o.MedcoNodeExploreSearchHandler == nil {
+		unregistered = append(unregistered, "medco_node.ExploreSearchHandler")
 	}
 
-	if o.Picsure2QueryResultHandler == nil {
-		unregistered = append(unregistered, "picsure2.QueryResultHandler")
+	if o.MedcoNodeGetExploreQueryHandler == nil {
+		unregistered = append(unregistered, "medco_node.GetExploreQueryHandler")
 	}
 
-	if o.Picsure2QueryStatusHandler == nil {
-		unregistered = append(unregistered, "picsure2.QueryStatusHandler")
+	if o.MedcoNetworkGetMetadataHandler == nil {
+		unregistered = append(unregistered, "medco_network.GetMetadataHandler")
 	}
 
-	if o.Picsure2QuerySyncHandler == nil {
-		unregistered = append(unregistered, "picsure2.QuerySyncHandler")
+	if o.GenomicAnnotationsGetValuesHandler == nil {
+		unregistered = append(unregistered, "genomic_annotations.GetValuesHandler")
 	}
 
-	if o.Picsure2SearchHandler == nil {
-		unregistered = append(unregistered, "picsure2.SearchHandler")
+	if o.GenomicAnnotationsGetVariantsHandler == nil {
+		unregistered = append(unregistered, "genomic_annotations.GetVariantsHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -223,13 +225,13 @@ func (o *MedcoConnectorAPI) ServeErrorFor(operationID string) func(http.Response
 func (o *MedcoConnectorAPI) AuthenticatorsFor(schemes map[string]spec.SecurityScheme) map[string]runtime.Authenticator {
 
 	result := make(map[string]runtime.Authenticator)
-	for name, scheme := range schemes {
+	for name := range schemes {
 		switch name {
 
-		case "MedCoToken":
+		case "medco-jwt":
 
-			result[name] = o.BearerAuthenticator(scheme.Name, func(token string, scopes []string) (interface{}, error) {
-				return o.MedCoTokenAuth(token, scopes)
+			result[name] = o.BearerAuthenticator(name, func(token string, scopes []string) (interface{}, error) {
+				return o.MedcoJwtAuth(token, scopes)
 			})
 
 		}
@@ -320,32 +322,32 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/picsure2/info"] = picsure2.NewGetInfo(o.context, o.Picsure2GetInfoHandler)
+	o.handlers["POST"]["/node/explore/query"] = medco_node.NewExploreQuery(o.context, o.MedcoNodeExploreQueryHandler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/picsure2/query"] = picsure2.NewQuery(o.context, o.Picsure2QueryHandler)
+	o.handlers["POST"]["/node/explore/search"] = medco_node.NewExploreSearch(o.context, o.MedcoNodeExploreSearchHandler)
 
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/picsure2/query/{queryId}/result"] = picsure2.NewQueryResult(o.context, o.Picsure2QueryResultHandler)
+	o.handlers["GET"]["/node/explore/query/{queryId}"] = medco_node.NewGetExploreQuery(o.context, o.MedcoNodeGetExploreQueryHandler)
 
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/picsure2/query/{queryId}/status"] = picsure2.NewQueryStatus(o.context, o.Picsure2QueryStatusHandler)
+	o.handlers["GET"]["/network"] = medco_network.NewGetMetadata(o.context, o.MedcoNetworkGetMetadataHandler)
 
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/picsure2/query/sync"] = picsure2.NewQuerySync(o.context, o.Picsure2QuerySyncHandler)
+	o.handlers["GET"]["/genomic-annotations/{annotation}"] = genomic_annotations.NewGetValues(o.context, o.GenomicAnnotationsGetValuesHandler)
 
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/picsure2/search"] = picsure2.NewSearch(o.context, o.Picsure2SearchHandler)
+	o.handlers["GET"]["/genomic-annotations/{annotation}/{value}"] = genomic_annotations.NewGetVariants(o.context, o.GenomicAnnotationsGetVariantsHandler)
 
 }
 
