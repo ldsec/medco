@@ -181,7 +181,7 @@ services:
     ports:
     - "82:80"
     environment:
-      - GB_MEDCO_NODE_URL=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/medco
+      - GB_MEDCO_NODE_URL=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-0
       - GB_KEYCLOAK_URL=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/auth
       - GB_FOOTER_TEXT=
     networks:
