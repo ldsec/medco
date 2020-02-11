@@ -128,6 +128,7 @@ services:
       - OIDC_REQ_TOKEN_CLIENT_ID=medco
     volumes:
       - ../configuration-profiles/dev-local-3nodes:/medco-configuration
+      - ./:/results
     network_mode: host
 
   medco-loader:
@@ -138,9 +139,14 @@ services:
       - UNLYNX_GROUP_FILE_IDX=0
       - I2B2_DB_HOST=localhost
       - I2B2_DB_PORT=5432
-      - I2B2_DB_NAME=i2b2medcosrv
+      - I2B2_DB_NAME=i2b2medco
       - I2B2_DB_USER=i2b2
       - I2B2_DB_PASSWORD=i2b2
+      - GA_DB_HOST=localhost
+      - GA_DB_PORT=5432
+      - GA_DB_NAME=gamedco
+      - GA_DB_USER=genomicannotations
+      - GA_DB_PASSWORD=genomicannotations
     volumes:
       - ../resources/data:/data
       - ../configuration-profiles/dev-local-3nodes:/medco-configuration
