@@ -1,8 +1,7 @@
 package servicesmedco
 
 import (
-	"github.com/lca1/unlynx/lib"
-	"github.com/satori/go.uuid"
+	"github.com/ldsec/unlynx/lib"
 	"go.dedis.ch/kyber/v3"
 	"go.dedis.ch/kyber/v3/util/key"
 	"go.dedis.ch/onet/v3"
@@ -41,17 +40,14 @@ func (c *API) SendSurveyDDTRequestTerms(entities *onet.Roster, surveyID SurveyID
 	start := time.Now()
 	log.Lvl2("Client", c.ClientID, "is creating a DDT survey with ID:", surveyID)
 
-	rndUUID := uuid.NewV4()
 	sdq := SurveyDDTRequest{
-		SurveyID: SurveyID(rndUUID.String()),
+		SurveyID: surveyID,
 		Roster:   *entities,
 		Proofs:   proofs,
 		Testing:  testing,
 
 		// query parameters to DDT
 		Terms: terms,
-
-		IntraMessage: false,
 	}
 
 	resp := ResultDDT{}
@@ -59,8 +55,8 @@ func (c *API) SendSurveyDDTRequestTerms(entities *onet.Roster, surveyID SurveyID
 	if err != nil {
 		return nil, nil, TimeResults{}, err
 	}
-	resp.TR.MapTR[DDTRequestTime] = time.Since(start)
-	return &surveyID, resp.Result, resp.TR, nil
+	resp.TR[DDTRequestTime] = time.Since(start)
+	return &surveyID, resp.Result, TimeResults{resp.TR}, nil
 }
 
 // SendSurveyKSRequest performs key switching in a list of values
@@ -86,12 +82,14 @@ func (c *API) SendSurveyKSRequest(entities *onet.Roster, surveyID SurveyID, cPK 
 }
 
 // SendSurveyShuffleRequest performs shuffling + key switching on a list of values
-func (c *API) SendSurveyShuffleRequest(entities *onet.Roster, surveyID SurveyID, cPK kyber.Point, value libunlynx.CipherText, proofs bool) (*SurveyID, libunlynx.CipherText, TimeResults, error) {
+func (c *API) SendSurveyShuffleRequest(entities *onet.Roster, surveyID SurveyID, cPK kyber.Point, value *libunlynx.CipherText, proofs bool) (*SurveyID, libunlynx.CipherText, TimeResults, error) {
 	start := time.Now()
 	log.Lvl2("Client", c.ClientID, "is creating a Shuffle survey with ID:", surveyID)
 
 	target := make(libunlynx.CipherVector, 0)
-	target = append(target, value)
+	if value != nil {
+		target = append(target, *value)
+	}
 	ssr := SurveyShuffleRequest{
 		SurveyID:      surveyID,
 		Roster:        *entities,
