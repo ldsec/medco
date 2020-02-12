@@ -5,12 +5,10 @@ services:
       file: ../docker-compose-definitions.yml
       service: medco-cli-client
     environment:
-      - PICSURE2_API_HOST=${MEDCO_CENTRAL_NODE_HOST:?}
-      - PICSURE2_API_SCHEME=https
-      - PICSURE2_RESOURCES=${PICSURE2_RESOURCES:?}
-      - OIDC_REQ_TOKEN_URL=${KEYCLOAK_REALM_URL:?}/protocol/openid-connect/token
-      - UNLYNX_GROUP_FILE_IDX=${MEDCO_NODE_IDX:?}
-      - OIDC_CLIENT_ID=${KEYCLOAK_CLIENT_ID:?}
+      - MEDCO_NODE_IDX=${MEDCO_NODE_IDX:?}
+      - MEDCO_CONNECTOR_URL=https://${MEDCO_NODE_DNS_NAME}/medco
+      - OIDC_REQ_TOKEN_URL=https://${MEDCO_NODE_DNS_NAME:?}/auth/realms/${KEYCLOAK_REALM:?}/protocol/openid-connect/token
+      - OIDC_REQ_TOKEN_CLIENT_ID=${KEYCLOAK_CLIENT_ID:?}
     volumes:
       - ../../configuration-profiles/${MEDCO_PROFILE_NAME:?}:/medco-configuration
 
@@ -20,6 +18,7 @@ services:
       service: medco-loader
     environment:
       - UNLYNX_GROUP_FILE_IDX=${MEDCO_NODE_IDX:?}
-      - I2B2_DB_HOST=${MEDCO_NODE_HOST:?}
+      - I2B2_DB_HOST=${MEDCO_NODE_DNS_NAME:?}
+      - GA_DB_HOST=${MEDCO_NODE_DNS_NAME:?}
     volumes:
       - ../../configuration-profiles/${MEDCO_PROFILE_NAME:?}:/medco-configuration

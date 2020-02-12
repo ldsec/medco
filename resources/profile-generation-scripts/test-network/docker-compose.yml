@@ -1,0 +1,87 @@
+version: '2.4'
+services:
+  i2b2:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: i2b2
+    environment:
+      - WILDFLY_ADMIN_PASSWORD=${I2B2_WILDFLY_PASSWORD:?}
+      - I2B2_SERVICE_PASSWORD=${I2B2_SERVICE_PASSWORD:?}
+      - DEFAULT_USER_PASSWORD=${I2B2_USER_PASSWORD:?}
+
+  medco-unlynx:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: medco-unlynx
+    ports:
+      - "2000:2000"
+      - "2001:2001"
+    environment:
+      - NODE_IDX=${MEDCO_NODE_IDX:?}
+    volumes:
+      - ../../configuration-profiles/${MEDCO_PROFILE_NAME:?}:/medco-configuration
+
+  medco-connector:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: medco-connector
+    environment:
+      - MEDCO_NODE_IDX=${MEDCO_NODE_IDX:?}
+      - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD:?}
+      - OIDC_JWKS_URLS=${OIDC_JWKS_URLS:?}
+      - OIDC_JWT_ISSUERS=${OIDC_JWT_ISSUERS:?}
+      - OIDC_CLIENT_IDS=${OIDC_CLIENT_IDS:?}
+      - OIDC_JWT_USER_ID_CLAIMS=${OIDC_JWT_USER_ID_CLAIMS:?}
+      - MEDCO_NODES_URL=${MEDCO_NODES_URL:?}
+    volumes:
+      - ../../configuration-profiles/${MEDCO_PROFILE_NAME:?}:/medco-configuration
+
+  glowing-bear-medco:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: glowing-bear-medco
+    environment:
+      - GB_MEDCO_NODE_URL=https://${MEDCO_NODE_DNS_NAME:?}/medco
+      - GB_KEYCLOAK_URL=https://${MEDCO_NODE_DNS_NAME:?}/auth
+      - GB_KEYCLOAK_REALM=${KEYCLOAK_REALM:?}
+      - GB_KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID:?}
+      - GB_FOOTER_TEXT=MedCo network ${MEDCO_NETWORK_NAME:?}, node ${MEDCO_NODE_IDX:?} / ${MEDCO_NODE_DNS_NAME:?}
+
+  nginx:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - HTTP_SCHEME=https
+    volumes:
+      - ../../configuration-profiles/${MEDCO_PROFILE_NAME:?}/group.toml:/medco-configuration/group.toml
+      - ../../configuration-profiles/${MEDCO_PROFILE_NAME:?}/certificate.crt:/medco-configuration/certificate.crt
+      - ../../configuration-profiles/${MEDCO_PROFILE_NAME:?}/certificate.key:/medco-configuration/certificate.key
+
+  postgresql:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: postgresql
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?}
+    ports:
+      - "5432:5432"
+
+  pg-admin:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: pg-admin
+    environment:
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD:?}
+
+  keycloak:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: keycloak
+    environment:
+      - KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD:?}
+    depends_on:
+      - postgresql

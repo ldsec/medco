@@ -18,38 +18,38 @@ PUB_KEY="${4-}"
 PRIV_KEY="${5-}"
 
 # convenience variables
-PROFILE_NAME="test-network-$NETWORK_NAME-node$NODE_IDX"
+PROFILE_NAME="test-network-${NETWORK_NAME}-node${NODE_IDX}"
 SCRIPT_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-MEDCO_UNLYNX_VER="v0.2.1"
-CONF_FOLDER="$SCRIPT_FOLDER/../../../configuration-profiles/$PROFILE_NAME"
-COMPOSE_FOLDER="$SCRIPT_FOLDER/../../../compose-profiles/$PROFILE_NAME"
+MEDCO_UNLYNX_VER="v0.3.0"
+CONF_FOLDER="${SCRIPT_FOLDER}/../../../configuration-profiles/${PROFILE_NAME}"
+COMPOSE_FOLDER="${SCRIPT_FOLDER}/../../../compose-profiles/${PROFILE_NAME}"
 if [[ -d ${CONF_FOLDER} ]] || [[ -d ${COMPOSE_FOLDER} ]]; then
     echo "The compose and/or configuration profile folder exists. Aborting."
     exit 2
 fi
 
-read -p "### About to generate configuration of node $NODE_IDX ($NODE_DNS_NAME) for profile $PROFILE_NAME, <Enter> to continue, <Ctrl+C> to abort."
+read -rp "### About to generate configuration of node ${NODE_IDX} (${NODE_DNS_NAME}) for profile ${PROFILE_NAME}, <Enter> to continue, <Ctrl+C> to abort."
 
 echo "### Dependencies check, script will abort if dependency if not found"
 which docker openssl
 
 # ===================== pre-requisites ======================
-mkdir "$CONF_FOLDER" "$COMPOSE_FOLDER"
-echo -n "$NODE_DNS_NAME" > "$CONF_FOLDER/srv$NODE_IDX-nodednsname.txt"
+mkdir "${CONF_FOLDER}" "${COMPOSE_FOLDER}"
+echo -n "${NODE_DNS_NAME}" > "${CONF_FOLDER}/srv${NODE_IDX}-nodednsname.txt"
 
 
 # ===================== unlynx keys =========================
 echo "### Generating unlynx keys"
 if [[ -z ${PUB_KEY} ]]; then
-    docker run -v "$CONF_FOLDER":/medco-configuration -u $(id -u):$(id -g) medco/medco-unlynx:${MEDCO_UNLYNX_VER} \
-        server setupNonInteractive --serverBinding "$NODE_DNS_NAME:2000" --description "${PROFILE_NAME}_medco_unlynx_server" \
-        --privateTomlPath "/medco-configuration/srv$NODE_IDX-private.toml" \
-        --publicTomlPath "/medco-configuration/srv$NODE_IDX-public.toml"
+    docker run -v "$CONF_FOLDER:/medco-configuration" -u "$(id -u):$(id -g)" "medco/medco-unlynx:${MEDCO_UNLYNX_VER}" \
+        server setupNonInteractive --serverBinding "${NODE_DNS_NAME}:2000" --description "${PROFILE_NAME}_medco_unlynx_server" \
+        --privateTomlPath "/medco-configuration/srv${NODE_IDX}-private.toml" \
+        --publicTomlPath "/medco-configuration/srv${NODE_IDX}-public.toml"
 else
-    docker run -v "$CONF_FOLDER":/medco-configuration -u $(id -u):$(id -g) medco/medco-unlynx:${MEDCO_UNLYNX_VER} \
-        server setupNonInteractive --serverBinding "$NODE_DNS_NAME:2000" --description "${PROFILE_NAME}_medco_unlynx_server" \
-        --privateTomlPath "/medco-configuration/srv$NODE_IDX-private.toml" \
-        --publicTomlPath "/medco-configuration/srv$NODE_IDX-public.toml" \
+    docker run -v "$CONF_FOLDER:/medco-configuration" -u "$(id -u):$(id -g)" "medco/medco-unlynx:${MEDCO_UNLYNX_VER}" \
+        server setupNonInteractive --serverBinding "${NODE_DNS_NAME}:2000" --description "${PROFILE_NAME}_medco_unlynx_server" \
+        --privateTomlPath "/medco-configuration/srv${NODE_IDX}-private.toml" \
+        --publicTomlPath "/medco-configuration/srv${NODE_IDX}-public.toml" \
         --pubKey "${PUB_KEY}" --privKey "${PRIV_KEY}"
 fi
 echo "### Unlynx keys generated!"
@@ -57,7 +57,7 @@ echo "### Unlynx keys generated!"
 
 # ===================== HTTPS cert ==========================
 echo "### Generating self-signed HTTPS certificate"
-cat > "$SCRIPT_FOLDER/openssl.cnf" <<EOF
+cat > "${SCRIPT_FOLDER}/openssl.cnf" <<EOF
 [req]
 distinguished_name = req_distinguished_name
 req_extensions = v3_req
@@ -83,21 +83,21 @@ subjectAltName = @alt_names
 DNS.1 = ${NODE_DNS_NAME}
 EOF
 
-openssl genrsa -out "$CONF_FOLDER/certificate.key" 2048
-echo -e "\n\n\n\n\n" | openssl req -new -out "$CONF_FOLDER/certificate.csr" \
-    -key "$CONF_FOLDER/certificate.key" -config "$SCRIPT_FOLDER/openssl.cnf"
-openssl x509 -req -days 3650 -in "$CONF_FOLDER/certificate.csr" -signkey "$CONF_FOLDER/certificate.key" \
-    -out "$CONF_FOLDER/certificate.crt" -extensions v3_req -extfile "$SCRIPT_FOLDER/openssl.cnf"
-cp "$CONF_FOLDER/certificate.crt" "$CONF_FOLDER/srv$NODE_IDX-certificate.crt"
-rm "$SCRIPT_FOLDER/openssl.cnf"
+openssl genrsa -out "${CONF_FOLDER}/certificate.key" 2048
+echo -e "\n\n\n\n\n" | openssl req -new -out "${CONF_FOLDER}/certificate.csr" \
+    -key "${CONF_FOLDER}/certificate.key" -config "${SCRIPT_FOLDER}/openssl.cnf"
+openssl x509 -req -days 3650 -in "${CONF_FOLDER}/certificate.csr" -signkey "${CONF_FOLDER}/certificate.key" \
+    -out "${CONF_FOLDER}/certificate.crt" -extensions v3_req -extfile "${SCRIPT_FOLDER}/openssl.cnf"
+cp "${CONF_FOLDER}/certificate.crt" "${CONF_FOLDER}/srv${NODE_IDX}-certificate.crt"
+rm "${SCRIPT_FOLDER}/openssl.cnf"
 echo "### Certificate generated!"
 
 
 # ===================== compose profile =====================
 echo "### Generating compose profile"
-cp "$SCRIPT_FOLDER/docker-compose.common.yml" "$SCRIPT_FOLDER/docker-compose.node.yml" "$COMPOSE_FOLDER/"
-cat > "$COMPOSE_FOLDER/.env" <<EOF
-MEDCO_NODE_URL=https://${NODE_DNS_NAME}
+cp "${SCRIPT_FOLDER}/docker-compose.yml" "${SCRIPT_FOLDER}/docker-compose.tools.yml" "${COMPOSE_FOLDER}/"
+cat > "${COMPOSE_FOLDER}/.env" <<EOF
+MEDCO_NODE_DNS_NAME=${NODE_DNS_NAME}
 MEDCO_NODE_IDX=${NODE_IDX}
 MEDCO_PROFILE_NAME=${PROFILE_NAME}
 MEDCO_NETWORK_NAME=${NETWORK_NAME}
@@ -108,25 +108,18 @@ I2B2_USER_PASSWORD=demouser
 POSTGRES_PASSWORD=postgres1
 PGADMIN_PASSWORD=admin
 
+KEYCLOAK_PASSWORD=keycloak
+KEYCLOAK_REALM=master
 KEYCLOAK_CLIENT_ID=medco
 KEYCLOAK_USER_CLAIM=preferred_username
 
 EOF
-
-if [[ ${NODE_IDX} -eq 0 ]]; then
-    echo "### Generating additional configuration for central node"
-    cp "$SCRIPT_FOLDER/docker-compose.central.yml" "$COMPOSE_FOLDER/"
-    cat >> "$COMPOSE_FOLDER/.env" <<EOF
-KEYCLOAK_PASSWORD=keycloak
-
-EOF
-fi
 echo "### Compose profile generated!"
 
 
 # ===================== public archive ======================
 echo "### Generating archive to be shared"
-tar czvf "$CONF_FOLDER/srv$NODE_IDX-public.tar.gz" -C "$CONF_FOLDER" \
-    "srv$NODE_IDX-certificate.crt" "srv$NODE_IDX-public.toml" "srv$NODE_IDX-nodednsname.txt"
-echo "### DONE! srv$NODE_IDX-public.tar.gz generated, ready for step 2"
+tar czvf "${CONF_FOLDER}/srv${NODE_IDX}-public.tar.gz" -C "${CONF_FOLDER}" \
+    "srv${NODE_IDX}-certificate.crt" "srv${NODE_IDX}-public.toml" "srv${NODE_IDX}-nodednsname.txt"
+echo "### DONE! srv${NODE_IDX}-public.tar.gz generated, ready for step 2"
 
