@@ -1,14 +1,15 @@
 package unlynx
 
 import (
-	"github.com/ldsec/medco-connector/util/server"
+	"os"
+	"strconv"
+
+	utilserver "github.com/ldsec/medco-connector/util/server"
 	servicesmedco "github.com/ldsec/medco-unlynx/services"
 	libunlynx "github.com/ldsec/unlynx/lib"
 	"github.com/sirupsen/logrus"
 	"go.dedis.ch/onet/v3"
 	"go.dedis.ch/onet/v3/app"
-	"os"
-	"strconv"
 )
 
 // serializeCipherVector serializes a vector of cipher texts into a string-encoded slice
@@ -42,7 +43,7 @@ func deserializeCipherVector(cipherTexts []string) (cipherVector libunlynx.Ciphe
 }
 
 // newUnlynxClient creates a new client to communicate with unlynx
-func newUnlynxClient() (unlynxClient *servicesmedco.API, cothorityRoster *onet.Roster) {
+func NewUnlynxClient() (unlynxClient *servicesmedco.API, cothorityRoster *onet.Roster) {
 
 	// initialize medco client
 	groupFile, err := os.Open(utilserver.UnlynxGroupFilePath)
@@ -66,7 +67,7 @@ func newUnlynxClient() (unlynxClient *servicesmedco.API, cothorityRoster *onet.R
 
 // getEncryptedZero returns an encrypted zero
 func getEncryptedZero() (serializedZero string, err error) {
-	_, cothorityRoster := newUnlynxClient()
+	_, cothorityRoster := NewUnlynxClient()
 	encZero := libunlynx.EncryptInt(cothorityRoster.Aggregate, 0)
 	serializedZero, err = encZero.Serialize()
 	if err != nil {

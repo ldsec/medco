@@ -1,11 +1,12 @@
 package main
 
 import (
+	"os"
+	"strings"
+
 	medcoclient "github.com/ldsec/medco-connector/client"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
-	"os"
-	"strings"
 )
 
 func main() {
@@ -78,6 +79,20 @@ func main() {
 		},
 	}
 
+	//--- survival analysis command flags
+	survivalAnalysisFlag := []cli.Flag{
+		cli.StringFlag{
+			Name:  "granularity, g",
+			Usage: "Granularity",
+			Value: "Year",
+		},
+		cli.Int64Flag{
+			Name:  "limit, l",
+			Usage: "Limit ",
+			Value: 3000,
+		},
+	}
+
 	// --- app commands
 	cliApp.Commands = []cli.Command{
 		//{
@@ -145,6 +160,25 @@ func main() {
 					c.Args().Get(1),
 					c.String("zygosity"),
 					c.Bool("encrypted"),
+					c.GlobalBool("disableTLSCheck"),
+				)
+			},
+		},
+
+		{
+			Name:        "survival-analysis",
+			Aliases:     []string{"srva"},
+			Usage:       "Run a survival analysis",
+			Flags:       survivalAnalysisFlag,
+			ArgsUsage:   "[-g granularity] [-l limit]",
+			Description: "Returns the points of the survival curve",
+			Action: func(c *cli.Context) error {
+				return medcoclient.ExecuteClientSurvivalAnalysis(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.String("granularity"),
+					c.Int64("limit"),
 					c.GlobalBool("disableTLSCheck"),
 				)
 			},

@@ -40,6 +40,9 @@ const (
 
 	// ExploreQueryTypeCountGlobalObfuscated captures enum value "count_global_obfuscated"
 	ExploreQueryTypeCountGlobalObfuscated ExploreQueryType = "count_global_obfuscated"
+
+	// ExploreQueryTypeCountGlobalObfuscated captures enum value "count_global_obfuscated"
+	ExploreQueryTypeSurvival ExploreQueryType = "survival"
 )
 
 // for schema
@@ -47,7 +50,7 @@ var exploreQueryTypeEnum []interface{}
 
 func init() {
 	var res []ExploreQueryType
-	if err := json.Unmarshal([]byte(`["patient_list","count_per_site","count_per_site_obfuscated","count_per_site_shuffled","count_per_site_shuffled_obfuscated","count_global","count_global_obfuscated"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["patient_list","count_per_site","count_per_site_obfuscated","count_per_site_shuffled","count_per_site_shuffled_obfuscated","count_global","count_global_obfuscated","survival"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {

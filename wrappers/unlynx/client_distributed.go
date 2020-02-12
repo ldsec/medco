@@ -2,17 +2,18 @@ package unlynx
 
 import (
 	"errors"
-	"github.com/ldsec/medco-connector/util/server"
-	"github.com/ldsec/medco-unlynx/services"
-	"github.com/ldsec/unlynx/lib"
-	"github.com/sirupsen/logrus"
 	"strconv"
 	"time"
+
+	utilserver "github.com/ldsec/medco-connector/util/server"
+	servicesmedco "github.com/ldsec/medco-unlynx/services"
+	libunlynx "github.com/ldsec/unlynx/lib"
+	"github.com/sirupsen/logrus"
 )
 
 // DDTagValues makes request through unlynx to compute distributed deterministic tags of encrypted values
 func DDTagValues(queryName string, values []string) (taggedValues map[string]string, times map[string]time.Duration, err error) {
-	unlynxClient, cothorityRoster := newUnlynxClient()
+	unlynxClient, cothorityRoster := NewUnlynxClient()
 
 	// deserialize values
 	desValues, err := deserializeCipherVector(values)
@@ -23,15 +24,15 @@ func DDTagValues(queryName string, values []string) (taggedValues map[string]str
 	// execute DDT
 	type DDTResults struct {
 		Results []libunlynx.GroupingKey
-		Times servicesmedco.TimeResults
-		Err error
+		Times   servicesmedco.TimeResults
+		Err     error
 	}
 	ddtResultsChan := make(chan DDTResults)
 
 	go func() {
 		_, ddtResults, ddtTimes, ddtErr := unlynxClient.SendSurveyDDTRequestTerms(
 			cothorityRoster,
-			servicesmedco.SurveyID(queryName + "_DDT"),
+			servicesmedco.SurveyID(queryName+"_DDT"),
 			desValues,
 			false,
 			false,
@@ -72,7 +73,7 @@ func KeySwitchValue(queryName string, value string, targetPubKey string) (string
 
 // KeySwitchValues makes request through unlynx to key switch encrypted values
 func KeySwitchValues(queryName string, values []string, targetPubKey string) (keySwitchedValues []string, times map[string]time.Duration, err error) {
-	unlynxClient, cothorityRoster := newUnlynxClient()
+	unlynxClient, cothorityRoster := NewUnlynxClient()
 
 	// deserialize values and target public key
 	desValues, err := deserializeCipherVector(values)
@@ -89,15 +90,15 @@ func KeySwitchValues(queryName string, values []string, targetPubKey string) (ke
 	// execute key switching request
 	type KSResults struct {
 		Results libunlynx.CipherVector
-		Times servicesmedco.TimeResults
-		Err error
+		Times   servicesmedco.TimeResults
+		Err     error
 	}
 	ksResultsChan := make(chan KSResults)
 
 	go func() {
 		_, ksResult, ksTimes, ksErr := unlynxClient.SendSurveyKSRequest(
 			cothorityRoster,
-			servicesmedco.SurveyID(queryName + "_KS"),
+			servicesmedco.SurveyID(queryName+"_KS"),
 			desTargetKey,
 			desValues,
 			false,
@@ -128,7 +129,7 @@ func KeySwitchValues(queryName string, values []string, targetPubKey string) (ke
 
 // ShuffleAndKeySwitchValue makes request through unlynx to shuffle and key switch one value per node
 func ShuffleAndKeySwitchValue(queryName string, value string, targetPubKey string) (shuffledKsValue string, times map[string]time.Duration, err error) {
-	unlynxClient, cothorityRoster := newUnlynxClient()
+	unlynxClient, cothorityRoster := NewUnlynxClient()
 
 	// deserialize value and target public key
 	desValue := libunlynx.CipherText{}
@@ -146,15 +147,15 @@ func ShuffleAndKeySwitchValue(queryName string, value string, targetPubKey strin
 	// execute shuffle and key switching request
 	type ShuffleKSResults struct {
 		Results libunlynx.CipherText
-		Times servicesmedco.TimeResults
-		Err error
+		Times   servicesmedco.TimeResults
+		Err     error
 	}
 	shuffleKsResultsChan := make(chan ShuffleKSResults)
 
 	go func() {
 		_, shuffleKsResult, shuffleKsTimes, shuffleKsErr := unlynxClient.SendSurveyShuffleRequest(
 			cothorityRoster,
-			servicesmedco.SurveyID(queryName + "_SHUFFLE"),
+			servicesmedco.SurveyID(queryName+"_SHUFFLE"),
 			desTargetKey,
 			&desValue,
 			false,
@@ -185,7 +186,7 @@ func ShuffleAndKeySwitchValue(queryName string, value string, targetPubKey strin
 
 // AggregateAndKeySwitchValue makes request through unlynx to aggregate and key switch one value per node
 func AggregateAndKeySwitchValue(queryName string, value string, targetPubKey string) (aggValue string, times map[string]time.Duration, err error) {
-	unlynxClient, cothorityRoster := newUnlynxClient()
+	unlynxClient, cothorityRoster := NewUnlynxClient()
 
 	// deserialize value and target public key
 	desValue := libunlynx.CipherText{}
@@ -203,15 +204,15 @@ func AggregateAndKeySwitchValue(queryName string, value string, targetPubKey str
 	// execute shuffle and key switching request
 	type AggKSResults struct {
 		Results libunlynx.CipherText
-		Times servicesmedco.TimeResults
-		Err error
+		Times   servicesmedco.TimeResults
+		Err     error
 	}
 	aggKsResultsChan := make(chan AggKSResults)
 
 	go func() {
 		_, aggKsResult, aggKsTimes, aggKsErr := unlynxClient.SendSurveyAggRequest(
 			cothorityRoster,
-			servicesmedco.SurveyID(queryName + "_AGG"),
+			servicesmedco.SurveyID(queryName+"_AGG"),
 			desTargetKey,
 			desValue,
 			false,

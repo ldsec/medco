@@ -1,14 +1,19 @@
 package medcoserver
 
 import (
+	"strconv"
+	"time"
+
 	"github.com/ldsec/medco-connector/restapi/models"
+	"github.com/ldsec/medco-connector/survival/common"
 	"github.com/ldsec/medco-connector/wrappers/i2b2"
 	"github.com/ldsec/medco-connector/wrappers/unlynx"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"strconv"
-	"time"
 )
+
+//TODO this callback is a temporary solution
+var GraftCallback func(q *ExploreQuery, patientIDs []string, encNumberOfPatients string)
 
 // todo: log query (with associated status)
 // todo: put user + query type + unique ID in query id
@@ -21,6 +26,7 @@ type ExploreQuery struct {
 		EncCount       string
 		EncPatientList []string
 		Timers         map[string]time.Duration
+		EncEvents      map[string][2]string
 	}
 }
 
@@ -100,6 +106,22 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	q.addTimers("medco-connector-local-agg", timer, nil)
 
 	// compute and key switch count (returns optionally global aggregate or shuffled results)
+
+	if queryType.Survival {
+		GraftCallback(q, patientIDs, aggPatientFlags)
+		//survival.Execute(q, patientDummyFlags, patientIDs, 1)
+		survQuery := q.ConvertToSurvivalQuery()
+
+		//TODO use identifiaction of query
+
+		//timecodes := survival.GlobalTimeCodes
+		//TODO hide this more
+		survQuery.ExecuteCallback = common.ExecCallback
+
+		err = survQuery.Execute(patientIDs)
+		return
+	}
+
 	timer = time.Now()
 	var encCount string
 	var ksCountTimers map[string]time.Duration
@@ -233,4 +255,13 @@ func (q *ExploreQuery) isValid() (err error) {
 		logrus.Error(err)
 	}
 	return
+}
+
+//ConvertSurvivalQuery is a quick solution to avoid cyclic import. For the moment, the two kinds may differ in their methods, but not in their members
+func (q *ExploreQuery) ConvertToSurvivalQuery() *common.ExploreQuery {
+	return &common.ExploreQuery{
+		ID:     q.ID,
+		Query:  q.Query,
+		Result: q.Result,
+	}
 }

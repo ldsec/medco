@@ -16,6 +16,8 @@ tags:
     description: "MedCo Node API"
   - name: "genomic-annotations"
     description: "Genomic Annotations Query API"
+  - name : "survival-analysis"
+    description : "Survival analysis API"
 schemes:
   - "http"
 consumes:
@@ -189,6 +191,45 @@ paths:
           $ref: "#/responses/errorResponse"
       security:
         - medco-jwt: ["medco-genomic-annotations"]
+  /survival-analysis/{granularity}:
+    get :
+      tags:
+        - "survival-analysis"
+      summary: "Send a query to run a survival analysis"
+      operationId: "getSurvivalAnalysis"
+      parameters:
+      - in: "path"
+        name: "granularity"
+        description: "Time point resolution"
+        required: true
+        type: "string"
+        pattern: "day|week|month|year"
+
+      responses:
+        200:
+          description: "Queried survival analysis"
+          schema:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                timepoint: 
+                  type: "string"
+                events:
+                  type: "object"
+                  properties:
+                    eventofinterest:
+                      type: "string"
+                    censoringevent:
+                      type: "string"
+        404:
+          description: "TODO not found"
+        default:
+          $ref: '#/responses/errorResponse'
+      security:
+        - medco-jwt: ["medco-explore"]
+
+
 
 securityDefinitions:
   medco-jwt:
@@ -389,6 +430,7 @@ definitions:
       - count_per_site_shuffled_obfuscated
       - count_global
       - count_global_obfuscated
+      - survival_analysis
 
   exploreQueryResultElement:
     type: "object"
@@ -406,6 +448,20 @@ definitions:
         type: "array"
         items:
           type: "string"
+      encryptedSurvivalAnalysis:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            timecode:
+              type: "string"
+            timepoint:
+              type: "object"
+              properties:
+                eventofinterest:
+                  type: "string"
+                censoringevent:
+                  type: "string"
       timers:
         type: "array"
         items:

@@ -1,21 +1,23 @@
 package unlynx
 
 import (
-	"github.com/ldsec/medco-connector/util/server"
-	libunlynx "github.com/ldsec/unlynx/lib"
-	"github.com/sirupsen/logrus"
-	"go.dedis.ch/onet/v3"
-	"go.dedis.ch/onet/v3/app"
 	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
 	"time"
+
+	utilserver "github.com/ldsec/medco-connector/util/server"
+	libunlynx "github.com/ldsec/unlynx/lib"
+	"github.com/sirupsen/logrus"
+	"go.dedis.ch/onet/v3"
+	"go.dedis.ch/onet/v3/app"
 )
 
 // warning: needs medco deployment dev-3nodes-local running
 
 var cothorityRoster *onet.Roster
+
 func init() {
 	utilserver.SetLogLevel("5")
 	utilserver.UnlynxGroupFileIdx = 0
@@ -49,7 +51,7 @@ func TestGetQueryTermsDDT(t *testing.T) {
 
 	t.Log(encryptedInt0, encryptedInt1)
 
-	tags, _, err := DDTagValues("test query " + time.Now().Format(time.RFC3339Nano), []string{
+	tags, _, err := DDTagValues("test query "+time.Now().Format(time.RFC3339Nano), []string{
 		encryptedInt0,
 		encryptedInt1,
 	})
@@ -59,6 +61,7 @@ func TestGetQueryTermsDDT(t *testing.T) {
 	}
 	t.Log(tags)
 }
+
 // todo: need to submit to all 3 nodes
 //func TestAggregateAndKeySwitchDummyFlags(t *testing.T) {
 //	privKey, pubKey := libunlynx.GenKey()

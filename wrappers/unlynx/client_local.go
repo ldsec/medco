@@ -77,7 +77,7 @@ func LocallyObfuscateValue(encValue string, obfuscationParam int, pubKey string)
 
 // EncryptWithCothorityKey encrypts an integer with the public key of the cothority
 func EncryptWithCothorityKey(value int64) (encrypted string, err error) {
-	_, cothorityRoster := newUnlynxClient()
+	_, cothorityRoster := NewUnlynxClient()
 	encrypted, err = libunlynx.EncryptInt(cothorityRoster.Aggregate, value).Serialize()
 	if err != nil {
 		logrus.Error("unlynx failed serializing encrypted value: ", err)
@@ -140,7 +140,7 @@ func GenerateKeyPair() (pubKey string, privKey string, err error) {
 
 // GetCothorityKey returns the aggregated cothority public key
 func GetCothorityKey() (key string, err error) {
-	_, cothorityRoster := newUnlynxClient()
+	_, cothorityRoster := NewUnlynxClient()
 	key, err = libunlynx.SerializePoint(cothorityRoster.Aggregate)
 	if err != nil {
 		logrus.Error("unlynx error serializing public aggregate key: ", err)

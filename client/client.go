@@ -5,17 +5,19 @@ import (
 	"encoding/csv"
 	"errors"
 	"fmt"
-	"github.com/ldsec/medco-connector/restapi/models"
-	utilclient "github.com/ldsec/medco-connector/util/client"
-	"github.com/ldsec/medco-connector/wrappers/unlynx"
-	"github.com/ldsec/medco-loader/loader/identifiers"
-	"github.com/sirupsen/logrus"
 	"io"
 	"os"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/ldsec/medco-connector/restapi/models"
+	"github.com/ldsec/medco-connector/survival/common"
+	utilclient "github.com/ldsec/medco-connector/util/client"
+	"github.com/ldsec/medco-connector/wrappers/unlynx"
+	"github.com/ldsec/medco-loader/loader/identifiers"
+	"github.com/sirupsen/logrus"
 )
 
 // ExecuteClientQuery execute and display the results of the MedCo client query
@@ -40,9 +42,20 @@ func ExecuteClientQuery(token, username, password, queryType, queryString, resul
 		logrus.Error("invalid query type")
 		return
 	}
+	//ask the nodes to do that at the beginning of the survival queries
+	/*
+		if queryTypeParsed == models.ExploreQueryTypeSurvival {
+			var timeCodes []string
+			timeCodes, err = survival.GetTimeCodes()
+			//TODO indentify this global query in a map[queryID] timecodes or somehting like that
+
+			survival.GlobalTimeCodes = timeCodes
+			survival.Init()
+		}
+	*/
 
 	// parse query string
-	panelsItemKeys, panelsIsNot, err := parseQueryString(queryString)
+	panelsItemKeys, panelsIsNot, err := ParseQueryString(queryString)
 	if err != nil {
 		return
 	}
@@ -152,8 +165,8 @@ func printResultsCSV(nodesResult map[int]*ExploreQueryResult, output io.Writer) 
 	return
 }
 
-// parseQueryString parses the query string given as input
-func parseQueryString(queryString string) (panelsItemKeys [][]int64, panelsIsNot []bool, err error) {
+// ParseQueryString parses the query string given as input
+func ParseQueryString(queryString string) (panelsItemKeys [][]int64, panelsIsNot []bool, err error) {
 	logrus.Info("Client query is: ", queryString)
 
 	panelsItemKeys = make([][]int64, 0)
@@ -337,6 +350,36 @@ func ExecuteClientGenomicAnnotationsGetVariants(token, username, password, annot
 	}
 
 	result, err := clientGenomicAnnotationsGetVariants.Execute()
+	if err != nil {
+		return
+	}
+
+	for _, variant := range result {
+		fmt.Printf("%s\n", variant)
+	}
+
+	return
+
+}
+
+func ExecuteClientSurvivalAnalysis(token, username, password, granularity string, limit int64, disableTLSCheck bool) (err error) {
+	var accessToken string
+	if len(token) > 0 {
+		accessToken = token
+	} else {
+		logrus.Debug("No token provided, requesting token for user ", username, ", disable TLS check: ", disableTLSCheck)
+		accessToken, err = utilclient.RetrieveAccessToken(username, password, disableTLSCheck)
+		if err != nil {
+			return
+		}
+	}
+	// execute query
+	clientSurvicalAnalysis, err := common.NewSurvivalAnalysis(accessToken, granularity, limit, disableTLSCheck)
+	if err != nil {
+		return
+	}
+
+	result, err := clientSurvicalAnalysis.Execute()
 	if err != nil {
 		return
 	}
