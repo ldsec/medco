@@ -1,7 +1,7 @@
 version: '2.4'
 services:
   i2b2:
-    image: medco/i2b2:${I2B2_VERSION:-MedCo-v0.2.1}
+    image: medco/i2b2:${I2B2_VERSION:-MedCo-v0.3.0}
     build:
       context: ../docker-images/i2b2
     environment:
@@ -17,7 +17,7 @@ services:
       - AXIS2_LOGLEVEL=INFO
 
   medco-unlynx:
-    image: medco/medco-unlynx:${MEDCO_UNLYNX_VERSION:-v0.2.1}
+    image: medco/medco-unlynx:${MEDCO_UNLYNX_VERSION:-v0.3.0}
     ports:
     - "2000"
     - "2001"
@@ -28,7 +28,7 @@ services:
     - ../configuration-profiles/dev-local-3nodes:/medco-configuration
 
   nginx:
-    image: medco/nginx:${NGINX_VERSION:-MedCo-v0.2.1}
+    image: medco/nginx:${NGINX_VERSION:-MedCo-v0.3.0}
     build:
       context: ../docker-images/nginx
     ports:
@@ -52,7 +52,7 @@ services:
     - ../docker-images/postgresql/initdb-data:/docker-entrypoint-initdb.d
 
   pg-admin:
-    image: medco/pgadmin4:${PGADMIN_VERSION:-MedCo-v0.2.1}
+    image: medco/pgadmin4:${PGADMIN_VERSION:-MedCo-v0.3.0}
     build:
       context: ../docker-images/pgadmin
     environment:
@@ -60,7 +60,7 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=admin
 
   keycloak:
-    image: medco/keycloak:${KEYCLOAK_VERSION:-MedCo-v0.2.1}
+    image: medco/keycloak:${KEYCLOAK_VERSION:-MedCo-v0.3.0}
     build:
       context: ../docker-images/keycloak
     environment:
@@ -74,7 +74,7 @@ services:
       - DB_PASSWORD=keycloak
 
   glowing-bear-medco:
-    image: medco/glowing-bear-medco:${GLOWING_BEAR_MEDCO_VERSION:-v0.2.1}
+    image: medco/glowing-bear-medco:${GLOWING_BEAR_MEDCO_VERSION:-v0.3.0}
     ports:
       - "80"
     environment:
@@ -85,7 +85,7 @@ services:
       - GB_FOOTER_TEXT=
 
   medco-connector:
-    image: medco/medco-connector:${MEDCO_CONNECTOR_VERSION:-v0.2.1}
+    image: medco/medco-connector:${MEDCO_CONNECTOR_VERSION:-v0.3.0}
     ports:
       - "1999"
     environment:
@@ -116,7 +116,7 @@ services:
       - ../configuration-profiles/dev-local-3nodes:/medco-configuration
 
   medco-cli-client:
-    image: medco/medco-cli-client:${MEDCO_CONNECTOR_VERSION:-v0.2.1}
+    image: medco/medco-cli-client:${MEDCO_CONNECTOR_VERSION:-v0.3.0}
     environment:
       - LOG_LEVEL=3
       - UNLYNX_GROUP_FILE_PATH=/medco-configuration/group.toml
@@ -132,7 +132,7 @@ services:
     network_mode: host
 
   medco-loader:
-    image: medco/medco-loader:${MEDCO_LOADER_VERSION:-v0.2.1}
+    image: medco/medco-loader:${MEDCO_LOADER_VERSION:-v0.3.0}
     environment:
       - LOG_LEVEL=3
       - UNLYNX_GROUP_FILE_PATH=/medco-configuration/group.toml
