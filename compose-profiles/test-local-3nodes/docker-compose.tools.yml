@@ -5,9 +5,8 @@ services:
       file: ../docker-compose-definitions.yml
       service: medco-cli-client
     environment:
-      - PICSURE2_API_HOST=${MEDCO_NODE_HOST:?}
-      - PICSURE2_API_SCHEME=${MEDCO_NODE_HTTP_SCHEME:?}
       - OIDC_REQ_TOKEN_URL=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/auth/realms/master/protocol/openid-connect/token
+      - MEDCO_CONNECTOR_URL=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-0
     volumes:
       - ../../configuration-profiles/test-local-3nodes:/medco-configuration
 
@@ -20,6 +19,7 @@ services:
       - GA_DB_NAME=gamedcosrv0
       - UNLYNX_GROUP_FILE_IDX=0
       - I2B2_DB_HOST=${MEDCO_NODE_HOST:?}
+      - GA_DB_HOST=${MEDCO_NODE_HOST:?}
     volumes:
       - ../../configuration-profiles/test-local-3nodes:/medco-configuration
 
@@ -32,6 +32,7 @@ services:
       - GA_DB_NAME=gamedcosrv1
       - UNLYNX_GROUP_FILE_IDX=1
       - I2B2_DB_HOST=${MEDCO_NODE_HOST:?}
+      - GA_DB_HOST=${MEDCO_NODE_HOST:?}
     volumes:
       - ../../configuration-profiles/test-local-3nodes:/medco-configuration
 
@@ -44,5 +45,6 @@ services:
       - GA_DB_NAME=gamedcosrv0
       - UNLYNX_GROUP_FILE_IDX=2
       - I2B2_DB_HOST=${MEDCO_NODE_HOST:?}
+      - GA_DB_HOST=${MEDCO_NODE_HOST:?}
     volumes:
       - ../../configuration-profiles/test-local-3nodes:/medco-configuration

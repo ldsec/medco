@@ -7,7 +7,6 @@ services:
     environment:
       - I2B2_DB_NAME=i2b2medcosrv0
       - I2B2_DOMAIN_NAME=i2b2medcosrv0
-      - NODE_IDX=0
       - WILDFLY_ADMIN_PASSWORD=${I2B2_WILDFLY_PASSWORD:?}
       - I2B2_SERVICE_PASSWORD=${I2B2_SERVICE_PASSWORD:?}
       - DEFAULT_USER_PASSWORD=${I2B2_USER_PASSWORD:?}
@@ -65,7 +64,6 @@ services:
     environment:
       - I2B2_DB_NAME=i2b2medcosrv1
       - I2B2_DOMAIN_NAME=i2b2medcosrv1
-      - NODE_IDX=1
       - WILDFLY_ADMIN_PASSWORD=${I2B2_WILDFLY_PASSWORD:?}
       - I2B2_SERVICE_PASSWORD=${I2B2_SERVICE_PASSWORD:?}
       - DEFAULT_USER_PASSWORD=${I2B2_USER_PASSWORD:?}
@@ -123,7 +121,6 @@ services:
     environment:
       - I2B2_DB_NAME=i2b2medcosrv2
       - I2B2_DOMAIN_NAME=i2b2medcosrv2
-      - NODE_IDX=2
       - WILDFLY_ADMIN_PASSWORD=${I2B2_WILDFLY_PASSWORD:?}
       - I2B2_SERVICE_PASSWORD=${I2B2_SERVICE_PASSWORD:?}
       - DEFAULT_USER_PASSWORD=${I2B2_USER_PASSWORD:?}
