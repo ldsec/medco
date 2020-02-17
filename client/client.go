@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/ldsec/medco-connector/restapi/models"
-	"github.com/ldsec/medco-connector/survival/common"
+	survivalclient "github.com/ldsec/medco-connector/survival/client"
 	utilclient "github.com/ldsec/medco-connector/util/client"
 	"github.com/ldsec/medco-connector/wrappers/unlynx"
 	"github.com/ldsec/medco-loader/loader/identifiers"
@@ -374,7 +374,7 @@ func ExecuteClientSurvivalAnalysis(token, username, password, granularity string
 		}
 	}
 	// execute query
-	clientSurvicalAnalysis, err := common.NewSurvivalAnalysis(accessToken, granularity, limit, disableTLSCheck)
+	clientSurvicalAnalysis, err := survivalclient.NewSurvivalAnalysis(accessToken, granularity, limit, disableTLSCheck)
 	if err != nil {
 		return
 	}

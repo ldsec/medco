@@ -1,4 +1,4 @@
-package common
+package survivalclient
 
 //for client !!!
 import (

@@ -8,7 +8,7 @@ import (
 
 	loads "github.com/go-openapi/loads"
 	flags "github.com/jessevdk/go-flags"
-	"github.com/ldsec/medco-connector/restapi/server"
+	server "github.com/ldsec/medco-connector/restapi/server"
 	"github.com/ldsec/medco-connector/restapi/server/operations"
 )
 

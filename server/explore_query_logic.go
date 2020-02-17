@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/ldsec/medco-connector/restapi/models"
-	"github.com/ldsec/medco-connector/survival/common"
+	survivalserver "github.com/ldsec/medco-connector/survival/server"
 	"github.com/ldsec/medco-connector/wrappers/i2b2"
 	"github.com/ldsec/medco-connector/wrappers/unlynx"
 	"github.com/pkg/errors"
@@ -116,7 +116,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 
 		//timecodes := survival.GlobalTimeCodes
 		//TODO hide this more
-		survQuery.ExecuteCallback = common.ExecCallback
+		survQuery.ExecuteCallback = survivalserver.ExecCallback
 
 		err = survQuery.Execute(patientIDs)
 		return
@@ -258,8 +258,8 @@ func (q *ExploreQuery) isValid() (err error) {
 }
 
 //ConvertSurvivalQuery is a quick solution to avoid cyclic import. For the moment, the two kinds may differ in their methods, but not in their members
-func (q *ExploreQuery) ConvertToSurvivalQuery() *common.ExploreQuery {
-	return &common.ExploreQuery{
+func (q *ExploreQuery) ConvertToSurvivalQuery() *survivalserver.ExploreQuery {
+	return &survivalserver.ExploreQuery{
 		ID:     q.ID,
 		Query:  q.Query,
 		Result: q.Result,

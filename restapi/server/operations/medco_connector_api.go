@@ -22,6 +22,7 @@ import (
 	"github.com/ldsec/medco-connector/restapi/server/operations/genomic_annotations"
 	"github.com/ldsec/medco-connector/restapi/server/operations/medco_network"
 	"github.com/ldsec/medco-connector/restapi/server/operations/medco_node"
+	"github.com/ldsec/medco-connector/restapi/server/operations/survival_analysis"
 
 	models "github.com/ldsec/medco-connector/restapi/models"
 )
@@ -54,6 +55,9 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 		}),
 		MedcoNetworkGetMetadataHandler: medco_network.GetMetadataHandlerFunc(func(params medco_network.GetMetadataParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation MedcoNetworkGetMetadata has not yet been implemented")
+		}),
+		SurvivalAnalysisGetSurvivalAnalysisHandler: survival_analysis.GetSurvivalAnalysisHandlerFunc(func(params survival_analysis.GetSurvivalAnalysisParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation SurvivalAnalysisGetSurvivalAnalysis has not yet been implemented")
 		}),
 		GenomicAnnotationsGetValuesHandler: genomic_annotations.GetValuesHandlerFunc(func(params genomic_annotations.GetValuesParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation GenomicAnnotationsGetValues has not yet been implemented")
@@ -114,6 +118,8 @@ type MedcoConnectorAPI struct {
 	MedcoNodeGetExploreQueryHandler medco_node.GetExploreQueryHandler
 	// MedcoNetworkGetMetadataHandler sets the operation handler for the get metadata operation
 	MedcoNetworkGetMetadataHandler medco_network.GetMetadataHandler
+	// SurvivalAnalysisGetSurvivalAnalysisHandler sets the operation handler for the get survival analysis operation
+	SurvivalAnalysisGetSurvivalAnalysisHandler survival_analysis.GetSurvivalAnalysisHandler
 	// GenomicAnnotationsGetValuesHandler sets the operation handler for the get values operation
 	GenomicAnnotationsGetValuesHandler genomic_annotations.GetValuesHandler
 	// GenomicAnnotationsGetVariantsHandler sets the operation handler for the get variants operation
@@ -199,6 +205,10 @@ func (o *MedcoConnectorAPI) Validate() error {
 
 	if o.MedcoNetworkGetMetadataHandler == nil {
 		unregistered = append(unregistered, "medco_network.GetMetadataHandler")
+	}
+
+	if o.SurvivalAnalysisGetSurvivalAnalysisHandler == nil {
+		unregistered = append(unregistered, "survival_analysis.GetSurvivalAnalysisHandler")
 	}
 
 	if o.GenomicAnnotationsGetValuesHandler == nil {
@@ -338,6 +348,11 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/network"] = medco_network.NewGetMetadata(o.context, o.MedcoNetworkGetMetadataHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/survival-analysis/{granularity}"] = survival_analysis.NewGetSurvivalAnalysis(o.context, o.SurvivalAnalysisGetSurvivalAnalysisHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)

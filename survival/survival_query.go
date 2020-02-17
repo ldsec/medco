@@ -1,15 +1,15 @@
 package survival
 
 import (
-	"github.com/ldsec/medco-connector/survival/common"
-	"github.com/ldsec/medco-connector/survival/directaccess"
+	survivalserver "github.com/ldsec/medco-connector/survival/server"
+	"github.com/ldsec/medco-connector/survival/server/directaccess"
 )
 
 //TODO remove this magic
 const queryname = `I'm the survival query !`
 
 func Init() {
-	common.ExecCallback = directaccess.QueryTimePoints
+	survivalserver.ExecCallback = directaccess.QueryTimePoints
 }
 
 //like similar to explore_query_logic, but is not necessery to share the patient list,only the count

@@ -14,9 +14,10 @@ import (
 	"github.com/ldsec/medco-connector/restapi/client/genomic_annotations"
 	"github.com/ldsec/medco-connector/restapi/client/medco_network"
 	"github.com/ldsec/medco-connector/restapi/client/medco_node"
+	"github.com/ldsec/medco-connector/restapi/client/survival_analysis"
 )
 
-// Default medco cli HTTP client.
+// Default med co connector HTTP client.
 var Default = NewHTTPClient(nil)
 
 const (
@@ -31,12 +32,12 @@ const (
 // DefaultSchemes are the default schemes found in Meta (info) section of spec file
 var DefaultSchemes = []string{"http"}
 
-// NewHTTPClient creates a new medco cli HTTP client.
+// NewHTTPClient creates a new med co connector HTTP client.
 func NewHTTPClient(formats strfmt.Registry) *MedcoCli {
 	return NewHTTPClientWithConfig(formats, nil)
 }
 
-// NewHTTPClientWithConfig creates a new medco cli HTTP client,
+// NewHTTPClientWithConfig creates a new med co connector HTTP client,
 // using a customizable transport config.
 func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *MedcoCli {
 	// ensure nullable parameters have default
@@ -49,7 +50,7 @@ func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *Med
 	return New(transport, formats)
 }
 
-// New creates a new medco cli client
+// New creates a new med co connector client
 func New(transport runtime.ClientTransport, formats strfmt.Registry) *MedcoCli {
 	// ensure nullable parameters have default
 	if formats == nil {
@@ -64,6 +65,8 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *MedcoCli {
 	cli.MedcoNetwork = medco_network.New(transport, formats)
 
 	cli.MedcoNode = medco_node.New(transport, formats)
+
+	cli.SurvivalAnalysis = survival_analysis.New(transport, formats)
 
 	return cli
 }
@@ -107,13 +110,15 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 	return cfg
 }
 
-// MedcoCli is a client for medco cli
+// MedcoCli is a client for med co connector
 type MedcoCli struct {
 	GenomicAnnotations *genomic_annotations.Client
 
 	MedcoNetwork *medco_network.Client
 
 	MedcoNode *medco_node.Client
+
+	SurvivalAnalysis *survival_analysis.Client
 
 	Transport runtime.ClientTransport
 }
@@ -127,5 +132,7 @@ func (c *MedcoCli) SetTransport(transport runtime.ClientTransport) {
 	c.MedcoNetwork.SetTransport(transport)
 
 	c.MedcoNode.SetTransport(transport)
+
+	c.SurvivalAnalysis.SetTransport(transport)
 
 }

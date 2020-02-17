@@ -1,4 +1,4 @@
-package common
+package survivalclient
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 	"time"
 
 	httptransport "github.com/go-openapi/runtime/client"
+	"github.com/sirupsen/logrus"
 
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
@@ -136,11 +137,12 @@ func (this *GetSurvivalAnalysisNotFound) readResponse(response runtime.ClientRes
 	return nil
 }
 
-type DefaultBody struct {
+//from swagger models
+type GetSurvivalAnalysisDefaultBody struct {
 	Message string `json:"message,omitempty"`
 }
 
-func (this *DefaultBody) MarshalBinary() (res []byte, err error) {
+func (this *GetSurvivalAnalysisDefaultBody) MarshalBinary() (res []byte, err error) {
 	if this == nil {
 		return
 	}
@@ -148,22 +150,26 @@ func (this *DefaultBody) MarshalBinary() (res []byte, err error) {
 	return
 
 }
-func (this *DefaultBody) UnmarshalBinary(b []byte) (err error) {
-	var res DefaultBody
+func (this *GetSurvivalAnalysisDefaultBody) UnmarshalBinary(b []byte) (err error) {
+	var res GetSurvivalAnalysisDefaultBody
+	//DEBUG
+	logrus.Debug((string(b)))
 	err = swag.ReadJSON(b, &res)
+
 	if err != nil {
+		err = fmt.Errorf(`%s, problematic string: `, string(b))
 		return
 	}
 	*this = res
 	return
 }
-func (this DefaultBody) Validate(formats strfmt.Registry) error {
+func (this GetSurvivalAnalysisDefaultBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
 type GetSurvivalAnalysisDefault struct {
 	_statusCode int
-	Payload     *DefaultBody
+	Payload     *GetSurvivalAnalysisDefaultBody
 }
 
 func (this *GetSurvivalAnalysisDefault) Error() string {
@@ -175,7 +181,7 @@ func (this *GetSurvivalAnalysisDefault) Code() int {
 }
 
 func (this *GetSurvivalAnalysisDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) (err error) {
-	this.Payload = &DefaultBody{}
+	this.Payload = &GetSurvivalAnalysisDefaultBody{}
 	err = consumer.Consume(response.Body(), this.Payload)
 	return
 }

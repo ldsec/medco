@@ -1,27 +1,27 @@
 // This file is safe to edit. Once it exists it will not be overwritten
 
-package server
+package restapi
 
 import (
 	"crypto/tls"
-	"github.com/ldsec/medco-connector/server/handlers"
-	"github.com/ldsec/medco-connector/util/server"
-	"github.com/sirupsen/logrus"
 	"net/http"
 
-	"github.com/go-openapi/errors"
-	"github.com/go-openapi/runtime"
-	"github.com/go-openapi/runtime/middleware"
+	utilserver "github.com/ldsec/medco-connector/util/server"
 
+	errors "github.com/go-openapi/errors"
+	runtime "github.com/go-openapi/runtime"
+	middleware "github.com/go-openapi/runtime/middleware"
+	"github.com/sirupsen/logrus"
+
+	"github.com/ldsec/medco-connector/restapi/models"
 	"github.com/ldsec/medco-connector/restapi/server/operations"
 	"github.com/ldsec/medco-connector/restapi/server/operations/genomic_annotations"
 	"github.com/ldsec/medco-connector/restapi/server/operations/medco_network"
 	"github.com/ldsec/medco-connector/restapi/server/operations/medco_node"
-
-	"github.com/ldsec/medco-connector/restapi/models"
+	"github.com/ldsec/medco-connector/server/handlers"
 )
 
-//go:generate swagger generate server --target ../../../medco-connector --name MedcoConnector --spec ../../swagger/medco-connector.yml --model-package restapi/models --server-package restapi/server --principal models.User
+//go:generate swagger generate server --target ../../swaggerDIY --name MedCoConnector --spec ../../swagger/medco-connector.yml
 
 func configureFlags(api *operations.MedcoConnectorAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }

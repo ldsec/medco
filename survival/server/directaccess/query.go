@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ldsec/medco-connector/survival/common"
+	survivalserver "github.com/ldsec/medco-connector/survival/server"
 	utilserver "github.com/ldsec/medco-connector/util/server"
 	"github.com/ldsec/medco-connector/wrappers/unlynx"
 	servicesmedco "github.com/ldsec/medco-unlynx/services"
@@ -25,22 +25,24 @@ const (
 	interBlob         = "," //blobconcept does not contain any comma
 )
 
-//type Map common.Map
+//type Map survivalserver.Map
 
 //type PatientSet []PatientID
 
 // QueryTimePoints is the function that translates a medco survival query in multiple calls on psql and unlynx
-func QueryTimePoints(q *common.ExploreQuery, patientSet []string, timePoints []string, batchNumber int) (err error) {
+func QueryTimePoints(q *survivalserver.ExploreQuery, patientSet []string, timePoints []string, batchNumber int) (err error) {
+
+	exceptionHandler = survivalserver.NewExceptionHandler(1)
 	go func() {
 		err = utilserver.DBConnection.Ping()
 		if err != nil {
 			logrus.Error("Impossible to connect to database")
-			common.PushError(err)
+			exceptionHandler.PushError(err)
 			return
 		}
-		batches, err := common.NewBatchItertor(timePoints, batchNumber)
+		batches, err := survivalserver.NewBatchItertor(timePoints, batchNumber)
 		if err != nil {
-			common.PushError(err)
+			exceptionHandler.PushError(err)
 			return
 		}
 
@@ -61,14 +63,14 @@ func QueryTimePoints(q *common.ExploreQuery, patientSet []string, timePoints []s
 					//error chans ??
 					go func(time string) {
 
-						result := common.Result{}
+						result := survivalserver.Result{}
 						defer waitGroup.Done()
 						query := buildSingleQuery(patientSet, time)
 						rows, err := utilserver.DBConnection.Query(query)
 						if err != nil {
 							result.Error = err
-							common.ResultMap.Store(time, result)
-							common.PushError(err)
+							survivalserver.ResultMap.Store(time, result)
+							exceptionHandler.PushError(err)
 							return
 						}
 
@@ -76,12 +78,12 @@ func QueryTimePoints(q *common.ExploreQuery, patientSet []string, timePoints []s
 							var blob string
 							err = rows.Scan(&blob)
 							if err != nil {
-								common.PushError(err)
+								exceptionHandler.PushError(err)
 								return
 							}
-							event, censoring, err := common.BreakBlob(blob)
+							event, censoring, err := survivalserver.BreakBlob(blob)
 							if err != nil {
-								common.PushError(err)
+								exceptionHandler.PushError(err)
 								return
 							}
 							events = append(events, event)
@@ -89,18 +91,18 @@ func QueryTimePoints(q *common.ExploreQuery, patientSet []string, timePoints []s
 						}
 						err = rows.Close()
 						if err != nil {
-							common.PushError(err)
+							exceptionHandler.PushError(err)
 							return
 						}
 
 						events, err := unlynx.LocallyAggregateValues(events)
 						if err != nil {
-							common.PushError(err)
+							exceptionHandler.PushError(err)
 							return
 						}
 						censoringEvents, err := unlynx.LocallyAggregateValues(censorings)
 						if err != nil {
-							common.PushError(err)
+							exceptionHandler.PushError(err)
 
 						}
 
@@ -114,10 +116,10 @@ func QueryTimePoints(q *common.ExploreQuery, patientSet []string, timePoints []s
 				var receptionBarrier sync.WaitGroup
 				receptionBarrier.Add(len(batch))
 				for range batch {
-					err = aggregateAndKeySwitchCollect(&common.ResultMap, unlynxChannel, &receptionBarrier)
+					err = aggregateAndKeySwitchCollect(&survivalserver.ResultMap, unlynxChannel, &receptionBarrier)
 					if err != nil {
 						errOccured = true
-						common.PushError(err)
+						exceptionHandler.PushError(err)
 						break
 					}
 				}
@@ -130,7 +132,7 @@ func QueryTimePoints(q *common.ExploreQuery, patientSet []string, timePoints []s
 				waitGroup.Add(1)
 
 				go func() {
-					result := common.Result{}
+					result := survivalserver.Result{}
 
 					defer waitGroup.Done()
 
@@ -141,23 +143,23 @@ func QueryTimePoints(q *common.ExploreQuery, patientSet []string, timePoints []s
 					if err != nil {
 						result.Error = err
 						//TODO handle this kind of error
-						common.ResultMap.Store("", result)
-						common.PushError(err)
+						survivalserver.ResultMap.Store("", result)
+						exceptionHandler.PushError(err)
 						return
 					}
 					//var unlynxBarrier sync.WaitGroup
 					//for the moment do all in one run (dangerous ?)
 					//unlynxBarrier.Add(rows)
 
-					unlynxBarrier, err := common.NewBarrier(100)
+					unlynxBarrier, err := survivalserver.NewBarrier(100)
 					if err != nil {
 						result.Error = err
 						//TODO handle this kind of error
-						common.ResultMap.Store("", result)
-						common.PushError(err)
+						survivalserver.ResultMap.Store("", result)
+						exceptionHandler.PushError(err)
 						return
 					}
-					set := common.NewSet(len(batch))
+					set := survivalserver.NewSet(len(batch))
 					for _, timeCode := range batch {
 						set.Add(timeCode)
 					}
@@ -177,12 +179,12 @@ func QueryTimePoints(q *common.ExploreQuery, patientSet []string, timePoints []s
 						eventsOfInterest := make([]string, len(str))
 						censoringEvents := make([]string, len(str))
 						for idx, blob := range str {
-							eventsOfInterest[idx], censoringEvents[idx], err = common.BreakBlob(blob)
+							eventsOfInterest[idx], censoringEvents[idx], err = survivalserver.BreakBlob(blob)
 							if err != nil {
 								result.Error = err
-								common.ResultMap.Store(recipiens.TimeCode, result)
+								survivalserver.ResultMap.Store(recipiens.TimeCode, result)
 								rows.Close()
-								common.PushError(err)
+								exceptionHandler.PushError(err)
 								return
 							}
 
@@ -194,12 +196,12 @@ func QueryTimePoints(q *common.ExploreQuery, patientSet []string, timePoints []s
 
 							events, err := unlynx.LocallyAggregateValues(eventsOfInterest)
 							if err != nil {
-								common.PushError(err)
+								exceptionHandler.PushError(err)
 								return
 							}
 							censoringEvents, err := unlynx.LocallyAggregateValues(censoringEvents)
 							if err != nil {
-								common.PushError(err)
+								exceptionHandler.PushError(err)
 								return
 
 							}
@@ -219,19 +221,19 @@ func QueryTimePoints(q *common.ExploreQuery, patientSet []string, timePoints []s
 					set.ForEach(func(key string) {
 
 						go func() {
-							zeroEvent, err := common.ZeroPointEncryption()
+							zeroEvent, err := survivalserver.ZeroPointEncryption()
 							if err != nil {
-								common.PushError(err)
+								exceptionHandler.PushError(err)
 
 							}
-							zeroCensoring, err := common.ZeroPointEncryption()
+							zeroCensoring, err := survivalserver.ZeroPointEncryption()
 							err = aggregateAndKeySwitchSend(`queryname`, key, zeroEvent, zeroCensoring, q.Query.UserPublicKey, unlynxChannel)
 							if err != nil {
-								common.PushError(err)
+								exceptionHandler.PushError(err)
 							}
 
 						}()
-						//common.ResultMap.Store(key, result)
+						//survivalserver.ResultMap.Store(key, result)
 
 					})
 
@@ -240,11 +242,11 @@ func QueryTimePoints(q *common.ExploreQuery, patientSet []string, timePoints []s
 					var receptionBarrier sync.WaitGroup
 					receptionBarrier.Add(len(batch))
 					for range batch {
-						err = aggregateAndKeySwitchCollect(&common.ResultMap, unlynxChannel, &receptionBarrier)
+						err = aggregateAndKeySwitchCollect(&survivalserver.ResultMap, unlynxChannel, &receptionBarrier)
 						if err != nil {
 
 							errorOccurred = true
-							common.PushError(err)
+							exceptionHandler.PushError(err)
 							break
 						}
 					}
@@ -259,17 +261,17 @@ func QueryTimePoints(q *common.ExploreQuery, patientSet []string, timePoints []s
 
 		}
 		//err chans !!!
-		common.Finished()
+		exceptionHandler.Finished()
 		return
 	}()
-	err = common.WaitEndSignal(3000)
+	err = survivalserver.WaitEndSignal(3000)
 	if err != nil {
 		return
 	}
 	targetMap := &q.Result.EncEvents
-	common.ResultMap.Range(func(timeCode /*string*/, events interface{} /*common.Result*/) bool {
+	survivalserver.ResultMap.Range(func(timeCode /*string*/, events interface{} /*survivalserver.Result*/) bool {
 		timeCodeString := timeCode.(string)
-		eventStruct := events.(common.Result)
+		eventStruct := events.(survivalserver.Result)
 		(*targetMap)[timeCodeString] = [2]string{eventStruct.EventValue, eventStruct.CensoringValue}
 		return true
 	})
@@ -433,7 +435,7 @@ func aggregateAndKeySwitchCollect(finalResultMap *sync.Map, aggKsResultsChan cha
 			waitGroup.Done()
 			return
 		}
-		res := common.Result{
+		res := survivalserver.Result{
 			EventValue:     aggKsResult.event.Value,
 			CensoringValue: aggKsResult.censoring.Value,
 			Error:          err,

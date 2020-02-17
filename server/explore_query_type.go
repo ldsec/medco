@@ -104,7 +104,7 @@ func NewExploreQueryType(requestedQueryType models.ExploreQueryType) (queryType 
 			Obfuscated:  true,
 			Survival:    false,
 		}
-	case models.ExploreQueryTypeSurvival:
+	case models.ExploreQueryTypeSurvivalAnalysis:
 		queryType = ExploreQueryType{
 			PatientList: true,
 			CountType:   Global,
