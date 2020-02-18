@@ -9,7 +9,7 @@ services:
       - I2B2_DB_PORT=5432
       - I2B2_DB_USER=i2b2
       - I2B2_DB_PW=i2b2
-      - I2B2_DB_NAME=i2b2medcosrv
+      - I2B2_DB_NAME=i2b2medco
       - WILDFLY_ADMIN_PASSWORD=admin
       - I2B2_DOMAIN_NAME=i2b2medco
       - I2B2_SERVICE_PASSWORD=pFjy3EjDVwLfT2rB9xkK
