@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/validate"
 
@@ -37,6 +38,10 @@ type GetSurvivalAnalysisParams struct {
 	  In: path
 	*/
 	Granularity string
+	/*User public key and selection panels
+	  In: body
+	*/
+	UserPublicKeyAndPanels GetSurvivalAnalysisBody
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -53,6 +58,22 @@ func (o *GetSurvivalAnalysisParams) BindRequest(r *http.Request, route *middlewa
 		res = append(res, err)
 	}
 
+	if runtime.HasBody(r) {
+		defer r.Body.Close()
+		var body GetSurvivalAnalysisBody
+		if err := route.Consumer.Consume(r.Body, &body); err != nil {
+			res = append(res, errors.NewParseError("userPublicKeyAndPanels", "body", "", err))
+		} else {
+			// validate body object
+			if err := body.Validate(route.Formats); err != nil {
+				res = append(res, err)
+			}
+
+			if len(res) == 0 {
+				o.UserPublicKeyAndPanels = body
+			}
+		}
+	}
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}

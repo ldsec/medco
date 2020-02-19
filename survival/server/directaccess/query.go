@@ -30,9 +30,32 @@ const (
 //type PatientSet []PatientID
 
 // QueryTimePoints is the function that translates a medco survival query in multiple calls on psql and unlynx
-func QueryTimePoints(q *survivalserver.ExploreQuery, patientSet []string, timePoints []string, batchNumber int) (err error) {
+type SurvivalQuery interface {
+	Execute() error
+	GetTimeCodes() ([]string, error)
+	GetPatients() ([]string, error)
+	GetID() string
+	GetUserPublicKey() string
+	SetResultMap(map[string][2]string) error
+}
 
-	exceptionHandler = survivalserver.NewExceptionHandler(1)
+func QueryTimePoints(q SurvivalQuery, batchNumber int) (err error) {
+	var timePoints []string
+	var patientSet []string
+
+	timePoints, err = q.GetTimeCodes()
+	if err != nil {
+		return
+	}
+	patientSet, err = q.GetPatients()
+	if err != nil {
+		return
+	}
+
+	exceptionHandler, err := survivalserver.NewExceptionHandler(1)
+	if err != nil {
+		return
+	}
 	go func() {
 		err = utilserver.DBConnection.Ping()
 		if err != nil {
@@ -106,7 +129,7 @@ func QueryTimePoints(q *survivalserver.ExploreQuery, patientSet []string, timePo
 
 						}
 
-						err = aggregateAndKeySwitchSend(q.ID, time, events, censoringEvents, q.Query.UserPublicKey, unlynxChannel)
+						err = aggregateAndKeySwitchSend(q.GetID(), time, events, censoringEvents, q.GetUserPublicKey(), unlynxChannel)
 
 					}(time)
 
@@ -206,7 +229,7 @@ func QueryTimePoints(q *survivalserver.ExploreQuery, patientSet []string, timePo
 
 							}
 
-							err = aggregateAndKeySwitchSend(`queryname`, recipiens.TimeCode, events, censoringEvents, q.Query.UserPublicKey, unlynxChannel)
+							err = aggregateAndKeySwitchSend(`queryname`, recipiens.TimeCode, events, censoringEvents, q.GetUserPublicKey(), unlynxChannel)
 
 							unlynxBarrier.Done()
 						}()
@@ -227,7 +250,7 @@ func QueryTimePoints(q *survivalserver.ExploreQuery, patientSet []string, timePo
 
 							}
 							zeroCensoring, err := survivalserver.ZeroPointEncryption()
-							err = aggregateAndKeySwitchSend(`queryname`, key, zeroEvent, zeroCensoring, q.Query.UserPublicKey, unlynxChannel)
+							err = aggregateAndKeySwitchSend(`queryname`, key, zeroEvent, zeroCensoring, q.GetUserPublicKey(), unlynxChannel)
 							if err != nil {
 								exceptionHandler.PushError(err)
 							}
@@ -264,17 +287,21 @@ func QueryTimePoints(q *survivalserver.ExploreQuery, patientSet []string, timePo
 		exceptionHandler.Finished()
 		return
 	}()
-	err = survivalserver.WaitEndSignal(3000)
+	err = exceptionHandler.WaitEndSignal(3000)
 	if err != nil {
 		return
 	}
-	targetMap := &q.Result.EncEvents
+	targetMap := make(map[string][2]string)
 	survivalserver.ResultMap.Range(func(timeCode /*string*/, events interface{} /*survivalserver.Result*/) bool {
 		timeCodeString := timeCode.(string)
 		eventStruct := events.(survivalserver.Result)
-		(*targetMap)[timeCodeString] = [2]string{eventStruct.EventValue, eventStruct.CensoringValue}
+		targetMap[timeCodeString] = [2]string{eventStruct.EventValue, eventStruct.CensoringValue}
 		return true
 	})
+	err = q.SetResultMap(targetMap)
+	if err != nil {
+		return
+	}
 	return
 }
 

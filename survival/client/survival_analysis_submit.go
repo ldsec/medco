@@ -7,6 +7,8 @@ import (
 	"time"
 
 	httptransport "github.com/go-openapi/runtime/client"
+	"github.com/ldsec/medco-connector/restapi/client/survival_analysis"
+	utilclient "github.com/ldsec/medco-connector/util/client"
 	"github.com/sirupsen/logrus"
 
 	"github.com/go-openapi/runtime"
@@ -16,18 +18,23 @@ import (
 
 //for client !!
 
-func (clientSurvivalAnalysis *SurvivalAnalysis) submitToNode() (results []string, err error) {
+func (clientSurvivalAnalysis *SurvivalAnalysis) submitToNode(nodeIdx int) (results []string, err error) {
 	//magicNumber
-	params := GetSurvivalAnalysisParameter{Command: clientSurvivalAnalysis, timeout: time.Duration(300) * time.Second}
+	params := survival_analysis.NewGetSurvivalAnalysisParamsWithTimeout(time.Duration(utilclient.QueryTimeoutSeconds) * time.Second)
+	params.WithGranularity(clientSurvivalAnalysis.granularity)
+	bodyKeyAndPanels := &survival_analysis.GetSurvivalAnalysisBody{UserPublicKey: params.UserPublicKeyAndPanels.UserPublicKey, Panels: params.UserPublicKeyAndPanels.Panels}
+	//break UserPublickKeyAndpanels ?
+	params.WithUserPublicKeyAndPanels(*bodyKeyAndPanels)
+
 	authInfo := httptransport.BearerToken(clientSurvivalAnalysis.authToken)
-	response, err := clientSurvivalAnalysis.httpMedCoClient.Transport.Submit(&runtime.ClientOperation{
+	response, err := clientSurvivalAnalysis.httpMedCoClients[nodeIdx].Transport.Submit(&runtime.ClientOperation{
 		ID:                 "getSurvivalAnalysis",
 		Method:             "GET",
 		PathPattern:        "/survival-analysis/{granularity}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
-		Params:             &params,
+		Params:             params,
 		Reader:             &GetSurvivalAnalysisReader{formats: clientSurvivalAnalysis.formats},
 		AuthInfo:           authInfo,
 		Context:            params.Context,

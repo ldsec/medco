@@ -204,6 +204,18 @@ paths:
         required: true
         type: "string"
         pattern: "day|week|month|year"
+      - in: "body"
+        description: "User public key and selection panels"
+        name: "userPublicKeyAndPanels"
+        schema:
+          type: "object"
+          properties:
+            userPublicKey:              
+              $ref: "#/definitions/exploreQuery/properties/userPublicKey"
+            panels:
+              $ref: "#/definitions/exploreQuery/properties/panels"
+          
+
 
       responses:
         200:

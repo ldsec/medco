@@ -17,7 +17,7 @@ import (
 	"github.com/ldsec/medco-connector/restapi/client/survival_analysis"
 )
 
-// Default med co connector HTTP client.
+// Default medco cli HTTP client.
 var Default = NewHTTPClient(nil)
 
 const (
@@ -32,12 +32,12 @@ const (
 // DefaultSchemes are the default schemes found in Meta (info) section of spec file
 var DefaultSchemes = []string{"http"}
 
-// NewHTTPClient creates a new med co connector HTTP client.
+// NewHTTPClient creates a new medco cli HTTP client.
 func NewHTTPClient(formats strfmt.Registry) *MedcoCli {
 	return NewHTTPClientWithConfig(formats, nil)
 }
 
-// NewHTTPClientWithConfig creates a new med co connector HTTP client,
+// NewHTTPClientWithConfig creates a new medco cli HTTP client,
 // using a customizable transport config.
 func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *MedcoCli {
 	// ensure nullable parameters have default
@@ -50,7 +50,7 @@ func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *Med
 	return New(transport, formats)
 }
 
-// New creates a new med co connector client
+// New creates a new medco cli client
 func New(transport runtime.ClientTransport, formats strfmt.Registry) *MedcoCli {
 	// ensure nullable parameters have default
 	if formats == nil {
@@ -110,7 +110,7 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 	return cfg
 }
 
-// MedcoCli is a client for med co connector
+// MedcoCli is a client for medco cli
 type MedcoCli struct {
 	GenomicAnnotations *genomic_annotations.Client
 

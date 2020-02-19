@@ -12,8 +12,11 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 
 	strfmt "github.com/go-openapi/strfmt"
+
+	"github.com/ldsec/medco-connector/restapi/models"
 )
 
 // GetSurvivalAnalysisReader is a Reader for the GetSurvivalAnalysis structure.
@@ -139,6 +142,84 @@ func (o *GetSurvivalAnalysisDefault) readResponse(response runtime.ClientRespons
 		return err
 	}
 
+	return nil
+}
+
+/*GetSurvivalAnalysisBody get survival analysis body
+swagger:model GetSurvivalAnalysisBody
+*/
+type GetSurvivalAnalysisBody struct {
+
+	// panels
+	Panels models.ExploreQueryPanels `json:"panels,omitempty"`
+
+	// user public key
+	// Pattern: ^[\w=-]+$
+	UserPublicKey string `json:"userPublicKey,omitempty"`
+}
+
+// Validate validates this get survival analysis body
+func (o *GetSurvivalAnalysisBody) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validatePanels(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateUserPublicKey(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *GetSurvivalAnalysisBody) validatePanels(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.Panels) { // not required
+		return nil
+	}
+
+	if err := o.Panels.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("userPublicKeyAndPanels" + "." + "panels")
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (o *GetSurvivalAnalysisBody) validateUserPublicKey(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.UserPublicKey) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("userPublicKeyAndPanels"+"."+"userPublicKey", "body", string(o.UserPublicKey), `^[\w=-]+$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *GetSurvivalAnalysisBody) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *GetSurvivalAnalysisBody) UnmarshalBinary(b []byte) error {
+	var res GetSurvivalAnalysisBody
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
 	return nil
 }
 

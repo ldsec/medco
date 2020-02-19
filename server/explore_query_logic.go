@@ -5,15 +5,12 @@ import (
 	"time"
 
 	"github.com/ldsec/medco-connector/restapi/models"
-	survivalserver "github.com/ldsec/medco-connector/survival/server"
+
 	"github.com/ldsec/medco-connector/wrappers/i2b2"
 	"github.com/ldsec/medco-connector/wrappers/unlynx"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
-
-//TODO this callback is a temporary solution
-var GraftCallback func(q *ExploreQuery, patientIDs []string, encNumberOfPatients string)
 
 // todo: log query (with associated status)
 // todo: put user + query type + unique ID in query id
@@ -67,7 +64,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 
 	// tag query terms
 	timer = time.Now()
-	taggedQueryTerms, ddtTimers, err := unlynx.DDTagValues(q.ID, q.getEncQueryTerms())
+	taggedQueryTerms, ddtTimers, err := unlynx.DDTagValues(q.ID, q.GetEncQueryTerms())
 	if err != nil {
 		return
 	}
@@ -76,7 +73,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 
 	// i2b2 PSM query with tagged items
 	timer = time.Now()
-	panelsItemKeys, panelsIsNot, err := q.getI2b2PsmQueryTerms(taggedQueryTerms)
+	panelsItemKeys, panelsIsNot, err := q.GetI2b2PsmQueryTerms(taggedQueryTerms)
 	if err != nil {
 		return
 	}
@@ -106,21 +103,22 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	q.addTimers("medco-connector-local-agg", timer, nil)
 
 	// compute and key switch count (returns optionally global aggregate or shuffled results)
+	/*
+		if queryType.Survival {
+			GraftCallback(q, patientIDs, aggPatientFlags)
+			//survival.Execute(q, patientDummyFlags, patientIDs, 1)
+			survQuery := q.ConvertToSurvivalQuery()
 
-	if queryType.Survival {
-		GraftCallback(q, patientIDs, aggPatientFlags)
-		//survival.Execute(q, patientDummyFlags, patientIDs, 1)
-		survQuery := q.ConvertToSurvivalQuery()
+			//TODO use identifiaction of query
 
-		//TODO use identifiaction of query
+			//timecodes := survival.GlobalTimeCodes
+			//TODO hide this more
+			survQuery.ExecuteCallback = survivalserver.ExecCallback
 
-		//timecodes := survival.GlobalTimeCodes
-		//TODO hide this more
-		survQuery.ExecuteCallback = survivalserver.ExecCallback
-
-		err = survQuery.Execute(patientIDs)
-		return
-	}
+			err = survQuery.Execute(patientIDs)
+			return
+		}
+	*/
 
 	timer = time.Now()
 	var encCount string
@@ -211,7 +209,7 @@ func (q *ExploreQuery) maskPatientIDs(patientIDs []string, patientDummyFlags []s
 	return
 }
 
-func (q *ExploreQuery) getEncQueryTerms() (encQueryTerms []string) {
+func (q *ExploreQuery) GetEncQueryTerms() (encQueryTerms []string) {
 	for _, panel := range q.Query.Panels {
 		for _, item := range panel.Items {
 			if *item.Encrypted {
@@ -222,7 +220,7 @@ func (q *ExploreQuery) getEncQueryTerms() (encQueryTerms []string) {
 	return
 }
 
-func (q *ExploreQuery) getI2b2PsmQueryTerms(taggedQueryTerms map[string]string) (panelsItemKeys [][]string, panelsIsNot []bool, err error) {
+func (q *ExploreQuery) GetI2b2PsmQueryTerms(taggedQueryTerms map[string]string) (panelsItemKeys [][]string, panelsIsNot []bool, err error) {
 	for panelIdx, panel := range q.Query.Panels {
 		panelsIsNot = append(panelsIsNot, *panel.Not)
 
@@ -255,13 +253,4 @@ func (q *ExploreQuery) isValid() (err error) {
 		logrus.Error(err)
 	}
 	return
-}
-
-//ConvertSurvivalQuery is a quick solution to avoid cyclic import. For the moment, the two kinds may differ in their methods, but not in their members
-func (q *ExploreQuery) ConvertToSurvivalQuery() *survivalserver.ExploreQuery {
-	return &survivalserver.ExploreQuery{
-		ID:     q.ID,
-		Query:  q.Query,
-		Result: q.Result,
-	}
 }

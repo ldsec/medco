@@ -66,6 +66,11 @@ type GetSurvivalAnalysisParams struct {
 
 	*/
 	Granularity string
+	/*UserPublicKeyAndPanels
+	  User public key and selection panels
+
+	*/
+	UserPublicKeyAndPanels GetSurvivalAnalysisBody
 
 	timeout    time.Duration
 	Context    context.Context
@@ -116,6 +121,17 @@ func (o *GetSurvivalAnalysisParams) SetGranularity(granularity string) {
 	o.Granularity = granularity
 }
 
+// WithUserPublicKeyAndPanels adds the userPublicKeyAndPanels to the get survival analysis params
+func (o *GetSurvivalAnalysisParams) WithUserPublicKeyAndPanels(userPublicKeyAndPanels GetSurvivalAnalysisBody) *GetSurvivalAnalysisParams {
+	o.SetUserPublicKeyAndPanels(userPublicKeyAndPanels)
+	return o
+}
+
+// SetUserPublicKeyAndPanels adds the userPublicKeyAndPanels to the get survival analysis params
+func (o *GetSurvivalAnalysisParams) SetUserPublicKeyAndPanels(userPublicKeyAndPanels GetSurvivalAnalysisBody) {
+	o.UserPublicKeyAndPanels = userPublicKeyAndPanels
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *GetSurvivalAnalysisParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -126,6 +142,10 @@ func (o *GetSurvivalAnalysisParams) WriteToRequest(r runtime.ClientRequest, reg 
 
 	// path param granularity
 	if err := r.SetPathParam("granularity", o.Granularity); err != nil {
+		return err
+	}
+
+	if err := r.SetBodyParam(o.UserPublicKeyAndPanels); err != nil {
 		return err
 	}
 

@@ -1,6 +1,6 @@
 // This file is safe to edit. Once it exists it will not be overwritten
 
-package restapi
+package server
 
 import (
 	"crypto/tls"
@@ -18,6 +18,7 @@ import (
 	"github.com/ldsec/medco-connector/restapi/server/operations/genomic_annotations"
 	"github.com/ldsec/medco-connector/restapi/server/operations/medco_network"
 	"github.com/ldsec/medco-connector/restapi/server/operations/medco_node"
+	"github.com/ldsec/medco-connector/restapi/server/operations/survival_analysis"
 	"github.com/ldsec/medco-connector/server/handlers"
 )
 
@@ -72,6 +73,9 @@ func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
 
 	// /genomic-annotations/{annotation}/{value}
 	api.GenomicAnnotationsGetVariantsHandler = genomic_annotations.GetVariantsHandlerFunc(handlers.MedCoGenomicAnnotationsGetVariantsHandler)
+
+	// /survival-analysis/{granularity}
+	api.SurvivalAnalysisGetSurvivalAnalysisHandler = survival_analysis.GetSurvivalAnalysisHandlerFunc(handlers.MedCoSurvivalAnalysisGetSurvivalAnalysisHandler)
 
 	api.ServerShutdown = func() {}
 

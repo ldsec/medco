@@ -3,14 +3,11 @@ package survivalserver
 import (
 	"fmt"
 
-	"strconv"
 	"strings"
 	"sync"
 
 	"time"
 
-	"github.com/ldsec/medco-connector/restapi/models"
-	"github.com/ldsec/medco-connector/wrappers/i2b2"
 	"github.com/ldsec/medco-connector/wrappers/unlynx"
 )
 
@@ -45,7 +42,7 @@ func BreakBlob(blobValue string) (eventOfInterest, censoringEvent string, err er
 	return
 }
 
-const timeConceptRootPath = `/SurvivalAnalysis/`
+const TimeConceptRootPath = `/SurvivalAnalysis/`
 
 //TODO another function already exists in unlynx wrapper
 func ZeroPointEncryption() (res string, err error) {
@@ -68,37 +65,3 @@ func UnlynxRequestName(queryName, timecode string) string {
 
 //this redundance is a quick solutiio to avoid cyclic imports with medcoservers
 //TODO expected to become ghost code
-type ExploreQuery struct {
-	ID     string
-	Query  *models.ExploreQuery
-	Result struct {
-		EncCount       string
-		EncPatientList []string
-		Timers         map[string]time.Duration
-		EncEvents      map[string][2]string
-	}
-	ExecuteCallback func(*ExploreQuery, []string, []string, int) error
-}
-
-var ExecCallback func(*ExploreQuery, []string, []string, int) error
-
-func (q *ExploreQuery) Execute(patientIDs []string) error {
-	timeCodes, err := GetTimeCodes()
-	if err != nil {
-		return err
-	}
-
-	return q.ExecuteCallback(q, patientIDs, timeCodes, 1)
-}
-
-func GetTimeCodes() (timeCode []string, err error) {
-	results, err := i2b2.GetOntologyChildren(timeConceptRootPath)
-	if err != nil {
-		return
-	}
-	for _, result := range results {
-		timeCode = append(timeCode, strconv.FormatInt(*(result.MedcoEncryption.ID), 10))
-	}
-	return
-
-}
