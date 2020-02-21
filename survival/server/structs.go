@@ -62,6 +62,3 @@ func ZeroPointEncryption() (res string, err error) {
 func UnlynxRequestName(queryName, timecode string) string {
 	return queryName + timecode
 }
-
-//this redundance is a quick solutiio to avoid cyclic imports with medcoservers
-//TODO expected to become ghost code

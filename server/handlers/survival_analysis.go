@@ -12,26 +12,7 @@ import (
 
 func MedCoSurvivalAnalysisGetSurvivalAnalysisHandler(param survival_analysis.GetSurvivalAnalysisParams, principal *models.User) middleware.Responder {
 
-	survivalAnalysisQuery := survival.NewQuery("TODO find me an ID", param.UserPublicKeyAndPanels.UserPublicKey, param.UserPublicKeyAndPanels.Panels)
-	patientErrChan := make(chan error)
-	timeCodeErrChan := make(chan error)
-	go func() {
-		patientErrChan <- survivalAnalysisQuery.LoadPatients()
-	}()
-	go func() {
-		timeCodeErrChan <- survivalAnalysisQuery.LoadTimeCodes(param.Granularity)
-	}()
-
-	if patientErr := <-patientErrChan; patientErr != nil {
-		logrus.Error(fmt.Sprintf("Query execution error : %s", patientErr.Error()))
-		return survival_analysis.NewGetSurvivalAnalysisNotFound()
-
-	}
-	if timeCodeErr := <-patientErrChan; timeCodeErr != nil {
-		logrus.Error(fmt.Sprintf("Query execution error : %s", timeCodeErr.Error()))
-		return survival_analysis.NewGetSurvivalAnalysisNotFound()
-
-	}
+	survivalAnalysisQuery := survival.NewQuery("TODO FIND ME AN ID !!", param.Body.UserPublicKey, param.Body.PatientSetID, param.Body.TimeCodes)
 
 	if err := survivalAnalysisQuery.Execute(); err != nil {
 		logrus.Error(fmt.Sprintf("Query execution error : %s", err.Error()))

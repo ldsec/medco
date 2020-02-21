@@ -29,6 +29,9 @@ type ExploreQueryResultElement struct {
 	// encrypted survival analysis
 	EncryptedSurvivalAnalysis []*ExploreQueryResultElementEncryptedSurvivalAnalysisItems0 `json:"encryptedSurvivalAnalysis"`
 
+	// patient set ID
+	PatientSetID string `json:"patientSetID,omitempty"`
+
 	// status
 	// Enum: [queued pending error available]
 	Status string `json:"status,omitempty"`

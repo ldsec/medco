@@ -4,9 +4,12 @@ package survivalclient
 import (
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/ldsec/medco-connector/restapi/client/survival_analysis"
 
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
@@ -25,24 +28,23 @@ type SurvivalAnalysis struct {
 	// authToken is the OIDC authentication JWT
 	authToken string
 
+	patientSetIDs map[int]string
+
+	timeCodes []string
+
 	userPublicKey string
 
 	userPrivateKey string
 
-	granularity string
-
-	limit int64
-	//TODO patient list []
-
 	formats strfmt.Registry
 }
 
-func NewSurvivalAnalysis(token, granularity string, limit int64, disableTLSCheck bool) (q *SurvivalAnalysis, err error) {
+func NewSurvivalAnalysis(token string, patientSetIDs map[int]string, timeCodes []string, disableTLSCheck bool) (q *SurvivalAnalysis, err error) {
 	q = &SurvivalAnalysis{
-		authToken:   token,
-		granularity: granularity,
-		limit:       limit,
-		formats:     strfmt.Default,
+		authToken:     token,
+		patientSetIDs: patientSetIDs,
+		timeCodes:     timeCodes,
+		formats:       strfmt.Default,
 	}
 
 	parsedURL, err := url.Parse(utilclient.MedCoConnectorURL)
@@ -93,10 +95,64 @@ func NewSurvivalAnalysis(token, granularity string, limit int64, disableTLSCheck
 
 }
 
-func (clientSurvivalAnalysis *SurvivalAnalysis) Execute() (results []string, err error) {
+type EncryptedResults struct {
+	TimePoint string
+	Events    Events
+}
+
+type Events struct {
+	EventsOfInterest string
+	CensoringEvents  string
+}
+
+func (clientSurvivalAnalysis *SurvivalAnalysis) Execute() (results []*EncryptedResults, err error) {
+
+	errChan := make(chan error)
+	resultChan := make(chan []*survival_analysis.GetSurvivalAnalysisOKBodyItems0)
+
 	for idx := range clientSurvivalAnalysis.httpMedCoClients {
-		clientSurvivalAnalysis.submitToNode(idx)
+
+		go func(idx int) {
+			res, Error := clientSurvivalAnalysis.submitToNode(idx)
+			if Error != nil {
+				errChan <- Error
+			}
+			resultChan <- res
+		}(idx)
 	}
-	err = errors.New("TODO finihssh to impleent the results for the client side ")
+	//TODO magic number
+	timeout := time.After(time.Duration(3000) * time.Second)
+
+nodeLoop:
+	for idx := range clientSurvivalAnalysis.httpMedCoClients {
+		select {
+		case nodeLoopRes := <-resultChan:
+			concatEncryptedResults(results, nodeLoopRes)
+
+		case nodeLoopErr := <-errChan:
+			err = fmt.Errorf("Node %d threw %s : %s", idx, nodeLoopErr.Error(), err.Error())
+		case <-timeout:
+			err = fmt.Errorf(" Timeout : %s", err.Error())
+			break nodeLoop
+
+		}
+	}
+
 	return
+}
+
+func concatEncryptedResults(target []*EncryptedResults, toExctract []*survival_analysis.GetSurvivalAnalysisOKBodyItems0) []*EncryptedResults {
+	var res = target
+	for _, bodyItem := range toExctract {
+		result := &EncryptedResults{
+			TimePoint: bodyItem.Timepoint,
+			Events: Events{
+				EventsOfInterest: bodyItem.Events.Eventofinterest,
+				CensoringEvents:  bodyItem.Events.Censoringevent,
+			},
+		}
+		res = append(res, result)
+	}
+
+	return res
 }

@@ -3,6 +3,7 @@ package utilserver
 import (
 	"encoding/json"
 	"errors"
+
 	"github.com/ldsec/medco-connector/restapi/models"
 	"github.com/lestrrat-go/jwx/jwt"
 	"github.com/sirupsen/logrus"
@@ -102,6 +103,8 @@ func extractAuthorizationsFromToken(token *jwt.Token, provider *oidcProvider) (u
 			ua.RestAPI = append(ua.RestAPI, models.RestAPIAuthorizationMedcoExplore)
 		case string(models.RestAPIAuthorizationMedcoGenomicAnnotations):
 			ua.RestAPI = append(ua.RestAPI, models.RestAPIAuthorizationMedcoGenomicAnnotations)
+		case string(models.RestAPIAuthorizationMedcoSurivalAnalysis):
+			ua.RestAPI = append(ua.RestAPI, models.RestAPIAuthorizationMedcoSurivalAnalysis)
 
 		// explore query type authorizations
 		case string(models.ExploreQueryTypePatientList):
@@ -118,6 +121,8 @@ func extractAuthorizationsFromToken(token *jwt.Token, provider *oidcProvider) (u
 			ua.ExploreQuery = append(ua.ExploreQuery, models.ExploreQueryTypeCountGlobal)
 		case string(models.ExploreQueryTypeCountGlobalObfuscated):
 			ua.ExploreQuery = append(ua.ExploreQuery, models.ExploreQueryTypeCountGlobalObfuscated)
+		case string(models.ExploreQueryTypePatientSet):
+			ua.ExploreQuery = append(ua.ExploreQuery, models.ExploreQueryTypePatientSet)
 
 		default:
 			logrus.Debug("ignored role ", extractedRole)

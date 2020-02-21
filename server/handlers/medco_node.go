@@ -1,13 +1,14 @@
 package handlers
 
 import (
+	"time"
+
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/ldsec/medco-connector/restapi/models"
 	"github.com/ldsec/medco-connector/restapi/server/operations/medco_node"
-	"github.com/ldsec/medco-connector/server"
-	"github.com/ldsec/medco-connector/util/server"
+	medcoserver "github.com/ldsec/medco-connector/server"
+	utilserver "github.com/ldsec/medco-connector/util/server"
 	"github.com/ldsec/medco-connector/wrappers/i2b2"
-	"time"
 )
 
 // MedCoNodeExploreSearchHandler handles /medco/node/explore/search API endpoint
@@ -21,7 +22,7 @@ func MedCoNodeExploreSearchHandler(params medco_node.ExploreSearchParams, princi
 	}
 
 	return medco_node.NewExploreSearchOK().WithPayload(&medco_node.ExploreSearchOKBody{
-		Search: params.SearchRequest,
+		Search:  params.SearchRequest,
 		Results: searchResult,
 	})
 }
@@ -66,18 +67,18 @@ func MedCoNodeExploreQueryHandler(params medco_node.ExploreQueryParams, principa
 	for timerName, timerDuration := range query.Result.Timers {
 		milliseconds := int64(timerDuration / time.Millisecond)
 		timers = append(timers, &models.ExploreQueryResultElementTimersItems0{
-			Name: timerName,
+			Name:         timerName,
 			Milliseconds: &milliseconds,
 		})
 	}
 
 	return medco_node.NewExploreQueryOK().WithPayload(&medco_node.ExploreQueryOKBody{
-		ID:     query.ID,
-		Query:  params.QueryRequest.Query,
+		ID:    query.ID,
+		Query: params.QueryRequest.Query,
 		Result: &models.ExploreQueryResultElement{
-			EncryptedCount: query.Result.EncCount,
+			EncryptedCount:       query.Result.EncCount,
 			EncryptedPatientList: query.Result.EncPatientList,
-			Timers: timers,
-			Status: models.ExploreQueryResultElementStatusAvailable,
-	}})
+			Timers:               timers,
+			Status:               models.ExploreQueryResultElementStatusAvailable,
+		}})
 }

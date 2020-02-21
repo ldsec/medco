@@ -7,6 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ldsec/medco-connector/wrappers/i2b2"
+
 	survivalserver "github.com/ldsec/medco-connector/survival/server"
 	utilserver "github.com/ldsec/medco-connector/util/server"
 	"github.com/ldsec/medco-connector/wrappers/unlynx"
@@ -32,8 +34,8 @@ const (
 // QueryTimePoints is the function that translates a medco survival query in multiple calls on psql and unlynx
 type SurvivalQuery interface {
 	Execute() error
-	GetTimeCodes() ([]string, error)
-	GetPatients() ([]string, error)
+	GetTimeCodes() []string
+	GetPatientSetID() string
 	GetID() string
 	GetUserPublicKey() string
 	SetResultMap(map[string][2]string) error
@@ -43,14 +45,10 @@ func QueryTimePoints(q SurvivalQuery, batchNumber int) (err error) {
 	var timePoints []string
 	var patientSet []string
 
-	timePoints, err = q.GetTimeCodes()
-	if err != nil {
-		return
-	}
-	patientSet, err = q.GetPatients()
-	if err != nil {
-		return
-	}
+	timePoints = q.GetTimeCodes()
+
+	patientSetID := q.GetPatientSetID()
+	patientSet, _, err = i2b2.GetPatientSet(patientSetID)
 
 	exceptionHandler, err := survivalserver.NewExceptionHandler(1)
 	if err != nil {

@@ -61,16 +61,11 @@ for the get survival analysis operation typically these are written to a http.Re
 */
 type GetSurvivalAnalysisParams struct {
 
-	/*Granularity
-	  Time point resolution
+	/*Body
+	  User public key, patient list and time codes strings to run the survival analysis
 
 	*/
-	Granularity string
-	/*UserPublicKeyAndPanels
-	  User public key and selection panels
-
-	*/
-	UserPublicKeyAndPanels GetSurvivalAnalysisBody
+	Body GetSurvivalAnalysisBody
 
 	timeout    time.Duration
 	Context    context.Context
@@ -110,26 +105,15 @@ func (o *GetSurvivalAnalysisParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithGranularity adds the granularity to the get survival analysis params
-func (o *GetSurvivalAnalysisParams) WithGranularity(granularity string) *GetSurvivalAnalysisParams {
-	o.SetGranularity(granularity)
+// WithBody adds the body to the get survival analysis params
+func (o *GetSurvivalAnalysisParams) WithBody(body GetSurvivalAnalysisBody) *GetSurvivalAnalysisParams {
+	o.SetBody(body)
 	return o
 }
 
-// SetGranularity adds the granularity to the get survival analysis params
-func (o *GetSurvivalAnalysisParams) SetGranularity(granularity string) {
-	o.Granularity = granularity
-}
-
-// WithUserPublicKeyAndPanels adds the userPublicKeyAndPanels to the get survival analysis params
-func (o *GetSurvivalAnalysisParams) WithUserPublicKeyAndPanels(userPublicKeyAndPanels GetSurvivalAnalysisBody) *GetSurvivalAnalysisParams {
-	o.SetUserPublicKeyAndPanels(userPublicKeyAndPanels)
-	return o
-}
-
-// SetUserPublicKeyAndPanels adds the userPublicKeyAndPanels to the get survival analysis params
-func (o *GetSurvivalAnalysisParams) SetUserPublicKeyAndPanels(userPublicKeyAndPanels GetSurvivalAnalysisBody) {
-	o.UserPublicKeyAndPanels = userPublicKeyAndPanels
+// SetBody adds the body to the get survival analysis params
+func (o *GetSurvivalAnalysisParams) SetBody(body GetSurvivalAnalysisBody) {
+	o.Body = body
 }
 
 // WriteToRequest writes these params to a swagger request
@@ -140,12 +124,7 @@ func (o *GetSurvivalAnalysisParams) WriteToRequest(r runtime.ClientRequest, reg 
 	}
 	var res []error
 
-	// path param granularity
-	if err := r.SetPathParam("granularity", o.Granularity); err != nil {
-		return err
-	}
-
-	if err := r.SetBodyParam(o.UserPublicKeyAndPanels); err != nil {
+	if err := r.SetBodyParam(o.Body); err != nil {
 		return err
 	}
 

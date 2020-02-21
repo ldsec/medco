@@ -11,9 +11,6 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
-	"github.com/go-openapi/validate"
-
-	strfmt "github.com/go-openapi/strfmt"
 )
 
 // NewGetSurvivalAnalysisParams creates a new GetSurvivalAnalysisParams object
@@ -32,16 +29,10 @@ type GetSurvivalAnalysisParams struct {
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
 
-	/*Time point resolution
-	  Required: true
-	  Pattern: day|week|month|year
-	  In: path
-	*/
-	Granularity string
-	/*User public key and selection panels
+	/*User public key, patient list and time codes strings to run the survival analysis
 	  In: body
 	*/
-	UserPublicKeyAndPanels GetSurvivalAnalysisBody
+	Body GetSurvivalAnalysisBody
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -53,16 +44,11 @@ func (o *GetSurvivalAnalysisParams) BindRequest(r *http.Request, route *middlewa
 
 	o.HTTPRequest = r
 
-	rGranularity, rhkGranularity, _ := route.Params.GetOK("granularity")
-	if err := o.bindGranularity(rGranularity, rhkGranularity, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
 		var body GetSurvivalAnalysisBody
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
-			res = append(res, errors.NewParseError("userPublicKeyAndPanels", "body", "", err))
+			res = append(res, errors.NewParseError("body", "body", "", err))
 		} else {
 			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
@@ -70,41 +56,12 @@ func (o *GetSurvivalAnalysisParams) BindRequest(r *http.Request, route *middlewa
 			}
 
 			if len(res) == 0 {
-				o.UserPublicKeyAndPanels = body
+				o.Body = body
 			}
 		}
 	}
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-// bindGranularity binds and validates parameter Granularity from path.
-func (o *GetSurvivalAnalysisParams) bindGranularity(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: true
-	// Parameter is provided by construction from the route
-
-	o.Granularity = raw
-
-	if err := o.validateGranularity(formats); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// validateGranularity carries on validations for parameter Granularity
-func (o *GetSurvivalAnalysisParams) validateGranularity(formats strfmt.Registry) error {
-
-	if err := validate.Pattern("granularity", "path", o.Granularity, `day|week|month|year`); err != nil {
-		return err
-	}
-
 	return nil
 }

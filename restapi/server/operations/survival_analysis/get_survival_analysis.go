@@ -35,7 +35,7 @@ func NewGetSurvivalAnalysis(ctx *middleware.Context, handler GetSurvivalAnalysis
 	return &GetSurvivalAnalysis{Context: ctx, Handler: handler}
 }
 
-/*GetSurvivalAnalysis swagger:route GET /survival-analysis/{granularity} survival-analysis getSurvivalAnalysis
+/*GetSurvivalAnalysis swagger:route POST /survival-analysis survival-analysis getSurvivalAnalysis
 
 Send a query to run a survival analysis
 
@@ -80,8 +80,11 @@ func (o *GetSurvivalAnalysis) ServeHTTP(rw http.ResponseWriter, r *http.Request)
 // swagger:model GetSurvivalAnalysisBody
 type GetSurvivalAnalysisBody struct {
 
-	// panels
-	Panels models.ExploreQueryPanels `json:"panels,omitempty"`
+	// patient set ID
+	PatientSetID string `json:"patientSetID,omitempty"`
+
+	// time codes
+	TimeCodes []string `json:"timeCodes"`
 
 	// user public key
 	// Pattern: ^[\w=-]+$
@@ -91,10 +94,6 @@ type GetSurvivalAnalysisBody struct {
 // Validate validates this get survival analysis body
 func (o *GetSurvivalAnalysisBody) Validate(formats strfmt.Registry) error {
 	var res []error
-
-	if err := o.validatePanels(formats); err != nil {
-		res = append(res, err)
-	}
 
 	if err := o.validateUserPublicKey(formats); err != nil {
 		res = append(res, err)
@@ -106,29 +105,13 @@ func (o *GetSurvivalAnalysisBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *GetSurvivalAnalysisBody) validatePanels(formats strfmt.Registry) error {
-
-	if swag.IsZero(o.Panels) { // not required
-		return nil
-	}
-
-	if err := o.Panels.Validate(formats); err != nil {
-		if ve, ok := err.(*errors.Validation); ok {
-			return ve.ValidateName("userPublicKeyAndPanels" + "." + "panels")
-		}
-		return err
-	}
-
-	return nil
-}
-
 func (o *GetSurvivalAnalysisBody) validateUserPublicKey(formats strfmt.Registry) error {
 
 	if swag.IsZero(o.UserPublicKey) { // not required
 		return nil
 	}
 
-	if err := validate.Pattern("userPublicKeyAndPanels"+"."+"userPublicKey", "body", string(o.UserPublicKey), `^[\w=-]+$`); err != nil {
+	if err := validate.Pattern("body"+"."+"userPublicKey", "body", string(o.UserPublicKey), `^[\w=-]+$`); err != nil {
 		return err
 	}
 

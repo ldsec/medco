@@ -23,8 +23,8 @@ type ExploreQueryType struct {
 
 	// todo: include differential privacy requested
 
-	// Survival analysis
-	Survival bool
+	// PatientSet  encodes if the patient set are needed further
+	PatientSet bool
 }
 
 // CountType encodes the type of count, either global or per site
@@ -48,7 +48,7 @@ func NewExploreQueryType(requestedQueryType models.ExploreQueryType) (queryType 
 			CountType:   PerSite,
 			Shuffled:    false,
 			Obfuscated:  false,
-			Survival:    false,
+			PatientSet:  false,
 		}
 
 	case models.ExploreQueryTypeCountPerSite:
@@ -57,7 +57,7 @@ func NewExploreQueryType(requestedQueryType models.ExploreQueryType) (queryType 
 			CountType:   PerSite,
 			Shuffled:    false,
 			Obfuscated:  false,
-			Survival:    false,
+			PatientSet:  false,
 		}
 
 	case models.ExploreQueryTypeCountPerSiteObfuscated:
@@ -66,7 +66,7 @@ func NewExploreQueryType(requestedQueryType models.ExploreQueryType) (queryType 
 			CountType:   PerSite,
 			Shuffled:    false,
 			Obfuscated:  true,
-			Survival:    false,
+			PatientSet:  false,
 		}
 
 	case models.ExploreQueryTypeCountPerSiteShuffled:
@@ -75,7 +75,7 @@ func NewExploreQueryType(requestedQueryType models.ExploreQueryType) (queryType 
 			CountType:   PerSite,
 			Shuffled:    true,
 			Obfuscated:  false,
-			Survival:    false,
+			PatientSet:  false,
 		}
 
 	case models.ExploreQueryTypeCountPerSiteShuffledObfuscated:
@@ -84,7 +84,7 @@ func NewExploreQueryType(requestedQueryType models.ExploreQueryType) (queryType 
 			CountType:   PerSite,
 			Shuffled:    true,
 			Obfuscated:  true,
-			Survival:    false,
+			PatientSet:  false,
 		}
 
 	case models.ExploreQueryTypeCountGlobal:
@@ -93,7 +93,7 @@ func NewExploreQueryType(requestedQueryType models.ExploreQueryType) (queryType 
 			CountType:   Global,
 			Shuffled:    false,
 			Obfuscated:  false,
-			Survival:    false,
+			PatientSet:  false,
 		}
 
 	case models.ExploreQueryTypeCountGlobalObfuscated:
@@ -102,15 +102,15 @@ func NewExploreQueryType(requestedQueryType models.ExploreQueryType) (queryType 
 			CountType:   Global,
 			Shuffled:    false,
 			Obfuscated:  true,
-			Survival:    false,
+			PatientSet:  false,
 		}
-	case models.ExploreQueryTypeSurvivalAnalysis:
+	case models.ExploreQueryTypePatientSet:
 		queryType = ExploreQueryType{
 			PatientList: true,
 			CountType:   Global,
 			Shuffled:    false,
 			Obfuscated:  false,
-			Survival:    true,
+			PatientSet:  true,
 		}
 
 	default:

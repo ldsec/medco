@@ -15,8 +15,6 @@ import (
 	"github.com/go-openapi/validate"
 
 	strfmt "github.com/go-openapi/strfmt"
-
-	"github.com/ldsec/medco-connector/restapi/models"
 )
 
 // GetSurvivalAnalysisReader is a Reader for the GetSurvivalAnalysis structure.
@@ -65,7 +63,7 @@ type GetSurvivalAnalysisOK struct {
 }
 
 func (o *GetSurvivalAnalysisOK) Error() string {
-	return fmt.Sprintf("[GET /survival-analysis/{granularity}][%d] getSurvivalAnalysisOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[POST /survival-analysis][%d] getSurvivalAnalysisOK  %+v", 200, o.Payload)
 }
 
 func (o *GetSurvivalAnalysisOK) GetPayload() []*GetSurvivalAnalysisOKBodyItems0 {
@@ -95,7 +93,7 @@ type GetSurvivalAnalysisNotFound struct {
 }
 
 func (o *GetSurvivalAnalysisNotFound) Error() string {
-	return fmt.Sprintf("[GET /survival-analysis/{granularity}][%d] getSurvivalAnalysisNotFound ", 404)
+	return fmt.Sprintf("[POST /survival-analysis][%d] getSurvivalAnalysisNotFound ", 404)
 }
 
 func (o *GetSurvivalAnalysisNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -126,7 +124,7 @@ func (o *GetSurvivalAnalysisDefault) Code() int {
 }
 
 func (o *GetSurvivalAnalysisDefault) Error() string {
-	return fmt.Sprintf("[GET /survival-analysis/{granularity}][%d] getSurvivalAnalysis default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[POST /survival-analysis][%d] getSurvivalAnalysis default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *GetSurvivalAnalysisDefault) GetPayload() *GetSurvivalAnalysisDefaultBody {
@@ -150,8 +148,11 @@ swagger:model GetSurvivalAnalysisBody
 */
 type GetSurvivalAnalysisBody struct {
 
-	// panels
-	Panels models.ExploreQueryPanels `json:"panels,omitempty"`
+	// patient set ID
+	PatientSetID string `json:"patientSetID,omitempty"`
+
+	// time codes
+	TimeCodes []string `json:"timeCodes"`
 
 	// user public key
 	// Pattern: ^[\w=-]+$
@@ -161,10 +162,6 @@ type GetSurvivalAnalysisBody struct {
 // Validate validates this get survival analysis body
 func (o *GetSurvivalAnalysisBody) Validate(formats strfmt.Registry) error {
 	var res []error
-
-	if err := o.validatePanels(formats); err != nil {
-		res = append(res, err)
-	}
 
 	if err := o.validateUserPublicKey(formats); err != nil {
 		res = append(res, err)
@@ -176,29 +173,13 @@ func (o *GetSurvivalAnalysisBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *GetSurvivalAnalysisBody) validatePanels(formats strfmt.Registry) error {
-
-	if swag.IsZero(o.Panels) { // not required
-		return nil
-	}
-
-	if err := o.Panels.Validate(formats); err != nil {
-		if ve, ok := err.(*errors.Validation); ok {
-			return ve.ValidateName("userPublicKeyAndPanels" + "." + "panels")
-		}
-		return err
-	}
-
-	return nil
-}
-
 func (o *GetSurvivalAnalysisBody) validateUserPublicKey(formats strfmt.Registry) error {
 
 	if swag.IsZero(o.UserPublicKey) { // not required
 		return nil
 	}
 
-	if err := validate.Pattern("userPublicKeyAndPanels"+"."+"userPublicKey", "body", string(o.UserPublicKey), `^[\w=-]+$`); err != nil {
+	if err := validate.Pattern("body"+"."+"userPublicKey", "body", string(o.UserPublicKey), `^[\w=-]+$`); err != nil {
 		return err
 	}
 

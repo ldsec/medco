@@ -191,29 +191,27 @@ paths:
           $ref: "#/responses/errorResponse"
       security:
         - medco-jwt: ["medco-genomic-annotations"]
-  /survival-analysis/{granularity}:
-    get :
+  /survival-analysis:
+    post :
       tags:
         - "survival-analysis"
       summary: "Send a query to run a survival analysis"
       operationId: "getSurvivalAnalysis"
       parameters:
-      - in: "path"
-        name: "granularity"
-        description: "Time point resolution"
-        required: true
-        type: "string"
-        pattern: "day|week|month|year"
       - in: "body"
-        description: "User public key and selection panels"
-        name: "userPublicKeyAndPanels"
+        description: "User public key, patient list and time codes strings to run the survival analysis"
+        name: "body"
         schema:
           type: "object"
           properties:
-            userPublicKey:              
+            userPublicKey:
               $ref: "#/definitions/exploreQuery/properties/userPublicKey"
-            panels:
-              $ref: "#/definitions/exploreQuery/properties/panels"
+            patientSetID:
+              type: "string"
+            timeCodes:
+              type: "array"
+              items:
+                type: "string"
           
 
 
@@ -239,7 +237,7 @@ paths:
         default:
           $ref: '#/responses/errorResponse'
       security:
-        - medco-jwt: ["medco-explore"]
+        - medco-jwt: ["medco-survival-analysis"]
 
 
 
@@ -442,7 +440,7 @@ definitions:
       - count_per_site_shuffled_obfuscated
       - count_global
       - count_global_obfuscated
-      - survival_analysis
+      - patient_set
 
   exploreQueryResultElement:
     type: "object"
@@ -454,6 +452,8 @@ definitions:
           - pending
           - error
           - available
+      patientSetID:
+        type: "string"
       encryptedCount:
         type: "string"
       encryptedPatientList:
@@ -492,6 +492,7 @@ definitions:
       - medco-network
       - medco-explore
       - medco-genomic-annotations
+      - medco-surival-analysis
 
   user:
     type: "object"

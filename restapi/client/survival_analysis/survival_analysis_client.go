@@ -35,8 +35,8 @@ func (a *Client) GetSurvivalAnalysis(params *GetSurvivalAnalysisParams, authInfo
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getSurvivalAnalysis",
-		Method:             "GET",
-		PathPattern:        "/survival-analysis/{granularity}",
+		Method:             "POST",
+		PathPattern:        "/survival-analysis",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},

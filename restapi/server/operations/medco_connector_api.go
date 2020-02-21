@@ -349,10 +349,10 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 	}
 	o.handlers["GET"]["/network"] = medco_network.NewGetMetadata(o.context, o.MedcoNetworkGetMetadataHandler)
 
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/survival-analysis/{granularity}"] = survival_analysis.NewGetSurvivalAnalysis(o.context, o.SurvivalAnalysisGetSurvivalAnalysisHandler)
+	o.handlers["POST"]["/survival-analysis"] = survival_analysis.NewGetSurvivalAnalysis(o.context, o.SurvivalAnalysisGetSurvivalAnalysisHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)

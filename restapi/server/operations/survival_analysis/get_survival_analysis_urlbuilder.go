@@ -9,16 +9,11 @@ import (
 	"errors"
 	"net/url"
 	golangswaggerpaths "path"
-	"strings"
 )
 
 // GetSurvivalAnalysisURL generates an URL for the get survival analysis operation
 type GetSurvivalAnalysisURL struct {
-	Granularity string
-
 	_basePath string
-	// avoid unkeyed usage
-	_ struct{}
 }
 
 // WithBasePath sets the base path for this url builder, only required when it's different from the
@@ -40,14 +35,7 @@ func (o *GetSurvivalAnalysisURL) SetBasePath(bp string) {
 func (o *GetSurvivalAnalysisURL) Build() (*url.URL, error) {
 	var _result url.URL
 
-	var _path = "/survival-analysis/{granularity}"
-
-	granularity := o.Granularity
-	if granularity != "" {
-		_path = strings.Replace(_path, "{granularity}", granularity, -1)
-	} else {
-		return nil, errors.New("granularity is required on GetSurvivalAnalysisURL")
-	}
+	var _path = "/survival-analysis"
 
 	_basePath := o._basePath
 	if _basePath == "" {

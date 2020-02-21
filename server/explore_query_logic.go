@@ -23,7 +23,7 @@ type ExploreQuery struct {
 		EncCount       string
 		EncPatientList []string
 		Timers         map[string]time.Duration
-		EncEvents      map[string][2]string
+		PatientSetID   string
 	}
 }
 
@@ -175,6 +175,13 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 		q.addTimers("medco-connector-unlynx-key-switch-patient-list", timer, ksPatientListTimers)
 		q.Result.EncPatientList = ksMaskedPatientIDs
 		logrus.Info(q.ID, ": key switched patient IDs")
+	}
+
+	//optionally return the patient set ID
+	if queryType.PatientSet {
+		logrus.Info(q.ID, ": patient set id requested")
+
+		q.Result.PatientSetID = patientSetID
 	}
 
 	q.addTimers("medco-connector-overall", overallTimer, nil)

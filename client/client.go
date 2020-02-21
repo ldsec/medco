@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/ldsec/medco-connector/restapi/models"
-	survivalclient "github.com/ldsec/medco-connector/survival/client"
 	utilclient "github.com/ldsec/medco-connector/util/client"
 	"github.com/ldsec/medco-connector/wrappers/unlynx"
 	"github.com/ldsec/medco-loader/loader/identifiers"
@@ -350,36 +349,6 @@ func ExecuteClientGenomicAnnotationsGetVariants(token, username, password, annot
 	}
 
 	result, err := clientGenomicAnnotationsGetVariants.Execute()
-	if err != nil {
-		return
-	}
-
-	for _, variant := range result {
-		fmt.Printf("%s\n", variant)
-	}
-
-	return
-
-}
-
-func ExecuteClientSurvivalAnalysis(token, username, password, granularity string, limit int64, disableTLSCheck bool) (err error) {
-	var accessToken string
-	if len(token) > 0 {
-		accessToken = token
-	} else {
-		logrus.Debug("No token provided, requesting token for user ", username, ", disable TLS check: ", disableTLSCheck)
-		accessToken, err = utilclient.RetrieveAccessToken(username, password, disableTLSCheck)
-		if err != nil {
-			return
-		}
-	}
-	// execute query
-	clientSurvicalAnalysis, err := survivalclient.NewSurvivalAnalysis(accessToken, granularity, limit, disableTLSCheck)
-	if err != nil {
-		return
-	}
-
-	result, err := clientSurvicalAnalysis.Execute()
 	if err != nil {
 		return
 	}

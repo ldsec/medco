@@ -297,12 +297,12 @@ func init() {
         }
       }
     },
-    "/survival-analysis/{granularity}": {
-      "get": {
+    "/survival-analysis": {
+      "post": {
         "security": [
           {
             "medco-jwt": [
-              "medco-explore"
+              "medco-survival-analysis"
             ]
           }
         ],
@@ -313,22 +313,20 @@ func init() {
         "operationId": "getSurvivalAnalysis",
         "parameters": [
           {
-            "pattern": "day|week|month|year",
-            "type": "string",
-            "description": "Time point resolution",
-            "name": "granularity",
-            "in": "path",
-            "required": true
-          },
-          {
-            "description": "User public key and selection panels",
-            "name": "userPublicKeyAndPanels",
+            "description": "User public key, patient list and time codes strings to run the survival analysis",
+            "name": "body",
             "in": "body",
             "schema": {
               "type": "object",
               "properties": {
-                "panels": {
-                  "$ref": "#/definitions/exploreQuery/properties/panels"
+                "patientSetID": {
+                  "type": "string"
+                },
+                "timeCodes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 },
                 "userPublicKey": {
                   "$ref": "#/definitions/exploreQuery/properties/userPublicKey"
@@ -475,6 +473,9 @@ func init() {
             }
           }
         },
+        "patientSetID": {
+          "type": "string"
+        },
         "status": {
           "type": "string",
           "enum": [
@@ -514,7 +515,7 @@ func init() {
         "count_per_site_shuffled_obfuscated",
         "count_global",
         "count_global_obfuscated",
-        "survival_analysis"
+        "patient_set"
       ]
     },
     "exploreSearch": {
@@ -601,7 +602,8 @@ func init() {
       "enum": [
         "medco-network",
         "medco-explore",
-        "medco-genomic-annotations"
+        "medco-genomic-annotations",
+        "medco-surival-analysis"
       ]
     },
     "user": {
@@ -1210,12 +1212,12 @@ func init() {
         }
       }
     },
-    "/survival-analysis/{granularity}": {
-      "get": {
+    "/survival-analysis": {
+      "post": {
         "security": [
           {
             "medco-jwt": [
-              "medco-explore"
+              "medco-survival-analysis"
             ]
           }
         ],
@@ -1226,22 +1228,20 @@ func init() {
         "operationId": "getSurvivalAnalysis",
         "parameters": [
           {
-            "pattern": "day|week|month|year",
-            "type": "string",
-            "description": "Time point resolution",
-            "name": "granularity",
-            "in": "path",
-            "required": true
-          },
-          {
-            "description": "User public key and selection panels",
-            "name": "userPublicKeyAndPanels",
+            "description": "User public key, patient list and time codes strings to run the survival analysis",
+            "name": "body",
             "in": "body",
             "schema": {
               "type": "object",
               "properties": {
-                "panels": {
-                  "$ref": "#/definitions/exploreQueryPanels"
+                "patientSetID": {
+                  "type": "string"
+                },
+                "timeCodes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 },
                 "userPublicKey": {
                   "type": "string",
@@ -1311,7 +1311,51 @@ func init() {
           }
         },
         "panels": {
-          "$ref": "#/definitions/exploreQueryPanels"
+          "description": "i2b2 panels (linked by an AND)",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "not"
+            ],
+            "properties": {
+              "items": {
+                "description": "i2b2 items (linked by an OR)",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "encrypted",
+                    "queryTerm"
+                  ],
+                  "properties": {
+                    "encrypted": {
+                      "type": "boolean"
+                    },
+                    "operator": {
+                      "type": "string",
+                      "enum": [
+                        "exists",
+                        "equals"
+                      ]
+                    },
+                    "queryTerm": {
+                      "type": "string",
+                      "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/?)$"
+                    },
+                    "value": {
+                      "type": "string",
+                      "maxLength": 0
+                    }
+                  }
+                }
+              },
+              "not": {
+                "description": "exclude the i2b2 panel",
+                "type": "boolean"
+              }
+            }
+          }
         },
         "type": {
           "$ref": "#/definitions/exploreQueryType"
@@ -1321,54 +1365,6 @@ func init() {
           "pattern": "^[\\w=-]+$"
         }
       }
-    },
-    "exploreQueryPanels": {
-      "description": "i2b2 panels (linked by an AND)",
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": [
-          "not"
-        ],
-        "properties": {
-          "items": {
-            "description": "i2b2 items (linked by an OR)",
-            "type": "array",
-            "items": {
-              "type": "object",
-              "required": [
-                "encrypted",
-                "queryTerm"
-              ],
-              "properties": {
-                "encrypted": {
-                  "type": "boolean"
-                },
-                "operator": {
-                  "type": "string",
-                  "enum": [
-                    "exists",
-                    "equals"
-                  ]
-                },
-                "queryTerm": {
-                  "type": "string",
-                  "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/?)$"
-                },
-                "value": {
-                  "type": "string",
-                  "maxLength": 0
-                }
-              }
-            }
-          },
-          "not": {
-            "description": "exclude the i2b2 panel",
-            "type": "boolean"
-          }
-        }
-      },
-      "x-go-gen-location": "models"
     },
     "exploreQueryResultElement": {
       "type": "object",
@@ -1403,6 +1399,9 @@ func init() {
               }
             }
           }
+        },
+        "patientSetID": {
+          "type": "string"
         },
         "status": {
           "type": "string",
@@ -1443,7 +1442,7 @@ func init() {
         "count_per_site_shuffled_obfuscated",
         "count_global",
         "count_global_obfuscated",
-        "survival_analysis"
+        "patient_set"
       ]
     },
     "exploreSearch": {
@@ -1530,7 +1529,8 @@ func init() {
       "enum": [
         "medco-network",
         "medco-explore",
-        "medco-genomic-annotations"
+        "medco-genomic-annotations",
+        "medco-surival-analysis"
       ]
     },
     "user": {

@@ -4,6 +4,8 @@ import (
 	"os"
 	"strings"
 
+	survivalcli "github.com/ldsec/medco-connector/survival/cli"
+
 	medcoclient "github.com/ldsec/medco-connector/client"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -84,12 +86,12 @@ func main() {
 		cli.StringFlag{
 			Name:  "granularity, g",
 			Usage: "Granularity",
-			Value: "Year",
+			Value: "year",
 		},
 		cli.Int64Flag{
 			Name:  "limit, l",
 			Usage: "Limit ",
-			Value: 3000,
+			Value: 10,
 		},
 	}
 
@@ -173,12 +175,13 @@ func main() {
 			ArgsUsage:   "[-g granularity] [-l limit]",
 			Description: "Returns the points of the survival curve",
 			Action: func(c *cli.Context) error {
-				return medcoclient.ExecuteClientSurvivalAnalysis(
+				return survivalcli.ClientSurvival(
 					c.GlobalString("token"),
-					c.GlobalString("user"),
-					c.GlobalString("password"),
 					c.String("granularity"),
 					c.Int64("limit"),
+					c.Args().First()+" "+strings.Join(c.Args().Tail(), " "),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
 					c.GlobalBool("disableTLSCheck"),
 				)
 			},
