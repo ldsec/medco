@@ -25,6 +25,7 @@ require (
 	go.dedis.ch/onet/v3 v3.1.0
 	go.mongodb.org/mongo-driver v1.3.0 // indirect
 	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
+	golang.org/x/tools v0.0.0-20190617190820-da514acc4774 // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
 
