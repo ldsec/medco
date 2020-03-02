@@ -78,6 +78,7 @@ func MedCoNodeExploreQueryHandler(params medco_node.ExploreQueryParams, principa
 		Result: &models.ExploreQueryResultElement{
 			EncryptedCount:       query.Result.EncCount,
 			EncryptedPatientList: query.Result.EncPatientList,
+			PatientSetID:         query.Result.PatientSetID,
 			Timers:               timers,
 			Status:               models.ExploreQueryResultElementStatusAvailable,
 		}})

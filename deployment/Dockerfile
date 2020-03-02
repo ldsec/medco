@@ -43,7 +43,11 @@ ENV I2B2_HIVE_URL=http://i2b2:8080/i2b2/services \
     GA_DB_PORT=5432 \
     GA_DB_USER=genomicannotations \
     GA_DB_PW=genomicannotations \
-    GA_DB_NAME=gamedcosrv
-
+    GA_DB_NAME=gamedcosrv \
+    DIRECT_ACCESS_DB_HOST=postgresql \
+    DIRECT_ACCESS_DB_PORT=5432 \
+    DIRECT_ACCESS_DB_USER=i2b2 \
+    DIRECT_ACCESS_DB_PW=i2b2 \
+    DIRECT_ACCESS_DB_NAME=i2b2medcosrv
 EXPOSE 1999
 ENTRYPOINT docker-entrypoint.sh medco-connector-server --write-timeout=${SERVER_HTTP_WRITE_TIMEOUT_SECONDS}s

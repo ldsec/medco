@@ -80,6 +80,9 @@ func (o *GetSurvivalAnalysis) ServeHTTP(rw http.ResponseWriter, r *http.Request)
 // swagger:model GetSurvivalAnalysisBody
 type GetSurvivalAnalysisBody struct {
 
+	// ID
+	ID string `json:"ID,omitempty"`
+
 	// patient set ID
 	PatientSetID string `json:"patientSetID,omitempty"`
 

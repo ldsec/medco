@@ -2,11 +2,13 @@ package i2b2
 
 import (
 	"errors"
-	"github.com/ldsec/medco-connector/restapi/models"
-	"github.com/ldsec/medco-connector/util/server"
-	"github.com/sirupsen/logrus"
+	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/ldsec/medco-connector/restapi/models"
+	utilserver "github.com/ldsec/medco-connector/util/server"
+	"github.com/sirupsen/logrus"
 )
 
 // GetOntologyChildren makes request to browse the i2b2 ontology
@@ -26,7 +28,7 @@ func GetOntologyChildren(path string) (results []*models.ExploreSearchResultElem
 
 	} else if path == "/" {
 		err = i2b2XMLRequest(
-			utilserver.I2b2HiveURL+ "/OntologyService/getCategories",
+			utilserver.I2b2HiveURL+"/OntologyService/getCategories",
 			NewOntReqGetCategoriesMessageBody(),
 			xmlResponse,
 		)
@@ -36,11 +38,12 @@ func GetOntologyChildren(path string) (results []*models.ExploreSearchResultElem
 
 	} else {
 		err = i2b2XMLRequest(
-			utilserver.I2b2HiveURL+ "/OntologyService/getChildren",
+			utilserver.I2b2HiveURL+"/OntologyService/getChildren",
 			NewOntReqGetChildrenMessageBody(convertPathToI2b2Format(path)),
 			xmlResponse,
 		)
 		if err != nil {
+
 			return nil, err
 		}
 	}
@@ -71,15 +74,15 @@ func parseI2b2Concept(concept Concept) (result *models.ExploreSearchResultElemen
 	false := false
 
 	result = &models.ExploreSearchResultElement{
-		Name: concept.Name,
+		Name:        concept.Name,
 		DisplayName: concept.Name,
-		Code: concept.Basecode,
+		Code:        concept.Basecode,
 		MedcoEncryption: &models.ExploreSearchResultElementMedcoEncryption{
-			Encrypted: &false,
+			Encrypted:   &false,
 			ChildrenIds: []int64{},
 		},
 		Metadata: nil,
-		Path: convertPathFromI2b2Format(concept.Key),
+		Path:     convertPathFromI2b2Format(concept.Key),
 		//Type: models.SearchResultElementTypeConcept,
 		//Leaf: false,
 	}
@@ -110,7 +113,7 @@ func parseI2b2Concept(concept Concept) (result *models.ExploreSearchResultElemen
 	if splitCode[0] == "ENC_ID" {
 		result.MedcoEncryption.Encrypted = &true
 
-		if  parsedCode, parseErr := strconv.ParseInt(splitCode[1], 10, 64); parseErr != nil {
+		if parsedCode, parseErr := strconv.ParseInt(splitCode[1], 10, 64); parseErr != nil {
 			logrus.Error("Malformed concept could not be parsed: ", concept.Basecode, "error: ", parseErr)
 			return nil, parseErr
 		} else if len(splitCode) != 2 {
@@ -121,7 +124,7 @@ func parseI2b2Concept(concept Concept) (result *models.ExploreSearchResultElemen
 			result.MedcoEncryption.ID = &parsedCode
 		}
 
-	// if concept from loader v1 encrypted (from metadata xml)
+		// if concept from loader v1 encrypted (from metadata xml)
 	} else if concept.Metadataxml.ValueMetadata.EncryptedType != "" {
 		result.MedcoEncryption.Encrypted = &true
 
@@ -132,17 +135,21 @@ func parseI2b2Concept(concept Concept) (result *models.ExploreSearchResultElemen
 		}
 
 		result.MedcoEncryption.ID = &parsedNodeID
-		for _, childEncryptIDString := range strings.Split(concept.Metadataxml.ValueMetadata.ChildrenEncryptIDs, ",") {
 
-			childEncryptID, parseErr := strconv.ParseInt(childEncryptIDString, 10, 64)
-			if parseErr != nil {
-				logrus.Error("Malformed ID could not be parsed: ", childEncryptIDString, "error: ", parseErr)
-				return nil, parseErr
+		if childEncryptIDStrings := concept.Metadataxml.ValueMetadata.ChildrenEncryptIDs; childEncryptIDStrings != "" {
+			for _, childEncryptIDString := range strings.Split(concept.Metadataxml.ValueMetadata.ChildrenEncryptIDs, ";") {
+
+				childEncryptID, parseErr := strconv.ParseInt(childEncryptIDString, 10, 64)
+				if parseErr != nil {
+					logrus.Error("Malformed ID could not be parsed: ", childEncryptIDString, "error: ", parseErr)
+					parseErr = fmt.Errorf("jksfdjklsfdéjklsfdéjklsfdéjklsfdaéjklsfdsfdasfdaéjklsfdéjlsfdaéjklsfdaéjkl %s", parseErr)
+					return nil, parseErr
+				}
+				result.MedcoEncryption.ChildrenIds = append(result.MedcoEncryption.ChildrenIds, childEncryptID)
 			}
-			result.MedcoEncryption.ChildrenIds = append(result.MedcoEncryption.ChildrenIds, childEncryptID)
 		}
 
-	// if genomic concept from data loader v0 (from concept code)
+		// if genomic concept from data loader v0 (from concept code)
 	} else if splitCode[0] == "GEN" {
 		result.Type = models.ExploreSearchResultElementTypeGenomicAnnotation
 

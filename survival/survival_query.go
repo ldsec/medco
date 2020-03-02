@@ -7,9 +7,6 @@ import (
 	"github.com/ldsec/medco-connector/survival/server/directaccess"
 )
 
-//TODO remove this magic
-const queryname = `I'm the survival query !`
-
 type Query struct {
 	ID            string
 	UserPublicKey string
@@ -42,7 +39,7 @@ func (q *Query) GetPatientSetID() string {
 }
 
 func (q *Query) GetTimeCodes() []string {
-	return q.GetTimeCodes()
+	return q.TimeCodes
 }
 
 //TODO sync map this
@@ -61,5 +58,7 @@ func (q *Query) SetResultMap(resultMap map[string][2]string) error {
 }
 
 func (q *Query) Execute() error {
-	return directaccess.QueryTimePoints(q, 1)
+	err := directaccess.QueryTimePoints(q, 1)
+
+	return err
 }

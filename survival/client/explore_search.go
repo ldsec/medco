@@ -116,7 +116,7 @@ func (search *ExploreSearch) submitToNode(idx int) (result []*models.ExploreSear
 	}
 	params.SetSearchRequest(searchRequest)
 
-	response, err := search.httpMedCoClients[0].MedcoNode.ExploreSearch(params, httptransport.BearerToken(search.AuthToken))
+	response, err := search.httpMedCoClients[idx].MedcoNode.ExploreSearch(params, httptransport.BearerToken(search.AuthToken))
 	if err != nil {
 		logrus.Error("explore search  error: ", err)
 		return

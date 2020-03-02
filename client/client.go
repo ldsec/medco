@@ -41,17 +41,6 @@ func ExecuteClientQuery(token, username, password, queryType, queryString, resul
 		logrus.Error("invalid query type")
 		return
 	}
-	//ask the nodes to do that at the beginning of the survival queries
-	/*
-		if queryTypeParsed == models.ExploreQueryTypeSurvival {
-			var timeCodes []string
-			timeCodes, err = survival.GetTimeCodes()
-			//TODO indentify this global query in a map[queryID] timecodes or somehting like that
-
-			survival.GlobalTimeCodes = timeCodes
-			survival.Init()
-		}
-	*/
 
 	// parse query string
 	panelsItemKeys, panelsIsNot, err := ParseQueryString(queryString)
@@ -214,7 +203,11 @@ func ParseQueryString(queryString string) (panelsItemKeys [][]int64, panelsIsNot
 				}
 
 			} else {
+				queryItem = strings.TrimSpace(queryItem)
 				parsedInt, parsedErr := strconv.ParseInt(queryItem, 10, 64)
+				if parsedErr != nil {
+					logrus.Debug("Caught exception from strconv %s: ", parsedErr)
+				}
 
 				// case 2: simple integer
 				if parsedErr == nil {

@@ -204,6 +204,8 @@ paths:
         schema:
           type: "object"
           properties:
+            ID:
+              type: "string"
             userPublicKey:
               $ref: "#/definitions/exploreQuery/properties/userPublicKey"
             patientSetID:
@@ -460,20 +462,6 @@ definitions:
         type: "array"
         items:
           type: "string"
-      encryptedSurvivalAnalysis:
-        type: "array"
-        items:
-          type: "object"
-          properties:
-            timecode:
-              type: "string"
-            timepoint:
-              type: "object"
-              properties:
-                eventofinterest:
-                  type: "string"
-                censoringevent:
-                  type: "string"
       timers:
         type: "array"
         items:
@@ -492,7 +480,7 @@ definitions:
       - medco-network
       - medco-explore
       - medco-genomic-annotations
-      - medco-surival-analysis
+      - medco-survival-analysis
 
   user:
     type: "object"

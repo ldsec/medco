@@ -47,15 +47,7 @@ const TimeConceptRootPath = `/SurvivalAnalysis/`
 //TODO another function already exists in unlynx wrapper
 func ZeroPointEncryption() (res string, err error) {
 
-	events, err := unlynx.EncryptWithCothorityKey(int64(0))
-	if err != nil {
-		return
-	}
-	censoringEvents, err := unlynx.EncryptWithCothorityKey(int64(0))
-	if err != nil {
-		return
-	}
-	res = events + eventFlagSeparator + censoringEvents
+	res, err = unlynx.EncryptWithCothorityKey(int64(0))
 	return
 }
 

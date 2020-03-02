@@ -26,9 +26,6 @@ type ExploreQueryResultElement struct {
 	// encrypted patient list
 	EncryptedPatientList []string `json:"encryptedPatientList"`
 
-	// encrypted survival analysis
-	EncryptedSurvivalAnalysis []*ExploreQueryResultElementEncryptedSurvivalAnalysisItems0 `json:"encryptedSurvivalAnalysis"`
-
 	// patient set ID
 	PatientSetID string `json:"patientSetID,omitempty"`
 
@@ -44,10 +41,6 @@ type ExploreQueryResultElement struct {
 func (m *ExploreQueryResultElement) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateEncryptedSurvivalAnalysis(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if err := m.validateStatus(formats); err != nil {
 		res = append(res, err)
 	}
@@ -59,31 +52,6 @@ func (m *ExploreQueryResultElement) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *ExploreQueryResultElement) validateEncryptedSurvivalAnalysis(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.EncryptedSurvivalAnalysis) { // not required
-		return nil
-	}
-
-	for i := 0; i < len(m.EncryptedSurvivalAnalysis); i++ {
-		if swag.IsZero(m.EncryptedSurvivalAnalysis[i]) { // not required
-			continue
-		}
-
-		if m.EncryptedSurvivalAnalysis[i] != nil {
-			if err := m.EncryptedSurvivalAnalysis[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("encryptedSurvivalAnalysis" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
-	}
-
 	return nil
 }
 
@@ -172,101 +140,6 @@ func (m *ExploreQueryResultElement) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (m *ExploreQueryResultElement) UnmarshalBinary(b []byte) error {
 	var res ExploreQueryResultElement
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*m = res
-	return nil
-}
-
-// ExploreQueryResultElementEncryptedSurvivalAnalysisItems0 explore query result element encrypted survival analysis items0
-// swagger:model ExploreQueryResultElementEncryptedSurvivalAnalysisItems0
-type ExploreQueryResultElementEncryptedSurvivalAnalysisItems0 struct {
-
-	// timecode
-	Timecode string `json:"timecode,omitempty"`
-
-	// timepoint
-	Timepoint *ExploreQueryResultElementEncryptedSurvivalAnalysisItems0Timepoint `json:"timepoint,omitempty"`
-}
-
-// Validate validates this explore query result element encrypted survival analysis items0
-func (m *ExploreQueryResultElementEncryptedSurvivalAnalysisItems0) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateTimepoint(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *ExploreQueryResultElementEncryptedSurvivalAnalysisItems0) validateTimepoint(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Timepoint) { // not required
-		return nil
-	}
-
-	if m.Timepoint != nil {
-		if err := m.Timepoint.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("timepoint")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (m *ExploreQueryResultElementEncryptedSurvivalAnalysisItems0) MarshalBinary() ([]byte, error) {
-	if m == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(m)
-}
-
-// UnmarshalBinary interface implementation
-func (m *ExploreQueryResultElementEncryptedSurvivalAnalysisItems0) UnmarshalBinary(b []byte) error {
-	var res ExploreQueryResultElementEncryptedSurvivalAnalysisItems0
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*m = res
-	return nil
-}
-
-// ExploreQueryResultElementEncryptedSurvivalAnalysisItems0Timepoint explore query result element encrypted survival analysis items0 timepoint
-// swagger:model ExploreQueryResultElementEncryptedSurvivalAnalysisItems0Timepoint
-type ExploreQueryResultElementEncryptedSurvivalAnalysisItems0Timepoint struct {
-
-	// censoringevent
-	Censoringevent string `json:"censoringevent,omitempty"`
-
-	// eventofinterest
-	Eventofinterest string `json:"eventofinterest,omitempty"`
-}
-
-// Validate validates this explore query result element encrypted survival analysis items0 timepoint
-func (m *ExploreQueryResultElementEncryptedSurvivalAnalysisItems0Timepoint) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (m *ExploreQueryResultElementEncryptedSurvivalAnalysisItems0Timepoint) MarshalBinary() ([]byte, error) {
-	if m == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(m)
-}
-
-// UnmarshalBinary interface implementation
-func (m *ExploreQueryResultElementEncryptedSurvivalAnalysisItems0Timepoint) UnmarshalBinary(b []byte) error {
-	var res ExploreQueryResultElementEncryptedSurvivalAnalysisItems0Timepoint
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

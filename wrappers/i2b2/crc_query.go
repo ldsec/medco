@@ -2,7 +2,8 @@ package i2b2
 
 import (
 	"errors"
-	"github.com/ldsec/medco-connector/util/server"
+
+	utilserver "github.com/ldsec/medco-connector/util/server"
 	"github.com/sirupsen/logrus"
 )
 
@@ -15,7 +16,7 @@ func ExecutePsmQuery(queryName string, panelsItemKeys [][]string, panelsIsNot []
 	}
 
 	err = i2b2XMLRequest(
-		utilserver.I2b2HiveURL+ "/QueryToolService/request",
+		utilserver.I2b2HiveURL+"/QueryToolService/request",
 		NewCrcPsmReqFromQueryDef(
 			queryName,
 			panelsItemKeys,
@@ -72,7 +73,7 @@ func GetPatientSet(patientSetID string) (patientIDs []string, patientDummyFlags 
 	}
 
 	err = i2b2XMLRequest(
-		utilserver.I2b2HiveURL+ "/QueryToolService/pdorequest",
+		utilserver.I2b2HiveURL+"/QueryToolService/pdorequest",
 		NewCrcPdoReqFromInputList(patientSetID),
 		xmlResponse,
 	)

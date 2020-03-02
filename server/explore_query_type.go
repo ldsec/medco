@@ -106,7 +106,7 @@ func NewExploreQueryType(requestedQueryType models.ExploreQueryType) (queryType 
 		}
 	case models.ExploreQueryTypePatientSet:
 		queryType = ExploreQueryType{
-			PatientList: true,
+			PatientList: false,
 			CountType:   Global,
 			Shuffled:    false,
 			Obfuscated:  false,

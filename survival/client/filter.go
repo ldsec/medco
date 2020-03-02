@@ -9,13 +9,14 @@ import (
 )
 
 const (
-	basePath   string = "/SurvivalAnalysis/"
-	searchType string = "children"
+	basePath   string = "/i2b2_SRVA/SurvivalAnalysis/"
+	searchType string = ""
 )
 
 var fromRequestToI2b2 map[string]string = map[string]string{"day": "Day", "week": "Week", "month": "Month", "year": "Year"}
 
 func GetTimeCodes(accessToken, granularity string, limit int64, disableTLS bool) (timeCodes map[string]int64, err error) {
+
 	gran, ok := fromRequestToI2b2[granularity]
 	if !ok {
 		err = fmt.Errorf("Time resolution %s not found in available granularities", granularity)
@@ -40,10 +41,11 @@ func GetTimeCodes(accessToken, granularity string, limit int64, disableTLS bool)
 		recordSkipped = func(skipResult *models.ExploreSearchResultElement) {
 		}
 	}
+	timeCodes = make(map[string]int64)
 
 	for _, result := range searchResults.Elements {
-
-		if *result.MedcoEncryption.Encrypted && *result.Leaf {
+		//the Leaf nature of the concept was not return in getontolgoy children
+		if *result.MedcoEncryption.Encrypted /* && *result.Leaf*/ {
 			if value, isNotValidInt := strconv.ParseInt(result.Name, 10, 64); isNotValidInt == nil && value < limit {
 				timeCodes[result.Name] = value
 
@@ -56,9 +58,12 @@ func GetTimeCodes(accessToken, granularity string, limit int64, disableTLS bool)
 	}
 
 	if length := len(skipped); length != 0 {
-		logrus.Debug("Skipped %d concepts", length)
+		logrus.Debug(fmt.Sprintf("Skipped %d concepts", length))
 		for _, skipConcept := range skipped {
 			logrus.Debug(*skipConcept)
+		}
+		if err != nil {
+			return
 		}
 	}
 

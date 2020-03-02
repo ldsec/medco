@@ -9,7 +9,7 @@ const queryType models.ExploreQueryType = models.ExploreQueryTypePatientSet
 
 //fast solution to avoid cyclic import with medco-connector/client
 
-func GetPatientList(accessToken string, panels [][]string, panelsIsNot []bool, disableTLSCheck bool) (patientSetIDs map[int]string, err error) {
+func GetPatientSetIDs(accessToken string, panels [][]string, panelsIsNot []bool, disableTLSCheck bool) (patientSetIDs map[int]string, err error) {
 
 	clientQuery, err := medcoclient.NewExploreQuery(accessToken, queryType, panels, panelsIsNot, disableTLSCheck)
 	if err != nil {
@@ -19,7 +19,7 @@ func GetPatientList(accessToken string, panels [][]string, panelsIsNot []bool, d
 	if err != nil {
 		return
 	}
-
+	patientSetIDs = make(map[int]string)
 	for nodeIdx, result := range nodesResult {
 		patientSetIDs[nodeIdx] = result.PatientSetID
 	}

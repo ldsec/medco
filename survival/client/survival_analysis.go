@@ -22,11 +22,12 @@ import (
 
 //for medco cli
 type SurvivalAnalysis struct {
-
 	// httpMedCoClient is the HTTP client for the MedCo connector
 	httpMedCoClients []*client.MedcoCli
 	// authToken is the OIDC authentication JWT
 	authToken string
+
+	id string
 
 	patientSetIDs map[int]string
 
@@ -42,6 +43,7 @@ type SurvivalAnalysis struct {
 func NewSurvivalAnalysis(token string, patientSetIDs map[int]string, timeCodes []string, disableTLSCheck bool) (q *SurvivalAnalysis, err error) {
 	q = &SurvivalAnalysis{
 		authToken:     token,
+		id:            "MedCo_Survival_Analysis" + time.Now().Format(time.RFC3339),
 		patientSetIDs: patientSetIDs,
 		timeCodes:     timeCodes,
 		formats:       strfmt.Default,
@@ -85,7 +87,7 @@ func NewSurvivalAnalysis(token string, patientSetIDs map[int]string, timeCodes [
 		nodeTransport.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: disableTLSCheck}
 		q.httpMedCoClients[*node.Index] = client.New(nodeTransport, nil)
 	}
-
+	//one pair per time point in the event matrix
 	q.userPublicKey, q.userPrivateKey, err = unlynx.GenerateKeyPair()
 	if err != nil {
 		return
@@ -115,6 +117,7 @@ func (clientSurvivalAnalysis *SurvivalAnalysis) Execute() (results []*EncryptedR
 		go func(idx int) {
 			res, Error := clientSurvivalAnalysis.submitToNode(idx)
 			if Error != nil {
+				logrus.Errorf("Survival analysis exection error : %s", Error)
 				errChan <- Error
 			}
 			resultChan <- res
@@ -130,7 +133,11 @@ nodeLoop:
 			concatEncryptedResults(results, nodeLoopRes)
 
 		case nodeLoopErr := <-errChan:
-			err = fmt.Errorf("Node %d threw %s : %s", idx, nodeLoopErr.Error(), err.Error())
+			if err != nil {
+				err = fmt.Errorf("Node %d threw %s : %s", idx, nodeLoopErr, err)
+			} else {
+				err = fmt.Errorf("Node %d threw %s", idx, nodeLoopErr)
+			}
 		case <-timeout:
 			err = fmt.Errorf(" Timeout : %s", err.Error())
 			break nodeLoop

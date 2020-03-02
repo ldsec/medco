@@ -3,9 +3,10 @@ package i2b2
 import (
 	"bytes"
 	"encoding/xml"
-	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/sirupsen/logrus"
 )
 
 // todo doc

@@ -21,11 +21,12 @@ func (clientSurvivalAnalysis *SurvivalAnalysis) submitToNode(nodeIdx int) (resul
 	patientSetID, ok := clientSurvivalAnalysis.patientSetIDs[nodeIdx]
 
 	if !ok {
-		err = fmt.Errorf("Node index %d not found", nodeIdx)
+		err = fmt.Errorf("Node index %d not found in patient sets", nodeIdx)
 		return
 	}
 
 	body := &survival_analysis.GetSurvivalAnalysisBody{
+		ID:            clientSurvivalAnalysis.id,
 		TimeCodes:     clientSurvivalAnalysis.timeCodes,
 		PatientSetID:  patientSetID,
 		UserPublicKey: clientSurvivalAnalysis.userPublicKey,
@@ -34,7 +35,7 @@ func (clientSurvivalAnalysis *SurvivalAnalysis) submitToNode(nodeIdx int) (resul
 	response, err := clientSurvivalAnalysis.httpMedCoClients[nodeIdx].SurvivalAnalysis.GetSurvivalAnalysis(params, httptransport.BearerToken(clientSurvivalAnalysis.authToken))
 
 	if err != nil {
-		logrus.Error("explore query error: ", err)
+		logrus.Error("survival analysis error: ", err)
 		return
 	}
 	results = response.GetPayload()

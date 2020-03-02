@@ -2,12 +2,13 @@ package utilserver
 
 import (
 	"database/sql"
-	"github.com/sirupsen/logrus"
-	onetLog "go.dedis.ch/onet/v3/log"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/sirupsen/logrus"
+	onetLog "go.dedis.ch/onet/v3/log"
 )
 
 // LogLevel is the log level, assuming the same convention as the cothority / unlynx log levels:

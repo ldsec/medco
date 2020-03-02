@@ -319,6 +319,9 @@ func init() {
             "schema": {
               "type": "object",
               "properties": {
+                "ID": {
+                  "type": "string"
+                },
                 "patientSetID": {
                   "type": "string"
                 },
@@ -451,28 +454,6 @@ func init() {
             "type": "string"
           }
         },
-        "encryptedSurvivalAnalysis": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "timecode": {
-                "type": "string"
-              },
-              "timepoint": {
-                "type": "object",
-                "properties": {
-                  "censoringevent": {
-                    "type": "string"
-                  },
-                  "eventofinterest": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        },
         "patientSetID": {
           "type": "string"
         },
@@ -603,7 +584,7 @@ func init() {
         "medco-network",
         "medco-explore",
         "medco-genomic-annotations",
-        "medco-surival-analysis"
+        "medco-survival-analysis"
       ]
     },
     "user": {
@@ -1234,6 +1215,9 @@ func init() {
             "schema": {
               "type": "object",
               "properties": {
+                "ID": {
+                  "type": "string"
+                },
                 "patientSetID": {
                   "type": "string"
                 },
@@ -1378,28 +1362,6 @@ func init() {
             "type": "string"
           }
         },
-        "encryptedSurvivalAnalysis": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "timecode": {
-                "type": "string"
-              },
-              "timepoint": {
-                "type": "object",
-                "properties": {
-                  "censoringevent": {
-                    "type": "string"
-                  },
-                  "eventofinterest": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        },
         "patientSetID": {
           "type": "string"
         },
@@ -1530,7 +1492,7 @@ func init() {
         "medco-network",
         "medco-explore",
         "medco-genomic-annotations",
-        "medco-surival-analysis"
+        "medco-survival-analysis"
       ]
     },
     "user": {
