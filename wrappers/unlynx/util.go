@@ -1,6 +1,7 @@
 package unlynx
 
 import (
+	"errors"
 	"github.com/ldsec/medco-connector/util/server"
 	servicesmedco "github.com/ldsec/medco-unlynx/services"
 	libunlynx "github.com/ldsec/unlynx/lib"
@@ -28,7 +29,14 @@ func serializeCipherVector(cipherVector libunlynx.CipherVector) (serializedVecto
 
 // deserializeCipherVector deserializes string-encoded cipher texts into a vector
 func deserializeCipherVector(cipherTexts []string) (cipherVector libunlynx.CipherVector, err error) {
-	for _, cipherText := range cipherTexts {
+	for idx, cipherText := range cipherTexts {
+
+		if len(cipherText) == 0 {
+			err = errors.New("invalid value in the cipher vector index " + strconv.Itoa(idx))
+			logrus.Error(err)
+			return
+		}
+
 		deserialized := libunlynx.CipherText{}
 		err = deserialized.Deserialize(cipherText)
 		if err != nil {
