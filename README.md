@@ -23,6 +23,11 @@ make swagger-gen
 To learn how to use it, check the [CLI documentation](https://ldsec.gitbook.io/medco-documentation/system-administrators/cli).
 
 ## Source code organization
+
+MedCo Connector uses [go-swagger](https://github.com/go-swagger/go-swagger) to generate server, client and models code.
+As such, the code is organized around the Swagger definitions located in 
+[swagger/medco-connector.yml](swagger/medco-connector.yml).
+
 - *client*: client logic
 - *cmd*: runnable applications
     - *cmd/medco-cli-client*: client application
