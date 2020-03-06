@@ -197,7 +197,6 @@ services:
       intra-node-srv0:
       inter-nodes:
     volumes:
-    - ../../configuration-profiles/test-local-3nodes/group.toml:/medco-configuration/group.toml
     - ../../configuration-profiles/test-local-3nodes/certificate.crt:/medco-configuration/certificate.crt
     - ../../configuration-profiles/test-local-3nodes/certificate.key:/medco-configuration/certificate.key
 
@@ -249,3 +248,6 @@ networks:
     driver: bridge
   intra-node-srv2:
     driver: bridge
+
+volumes:
+  medcodb:

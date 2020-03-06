@@ -221,3 +221,6 @@ networks:
     driver: bridge
   intra-node-srv2:
     driver: bridge
+
+volumes:
+  medcodb:

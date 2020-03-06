@@ -40,7 +40,6 @@ services:
     volumes:
       - ../docker-images/nginx/www-data:/www-data
       - ../docker-images/nginx/conf.d:/etc/nginx/conf.d
-      - ../configuration-profiles/dev-local-3nodes/group.toml:/medco-configuration/group.toml
 
   postgresql:
     image: postgres:9.6
@@ -49,6 +48,7 @@ services:
     ports:
     - "5432"
     volumes:
+    - medcodb:/var/lib/postgresql/data
     - ../docker-images/postgresql/initdb-data:/docker-entrypoint-initdb.d
 
   pg-admin:
