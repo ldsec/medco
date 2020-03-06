@@ -136,25 +136,29 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	if queryType.PatientList {
 		logrus.Info(q.ID, ": patient list requested")
 
-		// mask patient IDs
-		timer = time.Now()
-		maskedPatientIDs, err := q.maskPatientIDs(patientIDs, patientDummyFlags)
-		if err != nil {
-			return err
-		}
+		if len(patientIDs) == 0 {
+			logrus.Info(q.ID, ": empty patient list. Skipping masking and key switching")
+		} else {
+			// mask patient IDs
+			timer = time.Now()
+			maskedPatientIDs, err := q.maskPatientIDs(patientIDs, patientDummyFlags)
+			if err != nil {
+				return err
+			}
 
-		logrus.Info(q.ID, ": masked ", len(maskedPatientIDs), " patient IDs")
-		q.addTimers("medco-connector-local-patient-list-masking", timer, nil)
+			logrus.Info(q.ID, ": masked ", len(maskedPatientIDs), " patient IDs")
+			q.addTimers("medco-connector-local-patient-list-masking", timer, nil)
 
-		// key switch the masked patient IDs
-		timer = time.Now()
-		ksMaskedPatientIDs, ksPatientListTimers, err := unlynx.KeySwitchValues(q.ID, maskedPatientIDs, q.Query.UserPublicKey)
-		if err != nil {
-			return err
+			// key switch the masked patient IDs
+			timer = time.Now()
+			ksMaskedPatientIDs, ksPatientListTimers, err := unlynx.KeySwitchValues(q.ID, maskedPatientIDs, q.Query.UserPublicKey)
+			if err != nil {
+				return err
+			}
+			q.addTimers("medco-connector-unlynx-key-switch-patient-list", timer, ksPatientListTimers)
+			q.Result.EncPatientList = ksMaskedPatientIDs
+			logrus.Info(q.ID, ": key switched patient IDs")
 		}
-		q.addTimers("medco-connector-unlynx-key-switch-patient-list", timer, ksPatientListTimers)
-		q.Result.EncPatientList = ksMaskedPatientIDs
-		logrus.Info(q.ID, ": key switched patient IDs")
 	}
 
 	q.addTimers("medco-connector-overall", overallTimer, nil)

@@ -84,11 +84,10 @@ func GetPatientSet(patientSetID string) (patientIDs []string, patientDummyFlags 
 	// extract patient data
 	for _, patient := range xmlResponse.MessageBody.(*CrcPdoRespMessageBody).Response.PatientData.PatientSet.Patient {
 
-		patientIDs = append(patientIDs, patient.PatientID)
-
 		dummyFlagFound := false
 		for _, patientColumn := range patient.Param {
-			if patientColumn.Column == "enc_dummy_flag_cd" {
+			if patientColumn.Column == "enc_dummy_flag_cd" && len(patientColumn.Text) > 0 {
+				patientIDs = append(patientIDs, patient.PatientID)
 				patientDummyFlags = append(patientDummyFlags, patientColumn.Text)
 				dummyFlagFound = true
 				break
@@ -96,7 +95,7 @@ func GetPatientSet(patientSetID string) (patientIDs []string, patientDummyFlags 
 		}
 
 		if !dummyFlagFound {
-			patientDummyFlags = append(patientDummyFlags, "")
+			logrus.Warn("GetPatientSet: ignored patient ", patient.PatientID, " because of missing dummy flag")
 		}
 	}
 
