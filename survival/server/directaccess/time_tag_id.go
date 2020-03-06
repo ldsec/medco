@@ -1,10 +1,11 @@
 package directaccess
 
 import (
-	"errors"
+	"fmt"
 	"strings"
 
 	survivalserver "github.com/ldsec/medco-connector/survival/server"
+	utilserver "github.com/ldsec/medco-connector/util/server"
 )
 
 type DirectAccessTags func(map[string]string) (map[string]string, error)
@@ -34,6 +35,7 @@ func getTagIDs(tags map[string]string) (tagIDs map[string]string, err error) {
 		return
 	}
 	tagIDs = make(map[string]string, len(tags))
+	numberOfRows := 0
 
 	for rows.Next() {
 		recipiens := &tagRecipiens{}
@@ -46,12 +48,16 @@ func getTagIDs(tags map[string]string) (tagIDs map[string]string, err error) {
 		tag = strings.Replace(tag, "\\", "", 1)
 		encTimeCode, ok := tags[tag]
 		if !ok {
-			err = errors.New("tag not found in the map (tags -> encID)")
+			err = fmt.Errorf("tag  %s  not found, node index %d", tag, utilserver.MedCoNodeIdx)
 			return
 		}
 
 		tagIDs[recipiens.conceptCode] = encTimeCode
+		numberOfRows++
 
+	}
+	if numberOfRows == 0 {
+		err = fmt.Errorf("From node %d, Unable to find any of the tag in the data base %s", utilserver.MedCoNodeIdx, DBName)
 	}
 
 	err = rows.Close()

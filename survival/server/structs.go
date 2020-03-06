@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"strings"
-	"sync"
 
 	"time"
 
@@ -27,8 +26,6 @@ type PatientID string
 func (str PatientID) String() string {
 	return string(str)
 }
-
-var ResultMap sync.Map
 
 func BreakBlob(blobValue string) (eventOfInterest, censoringEvent string, err error) {
 	res := strings.Split(blobValue, eventFlagSeparator)

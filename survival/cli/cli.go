@@ -3,6 +3,7 @@ package survivalcli
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"sync"
 	"time"
 
@@ -94,7 +95,7 @@ func ClientSurvival(token string, granularity string, limit int64, queryString, 
 	}()
 
 	select {
-	case <-time.After(time.Duration(30) * time.Second):
+	case <-time.After(time.Duration(300) * time.Second):
 		logrus.Panic("Unexpected delay")
 	case <-signalChan:
 	}
@@ -134,14 +135,22 @@ func ClientSurvival(token string, granularity string, limit int64, queryString, 
 	if err != nil {
 		return
 	}
-	var results []ClientResultElement
+	logrus.Infof("obtained %d results", len(survResults))
 
 	for _, encElement := range survResults {
+		var clearEvent int64
+		var clearCensoringEvent int64
 		clearTimePoint := encTimeCodesInverseMap[encElement.TimePoint]
-		results = append(results, ClientResultElement{ClearTimePoint: clearTimePoint,
-			EncEventOfInterest: encElement.Events.EventsOfInterest,
-			EncCensoringEvent:  encElement.Events.CensoringEvents,
-		})
+		clearEvent, err = unlynx.Decrypt(encElement.Events.EventsOfInterest, survivalAnalysis.GetPrivateKey())
+		if err != nil {
+			return
+		}
+		clearCensoringEvent, err = unlynx.Decrypt(encElement.Events.CensoringEvents, survivalAnalysis.GetPrivateKey())
+		if err != nil {
+			return
+		}
+		logrus.Infof("At time %s , %s events of interests and %s censoring events\n", clearTimePoint, strconv.FormatInt(clearEvent, 10), strconv.FormatInt(clearCensoringEvent, 10))
+
 	}
 	logrus.Info("Survival analysis request done")
 	return

@@ -47,7 +47,8 @@ func GetTimeCodes(accessToken, granularity string, limit int64, disableTLS bool)
 		//the Leaf nature of the concept was not return in getontolgoy children
 		if *result.MedcoEncryption.Encrypted /* && *result.Leaf*/ {
 			if value, isNotValidInt := strconv.ParseInt(result.Name, 10, 64); isNotValidInt == nil && value < limit {
-				timeCodes[result.Name] = value
+
+				timeCodes[result.Name] = *result.MedcoEncryption.ID
 
 			} else {
 				recordSkipped(result)

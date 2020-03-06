@@ -31,6 +31,7 @@ const (
 )
 
 var DirectAccessDB *sql.DB
+var DBName string
 
 //TODO enable once connection debugged
 
@@ -43,6 +44,7 @@ func init() {
 		port = 5432
 	}
 	name := os.Getenv("DIRECT_ACCESS_DB_NAME")
+	DBName = name
 	loginUser := os.Getenv("DIRECT_ACCESS_DB_USER")
 	loginPw := os.Getenv("DIRECT_ACCESS_DB_PW")
 
@@ -70,6 +72,7 @@ type SurvivalQuery interface {
 }
 
 func QueryTimePoints(q SurvivalQuery, batchNumber int) (err error) {
+	var storage sync.Map
 
 	err = DirectAccessDB.Ping()
 
@@ -112,7 +115,7 @@ func QueryTimePoints(q SurvivalQuery, batchNumber int) (err error) {
 			censoring *unlynxResult
 		}, 1024)
 
-		for tag := range tagIDToEncTimePoints {
+		for _, encTimePoint := range tagIDToEncTimePoints {
 			var zeroEvents string
 			var zeroCensoring string
 			zeroEvents, err = survivalserver.ZeroPointEncryption()
@@ -124,7 +127,7 @@ func QueryTimePoints(q SurvivalQuery, batchNumber int) (err error) {
 				return
 			}
 
-			err = aggregateAndKeySwitchSend(q.GetID(), tag, zeroEvents, zeroCensoring, q.GetUserPublicKey(), unlynxChannel)
+			err = aggregateAndKeySwitchSend(q.GetID(), encTimePoint, zeroEvents, zeroCensoring, q.GetUserPublicKey(), unlynxChannel)
 			if err != nil {
 				return
 			}
@@ -133,13 +136,13 @@ func QueryTimePoints(q SurvivalQuery, batchNumber int) (err error) {
 		var receptionBarrier sync.WaitGroup
 		receptionBarrier.Add(len(tagIDToEncTimePoints))
 		for i := 0; i < len(tagIDToEncTimePoints); i++ {
-			err = aggregateAndKeySwitchCollect(&survivalserver.ResultMap, unlynxChannel, &receptionBarrier)
+			err = aggregateAndKeySwitchCollect(&storage, unlynxChannel, &receptionBarrier)
 			if err != nil {
 				return
 			}
 		}
 
-		err = fillResult(q)
+		err = fillResult(q, &storage)
 
 		return
 	}
@@ -178,24 +181,29 @@ func QueryTimePoints(q SurvivalQuery, batchNumber int) (err error) {
 				waitGroup.Add(len(batch))
 				var events []string
 				var censorings []string
-				for idx, timeCode := range batch {
+				for _, timeCode := range batch {
 
 					//error chans ??
-					go func(idx int, timeCode string) {
+					go func(timeCode string) {
 
 						result := survivalserver.Result{}
-						defer func() {
+						//TODO not elegant
+						deferred := func(err error) {
 							result.Error = err
-							survivalserver.ResultMap.Store(tagIDToEncTimePoints[timeCode], result)
-							exceptionHandler.PushError(err)
+							//storage.Store(tagIDToEncTimePoints[timeCode], result)
+							if err != nil {
+								exceptionHandler.PushError(err)
+							}
 							waitGroup.Done()
-						}()
+						}
 						query := buildSingleQuery(patientSet, timeCode)
 
 						rows, err := DirectAccessDB.Query(query)
 
-						err = survivalserver.NiceError(err)
+						//logrus.Panic("\n\n\n                   :3\n\n")
 						if err != nil {
+
+							deferred(err)
 
 							return
 						}
@@ -208,13 +216,14 @@ func QueryTimePoints(q SurvivalQuery, batchNumber int) (err error) {
 
 							err = survivalserver.NiceError(err)
 							if err != nil {
+								deferred(err)
 
 								return
 							}
 							event, censoring, err := survivalserver.BreakBlob(blob)
 							err = survivalserver.NiceError(err)
 							if err != nil {
-
+								deferred(err)
 								return
 							}
 							events = append(events, event)
@@ -223,6 +232,7 @@ func QueryTimePoints(q SurvivalQuery, batchNumber int) (err error) {
 						err = rows.Close()
 						err = survivalserver.NiceError(err)
 						if err != nil {
+							deferred(err)
 
 							return
 						}
@@ -230,36 +240,45 @@ func QueryTimePoints(q SurvivalQuery, batchNumber int) (err error) {
 							err = errors.New("no row !!!" + query)
 						}
 						if err != nil {
-
+							deferred(err)
 							return
 						}
 
 						events, err := unlynx.LocallyAggregateValues(events)
 						err = survivalserver.NiceError(err)
 						if err != nil {
+							deferred(err)
 
 							return
 						}
 						censoringEvents, err := unlynx.LocallyAggregateValues(censorings)
 						if err != nil {
+							deferred(err)
 							return
 
 						}
+						encTimeCode, ok := tagIDToEncTimePoints[timeCode]
+						if !ok {
+							//TODO check orth
+							err = errors.New("the map tag -> encrypted ill-formed")
+						}
 
-						err = aggregateAndKeySwitchSend(q.GetID(), strconv.Itoa(idx), events, censoringEvents, q.GetUserPublicKey(), unlynxChannel)
+						err = aggregateAndKeySwitchSend(q.GetID(), encTimeCode, events, censoringEvents, q.GetUserPublicKey(), unlynxChannel)
 						if err != nil {
+							deferred(err)
 							return
 						}
 						err = survivalserver.NiceError(err)
+						deferred(err)
 						return
-					}(idx, timeCode)
+					}(timeCode)
 
 				}
 				errOccured := false
 				var receptionBarrier sync.WaitGroup
 				receptionBarrier.Add(len(batch))
 				for range batch {
-					err = aggregateAndKeySwitchCollect(&survivalserver.ResultMap, unlynxChannel, &receptionBarrier)
+					err = aggregateAndKeySwitchCollect(&storage, unlynxChannel, &receptionBarrier)
 					if err != nil {
 						errOccured = true
 						exceptionHandler.PushError(err)
@@ -285,13 +304,14 @@ func QueryTimePoints(q SurvivalQuery, batchNumber int) (err error) {
 					//debug
 					if err != nil {
 						err = errors.New(err.Error() + " " + query)
+						return
 					}
 					err = survivalserver.NiceError(err)
 
 					if err != nil {
 						result.Error = err
 						//TODO handle this kind of error
-						survivalserver.ResultMap.Store("", result)
+						storage.Store("", result)
 						exceptionHandler.PushError(err)
 						return
 					}
@@ -321,7 +341,7 @@ func QueryTimePoints(q SurvivalQuery, batchNumber int) (err error) {
 							err = survivalserver.NiceError(err)
 							if err != nil {
 								result.Error = err
-								survivalserver.ResultMap.Store(recipiens.TimeCode, result)
+								storage.Store(recipiens.TimeCode, result)
 								rows.Close()
 								exceptionHandler.PushError(err)
 								return
@@ -345,8 +365,18 @@ func QueryTimePoints(q SurvivalQuery, batchNumber int) (err error) {
 								return
 
 							}
+							encTimeCode, ok := tagIDToEncTimePoints[recipiens.TimeCode]
+							if !ok {
+								//TODO orthograph
+								err = errors.New("ill formed time codes map")
+							}
+							err = survivalserver.NiceError(err)
+							if err != nil {
+								exceptionHandler.PushError(err)
+								return
+							}
 
-							err = aggregateAndKeySwitchSend(q.GetID(), recipiens.TimeCode, events, censoringEvents, q.GetUserPublicKey(), unlynxChannel)
+							err = aggregateAndKeySwitchSend(q.GetID(), encTimeCode, events, censoringEvents, q.GetUserPublicKey(), unlynxChannel)
 							err = survivalserver.NiceError(err)
 							if err != nil {
 								exceptionHandler.PushError(err)
@@ -375,7 +405,7 @@ func QueryTimePoints(q SurvivalQuery, batchNumber int) (err error) {
 							}
 
 						}()
-						//survivalserver.ResultMap.Store(key, result)
+						//storage.Store(key, result)
 
 					})
 
@@ -384,7 +414,7 @@ func QueryTimePoints(q SurvivalQuery, batchNumber int) (err error) {
 					var receptionBarrier sync.WaitGroup
 					receptionBarrier.Add(len(batch))
 					for range batch {
-						err = aggregateAndKeySwitchCollect(&survivalserver.ResultMap, unlynxChannel, &receptionBarrier)
+						err = aggregateAndKeySwitchCollect(&storage, unlynxChannel, &receptionBarrier)
 						err = survivalserver.NiceError(err)
 						if err != nil {
 
@@ -411,20 +441,23 @@ func QueryTimePoints(q SurvivalQuery, batchNumber int) (err error) {
 	if err != nil {
 		return
 	}
-	err = fillResult(q)
+	err = fillResult(q, &storage)
 	err = survivalserver.NiceError(err)
 	if err != nil {
 		return
 	}
 	return
 }
-func fillResult(q SurvivalQuery) (err error) {
+func fillResult(q SurvivalQuery, storage *sync.Map) (err error) {
 
 	targetMap := make(map[string][2]string)
-	survivalserver.ResultMap.Range(func(timeCode /*string*/, events interface{} /*survivalserver.Result*/) bool {
+	counter := 0
+	storage.Range(func(timeCode /*string*/, events interface{} /*survivalserver.Result*/) bool {
 		if timeCodeString, ok1 := timeCode.(string); ok1 {
 			if eventStruct, ok2 := events.(survivalserver.Result); ok2 {
+
 				targetMap[timeCodeString] = [2]string{eventStruct.EventValue, eventStruct.CensoringValue}
+				counter++
 				return true
 			}
 			logrus.Panic("Wrong type for map value")
@@ -473,12 +506,25 @@ func stringMapAndAdd(inputList []string) string {
 
 }
 
+type AggKSResults struct {
+	Results libunlynx.CipherText
+	Times   servicesmedco.TimeResults
+	Err     error
+}
+type individualRequest struct {
+	timeCode   *string
+	cipherText *libunlynx.CipherText
+	err        error
+}
+
 func aggregateAndKeySwitchSend(queryName, timeCode, eventValue, censoringValue, targetPubKey string, aggKsResultsChan chan struct {
 	event     *unlynxResult
 	censoring *unlynxResult
 }) (err error) {
-	unlynxClient, cothorityRoster := unlynx.NewUnlynxClient()
-
+	//TODO verify that one unlynx Client is in deed serial
+	/*
+		unlynxClient, cothorityRoster := unlynx.NewUnlynxClient()
+	*/
 	// deserialize value and target public key
 	eventValueDeserialized := libunlynx.CipherText{}
 	err = eventValueDeserialized.Deserialize(eventValue)
@@ -511,36 +557,23 @@ func aggregateAndKeySwitchSend(queryName, timeCode, eventValue, censoringValue, 
 		cipherText *libunlynx.CipherText
 		err        error
 	}
-	eventChannel := make(chan *individualRequest, 1)
-	censoringChannel := make(chan *individualRequest, 1)
+	eventChannel := make(chan *individualRequest)
+	censoringChannel := make(chan *individualRequest)
 	//connectCallback := func() {}
 
 	connectCallback := func() {
 		var eventRequest *individualRequest
 		var censoringRequest *individualRequest
-		select {
-		//if event is ready first, does not handle timeout here
-		case eventRequest = <-eventChannel:
-			censoringRequest = <-censoringChannel
-		case censoringRequest = <-censoringChannel:
-			eventRequest = <-eventChannel
-		}
+
+		eventRequest = <-eventChannel
+		censoringRequest = <-censoringChannel
+
 		cipherEvent, err1 := eventRequest.cipherText.Serialize()
 		cipherCensoring, err2 := censoringRequest.cipherText.Serialize()
 		//both keys are extpected to be the same here
 		eventResult := &unlynxResult{eventRequest.timeCode, cipherEvent, err1}
 		censoringResult := &unlynxResult{censoringRequest.timeCode, cipherCensoring, err2}
 
-		select {
-		//TODO define this struct
-		case aggKsResultsChan <- struct {
-			event     *unlynxResult
-			censoring *unlynxResult
-		}{eventResult, censoringResult}:
-		//success in merging chans
-		case <-time.After(time.Duration(300) * time.Second): //TODO magic
-			logrus.Error("Buffered channel full for too long")
-		}
 		//TODO define this struct
 		aggKsResultsChan <- struct {
 			event     *unlynxResult
@@ -548,15 +581,17 @@ func aggregateAndKeySwitchSend(queryName, timeCode, eventValue, censoringValue, 
 		}{eventResult, censoringResult}
 	}
 
-	individualAggSend := func(desValue libunlynx.CipherText, requestName string, timeCode *string, individualUnlynxChannel chan *individualRequest) {
+	individualAggSend := func(desValue libunlynx.CipherText, requestName string, timeCode string, individualUnlynxChannel chan *individualRequest) {
 
-		_, aggKsResult, _, aggKsErr := unlynxClient.SendSurveyAggRequest(
+		unlynxClient, cothorityRoster := unlynx.NewUnlynxClient()
+		surveyID, aggKsResult, _, aggKsErr := unlynxClient.SendSurveyAggRequest(
 			cothorityRoster,
-			servicesmedco.SurveyID(requestName+*timeCode),
+			servicesmedco.SurveyID(requestName+timeCode),
 			desTargetKey,
 			desValue,
 			false,
 		)
+		logrus.Debug("Received results from survey " + string(*surveyID))
 		aggKsErr = survivalserver.NiceError(aggKsErr)
 
 		if aggKsErr != nil {
@@ -564,21 +599,19 @@ func aggregateAndKeySwitchSend(queryName, timeCode, eventValue, censoringValue, 
 		}
 
 		result := &individualRequest{
-			timeCode:   timeCode,
+			timeCode:   &timeCode,
 			cipherText: &aggKsResult,
 			err:        aggKsErr,
 		}
-		select {
-		case individualUnlynxChannel <- result:
-			//success
-			return
-		case <-time.After(time.Duration(300) * time.Second): //TODO magic
-			err = errors.New("Unexpected error on local channel")
-		}
+
+		individualUnlynxChannel <- result
+
 	}
 
-	go individualAggSend(eventValueDeserialized, queryName+"_Event_", &timeCode, eventChannel)
-	go individualAggSend(censoringValueDeserialized, queryName+"_Censoring_Event_", &timeCode, censoringChannel)
+	go individualAggSend(eventValueDeserialized, queryName+"_Event_", timeCode, eventChannel)
+	logrus.Debug("Sent survey " + queryName + "_Event_" + timeCode)
+	go individualAggSend(censoringValueDeserialized, queryName+"_Censoring_Event_", timeCode, censoringChannel)
+	logrus.Debug("Sent survey " + queryName + "_Censoring_Event_" + timeCode)
 	go connectCallback()
 
 	return
@@ -588,17 +621,18 @@ func aggregateAndKeySwitchCollect(finalResultMap *sync.Map, aggKsResultsChan cha
 	event     *unlynxResult
 	censoring *unlynxResult
 }, waitGroup *sync.WaitGroup) (err error) {
+	defer waitGroup.Done()
 	select {
 	case aggKsResult := <-aggKsResultsChan:
 		if aggKsResult.event.Error != nil || aggKsResult.censoring.Error != nil {
 			err = fmt.Errorf("Error during unlynx process on time points  : %s , %s", aggKsResult.event.Error.Error(), aggKsResult.censoring.Error.Error())
-			waitGroup.Done()
+
 			return
 		}
-		//times = aggKsResult.Times.MapTR
-		if aggKsResult.event.Key != aggKsResult.censoring.Key {
-			err = errors.New("time concept keys are  expected to be the same")
-			waitGroup.Done()
+
+		if *aggKsResult.event.Key != *aggKsResult.censoring.Key {
+			err = fmt.Errorf("concept key %s and %s are not the same", *aggKsResult.event.Key, *aggKsResult.censoring.Key)
+
 			return
 		}
 		res := survivalserver.Result{
@@ -606,13 +640,15 @@ func aggregateAndKeySwitchCollect(finalResultMap *sync.Map, aggKsResultsChan cha
 			CensoringValue: aggKsResult.censoring.Value,
 			Error:          err,
 		}
-		finalResultMap.Store(aggKsResult.event.Key, res)
-		waitGroup.Done()
+		//TODO map result ky tio string time point integer indentifier
+		logrus.Debug("Received key switched events for time point" + *aggKsResult.event.Key)
+		finalResultMap.Store(*aggKsResult.event.Key, res)
+
 		return
 	case <-time.After(time.Duration(utilserver.UnlynxTimeoutSeconds) * time.Second):
 		err = errors.New("unlynx timeout")
 		err = survivalserver.NiceError(err)
-		waitGroup.Done()
+
 		return
 	}
 

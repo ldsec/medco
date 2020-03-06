@@ -87,7 +87,7 @@ func NewSurvivalAnalysis(token string, patientSetIDs map[int]string, timeCodes [
 		nodeTransport.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: disableTLSCheck}
 		q.httpMedCoClients[*node.Index] = client.New(nodeTransport, nil)
 	}
-	//one pair per time point in the event matrix
+
 	q.userPublicKey, q.userPrivateKey, err = unlynx.GenerateKeyPair()
 	if err != nil {
 		return
@@ -105,6 +105,10 @@ type EncryptedResults struct {
 type Events struct {
 	EventsOfInterest string
 	CensoringEvents  string
+}
+
+func (clientSurvivalAnalysis *SurvivalAnalysis) GetPrivateKey() string {
+	return clientSurvivalAnalysis.userPrivateKey
 }
 
 func (clientSurvivalAnalysis *SurvivalAnalysis) Execute() (results []*EncryptedResults, err error) {
@@ -130,7 +134,7 @@ nodeLoop:
 	for idx := range clientSurvivalAnalysis.httpMedCoClients {
 		select {
 		case nodeLoopRes := <-resultChan:
-			concatEncryptedResults(results, nodeLoopRes)
+			results = concatEncryptedResults(results, nodeLoopRes)
 
 		case nodeLoopErr := <-errChan:
 			if err != nil {

@@ -2,7 +2,6 @@ package survivalserver
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/ldsec/medco-connector/wrappers/unlynx"
@@ -38,16 +37,12 @@ func NewTimeCodesMap(queryName string, encTimeCodes []string, tagToTagIDS TagsTo
 	}
 	timeCodeMap.encTimeCodesToTags, times, err = unlynx.DDTagValues(queryName+"_TIME_CONCEPT_CODES_", encTimeCodes)
 
-	err = errors.New("encryption to tagging map\n" + fmt.Sprint(timeCodeMap.encTimeCodesToTags))
-	if err != nil {
-		return
-	}
-
 	for encTimeCode, tag := range timeCodeMap.encTimeCodesToTags {
 		timeCodeMap.tagsToEncTimeCodes[tag] = encTimeCode
 	}
 
 	timeCodeMap.tagIDsToEncTimeCodes, err = timeCodeMap.tagToTagIDS.GetTagIDs(timeCodeMap.tagsToEncTimeCodes)
+
 	if err != nil {
 		return
 	}
