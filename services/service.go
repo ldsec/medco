@@ -741,14 +741,14 @@ func (s *Service) StartProtocol(name, typeQ string, pc ProtocolConfig,
 		return nil, err
 	}
 
-	go func(pname string) {
+	go func(name string) {
 		if tmpErr := pi.Dispatch(); tmpErr != nil {
-			log.Error("Error running Dispatch ->" + name + " :" + err.Error())
+			log.Error("Error running Dispatch ->" + name + " :" + tmpErr.Error())
 		}
 	}(name)
-	go func(pname string) {
+	go func(name string) {
 		if tmpErr := pi.Start(); tmpErr != nil {
-			log.Error("Error running Start ->" + name + " :" + err.Error())
+			log.Error("Error running Start ->" + name + " :" + tmpErr.Error())
 		}
 	}(name)
 
