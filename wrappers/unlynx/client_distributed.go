@@ -2,7 +2,6 @@ package unlynx
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -79,16 +78,12 @@ func KeySwitchValues(queryName string, values []string, targetPubKey string) (ke
 	// deserialize values and target public key
 	desValues, err := deserializeCipherVector(values)
 	if err != nil {
-		err = fmt.Errorf("deserializeCipherVector %s", err)
-		//panic("deserializeCipherVector")
 		return
 	}
 
 	desTargetKey, err := libunlynx.DeserializePoint(targetPubKey)
 	if err != nil {
-		err = fmt.Errorf("deserializePoint %s", err)
 		logrus.Error("unlynx error deserializing target public key: ", err)
-		//panic("desirializePoint")
 		return
 	}
 
@@ -115,21 +110,18 @@ func KeySwitchValues(queryName string, values []string, targetPubKey string) (ke
 	case ksResult := <-ksResultsChan:
 		err = ksResult.Err
 		if err != nil {
-			err = fmt.Errorf("deserializeKsReslutsChan %s", err)
 			logrus.Error("unlynx error executing key switching: ", err)
 
 		} else {
 			times = ksResult.Times.MapTR
 			keySwitchedValues, err = serializeCipherVector(ksResult.Results)
 			if err != nil {
-				err = fmt.Errorf("serializeCipherVector %s", err)
 				logrus.Error("unlynx error serializing: ", err)
 			}
 		}
 
 	case <-time.After(time.Duration(utilserver.UnlynxTimeoutSeconds) * time.Second):
 		err = errors.New("unlynx timeout")
-		err = fmt.Errorf("timeout %s", err)
 		logrus.Error(err)
 	}
 	return

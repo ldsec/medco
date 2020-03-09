@@ -107,8 +107,9 @@ type Events struct {
 	CensoringEvents  string
 }
 
-func (clientSurvivalAnalysis *SurvivalAnalysis) GetPrivateKey() string {
-	return clientSurvivalAnalysis.userPrivateKey
+//Decrypt deciphers a valuew that is expected to be encrypted under user public key
+func (clientSurvivalAnalysis *SurvivalAnalysis) Decrypt(value string) (int64, error) {
+	return unlynx.Decrypt(value, clientSurvivalAnalysis.userPrivateKey)
 }
 
 func (clientSurvivalAnalysis *SurvivalAnalysis) Execute() (results []*EncryptedResults, err error) {

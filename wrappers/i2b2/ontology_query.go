@@ -2,7 +2,6 @@ package i2b2
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -43,7 +42,6 @@ func GetOntologyChildren(path string) (results []*models.ExploreSearchResultElem
 			xmlResponse,
 		)
 		if err != nil {
-
 			return nil, err
 		}
 	}
@@ -142,7 +140,6 @@ func parseI2b2Concept(concept Concept) (result *models.ExploreSearchResultElemen
 				childEncryptID, parseErr := strconv.ParseInt(childEncryptIDString, 10, 64)
 				if parseErr != nil {
 					logrus.Error("Malformed ID could not be parsed: ", childEncryptIDString, "error: ", parseErr)
-					parseErr = fmt.Errorf("jksfdjklsfdéjklsfdéjklsfdéjklsfdaéjklsfdsfdasfdaéjklsfdéjlsfdaéjklsfdaéjkl %s", parseErr)
 					return nil, parseErr
 				}
 				result.MedcoEncryption.ChildrenIds = append(result.MedcoEncryption.ChildrenIds, childEncryptID)

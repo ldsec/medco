@@ -3,18 +3,21 @@ package handlers
 import (
 	"fmt"
 
+	survivalserver "github.com/ldsec/medco-connector/survival/server"
+
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/ldsec/medco-connector/restapi/models"
 	"github.com/ldsec/medco-connector/restapi/server/operations/survival_analysis"
-	"github.com/ldsec/medco-connector/survival"
 	"github.com/sirupsen/logrus"
 )
 
+// MedCoSurvivalAnalysisGetSurvivalAnalysisHandler handles /survival-analysis API endpoint
 func MedCoSurvivalAnalysisGetSurvivalAnalysisHandler(param survival_analysis.GetSurvivalAnalysisParams, principal *models.User) middleware.Responder {
 
-	survivalAnalysisQuery := survival.NewQuery(param.Body.ID, param.Body.UserPublicKey, param.Body.PatientSetID, param.Body.TimeCodes)
+	survivalAnalysisQuery := survivalserver.NewQuery(param.Body.ID, param.Body.UserPublicKey, param.Body.PatientSetID, param.Body.TimeCodes)
 
-	if err := survivalAnalysisQuery.Execute(); err != nil {
+	batchNumber := 1 //solution for higher is not implemented yet
+	if err := survivalAnalysisQuery.Execute(batchNumber); err != nil {
 		logrus.Error(fmt.Sprintf("Query execution error : %s", err))
 		return survival_analysis.NewGetSurvivalAnalysisDefault(500).WithPayload(&survival_analysis.GetSurvivalAnalysisDefaultBody{Message: err.Error()})
 	}

@@ -1,4 +1,4 @@
-package survivalcli
+package survivalclient
 
 import (
 	"errors"
@@ -8,7 +8,7 @@ import (
 	"time"
 
 	medcoclient "github.com/ldsec/medco-connector/client"
-	survivalclient "github.com/ldsec/medco-connector/survival/client"
+
 	"github.com/ldsec/medco-connector/wrappers/unlynx"
 	"github.com/sirupsen/logrus"
 )
@@ -23,7 +23,7 @@ type ClientResultElement struct {
 
 func ClientSurvival(token string, granularity string, limit int64, queryString, username, password string, disableTLSCheck bool) (err error) {
 
-	accessToken, err := survivalclient.GetToken(token, username, password, disableTLSCheck)
+	accessToken, err := GetToken(token, username, password, disableTLSCheck)
 	if err != nil {
 		return
 	}
@@ -49,7 +49,7 @@ func ClientSurvival(token string, granularity string, limit int64, queryString, 
 			errChan <- err
 			return
 		}
-		patientSetIDs, err := survivalclient.GetPatientSetIDs(accessToken, encPanels, panelsIsNot, disableTLSCheck)
+		patientSetIDs, err := GetPatientSetIDs(accessToken, encPanels, panelsIsNot, disableTLSCheck)
 		logrus.Debug(patientSetIDs)
 		if err != nil {
 			logrus.Error("Patient set creation error: ", err)
@@ -66,7 +66,7 @@ func ClientSurvival(token string, granularity string, limit int64, queryString, 
 	go func() {
 		logrus.Info("Creating time point maps")
 
-		timeCodes, err := survivalclient.GetTimeCodes(accessToken, granularity, limit, disableTLSCheck)
+		timeCodes, err := GetTimeCodes(accessToken, granularity, limit, disableTLSCheck)
 		if err != nil {
 			logrus.Error("Time point maps creation error: ", err)
 			barrier.Done()
@@ -76,7 +76,7 @@ func ClientSurvival(token string, granularity string, limit int64, queryString, 
 		}
 		logrus.Debug("Integer identifier of the time concepts")
 		logrus.Debug(fmt.Sprint(timeCodes))
-		encTimeCodesMap, encTimeCodesInverseMap, err := survivalclient.EncryptTimeCodes(timeCodes)
+		encTimeCodesMap, encTimeCodesInverseMap, err := EncryptTimeCodes(timeCodes)
 		if err != nil {
 			logrus.Error("Time point maps creation error", err)
 			barrier.Done()
@@ -126,7 +126,7 @@ func ClientSurvival(token string, granularity string, limit int64, queryString, 
 		return
 	}
 
-	survivalAnalysis, err := survivalclient.NewSurvivalAnalysis(accessToken, patientSetIDs, encTimeCodes, disableTLSCheck)
+	survivalAnalysis, err := NewSurvivalAnalysis(accessToken, patientSetIDs, encTimeCodes, disableTLSCheck)
 	if err != nil {
 		return
 	}
@@ -141,11 +141,11 @@ func ClientSurvival(token string, granularity string, limit int64, queryString, 
 		var clearEvent int64
 		var clearCensoringEvent int64
 		clearTimePoint := encTimeCodesInverseMap[encElement.TimePoint]
-		clearEvent, err = unlynx.Decrypt(encElement.Events.EventsOfInterest, survivalAnalysis.GetPrivateKey())
+		clearEvent, err = survivalAnalysis.Decrypt(encElement.Events.EventsOfInterest)
 		if err != nil {
 			return
 		}
-		clearCensoringEvent, err = unlynx.Decrypt(encElement.Events.CensoringEvents, survivalAnalysis.GetPrivateKey())
+		clearCensoringEvent, err = survivalAnalysis.Decrypt(encElement.Events.CensoringEvents)
 		if err != nil {
 			return
 		}

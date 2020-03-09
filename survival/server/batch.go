@@ -1,12 +1,14 @@
 package survivalserver
 
 import (
-	"fmt"
-	"github.com/sirupsen/logrus"
-	"math"
 	"errors"
+	"fmt"
+	"math"
+
+	"github.com/sirupsen/logrus"
 )
 
+//BatchIterator implements a batch stream of timepoints
 type BatchIterator struct {
 	timeCodes         []string
 	length            int
@@ -18,7 +20,8 @@ type BatchIterator struct {
 	endReached bool
 }
 
-func NewBatchItertor(timePoints []string, batchNumber int) (batches *BatchIterator, err error) {
+//NewBatchIterator batch iterator construct
+func NewBatchIterator(timePoints []string, batchNumber int) (batches *BatchIterator, err error) {
 	length := len(timePoints)
 	if length == 0 {
 		err = errors.New("Input array must contain at least 1 time code")
@@ -43,6 +46,7 @@ func NewBatchItertor(timePoints []string, batchNumber int) (batches *BatchIterat
 	return
 }
 
+//Next goes to the next value in the time point batch if the ends has not been reached, else returns the  last available batch
 func (batches *BatchIterator) Next() (res []string) {
 	resLower := int(math.Floor(float64(batches.currentBatchIndex) * batches.batchSize))
 	resUpper := int(math.Floor(float64(batches.currentBatchIndex+1) * batches.batchSize))
@@ -56,6 +60,7 @@ func (batches *BatchIterator) Next() (res []string) {
 	return res
 }
 
+//Done indicates whether the last batch has been reached
 func (batches *BatchIterator) Done() bool {
 	return batches.endReached
 }

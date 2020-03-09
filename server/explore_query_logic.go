@@ -64,7 +64,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 
 	// tag query terms
 	timer = time.Now()
-	taggedQueryTerms, ddtTimers, err := unlynx.DDTagValues(q.ID, q.GetEncQueryTerms())
+	taggedQueryTerms, ddtTimers, err := unlynx.DDTagValues(q.ID, q.getEncQueryTerms())
 	if err != nil {
 		return
 	}
@@ -73,7 +73,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 
 	// i2b2 PSM query with tagged items
 	timer = time.Now()
-	panelsItemKeys, panelsIsNot, err := q.GetI2b2PsmQueryTerms(taggedQueryTerms)
+	panelsItemKeys, panelsIsNot, err := q.getI2b2PsmQueryTerms(taggedQueryTerms)
 	if err != nil {
 		return
 	}
@@ -103,23 +103,6 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	q.addTimers("medco-connector-local-agg", timer, nil)
 
 	// compute and key switch count (returns optionally global aggregate or shuffled results)
-	/*
-		if queryType.Survival {
-			GraftCallback(q, patientIDs, aggPatientFlags)
-			//survival.Execute(q, patientDummyFlags, patientIDs, 1)
-			survQuery := q.ConvertToSurvivalQuery()
-
-			//TODO use identifiaction of query
-
-			//timecodes := survival.GlobalTimeCodes
-			//TODO hide this more
-			survQuery.ExecuteCallback = survivalserver.ExecCallback
-
-			err = survQuery.Execute(patientIDs)
-			return
-		}
-	*/
-
 	timer = time.Now()
 	var encCount string
 	var ksCountTimers map[string]time.Duration
@@ -156,25 +139,29 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	if queryType.PatientList {
 		logrus.Info(q.ID, ": patient list requested")
 
-		// mask patient IDs
-		timer = time.Now()
-		maskedPatientIDs, err := q.maskPatientIDs(patientIDs, patientDummyFlags)
-		if err != nil {
-			return err
-		}
+		if len(patientIDs) == 0 {
+			logrus.Info(q.ID, ": empty patient list. Skipping masking and key switching")
+		} else {
+			// mask patient IDs
+			timer = time.Now()
+			maskedPatientIDs, err := q.maskPatientIDs(patientIDs, patientDummyFlags)
+			if err != nil {
+				return err
+			}
 
-		logrus.Info(q.ID, ": masked ", len(maskedPatientIDs), " patient IDs")
-		q.addTimers("medco-connector-local-patient-list-masking", timer, nil)
+			logrus.Info(q.ID, ": masked ", len(maskedPatientIDs), " patient IDs")
+			q.addTimers("medco-connector-local-patient-list-masking", timer, nil)
 
-		// key switch the masked patient IDs
-		timer = time.Now()
-		ksMaskedPatientIDs, ksPatientListTimers, err := unlynx.KeySwitchValues(q.ID, maskedPatientIDs, q.Query.UserPublicKey)
-		if err != nil {
-			return err
+			// key switch the masked patient IDs
+			timer = time.Now()
+			ksMaskedPatientIDs, ksPatientListTimers, err := unlynx.KeySwitchValues(q.ID, maskedPatientIDs, q.Query.UserPublicKey)
+			if err != nil {
+				return err
+			}
+			q.addTimers("medco-connector-unlynx-key-switch-patient-list", timer, ksPatientListTimers)
+			q.Result.EncPatientList = ksMaskedPatientIDs
+			logrus.Info(q.ID, ": key switched patient IDs")
 		}
-		q.addTimers("medco-connector-unlynx-key-switch-patient-list", timer, ksPatientListTimers)
-		q.Result.EncPatientList = ksMaskedPatientIDs
-		logrus.Info(q.ID, ": key switched patient IDs")
 	}
 
 	//optionally return the patient set ID
@@ -216,7 +203,7 @@ func (q *ExploreQuery) maskPatientIDs(patientIDs []string, patientDummyFlags []s
 	return
 }
 
-func (q *ExploreQuery) GetEncQueryTerms() (encQueryTerms []string) {
+func (q *ExploreQuery) getEncQueryTerms() (encQueryTerms []string) {
 	for _, panel := range q.Query.Panels {
 		for _, item := range panel.Items {
 			if *item.Encrypted {
@@ -227,7 +214,7 @@ func (q *ExploreQuery) GetEncQueryTerms() (encQueryTerms []string) {
 	return
 }
 
-func (q *ExploreQuery) GetI2b2PsmQueryTerms(taggedQueryTerms map[string]string) (panelsItemKeys [][]string, panelsIsNot []bool, err error) {
+func (q *ExploreQuery) getI2b2PsmQueryTerms(taggedQueryTerms map[string]string) (panelsItemKeys [][]string, panelsIsNot []bool, err error) {
 	for panelIdx, panel := range q.Query.Panels {
 		panelsIsNot = append(panelsIsNot, *panel.Not)
 

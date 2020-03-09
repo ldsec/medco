@@ -4,19 +4,17 @@ import "sync/atomic"
 
 type lockState int32
 
-const (
-	available lockState = 0
-	locked    lockState = 1
-)
-
+//Spin implements a spinlock
 type Spin struct {
 	lock *lockState
 }
 
+// NewSpin spin constructor
 func NewSpin() *Spin {
 	return &Spin{lock: new(lockState)}
 }
 
+// Lock loops until the spin is released, then holds it
 func (spin *Spin) Lock() {
 
 	for cond := true; cond; {
@@ -28,6 +26,7 @@ func (spin *Spin) Lock() {
 	}
 }
 
+// Unlock releases the spin
 func (spin *Spin) Unlock() {
 
 	for cond := true; cond; {

@@ -8,22 +8,21 @@ import (
 	"go.dedis.ch/onet/v3/log"
 )
 
-//for the entire survival query, maybe wrap this around a query anin a structure that is created for each new survival query..
-const MaxSize = 1024
-
+//ExceptionHandler joins multiple parallel threads that can each returns an error
 type ExceptionHandler struct {
 	errorChannel        chan error
 	bufferSize          int
 	endOfProcessChannel chan struct{}
 }
 
+//NewExceptionHandler ExceptionHandler constructor
 func NewExceptionHandler(bufferSize int) (res *ExceptionHandler, err error) {
 	if bufferSize < 1 {
 		err = fmt.Errorf(`The size of the buffered channel must be at least 1, provided %d`, bufferSize)
 		return
 	}
-	if bufferSize > MaxSize {
-		err = fmt.Errorf(`%d exceeds max size of buffered channel %d`, bufferSize, MaxSize)
+	if bufferSize > errorChanMaxSize {
+		err = fmt.Errorf(`%d exceeds max size of buffered channel %d`, bufferSize, errorChanMaxSize)
 		return
 	}
 
@@ -38,9 +37,7 @@ func NewExceptionHandler(bufferSize int) (res *ExceptionHandler, err error) {
 
 }
 
-//var errorChannel = make(chan error)
-//var endOfProcessChannel = make(chan bool)
-
+//PushError push the error if th buffered channel is not full, does nothing else
 func (handler *ExceptionHandler) PushError(err error) {
 	select {
 	case handler.errorChannel <- err:
@@ -49,10 +46,13 @@ func (handler *ExceptionHandler) PushError(err error) {
 		log.Lvl2("error channels already full")
 	}
 }
+
+//Finished indicates that all executions in threads are finished
 func (handler *ExceptionHandler) Finished() {
 	handler.endOfProcessChannel <- struct{}{}
 }
 
+//WaitEndSignal waits until either the
 func (handler *ExceptionHandler) WaitEndSignal(timeoutInSeconds int) (err error) {
 	select {
 	case err = <-handler.errorChannel:

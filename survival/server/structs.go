@@ -1,7 +1,13 @@
 package survivalserver
 
 import (
+	"database/sql"
 	"fmt"
+	"os"
+	"strconv"
+
+	utilserver "github.com/ldsec/medco-connector/util/server"
+	"github.com/sirupsen/logrus"
 
 	"strings"
 
@@ -10,6 +16,51 @@ import (
 	"github.com/ldsec/medco-connector/wrappers/unlynx"
 )
 
+const (
+	schema              string    = "i2b2demodata_i2b2"
+	table               string    = "observation_fact"
+	blobColumn          string    = "observation_blob"
+	timeConceptColumn   string    = "concept_cd"
+	patientIDColumn     string    = "patient_num"
+	naiveVersion        bool      = false
+	interBlob           string    = "," //blobconcept does not contain any comma
+	eventFlagSeparator  string    = ` `
+	timeConceptRootPath string    = `/SurvivalAnalysis/`
+	errLogTrace         int       = 10
+	available           lockState = 0
+	locked              lockState = 1
+	conceptTable        string    = "concept_dimension"
+	pathColumn          string    = "concept_path"
+	tagQuery            string    = `SELECT concept_path,concept_cd FROM i2b2demodata_i2b2.` + conceptTable
+	errorChanMaxSize    int       = 1024
+)
+
+var directAccessDB *sql.DB
+var dbName string
+
+func init() {
+
+	host := os.Getenv("DIRECT_ACCESS_DB_HOST")
+	port, err := strconv.ParseInt(os.Getenv("DIRECT_ACCESS_DB_PORT"), 10, 64)
+	if err != nil || port < 0 || port > 65535 {
+		logrus.Warn("Invalid port, defaulted")
+		port = 5432
+	}
+	name := os.Getenv("DIRECT_ACCESS_DB_NAME")
+	dbName = name
+	loginUser := os.Getenv("DIRECT_ACCESS_DB_USER")
+	loginPw := os.Getenv("DIRECT_ACCESS_DB_PW")
+
+	directAccessDB, err = utilserver.InitializeConnectionToDB(host, int(port), name, loginUser, loginPw)
+	if err != nil {
+		logrus.Error("Unable to connect database for direct access to I2B2")
+		return
+	}
+	logrus.Info("Connected I2B2 DB for direct access")
+	return
+}
+
+// Result holds information about time point, events, execution times and error
 type Result struct {
 	EventValue     string //or kyber.point
 	CensoringValue string //or kyber.point
@@ -17,17 +68,7 @@ type Result struct {
 	Error          error
 }
 
-const eventFlagSeparator = ` `
-
-//type Map sync.Map
-
-type PatientID string
-
-func (str PatientID) String() string {
-	return string(str)
-}
-
-func BreakBlob(blobValue string) (eventOfInterest, censoringEvent string, err error) {
+func breakBlob(blobValue string) (eventOfInterest, censoringEvent string, err error) {
 	res := strings.Split(blobValue, eventFlagSeparator)
 	//TODO magic
 	if len(res) != 2 {
@@ -39,15 +80,12 @@ func BreakBlob(blobValue string) (eventOfInterest, censoringEvent string, err er
 	return
 }
 
-const TimeConceptRootPath = `/SurvivalAnalysis/`
-
-//TODO another function already exists in unlynx wrapper
-func ZeroPointEncryption() (res string, err error) {
+func zeroPointEncryption() (res string, err error) {
 
 	res, err = unlynx.EncryptWithCothorityKey(int64(0))
 	return
 }
 
-func UnlynxRequestName(queryName, timecode string) string {
+func unlynxRequestName(queryName, timecode string) string {
 	return queryName + timecode
 }

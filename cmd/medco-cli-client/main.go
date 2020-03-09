@@ -4,7 +4,7 @@ import (
 	"os"
 	"strings"
 
-	survivalcli "github.com/ldsec/medco-connector/survival/cli"
+	survivalclient "github.com/ldsec/medco-connector/survival/client"
 
 	medcoclient "github.com/ldsec/medco-connector/client"
 	"github.com/sirupsen/logrus"
@@ -175,7 +175,7 @@ func main() {
 			ArgsUsage:   "[-g granularity] [-l limit]",
 			Description: "Returns the points of the survival curve",
 			Action: func(c *cli.Context) error {
-				return survivalcli.ClientSurvival(
+				return survivalclient.ClientSurvival(
 					c.GlobalString("token"),
 					c.String("granularity"),
 					c.Int64("limit"),
