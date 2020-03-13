@@ -25,7 +25,7 @@ type individualRequest struct {
 	err        error
 }
 
-func aggregateAndKeySwitchSend(queryName, timeCode, eventValue, censoringValue, targetPubKey string, aggKsResultsChan chan struct {
+func aggregateAndKeySwitchSend(queryName string, timeCode EncryptedEncID, eventValue, censoringValue, targetPubKey string, aggKsResultsChan chan struct {
 	event     *unlynxResult
 	censoring *unlynxResult
 }) (err error) {
@@ -54,14 +54,14 @@ func aggregateAndKeySwitchSend(queryName, timeCode, eventValue, censoringValue, 
 		return
 	}
 
-	// execute shuffle and key switching request
+	// execute and key switching request
 	type AggKSResults struct {
 		Results libunlynx.CipherText
 		Times   servicesmedco.TimeResults
 		Err     error
 	}
 	type individualRequest struct {
-		timeCode   *string
+		timeCode   *EncryptedEncID
 		cipherText *libunlynx.CipherText
 		err        error
 	}
@@ -89,12 +89,12 @@ func aggregateAndKeySwitchSend(queryName, timeCode, eventValue, censoringValue, 
 		}{eventResult, censoringResult}
 	}
 
-	individualAggSend := func(desValue libunlynx.CipherText, requestName string, timeCode string, individualUnlynxChannel chan *individualRequest) {
+	individualAggSend := func(desValue libunlynx.CipherText, requestName string, timeCode EncryptedEncID, individualUnlynxChannel chan *individualRequest) {
 
 		unlynxClient, cothorityRoster := unlynx.NewUnlynxClient()
 		surveyID, aggKsResult, _, aggKsErr := unlynxClient.SendSurveyAggRequest(
 			cothorityRoster,
-			servicesmedco.SurveyID(requestName+timeCode),
+			servicesmedco.SurveyID(requestName+string(timeCode)),
 			desTargetKey,
 			desValue,
 			false,
@@ -117,9 +117,9 @@ func aggregateAndKeySwitchSend(queryName, timeCode, eventValue, censoringValue, 
 	}
 
 	go individualAggSend(eventValueDeserialized, queryName+"_Event_", timeCode, eventChannel)
-	logrus.Debug("Sent survey " + queryName + "_Event_" + timeCode)
+	logrus.Debug("Sent survey " + queryName + "_Event_" + string(timeCode))
 	go individualAggSend(censoringValueDeserialized, queryName+"_Censoring_Event_", timeCode, censoringChannel)
-	logrus.Debug("Sent survey " + queryName + "_Censoring_Event_" + timeCode)
+	logrus.Debug("Sent survey " + queryName + "_Censoring_Event_" + string(timeCode))
 	go connectCallback()
 
 	return

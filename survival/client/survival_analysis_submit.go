@@ -43,6 +43,7 @@ func (clientSurvivalAnalysis *SurvivalAnalysis) submitToNode(nodeIdx int) (resul
 	return
 }
 
+// GetSurvivalAnalysisParameter holds the information for interaction with the REST API
 type GetSurvivalAnalysisParameter struct {
 	Command    *SurvivalAnalysis
 	timeout    time.Duration

@@ -15,6 +15,7 @@ const (
 
 var fromRequestToI2b2 map[string]string = map[string]string{"day": "Day", "week": "Week", "month": "Month", "year": "Year"}
 
+// GetTimeCodes execute the explore search to find the available time points for a given granularity and retrieves their related integer identifier
 func GetTimeCodes(accessToken, granularity string, limit int64, disableTLS bool) (timeCodes map[string]int64, err error) {
 
 	gran, ok := fromRequestToI2b2[granularity]

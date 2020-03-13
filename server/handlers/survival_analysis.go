@@ -21,6 +21,7 @@ func MedCoSurvivalAnalysisGetSurvivalAnalysisHandler(param survival_analysis.Get
 		logrus.Error(fmt.Sprintf("Query execution error : %s", err))
 		return survival_analysis.NewGetSurvivalAnalysisDefault(500).WithPayload(&survival_analysis.GetSurvivalAnalysisDefaultBody{Message: err.Error()})
 	}
+	survivalAnalysisQuery.PrintTimers()
 	results := survivalAnalysisQuery.Result
 	if results == nil {
 		logrus.Panic("Unexpected nil results")

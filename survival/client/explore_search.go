@@ -17,6 +17,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+//ExploreSearch is the request that interacts with the /node/explore/search endpoint of the REST API
 type ExploreSearch struct {
 	httpMedCoClients []*client.MedcoCli
 	AuthToken        string
@@ -24,6 +25,7 @@ type ExploreSearch struct {
 	Type             string
 }
 
+// NewExploreSearch is th ExploreSearch constructor
 func NewExploreSearch(accessToken, path, Type string, disableTLSCheck bool) (search *ExploreSearch, err error) {
 	search = &ExploreSearch{
 		AuthToken: accessToken,
@@ -73,6 +75,7 @@ func NewExploreSearch(accessToken, path, Type string, disableTLSCheck bool) (sea
 	return
 }
 
+//Execute is the main function of the explore search, it sends the request and waits
 func (search *ExploreSearch) Execute() (searchResult *ExploreSearchResult, err error) {
 	searchResultChan := make(chan []*models.ExploreSearchResultElement)
 	searchErrChan := make(chan error)
@@ -126,10 +129,12 @@ func (search *ExploreSearch) submitToNode(idx int) (result []*models.ExploreSear
 
 }
 
+// ExploreSearchResult holds the results of the explore search
 type ExploreSearchResult struct {
 	Elements []*models.ExploreSearchResultElement
 }
 
+//NewExploreSearchResultFromModels another constructor
 func NewExploreSearchResultFromModels(resultElements []*models.ExploreSearchResultElement) *ExploreSearchResult {
 	return &ExploreSearchResult{Elements: resultElements}
 }

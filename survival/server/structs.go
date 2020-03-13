@@ -35,6 +35,12 @@ const (
 	errorChanMaxSize    int       = 1024
 )
 
+// EncryptedEncID is  ElGamal encryption
+type EncryptedEncID string
+
+// TagID is  deterministic tag
+type TagID string
+
 var directAccessDB *sql.DB
 var dbName string
 
@@ -86,6 +92,6 @@ func zeroPointEncryption() (res string, err error) {
 	return
 }
 
-func unlynxRequestName(queryName, timecode string) string {
-	return queryName + timecode
+func unlynxRequestName(queryName string, timecode TagID) string {
+	return queryName + string(timecode)
 }

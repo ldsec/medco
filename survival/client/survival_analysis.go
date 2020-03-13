@@ -20,7 +20,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-//for medco cli
+//SurvivalAnalysis represent a survival analysis requeset
 type SurvivalAnalysis struct {
 	// httpMedCoClient is the HTTP client for the MedCo connector
 	httpMedCoClients []*client.MedcoCli
@@ -38,8 +38,11 @@ type SurvivalAnalysis struct {
 	userPrivateKey string
 
 	formats strfmt.Registry
+
+	timers map[string]time.Duration
 }
 
+// NewSurvivalAnalysis constructor for survival analysis request
 func NewSurvivalAnalysis(token string, patientSetIDs map[int]string, timeCodes []string, disableTLSCheck bool) (q *SurvivalAnalysis, err error) {
 	q = &SurvivalAnalysis{
 		authToken:     token,
@@ -47,6 +50,7 @@ func NewSurvivalAnalysis(token string, patientSetIDs map[int]string, timeCodes [
 		patientSetIDs: patientSetIDs,
 		timeCodes:     timeCodes,
 		formats:       strfmt.Default,
+		timers:        make(map[string]time.Duration),
 	}
 
 	parsedURL, err := url.Parse(utilclient.MedCoConnectorURL)
@@ -97,23 +101,29 @@ func NewSurvivalAnalysis(token string, patientSetIDs map[int]string, timeCodes [
 
 }
 
+// EncryptedResults holds a TimePoint and the corresponding encrypted events
 type EncryptedResults struct {
 	TimePoint string
 	Events    Events
 }
 
+//Events holds the number of events at a given timepoint in base64 strings
 type Events struct {
 	EventsOfInterest string
 	CensoringEvents  string
 }
 
-//Decrypt deciphers a valuew that is expected to be encrypted under user public key
+//Decrypt deciphers a value that is expected to be encrypted under user public key
 func (clientSurvivalAnalysis *SurvivalAnalysis) Decrypt(value string) (int64, error) {
 	return unlynx.Decrypt(value, clientSurvivalAnalysis.userPrivateKey)
 }
 
+//Execute is the main function that sends the request and waits
 func (clientSurvivalAnalysis *SurvivalAnalysis) Execute() (results []*EncryptedResults, err error) {
-
+	totalTimer := time.Now()
+	defer func(since time.Time) {
+		err = clientSurvivalAnalysis.addTimer("time for the total execution ", since)
+	}(totalTimer)
 	errChan := make(chan error)
 	resultChan := make(chan []*survival_analysis.GetSurvivalAnalysisOKBodyItems0)
 
@@ -167,4 +177,40 @@ func concatEncryptedResults(target []*EncryptedResults, toExctract []*survival_a
 	}
 
 	return res
+}
+
+func (clientSurvivalAnalysis *SurvivalAnalysis) addTimer(label string, since time.Time) (err error) {
+	if _, exists := clientSurvivalAnalysis.timers[label]; exists {
+		err = errors.New("Timer label " + label + " already exists")
+		return
+	}
+	clientSurvivalAnalysis.timers[label] = time.Since(since)
+	return
+
+}
+
+func (clientSurvivalAnalysis *SurvivalAnalysis) addTimers(timers map[string]time.Duration) (err error) {
+	for label, duration := range timers {
+		if _, exists := clientSurvivalAnalysis.timers[label]; exists {
+			err = errors.New("Timer label " + label + " already exists")
+			return
+		}
+		clientSurvivalAnalysis.timers[label] = duration
+	}
+	return
+
+}
+
+//TODO test if it copies or not the map, I think it does not copy
+
+// GetTimers returns the timers of the SurvivalAnalysis
+func (clientSurvivalAnalysis *SurvivalAnalysis) GetTimers() map[string]time.Duration {
+	return clientSurvivalAnalysis.timers
+}
+
+// PrintTimers prints the timers in the standard output if debug is enabled
+func (clientSurvivalAnalysis *SurvivalAnalysis) PrintTimers() {
+	for label, duration := range clientSurvivalAnalysis.timers {
+		logrus.Debug(label + duration.String())
+	}
 }

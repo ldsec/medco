@@ -15,12 +15,14 @@ import (
 
 type timeCodesMaps [2]map[string]string
 
+//ClientResultElement holds the information for the CLI whole susrvival analysis loop
 type ClientResultElement struct {
 	ClearTimePoint     string
 	EncEventOfInterest string
 	EncCensoringEvent  string
 }
 
+//ClientSurvival represents the whole survival analysis loop: it gets the time codes and the patient set, the request for the aggregates for the survival analysis and deciphers them
 func ClientSurvival(token string, granularity string, limit int64, queryString, username, password string, disableTLSCheck bool) (err error) {
 
 	accessToken, err := GetToken(token, username, password, disableTLSCheck)
@@ -42,7 +44,7 @@ func ClientSurvival(token string, granularity string, limit int64, queryString, 
 	go func() {
 		logrus.Info("Creating patient set")
 
-		encPanels, panelsIsNot, err := ParseAndEncryptQueryString(queryString)
+		encPanels, panelsIsNot, err := parseAndEncryptQueryString(queryString)
 		if err != nil {
 			logrus.Error("Patient set creation error: ", err)
 			barrier.Done()
@@ -135,8 +137,9 @@ func ClientSurvival(token string, granularity string, limit int64, queryString, 
 	if err != nil {
 		return
 	}
+	survivalAnalysis.PrintTimers()
 	logrus.Infof("obtained %d results", len(survResults))
-
+	sequentialDecryptionTimer := time.Now()
 	for _, encElement := range survResults {
 		var clearEvent int64
 		var clearCensoringEvent int64
@@ -152,12 +155,14 @@ func ClientSurvival(token string, granularity string, limit int64, queryString, 
 		logrus.Infof("At time %s , %s events of interests and %s censoring events\n", clearTimePoint, strconv.FormatInt(clearEvent, 10), strconv.FormatInt(clearCensoringEvent, 10))
 
 	}
+	logrus.Debug("Time needed for sequential decryption : " +
+		time.Since(sequentialDecryptionTimer).String())
 	logrus.Info("Survival analysis request done")
 	return
 
 }
 
-func ParseAndEncryptQueryString(queryString string) (encPanels [][]string, panelsIsNot []bool, err error) {
+func parseAndEncryptQueryString(queryString string) (encPanels [][]string, panelsIsNot []bool, err error) {
 	panels, panelsIsNot, err := medcoclient.ParseQueryString(queryString)
 	if err != nil {
 		return

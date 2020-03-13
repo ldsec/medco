@@ -10,7 +10,7 @@ import (
 
 //BatchIterator implements a batch stream of timepoints
 type BatchIterator struct {
-	timeCodes         []string
+	timeCodes         []TagID
 	length            int
 	batchNumber       int
 	batchSize         float64
@@ -21,7 +21,7 @@ type BatchIterator struct {
 }
 
 //NewBatchIterator batch iterator construct
-func NewBatchIterator(timePoints []string, batchNumber int) (batches *BatchIterator, err error) {
+func NewBatchIterator(timePoints []TagID, batchNumber int) (batches *BatchIterator, err error) {
 	length := len(timePoints)
 	if length == 0 {
 		err = errors.New("Input array must contain at least 1 time code")
@@ -47,7 +47,7 @@ func NewBatchIterator(timePoints []string, batchNumber int) (batches *BatchItera
 }
 
 //Next goes to the next value in the time point batch if the ends has not been reached, else returns the  last available batch
-func (batches *BatchIterator) Next() (res []string) {
+func (batches *BatchIterator) Next() (res []TagID) {
 	resLower := int(math.Floor(float64(batches.currentBatchIndex) * batches.batchSize))
 	resUpper := int(math.Floor(float64(batches.currentBatchIndex+1) * batches.batchSize))
 	res = batches.timeCodes[resLower:resUpper]
