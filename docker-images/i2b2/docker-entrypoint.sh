@@ -17,15 +17,17 @@ echo "Initialising i2b2 database"
         CREATE DATABASE ${I2B2_DB_NAME};
 EOSQL
 
-    # get the i2b2 data
-    pushd "$I2B2_DATA_DIR"
-    git clone --depth 1 --branch "$I2B2_DATA_VERSION" https://github.com/i2b2/i2b2-data.git .
-    popd
+    # uncompress the i2b2 data
+    tar -xf "$I2B2_COMPRESSED_DATA_DIR"/"i2b2-data.tar.gz" -C "$I2B2_DATA_DIR" --strip-components 1
 
     # run loading scripts
     for f in "$I2B2_SQL_DIR"/*.sh; do
         bash "$f"
     done
+
+    # delete loaded data
+    rm -rf "$I2B2_DATA_DIR"/{*,.*} || true
+
 fi
 
 # execute pre-init scripts & run wildfly
