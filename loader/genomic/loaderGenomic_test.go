@@ -13,16 +13,28 @@ import (
 	"testing"
 )
 
-const (
-	clinicalOntology = "../../data/genomic/tcga_cbio/8_clinical_data.csv"
-	genomicOntology  = "../../data/genomic/tcga_cbio/8_mutation_data.csv"
-	clinicalFile     = "../../data/genomic/tcga_cbio/8_clinical_data.csv"
-	genomicFile      = "../../data/genomic/tcga_cbio/8_mutation_data.csv"
+func init() {
+	dpath := os.Getenv("DEFAULT_DATA_PATH")
+	if dpath == "" {
+		DefaultDataPath = "../../data/"
+	} else {
+		DefaultDataPath = dpath
+	}
+}
 
-	//clinicalOntology = "../data/genomic/tcga_cbio/clinical_data.csv"
-	//genomicOntology  = "../data/genomic/tcga_cbio/mutation_data.csv"
-	//clinicalFile     = "../data/genomic/tcga_cbio/clinical_data.csv"
-	//genomicFile      = "../data/genomic/tcga_cbio/mutation_data.csv"
+// DefaultDataPath is the default path for the data folder
+var DefaultDataPath string
+
+var (
+	clinicalOntology = "genomic/tcga_cbio/8_clinical_data.csv"
+	genomicOntology  = "genomic/tcga_cbio/8_mutation_data.csv"
+	clinicalFile     = "genomic/tcga_cbio/8_clinical_data.csv"
+	genomicFile      = "genomic/tcga_cbio/8_mutation_data.csv"
+
+	//clinicalOntology = "genomic/tcga_cbio/clinical_data.csv"
+	//genomicOntology  = "genomic/tcga_cbio/mutation_data.csv"
+	//clinicalFile     = "genomic/tcga_cbio/clinical_data.csv"
+	//genomicFile      = "genomic/tcga_cbio/mutation_data.csv"
 )
 
 func getRoster(groupFilePath string) (*onet.Roster, *onet.LocalTest, error) {
@@ -60,10 +72,16 @@ func getRoster(groupFilePath string) (*onet.Roster, *onet.LocalTest, error) {
 func generateFiles(t *testing.T, el *onet.Roster, entryPointIdx int) {
 	log.SetDebugVisible(1)
 
+	clinicalOntology = DefaultDataPath + clinicalOntology
+	genomicOntology = DefaultDataPath + genomicOntology
+
 	fOntologyClinical, err := os.Open(clinicalOntology)
 	assert.True(t, err == nil, err)
 	fOntologyGenomic, err := os.Open(genomicOntology)
 	assert.True(t, err == nil, err)
+
+	clinicalFile = DefaultDataPath + clinicalFile
+	genomicFile = DefaultDataPath + genomicFile
 
 	fClinical, err := os.Open(clinicalFile)
 	assert.True(t, err == nil, err)
@@ -75,7 +93,7 @@ func generateFiles(t *testing.T, el *onet.Roster, entryPointIdx int) {
 	loadergenomic.Testing = true
 	loadergenomic.OntValues = make(map[loadergenomic.ConceptPath]loadergenomic.ConceptID)
 	loadergenomic.TextSearchIndex = int64(1)
-	loadergenomic.OutputFilePath = "../../data/genomic/"
+	loadergenomic.OutputFilePath = DefaultDataPath + "genomic/"
 
 	for i := range loadergenomic.FilePathsOntology {
 		loadergenomic.FilePathsOntology[i] = loadergenomic.OutputFilePath + loadergenomic.FilePathsOntology[i]
@@ -145,7 +163,7 @@ func TestGenerateFilesLocalTest(t *testing.T) {
 }
 
 func TestGeneratePubKey(t *testing.T) {
-	el, _, err := getRoster("../../data/genomic/group.toml")
+	el, _, err := getRoster(DefaultDataPath + "genomic/group.toml")
 	assert.True(t, err == nil, err)
 
 	b, err := el.Aggregate.MarshalBinary()
@@ -157,7 +175,7 @@ func TestGeneratePubKey(t *testing.T) {
 func TestGenerateFilesGroupFile(t *testing.T) {
 	t.Skip()
 	// increase maximum in onet.tcp.go to allow for big packets (for now is the max value for uint32)
-	el, _, err := getRoster("../../data/genomic/group.toml")
+	el, _, err := getRoster(DefaultDataPath + "genomic/group.toml")
 
 	assert.True(t, err == nil, err)
 	generateFiles(t, el, 0)

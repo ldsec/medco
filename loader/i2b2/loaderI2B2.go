@@ -15,6 +15,32 @@ import (
 	"time"
 )
 
+func init() {
+	dpath := os.Getenv("DEFAULT_DATA_PATH")
+	if dpath == "" {
+		DefaultDataPath = "../../data/"
+		log.Warn("Couldn't parse DEFAULT_DATA_PATH, using default value: ", "../../data/")
+	} else {
+		DefaultDataPath = dpath
+	}
+
+	addDataPathToFiles()
+}
+
+func addDataPathToFiles() {
+	for k, v := range InputFilePaths {
+		InputFilePaths[k] = DefaultDataPath + v
+	}
+	for k, v := range OutputFilePaths {
+		tmp := OutputFilePaths[k]
+		tmp.Path = DefaultDataPath + v.Path
+		OutputFilePaths[k] = tmp
+	}
+}
+
+// DefaultDataPath is the default path for the data folder
+var DefaultDataPath string
+
 // Files is the object structure behind the files.toml
 type Files struct {
 	TableAccess       string
@@ -53,39 +79,39 @@ var (
 	}
 
 	InputFilePaths = map[string]string{
-		"ONTOLOGY_BIRN":        "../../data/i2b2/original/birn.csv",
-		"ONTOLOGY_CUSTOM_META": "../../data/i2b2/original/custom_meta.csv",
-		"ONTOLOGY_ICD10_ICD9":  "../../data/i2b2/original/icd10_icd9.csv",
-		"ONTOLOGY_I2B2":        "../../data/i2b2/original/i2b2.csv",
+		"ONTOLOGY_BIRN":        "i2b2/original/birn.csv",
+		"ONTOLOGY_CUSTOM_META": "i2b2/original/custom_meta.csv",
+		"ONTOLOGY_ICD10_ICD9":  "i2b2/original/icd10_icd9.csv",
+		"ONTOLOGY_I2B2":        "i2b2/original/i2b2.csv",
 
-		"TABLE_ACCESS":      "../../data/i2b2/original/table_access.csv",
-		"DUMMY_TO_PATIENT":  "../../data/i2b2/original/dummy_to_patient.csv",
-		"PATIENT_DIMENSION": "../../data/i2b2/original/patient_dimension.csv",
-		"VISIT_DIMENSION":   "../../data/i2b2/original/visit_dimension.csv",
-		"CONCEPT_DIMENSION": "../../data/i2b2/original/concept_dimension.csv",
-		"OBSERVATION_FACT":  "../../data/i2b2/original/observation_fact.csv",
+		"TABLE_ACCESS":      "i2b2/original/table_access.csv",
+		"DUMMY_TO_PATIENT":  "i2b2/original/dummy_to_patient.csv",
+		"PATIENT_DIMENSION": "i2b2/original/patient_dimension.csv",
+		"VISIT_DIMENSION":   "i2b2/original/visit_dimension.csv",
+		"CONCEPT_DIMENSION": "i2b2/original/concept_dimension.csv",
+		"OBSERVATION_FACT":  "i2b2/original/observation_fact.csv",
 	}
 
 	OutputFilePaths = map[string]FileInfo{
-		"TABLE_ACCESS":     {TableName: ONT + "table_access", Path: "../../data/i2b2/converted/table_access.csv"},
-		"SENSITIVE_TAGGED": {TableName: ONT + "sensitive_tagged", Path: "../../data/i2b2/converted/sensitive_tagged.csv"},
+		"TABLE_ACCESS":     {TableName: ONT + "table_access", Path: "i2b2/converted/table_access.csv"},
+		"SENSITIVE_TAGGED": {TableName: ONT + "sensitive_tagged", Path: "i2b2/converted/sensitive_tagged.csv"},
 
-		"LOCAL_BIRN":        {TableName: I2B2METADATA + "birn", Path: "../../data/i2b2/converted/local_birn.csv"},
-		"LOCAL_CUSTOM_META": {TableName: I2B2METADATA + "custom_meta", Path: "../../data/i2b2/converted/local_custom_meta.csv"},
-		"LOCAL_ICD10_ICD9":  {TableName: I2B2METADATA + "icd10_icd9", Path: "../../data/i2b2/converted/local_icd10_icd9.csv"},
-		"LOCAL_I2B2":        {TableName: I2B2METADATA + "i2b2", Path: "../../data/i2b2/converted/local_i2b2.csv"},
+		"LOCAL_BIRN":        {TableName: I2B2METADATA + "birn", Path: "i2b2/converted/local_birn.csv"},
+		"LOCAL_CUSTOM_META": {TableName: I2B2METADATA + "custom_meta", Path: "i2b2/converted/local_custom_meta.csv"},
+		"LOCAL_ICD10_ICD9":  {TableName: I2B2METADATA + "icd10_icd9", Path: "i2b2/converted/local_icd10_icd9.csv"},
+		"LOCAL_I2B2":        {TableName: I2B2METADATA + "i2b2", Path: "i2b2/converted/local_i2b2.csv"},
 
-		"MEDCO_BIRN":        {TableName: ONT + "birn", Path: "../../data/i2b2/converted/medco_birn.csv"},
-		"MEDCO_CUSTOM_META": {TableName: ONT + "custom_meta", Path: "../../data/i2b2/converted/medco_custom_meta.csv"},
-		"MEDCO_ICD10_ICD9":  {TableName: ONT + "icd10_icd9", Path: "../../data/i2b2/converted/medco_icd10_icd9.csv"},
-		"MEDCO_I2B2":        {TableName: ONT + "i2b2", Path: "../../data/i2b2/converted/medco_i2b2.csv"},
+		"MEDCO_BIRN":        {TableName: ONT + "birn", Path: "i2b2/converted/medco_birn.csv"},
+		"MEDCO_CUSTOM_META": {TableName: ONT + "custom_meta", Path: "i2b2/converted/medco_custom_meta.csv"},
+		"MEDCO_ICD10_ICD9":  {TableName: ONT + "icd10_icd9", Path: "i2b2/converted/medco_icd10_icd9.csv"},
+		"MEDCO_I2B2":        {TableName: ONT + "i2b2", Path: "i2b2/converted/medco_i2b2.csv"},
 
-		"PATIENT_DIMENSION": {TableName: I2B2DEMODATA + "patient_dimension", Path: "../../data/i2b2/converted/patient_dimension.csv"},
-		"NEW_PATIENT_NUM":   {TableName: "", Path: "../../data/i2b2/converted/new_patient_num.csv"},
-		"VISIT_DIMENSION":   {TableName: I2B2DEMODATA + "visit_dimension", Path: "../../data/i2b2/converted/visit_dimension.csv"},
-		"NEW_ENCOUNTER_NUM": {TableName: "", Path: "../../data/i2b2/converted/new_encounter_num.csv"},
-		"CONCEPT_DIMENSION": {TableName: I2B2DEMODATA + "concept_dimension", Path: "../../data/i2b2/converted/concept_dimension.csv"},
-		"OBSERVATION_FACT":  {TableName: I2B2DEMODATA + "observation_fact", Path: "../../data/i2b2/converted/observation_fact.csv"},
+		"PATIENT_DIMENSION": {TableName: I2B2DEMODATA + "patient_dimension", Path: "i2b2/converted/patient_dimension.csv"},
+		"NEW_PATIENT_NUM":   {TableName: "", Path: "i2b2/converted/new_patient_num.csv"},
+		"VISIT_DIMENSION":   {TableName: I2B2DEMODATA + "visit_dimension", Path: "i2b2/converted/visit_dimension.csv"},
+		"NEW_ENCOUNTER_NUM": {TableName: "", Path: "i2b2/converted/new_encounter_num.csv"},
+		"CONCEPT_DIMENSION": {TableName: I2B2DEMODATA + "concept_dimension", Path: "i2b2/converted/concept_dimension.csv"},
+		"OBSERVATION_FACT":  {TableName: I2B2DEMODATA + "observation_fact", Path: "i2b2/converted/observation_fact.csv"},
 	}
 
 	FileBashPath = "24-load-i2b2-data.sh"
@@ -347,7 +373,7 @@ func LoadDataFiles() error {
 func readCSV(filename string) ([][]string, error) {
 	csvInputFile, err := os.Open(InputFilePaths[filename])
 	if err != nil {
-		log.Fatal("Error opening [" + strings.ToLower(filename) + "].csv")
+		log.Fatal("Error opening [" + strings.ToLower(InputFilePaths[filename]) + "].csv")
 		return nil, err
 	}
 	defer csvInputFile.Close()

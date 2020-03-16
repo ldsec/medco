@@ -20,6 +20,19 @@ import (
 	"time"
 )
 
+func init() {
+	dpath := os.Getenv("DEFAULT_DATA_PATH")
+	if dpath == "" {
+		DefaultDataPath = "../../data/"
+		log.Warn("Couldn't parse DEFAULT_DATA_PATH, using default value: ", "../../data/")
+	} else {
+		DefaultDataPath = dpath
+	}
+}
+
+// DefaultDataPath is the default path for the data folder
+var DefaultDataPath string
+
 // I2B2METADATA path to i2b2metadata schema
 const I2B2METADATA = "i2b2metadata_i2b2."
 
@@ -34,7 +47,7 @@ const ANNOTATIONS = "genomic_annotations."
 
 // The different paths and handlers for all the .sql files
 var (
-	OutputFilePath = "../data/genomic/"
+	OutputFilePath = "genomic/"
 
 	TablenamesOntology = [...]string{ONT + "clinical_sensitive",
 		ONT + "clinical_non_sensitive",
@@ -1024,7 +1037,6 @@ func GenerateDataFiles(group *onet.Roster, fClinical, fGenomic *os.File) error {
 					}
 
 					headerGenomic = append(headerGenomic, el)
-
 				}
 				first = false
 			} else {

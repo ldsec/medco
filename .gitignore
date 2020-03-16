@@ -50,3 +50,6 @@ loader/genomic/*.sh
 loader/i2b2/*.toml
 loader/i2b2/*.sh
 coverage.txt
+
+data/genomic
+data/i2b2

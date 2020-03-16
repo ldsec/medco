@@ -3,15 +3,17 @@ go:
   - 1.x
 
 env:
-  - GO111MODULE=on
+  - GO111MODULE=on DEFAULT_DATA_PATH=~/build/ldsec/medco-loader/data/
 
 before_install:
-  - git lfs pull
+  - cd ~/build/ldsec/medco-loader/data
+  - bash download_test_data.sh
 
 install:
   - go get -t ./...
 
 script:
+  - cd ~/build/ldsec/medco-loader
   - make test
 
 after_success:
