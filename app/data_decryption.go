@@ -1,7 +1,7 @@
 package main
 
 import (
-	"errors"
+	"fmt"
 	"github.com/ldsec/unlynx/lib"
 	"github.com/urfave/cli"
 	"go.dedis.ch/onet/v3/log"
@@ -21,7 +21,7 @@ func decryptIntFromApp(c *cli.Context) error {
 	}
 
 	if c.NArg() != 1 {
-		err := errors.New("wrong number of arguments (only 1 allowed, except for the flags)")
+		err := fmt.Errorf("wrong number of arguments (only 1 allowed, except for the flags)")
 		log.Error(err)
 		return cli.NewExitError(err, 3)
 	}

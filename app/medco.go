@@ -1,7 +1,7 @@
 package main
 
 import (
-	"errors"
+	"fmt"
 	"os"
 
 	"github.com/ldsec/unlynx/lib"
@@ -225,10 +225,10 @@ func main() {
 					Usage:   "Setup server configuration (interactive)",
 					Action: func(c *cli.Context) error {
 						if c.String(optionConfig) != "" {
-							return errors.New("[-] Configuration file option cannot be used for the 'setup' command")
+							return fmt.Errorf("[-] Configuration file option cannot be used for the 'setup' command")
 						}
 						if c.GlobalIsSet("debug") {
-							return errors.New("[-] Debug option cannot be used for the 'setup' command")
+							return fmt.Errorf("[-] Debug option cannot be used for the 'setup' command")
 						}
 						app.InteractiveConfig(libunlynx.SuiTe, BinaryName)
 						return nil

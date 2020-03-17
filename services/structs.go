@@ -2,7 +2,6 @@ package servicesmedco
 
 import (
 	"fmt"
-	"github.com/btcsuite/goleveldb/leveldb/errors"
 	"github.com/ldsec/unlynx/lib"
 	"go.dedis.ch/kyber/v3"
 	"go.dedis.ch/onet/v3"
@@ -162,10 +161,10 @@ type SurveyAggGenerated struct {
 func (s *Service) deleteSurveyKS(sid SurveyID) (SurveyKS, error) {
 	surv, err := s.MapSurveyKS.Remove(string(sid))
 	if err != nil {
-		return SurveyKS{}, errors.New("Error" + err.Error() + "while deleting surveyID: " + string(sid))
+		return SurveyKS{}, fmt.Errorf("error while deleting surveyID ("+string(sid)+"): %v", err.Error())
 	}
 	if surv == nil {
-		return SurveyKS{}, errors.New("No entry in map with surveyID: " + string(sid))
+		return SurveyKS{}, fmt.Errorf("no entry in map with surveyID (" + string(sid) + ")")
 	}
 	return surv.(SurveyKS), nil
 }
@@ -173,10 +172,10 @@ func (s *Service) deleteSurveyKS(sid SurveyID) (SurveyKS, error) {
 func (s *Service) deleteSurveyShuffle(sid SurveyID) (SurveyShuffle, error) {
 	surv, err := s.MapSurveyShuffle.Remove(string(sid))
 	if err != nil {
-		return SurveyShuffle{}, errors.New("Error" + err.Error() + "while deleting surveyID: " + string(sid))
+		return SurveyShuffle{}, fmt.Errorf("error while deleting surveyID ("+string(sid)+"): %v", err.Error())
 	}
 	if surv == nil {
-		return SurveyShuffle{}, errors.New("No entry in map with surveyID: " + string(sid))
+		return SurveyShuffle{}, fmt.Errorf("no entry in map with surveyID (" + string(sid) + ")")
 	}
 	return surv.(SurveyShuffle), nil
 }
@@ -184,10 +183,10 @@ func (s *Service) deleteSurveyShuffle(sid SurveyID) (SurveyShuffle, error) {
 func (s *Service) deleteSurveyAgg(sid SurveyID) (SurveyAgg, error) {
 	surv, err := s.MapSurveyAgg.Remove(string(sid))
 	if err != nil {
-		return SurveyAgg{}, errors.New("Error" + err.Error() + "while deleting surveyID: " + string(sid))
+		return SurveyAgg{}, fmt.Errorf("error while deleting surveyID ("+string(sid)+"): %v", err.Error())
 	}
 	if surv == nil {
-		return SurveyAgg{}, errors.New("No entry in map with surveyID: " + string(sid))
+		return SurveyAgg{}, fmt.Errorf("no entry in map with surveyID (" + string(sid) + ")")
 	}
 	return surv.(SurveyAgg), nil
 }
@@ -195,10 +194,10 @@ func (s *Service) deleteSurveyAgg(sid SurveyID) (SurveyAgg, error) {
 func (s *Service) getSurveyKS(sid SurveyID) (SurveyKS, error) {
 	surv, err := s.MapSurveyKS.Get(string(sid))
 	if err != nil {
-		return SurveyKS{}, errors.New("Error" + err.Error() + "while getting surveyID: " + string(sid))
+		return SurveyKS{}, fmt.Errorf("error while getting surveyID ("+string(sid)+"): %v", err.Error())
 	}
 	if surv == nil {
-		return SurveyKS{}, errors.New("Empty map entry while getting surveyID: " + string(sid))
+		return SurveyKS{}, fmt.Errorf("empty map entry while getting surveyID (" + string(sid) + ")")
 	}
 	return surv.(SurveyKS), nil
 }
@@ -206,10 +205,10 @@ func (s *Service) getSurveyKS(sid SurveyID) (SurveyKS, error) {
 func (s *Service) getSurveyShuffle(sid SurveyID) (SurveyShuffle, error) {
 	surv, err := s.MapSurveyShuffle.Get(string(sid))
 	if err != nil {
-		return SurveyShuffle{}, errors.New("Error" + err.Error() + "while getting surveyID: " + string(sid))
+		return SurveyShuffle{}, fmt.Errorf("error while getting surveyID ("+string(sid)+"): %v", err.Error())
 	}
 	if surv == nil {
-		return SurveyShuffle{}, errors.New("Empty map entry while getting surveyID: " + string(sid))
+		return SurveyShuffle{}, fmt.Errorf("empty map entry while getting surveyID (" + string(sid) + ")")
 	}
 	return surv.(SurveyShuffle), nil
 }
@@ -217,10 +216,10 @@ func (s *Service) getSurveyShuffle(sid SurveyID) (SurveyShuffle, error) {
 func (s *Service) getSurveyAgg(sid SurveyID) (SurveyAgg, error) {
 	surv, err := s.MapSurveyAgg.Get(string(sid))
 	if err != nil {
-		return SurveyAgg{}, errors.New("Error" + err.Error() + "while getting surveyID" + string(sid))
+		return SurveyAgg{}, fmt.Errorf("error while getting surveyID ("+string(sid)+"): %v", err.Error())
 	}
 	if surv == nil {
-		return SurveyAgg{}, errors.New("Empty map entry while getting surveyID" + string(sid))
+		return SurveyAgg{}, fmt.Errorf("empty map entry while getting surveyID (" + string(sid) + ")")
 	}
 	return surv.(SurveyAgg), nil
 }

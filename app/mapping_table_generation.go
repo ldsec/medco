@@ -1,7 +1,7 @@
 package main
 
 import (
-	"errors"
+	"fmt"
 	"github.com/urfave/cli"
 	"go.dedis.ch/kyber/v3"
 	"go.dedis.ch/kyber/v3/suites"
@@ -49,7 +49,7 @@ func mappingTableGenFromApp(c *cli.Context) error {
 	case "go":
 		err = writeMapToGoFile(file, PointToInt)
 	default:
-		err = errors.New("format selected is incorrect: " + outputFormat)
+		err = fmt.Errorf("format selected is incorrect: " + outputFormat)
 	}
 
 	if err != nil {

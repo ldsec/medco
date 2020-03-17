@@ -1,7 +1,7 @@
 package main
 
 import (
-	"errors"
+	"fmt"
 	"github.com/ldsec/unlynx/lib"
 	"github.com/urfave/cli"
 	"go.dedis.ch/kyber/v3/util/encoding"
@@ -25,7 +25,7 @@ func NonInteractiveSetup(c *cli.Context) error {
 	providedPrivKey := c.String("privKey")
 
 	if serverBindingStr == "" || description == "" || privateTomlPath == "" || publicTomlPath == "" {
-		err := errors.New("arguments not OK")
+		err := fmt.Errorf("arguments not OK")
 		log.Error(err)
 		return cli.NewExitError(err, 3)
 	}
@@ -72,12 +72,12 @@ func NonInteractiveSetup(c *cli.Context) error {
 	group := app.NewGroupToml(server)
 
 	if err := conf.Save(privateTomlPath); err != nil {
-		err := errors.New("failed saving private.toml")
+		err := fmt.Errorf("failed saving private.toml")
 		log.Error(err)
 		return cli.NewExitError(err, 3)
 	}
 	if err := group.Save(publicTomlPath); err != nil {
-		err := errors.New("failed saving group.toml")
+		err := fmt.Errorf("failed saving group.toml")
 		log.Error(err)
 		return cli.NewExitError(err, 3)
 	}

@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"github.com/BurntSushi/toml"
-	"github.com/btcsuite/goleveldb/leveldb/errors"
 	"github.com/fanliao/go-concurrentMap"
 	"github.com/ldsec/medco-unlynx/protocols"
 	"github.com/ldsec/unlynx/lib"
@@ -475,7 +474,7 @@ func (s *Service) whatRequest(target string) (bool, libunlynx.CipherVector, kybe
 		cPubKey = surveyAgg.Request.ClientPubKey
 
 	default:
-		return false, nil, nil, errors.New("Could not identify the request:" + typeQ)
+		return false, nil, nil, fmt.Errorf("could not identify the request:" + typeQ)
 	}
 	return proofs, data, cPubKey, nil
 }
@@ -542,14 +541,12 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance,
 			path := DDTSecretsPath + "_" + s.ServerIdentity().Address.Host() + ":" + s.ServerIdentity().Address.Port() + ".toml"
 			aux, err = CheckDDTSecrets(path, serverIDMap.Address, nil)
 			if err != nil || aux == nil {
-				log.Fatal(err)
-				return nil, errors.New("Error while reading the DDT secrets from file")
+				return nil, fmt.Errorf("error while reading the DDT secrets from file: %v", err)
 			}
 		} else {
 			aux, err = CheckDDTSecrets(os.Getenv("UNLYNX_DDT_SECRETS_FILE_PATH"), serverIDMap.Address, nil)
 			if err != nil || aux == nil {
-				log.Fatal(err)
-				return nil, errors.New("Error while reading the DDT secrets from file")
+				return nil, fmt.Errorf("error while reading the DDT secrets from file: %v", err)
 			}
 		}
 		hashCreation.SurveySecretKey = &aux
@@ -606,8 +603,7 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance,
 			if err != nil {
 				log.Lvl3(s.ServerIdentity(), "Waiting for data to arrive for survey", target)
 				if i == maxLoop {
-					return nil, xerrors.New(
-						"didn't get data within time - aborting")
+					return nil, xerrors.New("didn't get data within time - aborting")
 				}
 				time.Sleep(1 * time.Second)
 			} else {
@@ -637,7 +633,7 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance,
 		prop.RegisterOnDataToChildren(func(msg network.Message) error {
 			pc, ok := msg.(*ProtocolConfig)
 			if !ok {
-				return errors.New("didn't get ProtocolConfig")
+				return fmt.Errorf("didn't get ProtocolConfig")
 			}
 			surveyIDChan <- pc.SurveyID
 			return nil
@@ -648,7 +644,7 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance,
 			case ss := <-surveyShuffleChan:
 				return &ss.Request
 			case <-time.After(libunlynx.TIMEOUT):
-				return errors.New(s.ServerIdentity().String() + "didn't get the data from the nodes in time.")
+				return fmt.Errorf(s.ServerIdentity().String() + " didn't get the data from the nodes in time.")
 			}
 		})
 		go func() {
@@ -679,8 +675,7 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance,
 		prop.RegisterOnDataToChildren(func(msg network.Message) error {
 			ssr, ok := msg.(*SurveyShuffleRequest)
 			if !ok {
-				return xerrors.New("didn't receive SurveyShuffleRequest" +
-					" message")
+				return xerrors.New("didn't receive SurveyShuffleRequest message")
 			}
 			surveyShuffle, err := s.getSurveyShuffle(ssr.SurveyID)
 			if err != nil {
@@ -698,7 +693,7 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance,
 		})
 
 	default:
-		return nil, errors.New("Service attempts to start an unknown protocol: " + tn.ProtocolName() + ".")
+		return nil, fmt.Errorf("Service attempts to start an unknown protocol: " + tn.ProtocolName())
 	}
 	return pi, nil
 }
@@ -941,14 +936,14 @@ func CheckDDTSecrets(path string, id network.Address, secret kyber.Scalar) (kybe
 
 func emptySurveyID(id SurveyID) error {
 	if id == "" {
-		return errors.New("survey id is empty")
+		return fmt.Errorf("survey id is empty")
 	}
 	return nil
 }
 
 func emptyRoster(roster onet.Roster) error {
 	if len(roster.List) == 0 {
-		return errors.New("roster is empty")
+		return fmt.Errorf("roster is empty")
 	}
 	return nil
 }
