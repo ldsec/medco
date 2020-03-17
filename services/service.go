@@ -591,8 +591,7 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance,
 			keySwitch.Proofs = proofs
 			dataToSwitch := data
 			keySwitch.TargetOfSwitch = &dataToSwitch
-			tmp := cPubKey
-			keySwitch.TargetPublicKey = &tmp
+			keySwitch.TargetPublicKey = &cPubKey
 		}
 
 	case protocolsunlynx.CollectiveAggregationProtocolName:
