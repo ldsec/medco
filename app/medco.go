@@ -24,9 +24,6 @@ const (
 	optionConfig      = "config"
 	optionConfigShort = "c"
 
-	optionTimeout      = "timeout"
-	optionTimeoutShort = "t"
-
 	optionGroupFile      = "file"
 	optionGroupFileShort = "f"
 
@@ -124,12 +121,6 @@ func main() {
 		cli.StringFlag{
 			Name:  optionConfig + ", " + optionConfigShort,
 			Usage: "Configuration file of the server",
-		},
-		cli.Int64Flag{
-			Name:     optionTimeout + ", " + optionTimeoutShort,
-			Usage:    "Communication timeout (in minutes)",
-			Required: false,
-			Value:    20,
 		},
 	}
 

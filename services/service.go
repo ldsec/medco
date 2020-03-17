@@ -27,13 +27,7 @@ func init() {
 
 	// Register SurveyShuffleRequest for propagation-protocol
 	network.RegisterMessage(&SurveyShuffleRequest{})
-
-	// Default timeout just for all tests to work
-	TimeoutService = 20 * time.Minute
 }
-
-// TimeoutService is the communication idle timeout
-var TimeoutService time.Duration
 
 var propagateShuffleFromChildren = "PropShuffleFromChildren"
 var propagateShuffleToChildren = "PropShuffleToChildren"
@@ -41,8 +35,6 @@ var propagateShuffleToChildren = "PropShuffleToChildren"
 // Service defines a service in unlynx
 type Service struct {
 	*onet.ServiceProcessor
-
-	Timeout time.Duration
 
 	shuffleGetData protocols.PropagationFunc
 	shufflePutData protocols.PropagationFunc
@@ -56,7 +48,6 @@ type Service struct {
 // NewService constructor which registers the needed messages.
 func NewService(c *onet.Context) (onet.Service, error) {
 	newUnLynxInstance := &Service{
-		Timeout:          TimeoutService,
 		ServiceProcessor: onet.NewServiceProcessor(c),
 		MapSurveyKS:      concurrent.NewConcurrentMap(),
 		MapSurveyShuffle: concurrent.NewConcurrentMap(),
@@ -217,7 +208,7 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 		}
 
 		childrenMsgs, err := s.shuffleGetData(&ssr.Roster,
-			&ProtocolConfig{SurveyID: ssr.SurveyID}, s.Timeout)
+			&ProtocolConfig{SurveyID: ssr.SurveyID}, libunlynx.TIMEOUT)
 		if err != nil {
 			return nil, fmt.Errorf("couldn't get children data: %+v", err)
 		}
@@ -276,7 +267,7 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 		// signal the other nodes that they need to prepare to execute a key switching
 		// basically after shuffling the results the root server needs to send them back
 		// to the remaining nodes for key switching
-		_, err = s.shufflePutData(&ssr.Roster, ssr, s.Timeout)
+		_, err = s.shufflePutData(&ssr.Roster, ssr, libunlynx.TIMEOUT)
 		if err != nil {
 			s.deleteSurveyShuffle(ssr.SurveyID)
 			return nil, fmt.Errorf("couldn't send data to children: %+v", err)
@@ -367,7 +358,7 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 		return &Result{Result: libunlynx.CipherVector{keySwitchingResult[index]},
 			TR: surveyShuffle.TR}, nil
 
-	case <-time.After(s.Timeout):
+	case <-time.After(libunlynx.TIMEOUT):
 		// remove query from map
 		_, err = s.deleteSurveyShuffle(ssr.SurveyID)
 		if err != nil {
@@ -609,7 +600,7 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance,
 
 	case protocolsunlynx.CollectiveAggregationProtocolName:
 		var surveyAgg SurveyAgg
-		maxLoop := int(s.Timeout.Minutes()) * 60
+		maxLoop := int(libunlynx.TIMEOUT.Seconds())
 		for i := 1; i <= maxLoop; i++ {
 			surveyAgg, err = s.getSurveyAgg(target)
 			if err != nil {
@@ -656,7 +647,7 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance,
 			select {
 			case ss := <-surveyShuffleChan:
 				return &ss.Request
-			case <-time.After(s.Timeout):
+			case <-time.After(libunlynx.TIMEOUT):
 				return errors.New(s.ServerIdentity().String() + "didn't get the data from the nodes in time.")
 			}
 		})
@@ -672,7 +663,7 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance,
 						break
 					}
 				}
-			case <-time.After(s.Timeout):
+			case <-time.After(libunlynx.TIMEOUT):
 				log.Error(s.ServerIdentity().String() + "didn't get the survey notification in time.")
 				return
 			}
@@ -709,11 +700,6 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance,
 	default:
 		return nil, errors.New("Service attempts to start an unknown protocol: " + tn.ProtocolName() + ".")
 	}
-
-	if err := tn.SetConfig(conf); err != nil {
-		return nil, xerrors.Errorf("couldn't set config: %+v", err)
-	}
-
 	return pi, nil
 }
 
@@ -730,6 +716,9 @@ func (s *Service) StartProtocol(name, typeQ string, pc ProtocolConfig,
 	conf, err := pc.getConfig()
 	if err != nil {
 		return nil, fmt.Errorf("couldn't get config: %+v", err)
+	}
+	if err := tn.SetConfig(&conf); err != nil {
+		return nil, xerrors.Errorf("couldn't set config: %+v", err)
 	}
 	pi, err := s.NewProtocol(tn, &conf)
 	if err != nil || pi == nil {
@@ -775,7 +764,7 @@ func (s *Service) TaggingPhase(targetSurvey *SurveyDDTRequest,
 	case deterministicTaggingResult := <-pi.(*protocolsunlynx.DeterministicTaggingProtocol).FeedbackChannel:
 		execTime := pi.(*protocolsunlynx.DeterministicTaggingProtocol).ExecTime
 		return deterministicTaggingResult, execTime, time.Since(start) - execTime, nil
-	case <-time.After(s.Timeout):
+	case <-time.After(libunlynx.TIMEOUT):
 		return nil, 0, 0, fmt.Errorf("couldn't finish tagging protocol in time")
 	}
 }
@@ -797,7 +786,7 @@ func (s *Service) CollectiveAggregationPhase(targetSurvey SurveyID, roster *onet
 			break
 		}
 		return finalResult, time.Since(start), nil
-	case <-time.After(s.Timeout):
+	case <-time.After(libunlynx.TIMEOUT):
 		return libunlynx.CipherText{}, 0, fmt.Errorf("couldn't finish collective aggregation protocol in time")
 	}
 }
@@ -814,7 +803,7 @@ func (s *Service) ShufflingPhase(targetSurvey SurveyID, roster *onet.Roster) ([]
 	case shufflingResult := <-pi.(*protocolsunlynx.ShufflingProtocol).FeedbackChannel:
 		execTime := pi.(*protocolsunlynx.ShufflingProtocol).ExecTime
 		return shufflingResult, execTime, time.Since(start) - execTime, nil
-	case <-time.After(s.Timeout):
+	case <-time.After(libunlynx.TIMEOUT):
 		return nil, 0, 0, fmt.Errorf("couldn't finish shuffling protocol in time")
 	}
 }
@@ -831,7 +820,7 @@ func (s *Service) KeySwitchingPhase(targetSurvey SurveyID, typeQ string, roster 
 	case keySwitchedAggregatedResponses := <-pi.(*protocolsunlynx.KeySwitchingProtocol).FeedbackChannel:
 		execTime := pi.(*protocolsunlynx.KeySwitchingProtocol).ExecTime
 		return keySwitchedAggregatedResponses, execTime, time.Since(start) - execTime, nil
-	case <-time.After(s.Timeout):
+	case <-time.After(libunlynx.TIMEOUT):
 		return nil, 0, 0, fmt.Errorf("couldn't finish key switching protocol in time")
 	}
 }
