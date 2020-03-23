@@ -31,6 +31,7 @@ services:
     environment:
       - HTTP_SCHEME=http
       - ALL_TIMEOUTS_SECONDS=600
+      - PROD_CONFIG=false
     volumes:
       - ../docker-images/nginx/www-data:/www-data
       - ../docker-images/nginx/conf.d:/etc/nginx/conf.d

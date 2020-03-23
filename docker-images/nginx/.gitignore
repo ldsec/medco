@@ -1,2 +1,3 @@
 conf.d/servers.conf
-conf.d/common/server-revproxy.conf.inc
+conf.d/common/server-revproxy-base.conf.inc
+conf.d/common/server-revproxy-dev.conf.inc

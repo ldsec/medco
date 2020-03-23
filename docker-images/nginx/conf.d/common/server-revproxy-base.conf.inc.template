@@ -31,18 +31,6 @@ location /auth {
     proxy_pass http://$upstream_host:8080;
 }
 
-location /pgadmin {
-    set $upstream_host pg-admin;
-    proxy_pass http://$upstream_host;
-    proxy_set_header X-Script-Name /pgadmin;
-    proxy_redirect http://$upstream_host/pgadmin /pgadmin;
-}
-
-location /i2b2 {
-    set $upstream_host i2b2;
-    proxy_pass http://$upstream_host:8080;
-}
-
 location /glowing-bear {
     set $upstream_host glowing-bear-medco;
     proxy_pass http://$upstream_host;
@@ -51,29 +39,5 @@ location /glowing-bear {
 location /medco {
     include /etc/nginx/conf.d/common/cors.inc;
     set $upstream_host medco-connector;
-    proxy_pass http://$upstream_host:1999;
-}
-
-
-### --- only used in dev or test profiles
-
-location /local-3nodes/medco-0 {
-    include /etc/nginx/conf.d/common/cors.inc;
-    set $upstream_host medco-connector-srv0;
-    rewrite /local-3nodes/medco-0/(.*) /medco/$1 break;
-    proxy_pass http://$upstream_host:1999;
-}
-
-location /local-3nodes/medco-1 {
-    include /etc/nginx/conf.d/common/cors.inc;
-    set $upstream_host medco-connector-srv1;
-    rewrite /local-3nodes/medco-1/(.*) /medco/$1 break;
-    proxy_pass http://$upstream_host:1999;
-}
-
-location /local-3nodes/medco-2 {
-    include /etc/nginx/conf.d/common/cors.inc;
-    set $upstream_host medco-connector-srv2;
-    rewrite /local-3nodes/medco-2/(.*) /medco/$1 break;
     proxy_pass http://$upstream_host:1999;
 }
