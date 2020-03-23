@@ -18,9 +18,6 @@ services:
 
   medco-unlynx:
     image: medco/medco-unlynx:${MEDCO_UNLYNX_VERSION:-v0.3.1}
-    ports:
-    - "2000"
-    - "2001"
     environment:
     - NODE_IDX=0
     - UNLYNX_DEBUG_LEVEL=1
@@ -31,9 +28,6 @@ services:
     image: medco/nginx:${NGINX_VERSION:-v0.3.1-MedCo}
     build:
       context: ../docker-images/nginx
-    ports:
-      - "80"
-      - "443"
     environment:
       - HTTP_SCHEME=http
       - ALL_TIMEOUTS_SECONDS=600
@@ -45,8 +39,6 @@ services:
     image: postgres:9.6
     environment:
     - POSTGRES_PASSWORD=postgres
-    ports:
-    - "5432"
     volumes:
     - medcodb:/var/lib/postgresql/data
     - ../docker-images/postgresql/initdb-data:/docker-entrypoint-initdb.d
@@ -75,8 +67,6 @@ services:
 
   glowing-bear-medco:
     image: medco/glowing-bear-medco:${GLOWING_BEAR_MEDCO_VERSION:-v0.3.1}
-    ports:
-      - "80"
     environment:
       - GB_MEDCO_NODE_URL=http://localhost/local-3nodes/medco-0
       - GB_KEYCLOAK_URL=http://localhost/auth
@@ -86,8 +76,6 @@ services:
 
   medco-connector:
     image: medco/medco-connector:${MEDCO_CONNECTOR_VERSION:-v0.3.1}
-    ports:
-      - "1999"
     environment:
       - SERVER_HTTP_WRITE_TIMEOUT_SECONDS=600
       - I2B2_HIVE_URL=http://i2b2:8080/i2b2/services
