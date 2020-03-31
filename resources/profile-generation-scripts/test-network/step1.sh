@@ -20,7 +20,7 @@ PRIV_KEY="${5-}"
 # convenience variables
 PROFILE_NAME="test-network-${NETWORK_NAME}-node${NODE_IDX}"
 SCRIPT_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-MEDCO_UNLYNX_VER="v0.3.1"
+MEDCO_UNLYNX_VER="v1.0.0"
 CONF_FOLDER="${SCRIPT_FOLDER}/../../../configuration-profiles/${PROFILE_NAME}"
 COMPOSE_FOLDER="${SCRIPT_FOLDER}/../../../compose-profiles/${PROFILE_NAME}"
 if [[ -d ${CONF_FOLDER} ]] || [[ -d ${COMPOSE_FOLDER} ]]; then
