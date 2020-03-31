@@ -29,7 +29,7 @@ type GetSurvivalAnalysisParams struct {
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
 
-	/*User public key, patient list and time codes strings to run the survival analysis
+	/*User public key, patient list and time codes strings for the survival analysis
 	  In: body
 	*/
 	Body GetSurvivalAnalysisBody

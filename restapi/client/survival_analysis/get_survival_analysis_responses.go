@@ -8,6 +8,7 @@ package survival_analysis
 import (
 	"fmt"
 	"io"
+	"strconv"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
@@ -59,21 +60,23 @@ func NewGetSurvivalAnalysisOK() *GetSurvivalAnalysisOK {
 Queried survival analysis
 */
 type GetSurvivalAnalysisOK struct {
-	Payload []*GetSurvivalAnalysisOKBodyItems0
+	Payload *GetSurvivalAnalysisOKBody
 }
 
 func (o *GetSurvivalAnalysisOK) Error() string {
 	return fmt.Sprintf("[POST /survival-analysis][%d] getSurvivalAnalysisOK  %+v", 200, o.Payload)
 }
 
-func (o *GetSurvivalAnalysisOK) GetPayload() []*GetSurvivalAnalysisOKBodyItems0 {
+func (o *GetSurvivalAnalysisOK) GetPayload() *GetSurvivalAnalysisOKBody {
 	return o.Payload
 }
 
 func (o *GetSurvivalAnalysisOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
+	o.Payload = new(GetSurvivalAnalysisOKBody)
+
 	// response payload
-	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 
@@ -239,20 +242,89 @@ func (o *GetSurvivalAnalysisDefaultBody) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-/*GetSurvivalAnalysisOKBodyItems0 get survival analysis o k body items0
-swagger:model GetSurvivalAnalysisOKBodyItems0
+/*GetSurvivalAnalysisOKBody get survival analysis o k body
+swagger:model GetSurvivalAnalysisOKBody
 */
-type GetSurvivalAnalysisOKBodyItems0 struct {
+type GetSurvivalAnalysisOKBody struct {
+
+	// results
+	Results []*ResultsItems0 `json:"results"`
+
+	// timers
+	Timers map[string]float64 `json:"timers,omitempty"`
+}
+
+// Validate validates this get survival analysis o k body
+func (o *GetSurvivalAnalysisOKBody) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateResults(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *GetSurvivalAnalysisOKBody) validateResults(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.Results) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(o.Results); i++ {
+		if swag.IsZero(o.Results[i]) { // not required
+			continue
+		}
+
+		if o.Results[i] != nil {
+			if err := o.Results[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("getSurvivalAnalysisOK" + "." + "results" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *GetSurvivalAnalysisOKBody) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *GetSurvivalAnalysisOKBody) UnmarshalBinary(b []byte) error {
+	var res GetSurvivalAnalysisOKBody
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+/*ResultsItems0 results items0
+swagger:model ResultsItems0
+*/
+type ResultsItems0 struct {
 
 	// events
-	Events *GetSurvivalAnalysisOKBodyItems0Events `json:"events,omitempty"`
+	Events *ResultsItems0Events `json:"events,omitempty"`
 
 	// timepoint
 	Timepoint string `json:"timepoint,omitempty"`
 }
 
-// Validate validates this get survival analysis o k body items0
-func (o *GetSurvivalAnalysisOKBodyItems0) Validate(formats strfmt.Registry) error {
+// Validate validates this results items0
+func (o *ResultsItems0) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := o.validateEvents(formats); err != nil {
@@ -265,7 +337,7 @@ func (o *GetSurvivalAnalysisOKBodyItems0) Validate(formats strfmt.Registry) erro
 	return nil
 }
 
-func (o *GetSurvivalAnalysisOKBodyItems0) validateEvents(formats strfmt.Registry) error {
+func (o *ResultsItems0) validateEvents(formats strfmt.Registry) error {
 
 	if swag.IsZero(o.Events) { // not required
 		return nil
@@ -284,7 +356,7 @@ func (o *GetSurvivalAnalysisOKBodyItems0) validateEvents(formats strfmt.Registry
 }
 
 // MarshalBinary interface implementation
-func (o *GetSurvivalAnalysisOKBodyItems0) MarshalBinary() ([]byte, error) {
+func (o *ResultsItems0) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -292,8 +364,8 @@ func (o *GetSurvivalAnalysisOKBodyItems0) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *GetSurvivalAnalysisOKBodyItems0) UnmarshalBinary(b []byte) error {
-	var res GetSurvivalAnalysisOKBodyItems0
+func (o *ResultsItems0) UnmarshalBinary(b []byte) error {
+	var res ResultsItems0
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -301,10 +373,10 @@ func (o *GetSurvivalAnalysisOKBodyItems0) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-/*GetSurvivalAnalysisOKBodyItems0Events get survival analysis o k body items0 events
-swagger:model GetSurvivalAnalysisOKBodyItems0Events
+/*ResultsItems0Events results items0 events
+swagger:model ResultsItems0Events
 */
-type GetSurvivalAnalysisOKBodyItems0Events struct {
+type ResultsItems0Events struct {
 
 	// censoringevent
 	Censoringevent string `json:"censoringevent,omitempty"`
@@ -313,13 +385,13 @@ type GetSurvivalAnalysisOKBodyItems0Events struct {
 	Eventofinterest string `json:"eventofinterest,omitempty"`
 }
 
-// Validate validates this get survival analysis o k body items0 events
-func (o *GetSurvivalAnalysisOKBodyItems0Events) Validate(formats strfmt.Registry) error {
+// Validate validates this results items0 events
+func (o *ResultsItems0Events) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (o *GetSurvivalAnalysisOKBodyItems0Events) MarshalBinary() ([]byte, error) {
+func (o *ResultsItems0Events) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -327,8 +399,8 @@ func (o *GetSurvivalAnalysisOKBodyItems0Events) MarshalBinary() ([]byte, error) 
 }
 
 // UnmarshalBinary interface implementation
-func (o *GetSurvivalAnalysisOKBodyItems0Events) UnmarshalBinary(b []byte) error {
-	var res GetSurvivalAnalysisOKBodyItems0Events
+func (o *ResultsItems0Events) UnmarshalBinary(b []byte) error {
+	var res ResultsItems0Events
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

@@ -3,10 +3,12 @@ package survivalclient
 //for client !!!
 import (
 	"crypto/tls"
+	"encoding/csv"
 	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/ldsec/medco-connector/restapi/client/survival_analysis"
@@ -40,6 +42,10 @@ type SurvivalAnalysis struct {
 	formats strfmt.Registry
 
 	timers map[string]time.Duration
+
+	profilingBuffer BufferToPrint
+
+	profiling *csv.Writer
 }
 
 // NewSurvivalAnalysis constructor for survival analysis request
@@ -52,6 +58,9 @@ func NewSurvivalAnalysis(token string, patientSetIDs map[int]string, timeCodes [
 		formats:       strfmt.Default,
 		timers:        make(map[string]time.Duration),
 	}
+
+	q.profiling = csv.NewWriter(&q.profilingBuffer)
+	q.profiling.Write([]string{"label", "value_in_seconds", "node_index"})
 
 	parsedURL, err := url.Parse(utilclient.MedCoConnectorURL)
 	if err != nil {
@@ -118,6 +127,11 @@ func (clientSurvivalAnalysis *SurvivalAnalysis) Decrypt(value string) (int64, er
 	return unlynx.Decrypt(value, clientSurvivalAnalysis.userPrivateKey)
 }
 
+type NodeResult struct {
+	Body      *survival_analysis.GetSurvivalAnalysisOKBody
+	NodeIndex int
+}
+
 //Execute is the main function that sends the request and waits
 func (clientSurvivalAnalysis *SurvivalAnalysis) Execute() (results []*EncryptedResults, err error) {
 	totalTimer := time.Now()
@@ -125,7 +139,7 @@ func (clientSurvivalAnalysis *SurvivalAnalysis) Execute() (results []*EncryptedR
 		err = clientSurvivalAnalysis.addTimer("time for the total execution ", since)
 	}(totalTimer)
 	errChan := make(chan error)
-	resultChan := make(chan []*survival_analysis.GetSurvivalAnalysisOKBodyItems0)
+	resultChan := make(chan NodeResult)
 
 	for idx := range clientSurvivalAnalysis.httpMedCoClients {
 
@@ -135,7 +149,8 @@ func (clientSurvivalAnalysis *SurvivalAnalysis) Execute() (results []*EncryptedR
 				logrus.Errorf("Survival analysis exection error : %s", Error)
 				errChan <- Error
 			}
-			resultChan <- res
+
+			resultChan <- NodeResult{Body: res, NodeIndex: idx}
 		}(idx)
 	}
 	//TODO magic number
@@ -145,7 +160,17 @@ nodeLoop:
 	for idx := range clientSurvivalAnalysis.httpMedCoClients {
 		select {
 		case nodeLoopRes := <-resultChan:
-			results = concatEncryptedResults(results, nodeLoopRes)
+			for label, value := range nodeLoopRes.Body.Timers {
+
+				timerErr := clientSurvivalAnalysis.profiling.Write([]string{label, strconv.FormatFloat(value, 'f', -1, 64), strconv.Itoa(nodeLoopRes.NodeIndex)})
+				if timerErr != nil {
+					err = fmt.Errorf("Node %d threw %s : %s", idx, timerErr, err)
+					return
+				}
+
+			}
+			clientSurvivalAnalysis.profiling.Flush()
+			results = appendEncryptedResults(results, nodeLoopRes.Body)
 
 		case nodeLoopErr := <-errChan:
 			if err != nil {
@@ -163,9 +188,9 @@ nodeLoop:
 	return
 }
 
-func concatEncryptedResults(target []*EncryptedResults, toExctract []*survival_analysis.GetSurvivalAnalysisOKBodyItems0) []*EncryptedResults {
+func appendEncryptedResults(target []*EncryptedResults, toExctract *survival_analysis.GetSurvivalAnalysisOKBody) []*EncryptedResults {
 	var res = target
-	for _, bodyItem := range toExctract {
+	for _, bodyItem := range toExctract.Results {
 		result := &EncryptedResults{
 			TimePoint: bodyItem.Timepoint,
 			Events: Events{
@@ -213,4 +238,18 @@ func (clientSurvivalAnalysis *SurvivalAnalysis) PrintTimers() {
 	for label, duration := range clientSurvivalAnalysis.timers {
 		logrus.Debug(label + duration.String())
 	}
+}
+
+func (clientSurvivalAnalysis *SurvivalAnalysis) DumpTimers() error {
+	for label, value := range clientSurvivalAnalysis.timers {
+		durationSeconds := value.Seconds()
+		err := clientSurvivalAnalysis.profiling.Write([]string{label, strconv.FormatFloat(durationSeconds, 'f', -1, 64), "-1"})
+		if err != nil {
+			return err
+		}
+	}
+	clientSurvivalAnalysis.profiling.Flush()
+
+	return nil
+
 }

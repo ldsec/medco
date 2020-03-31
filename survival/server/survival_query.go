@@ -21,11 +21,10 @@ type Query struct {
 	TimeCodes     []EncryptedEncID
 
 	//TODO also hide that
-	Result *struct {
+	Result struct {
 		Timers    map[string]time.Duration
 		EncEvents map[string][2]string
 	}
-	timers map[string]time.Duration
 
 	spin *Spin
 }
@@ -36,36 +35,37 @@ func NewQuery(qID, pubKey, patientSetID string, timeCodes []string) *Query {
 	for idx, timeCode := range timeCodes {
 		encryptedEncIDs[idx] = EncryptedEncID(timeCode)
 	}
-	return &Query{ID: qID, UserPublicKey: pubKey, PatientSetID: patientSetID, TimeCodes: encryptedEncIDs, timers: make(map[string]time.Duration), spin: NewSpin()}
+	res := &Query{ID: qID, UserPublicKey: pubKey,
+		PatientSetID: patientSetID,
+		TimeCodes:    encryptedEncIDs,
+		spin:         NewSpin()}
+	res.Result.EncEvents = make(map[string][2]string)
+	res.Result.Timers = make(map[string]time.Duration)
+	return res
 }
 
 func (q *Query) addTimer(label string, since time.Time) (err error) {
-	if _, exists := q.timers[label]; exists {
+	if _, exists := q.Result.Timers[label]; exists {
 		err = errors.New("label " + label + " already exists in timers")
 		return
 	}
-	q.timers[label] = time.Since(since)
+	q.Result.Timers[label] = time.Since(since)
 	return
 }
 func (q *Query) addTimers(timers map[string]time.Duration) (err error) {
 	for label, duration := range timers {
-		if _, exists := q.timers[label]; exists {
+		if _, exists := q.Result.Timers[label]; exists {
 			err = errors.New("label " + label + " already exists in timers")
 			return
 		}
-		q.timers[label] = duration
+		q.Result.Timers[label] = duration
 	}
 	return
 }
 
-// GetTimers returns the execution time information
-func (q *Query) GetTimers() map[string]time.Duration {
-	return q.timers
-}
-
 // PrintTimers print the execution time information if the log level is Debug
 func (q *Query) PrintTimers() {
-	for label, duration := range q.timers {
+	for label, duration := range q.Result.Timers {
 		logrus.Debug(label + duration.String())
 	}
 }
@@ -74,12 +74,7 @@ func (q *Query) PrintTimers() {
 func (q *Query) SetResultMap(resultMap map[string][2]string) error {
 	q.spin.Lock()
 	defer q.spin.Unlock()
-	if q.Result == nil {
-		q.Result = new(struct {
-			Timers    map[string]time.Duration
-			EncEvents map[string][2]string
-		})
-	}
+
 	q.Result.EncEvents = resultMap
 	return nil
 

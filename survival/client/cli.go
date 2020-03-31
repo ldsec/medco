@@ -138,6 +138,7 @@ func ClientSurvival(token string, granularity string, limit int64, queryString, 
 		return
 	}
 	survivalAnalysis.PrintTimers()
+
 	logrus.Infof("obtained %d results", len(survResults))
 	sequentialDecryptionTimer := time.Now()
 	for _, encElement := range survResults {
@@ -155,9 +156,16 @@ func ClientSurvival(token string, granularity string, limit int64, queryString, 
 		logrus.Infof("At time %s , %s events of interests and %s censoring events\n", clearTimePoint, strconv.FormatInt(clearEvent, 10), strconv.FormatInt(clearCensoringEvent, 10))
 
 	}
-	logrus.Debug("Time needed for sequential decryption : " +
-		time.Since(sequentialDecryptionTimer).String())
+
+	survivalAnalysis.addTimer("time for sequential decryption", sequentialDecryptionTimer)
 	logrus.Info("Survival analysis request done")
+	err = survivalAnalysis.DumpTimers()
+	if err != nil {
+		return
+	}
+	//TODO method in profiling.go
+	fmt.Println("EXECUTION TIMES")
+	fmt.Print(string(survivalAnalysis.profilingBuffer.textBuffer))
 	return
 
 }

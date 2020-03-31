@@ -15,7 +15,7 @@ import (
 
 //for client !!
 
-func (clientSurvivalAnalysis *SurvivalAnalysis) submitToNode(nodeIdx int) (results []*survival_analysis.GetSurvivalAnalysisOKBodyItems0, err error) {
+func (clientSurvivalAnalysis *SurvivalAnalysis) submitToNode(nodeIdx int) (results *survival_analysis.GetSurvivalAnalysisOKBody, err error) {
 	//magicNumber
 	params := survival_analysis.NewGetSurvivalAnalysisParamsWithTimeout(time.Duration(utilclient.QueryTimeoutSeconds) * time.Second)
 	patientSetID, ok := clientSurvivalAnalysis.patientSetIDs[nodeIdx]

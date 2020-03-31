@@ -62,7 +62,7 @@ for the get survival analysis operation typically these are written to a http.Re
 type GetSurvivalAnalysisParams struct {
 
 	/*Body
-	  User public key, patient list and time codes strings to run the survival analysis
+	  User public key, patient list and time codes strings for the survival analysis
 
 	*/
 	Body GetSurvivalAnalysisBody

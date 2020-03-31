@@ -199,7 +199,7 @@ paths:
       operationId: "getSurvivalAnalysis"
       parameters:
       - in: "body"
-        description: "User public key, patient list and time codes strings to run the survival analysis"
+        description: "User public key, patient list and time codes strings for the survival analysis"
         name: "body"
         schema:
           type: "object"
@@ -221,19 +221,27 @@ paths:
         200:
           description: "Queried survival analysis"
           schema:
-            type: "array"
-            items:
-              type: "object"
-              properties:
-                timepoint: 
-                  type: "string"
-                events:
+            type: "object"
+            properties:
+              results:
+                type : "array"
+                items:
                   type: "object"
                   properties:
-                    eventofinterest:
+                    timepoint:
                       type: "string"
-                    censoringevent:
-                      type: "string"
+                    events:
+                      type: "object"
+                      properties:
+                        eventofinterest:
+                          type: "string"
+                        censoringevent:
+                          type: "string"
+              timers:
+                type: "object"
+                additionalProperties:
+                  type: "number"
+
         404:
           description: "TODO not found"
         default:

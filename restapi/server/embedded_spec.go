@@ -313,7 +313,7 @@ func init() {
         "operationId": "getSurvivalAnalysis",
         "parameters": [
           {
-            "description": "User public key, patient list and time codes strings to run the survival analysis",
+            "description": "User public key, patient list and time codes strings for the survival analysis",
             "name": "body",
             "in": "body",
             "schema": {
@@ -342,23 +342,34 @@ func init() {
           "200": {
             "description": "Queried survival analysis",
             "schema": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "events": {
+              "type": "object",
+              "properties": {
+                "results": {
+                  "type": "array",
+                  "items": {
                     "type": "object",
                     "properties": {
-                      "censoringevent": {
-                        "type": "string"
+                      "events": {
+                        "type": "object",
+                        "properties": {
+                          "censoringevent": {
+                            "type": "string"
+                          },
+                          "eventofinterest": {
+                            "type": "string"
+                          }
+                        }
                       },
-                      "eventofinterest": {
+                      "timepoint": {
                         "type": "string"
                       }
                     }
-                  },
-                  "timepoint": {
-                    "type": "string"
+                  }
+                },
+                "timers": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "number"
                   }
                 }
               }
@@ -1209,7 +1220,7 @@ func init() {
         "operationId": "getSurvivalAnalysis",
         "parameters": [
           {
-            "description": "User public key, patient list and time codes strings to run the survival analysis",
+            "description": "User public key, patient list and time codes strings for the survival analysis",
             "name": "body",
             "in": "body",
             "schema": {
@@ -1239,23 +1250,34 @@ func init() {
           "200": {
             "description": "Queried survival analysis",
             "schema": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "events": {
+              "type": "object",
+              "properties": {
+                "results": {
+                  "type": "array",
+                  "items": {
                     "type": "object",
                     "properties": {
-                      "censoringevent": {
-                        "type": "string"
+                      "events": {
+                        "type": "object",
+                        "properties": {
+                          "censoringevent": {
+                            "type": "string"
+                          },
+                          "eventofinterest": {
+                            "type": "string"
+                          }
+                        }
                       },
-                      "eventofinterest": {
+                      "timepoint": {
                         "type": "string"
                       }
                     }
-                  },
-                  "timepoint": {
-                    "type": "string"
+                  }
+                },
+                "timers": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "number"
                   }
                 }
               }

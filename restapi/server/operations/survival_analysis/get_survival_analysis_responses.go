@@ -23,7 +23,7 @@ type GetSurvivalAnalysisOK struct {
 	/*
 	  In: Body
 	*/
-	Payload []*GetSurvivalAnalysisOKBodyItems0 `json:"body,omitempty"`
+	Payload *GetSurvivalAnalysisOKBody `json:"body,omitempty"`
 }
 
 // NewGetSurvivalAnalysisOK creates GetSurvivalAnalysisOK with default headers values
@@ -33,13 +33,13 @@ func NewGetSurvivalAnalysisOK() *GetSurvivalAnalysisOK {
 }
 
 // WithPayload adds the payload to the get survival analysis o k response
-func (o *GetSurvivalAnalysisOK) WithPayload(payload []*GetSurvivalAnalysisOKBodyItems0) *GetSurvivalAnalysisOK {
+func (o *GetSurvivalAnalysisOK) WithPayload(payload *GetSurvivalAnalysisOKBody) *GetSurvivalAnalysisOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get survival analysis o k response
-func (o *GetSurvivalAnalysisOK) SetPayload(payload []*GetSurvivalAnalysisOKBodyItems0) {
+func (o *GetSurvivalAnalysisOK) SetPayload(payload *GetSurvivalAnalysisOKBody) {
 	o.Payload = payload
 }
 
@@ -47,14 +47,11 @@ func (o *GetSurvivalAnalysisOK) SetPayload(payload []*GetSurvivalAnalysisOKBodyI
 func (o *GetSurvivalAnalysisOK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(200)
-	payload := o.Payload
-	if payload == nil {
-		// return empty array
-		payload = make([]*GetSurvivalAnalysisOKBodyItems0, 0, 50)
-	}
-
-	if err := producer.Produce(rw, payload); err != nil {
-		panic(err) // let the recovery middleware deal with this
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
 	}
 }
 
