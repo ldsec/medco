@@ -1,7 +1,7 @@
 package main
 
 import (
-	"errors"
+	"fmt"
 	"github.com/ldsec/medco-unlynx/services"
 	libunlynx "github.com/ldsec/unlynx/lib"
 	"github.com/urfave/cli"
@@ -21,7 +21,7 @@ func generateTaggingSecrets(c *cli.Context) error {
 	nodeIndex := c.Int("nodeIndex")
 
 	if groupTomlPath == "" {
-		err := errors.New("arguments not OK")
+		err := fmt.Errorf("arguments not OK")
 		log.Error(err)
 		return cli.NewExitError(err, 3)
 	}
@@ -49,7 +49,7 @@ func generateTaggingSecrets(c *cli.Context) error {
 
 		providedSecretsStringSplit := strings.Split(providedSecretsString, ",")
 		if len(providedSecretsStringSplit) != len(el.Roster.List) {
-			err := errors.New("provided secrets list does not match the length of the roster list")
+			err := fmt.Errorf("provided secrets list does not match the length of the roster list")
 			log.Error(err, len(providedSecretsStringSplit), " != ", len(el.Roster.List))
 			return err
 		}

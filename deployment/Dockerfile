@@ -26,6 +26,7 @@ FROM golang:1.13-alpine as release
 # run time environment variables
 ENV NODE_IDX="0" \
     UNLYNX_DEBUG_LEVEL="1" \
+    CONN_TIMEOUT="10m"\
     MEDCO_CONF_DIR="/medco-configuration"
 
 COPY --from=build /go/bin/medco-unlynx /go/bin/

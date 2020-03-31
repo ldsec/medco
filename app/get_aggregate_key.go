@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/base64"
-	"errors"
+	"fmt"
 	"github.com/urfave/cli"
 	"go.dedis.ch/onet/v3/app"
 	"go.dedis.ch/onet/v3/log"
@@ -15,7 +15,7 @@ func getAggregateKey(c *cli.Context) error {
 	groupTomlPath := c.String("file")
 
 	if groupTomlPath == "" {
-		err := errors.New("arguments not OK")
+		err := fmt.Errorf("arguments not OK")
 		log.Error(err)
 		return cli.NewExitError(err, 3)
 	}

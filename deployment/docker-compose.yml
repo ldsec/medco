@@ -11,5 +11,6 @@ services:
     environment:
     - NODE_IDX=0
     - UNLYNX_DEBUG_LEVEL=1
+    - CONN_TIMEOUT=10m
     volumes:
     - ./configuration-profile:/medco-configuration
