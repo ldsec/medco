@@ -31,6 +31,11 @@ services:
       - GA_DB_USER=genomicannotations
       - GA_DB_PW=genomicannotations
       - GA_DB_NAME=gamedcosrv
+      - I2B2_DB_HOST=postgresql
+      - I2B2_DB_PORT=5432
+      - I2B2_DB_USER=i2b2
+      - I2B2_DB_PW=i2b2
+      - I2B2_DB_NAME=i2b2medcosrv
     volumes:
       - ./configuration-profile:/medco-configuration
 
@@ -45,6 +50,7 @@ services:
       - MEDCO_NODE_IDX=0
       - CLIENT_QUERY_TIMEOUT_SECONDS=660
       - CLIENT_GENOMIC_ANNOTATIONS_QUERY_TIMEOUT_SECONDS=10
+      - CLIENT_GET_STATUS_TIMEOUT_SECONDS=60
       - MEDCO_CONNECTOR_URL=http://medco-connector-srv0/medco
       - OIDC_REQ_TOKEN_URL=http://localhost/auth/realms/master/protocol/openid-connect/token
       - OIDC_REQ_TOKEN_CLIENT_ID=medco

@@ -348,3 +348,52 @@ func ExecuteClientGenomicAnnotationsGetVariants(token, username, password, annot
 	return
 
 }
+
+// ExecuteClientGetStatus displays the result of the MedCo client get-status request
+func ExecuteClientGetStatus(token, username, password, outputFilePath string, disableTLSCheck bool) (err error) {
+
+	// get token
+	var accessToken string
+	if len(token) > 0 {
+		accessToken = token
+	} else {
+		logrus.Debug("No token provided, requesting token for user ", username, ", disable TLS check: ", disableTLSCheck)
+		accessToken, err = utilclient.RetrieveAccessToken(username, password, disableTLSCheck)
+		if err != nil {
+			return
+		}
+	}
+
+	clientGetStatus, err := NewGetStatus(accessToken, disableTLSCheck)
+	if err != nil {
+		return
+	}
+
+	result, err := clientGetStatus.Execute()
+	if err != nil {
+		return
+	}
+
+	output := ""
+
+	if result.StatusOK {
+		output = "MedCo Status: OK\n"
+	} else {
+		output = "MedCo Status: Error - " + result.Message + "\n"
+	}
+
+	if outputFilePath == "" {
+		fmt.Printf(output)
+	} else {
+		var file *os.File
+		file, err = os.Create(outputFilePath)
+		if err != nil {
+			logrus.Error("Error while opening output file")
+			return
+		}
+		file.WriteString(output)
+		file.Close()
+	}
+
+	return
+}

@@ -16,9 +16,10 @@ import (
 // warning: needs medco deployment dev-3nodes-local running
 
 var cothorityRoster *onet.Roster
+
 func init() {
 	utilserver.SetLogLevel("5")
-	utilserver.UnlynxGroupFileIdx = 0
+	//utilserver.UnlynxGroupFileIdx = 0
 
 	_, filename, _, _ := runtime.Caller(0)
 	utilserver.UnlynxGroupFilePath = filepath.Dir(filename) + "/test_group.toml"
@@ -49,7 +50,7 @@ func TestGetQueryTermsDDT(t *testing.T) {
 
 	t.Log(encryptedInt0, encryptedInt1)
 
-	tags, _, err := DDTagValues("test query " + time.Now().Format(time.RFC3339Nano), []string{
+	tags, _, err := DDTagValues("test query "+time.Now().Format(time.RFC3339Nano), []string{
 		encryptedInt0,
 		encryptedInt1,
 	})
@@ -59,6 +60,7 @@ func TestGetQueryTermsDDT(t *testing.T) {
 	}
 	t.Log(tags)
 }
+
 // todo: need to submit to all 3 nodes
 //func TestAggregateAndKeySwitchDummyFlags(t *testing.T) {
 //	privKey, pubKey := libunlynx.GenKey()

@@ -21,6 +21,7 @@ ENV LOG_LEVEL=5 \
     MEDCO_NODE_IDX=0 \
     CLIENT_QUERY_TIMEOUT_SECONDS=660 \
     CLIENT_GENOMIC_ANNOTATIONS_QUERY_TIMEOUT_SECONDS=10 \
+    CLIENT_GET_STATUS_TIMEOUT_SECONDS=60 \
     MEDCO_CONNECTOR_URL=http://medco-connector-srv0/medco \
     OIDC_REQ_TOKEN_URL=http://keycloak:8080/auth/realms/master/protocol/openid-connect/token \
     OIDC_REQ_TOKEN_CLIENT_ID=medco

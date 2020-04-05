@@ -296,6 +296,30 @@ func init() {
           }
         }
       }
+    },
+    "/node/status": {
+      "get": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-node-status"
+            ]
+          }
+        ],
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Get info about node status.",
+        "operationId": "getStatus",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/statusResponse"
+          },
+          "default": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -503,7 +527,8 @@ func init() {
       "enum": [
         "medco-network",
         "medco-explore",
-        "medco-genomic-annotations"
+        "medco-genomic-annotations",
+        "medco-node-status"
       ]
     },
     "user": {
@@ -644,6 +669,20 @@ func init() {
           "public-key": {
             "description": "Aggregated public key of the collective authority.",
             "type": "string"
+          }
+        }
+      }
+    },
+    "statusResponse": {
+      "description": "Node status response.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "statusOK": {
+            "type": "boolean"
           }
         }
       }
@@ -1107,6 +1146,49 @@ func init() {
           }
         }
       }
+    },
+    "/node/status": {
+      "get": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-node-status"
+            ]
+          }
+        ],
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Get info about node status.",
+        "operationId": "getStatus",
+        "responses": {
+          "200": {
+            "description": "Node status response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "statusOK": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -1317,7 +1399,8 @@ func init() {
       "enum": [
         "medco-network",
         "medco-explore",
-        "medco-genomic-annotations"
+        "medco-genomic-annotations",
+        "medco-node-status"
       ]
     },
     "user": {
@@ -1458,6 +1541,20 @@ func init() {
           "public-key": {
             "description": "Aggregated public key of the collective authority.",
             "type": "string"
+          }
+        }
+      }
+    },
+    "statusResponse": {
+      "description": "Node status response.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "statusOK": {
+            "type": "boolean"
           }
         }
       }

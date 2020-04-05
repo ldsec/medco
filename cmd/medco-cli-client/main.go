@@ -57,7 +57,7 @@ func main() {
 	}
 
 	//--- genomic annotations get values command flags
-	genomicAnnotationsGetValuesFlag := []cli.Flag{
+	genomicAnnotationsGetValuesFlags := []cli.Flag{
 		cli.Int64Flag{
 			Name:  "limit, l",
 			Usage: "Maximum number of returned values",
@@ -66,7 +66,7 @@ func main() {
 	}
 
 	//--- genomic annotations get variants command flags
-	genomicAnnotationsGetVariantsFlag := []cli.Flag{
+	genomicAnnotationsGetVariantsFlags := []cli.Flag{
 		cli.StringFlag{
 			Name:  "zygosity, z",
 			Usage: "Variant zygosysty",
@@ -75,6 +75,15 @@ func main() {
 		cli.BoolFlag{
 			Name:  "encrypted, e",
 			Usage: "Return encrypted variant id",
+		},
+	}
+
+	//---  node-status command flags
+	nodeStatusFlags := []cli.Flag{
+		cli.StringFlag{
+			Name:  "output, o",
+			Usage: "Output file",
+			Value: "",
 		},
 	}
 
@@ -113,7 +122,7 @@ func main() {
 			Name:      "genomic-annotations-get-values",
 			Aliases:   []string{"gval"},
 			Usage:     "Get genomic annotations values",
-			Flags:     genomicAnnotationsGetValuesFlag,
+			Flags:     genomicAnnotationsGetValuesFlags,
 			ArgsUsage: "[-l limit] [annotation] [value]",
 			Action: func(c *cli.Context) error {
 				return medcoclient.ExecuteClientGenomicAnnotationsGetValues(
@@ -132,7 +141,7 @@ func main() {
 			Name:      "genomic-annotations-get-variants",
 			Aliases:   []string{"gvar"},
 			Usage:     "Get genomic annotations variants",
-			Flags:     genomicAnnotationsGetVariantsFlag,
+			Flags:     genomicAnnotationsGetVariantsFlags,
 			ArgsUsage: "[-z zygosity] [-e] [annotation] [value]",
 			Description: "zygosity can be either heterozygous, homozygous, unknown or a combination of the three separated by |\n" +
 				"If omitted, the command will execute as if zygosity was equal to \"heterozygous|homozygous|unknown|\"",
@@ -145,6 +154,24 @@ func main() {
 					c.Args().Get(1),
 					c.String("zygosity"),
 					c.Bool("encrypted"),
+					c.GlobalBool("disableTLSCheck"),
+				)
+			},
+		},
+
+		{
+			Name:        "node-status",
+			Aliases:     []string{"nod-stat"},
+			Usage:       "Get node status",
+			Flags:       nodeStatusFlags,
+			ArgsUsage:   "[--output path/to/output/file]",
+			Description: "If the output file is omitted, the output is redirected to the stdout.",
+			Action: func(c *cli.Context) error {
+				return medcoclient.ExecuteClientGetStatus(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.String("output"),
 					c.GlobalBool("disableTLSCheck"),
 				)
 			},

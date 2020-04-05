@@ -10,7 +10,7 @@ docker-compose build
 ``` 
 
 ## How to use it
-*medco-connector* is part of the MedCo stack. To use it, you need to have the whole MedCo stack up and running on your machine. To achieve that you can follow, for example, the [Local Development Deployment guide](https://ldsec.gitbook.io/medco-documentation/system-administrator-guide/deployment/local-development-deployment). 
+*medco-connector* is part of the MedCo stack. To use it, you need to have the whole MedCo stack up and running on your machine. To achieve that you can follow, for example, the [Local Development Deployment guide](https://ldsec.gitbook.io/medco-documentation/developers/local-development-deployment). 
 
 The *medco-connector* APIs are defined using [go-swagger](https://github.com/go-swagger/go-swagger). To modify them, you must modify the `swagger/medco-connector.yml` file. To re-generate the server and client code you can run:
 ```shell

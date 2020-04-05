@@ -28,6 +28,9 @@ const (
 
 	// RestAPIAuthorizationMedcoGenomicAnnotations captures enum value "medco-genomic-annotations"
 	RestAPIAuthorizationMedcoGenomicAnnotations RestAPIAuthorization = "medco-genomic-annotations"
+
+	// RestAPIAuthorizationMedcoNodeStatus captures enum value "medco-node-status"
+	RestAPIAuthorizationMedcoNodeStatus RestAPIAuthorization = "medco-node-status"
 )
 
 // for schema
@@ -35,7 +38,7 @@ var restApiAuthorizationEnum []interface{}
 
 func init() {
 	var res []RestAPIAuthorization
-	if err := json.Unmarshal([]byte(`["medco-network","medco-explore","medco-genomic-annotations"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["medco-network","medco-explore","medco-genomic-annotations","medco-node-status"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {

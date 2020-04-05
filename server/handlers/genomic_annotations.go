@@ -1,19 +1,18 @@
 package handlers
 
 import (
-	"errors"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/ldsec/medco-connector/restapi/models"
 	"github.com/ldsec/medco-connector/restapi/server/operations/genomic_annotations"
+	"github.com/ldsec/medco-connector/server/genomicannotations"
 	utilserver "github.com/ldsec/medco-connector/util/server"
 	"github.com/sirupsen/logrus"
-	"strings"
 )
 
 // MedCoGenomicAnnotationsGetValuesHandler handles /medco/genomic-annotations/{annotation} API endpoint
 func MedCoGenomicAnnotationsGetValuesHandler(params genomic_annotations.GetValuesParams, principal *models.User) middleware.Responder {
 
-	err := utilserver.DBConnection.Ping()
+	err := utilserver.GaDBConnection.Ping()
 	if err != nil {
 		logrus.Error("Impossible to connect to DB: " + err.Error())
 		return genomic_annotations.NewGetValuesDefault(500).WithPayload(&genomic_annotations.GetValuesDefaultBody{
@@ -21,16 +20,13 @@ func MedCoGenomicAnnotationsGetValuesHandler(params genomic_annotations.GetValue
 		})
 	}
 
-	var query string
-
-	query, err = buildGetValuesQuery(params)
+	query, err := genomicannotations.BuildGetValuesQuery(params)
 	if err != nil {
 		logrus.Error("Query execution error: " + err.Error())
 		return genomic_annotations.NewGetVariantsNotFound()
 	}
 
-	//escaping * characters
-	rows, err := utilserver.DBConnection.Query(query, params.Annotation, strings.ReplaceAll(params.Value, "*", "\\*"), *params.Limit)
+	rows, err := genomicannotations.ExecuteGetValuesQuery(query, params)
 	if err != nil {
 		logrus.Error("Query execution error: " + err.Error())
 		return genomic_annotations.NewGetValuesDefault(500).WithPayload(&genomic_annotations.GetValuesDefaultBody{
@@ -39,18 +35,12 @@ func MedCoGenomicAnnotationsGetValuesHandler(params genomic_annotations.GetValue
 	}
 	defer rows.Close()
 
-	var annotations []string
-	var annotation string
-
-	for rows.Next() {
-		err := rows.Scan(&annotation)
-		if err != nil {
-			logrus.Error("Query result reading error: " + err.Error())
-			return genomic_annotations.NewGetValuesDefault(500).WithPayload(&genomic_annotations.GetValuesDefaultBody{
-				Message: "Query result reading error: " + err.Error(),
-			})
-		}
-		annotations = append(annotations, annotation)
+	annotations, err := genomicannotations.BuildGetValuesQueryResponse(rows)
+	if err != nil {
+		logrus.Error("Query result reading error: " + err.Error())
+		return genomic_annotations.NewGetValuesDefault(500).WithPayload(&genomic_annotations.GetValuesDefaultBody{
+			Message: "Query result reading error: " + err.Error(),
+		})
 	}
 
 	return genomic_annotations.NewGetValuesOK().WithPayload(annotations)
@@ -60,31 +50,22 @@ func MedCoGenomicAnnotationsGetValuesHandler(params genomic_annotations.GetValue
 // MedCoGenomicAnnotationsGetVariantsHandler handles /medco/genomic-annotations/{annotation}/{value} API endpoint
 func MedCoGenomicAnnotationsGetVariantsHandler(params genomic_annotations.GetVariantsParams, principal *models.User) middleware.Responder {
 
-	err := utilserver.DBConnection.Ping()
+	err := utilserver.GaDBConnection.Ping()
 	if err != nil {
 		logrus.Error("Impossible to connect to DB: " + err.Error())
 		return genomic_annotations.NewGetVariantsDefault(500).WithPayload(&genomic_annotations.GetVariantsDefaultBody{
 			Message: "Impossible to connect to DB: " + err.Error(),
 		})
 	}
-	zygosityStr := ""
-	if len(params.Zygosity) > 0 {
-		zygosityStr = params.Zygosity[0]
 
-		for i := 1; i < len(params.Zygosity); i++ {
-			zygosityStr += "|" + params.Zygosity[i]
-		}
-	}
+	query, err := genomicannotations.BuildGetVariantsQuery(params)
 
-	var query string
-
-	query, err = buildGetVariantsQuery(params)
 	if err != nil {
 		logrus.Error("Query execution error: " + err.Error())
 		return genomic_annotations.NewGetVariantsNotFound()
 	}
 
-	rows, err := utilserver.DBConnection.Query(query, params.Annotation, params.Value, zygosityStr, *params.Encrypted)
+	rows, err := genomicannotations.ExecuteGetVariantsQuery(query, params)
 	if err != nil {
 		logrus.Error("Query execution error: " + err.Error())
 		return genomic_annotations.NewGetValuesDefault(500).WithPayload(&genomic_annotations.GetValuesDefaultBody{
@@ -93,18 +74,12 @@ func MedCoGenomicAnnotationsGetVariantsHandler(params genomic_annotations.GetVar
 	}
 	defer rows.Close()
 
-	var variants []string
-	var variant string
-
-	for rows.Next() {
-		err := rows.Scan(&variant)
-		if err != nil {
-			logrus.Error("Query result reading error: " + err.Error())
-			return genomic_annotations.NewGetVariantsDefault(500).WithPayload(&genomic_annotations.GetVariantsDefaultBody{
-				Message: "Query result reading error: " + err.Error(),
-			})
-		}
-		variants = append(variants, variant)
+	variants, err := genomicannotations.BuildGetVariantsQueryResponse(rows)
+	if err != nil {
+		logrus.Error("Query result reading error: " + err.Error())
+		return genomic_annotations.NewGetVariantsDefault(500).WithPayload(&genomic_annotations.GetVariantsDefaultBody{
+			Message: "Query result reading error: " + err.Error(),
+		})
 	}
 
 	if len(variants) > 0 {
@@ -112,66 +87,4 @@ func MedCoGenomicAnnotationsGetVariantsHandler(params genomic_annotations.GetVar
 	}
 	return genomic_annotations.NewGetVariantsNotFound()
 
-}
-
-// annotationExists checks in the database if the annotation exists
-func annotationExists(annotationName string) (exists bool, err error) {
-	err = utilserver.DBConnection.Ping()
-	if err != nil {
-		logrus.Error("Impossible to connect to DB: " + err.Error())
-		return
-	}
-
-	res, err := utilserver.DBConnection.Query("SELECT genomic_annotations.ga_annotationexists($1)", annotationName)
-	if err != nil {
-		logrus.Error("Query execution error: " + err.Error())
-		return
-	}
-	defer res.Close()
-
-	if !res.Next() {
-		err = errors.New("No result available for annotationexists check")
-		logrus.Error(err)
-		return
-	}
-
-	err = res.Scan(&exists)
-	if err != nil {
-		logrus.Error("Query result reading error: " + err.Error())
-		return
-	}
-	return
-}
-
-func buildGetValuesQuery(params genomic_annotations.GetValuesParams) (string, error) {
-
-	if ok, err := annotationExists(params.Annotation); err != nil {
-		logrus.Error("annotation exists check failed: ", err)
-		return "", err
-	} else if !ok {
-		return "", errors.New("Requested invalid annotation type: " + params.Annotation)
-	}
-
-	return "SELECT genomic_annotations.ga_getvalues($1,$2,$3)", nil
-}
-
-func buildGetVariantsQuery(params genomic_annotations.GetVariantsParams) (string, error) {
-
-	if ok, err := annotationExists(params.Annotation); err != nil {
-		logrus.Error("annotation exists check failed: ", err)
-		return "", err
-	} else if !ok {
-		return "", errors.New("Requested invalid annotation type: " + params.Annotation)
-	}
-
-	return "SELECT genomic_annotations.ga_getvariants($1,$2,$3,$4)", nil
-}
-
-func contains(slice []string, value string) bool {
-	for _, s := range slice {
-		if s == value {
-			return true
-		}
-	}
-	return false
 }

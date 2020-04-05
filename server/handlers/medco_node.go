@@ -5,6 +5,7 @@ import (
 	"github.com/ldsec/medco-connector/restapi/models"
 	"github.com/ldsec/medco-connector/restapi/server/operations/medco_node"
 	"github.com/ldsec/medco-connector/server"
+	"github.com/ldsec/medco-connector/server/status"
 	"github.com/ldsec/medco-connector/util/server"
 	"github.com/ldsec/medco-connector/wrappers/i2b2"
 	"time"
@@ -21,7 +22,7 @@ func MedCoNodeExploreSearchHandler(params medco_node.ExploreSearchParams, princi
 	}
 
 	return medco_node.NewExploreSearchOK().WithPayload(&medco_node.ExploreSearchOKBody{
-		Search: params.SearchRequest,
+		Search:  params.SearchRequest,
 		Results: searchResult,
 	})
 }
@@ -66,18 +67,32 @@ func MedCoNodeExploreQueryHandler(params medco_node.ExploreQueryParams, principa
 	for timerName, timerDuration := range query.Result.Timers {
 		milliseconds := int64(timerDuration / time.Millisecond)
 		timers = append(timers, &models.ExploreQueryResultElementTimersItems0{
-			Name: timerName,
+			Name:         timerName,
 			Milliseconds: &milliseconds,
 		})
 	}
 
 	return medco_node.NewExploreQueryOK().WithPayload(&medco_node.ExploreQueryOKBody{
-		ID:     query.ID,
-		Query:  params.QueryRequest.Query,
+		ID:    query.ID,
+		Query: params.QueryRequest.Query,
 		Result: &models.ExploreQueryResultElement{
-			EncryptedCount: query.Result.EncCount,
+			EncryptedCount:       query.Result.EncCount,
 			EncryptedPatientList: query.Result.EncPatientList,
-			Timers: timers,
-			Status: models.ExploreQueryResultElementStatusAvailable,
-	}})
+			Timers:               timers,
+			Status:               models.ExploreQueryResultElementStatusAvailable,
+		}})
+}
+
+// MedCoNodeGetStatusHandler handles /medco/node/status API endpoint
+func MedCoNodeGetStatusHandler(params medco_node.GetStatusParams, principal *models.User) middleware.Responder {
+
+	message, status := status.CheckStatus()
+
+	return medco_node.NewGetStatusOK().WithPayload(&medco_node.GetStatusOKBody{
+		Message:  message,
+		StatusOK: status,
+	})
+
+	return nil
+
 }

@@ -67,6 +67,9 @@ func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
 		return middleware.NotImplemented("operation medco_node.GetQueryResult has not yet been implemented")
 	})
 
+	// /medco/node/status
+	api.MedcoNodeGetStatusHandler = medco_node.GetStatusHandlerFunc(handlers.MedCoNodeGetStatusHandler)
+
 	// /medco/genomic-annotations/{annotation}
 	api.GenomicAnnotationsGetValuesHandler = genomic_annotations.GetValuesHandlerFunc(handlers.MedCoGenomicAnnotationsGetValuesHandler)
 
