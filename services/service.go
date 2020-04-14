@@ -377,7 +377,7 @@ func (s *Service) HandleSurveyAggRequest(sar *SurveyAggRequest) (network.Message
 	if err := emptySurveyID(sar.SurveyID); err != nil {
 		return nil, xerrors.Errorf("%+v", err)
 	}
-	if sar.AggregateTarget.K == nil || sar.AggregateTarget.C == nil {
+	if sar.AggregateTarget == nil || len(sar.AggregateTarget) == 0 {
 		return nil, xerrors.Errorf(s.ServerIdentity().String() + " for survey" + string(sar.SurveyID) + "has no data to aggregate")
 	}
 	if sar.ClientPubKey == nil {
@@ -470,7 +470,7 @@ func (s *Service) whatRequest(target string) (bool, libunlynx.CipherVector, kybe
 			return false, nil, nil, err
 		}
 		proofs = surveyAgg.Request.Proofs
-		data = libunlynx.CipherVector{surveyAgg.Request.KSTarget}
+		data = surveyAgg.Request.KSTarget
 		cPubKey = surveyAgg.Request.ClientPubKey
 
 	default:
@@ -619,7 +619,9 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance,
 		aggr.Proofs = surveyAgg.Request.Proofs
 
 		data := make([]libunlynx.CipherText, 0)
-		data = append(data, surveyAgg.Request.AggregateTarget)
+		for i := range surveyAgg.Request.AggregateTarget {
+			data = append(data, surveyAgg.Request.AggregateTarget[i])
+		}
 		aggr.SimpleData = &data
 
 	case propagateShuffleFromChildren:
@@ -764,24 +766,24 @@ func (s *Service) TaggingPhase(targetSurvey *SurveyDDTRequest,
 }
 
 // CollectiveAggregationPhase performs a collective aggregation between the participating nodes
-func (s *Service) CollectiveAggregationPhase(targetSurvey SurveyID, roster *onet.Roster) (libunlynx.CipherText, time.Duration, error) {
+func (s *Service) CollectiveAggregationPhase(targetSurvey SurveyID, roster *onet.Roster) (libunlynx.CipherVector, time.Duration, error) {
 	start := time.Now()
 	pi, err := s.StartProtocol(protocolsunlynx.CollectiveAggregationProtocolName, "",
 		ProtocolConfig{targetSurvey, "", nil}, roster)
 	if err != nil {
-		return libunlynx.CipherText{}, 0, err
+		return nil, 0, err
 	}
 	select {
 	case aggregationResult := <-pi.(*protocolsunlynx.CollectiveAggregationProtocol).FeedbackChannel:
 		// in the resulting map there is only one element
-		var finalResult libunlynx.CipherText
+		finalResult := make(libunlynx.CipherVector, 0)
 		for _, v := range aggregationResult.GroupedData {
-			finalResult = v.AggregatingAttributes[0]
+			finalResult = v.AggregatingAttributes
 			break
 		}
 		return finalResult, time.Since(start), nil
 	case <-time.After(libunlynx.TIMEOUT):
-		return libunlynx.CipherText{}, 0, fmt.Errorf("couldn't finish collective aggregation protocol in time")
+		return nil, 0, fmt.Errorf("couldn't finish collective aggregation protocol in time")
 	}
 }
 

@@ -108,7 +108,7 @@ func (c *API) SendSurveyShuffleRequest(entities *onet.Roster, surveyID SurveyID,
 }
 
 // SendSurveyAggRequest sends the encrypted aggregate local results at each node and aggregates these values (result is the same for all nodes)
-func (c *API) SendSurveyAggRequest(entities *onet.Roster, surveyID SurveyID, cPK kyber.Point, value libunlynx.CipherText, proofs bool) (*SurveyID, libunlynx.CipherText, TimeResults, error) {
+func (c *API) SendSurveyAggRequest(entities *onet.Roster, surveyID SurveyID, cPK kyber.Point, values libunlynx.CipherVector, proofs bool) (*SurveyID, libunlynx.CipherVector, TimeResults, error) {
 	start := time.Now()
 	log.Lvl2("Client", c.ClientID, "is creating a Agg survey with ID:", surveyID)
 
@@ -117,16 +117,15 @@ func (c *API) SendSurveyAggRequest(entities *onet.Roster, surveyID SurveyID, cPK
 		Roster:          *entities,
 		Proofs:          proofs,
 		ClientPubKey:    cPK,
-		AggregateTarget: value,
+		AggregateTarget: values,
 	}
 
 	resp := Result{}
 	err := c.SendProtobuf(c.entryPoint, &sar, &resp)
 	if err != nil {
-
-		return nil, libunlynx.CipherText{}, TimeResults{}, err
+		return nil, nil, TimeResults{}, err
 	}
 	resp.TR.MapTR[AggrRequestTime] = time.Since(start)
-	return &surveyID, resp.Result[0], resp.TR, nil
+	return &surveyID, resp.Result, resp.TR, nil
 
 }
