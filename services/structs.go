@@ -121,8 +121,8 @@ type SurveyAggRequest struct {
 	Proofs       bool
 	ClientPubKey kyber.Point // we need this for the key switching
 
-	AggregateTarget libunlynx.CipherText // target results to aggregate. the root node adds the results from the other nodes here
-	KSTarget        libunlynx.CipherText // the final aggregated result to be key switched
+	AggregateTarget libunlynx.CipherVector // target results to aggregate. the root node adds the results from the other nodes here
+	KSTarget        libunlynx.CipherVector // the final aggregated results to be key switched
 }
 
 // SurveyKS is the struct that we persist in the service that contains all the data for the Key Switch request phase

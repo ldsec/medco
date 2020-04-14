@@ -183,8 +183,8 @@ func TestServiceAgg(t *testing.T) {
 
 	secKeys := make([]kyber.Scalar, 0)
 	pubKeys := make([]kyber.Point, 0)
-	targetData := *libunlynx.EncryptInt(el.Aggregate, int64(1))
-	results := make([]int64, nbrClients)
+	targetData := *libunlynx.EncryptIntVector(el.Aggregate, []int64{1})
+	results := make([][]int64, nbrClients)
 
 	for i := 0; i < nbrClients; i++ {
 		_, sK, pK := libunlynx.GenKeys(1)
@@ -205,7 +205,7 @@ func TestServiceAgg(t *testing.T) {
 	_, _, _, err = clients[0].SendSurveyAggRequest(el, "testAggRequest", nil, targetData, proofs)
 	assert.Error(t, err)
 	// no terms to aggregate
-	emptyData := libunlynx.CipherText{}
+	emptyData := libunlynx.CipherVector{}
 	_, _, _, err = clients[0].SendSurveyAggRequest(el, "testAggRequest", pubKeys[0], emptyData, proofs)
 	assert.Error(t, err)
 
@@ -221,7 +221,7 @@ func TestServiceAgg(t *testing.T) {
 			}
 
 			mutex.Lock()
-			results[i] = libunlynx.DecryptInt(secKeys[i], res)
+			results[i] = libunlynx.DecryptIntVector(secKeys[i], &res)
 			mutex.Unlock()
 			log.Lvl1("Time:", tr.MapTR)
 		}(i, client)
@@ -230,7 +230,7 @@ func TestServiceAgg(t *testing.T) {
 
 	// Check result
 	for _, res := range results {
-		assert.Equal(t, res, int64(nbrServers))
+		assert.Equal(t, res[0], int64(nbrServers))
 	}
 }
 
