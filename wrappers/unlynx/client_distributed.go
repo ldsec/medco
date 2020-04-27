@@ -184,13 +184,12 @@ func ShuffleAndKeySwitchValue(queryName string, value string, targetPubKey strin
 	return
 }
 
-// AggregateAndKeySwitchValue makes request through unlynx to aggregate and key switch one value per node
-func AggregateAndKeySwitchValue(queryName string, value string, targetPubKey string) (aggValue string, times map[string]time.Duration, err error) {
+// AggregateAndKeySwitchValues makes request through unlynx to aggregate and key switch one value per node
+func AggregateAndKeySwitchValues(queryName string, values []string, targetPubKey string) (aggValues []string, times map[string]time.Duration, err error) {
 	unlynxClient, cothorityRoster := NewUnlynxClient()
 
 	// deserialize value and target public key
-	desValue := libunlynx.CipherText{}
-	err = desValue.Deserialize(value)
+	desValues, err := deserializeCipherVector(values)
 	if err != nil {
 		return
 	}
@@ -203,7 +202,7 @@ func AggregateAndKeySwitchValue(queryName string, value string, targetPubKey str
 
 	// execute shuffle and key switching request
 	type AggKSResults struct {
-		Results libunlynx.CipherText
+		Results libunlynx.CipherVector
 		Times   servicesmedco.TimeResults
 		Err     error
 	}
@@ -214,7 +213,7 @@ func AggregateAndKeySwitchValue(queryName string, value string, targetPubKey str
 			cothorityRoster,
 			servicesmedco.SurveyID(queryName+"_AGG"),
 			desTargetKey,
-			desValue,
+			desValues,
 			false,
 		)
 		aggKsResultsChan <- AggKSResults{aggKsResult, aggKsTimes, aggKsErr}
@@ -228,7 +227,7 @@ func AggregateAndKeySwitchValue(queryName string, value string, targetPubKey str
 
 		} else {
 			times = aggKsResult.Times.MapTR
-			aggValue, err = aggKsResult.Results.Serialize()
+			aggValues, err = serializeCipherVector(aggKsResult.Results)
 			if err != nil {
 				logrus.Error("unlynx error serializing: ", err)
 			}
@@ -238,5 +237,13 @@ func AggregateAndKeySwitchValue(queryName string, value string, targetPubKey str
 		err = errors.New("unlynx timeout")
 		logrus.Error(err)
 	}
+	return
+}
+
+func AggregateAndKeySwitchValue(queryName string, value string, targetPubKey string) (aggValue string, times map[string]time.Duration, err error) {
+	values := []string{value}
+	var aggValues []string
+	aggValues, times, err = AggregateAndKeySwitchValues(queryName, values, targetPubKey)
+	aggValue = aggValues[0]
 	return
 }

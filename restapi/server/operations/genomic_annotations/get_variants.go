@@ -12,7 +12,7 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 	swag "github.com/go-openapi/swag"
 
-	models "github.com/ldsec/medco-connector/restapi/models"
+	"github.com/ldsec/medco-connector/restapi/models"
 )
 
 // GetVariantsHandlerFunc turns a function with the right signature into a get variants handler

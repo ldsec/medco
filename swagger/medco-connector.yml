@@ -210,6 +210,10 @@ paths:
               $ref: "#/definitions/exploreQuery/properties/userPublicKey"
             patientSetID:
               type: "string"
+            patientGroupIDs:
+              type: "array"
+              items:
+                type: "string"
             timeCodes:
               type: "array"
               items:
@@ -224,19 +228,26 @@ paths:
             type: "object"
             properties:
               results:
-                type : "array"
+                type: "array"
                 items:
                   type: "object"
                   properties:
-                    timepoint:
+                    groupID:
                       type: "string"
-                    events:
-                      type: "object"
-                      properties:
-                        eventofinterest:
-                          type: "string"
-                        censoringevent:
-                          type: "string"
+                    groupResults:
+                      type : "array"
+                      items:
+                        type: "object"
+                        properties:
+                          timepoint:
+                            type: "string"
+                          events:
+                            type: "object"
+                            properties:
+                              eventofinterest:
+                                type: "string"
+                              censoringevent:
+                                type: "string"
               timers:
                 type: "object"
                 additionalProperties:

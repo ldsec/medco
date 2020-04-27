@@ -33,7 +33,8 @@ type SurvivalAnalysis struct {
 
 	patientSetIDs map[int]string
 
-	timeCodes []string
+	patientGroups map[int]map[string]struct{}
+	timeCodes     []string
 
 	userPublicKey string
 
@@ -133,7 +134,7 @@ type NodeResult struct {
 }
 
 //Execute is the main function that sends the request and waits
-func (clientSurvivalAnalysis *SurvivalAnalysis) Execute() (results []*EncryptedResults, err error) {
+func (clientSurvivalAnalysis *SurvivalAnalysis) Execute() (results map[string][]*EncryptedResults, err error) {
 	totalTimer := time.Now()
 	defer func(since time.Time) {
 		err = clientSurvivalAnalysis.addTimer("time for the total execution ", since)
@@ -170,7 +171,32 @@ nodeLoop:
 
 			}
 			clientSurvivalAnalysis.profiling.Flush()
-			results = appendEncryptedResults(results, nodeLoopRes.Body)
+			//is in initial groups ??
+			if patientGroups, ok := clientSurvivalAnalysis.patientGroups[idx]; !ok {
+				err = errors.New("The node index was not found in the paitent groups map")
+				return
+			} else {
+				for _, groups := range nodeLoopRes.Body.Results {
+					if _, ok := patientGroups[groups.GroupID]; !ok {
+						errors.New("Unexpected group ID")
+						return
+					}
+
+					var innerList []*EncryptedResults
+					for _, val := range groups.GroupResults {
+						innerList = append(innerList, &EncryptedResults{TimePoint: val.Timepoint,
+							Events: Events{EventsOfInterest: val.Events.Eventofinterest,
+								CensoringEvents: val.Events.Censoringevent,
+							}})
+					}
+
+					if _, ok = results[groups.GroupID]; !ok {
+						results[groups.GroupID] = innerList
+					} else {
+						results[groups.GroupID] = append(results[groups.GroupID], innerList...)
+					}
+				}
+			}
 
 		case nodeLoopErr := <-errChan:
 			if err != nil {
@@ -186,22 +212,6 @@ nodeLoop:
 	}
 
 	return
-}
-
-func appendEncryptedResults(target []*EncryptedResults, toExctract *survival_analysis.GetSurvivalAnalysisOKBody) []*EncryptedResults {
-	var res = target
-	for _, bodyItem := range toExctract.Results {
-		result := &EncryptedResults{
-			TimePoint: bodyItem.Timepoint,
-			Events: Events{
-				EventsOfInterest: bodyItem.Events.Eventofinterest,
-				CensoringEvents:  bodyItem.Events.Censoringevent,
-			},
-		}
-		res = append(res, result)
-	}
-
-	return res
 }
 
 func (clientSurvivalAnalysis *SurvivalAnalysis) addTimer(label string, since time.Time) (err error) {

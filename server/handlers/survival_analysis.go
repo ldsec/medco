@@ -29,12 +29,19 @@ func MedCoSurvivalAnalysisGetSurvivalAnalysisHandler(param survival_analysis.Get
 		//return survival_analysis.NewGetSurvivalAnalysisDefault(500).WithPayload(&survival_analysis.GetSurvivalAnalysisDefaultBody{Message: "Query execution error : result pointer is nil"})
 	}*/
 	var resultList []*survival_analysis.ResultsItems0
-	for key, val := range results.EncEvents {
-		timePoint := key
-		event := val[0]
-		censoring := val[1]
-		events := &survival_analysis.ResultsItems0Events{Eventofinterest: event, Censoringevent: censoring}
-		resultList = append(resultList, &survival_analysis.ResultsItems0{Timepoint: timePoint, Events: events})
+	for group, timeCodeTovalue := range results.EncEvents {
+		newRes := &survival_analysis.ResultsItems0{GroupID: group}
+		var groupResultList []*survival_analysis.ResultsItems0GroupResultsItems0
+		for time, results := range timeCodeTovalue {
+			groupResultList = append(groupResultList, &survival_analysis.ResultsItems0GroupResultsItems0{
+				Events:    &survival_analysis.ResultsItems0GroupResultsItems0Events{Eventofinterest: results[0], Censoringevent: results[1]},
+				Timepoint: time,
+			})
+
+		}
+
+		newRes.GroupResults = groupResultList
+		resultList = append(resultList, newRes)
 	}
 	timers := make(map[string]float64, len(results.Timers))
 	for timerKey, timerValue := range results.Timers {

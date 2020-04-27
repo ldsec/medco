@@ -29,7 +29,6 @@ func main() {
 	parser := flags.NewParser(server, flags.Default)
 	parser.ShortDescription = "MedCo Connector"
 	parser.LongDescription = "API of the MedCo connector, that orchestrates the query at the MedCo node and provides information about the MedCo network."
-
 	server.ConfigureFlags()
 	for _, optsGroup := range api.CommandLineOptionsGroups {
 		_, err := parser.AddGroup(optsGroup.ShortDescription, optsGroup.LongDescription, optsGroup.Options)

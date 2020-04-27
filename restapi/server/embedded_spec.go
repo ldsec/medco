@@ -322,6 +322,12 @@ func init() {
                 "ID": {
                   "type": "string"
                 },
+                "patientGroupIDs": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
                 "patientSetID": {
                   "type": "string"
                 },
@@ -349,19 +355,30 @@ func init() {
                   "items": {
                     "type": "object",
                     "properties": {
-                      "events": {
-                        "type": "object",
-                        "properties": {
-                          "censoringevent": {
-                            "type": "string"
-                          },
-                          "eventofinterest": {
-                            "type": "string"
+                      "groupID": {
+                        "type": "string"
+                      },
+                      "groupResults": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "events": {
+                              "type": "object",
+                              "properties": {
+                                "censoringevent": {
+                                  "type": "string"
+                                },
+                                "eventofinterest": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "timepoint": {
+                              "type": "string"
+                            }
                           }
                         }
-                      },
-                      "timepoint": {
-                        "type": "string"
                       }
                     }
                   }
@@ -978,21 +995,7 @@ func init() {
                 "nodes": {
                   "type": "array",
                   "items": {
-                    "type": "object",
-                    "required": [
-                      "index"
-                    ],
-                    "properties": {
-                      "index": {
-                        "type": "integer"
-                      },
-                      "name": {
-                        "type": "string"
-                      },
-                      "url": {
-                        "type": "string"
-                      }
-                    }
+                    "$ref": "#/definitions/NodesItems0"
                   }
                 },
                 "public-key": {
@@ -1229,6 +1232,12 @@ func init() {
                 "ID": {
                   "type": "string"
                 },
+                "patientGroupIDs": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
                 "patientSetID": {
                   "type": "string"
                 },
@@ -1255,23 +1264,7 @@ func init() {
                 "results": {
                   "type": "array",
                   "items": {
-                    "type": "object",
-                    "properties": {
-                      "events": {
-                        "type": "object",
-                        "properties": {
-                          "censoringevent": {
-                            "type": "string"
-                          },
-                          "eventofinterest": {
-                            "type": "string"
-                          }
-                        }
-                      },
-                      "timepoint": {
-                        "type": "string"
-                      }
-                    }
+                    "$ref": "#/definitions/ResultsItems0"
                   }
                 },
                 "timers": {
@@ -1302,6 +1295,179 @@ func init() {
     }
   },
   "definitions": {
+    "ExploreQueryDifferentialPrivacy": {
+      "description": "differential privacy query parameters (todo)",
+      "type": "object",
+      "properties": {
+        "queryBudget": {
+          "type": "number",
+          "maximum": 0,
+          "minimum": 0
+        }
+      }
+    },
+    "ExploreQueryPanelsItems0": {
+      "type": "object",
+      "required": [
+        "not"
+      ],
+      "properties": {
+        "items": {
+          "description": "i2b2 items (linked by an OR)",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ExploreQueryPanelsItems0ItemsItems0"
+          }
+        },
+        "not": {
+          "description": "exclude the i2b2 panel",
+          "type": "boolean"
+        }
+      }
+    },
+    "ExploreQueryPanelsItems0ItemsItems0": {
+      "type": "object",
+      "required": [
+        "encrypted",
+        "queryTerm"
+      ],
+      "properties": {
+        "encrypted": {
+          "type": "boolean"
+        },
+        "operator": {
+          "type": "string",
+          "enum": [
+            "exists",
+            "equals"
+          ]
+        },
+        "queryTerm": {
+          "type": "string",
+          "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/?)$"
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 0
+        }
+      }
+    },
+    "ExploreQueryResultElementTimersItems0": {
+      "type": "object",
+      "required": [
+        "milliseconds"
+      ],
+      "properties": {
+        "milliseconds": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "ExploreSearchResultElementMedcoEncryption": {
+      "type": "object",
+      "required": [
+        "encrypted",
+        "id"
+      ],
+      "properties": {
+        "childrenIds": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "encrypted": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "NodesItems0": {
+      "type": "object",
+      "required": [
+        "index"
+      ],
+      "properties": {
+        "index": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      }
+    },
+    "ResultsItems0": {
+      "type": "object",
+      "properties": {
+        "groupID": {
+          "type": "string"
+        },
+        "groupResults": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ResultsItems0GroupResultsItems0"
+          }
+        }
+      }
+    },
+    "ResultsItems0GroupResultsItems0": {
+      "type": "object",
+      "properties": {
+        "events": {
+          "type": "object",
+          "properties": {
+            "censoringevent": {
+              "type": "string"
+            },
+            "eventofinterest": {
+              "type": "string"
+            }
+          }
+        },
+        "timepoint": {
+          "type": "string"
+        }
+      }
+    },
+    "ResultsItems0GroupResultsItems0Events": {
+      "type": "object",
+      "properties": {
+        "censoringevent": {
+          "type": "string"
+        },
+        "eventofinterest": {
+          "type": "string"
+        }
+      }
+    },
+    "UserAuthorizations": {
+      "type": "object",
+      "properties": {
+        "exploreQuery": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/exploreQueryType"
+          }
+        },
+        "restApi": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/restApiAuthorization"
+          }
+        }
+      }
+    },
     "exploreQuery": {
       "description": "MedCo-Explore query",
       "properties": {
@@ -1320,47 +1486,7 @@ func init() {
           "description": "i2b2 panels (linked by an AND)",
           "type": "array",
           "items": {
-            "type": "object",
-            "required": [
-              "not"
-            ],
-            "properties": {
-              "items": {
-                "description": "i2b2 items (linked by an OR)",
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "required": [
-                    "encrypted",
-                    "queryTerm"
-                  ],
-                  "properties": {
-                    "encrypted": {
-                      "type": "boolean"
-                    },
-                    "operator": {
-                      "type": "string",
-                      "enum": [
-                        "exists",
-                        "equals"
-                      ]
-                    },
-                    "queryTerm": {
-                      "type": "string",
-                      "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/?)$"
-                    },
-                    "value": {
-                      "type": "string",
-                      "maxLength": 0
-                    }
-                  }
-                }
-              },
-              "not": {
-                "description": "exclude the i2b2 panel",
-                "type": "boolean"
-              }
-            }
+            "$ref": "#/definitions/ExploreQueryPanelsItems0"
           }
         },
         "type": {
@@ -1399,19 +1525,7 @@ func init() {
         "timers": {
           "type": "array",
           "items": {
-            "type": "object",
-            "required": [
-              "milliseconds"
-            ],
-            "properties": {
-              "milliseconds": {
-                "type": "integer",
-                "format": "int64"
-              },
-              "name": {
-                "type": "string"
-              }
-            }
+            "$ref": "#/definitions/ExploreQueryResultElementTimersItems0"
           }
         }
       }

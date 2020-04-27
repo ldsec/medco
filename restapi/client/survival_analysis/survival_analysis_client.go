@@ -7,12 +7,11 @@ package survival_analysis
 
 import (
 	"github.com/go-openapi/runtime"
-
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 )
 
 // New creates a new survival analysis API client.
-func New(transport runtime.ClientTransport, formats strfmt.Registry) *Client {
+func New(transport runtime.ClientTransport, formats strfmt.Registry) ClientService {
 	return &Client{transport: transport, formats: formats}
 }
 
@@ -24,8 +23,15 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientService is the interface for Client methods
+type ClientService interface {
+	GetSurvivalAnalysis(params *GetSurvivalAnalysisParams, authInfo runtime.ClientAuthInfoWriter) (*GetSurvivalAnalysisOK, error)
+
+	SetTransport(transport runtime.ClientTransport)
+}
+
 /*
-GetSurvivalAnalysis sends a query to run a survival analysis
+  GetSurvivalAnalysis sends a query to run a survival analysis
 */
 func (a *Client) GetSurvivalAnalysis(params *GetSurvivalAnalysisParams, authInfo runtime.ClientAuthInfoWriter) (*GetSurvivalAnalysisOK, error) {
 	// TODO: Validate the params before sending

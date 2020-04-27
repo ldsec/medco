@@ -2,13 +2,8 @@ package survivalserver
 
 import (
 	"errors"
-	"strconv"
 	"strings"
-	"sync"
 	"time"
-
-	"github.com/ldsec/medco-connector/wrappers/i2b2"
-	"github.com/ldsec/medco-connector/wrappers/unlynx"
 
 	"github.com/sirupsen/logrus"
 )
@@ -23,7 +18,7 @@ type Query struct {
 	//TODO also hide that
 	Result struct {
 		Timers    map[string]time.Duration
-		EncEvents map[string][2]string
+		EncEvents map[string]map[string][2]string
 	}
 
 	spin *Spin
@@ -39,7 +34,7 @@ func NewQuery(qID, pubKey, patientSetID string, timeCodes []string) *Query {
 		PatientSetID: patientSetID,
 		TimeCodes:    encryptedEncIDs,
 		spin:         NewSpin()}
-	res.Result.EncEvents = make(map[string][2]string)
+	res.Result.EncEvents = make(map[string]map[string][2]string)
 	res.Result.Timers = make(map[string]time.Duration)
 	return res
 }
@@ -71,7 +66,7 @@ func (q *Query) PrintTimers() {
 }
 
 //SetResultMap sets the result map structure to return
-func (q *Query) SetResultMap(resultMap map[string][2]string) error {
+func (q *Query) SetResultMap(resultMap map[string]map[string][2]string) error {
 	q.spin.Lock()
 	defer q.spin.Unlock()
 
@@ -82,298 +77,7 @@ func (q *Query) SetResultMap(resultMap map[string][2]string) error {
 
 // Execute is the function that translates a medco survival query in multiple calls on psql and unlynx
 func (q *Query) Execute(batchNumber int) (err error) {
-	var storage sync.Map
-
-	err = directAccessDB.Ping()
-
-	if err != nil {
-		logrus.Error("Unable to ping database")
-		return
-	}
-
-	var timePoints []TagID
-	var patientSet []string
-
-	encTimePoints := q.TimeCodes
-	if len(encTimePoints) == 0 {
-		logrus.Panic("Unexpected empty list of time points")
-	}
-
-	timeCodesMap, _, err := NewTimeCodesMap(q.ID, encTimePoints)
-	if err != nil {
-		return
-	}
-	timePoints = timeCodesMap.tagIDs
-	tagIDToEncTimePoints := timeCodesMap.tagIDsToEncTimeCodes
-
-	patientSetID := q.PatientSetID
-	if patientSetID == "" {
-		logrus.Panic("Unexpected null string for patient set ID")
-	}
-	patientSet, _, err = i2b2.GetPatientSet(patientSetID)
-
-	err = NiceError(err)
-	if err != nil {
-		return
-	}
-	if len(patientSet) == 0 {
-		//TODO magic numbers
-		unlynxChannel := make(chan struct {
-			event     *unlynxResult
-			censoring *unlynxResult
-		}, 1024)
-
-		for _, encryptedEncIDs := range tagIDToEncTimePoints {
-			var zeroEvents string
-			var zeroCensoring string
-			zeroEvents, err = zeroPointEncryption()
-			if err != nil {
-				return
-			}
-			zeroCensoring, err = zeroPointEncryption()
-			if err != nil {
-				return
-			}
-
-			err = aggregateAndKeySwitchSend(q.ID, encryptedEncIDs, zeroEvents, zeroCensoring, q.UserPublicKey, unlynxChannel)
-			if err != nil {
-				return
-			}
-
-		}
-		var receptionBarrier sync.WaitGroup
-		receptionBarrier.Add(len(tagIDToEncTimePoints))
-		for i := 0; i < len(tagIDToEncTimePoints); i++ {
-			err = aggregateAndKeySwitchCollect(&storage, unlynxChannel, &receptionBarrier)
-			if err != nil {
-				return
-			}
-		}
-
-		err = q.fillResult(&storage)
-
-		return
-	}
-
-	if err != nil {
-		return
-	}
-
-	exceptionHandler, err := NewExceptionHandler(1)
-	err = NiceError(err)
-
-	if err != nil {
-		return
-	}
-	go func() {
-		start := time.Now()
-		defer func(err error) {
-			err = q.addTimer("Total time for a non-empty set", start)
-		}(err)
-
-		batches, err := NewBatchIterator(timePoints, batchNumber)
-
-		err = NiceError(err)
-
-		if err != nil {
-			exceptionHandler.PushError(err)
-			return
-		}
-
-		for batchCounter := 0; !batches.Done(); batchCounter++ {
-			batch := batches.Next()
-			//TODO magic numbers
-			unlynxChannel := make(chan struct {
-				event     *unlynxResult
-				censoring *unlynxResult
-			}, 1024)
-
-			batchIdx := batchCounter
-
-			//TODO not elegant !!!!!!!
-			result := Result{}
-
-			query := buildBatchQuery(patientSet, batch)
-
-			SQLQueryTime := time.Now()
-			rows, err := directAccessDB.Query(query)
-			if err != nil {
-				err = errors.New(err.Error() + " " + query)
-				return
-			}
-			err = q.addTimer("SQLQueryTime of batch "+strconv.Itoa(batchIdx)+" ", SQLQueryTime)
-			if err != nil {
-				return
-			}
-
-			err = NiceError(err)
-
-			if err != nil {
-				result.Error = err
-				//TODO handle this kind of error
-				storage.Store("", result)
-				exceptionHandler.PushError(err)
-				return
-			}
-
-			set := NewSet(len(batch))
-			for _, timeCode := range batch {
-				set.Add(timeCode)
-			}
-
-			// ------ aggregates and send aggregates for collective agg and key switching
-			//   ---- 1) do this for the result encountered in the loval observation fact
-			//   ---- 2) do this for remaining data (they will have an encrypted zero value)
-			unlynxMachineryTime := time.Now()
-			for rows.Next() {
-				recipiens := &struct {
-					TimeCode          string
-					ConcatenatedBlobs string
-				}{}
-				err = rows.Scan(&(recipiens.TimeCode), &(recipiens.ConcatenatedBlobs))
-				err = NiceError(err)
-				set.Remove(TagID(recipiens.TimeCode))
-
-				str := strings.Split(recipiens.ConcatenatedBlobs, interBlob)
-				eventsOfInterest := make([]string, len(str))
-				censoringEvents := make([]string, len(str))
-				for idx, blob := range str {
-					eventsOfInterest[idx], censoringEvents[idx], err = breakBlob(blob)
-					err = NiceError(err)
-					if err != nil {
-						result.Error = err
-						storage.Store(recipiens.TimeCode, result)
-						rows.Close()
-						exceptionHandler.PushError(err)
-						return
-					}
-
-				}
-
-				//err chans ?
-				go func() { //call unlynx for the first kind of events
-
-					events, err := unlynx.LocallyAggregateValues(eventsOfInterest)
-					err = NiceError(err)
-					if err != nil {
-						exceptionHandler.PushError(err)
-						return
-					}
-					censoringEvents, err := unlynx.LocallyAggregateValues(censoringEvents)
-					err = NiceError(err)
-					if err != nil {
-						exceptionHandler.PushError(err)
-						return
-
-					}
-
-					err = NiceError(err)
-					if err != nil {
-						exceptionHandler.PushError(err)
-						return
-					}
-
-					if EID, ok := timeCodesMap.tagIDsToEncTimeCodes[TagID(recipiens.TimeCode)]; ok {
-						err = aggregateAndKeySwitchSend(q.ID, EID, events, censoringEvents, q.UserPublicKey, unlynxChannel)
-					} else {
-						err = errors.New("missing TAGID in the time codes maps")
-					}
-
-					err = NiceError(err)
-					if err != nil {
-						exceptionHandler.PushError(err)
-						return
-					}
-				}()
-			}
-			rows.Close()
-			//for those that have not be found in this node
-
-			//TODO this is beyound the unlynx batch barrier mechanism
-			set.ForEach(func(key TagID) {
-
-				go func() {
-					zeroEvent, err := zeroPointEncryption()
-					err = NiceError(err)
-					if err != nil {
-						exceptionHandler.PushError(err)
-					}
-					zeroCensoring, err := zeroPointEncryption()
-					if EID, ok := timeCodesMap.tagIDsToEncTimeCodes[key]; ok {
-						err = aggregateAndKeySwitchSend(`queryname`, EID, zeroEvent, zeroCensoring, q.UserPublicKey, unlynxChannel)
-					} else {
-						err = errors.New("missing key in the time codes maps")
-					}
-					err = NiceError(err)
-					if err != nil {
-						exceptionHandler.PushError(err)
-					}
-
-				}()
-				//storage.Store(key, result)
-
-			})
-
-			// ------- collect the result of the  aggregate and key switch
-			errorOccurred := false
-			var receptionBarrier sync.WaitGroup
-			receptionBarrier.Add(len(batch))
-			for range batch {
-				err = aggregateAndKeySwitchCollect(&storage, unlynxChannel, &receptionBarrier)
-				err = NiceError(err)
-				if err != nil {
-
-					errorOccurred = true
-					exceptionHandler.PushError(err)
-					break
-				}
-			}
-			if !errorOccurred {
-				receptionBarrier.Wait()
-			}
-
-			err = q.addTimer("unlynx machinery time for batch "+strconv.Itoa(batchIdx)+" ", unlynxMachineryTime)
-			if err != nil {
-				return
-			}
-
-		}
-		//err chans !!!
-		exceptionHandler.Finished()
-		return
-	}()
-	err = exceptionHandler.WaitEndSignal(3000)
-	if err != nil {
-		return
-	}
-	err = q.fillResult(&storage)
-	err = NiceError(err)
-	if err != nil {
-		return
-	}
-	return
-}
-func (q *Query) fillResult(storage *sync.Map) (err error) {
-
-	targetMap := make(map[string][2]string)
-	counter := 0
-	storage.Range(func(timeCode /*string*/, events interface{} /*Result*/) bool {
-		if timeCodeString, ok1 := timeCode.(EncryptedEncID); ok1 {
-			if eventStruct, ok2 := events.(Result); ok2 {
-
-				targetMap[string(timeCodeString)] = [2]string{eventStruct.EventValue, eventStruct.CensoringValue}
-				counter++
-				return true
-			}
-			logrus.Panic("Wrong type for map value")
-
-		}
-		logrus.Panic("Wrong type for map key")
-		return false
-
-	})
-	err = q.SetResultMap(targetMap)
-
+	err = errors.New("TODO")
 	return
 }
 

@@ -1,5 +1,7 @@
 module github.com/ldsec/medco-connector
 
+replace github.com/ldsec/medco-unlynx => github.com/ldsec/medco-unlynx v0.3.2-0.20200414130428-b1239ae61d90
+
 require (
 	github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496 // indirect
 	github.com/go-openapi/analysis v0.19.7 // indirect
@@ -13,18 +15,18 @@ require (
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/ldsec/medco-loader v0.3.1
 	github.com/ldsec/medco-unlynx v0.3.1
-	github.com/ldsec/unlynx v1.4.0
+	github.com/ldsec/unlynx v1.4.1
 	github.com/lestrrat-go/jwx v0.9.0
 	github.com/lib/pq v1.3.0
 	github.com/pkg/errors v0.9.1
 	github.com/r0fls/gostats v0.0.0-20180711082619-e793b1fda35c
 	github.com/sirupsen/logrus v1.4.2
 	github.com/smartystreets/assertions v1.0.0 // indirect
-	github.com/stretchr/testify v1.4.0
-	github.com/urfave/cli v1.22.2
-	go.dedis.ch/onet/v3 v3.1.0
+	github.com/stretchr/testify v1.5.1
+	github.com/urfave/cli v1.22.3
+	go.dedis.ch/onet/v3 v3.2.0
 	go.mongodb.org/mongo-driver v1.3.0 // indirect
-	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
+	golang.org/x/net v0.0.0-20200301022130-244492dfa37a
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
 

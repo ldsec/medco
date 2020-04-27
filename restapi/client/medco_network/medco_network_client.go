@@ -7,12 +7,11 @@ package medco_network
 
 import (
 	"github.com/go-openapi/runtime"
-
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 )
 
 // New creates a new medco network API client.
-func New(transport runtime.ClientTransport, formats strfmt.Registry) *Client {
+func New(transport runtime.ClientTransport, formats strfmt.Registry) ClientService {
 	return &Client{transport: transport, formats: formats}
 }
 
@@ -24,8 +23,15 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientService is the interface for Client methods
+type ClientService interface {
+	GetMetadata(params *GetMetadataParams, authInfo runtime.ClientAuthInfoWriter) (*GetMetadataOK, error)
+
+	SetTransport(transport runtime.ClientTransport)
+}
+
 /*
-GetMetadata gets network metadata
+  GetMetadata gets network metadata
 */
 func (a *Client) GetMetadata(params *GetMetadataParams, authInfo runtime.ClientAuthInfoWriter) (*GetMetadataOK, error) {
 	// TODO: Validate the params before sending

@@ -15,7 +15,7 @@ import (
 	swag "github.com/go-openapi/swag"
 	validate "github.com/go-openapi/validate"
 
-	models "github.com/ldsec/medco-connector/restapi/models"
+	"github.com/ldsec/medco-connector/restapi/models"
 )
 
 // GetSurvivalAnalysisHandlerFunc turns a function with the right signature into a get survival analysis handler
@@ -83,6 +83,9 @@ type GetSurvivalAnalysisBody struct {
 
 	// ID
 	ID string `json:"ID,omitempty"`
+
+	// patient group i ds
+	PatientGroupIDs []string `json:"patientGroupIDs"`
 
 	// patient set ID
 	PatientSetID string `json:"patientSetID,omitempty"`
@@ -243,18 +246,18 @@ func (o *GetSurvivalAnalysisOKBody) UnmarshalBinary(b []byte) error {
 // swagger:model ResultsItems0
 type ResultsItems0 struct {
 
-	// events
-	Events *ResultsItems0Events `json:"events,omitempty"`
+	// group ID
+	GroupID string `json:"groupID,omitempty"`
 
-	// timepoint
-	Timepoint string `json:"timepoint,omitempty"`
+	// group results
+	GroupResults []*ResultsItems0GroupResultsItems0 `json:"groupResults"`
 }
 
 // Validate validates this results items0
 func (o *ResultsItems0) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := o.validateEvents(formats); err != nil {
+	if err := o.validateGroupResults(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -264,19 +267,26 @@ func (o *ResultsItems0) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *ResultsItems0) validateEvents(formats strfmt.Registry) error {
+func (o *ResultsItems0) validateGroupResults(formats strfmt.Registry) error {
 
-	if swag.IsZero(o.Events) { // not required
+	if swag.IsZero(o.GroupResults) { // not required
 		return nil
 	}
 
-	if o.Events != nil {
-		if err := o.Events.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("events")
-			}
-			return err
+	for i := 0; i < len(o.GroupResults); i++ {
+		if swag.IsZero(o.GroupResults[i]) { // not required
+			continue
 		}
+
+		if o.GroupResults[i] != nil {
+			if err := o.GroupResults[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("groupResults" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil
@@ -300,9 +310,70 @@ func (o *ResultsItems0) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-// ResultsItems0Events results items0 events
-// swagger:model ResultsItems0Events
-type ResultsItems0Events struct {
+// ResultsItems0GroupResultsItems0 results items0 group results items0
+// swagger:model ResultsItems0GroupResultsItems0
+type ResultsItems0GroupResultsItems0 struct {
+
+	// events
+	Events *ResultsItems0GroupResultsItems0Events `json:"events,omitempty"`
+
+	// timepoint
+	Timepoint string `json:"timepoint,omitempty"`
+}
+
+// Validate validates this results items0 group results items0
+func (o *ResultsItems0GroupResultsItems0) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateEvents(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *ResultsItems0GroupResultsItems0) validateEvents(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.Events) { // not required
+		return nil
+	}
+
+	if o.Events != nil {
+		if err := o.Events.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("events")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *ResultsItems0GroupResultsItems0) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *ResultsItems0GroupResultsItems0) UnmarshalBinary(b []byte) error {
+	var res ResultsItems0GroupResultsItems0
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+// ResultsItems0GroupResultsItems0Events results items0 group results items0 events
+// swagger:model ResultsItems0GroupResultsItems0Events
+type ResultsItems0GroupResultsItems0Events struct {
 
 	// censoringevent
 	Censoringevent string `json:"censoringevent,omitempty"`
@@ -311,13 +382,13 @@ type ResultsItems0Events struct {
 	Eventofinterest string `json:"eventofinterest,omitempty"`
 }
 
-// Validate validates this results items0 events
-func (o *ResultsItems0Events) Validate(formats strfmt.Registry) error {
+// Validate validates this results items0 group results items0 events
+func (o *ResultsItems0GroupResultsItems0Events) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (o *ResultsItems0Events) MarshalBinary() ([]byte, error) {
+func (o *ResultsItems0GroupResultsItems0Events) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -325,8 +396,8 @@ func (o *ResultsItems0Events) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *ResultsItems0Events) UnmarshalBinary(b []byte) error {
-	var res ResultsItems0Events
+func (o *ResultsItems0GroupResultsItems0Events) UnmarshalBinary(b []byte) error {
+	var res ResultsItems0GroupResultsItems0Events
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

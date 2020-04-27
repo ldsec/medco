@@ -3,7 +3,6 @@ package survivalclient
 import (
 	"errors"
 	"fmt"
-	"strconv"
 	"sync"
 	"time"
 
@@ -141,20 +140,26 @@ func ClientSurvival(token string, granularity string, limit int64, queryString, 
 
 	logrus.Infof("obtained %d results", len(survResults))
 	sequentialDecryptionTimer := time.Now()
-	for _, encElement := range survResults {
-		var clearEvent int64
-		var clearCensoringEvent int64
-		clearTimePoint := encTimeCodesInverseMap[encElement.TimePoint]
-		clearEvent, err = survivalAnalysis.Decrypt(encElement.Events.EventsOfInterest)
-		if err != nil {
-			return
-		}
-		clearCensoringEvent, err = survivalAnalysis.Decrypt(encElement.Events.CensoringEvents)
-		if err != nil {
-			return
-		}
-		logrus.Infof("At time %s , %s events of interests and %s censoring events\n", clearTimePoint, strconv.FormatInt(clearEvent, 10), strconv.FormatInt(clearCensoringEvent, 10))
+	for groupID, encryptedResults := range survResults {
+		for _, cipherEvents := range encryptedResults {
+			var clearEventOfInterest int64
+			var clearCensoringEvent int64
+			clearTimePoint, ok := encTimeCodesInverseMap[cipherEvents.TimePoint]
+			if !ok {
+				err = errors.New("unexpected encrypted time point")
+				return
+			}
+			clearEventOfInterest, err = survivalAnalysis.Decrypt(cipherEvents.Events.EventsOfInterest)
+			if err != nil {
+				return
+			}
+			clearCensoringEvent, err = survivalAnalysis.Decrypt(cipherEvents.Events.CensoringEvents)
+			if err != nil {
+				return
+			}
 
+			logrus.Infof("Group %s at timepoint %s has %i events of interest and %i censoring events", groupID, clearTimePoint, clearEventOfInterest, clearCensoringEvent)
+		}
 	}
 
 	survivalAnalysis.addTimer("time for sequential decryption", sequentialDecryptionTimer)
