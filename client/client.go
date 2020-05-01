@@ -103,6 +103,7 @@ func printResultsCSV(nodesResult map[int]*ExploreQueryResult, output io.Writer) 
 			strconv.Itoa(nodeIdx),
 			strconv.FormatInt(queryResult.Count, 10),
 			fmt.Sprint(queryResult.PatientList),
+			"set:" + fmt.Sprint(queryResult.PatientSetID),
 		})
 	}
 

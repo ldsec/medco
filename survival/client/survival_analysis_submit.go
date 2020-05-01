@@ -2,7 +2,6 @@ package survivalclient
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -18,20 +17,17 @@ import (
 func (clientSurvivalAnalysis *SurvivalAnalysis) submitToNode(nodeIdx int) (results *survival_analysis.GetSurvivalAnalysisOKBody, err error) {
 	//magicNumber
 	params := survival_analysis.NewGetSurvivalAnalysisParamsWithTimeout(time.Duration(utilclient.QueryTimeoutSeconds) * time.Second)
-	patientSetID, ok := clientSurvivalAnalysis.patientSetIDs[nodeIdx]
-
-	if !ok {
-		err = fmt.Errorf("Node index %d not found in patient sets", nodeIdx)
-		return
-	}
-
+	patientSetID := clientSurvivalAnalysis.patientSetID
+	logrus.Debugf("submitting %v", clientSurvivalAnalysis.patientGroupIDs)
 	body := &survival_analysis.GetSurvivalAnalysisBody{
-		ID:            clientSurvivalAnalysis.id,
-		TimeCodes:     clientSurvivalAnalysis.timeCodes,
-		PatientSetID:  patientSetID,
-		UserPublicKey: clientSurvivalAnalysis.userPublicKey,
+		ID:              clientSurvivalAnalysis.id,
+		TimeCodes:       clientSurvivalAnalysis.timeCodes,
+		PatientSetID:    patientSetID,
+		PatientGroupIDs: clientSurvivalAnalysis.patientGroupIDs,
+		UserPublicKey:   clientSurvivalAnalysis.userPublicKey,
 	}
 	params.SetBody(*body)
+	logrus.Debugf("submit %v", params.Body.PatientGroupIDs)
 	response, err := clientSurvivalAnalysis.httpMedCoClients[nodeIdx].SurvivalAnalysis.GetSurvivalAnalysis(params, httptransport.BearerToken(clientSurvivalAnalysis.authToken))
 
 	if err != nil {

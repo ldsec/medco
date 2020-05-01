@@ -13,7 +13,7 @@ import (
 
 func (timeCodesMap *TimeCodesMap) getTagIDs() (err error) {
 	paths := buildParameters(timeCodesMap.tagsToEncTimeCodes)
-	psqlQuery := tagQuery + ` WHERE concept_path IN (` + paths + `)`
+	psqlQuery := tagQuery + ` WHERE time_path IN (` + paths + `)`
 	rows, err := directAccessDB.Query(psqlQuery)
 	err = NiceError(err)
 	if err != nil {
@@ -42,7 +42,8 @@ func (timeCodesMap *TimeCodesMap) getTagIDs() (err error) {
 
 	}
 	if numberOfRows == 0 {
-		err = fmt.Errorf("From node %d, Unable to find any of the tag in the data base %s", utilserver.MedCoNodeIdx, dbName)
+		err = fmt.Errorf("From node %d, Unable to find any of the tag in the data base ", utilserver.MedCoNodeIdx)
+		return
 	}
 
 	err = rows.Close()
@@ -109,6 +110,74 @@ func NewTimeCodesMap(queryName string, encTimeCodes []EncryptedEncID) (timeCodeM
 	}
 	return
 
+}
+
+//NewTimeCodesMapWithCallback has the same purpose of NewTimeCodesMap, but return an error chan as the error can occur after the call of this function
+func NewTimeCodesMapWithCallback(queryName string, encTimeCodes []EncryptedEncID, callBack func(*TimeCodesMap, chan error, chan map[string]time.Duration)) (<-chan *TimeCodesMap, <-chan map[string]time.Duration, <-chan error) {
+	timeCodeMapChan := make(chan *TimeCodesMap, 1)
+	timesChan := make(chan map[string]time.Duration, 1)
+	errChan := make(chan error, 1)
+	interMediateTimesChan := make(chan map[string]time.Duration, 1)
+
+	errChan = make(chan error, 1) //if not 1, the fact of extrating these channels in a undefined order would block at pushing (the first possibility is immediate with errChan)
+	length := len(encTimeCodes)
+	if length == 0 {
+		errChan <- errors.New("Empty list of time codes")
+		return timeCodeMapChan, timesChan, errChan
+	}
+
+	encTimeCodesStrings := make([]string, length)
+
+	for idx, timeCode := range encTimeCodes {
+		encTimeCodesStrings[idx] = string(timeCode)
+	}
+
+	go func() {
+		timer := make(map[string]time.Duration)
+		timeCodeMap := &TimeCodesMap{
+			encTimeCodesToTags:   make(map[EncryptedEncID]string, length),
+			encTimeCodesToTagIDs: make(map[EncryptedEncID]TagID, length),
+			tagsToEncTimeCodes:   make(map[string]EncryptedEncID, length),
+			tagIDsToEncTimeCodes: make(map[TagID]EncryptedEncID, length),
+			tagIDs:               make([]TagID, 0, length),
+		}
+		encTimeCodesToTagsStrings, times, err := unlynx.DDTagValues(queryName+"_TIME_CONCEPT_CODES_", encTimeCodesStrings)
+		for key, value := range times {
+			timer[key] = value
+		}
+		for timeCode, tag := range encTimeCodesToTagsStrings {
+			timeCodeMap.encTimeCodesToTags[EncryptedEncID(timeCode)] = tag
+		}
+		for encTimeCode, tag := range timeCodeMap.encTimeCodesToTags {
+			timeCodeMap.tagsToEncTimeCodes[tag] = encTimeCode
+		}
+
+		err = timeCodeMap.getTagIDs()
+
+		if err != nil {
+			errChan <- err
+		}
+
+		for tagID := range timeCodeMap.tagIDsToEncTimeCodes {
+
+			timeCodeMap.tagIDs = append(timeCodeMap.tagIDs, tagID)
+		}
+
+		callBack(timeCodeMap, errChan, interMediateTimesChan)
+		select {
+		case intermediateTimer := <-interMediateTimesChan:
+			for key, val := range intermediateTimer {
+				timer[key] = val
+			}
+		default:
+		}
+
+		timeCodeMapChan <- timeCodeMap
+		timesChan <- timer
+		return
+	}()
+
+	return timeCodeMapChan, timesChan, errChan
 }
 
 // GetTagIDList returns the tag ID list

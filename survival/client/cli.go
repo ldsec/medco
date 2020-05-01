@@ -3,6 +3,7 @@ package survivalclient
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -22,48 +23,38 @@ type ClientResultElement struct {
 }
 
 //ClientSurvival represents the whole survival analysis loop: it gets the time codes and the patient set, the request for the aggregates for the survival analysis and deciphers them
-func ClientSurvival(token string, granularity string, limit int64, queryString, username, password string, disableTLSCheck bool) (err error) {
+func ClientSurvival(token, granularity, survivalType string, limit int64, patientSetID string, patientGroupIDsString string, username, password string, disableTLSCheck bool) (err error) {
 
 	accessToken, err := GetToken(token, username, password, disableTLSCheck)
 	if err != nil {
 		return
 	}
-
-	var patientSetIDs map[int]string
+	patientGroupIDs := strings.Split(patientGroupIDsString, ",")
+	patientGroupUniqueIDs := map[string]struct{}{}
+	for _, patientGroupID := range patientGroupIDs {
+		if _, alreadyIn := patientGroupUniqueIDs[patientGroupID]; alreadyIn {
+			logrus.Warn("dupplicate group id, skipping")
+		} else {
+			patientGroupUniqueIDs[patientGroupID] = struct{}{}
+		}
+	}
+	patientGroupIDs = []string{}
+	for key := range patientGroupUniqueIDs {
+		patientGroupIDs = append(patientGroupIDs, key)
+	}
+	logrus.Debug("groups : %v", patientGroupIDs)
 	var encTimeCodesMap map[string]string
 	var encTimeCodesInverseMap map[string]string
+	var encType string
+	encTypeChan := make(chan string)
 
-	errChan := make(chan error)
-	patientSetIDsChan := make(chan map[int]string)
+	errChan := make(chan error, 2)
+
 	encTimeCodesMapChan := make(chan timeCodesMaps)
 	signalChan := make(chan struct{})
 	var barrier sync.WaitGroup
 	barrier.Add(2)
 
-	go func() {
-		logrus.Info("Creating patient set")
-
-		encPanels, panelsIsNot, err := parseAndEncryptQueryString(queryString)
-		if err != nil {
-			logrus.Error("Patient set creation error: ", err)
-			barrier.Done()
-			errChan <- err
-			return
-		}
-		patientSetIDs, err := GetPatientSetIDs(accessToken, encPanels, panelsIsNot, disableTLSCheck)
-		logrus.Debug(patientSetIDs)
-		if err != nil {
-			logrus.Error("Patient set creation error: ", err)
-			barrier.Done()
-			errChan <- err
-
-			return
-		}
-		logrus.Info("Patient set created")
-		barrier.Done()
-		patientSetIDsChan <- patientSetIDs
-
-	}()
 	go func() {
 		logrus.Info("Creating time point maps")
 
@@ -91,25 +82,45 @@ func ClientSurvival(token string, granularity string, limit int64, queryString, 
 	}()
 
 	go func() {
+		logrus.Info("Retrieving survival type code")
+		typeCode, err := GetTypeCode(accessToken, survivalType, disableTLSCheck)
+		if err != nil {
+			barrier.Done()
+			errChan <- err
+			return
+		}
+		encType, err := unlynx.EncryptWithCothorityKey(typeCode)
+		if err != nil {
+			barrier.Done()
+			errChan <- err
+			return
+		}
+
+		logrus.Info("Type code retrieved")
+		barrier.Done()
+		encTypeChan <- encType
+
+	}()
+
+	go func() {
 		barrier.Wait()
 		signalChan <- struct{}{}
 	}()
 
 	select {
 	case <-time.After(time.Duration(300) * time.Second):
-		logrus.Panic("Unexpected delay")
+		logrus.Panic("NodeExplore Timeout")
 	case <-signalChan:
+		select {
+		case <-errChan:
+		default:
+		}
 	}
 
-	//not safe
-	select {
-	case err = <-errChan:
-		return
-	default:
-
-	}
-	patientSetIDs = <-patientSetIDsChan
 	encTimeCodesMaps := <-encTimeCodesMapChan
+
+	encType = <-encTypeChan
+
 	encTimeCodesMap = encTimeCodesMaps[0]
 	encTimeCodesInverseMap = encTimeCodesMaps[1]
 
@@ -122,18 +133,15 @@ func ClientSurvival(token string, granularity string, limit int64, queryString, 
 	logrus.Debug("Mapping between duration in clear text and encryption of the integer identifier")
 	logrus.Debug(fmt.Sprint(encTimeCodesMap))
 
-	err = validateIntermediateResults(patientSetIDs, encTimeCodes)
+	survivalAnalysis, err := NewSurvivalAnalysis(accessToken, patientSetID, patientGroupIDs, encTimeCodes, encType, disableTLSCheck)
 	if err != nil {
-		return
-	}
-
-	survivalAnalysis, err := NewSurvivalAnalysis(accessToken, patientSetIDs, encTimeCodes, disableTLSCheck)
-	if err != nil {
+		logrus.Error(err.Error())
 		return
 	}
 	logrus.Info("Survival analysis request created. Executing")
 	survResults, err := survivalAnalysis.Execute()
 	if err != nil {
+		logrus.Error(err.Error())
 		return
 	}
 	survivalAnalysis.PrintTimers()
@@ -158,7 +166,7 @@ func ClientSurvival(token string, granularity string, limit int64, queryString, 
 				return
 			}
 
-			logrus.Infof("Group %s at timepoint %s has %i events of interest and %i censoring events", groupID, clearTimePoint, clearEventOfInterest, clearCensoringEvent)
+			logrus.Infof("Group %s at timepoint %s has %d events of interest and %d censoring events", groupID, clearTimePoint, clearEventOfInterest, clearCensoringEvent)
 		}
 	}
 

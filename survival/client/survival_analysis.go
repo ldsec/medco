@@ -31,10 +31,10 @@ type SurvivalAnalysis struct {
 
 	id string
 
-	patientSetIDs map[int]string
+	patientSetID string
 
-	patientGroups map[int]map[string]struct{}
-	timeCodes     []string
+	patientGroupIDs []string
+	timeCodes       []string
 
 	userPublicKey string
 
@@ -50,14 +50,15 @@ type SurvivalAnalysis struct {
 }
 
 // NewSurvivalAnalysis constructor for survival analysis request
-func NewSurvivalAnalysis(token string, patientSetIDs map[int]string, timeCodes []string, disableTLSCheck bool) (q *SurvivalAnalysis, err error) {
+func NewSurvivalAnalysis(token string, patientSetID string, patientGroupIDs []string, timeCodes []string, typeCode string, disableTLSCheck bool) (q *SurvivalAnalysis, err error) {
 	q = &SurvivalAnalysis{
-		authToken:     token,
-		id:            "MedCo_Survival_Analysis" + time.Now().Format(time.RFC3339),
-		patientSetIDs: patientSetIDs,
-		timeCodes:     timeCodes,
-		formats:       strfmt.Default,
-		timers:        make(map[string]time.Duration),
+		authToken:       token,
+		id:              "MedCo_Survival_Analysis" + time.Now().Format(time.RFC3339),
+		patientSetID:    patientSetID,
+		patientGroupIDs: patientGroupIDs,
+		timeCodes:       timeCodes,
+		formats:         strfmt.Default,
+		timers:          make(map[string]time.Duration),
 	}
 
 	q.profiling = csv.NewWriter(&q.profilingBuffer)
@@ -149,17 +150,25 @@ func (clientSurvivalAnalysis *SurvivalAnalysis) Execute() (results map[string][]
 			if Error != nil {
 				logrus.Errorf("Survival analysis exection error : %s", Error)
 				errChan <- Error
-			}
+			} else {
 
-			resultChan <- NodeResult{Body: res, NodeIndex: idx}
+				resultChan <- NodeResult{Body: res, NodeIndex: idx}
+			}
 		}(idx)
 	}
 	//TODO magic number
 	timeout := time.After(time.Duration(3000) * time.Second)
 
+	results = make(map[string][]*EncryptedResults)
 nodeLoop:
 	for idx := range clientSurvivalAnalysis.httpMedCoClients {
 		select {
+		case nodeLoopErr := <-errChan:
+			if err != nil {
+				err = fmt.Errorf("Node %d threw %s : %s", idx, nodeLoopErr, err)
+			} else {
+				err = fmt.Errorf("Node %d threw %s", idx, nodeLoopErr)
+			}
 		case nodeLoopRes := <-resultChan:
 			for label, value := range nodeLoopRes.Body.Timers {
 
@@ -171,39 +180,21 @@ nodeLoop:
 
 			}
 			clientSurvivalAnalysis.profiling.Flush()
-			//is in initial groups ??
-			if patientGroups, ok := clientSurvivalAnalysis.patientGroups[idx]; !ok {
-				err = errors.New("The node index was not found in the paitent groups map")
-				return
-			} else {
-				for _, groups := range nodeLoopRes.Body.Results {
-					if _, ok := patientGroups[groups.GroupID]; !ok {
-						errors.New("Unexpected group ID")
-						return
-					}
 
-					var innerList []*EncryptedResults
-					for _, val := range groups.GroupResults {
-						innerList = append(innerList, &EncryptedResults{TimePoint: val.Timepoint,
-							Events: Events{EventsOfInterest: val.Events.Eventofinterest,
-								CensoringEvents: val.Events.Censoringevent,
-							}})
-					}
+			for _, groups := range nodeLoopRes.Body.Results {
 
-					if _, ok = results[groups.GroupID]; !ok {
-						results[groups.GroupID] = innerList
-					} else {
-						results[groups.GroupID] = append(results[groups.GroupID], innerList...)
-					}
+				var innerList []*EncryptedResults
+				for _, val := range groups.GroupResults {
+					innerList = append(innerList, &EncryptedResults{TimePoint: val.Timepoint,
+						Events: Events{EventsOfInterest: val.Events.Eventofinterest,
+							CensoringEvents: val.Events.Censoringevent,
+						}})
 				}
+
+				results[groups.GroupID] = append(results[groups.GroupID], innerList...)
+
 			}
 
-		case nodeLoopErr := <-errChan:
-			if err != nil {
-				err = fmt.Errorf("Node %d threw %s : %s", idx, nodeLoopErr, err)
-			} else {
-				err = fmt.Errorf("Node %d threw %s", idx, nodeLoopErr)
-			}
 		case <-timeout:
 			err = fmt.Errorf(" Timeout : %s", err.Error())
 			break nodeLoop

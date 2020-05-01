@@ -84,7 +84,7 @@ func main() {
 	//--- survival analysis command flags
 	survivalAnalysisFlag := []cli.Flag{
 		cli.StringFlag{
-			Name:  "granularity, g",
+			Name:  "granularity, r",
 			Usage: "Granularity",
 			Value: "year",
 		},
@@ -92,6 +92,19 @@ func main() {
 			Name:  "limit, l",
 			Usage: "Limit ",
 			Value: 10,
+		},
+		cli.StringFlag{
+			Name:  "set, s",
+			Usage: "Set ",
+		},
+		cli.StringFlag{
+			Name:  "groups, g",
+			Usage: "Groups",
+		},
+		cli.StringFlag{
+			Name:  "type, t",
+			Usage: "Type",
+			Value: "tumor-progression-free",
 		},
 	}
 
@@ -172,14 +185,16 @@ func main() {
 			Aliases:     []string{"srva"},
 			Usage:       "Run a survival analysis",
 			Flags:       survivalAnalysisFlag,
-			ArgsUsage:   "[-g granularity] [-l limit]",
+			ArgsUsage:   "[-r granularity] [-l limit] [-t type ] [-g groups]",
 			Description: "Returns the points of the survival curve",
 			Action: func(c *cli.Context) error {
 				return survivalclient.ClientSurvival(
 					c.GlobalString("token"),
 					c.String("granularity"),
+					c.String("type"),
 					c.Int64("limit"),
-					c.Args().First()+" "+strings.Join(c.Args().Tail(), " "),
+					c.String("set"),
+					c.String("groups"),
 					c.GlobalString("user"),
 					c.GlobalString("password"),
 					c.GlobalBool("disableTLSCheck"),

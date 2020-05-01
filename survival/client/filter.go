@@ -1,6 +1,7 @@
 package survivalclient
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 
@@ -9,11 +10,12 @@ import (
 )
 
 const (
-	basePath   string = "/i2b2_SRVA/SurvivalAnalysis/"
+	timePath   string = "/survival_TIME/SurvivalAnalysis/Time/"
+	typePath   string = "/survival_TYPE/SurvivalAnalysis/Type/"
 	searchType string = ""
 )
 
-var fromRequestToI2b2 map[string]string = map[string]string{"day": "Day", "week": "Week", "month": "Month", "year": "Year"}
+var fromRequestToI2b2 map[string]string = map[string]string{"day": "Day", "week": "Week", "month": "Month", "season": "Season", "year": "Year", "tumor-progression-free": "TumorProgressionFree"}
 
 // GetTimeCodes execute the explore search to find the available time points for a given granularity and retrieves their related integer identifier
 func GetTimeCodes(accessToken, granularity string, limit int64, disableTLS bool) (timeCodes map[string]int64, err error) {
@@ -23,7 +25,8 @@ func GetTimeCodes(accessToken, granularity string, limit int64, disableTLS bool)
 		err = fmt.Errorf("Time resolution %s not found in available granularities", granularity)
 		return
 	}
-	path := basePath + gran + "/"
+	path := timePath + gran + "/"
+	logrus.Debugf("survival time :%s  path:%s", granularity, path)
 	exploreSearch, err := NewExploreSearch(accessToken, path, searchType, disableTLS)
 	if err != nil {
 		return
@@ -71,4 +74,36 @@ func GetTimeCodes(accessToken, granularity string, limit int64, disableTLS bool)
 
 	return
 
+}
+
+func GetTypeCode(accessToken, survivalType string, disableTLS bool) (typeCode int64, err error) {
+	survType, ok := fromRequestToI2b2[survivalType]
+	if !ok {
+		err = fmt.Errorf("Time resolution %s not found in available granularities", survivalType)
+	}
+	path := typePath
+	//TODO what is searchType ???
+	exploreSearch, err := NewExploreSearch(accessToken, path, searchType, disableTLS)
+	if err != nil {
+		return
+	}
+	searchResults, err := exploreSearch.Execute()
+	if err != nil {
+		return
+	}
+	logrus.Debugf("survival type :%s  path:%s", survivalType, path)
+	if len(searchResults.Elements) == 0 {
+
+		err = errors.New("the element was not found")
+		return
+	}
+
+	for _, resultElm := range searchResults.Elements {
+		if resultElm.Name == survType {
+			typeCode = *resultElm.MedcoEncryption.ID
+			return
+		}
+	}
+	err = errors.New("element not found")
+	return
 }

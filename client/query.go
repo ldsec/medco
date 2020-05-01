@@ -196,10 +196,14 @@ func (clientQuery *ExploreQuery) generateModel() (queryModel *models.ExploreQuer
 		}
 
 		for _, encItem := range panel {
+			encrypted := new(bool)
+			*encrypted = true
+			queryTerm := new(string)
+			*queryTerm = encItem
 			panelModel.Items = append(panelModel.Items, &models.ExploreQueryPanelsItems0ItemsItems0{
-				Encrypted: &true,
+				Encrypted: encrypted,
 				Operator:  "exists",
-				QueryTerm: &encItem,
+				QueryTerm: queryTerm,
 				Value:     "",
 			})
 

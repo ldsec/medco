@@ -1,95 +1,79 @@
 package survivalserver
 
 import (
+	"errors"
 	"sort"
 	"time"
 
 	"github.com/ldsec/medco-connector/wrappers/unlynx"
-	"github.com/sirupsen/logrus"
 )
 
-type sortedMapElm struct {
-	key   string
-	value [2]string
-}
+func AKSgroups(queryID string, eventGroups EventGroups, targetPubKey string) (aksEventGroups EventGroups, time map[string]time.Duration, err error) {
 
-type sortedMap []*sortedMapElm
-
-func (sMap sortedMap) Less(i, j int) bool {
-	return sMap[i].key < sMap[j].key
-
-}
-
-func (sMap sortedMap) Swap(i, j int) {
-	sMap[i], sMap[j] = sMap[j], sMap[i]
-}
-
-func (sMap sortedMap) Len() int {
-	return len(sMap)
-}
-
-type sortedMapMapElm struct {
-	key   string
-	value sortedMap
-}
-
-type sortedMapMap []*sortedMapMapElm
-
-func (smapmap sortedMapMap) Less(i, j int) bool {
-	return smapmap[i].key < smapmap[j].key
-}
-
-func (smapmap sortedMapMap) Swap(i, j int) {
-	smapmap[i], smapmap[j] = smapmap[j], smapmap[i]
-}
-
-func (smapmap sortedMapMap) Len() int {
-	return len(smapmap)
-}
-
-func AKSgroups(queryID string, eventGroups map[string]map[string][2]string, targetPubKey string) (aggEventGroups map[string]map[string][2]string, time map[string]time.Duration, err error) {
-	nofEntries := 0
-	sortedEventGroups := sortedMapMap(make(sortedMapMap, 0))
-	for groupID, timePointToEvent := range eventGroups {
-		sortedEvents := sortedMap(make(sortedMap, 0))
-		for timePoint, events := range timePointToEvent {
-			sortedEvents = append(sortedEvents, &sortedMapElm{key: timePoint, value: events})
-			nofEntries += 2
-		}
-		sort.Sort(sortedEvents)
-		sortedEventGroups = append(sortedEventGroups, &sortedMapMapElm{key: groupID, value: sortedEvents})
-	}
-	sort.Sort(sortedEventGroups)
-
-	values := make([]string, 0)
-	for _, sortedEventGroup := range sortedEventGroups {
-		for _, value := range sortedEventGroup.value {
-			values = append(values, value.value[0])
-			values = append(values, value.value[1])
-		}
-
-	}
-	if len(values) != nofEntries {
-		logrus.Panic("something went wrong while flattening the associative arrays")
-	}
-	aggEventGroups = make(map[string]map[string][2]string)
-	var aggValues []string
-	aggValues, time, err = unlynx.AggregateAndKeySwitchValues(queryID, values, targetPubKey)
-	if err != nil {
+	if len(eventGroups) == 0 {
+		err = errors.New("no group")
 		return
 	}
 
+	var cumulativeLength int
+
+	//-------- deep copy and sorting by keys
+	aksEventGroups = EventGroups{}
+
+	for _, group := range eventGroups {
+		timePointResults := []*TimePointResult{}
+		for _, res := range group.TimePointResults {
+			cumulativeLength++
+			timePointResults = append(timePointResults, &TimePointResult{
+				TimePoint: res.TimePoint,
+				Result:    res.Result,
+			})
+		}
+		eventGroup := &EventGroup{GroupID: group.GroupID, TimePointResults: timePointResults}
+		sort.Sort(eventGroup)
+		aksEventGroups = append(aksEventGroups, eventGroup)
+	}
+
+	if cumulativeLength == 0 {
+		err = errors.New("all groups are empty")
+		return
+	}
+
+	sort.Sort(aksEventGroups)
+
+	// ---------  flattening
+	var flatInputs []string
+	for _, group := range aksEventGroups {
+		for _, timePoint := range group.TimePointResults {
+			flatInputs = append(flatInputs, timePoint.Result.EventValueAgg)
+			flatInputs = append(flatInputs, timePoint.Result.CensoringValueAgg)
+		}
+	}
+	//TODO already tested
+	if len(flatInputs) == 0 {
+		err = errors.New("no data to aggregate")
+		return
+	}
+
+	var flatOutputs []string
+	flatOutputs, time, err = unlynx.AggregateAndKeySwitchValues(queryID, flatInputs, targetPubKey)
+	if err != nil {
+		return
+	}
+	//logrus.Panicf("aasasdasfasfsafdafsafsa %d", len(flatOutputs))
+
 	position := 0
 
-	for _, sortedEventGroup := range sortedEventGroups {
-		aggEvents := make(map[string][2]string)
-		for _, value := range sortedEventGroup.value {
-			aggEvents[value.key] = [2]string{aggValues[position], aggValues[position+1]}
+	for _, aksEventGroup := range aksEventGroups {
+		for _, timePoint := range aksEventGroup.TimePointResults {
+
+			timePoint.Result.EventValueAgg = flatOutputs[position]
+			timePoint.Result.CensoringValueAgg = flatOutputs[position+1]
 			position += 2
 
 		}
-		aggEventGroups[sortedEventGroup.key] = aggEvents
 	}
+	//err = fmt.Errorf(" meeeeee %v mmmmmoooooo  %s maaaaaaaaaaa %s    ", aksEventGroups, aksEventGroups[0].GroupID, aksEventGroups[0].TimePointResults[0].TimePoint)
 
 	return
 
