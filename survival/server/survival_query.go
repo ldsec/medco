@@ -111,9 +111,8 @@ func (q *Query) Execute() (err error) {
 		var patientGroups [4][]PatientNum
 		var times map[string]time.Duration
 
-		//logrus.Panic("here")
 		barrierPtr.Wait()
-		//logrus.Panic("or there")
+
 		q.addTimer("time to get patient sets", timeToGetPatientSets)
 		select {
 		case err := <-errChan:
@@ -211,20 +210,15 @@ func (q *Query) Execute() (err error) {
 		//this could be with a call back or a new go routine, but this is the last step of the query
 		wholeAKStime := time.Now()
 		q.Result.EncEvents, times, err = AKSgroups(q.ID, q.Result.EncEvents, q.UserPublicKey)
-		//err = errors.New(err.Error() + fmt.Sprintf("    muuuuuuuuu   %v", q.Result.EncEvents[0]))
 
 		if err != nil {
-			//logrus.Panic("maybe it is an error ?")
 			innerErrChan <- err
 			return
 		}
 		q.addTimer("time for the whole AKS", wholeAKStime)
 		q.addTimers(times)
-		//logrus.Panic("even further")
 		return
 	})
-
-	//logrus.Panicf("@@@@@@@@ :3 %v", q.Result.EncEvents[0])
 
 	select {
 	case err = <-errorChan:

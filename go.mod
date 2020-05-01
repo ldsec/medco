@@ -13,8 +13,8 @@ require (
 	github.com/go-openapi/swag v0.19.7
 	github.com/go-openapi/validate v0.19.6
 	github.com/jessevdk/go-flags v1.4.0
-	github.com/ldsec/medco-loader v0.3.1
-	github.com/ldsec/medco-unlynx v0.3.1
+	github.com/ldsec/medco-loader v1.0.0
+	github.com/ldsec/medco-unlynx v1.0.0
 	github.com/ldsec/unlynx v1.4.1
 	github.com/lestrrat-go/jwx v0.9.0
 	github.com/lib/pq v1.3.0
