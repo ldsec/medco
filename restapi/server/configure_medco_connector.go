@@ -68,7 +68,7 @@ func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
 	})
 
 	// /medco/node/status
-	api.MedcoNodeGetStatusHandler = medco_node.GetStatusHandlerFunc(handlers.MedCoNodeGetStatusHandler)
+	api.MedcoNodeGetNodeStatusHandler = medco_node.GetNodeStatusHandlerFunc(handlers.MedCoGetNodeStatusHandler)
 
 	// /medco/genomic-annotations/{annotation}
 	api.GenomicAnnotationsGetValuesHandler = genomic_annotations.GetValuesHandlerFunc(handlers.MedCoGenomicAnnotationsGetValuesHandler)

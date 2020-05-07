@@ -1,4 +1,4 @@
-package status
+package node
 
 import (
 	"github.com/ldsec/medco-connector/server/genomicannotations"
@@ -6,22 +6,22 @@ import (
 	"github.com/ldsec/medco-connector/wrappers/unlynx"
 )
 
-// CheckStatus checks the status of the MedCo system
+// CheckStatus checks the status of the MedCo node
 func CheckStatus() (message string, status bool) {
 
 	okI2b2 := checkI2b2()
 	if !okI2b2 {
-		message += ":i2b2 error:"
+		message += "{i2b2 error} "
 	}
 
 	okUnlynx := checkUnlynx()
 	if !okUnlynx {
-		message += ":Unlynx error:"
+		message += "{Unlynx error} "
 	}
 
 	okGenomicAnnotations := checkGenomicAnnotations()
 	if !okGenomicAnnotations {
-		message += ":Genomic annotations error:"
+		message += "{Genomic annotations error}"
 	}
 
 	return message, okI2b2 && okUnlynx && okGenomicAnnotations

@@ -4,7 +4,7 @@ import (
 	"crypto/tls"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/ldsec/medco-connector/restapi/client"
-	"github.com/ldsec/medco-connector/restapi/client/medco_node"
+	"github.com/ldsec/medco-connector/restapi/client/medco_network"
 	utilclient "github.com/ldsec/medco-connector/util/client"
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -12,8 +12,8 @@ import (
 	"time"
 )
 
-// GetStatus is a MedCo client get-status request
-type GetStatus struct {
+// GetNetwork is a GET request to the /medco/network endpoint
+type GetNetwork struct {
 
 	// httpMedCoClient is the HTTP client for the MedCo connector
 	httpMedCoClient *client.MedcoCli
@@ -21,10 +21,10 @@ type GetStatus struct {
 	authToken string
 }
 
-// NewGetStatus creates a new MedCo client get-status request
-func NewGetStatus(authToken string, disableTLSCheck bool) (q *GetStatus, err error) {
+// NewGetNetwork creates a new GetNetwork request
+func NewGetNetwork(authToken string, disableTLSCheck bool) (q *GetNetwork, err error) {
 
-	q = &GetStatus{
+	q = &GetNetwork{
 		authToken: authToken,
 	}
 
@@ -40,24 +40,25 @@ func NewGetStatus(authToken string, disableTLSCheck bool) (q *GetStatus, err err
 	q.httpMedCoClient = client.New(transport, nil)
 
 	return
+
 }
 
-// Execute executes the MedCo client get-status request
-func (clientGetStatus *GetStatus) Execute() (result *medco_node.GetStatusOKBody, err error) {
+// Execute executes the GetNetwork request
+func (clientGetNetwork *GetNetwork) Execute() (result *medco_network.GetMetadataOKBody, err error) {
 
-	result, err = clientGetStatus.submitToNode()
+	result, err = clientGetNetwork.submitToNode()
 	return
 
 }
 
-func (clientGetStatus *GetStatus) submitToNode() (result *medco_node.GetStatusOKBody, err error) {
+func (clientGetNetwork *GetNetwork) submitToNode() (result *medco_network.GetMetadataOKBody, err error) {
 
-	params := medco_node.NewGetStatusParamsWithTimeout(time.Duration(utilclient.GetStatusTimeoutSeconds) * time.Second)
+	params := medco_network.NewGetMetadataParamsWithTimeout(time.Duration(utilclient.GetNetworkTimeoutSeconds) * time.Second)
 
-	response, err := clientGetStatus.httpMedCoClient.MedcoNode.GetStatus(params, httptransport.BearerToken(clientGetStatus.authToken))
+	response, err := clientGetNetwork.httpMedCoClient.MedcoNetwork.GetMetadata(params, httptransport.BearerToken(clientGetNetwork.authToken))
 
 	if err != nil {
-		logrus.Error("Get status error: ", err)
+		logrus.Error("Get network error: ", err)
 		return nil, err
 	}
 

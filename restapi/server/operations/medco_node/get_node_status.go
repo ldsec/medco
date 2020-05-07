@@ -15,40 +15,40 @@ import (
 	models "github.com/ldsec/medco-connector/restapi/models"
 )
 
-// GetStatusHandlerFunc turns a function with the right signature into a get status handler
-type GetStatusHandlerFunc func(GetStatusParams, *models.User) middleware.Responder
+// GetNodeStatusHandlerFunc turns a function with the right signature into a get node status handler
+type GetNodeStatusHandlerFunc func(GetNodeStatusParams, *models.User) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn GetStatusHandlerFunc) Handle(params GetStatusParams, principal *models.User) middleware.Responder {
+func (fn GetNodeStatusHandlerFunc) Handle(params GetNodeStatusParams, principal *models.User) middleware.Responder {
 	return fn(params, principal)
 }
 
-// GetStatusHandler interface for that can handle valid get status params
-type GetStatusHandler interface {
-	Handle(GetStatusParams, *models.User) middleware.Responder
+// GetNodeStatusHandler interface for that can handle valid get node status params
+type GetNodeStatusHandler interface {
+	Handle(GetNodeStatusParams, *models.User) middleware.Responder
 }
 
-// NewGetStatus creates a new http.Handler for the get status operation
-func NewGetStatus(ctx *middleware.Context, handler GetStatusHandler) *GetStatus {
-	return &GetStatus{Context: ctx, Handler: handler}
+// NewGetNodeStatus creates a new http.Handler for the get node status operation
+func NewGetNodeStatus(ctx *middleware.Context, handler GetNodeStatusHandler) *GetNodeStatus {
+	return &GetNodeStatus{Context: ctx, Handler: handler}
 }
 
-/*GetStatus swagger:route GET /node/status medco-node getStatus
+/*GetNodeStatus swagger:route GET /node/status medco-node getNodeStatus
 
 Get info about node status.
 
 */
-type GetStatus struct {
+type GetNodeStatus struct {
 	Context *middleware.Context
-	Handler GetStatusHandler
+	Handler GetNodeStatusHandler
 }
 
-func (o *GetStatus) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+func (o *GetNodeStatus) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	route, rCtx, _ := o.Context.RouteInfo(r)
 	if rCtx != nil {
 		r = rCtx
 	}
-	var Params = NewGetStatusParams()
+	var Params = NewGetNodeStatusParams()
 
 	uprinc, aCtx, err := o.Context.Authorize(r, route)
 	if err != nil {
@@ -74,21 +74,21 @@ func (o *GetStatus) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 }
 
-// GetStatusDefaultBody get status default body
-// swagger:model GetStatusDefaultBody
-type GetStatusDefaultBody struct {
+// GetNodeStatusDefaultBody get node status default body
+// swagger:model GetNodeStatusDefaultBody
+type GetNodeStatusDefaultBody struct {
 
 	// message
 	Message string `json:"message,omitempty"`
 }
 
-// Validate validates this get status default body
-func (o *GetStatusDefaultBody) Validate(formats strfmt.Registry) error {
+// Validate validates this get node status default body
+func (o *GetNodeStatusDefaultBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (o *GetStatusDefaultBody) MarshalBinary() ([]byte, error) {
+func (o *GetNodeStatusDefaultBody) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -96,8 +96,8 @@ func (o *GetStatusDefaultBody) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *GetStatusDefaultBody) UnmarshalBinary(b []byte) error {
-	var res GetStatusDefaultBody
+func (o *GetNodeStatusDefaultBody) UnmarshalBinary(b []byte) error {
+	var res GetNodeStatusDefaultBody
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -105,9 +105,9 @@ func (o *GetStatusDefaultBody) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-// GetStatusOKBody get status o k body
-// swagger:model GetStatusOKBody
-type GetStatusOKBody struct {
+// GetNodeStatusOKBody get node status o k body
+// swagger:model GetNodeStatusOKBody
+type GetNodeStatusOKBody struct {
 
 	// message
 	Message string `json:"message,omitempty"`
@@ -116,13 +116,13 @@ type GetStatusOKBody struct {
 	StatusOK bool `json:"statusOK,omitempty"`
 }
 
-// Validate validates this get status o k body
-func (o *GetStatusOKBody) Validate(formats strfmt.Registry) error {
+// Validate validates this get node status o k body
+func (o *GetNodeStatusOKBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (o *GetStatusOKBody) MarshalBinary() ([]byte, error) {
+func (o *GetNodeStatusOKBody) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -130,8 +130,8 @@ func (o *GetStatusOKBody) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *GetStatusOKBody) UnmarshalBinary(b []byte) error {
-	var res GetStatusOKBody
+func (o *GetNodeStatusOKBody) UnmarshalBinary(b []byte) error {
+	var res GetNodeStatusOKBody
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

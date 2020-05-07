@@ -25,7 +25,7 @@ var keySwitchParameters = []testKeySwitchValueParameters{
 	},
 }
 
-// TestUnlynx runs the genomic-annotations tests.
+// TestUnlynx runs the unlynx tests.
 func TestUnlynx() (testPassed bool) {
 
 	for _, testParams := range keySwitchParameters {

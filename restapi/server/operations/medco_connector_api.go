@@ -55,8 +55,8 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 		MedcoNetworkGetMetadataHandler: medco_network.GetMetadataHandlerFunc(func(params medco_network.GetMetadataParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation MedcoNetworkGetMetadata has not yet been implemented")
 		}),
-		MedcoNodeGetStatusHandler: medco_node.GetStatusHandlerFunc(func(params medco_node.GetStatusParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation MedcoNodeGetStatus has not yet been implemented")
+		MedcoNodeGetNodeStatusHandler: medco_node.GetNodeStatusHandlerFunc(func(params medco_node.GetNodeStatusParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation MedcoNodeGetNodeStatus has not yet been implemented")
 		}),
 		GenomicAnnotationsGetValuesHandler: genomic_annotations.GetValuesHandlerFunc(func(params genomic_annotations.GetValuesParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation GenomicAnnotationsGetValues has not yet been implemented")
@@ -117,8 +117,8 @@ type MedcoConnectorAPI struct {
 	MedcoNodeGetExploreQueryHandler medco_node.GetExploreQueryHandler
 	// MedcoNetworkGetMetadataHandler sets the operation handler for the get metadata operation
 	MedcoNetworkGetMetadataHandler medco_network.GetMetadataHandler
-	// MedcoNodeGetStatusHandler sets the operation handler for the get status operation
-	MedcoNodeGetStatusHandler medco_node.GetStatusHandler
+	// MedcoNodeGetNodeStatusHandler sets the operation handler for the get node status operation
+	MedcoNodeGetNodeStatusHandler medco_node.GetNodeStatusHandler
 	// GenomicAnnotationsGetValuesHandler sets the operation handler for the get values operation
 	GenomicAnnotationsGetValuesHandler genomic_annotations.GetValuesHandler
 	// GenomicAnnotationsGetVariantsHandler sets the operation handler for the get variants operation
@@ -206,8 +206,8 @@ func (o *MedcoConnectorAPI) Validate() error {
 		unregistered = append(unregistered, "medco_network.GetMetadataHandler")
 	}
 
-	if o.MedcoNodeGetStatusHandler == nil {
-		unregistered = append(unregistered, "medco_node.GetStatusHandler")
+	if o.MedcoNodeGetNodeStatusHandler == nil {
+		unregistered = append(unregistered, "medco_node.GetNodeStatusHandler")
 	}
 
 	if o.GenomicAnnotationsGetValuesHandler == nil {
@@ -351,7 +351,7 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/node/status"] = medco_node.NewGetStatus(o.context, o.MedcoNodeGetStatusHandler)
+	o.handlers["GET"]["/node/status"] = medco_node.NewGetNodeStatus(o.context, o.MedcoNodeGetNodeStatusHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)

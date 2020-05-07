@@ -108,7 +108,7 @@ paths:
       tags:
         - "medco-node"
       summary: "Get info about node status."
-      operationId: "getStatus"
+      operationId: "getNodeStatus"
       responses:
         200:
           $ref: "#/responses/statusResponse"

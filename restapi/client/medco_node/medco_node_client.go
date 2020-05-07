@@ -127,23 +127,23 @@ func (a *Client) GetExploreQuery(params *GetExploreQueryParams, authInfo runtime
 }
 
 /*
-GetStatus gets info about node status
+GetNodeStatus gets info about node status
 */
-func (a *Client) GetStatus(params *GetStatusParams, authInfo runtime.ClientAuthInfoWriter) (*GetStatusOK, error) {
+func (a *Client) GetNodeStatus(params *GetNodeStatusParams, authInfo runtime.ClientAuthInfoWriter) (*GetNodeStatusOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetStatusParams()
+		params = NewGetNodeStatusParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getStatus",
+		ID:                 "getNodeStatus",
 		Method:             "GET",
 		PathPattern:        "/node/status",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &GetStatusReader{formats: a.formats},
+		Reader:             &GetNodeStatusReader{formats: a.formats},
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
@@ -151,12 +151,12 @@ func (a *Client) GetStatus(params *GetStatusParams, authInfo runtime.ClientAuthI
 	if err != nil {
 		return nil, err
 	}
-	success, ok := result.(*GetStatusOK)
+	success, ok := result.(*GetNodeStatusOK)
 	if ok {
 		return success, nil
 	}
 	// unexpected success response
-	unexpectedSuccess := result.(*GetStatusDefault)
+	unexpectedSuccess := result.(*GetNodeStatusDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 

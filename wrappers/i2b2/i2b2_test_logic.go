@@ -24,6 +24,7 @@ var i2b2QueryParameters = []testI2b2QueryParameters{
 	},
 }
 
+// TestI2b2 runs the i2b2 tests.
 func TestI2b2() (testPassed bool) {
 
 	for _, testParams := range i2b2QueryParameters {

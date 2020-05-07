@@ -12,18 +12,18 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 )
 
-// NewGetStatusParams creates a new GetStatusParams object
+// NewGetNodeStatusParams creates a new GetNodeStatusParams object
 // no default values defined in spec.
-func NewGetStatusParams() GetStatusParams {
+func NewGetNodeStatusParams() GetNodeStatusParams {
 
-	return GetStatusParams{}
+	return GetNodeStatusParams{}
 }
 
-// GetStatusParams contains all the bound params for the get status operation
+// GetNodeStatusParams contains all the bound params for the get node status operation
 // typically these are obtained from a http.Request
 //
-// swagger:parameters getStatus
-type GetStatusParams struct {
+// swagger:parameters getNodeStatus
+type GetNodeStatusParams struct {
 
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
@@ -32,8 +32,8 @@ type GetStatusParams struct {
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
 // for simple values it will use straight method calls.
 //
-// To ensure default values, the struct must have been initialized with NewGetStatusParams() beforehand.
-func (o *GetStatusParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
+// To ensure default values, the struct must have been initialized with NewGetNodeStatusParams() beforehand.
+func (o *GetNodeStatusParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
 
 	o.HTTPRequest = r

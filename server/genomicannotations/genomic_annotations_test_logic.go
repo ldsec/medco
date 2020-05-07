@@ -136,6 +136,12 @@ var getVariantsParams = []testGetVariantsParameters{
 // TestGenomicAnnotations runs the genomic-annotations tests.
 func TestGenomicAnnotations() (testPassed bool) {
 
+	err := utilserver.GaDBConnection.Ping()
+	if err != nil {
+		logrus.Error("Impossible to connect to genomic annotations DB: " + err.Error())
+		return false
+	}
+
 	for _, testParams := range getValuesParams {
 		if !testGetValues(testParams) {
 			log := "test failed: "
@@ -185,10 +191,6 @@ func testDBConnection() (testPassed bool) {
 
 func testGetValues(testParams testGetValuesParameters) (testPassed bool) {
 
-	if !testDBConnection() {
-		return false
-	}
-
 	var annotations []string
 	var annotation string
 	params := genomic_annotations.NewGetValuesParams()
@@ -225,10 +227,6 @@ func testGetValues(testParams testGetValuesParameters) (testPassed bool) {
 }
 
 func testGetVariants(testParams testGetVariantsParameters) (testPassed bool) {
-
-	if !testDBConnection() {
-		return false
-	}
 
 	var variants []string
 	var variant string

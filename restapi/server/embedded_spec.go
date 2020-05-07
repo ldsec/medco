@@ -310,7 +310,7 @@ func init() {
           "medco-node"
         ],
         "summary": "Get info about node status.",
-        "operationId": "getStatus",
+        "operationId": "getNodeStatus",
         "responses": {
           "200": {
             "$ref": "#/responses/statusResponse"
@@ -674,7 +674,7 @@ func init() {
       }
     },
     "statusResponse": {
-      "description": "Node status response.",
+      "description": "Node/Network status response.",
       "schema": {
         "type": "object",
         "properties": {
@@ -1160,10 +1160,10 @@ func init() {
           "medco-node"
         ],
         "summary": "Get info about node status.",
-        "operationId": "getStatus",
+        "operationId": "getNodeStatus",
         "responses": {
           "200": {
-            "description": "Node status response.",
+            "description": "Node/Network status response.",
             "schema": {
               "type": "object",
               "properties": {
@@ -1546,7 +1546,7 @@ func init() {
       }
     },
     "statusResponse": {
-      "description": "Node status response.",
+      "description": "Node/Network status response.",
       "schema": {
         "type": "object",
         "properties": {

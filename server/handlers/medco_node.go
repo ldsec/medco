@@ -5,7 +5,7 @@ import (
 	"github.com/ldsec/medco-connector/restapi/models"
 	"github.com/ldsec/medco-connector/restapi/server/operations/medco_node"
 	"github.com/ldsec/medco-connector/server"
-	"github.com/ldsec/medco-connector/server/status"
+	"github.com/ldsec/medco-connector/server/node"
 	"github.com/ldsec/medco-connector/util/server"
 	"github.com/ldsec/medco-connector/wrappers/i2b2"
 	"time"
@@ -83,12 +83,12 @@ func MedCoNodeExploreQueryHandler(params medco_node.ExploreQueryParams, principa
 		}})
 }
 
-// MedCoNodeGetStatusHandler handles /medco/node/status API endpoint
-func MedCoNodeGetStatusHandler(params medco_node.GetStatusParams, principal *models.User) middleware.Responder {
+// MedCoGetNodeStatusHandler handles /medco/node/status API endpoint
+func MedCoGetNodeStatusHandler(params medco_node.GetNodeStatusParams, principal *models.User) middleware.Responder {
 
-	message, status := status.CheckStatus()
+	message, status := node.CheckStatus()
 
-	return medco_node.NewGetStatusOK().WithPayload(&medco_node.GetStatusOKBody{
+	return medco_node.NewGetNodeStatusOK().WithPayload(&medco_node.GetNodeStatusOKBody{
 		Message:  message,
 		StatusOK: status,
 	})

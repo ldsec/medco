@@ -87,6 +87,24 @@ func main() {
 		},
 	}
 
+	//---  network-info command flags
+	networkInfoFlags := []cli.Flag{
+		cli.StringFlag{
+			Name:  "output, o",
+			Usage: "Output file",
+			Value: "",
+		},
+	}
+
+	//---  network-status command flags
+	networkStatusFlags := []cli.Flag{
+		cli.StringFlag{
+			Name:  "output, o",
+			Usage: "Output file",
+			Value: "",
+		},
+	}
+
 	// --- app commands
 	cliApp.Commands = []cli.Command{
 		//{
@@ -167,7 +185,43 @@ func main() {
 			ArgsUsage:   "[--output path/to/output/file]",
 			Description: "If the output file is omitted, the output is redirected to the stdout.",
 			Action: func(c *cli.Context) error {
-				return medcoclient.ExecuteClientGetStatus(
+				return medcoclient.ExecuteClientGetNodeStatus(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.String("output"),
+					c.GlobalBool("disableTLSCheck"),
+				)
+			},
+		},
+
+		{
+			Name:        "network-info",
+			Aliases:     []string{"net-info"},
+			Usage:       "Get network info metadata",
+			Flags:       networkInfoFlags,
+			ArgsUsage:   "[--output path/to/output/file]",
+			Description: "If the output file is omitted, the output is redirected to the stdout.",
+			Action: func(c *cli.Context) error {
+				return medcoclient.ExecuteClientGetNetwork(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.String("output"),
+					c.GlobalBool("disableTLSCheck"),
+				)
+			},
+		},
+
+		{
+			Name:        "network-status",
+			Aliases:     []string{"net-stat"},
+			Usage:       "Get network status",
+			Flags:       networkStatusFlags,
+			ArgsUsage:   "[--output path/to/output/file]",
+			Description: "If the output file is omitted, the output is redirected to the stdout.",
+			Action: func(c *cli.Context) error {
+				return medcoclient.ExecuteClientGetNetworkStatus(
 					c.GlobalString("token"),
 					c.GlobalString("user"),
 					c.GlobalString("password"),
