@@ -260,6 +260,128 @@ paths:
       security:
         - medco-jwt: ["medco-survival-analysis"]
 
+  /cohorts/retrieval:
+    post:
+      tags:
+        - "cohortsRetrieval"
+      summary: "Retrieve cohort names and patient set IDs"
+      operationId: "postCohortsRetrieval"
+      parameters:
+        - in: "body"
+          description: "User Public key"
+          name: "body"
+          schema:
+            type: "object"
+            properties:
+              userPublicKey: 
+                $ref: "#/definitions/exploreQuery/properties/userPublicKey"
+      
+      responses:
+        200:
+          description: "Queried cohorts"
+          schema:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                cohortName:
+                  type: "string"
+                patientSetID:
+                  type: "string"
+                creationDate:
+                  type: "number"
+                updateDate:
+                  type: "number"
+        403:
+          description: "Not authorized"
+        default:
+          $ref: '#/responses/errorResponse'
+        404:
+          description: "User not found"
+        default:
+          $ref: '#/responses/errorResponse'
+  /cohorts/update:
+    post:
+      tags:
+        - "cohortsUpdate"
+      summary: "Update cohorts list with a new or modified cohort"
+      operationId: "postCohortsUpdate"
+      parameters:
+        - in: "body"
+          description: "User Public key"
+          name: "body"
+          schema:
+            type: "object"
+            properties:
+              cohort:
+                type: "object"
+                properties:
+                  cohortName:
+                    type: "string"
+                  patientSetID:
+                    type: "string"
+                  creationDate:
+                    type: "number"
+                  updateDate:
+                    type: "number"
+              userPublicKey: #for most obscure reason, it is impossible to use reference as it has been used so far and after, throws an error here
+                type: "string"
+                pattern: '^[\w=-]+$'
+       
+      responses:
+        200:
+          description: "Updated cohorts"
+          schema:
+            type: "string"
+        403:
+          description: "Not authorized"
+        default:
+          $ref: '#/responses/errorResponse'
+        404:
+          description: "User not found"
+        default:
+          $ref: '#/responses/errorResponse'
+        500:
+          description: "DB has been updated since last importation"
+        default:
+          $ref: '#/responses/errorResponse'
+  /cohorts/restoration:
+    post:
+      tags:
+        - "cohortsRestoration"
+      summary: "Returns the selection pannel of the cohorts"
+      operationId: "postCohortsRestoration"
+      parameters:
+        - in: "body"
+          description: "User Public key"
+          name: "body"
+          schema:
+            type: "object"
+            properties:
+              userPublicKey: 
+                $ref: "#/definitions/exploreQuery/properties/userPublicKey"
+              cohortName:
+                type: "string"
+              cohortUpdateDate:
+                type: "number"
+      responses:
+        200:
+          description: "Restored panels"
+          schema:
+            $ref: "#/definitions/exploreQuery/properties/panels"
+        403:
+          description: "Not authorized"
+        default:
+          $ref: '#/responses/errorResponse'
+        404:
+          description: "User and/or cohort not found"
+        default:
+          $ref: '#/responses/errorResponse'
+        500:
+          description: "DB has been updated since last importation"
+        default:
+          $ref: '#/responses/errorResponse'
+                   
 
 
 securityDefinitions:
