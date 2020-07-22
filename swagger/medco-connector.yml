@@ -207,17 +207,45 @@ paths:
             ID:
               type: "string"
             userPublicKey:
-              $ref: "#/definitions/exploreQuery/properties/userPublicKey"
-            patientSetID:
               type: "string"
-            patientGroupIDs:
-              type: "array"
+              pattern: '^[\w=-]+$'
+            setID:
+              type: "number"
+            subGroupDefinitions:
+              type : "array"
               items:
-                type: "string"
-            timeCodes:
-              type: "array"
-              items:
-                type: "string"
+                type: "object"
+                properties:
+                  cohortName:
+                    type: 'string'
+                  panels:
+                    type: "array"
+                    items:
+                      $ref: '#/definitions/panel'
+              maxItems: 4
+            timeLimit:
+              type: "number"
+            timeGranularity:
+              type: "string"
+              enum:
+                - day
+                - week
+                - month
+                - year
+            startConcept:
+              type: "string"
+            startColumn:
+              type: "string"
+              enum:
+                - "start_date"
+                - "end_date"
+            endConcept:
+              type: "string"
+            endColumn:
+              type: "string"
+              enum:
+                - "start_date"
+                - "end_date"
           
 
 
@@ -261,21 +289,11 @@ paths:
         - medco-jwt: ["medco-survival-analysis"]
 
   /cohorts/retrieval:
-    post:
+    get:
       tags:
         - "cohortsRetrieval"
       summary: "Retrieve cohort names and patient set IDs"
       operationId: "postCohortsRetrieval"
-      parameters:
-        - in: "body"
-          description: "User Public key"
-          name: "body"
-          schema:
-            type: "object"
-            properties:
-              userPublicKey: 
-                $ref: "#/definitions/exploreQuery/properties/userPublicKey"
-      
       responses:
         200:
           description: "Queried cohorts"
@@ -287,7 +305,7 @@ paths:
                 cohortName:
                   type: "string"
                 patientSetID:
-                  type: "string"
+                  type: "number"
                 creationDate:
                   type: "number"
                 updateDate:
@@ -308,7 +326,7 @@ paths:
       operationId: "postCohortsUpdate"
       parameters:
         - in: "body"
-          description: "User Public key"
+          description: "Cohort that has been updated or created"
           name: "body"
           schema:
             type: "object"
@@ -319,14 +337,11 @@ paths:
                   cohortName:
                     type: "string"
                   patientSetID:
-                    type: "string"
+                    type: "number"
                   creationDate:
                     type: "number"
                   updateDate:
                     type: "number"
-              userPublicKey: #for most obscure reason, it is impossible to use reference as it has been used so far and after, throws an error here
-                type: "string"
-                pattern: '^[\w=-]+$'
        
       responses:
         200:
@@ -339,42 +354,6 @@ paths:
           $ref: '#/responses/errorResponse'
         404:
           description: "User not found"
-        default:
-          $ref: '#/responses/errorResponse'
-        500:
-          description: "DB has been updated since last importation"
-        default:
-          $ref: '#/responses/errorResponse'
-  /cohorts/restoration:
-    post:
-      tags:
-        - "cohortsRestoration"
-      summary: "Returns the selection pannel of the cohorts"
-      operationId: "postCohortsRestoration"
-      parameters:
-        - in: "body"
-          description: "User Public key"
-          name: "body"
-          schema:
-            type: "object"
-            properties:
-              userPublicKey: 
-                $ref: "#/definitions/exploreQuery/properties/userPublicKey"
-              cohortName:
-                type: "string"
-              cohortUpdateDate:
-                type: "number"
-      responses:
-        200:
-          description: "Restored panels"
-          schema:
-            $ref: "#/definitions/exploreQuery/properties/panels"
-        403:
-          description: "Not authorized"
-        default:
-          $ref: '#/responses/errorResponse'
-        404:
-          description: "User and/or cohort not found"
         default:
           $ref: '#/responses/errorResponse'
         500:
@@ -546,32 +525,34 @@ definitions:
         type: "array"
         description: "i2b2 panels (linked by an AND)"
         items:
+          $ref: "#/definitions/panel"
+  panel:
+    type: "object"
+    required: [not]
+    properties:
+      not:
+        type: "boolean"
+        description: "exclude the i2b2 panel"
+      items:
+        type: "array"
+        description: "i2b2 items (linked by an OR)"
+        items:
           type: "object"
-          required: [not]
+          required: [encrypted, queryTerm]
           properties:
-            not:
+            queryTerm:
+              type: "string"
+              pattern: '^([\w=-]+)$|^((\/[^\/]+)+\/?)$'
+            operator:
+              type: "string"
+              enum:
+                - exists
+                - equals
+            value:
+              type: "string"
+              maxLength: 0
+            encrypted:
               type: "boolean"
-              description: "exclude the i2b2 panel"
-            items:
-              type: "array"
-              description: "i2b2 items (linked by an OR)"
-              items:
-                type: "object"
-                required: [encrypted, queryTerm]
-                properties:
-                  queryTerm:
-                    type: "string"
-                    pattern: '^([\w=-]+)$|^((\/[^\/]+)+\/?)$'
-                  operator:
-                    type: "string"
-                    enum:
-                      - exists
-                      - equals
-                  value:
-                    type: "string"
-                    maxLength: 0
-                  encrypted:
-                    type: "boolean"
 
   exploreQueryType:
     type: "string"
@@ -583,7 +564,6 @@ definitions:
       - count_per_site_shuffled_obfuscated
       - count_global
       - count_global_obfuscated
-      - patient_set
 
   exploreQueryResultElement:
     type: "object"
@@ -595,14 +575,14 @@ definitions:
           - pending
           - error
           - available
-      patientSetID:
-        type: "string"
       encryptedCount:
         type: "string"
       encryptedPatientList:
         type: "array"
         items:
           type: "string"
+      patientSetID:
+        type: "number"
       timers:
         type: "array"
         items:
