@@ -9,12 +9,13 @@ import (
 	"encoding/json"
 
 	"github.com/go-openapi/errors"
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 )
 
 // ExploreSearchResultElement explore search result element
+//
 // swagger:model exploreSearchResultElement
 type ExploreSearchResultElement struct {
 
@@ -129,7 +130,7 @@ const (
 
 // prop value enum
 func (m *ExploreSearchResultElement) validateTypeEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, exploreSearchResultElementTypeTypePropEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, exploreSearchResultElementTypeTypePropEnum, true); err != nil {
 		return err
 	}
 	return nil
@@ -168,6 +169,7 @@ func (m *ExploreSearchResultElement) UnmarshalBinary(b []byte) error {
 }
 
 // ExploreSearchResultElementMedcoEncryption explore search result element medco encryption
+//
 // swagger:model ExploreSearchResultElementMedcoEncryption
 type ExploreSearchResultElementMedcoEncryption struct {
 

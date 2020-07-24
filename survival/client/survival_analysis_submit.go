@@ -17,17 +17,18 @@ import (
 func (clientSurvivalAnalysis *SurvivalAnalysis) submitToNode(nodeIdx int) (results *survival_analysis.GetSurvivalAnalysisOKBody, err error) {
 	//magicNumber
 	params := survival_analysis.NewGetSurvivalAnalysisParamsWithTimeout(time.Duration(utilclient.QueryTimeoutSeconds) * time.Second)
-	patientSetID := clientSurvivalAnalysis.patientSetID
-	logrus.Debugf("submitting %v", clientSurvivalAnalysis.patientGroupIDs)
+
 	body := &survival_analysis.GetSurvivalAnalysisBody{
-		ID:              clientSurvivalAnalysis.id,
-		TimeCodes:       clientSurvivalAnalysis.timeCodes,
-		PatientSetID:    patientSetID,
-		PatientGroupIDs: clientSurvivalAnalysis.patientGroupIDs,
-		UserPublicKey:   clientSurvivalAnalysis.userPublicKey,
+		ID:                  clientSurvivalAnalysis.id,
+		UserPublicKey:       clientSurvivalAnalysis.userPublicKey,
+		SetID:               float64(clientSurvivalAnalysis.patientSetID),
+		SubGroupDefinitions: clientSurvivalAnalysis.subGroupDefinitions,
+		StartConcept:        clientSurvivalAnalysis.startConcept,
+		StartColumn:         clientSurvivalAnalysis.startColumn,
+		EndConcept:          clientSurvivalAnalysis.endConcept,
+		EndColumn:           clientSurvivalAnalysis.endColumn,
 	}
 	params.SetBody(*body)
-	logrus.Debugf("submit %v", params.Body.PatientGroupIDs)
 	response, err := clientSurvivalAnalysis.httpMedCoClients[nodeIdx].SurvivalAnalysis.GetSurvivalAnalysis(params, httptransport.BearerToken(clientSurvivalAnalysis.authToken))
 
 	if err != nil {

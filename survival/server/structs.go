@@ -99,6 +99,7 @@ type TimePointResult struct {
 
 type EventGroup struct {
 	GroupID          string
+	EncInitialCount  string
 	TimePointResults []*TimePointResult
 }
 type EventGroups []*EventGroup

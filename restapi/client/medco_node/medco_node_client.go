@@ -29,7 +29,11 @@ type ClientService interface {
 
 	ExploreSearch(params *ExploreSearchParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreSearchOK, error)
 
+	GetCohorts(params *GetCohortsParams, authInfo runtime.ClientAuthInfoWriter) (*GetCohortsOK, error)
+
 	GetExploreQuery(params *GetExploreQueryParams, authInfo runtime.ClientAuthInfoWriter) (*GetExploreQueryOK, error)
+
+	PostCohorts(params *PostCohortsParams, authInfo runtime.ClientAuthInfoWriter) (*PostCohortsOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -103,6 +107,40 @@ func (a *Client) ExploreSearch(params *ExploreSearchParams, authInfo runtime.Cli
 }
 
 /*
+  GetCohorts retrieves cohort names and patient set i ds
+*/
+func (a *Client) GetCohorts(params *GetCohortsParams, authInfo runtime.ClientAuthInfoWriter) (*GetCohortsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetCohortsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getCohorts",
+		Method:             "GET",
+		PathPattern:        "/node/explore/cohorts",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &GetCohortsReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetCohortsOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*GetCohortsDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
   GetExploreQuery gets status and result of a med co explore query
 */
 func (a *Client) GetExploreQuery(params *GetExploreQueryParams, authInfo runtime.ClientAuthInfoWriter) (*GetExploreQueryOK, error) {
@@ -133,6 +171,40 @@ func (a *Client) GetExploreQuery(params *GetExploreQueryParams, authInfo runtime
 	}
 	// unexpected success response
 	unexpectedSuccess := result.(*GetExploreQueryDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+  PostCohorts updates cohorts list with a new or modified cohort
+*/
+func (a *Client) PostCohorts(params *PostCohortsParams, authInfo runtime.ClientAuthInfoWriter) (*PostCohortsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPostCohortsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "postCohorts",
+		Method:             "POST",
+		PathPattern:        "/node/explore/cohorts",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &PostCohortsReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*PostCohortsOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*PostCohortsDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 

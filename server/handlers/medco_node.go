@@ -3,6 +3,8 @@ package handlers
 import (
 	"time"
 
+	cohortsserver "github.com/ldsec/medco-connector/cohorts/server"
+
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/ldsec/medco-connector/restapi/models"
 	"github.com/ldsec/medco-connector/restapi/server/operations/medco_node"
@@ -78,8 +80,46 @@ func MedCoNodeExploreQueryHandler(params medco_node.ExploreQueryParams, principa
 		Result: &models.ExploreQueryResultElement{
 			EncryptedCount:       query.Result.EncCount,
 			EncryptedPatientList: query.Result.EncPatientList,
-			PatientSetID:         query.Result.PatientSetID,
+			PatientSetID:         float64(query.Result.PatientSetID),
 			Timers:               timers,
 			Status:               models.ExploreQueryResultElementStatusAvailable,
 		}})
+}
+
+// MedCoNodeExploreQueryHandler handles /medco/node/explore/query API endpoint
+func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *models.User) middleware.Responder {
+	userID := principal.ID
+	cohorts, err := cohortsserver.GetCohorts(userID)
+	if err != nil {
+		medco_node.NewGetCohortsDefault(500).WithPayload(&medco_node.GetCohortsDefaultBody{
+			Message: err.Error(),
+		})
+	}
+	payload := &medco_node.GetCohortsOK{}
+	for _, cohort := range cohorts {
+		payload.Payload = append(payload.Payload,
+			&medco_node.GetCohortsOKBodyItems0{
+				CohortName:   cohort.CohortId,
+				PatientSetID: float64(cohort.ResultInstanceID),
+				CreationDate: float64(cohort.CreationDate),
+				UpdateDate:   float64(cohort.UpdateDate),
+			},
+		)
+	}
+
+	return medco_node.NewGetCohortsOK().WithPayload(payload.Payload)
+
+}
+
+func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal *models.User) middleware.Responder {
+	cohort := params.Body.Cohort
+	err := cohortsserver.InsertCohorts(principal.ID, cohort.CohortName, int(cohort.PatientSetID), int64(cohort.CreationDate), int64(cohort.UpdateDate))
+
+	if err != nil {
+		return medco_node.NewPostCohortsDefault(500).WithPayload(&medco_node.PostCohortsDefaultBody{
+			Message: err.Error(),
+		})
+	}
+
+	return medco_node.NewPostCohortsOK().WithPayload("cohort successfully updated")
 }

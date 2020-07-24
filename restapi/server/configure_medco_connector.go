@@ -6,12 +6,9 @@ import (
 	"crypto/tls"
 	"net/http"
 
-	utilserver "github.com/ldsec/medco-connector/util/server"
-
-	errors "github.com/go-openapi/errors"
-	runtime "github.com/go-openapi/runtime"
-	middleware "github.com/go-openapi/runtime/middleware"
-	"github.com/sirupsen/logrus"
+	"github.com/go-openapi/errors"
+	"github.com/go-openapi/runtime"
+	"github.com/go-openapi/runtime/middleware"
 
 	"github.com/ldsec/medco-connector/restapi/models"
 	"github.com/ldsec/medco-connector/restapi/server/operations"
@@ -19,63 +16,86 @@ import (
 	"github.com/ldsec/medco-connector/restapi/server/operations/medco_network"
 	"github.com/ldsec/medco-connector/restapi/server/operations/medco_node"
 	"github.com/ldsec/medco-connector/restapi/server/operations/survival_analysis"
-	"github.com/ldsec/medco-connector/server/handlers"
 )
 
-//go:generate swagger generate server --target ../../swaggerDIY --name MedCoConnector --spec ../../swagger/medco-connector.yml
+//go:generate swagger generate server --target ../../../medco-connector --name MedcoConnector --spec ../../swagger/medco-connector.yml --model-package restapi/models --server-package restapi/server --principal models.User
 
 func configureFlags(api *operations.MedcoConnectorAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }
 }
 
 func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
+	// configure the api here
 	api.ServeError = errors.ServeError
+
+	// Set your custom logger if needed. Default one is log.Printf
+	// Expected interface func(string, ...interface{})
+	//
+	// Example:
+	// api.Logger = log.Printf
+
 	api.JSONConsumer = runtime.JSONConsumer()
+
 	api.JSONProducer = runtime.JSONProducer()
-	api.Logger = logrus.Printf
 
-	// validate identity and generate principal, check endpoint-based authorizations
-	api.MedcoJwtAuth = func(token string, requiredAuthorizations []string) (principal *models.User, err error) {
-
-		// authenticate user
-		principal, err = utilserver.AuthenticateUser(token)
-		if err != nil {
-			return
+	if api.MedcoJwtAuth == nil {
+		api.MedcoJwtAuth = func(token string, scopes []string) (*models.User, error) {
+			return nil, errors.NotImplemented("oauth2 bearer auth (medco-jwt) has not yet been implemented")
 		}
-
-		// check rest api authorizations
-		for _, requiredAuthorization := range requiredAuthorizations {
-			err = utilserver.AuthorizeRestAPIEndpoint(principal, models.RestAPIAuthorization(requiredAuthorization))
-			if err != nil {
-				return
-			}
-		}
-
-		return
 	}
 
-	// /medco/network
-	api.MedcoNetworkGetMetadataHandler = medco_network.GetMetadataHandlerFunc(handlers.MedCoNetworkGetMetadataHandler)
+	// Set your custom authorizer if needed. Default one is security.Authorized()
+	// Expected interface runtime.Authorizer
+	//
+	// Example:
+	// api.APIAuthorizer = security.Authorized()
+	if api.MedcoNodeExploreQueryHandler == nil {
+		api.MedcoNodeExploreQueryHandler = medco_node.ExploreQueryHandlerFunc(func(params medco_node.ExploreQueryParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation medco_node.ExploreQuery has not yet been implemented")
+		})
+	}
+	if api.MedcoNodeExploreSearchHandler == nil {
+		api.MedcoNodeExploreSearchHandler = medco_node.ExploreSearchHandlerFunc(func(params medco_node.ExploreSearchParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation medco_node.ExploreSearch has not yet been implemented")
+		})
+	}
+	if api.MedcoNodeGetCohortsHandler == nil {
+		api.MedcoNodeGetCohortsHandler = medco_node.GetCohortsHandlerFunc(func(params medco_node.GetCohortsParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation medco_node.GetCohorts has not yet been implemented")
+		})
+	}
+	if api.MedcoNodeGetExploreQueryHandler == nil {
+		api.MedcoNodeGetExploreQueryHandler = medco_node.GetExploreQueryHandlerFunc(func(params medco_node.GetExploreQueryParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation medco_node.GetExploreQuery has not yet been implemented")
+		})
+	}
+	if api.MedcoNetworkGetMetadataHandler == nil {
+		api.MedcoNetworkGetMetadataHandler = medco_network.GetMetadataHandlerFunc(func(params medco_network.GetMetadataParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation medco_network.GetMetadata has not yet been implemented")
+		})
+	}
+	if api.SurvivalAnalysisGetSurvivalAnalysisHandler == nil {
+		api.SurvivalAnalysisGetSurvivalAnalysisHandler = survival_analysis.GetSurvivalAnalysisHandlerFunc(func(params survival_analysis.GetSurvivalAnalysisParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation survival_analysis.GetSurvivalAnalysis has not yet been implemented")
+		})
+	}
+	if api.GenomicAnnotationsGetValuesHandler == nil {
+		api.GenomicAnnotationsGetValuesHandler = genomic_annotations.GetValuesHandlerFunc(func(params genomic_annotations.GetValuesParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation genomic_annotations.GetValues has not yet been implemented")
+		})
+	}
+	if api.GenomicAnnotationsGetVariantsHandler == nil {
+		api.GenomicAnnotationsGetVariantsHandler = genomic_annotations.GetVariantsHandlerFunc(func(params genomic_annotations.GetVariantsParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation genomic_annotations.GetVariants has not yet been implemented")
+		})
+	}
+	if api.MedcoNodePostCohortsHandler == nil {
+		api.MedcoNodePostCohortsHandler = medco_node.PostCohortsHandlerFunc(func(params medco_node.PostCohortsParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation medco_node.PostCohorts has not yet been implemented")
+		})
+	}
 
-	// /medco/node/explore/search
-	api.MedcoNodeExploreSearchHandler = medco_node.ExploreSearchHandlerFunc(handlers.MedCoNodeExploreSearchHandler)
-
-	// /medco/node/explore/query
-	api.MedcoNodeExploreQueryHandler = medco_node.ExploreQueryHandlerFunc(handlers.MedCoNodeExploreQueryHandler)
-
-	// /medco/node/explore/query/{queryId}
-	api.MedcoNodeGetExploreQueryHandler = medco_node.GetExploreQueryHandlerFunc(func(params medco_node.GetExploreQueryParams, principal *models.User) middleware.Responder {
-		return middleware.NotImplemented("operation medco_node.GetQueryResult has not yet been implemented")
-	})
-
-	// /medco/genomic-annotations/{annotation}
-	api.GenomicAnnotationsGetValuesHandler = genomic_annotations.GetValuesHandlerFunc(handlers.MedCoGenomicAnnotationsGetValuesHandler)
-
-	// /genomic-annotations/{annotation}/{value}
-	api.GenomicAnnotationsGetVariantsHandler = genomic_annotations.GetVariantsHandlerFunc(handlers.MedCoGenomicAnnotationsGetVariantsHandler)
-
-	// /survival-analysis/{granularity}
-	api.SurvivalAnalysisGetSurvivalAnalysisHandler = survival_analysis.GetSurvivalAnalysisHandlerFunc(handlers.MedCoSurvivalAnalysisGetSurvivalAnalysisHandler)
+	api.PreServerShutdown = func() {}
 
 	api.ServerShutdown = func() {}
 

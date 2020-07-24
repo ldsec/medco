@@ -12,7 +12,7 @@ import (
 type ExploreQueryResult struct {
 	Count        int64
 	PatientList  []int64
-	PatientSetID string
+	PatientSetID int
 	Times        map[string]time.Duration
 }
 
@@ -22,7 +22,7 @@ func newQueryResult(nodeResult *models.ExploreQueryResultElement, privateKey str
 		Times: make(map[string]time.Duration),
 	}
 
-	parsedResult.PatientSetID = nodeResult.PatientSetID
+	parsedResult.PatientSetID = int(nodeResult.PatientSetID)
 	// decrypt count
 	parsedResult.Count, err = unlynx.Decrypt(nodeResult.EncryptedCount, privateKey)
 	if err != nil {

@@ -42,13 +42,19 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 		BasicAuthenticator:  security.BasicAuth,
 		APIKeyAuthenticator: security.APIKeyAuth,
 		BearerAuthenticator: security.BearerAuth,
-		JSONConsumer:        runtime.JSONConsumer(),
-		JSONProducer:        runtime.JSONProducer(),
+
+		JSONConsumer: runtime.JSONConsumer(),
+
+		JSONProducer: runtime.JSONProducer(),
+
 		MedcoNodeExploreQueryHandler: medco_node.ExploreQueryHandlerFunc(func(params medco_node.ExploreQueryParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_node.ExploreQuery has not yet been implemented")
 		}),
 		MedcoNodeExploreSearchHandler: medco_node.ExploreSearchHandlerFunc(func(params medco_node.ExploreSearchParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_node.ExploreSearch has not yet been implemented")
+		}),
+		MedcoNodeGetCohortsHandler: medco_node.GetCohortsHandlerFunc(func(params medco_node.GetCohortsParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation medco_node.GetCohorts has not yet been implemented")
 		}),
 		MedcoNodeGetExploreQueryHandler: medco_node.GetExploreQueryHandlerFunc(func(params medco_node.GetExploreQueryParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_node.GetExploreQuery has not yet been implemented")
@@ -64,10 +70,14 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 		}),
 		GenomicAnnotationsGetVariantsHandler: genomic_annotations.GetVariantsHandlerFunc(func(params genomic_annotations.GetVariantsParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation genomic_annotations.GetVariants has not yet been implemented")
-		}), MedcoJwtAuth: func(token string, scopes []string) (*models.User, error) {
+		}),
+		MedcoNodePostCohortsHandler: medco_node.PostCohortsHandlerFunc(func(params medco_node.PostCohortsParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation medco_node.PostCohorts has not yet been implemented")
+		}),
+
+		MedcoJwtAuth: func(token string, scopes []string) (*models.User, error) {
 			return nil, errors.NotImplemented("oauth2 bearer auth (medco-jwt) has not yet been implemented")
 		},
-
 		// default authorizer is authorized meaning no requests are blocked
 		APIAuthorizer: security.Authorized(),
 	}
@@ -94,9 +104,11 @@ type MedcoConnectorAPI struct {
 	// BearerAuthenticator generates a runtime.Authenticator from the supplied bearer token auth function.
 	// It has a default implementation in the security package, however you can replace it for your particular usage.
 	BearerAuthenticator func(string, security.ScopedTokenAuthentication) runtime.Authenticator
+
 	// JSONConsumer registers a consumer for the following mime types:
 	//   - application/json
 	JSONConsumer runtime.Consumer
+
 	// JSONProducer registers a producer for the following mime types:
 	//   - application/json
 	JSONProducer runtime.Producer
@@ -112,6 +124,8 @@ type MedcoConnectorAPI struct {
 	MedcoNodeExploreQueryHandler medco_node.ExploreQueryHandler
 	// MedcoNodeExploreSearchHandler sets the operation handler for the explore search operation
 	MedcoNodeExploreSearchHandler medco_node.ExploreSearchHandler
+	// MedcoNodeGetCohortsHandler sets the operation handler for the get cohorts operation
+	MedcoNodeGetCohortsHandler medco_node.GetCohortsHandler
 	// MedcoNodeGetExploreQueryHandler sets the operation handler for the get explore query operation
 	MedcoNodeGetExploreQueryHandler medco_node.GetExploreQueryHandler
 	// MedcoNetworkGetMetadataHandler sets the operation handler for the get metadata operation
@@ -122,6 +136,8 @@ type MedcoConnectorAPI struct {
 	GenomicAnnotationsGetValuesHandler genomic_annotations.GetValuesHandler
 	// GenomicAnnotationsGetVariantsHandler sets the operation handler for the get variants operation
 	GenomicAnnotationsGetVariantsHandler genomic_annotations.GetVariantsHandler
+	// MedcoNodePostCohortsHandler sets the operation handler for the post cohorts operation
+	MedcoNodePostCohortsHandler medco_node.PostCohortsHandler
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
 	ServeError func(http.ResponseWriter, *http.Request, error)
@@ -193,31 +209,31 @@ func (o *MedcoConnectorAPI) Validate() error {
 	}
 
 	if o.MedcoNodeExploreQueryHandler == nil {
-		unregistered = append(unregistered, "MedcoNode.ExploreQueryHandler")
+		unregistered = append(unregistered, "medco_node.ExploreQueryHandler")
 	}
-
 	if o.MedcoNodeExploreSearchHandler == nil {
-		unregistered = append(unregistered, "MedcoNode.ExploreSearchHandler")
+		unregistered = append(unregistered, "medco_node.ExploreSearchHandler")
 	}
-
+	if o.MedcoNodeGetCohortsHandler == nil {
+		unregistered = append(unregistered, "medco_node.GetCohortsHandler")
+	}
 	if o.MedcoNodeGetExploreQueryHandler == nil {
-		unregistered = append(unregistered, "MedcoNode.GetExploreQueryHandler")
+		unregistered = append(unregistered, "medco_node.GetExploreQueryHandler")
 	}
-
 	if o.MedcoNetworkGetMetadataHandler == nil {
-		unregistered = append(unregistered, "MedcoNetwork.GetMetadataHandler")
+		unregistered = append(unregistered, "medco_network.GetMetadataHandler")
 	}
-
 	if o.SurvivalAnalysisGetSurvivalAnalysisHandler == nil {
-		unregistered = append(unregistered, "SurvivalAnalysis.GetSurvivalAnalysisHandler")
+		unregistered = append(unregistered, "survival_analysis.GetSurvivalAnalysisHandler")
 	}
-
 	if o.GenomicAnnotationsGetValuesHandler == nil {
-		unregistered = append(unregistered, "GenomicAnnotations.GetValuesHandler")
+		unregistered = append(unregistered, "genomic_annotations.GetValuesHandler")
 	}
-
 	if o.GenomicAnnotationsGetVariantsHandler == nil {
-		unregistered = append(unregistered, "GenomicAnnotations.GetVariantsHandler")
+		unregistered = append(unregistered, "genomic_annotations.GetVariantsHandler")
+	}
+	if o.MedcoNodePostCohortsHandler == nil {
+		unregistered = append(unregistered, "medco_node.PostCohortsHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -234,13 +250,10 @@ func (o *MedcoConnectorAPI) ServeErrorFor(operationID string) func(http.Response
 
 // AuthenticatorsFor gets the authenticators for the specified security schemes
 func (o *MedcoConnectorAPI) AuthenticatorsFor(schemes map[string]spec.SecurityScheme) map[string]runtime.Authenticator {
-
 	result := make(map[string]runtime.Authenticator)
 	for name := range schemes {
 		switch name {
-
 		case "medco-jwt":
-
 			result[name] = o.BearerAuthenticator(name, func(token string, scopes []string) (interface{}, error) {
 				return o.MedcoJwtAuth(token, scopes)
 			})
@@ -248,14 +261,11 @@ func (o *MedcoConnectorAPI) AuthenticatorsFor(schemes map[string]spec.SecuritySc
 		}
 	}
 	return result
-
 }
 
 // Authorizer returns the registered authorizer
 func (o *MedcoConnectorAPI) Authorizer() runtime.Authorizer {
-
 	return o.APIAuthorizer
-
 }
 
 // ConsumersFor gets the consumers for the specified media types.
@@ -319,7 +329,6 @@ func (o *MedcoConnectorAPI) Context() *middleware.Context {
 
 func (o *MedcoConnectorAPI) initHandlerCache() {
 	o.Context() // don't care about the result, just that the initialization happened
-
 	if o.handlers == nil {
 		o.handlers = make(map[string]map[string]http.Handler)
 	}
@@ -328,37 +337,38 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/node/explore/query"] = medco_node.NewExploreQuery(o.context, o.MedcoNodeExploreQueryHandler)
-
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/node/explore/search"] = medco_node.NewExploreSearch(o.context, o.MedcoNodeExploreSearchHandler)
-
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/node/explore/cohorts"] = medco_node.NewGetCohorts(o.context, o.MedcoNodeGetCohortsHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/node/explore/query/{queryId}"] = medco_node.NewGetExploreQuery(o.context, o.MedcoNodeGetExploreQueryHandler)
-
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/network"] = medco_network.NewGetMetadata(o.context, o.MedcoNetworkGetMetadataHandler)
-
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/survival-analysis"] = survival_analysis.NewGetSurvivalAnalysis(o.context, o.SurvivalAnalysisGetSurvivalAnalysisHandler)
-
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/genomic-annotations/{annotation}"] = genomic_annotations.NewGetValues(o.context, o.GenomicAnnotationsGetValuesHandler)
-
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/genomic-annotations/{annotation}/{value}"] = genomic_annotations.NewGetVariants(o.context, o.GenomicAnnotationsGetVariantsHandler)
-
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/node/explore/cohorts"] = medco_node.NewPostCohorts(o.context, o.MedcoNodePostCohortsHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP
@@ -387,4 +397,16 @@ func (o *MedcoConnectorAPI) RegisterConsumer(mediaType string, consumer runtime.
 // RegisterProducer allows you to add (or override) a producer for a media type.
 func (o *MedcoConnectorAPI) RegisterProducer(mediaType string, producer runtime.Producer) {
 	o.customProducers[mediaType] = producer
+}
+
+// AddMiddlewareFor adds a http middleware to existing handler
+func (o *MedcoConnectorAPI) AddMiddlewareFor(method, path string, builder middleware.Builder) {
+	um := strings.ToUpper(method)
+	if path == "/" {
+		path = ""
+	}
+	o.Init()
+	if h, ok := o.handlers[um][path]; ok {
+		o.handlers[method][path] = builder(h)
+	}
 }

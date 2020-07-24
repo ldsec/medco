@@ -12,10 +12,9 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
-
-	strfmt "github.com/go-openapi/strfmt"
 )
 
 // NewGetVariantsParams creates a new GetVariantsParams object
@@ -203,7 +202,7 @@ func (o *GetVariantsParams) bindZygosity(rawData []string, hasKey bool, formats 
 	for i, zygosityIV := range zygosityIC {
 		zygosityI := zygosityIV
 
-		if err := validate.Enum(fmt.Sprintf("%s.%v", "zygosity", i), "query", zygosityI, []interface{}{"heterozygous", "homozygous", "unknown"}); err != nil {
+		if err := validate.EnumCase(fmt.Sprintf("%s.%v", "zygosity", i), "query", zygosityI, []interface{}{"heterozygous", "homozygous", "unknown"}, true); err != nil {
 			return err
 		}
 

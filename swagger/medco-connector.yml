@@ -196,7 +196,7 @@ paths:
       tags:
         - "survival-analysis"
       summary: "Send a query to run a survival analysis"
-      operationId: "getSurvivalAnalysis"
+      operationId: "survivalAnalysis"
       parameters:
       - in: "body"
         description: "User public key, patient list and time codes strings for the survival analysis"
@@ -288,12 +288,12 @@ paths:
       security:
         - medco-jwt: ["medco-survival-analysis"]
 
-  /cohorts/retrieval:
+  /node/explore/cohorts:
     get:
       tags:
-        - "cohortsRetrieval"
+        - "medco-node"
       summary: "Retrieve cohort names and patient set IDs"
-      operationId: "postCohortsRetrieval"
+      operationId: "getCohorts"
       responses:
         200:
           description: "Queried cohorts"
@@ -318,12 +318,11 @@ paths:
           description: "User not found"
         default:
           $ref: '#/responses/errorResponse'
-  /cohorts/update:
     post:
       tags:
-        - "cohortsUpdate"
+        - "medco-node"
       summary: "Update cohorts list with a new or modified cohort"
-      operationId: "postCohortsUpdate"
+      operationId: "postCohorts"
       parameters:
         - in: "body"
           description: "Cohort that has been updated or created"

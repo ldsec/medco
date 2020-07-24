@@ -6,16 +6,18 @@ package survival_analysis
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"strconv"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/ldsec/medco-connector/restapi/models"
 )
 
 // GetSurvivalAnalysisReader is a Reader for the GetSurvivalAnalysis structure.
@@ -154,14 +156,33 @@ type GetSurvivalAnalysisBody struct {
 	// ID
 	ID string `json:"ID,omitempty"`
 
-	// patient group i ds
-	PatientGroupIDs []string `json:"patientGroupIDs"`
+	// end column
+	// Enum: [start_date end_date]
+	EndColumn string `json:"endColumn,omitempty"`
 
-	// patient set ID
-	PatientSetID string `json:"patientSetID,omitempty"`
+	// end concept
+	EndConcept string `json:"endConcept,omitempty"`
 
-	// time codes
-	TimeCodes []string `json:"timeCodes"`
+	// set ID
+	SetID float64 `json:"setID,omitempty"`
+
+	// start column
+	// Enum: [start_date end_date]
+	StartColumn string `json:"startColumn,omitempty"`
+
+	// start concept
+	StartConcept string `json:"startConcept,omitempty"`
+
+	// sub group definitions
+	// Max Items: 4
+	SubGroupDefinitions []*SubGroupDefinitionsItems0 `json:"subGroupDefinitions"`
+
+	// time granularity
+	// Enum: [day week month year]
+	TimeGranularity string `json:"timeGranularity,omitempty"`
+
+	// time limit
+	TimeLimit float64 `json:"timeLimit,omitempty"`
 
 	// user public key
 	// Pattern: ^[\w=-]+$
@@ -172,6 +193,22 @@ type GetSurvivalAnalysisBody struct {
 func (o *GetSurvivalAnalysisBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := o.validateEndColumn(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateStartColumn(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateSubGroupDefinitions(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateTimeGranularity(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := o.validateUserPublicKey(formats); err != nil {
 		res = append(res, err)
 	}
@@ -179,6 +216,172 @@ func (o *GetSurvivalAnalysisBody) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+var getSurvivalAnalysisBodyTypeEndColumnPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["start_date","end_date"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		getSurvivalAnalysisBodyTypeEndColumnPropEnum = append(getSurvivalAnalysisBodyTypeEndColumnPropEnum, v)
+	}
+}
+
+const (
+
+	// GetSurvivalAnalysisBodyEndColumnStartDate captures enum value "start_date"
+	GetSurvivalAnalysisBodyEndColumnStartDate string = "start_date"
+
+	// GetSurvivalAnalysisBodyEndColumnEndDate captures enum value "end_date"
+	GetSurvivalAnalysisBodyEndColumnEndDate string = "end_date"
+)
+
+// prop value enum
+func (o *GetSurvivalAnalysisBody) validateEndColumnEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, getSurvivalAnalysisBodyTypeEndColumnPropEnum, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *GetSurvivalAnalysisBody) validateEndColumn(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.EndColumn) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := o.validateEndColumnEnum("body"+"."+"endColumn", "body", o.EndColumn); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var getSurvivalAnalysisBodyTypeStartColumnPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["start_date","end_date"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		getSurvivalAnalysisBodyTypeStartColumnPropEnum = append(getSurvivalAnalysisBodyTypeStartColumnPropEnum, v)
+	}
+}
+
+const (
+
+	// GetSurvivalAnalysisBodyStartColumnStartDate captures enum value "start_date"
+	GetSurvivalAnalysisBodyStartColumnStartDate string = "start_date"
+
+	// GetSurvivalAnalysisBodyStartColumnEndDate captures enum value "end_date"
+	GetSurvivalAnalysisBodyStartColumnEndDate string = "end_date"
+)
+
+// prop value enum
+func (o *GetSurvivalAnalysisBody) validateStartColumnEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, getSurvivalAnalysisBodyTypeStartColumnPropEnum, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *GetSurvivalAnalysisBody) validateStartColumn(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.StartColumn) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := o.validateStartColumnEnum("body"+"."+"startColumn", "body", o.StartColumn); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *GetSurvivalAnalysisBody) validateSubGroupDefinitions(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.SubGroupDefinitions) { // not required
+		return nil
+	}
+
+	iSubGroupDefinitionsSize := int64(len(o.SubGroupDefinitions))
+
+	if err := validate.MaxItems("body"+"."+"subGroupDefinitions", "body", iSubGroupDefinitionsSize, 4); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(o.SubGroupDefinitions); i++ {
+		if swag.IsZero(o.SubGroupDefinitions[i]) { // not required
+			continue
+		}
+
+		if o.SubGroupDefinitions[i] != nil {
+			if err := o.SubGroupDefinitions[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("body" + "." + "subGroupDefinitions" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+var getSurvivalAnalysisBodyTypeTimeGranularityPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["day","week","month","year"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		getSurvivalAnalysisBodyTypeTimeGranularityPropEnum = append(getSurvivalAnalysisBodyTypeTimeGranularityPropEnum, v)
+	}
+}
+
+const (
+
+	// GetSurvivalAnalysisBodyTimeGranularityDay captures enum value "day"
+	GetSurvivalAnalysisBodyTimeGranularityDay string = "day"
+
+	// GetSurvivalAnalysisBodyTimeGranularityWeek captures enum value "week"
+	GetSurvivalAnalysisBodyTimeGranularityWeek string = "week"
+
+	// GetSurvivalAnalysisBodyTimeGranularityMonth captures enum value "month"
+	GetSurvivalAnalysisBodyTimeGranularityMonth string = "month"
+
+	// GetSurvivalAnalysisBodyTimeGranularityYear captures enum value "year"
+	GetSurvivalAnalysisBodyTimeGranularityYear string = "year"
+)
+
+// prop value enum
+func (o *GetSurvivalAnalysisBody) validateTimeGranularityEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, getSurvivalAnalysisBodyTypeTimeGranularityPropEnum, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *GetSurvivalAnalysisBody) validateTimeGranularity(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.TimeGranularity) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := o.validateTimeGranularityEnum("body"+"."+"timeGranularity", "body", o.TimeGranularity); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -473,6 +676,75 @@ func (o *ResultsItems0GroupResultsItems0Events) MarshalBinary() ([]byte, error) 
 // UnmarshalBinary interface implementation
 func (o *ResultsItems0GroupResultsItems0Events) UnmarshalBinary(b []byte) error {
 	var res ResultsItems0GroupResultsItems0Events
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+/*SubGroupDefinitionsItems0 sub group definitions items0
+swagger:model SubGroupDefinitionsItems0
+*/
+type SubGroupDefinitionsItems0 struct {
+
+	// cohort name
+	CohortName string `json:"cohortName,omitempty"`
+
+	// panels
+	Panels []*models.Panel `json:"panels"`
+}
+
+// Validate validates this sub group definitions items0
+func (o *SubGroupDefinitionsItems0) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validatePanels(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *SubGroupDefinitionsItems0) validatePanels(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.Panels) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(o.Panels); i++ {
+		if swag.IsZero(o.Panels[i]) { // not required
+			continue
+		}
+
+		if o.Panels[i] != nil {
+			if err := o.Panels[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("panels" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *SubGroupDefinitionsItems0) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *SubGroupDefinitionsItems0) UnmarshalBinary(b []byte) error {
+	var res SubGroupDefinitionsItems0
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

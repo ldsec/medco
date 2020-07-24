@@ -23,7 +23,7 @@ type ExploreQuery struct {
 		EncCount       string
 		EncPatientList []string
 		Timers         map[string]time.Duration
-		PatientSetID   string
+		PatientSetID   int
 	}
 }
 
@@ -108,13 +108,13 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	var ksCountTimers map[string]time.Duration
 	if queryType.CountType == Global {
 		logrus.Info(q.ID, ": global aggregate requested")
-		encCount, ksCountTimers, err = unlynx.AggregateAndKeySwitchValue(q.ID, aggPatientFlags, q.Query.UserPublicKey)
+		encCount, ksCountTimers, err = unlynx.AggregateAndKeySwitchValue(q.ID, aggPatientFlags, string(q.Query.UserPublicKey))
 	} else if queryType.Shuffled {
 		logrus.Info(q.ID, ": count per site requested, shuffle enabled")
-		encCount, ksCountTimers, err = unlynx.ShuffleAndKeySwitchValue(q.ID, aggPatientFlags, q.Query.UserPublicKey)
+		encCount, ksCountTimers, err = unlynx.ShuffleAndKeySwitchValue(q.ID, aggPatientFlags, string(q.Query.UserPublicKey))
 	} else {
 		logrus.Info(q.ID, ": count per site requested, shuffle disabled")
-		encCount, ksCountTimers, err = unlynx.KeySwitchValue(q.ID, aggPatientFlags, q.Query.UserPublicKey)
+		encCount, ksCountTimers, err = unlynx.KeySwitchValue(q.ID, aggPatientFlags, string(q.Query.UserPublicKey))
 	}
 	if err != nil {
 		return
@@ -125,7 +125,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	if queryType.Obfuscated {
 		logrus.Info(q.ID, ": (local) obfuscation requested")
 		timer = time.Now()
-		encCount, err = unlynx.LocallyObfuscateValue(encCount, 5, q.Query.UserPublicKey) // todo: fixed distribution to make dynamic
+		encCount, err = unlynx.LocallyObfuscateValue(encCount, 5, string(q.Query.UserPublicKey)) // todo: fixed distribution to make dynamic
 		if err != nil {
 			return
 		}
@@ -154,7 +154,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 
 			// key switch the masked patient IDs
 			timer = time.Now()
-			ksMaskedPatientIDs, ksPatientListTimers, err := unlynx.KeySwitchValues(q.ID, maskedPatientIDs, q.Query.UserPublicKey)
+			ksMaskedPatientIDs, ksPatientListTimers, err := unlynx.KeySwitchValues(q.ID, maskedPatientIDs, string(q.Query.UserPublicKey))
 			if err != nil {
 				return err
 			}
@@ -167,8 +167,13 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	//optionally return the patient set ID
 	if queryType.PatientSet {
 		logrus.Info(q.ID, ": patient set id requested")
+		patientSetIDNum, convErr := strconv.Atoi(patientSetID)
+		err = convErr
+		if err != nil {
+			return
+		}
 
-		q.Result.PatientSetID = patientSetID
+		q.Result.PatientSetID = patientSetIDNum
 	}
 
 	q.addTimers("medco-connector-overall", overallTimer, nil)

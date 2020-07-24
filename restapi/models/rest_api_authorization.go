@@ -9,11 +9,12 @@ import (
 	"encoding/json"
 
 	"github.com/go-openapi/errors"
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/validate"
 )
 
 // RestAPIAuthorization rest Api authorization
+//
 // swagger:model restApiAuthorization
 type RestAPIAuthorization string
 
@@ -46,7 +47,7 @@ func init() {
 }
 
 func (m RestAPIAuthorization) validateRestAPIAuthorizationEnum(path, location string, value RestAPIAuthorization) error {
-	if err := validate.Enum(path, location, value, restApiAuthorizationEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, restApiAuthorizationEnum, true); err != nil {
 		return err
 	}
 	return nil

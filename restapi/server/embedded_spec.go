@@ -196,6 +196,105 @@ func init() {
         }
       }
     },
+    "/node/explore/cohorts": {
+      "get": {
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Retrieve cohort names and patient set IDs",
+        "operationId": "getCohorts",
+        "responses": {
+          "200": {
+            "description": "Queried cohorts",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "cohortName": {
+                    "type": "string"
+                  },
+                  "creationDate": {
+                    "type": "number"
+                  },
+                  "patientSetID": {
+                    "type": "number"
+                  },
+                  "updateDate": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not authorized"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "default": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Update cohorts list with a new or modified cohort",
+        "operationId": "postCohorts",
+        "parameters": [
+          {
+            "description": "Cohort that has been updated or created",
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "cohort": {
+                  "type": "object",
+                  "properties": {
+                    "cohortName": {
+                      "type": "string"
+                    },
+                    "creationDate": {
+                      "type": "number"
+                    },
+                    "patientSetID": {
+                      "type": "number"
+                    },
+                    "updateDate": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated cohorts",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "403": {
+            "description": "Not authorized"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "DB has been updated since last importation"
+          },
+          "default": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      }
+    },
     "/node/explore/query": {
       "post": {
         "security": [
@@ -322,23 +421,62 @@ func init() {
                 "ID": {
                   "type": "string"
                 },
-                "patientGroupIDs": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
+                "endColumn": {
+                  "type": "string",
+                  "enum": [
+                    "start_date",
+                    "end_date"
+                  ]
                 },
-                "patientSetID": {
+                "endConcept": {
                   "type": "string"
                 },
-                "timeCodes": {
+                "setID": {
+                  "type": "number"
+                },
+                "startColumn": {
+                  "type": "string",
+                  "enum": [
+                    "start_date",
+                    "end_date"
+                  ]
+                },
+                "startConcept": {
+                  "type": "string"
+                },
+                "subGroupDefinitions": {
                   "type": "array",
+                  "maxItems": 4,
                   "items": {
-                    "type": "string"
+                    "type": "object",
+                    "properties": {
+                      "cohortName": {
+                        "type": "string"
+                      },
+                      "panels": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/definitions/panel"
+                        }
+                      }
+                    }
                   }
                 },
+                "timeGranularity": {
+                  "type": "string",
+                  "enum": [
+                    "day",
+                    "week",
+                    "month",
+                    "year"
+                  ]
+                },
+                "timeLimit": {
+                  "type": "number"
+                },
                 "userPublicKey": {
-                  "$ref": "#/definitions/exploreQuery/properties/userPublicKey"
+                  "type": "string",
+                  "pattern": "^[\\w=-]+$"
                 }
               }
             }
@@ -419,46 +557,7 @@ func init() {
           "description": "i2b2 panels (linked by an AND)",
           "type": "array",
           "items": {
-            "type": "object",
-            "required": [
-              "not"
-            ],
-            "properties": {
-              "items": {
-                "description": "i2b2 items (linked by an OR)",
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "required": [
-                    "encrypted",
-                    "queryTerm"
-                  ],
-                  "properties": {
-                    "encrypted": {
-                      "type": "boolean"
-                    },
-                    "operator": {
-                      "type": "string",
-                      "enum": [
-                        "exists",
-                        "equals"
-                      ]
-                    },
-                    "queryTerm": {
-                      "type": "string",
-                      "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/?)$"
-                    },
-                    "value": {
-                      "type": "string"
-                    }
-                  }
-                }
-              },
-              "not": {
-                "description": "exclude the i2b2 panel",
-                "type": "boolean"
-              }
-            }
+            "$ref": "#/definitions/panel"
           }
         },
         "type": {
@@ -483,7 +582,7 @@ func init() {
           }
         },
         "patientSetID": {
-          "type": "string"
+          "type": "number"
         },
         "status": {
           "type": "string",
@@ -523,8 +622,7 @@ func init() {
         "count_per_site_shuffled",
         "count_per_site_shuffled_obfuscated",
         "count_global",
-        "count_global_obfuscated",
-        "patient_set"
+        "count_global_obfuscated"
       ]
     },
     "exploreSearch": {
@@ -603,6 +701,48 @@ func init() {
             "concept_text",
             "genomic_annotation"
           ]
+        }
+      }
+    },
+    "panel": {
+      "type": "object",
+      "required": [
+        "not"
+      ],
+      "properties": {
+        "items": {
+          "description": "i2b2 items (linked by an OR)",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "encrypted",
+              "queryTerm"
+            ],
+            "properties": {
+              "encrypted": {
+                "type": "boolean"
+              },
+              "operator": {
+                "type": "string",
+                "enum": [
+                  "exists",
+                  "equals"
+                ]
+              },
+              "queryTerm": {
+                "type": "string",
+                "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/?)$"
+              },
+              "value": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "not": {
+          "description": "exclude the i2b2 panel",
+          "type": "boolean"
         }
       }
     },
@@ -1019,6 +1159,107 @@ func init() {
         }
       }
     },
+    "/node/explore/cohorts": {
+      "get": {
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Retrieve cohort names and patient set IDs",
+        "operationId": "getCohorts",
+        "responses": {
+          "200": {
+            "description": "Queried cohorts",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/GetCohortsOKBodyItems0"
+              }
+            }
+          },
+          "403": {
+            "description": "Not authorized"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "default": {
+            "description": "Error response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Update cohorts list with a new or modified cohort",
+        "operationId": "postCohorts",
+        "parameters": [
+          {
+            "description": "Cohort that has been updated or created",
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "cohort": {
+                  "type": "object",
+                  "properties": {
+                    "cohortName": {
+                      "type": "string"
+                    },
+                    "creationDate": {
+                      "type": "number"
+                    },
+                    "patientSetID": {
+                      "type": "number"
+                    },
+                    "updateDate": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated cohorts",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "403": {
+            "description": "Not authorized"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "DB has been updated since last importation"
+          },
+          "default": {
+            "description": "Error response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/node/explore/query": {
       "post": {
         "security": [
@@ -1232,20 +1473,47 @@ func init() {
                 "ID": {
                   "type": "string"
                 },
-                "patientGroupIDs": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
+                "endColumn": {
+                  "type": "string",
+                  "enum": [
+                    "start_date",
+                    "end_date"
+                  ]
                 },
-                "patientSetID": {
+                "endConcept": {
                   "type": "string"
                 },
-                "timeCodes": {
+                "setID": {
+                  "type": "number"
+                },
+                "startColumn": {
+                  "type": "string",
+                  "enum": [
+                    "start_date",
+                    "end_date"
+                  ]
+                },
+                "startConcept": {
+                  "type": "string"
+                },
+                "subGroupDefinitions": {
                   "type": "array",
+                  "maxItems": 4,
                   "items": {
-                    "type": "string"
+                    "$ref": "#/definitions/SubGroupDefinitionsItems0"
                   }
+                },
+                "timeGranularity": {
+                  "type": "string",
+                  "enum": [
+                    "day",
+                    "week",
+                    "month",
+                    "year"
+                  ]
+                },
+                "timeLimit": {
+                  "type": "number"
                 },
                 "userPublicKey": {
                   "type": "string",
@@ -1306,52 +1574,6 @@ func init() {
         }
       }
     },
-    "ExploreQueryPanelsItems0": {
-      "type": "object",
-      "required": [
-        "not"
-      ],
-      "properties": {
-        "items": {
-          "description": "i2b2 items (linked by an OR)",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ExploreQueryPanelsItems0ItemsItems0"
-          }
-        },
-        "not": {
-          "description": "exclude the i2b2 panel",
-          "type": "boolean"
-        }
-      }
-    },
-    "ExploreQueryPanelsItems0ItemsItems0": {
-      "type": "object",
-      "required": [
-        "encrypted",
-        "queryTerm"
-      ],
-      "properties": {
-        "encrypted": {
-          "type": "boolean"
-        },
-        "operator": {
-          "type": "string",
-          "enum": [
-            "exists",
-            "equals"
-          ]
-        },
-        "queryTerm": {
-          "type": "string",
-          "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/?)$"
-        },
-        "value": {
-          "type": "string",
-          "maxLength": 0
-        }
-      }
-    },
     "ExploreQueryResultElementTimersItems0": {
       "type": "object",
       "required": [
@@ -1390,6 +1612,23 @@ func init() {
         }
       }
     },
+    "GetCohortsOKBodyItems0": {
+      "type": "object",
+      "properties": {
+        "cohortName": {
+          "type": "string"
+        },
+        "creationDate": {
+          "type": "number"
+        },
+        "patientSetID": {
+          "type": "number"
+        },
+        "updateDate": {
+          "type": "number"
+        }
+      }
+    },
     "NodesItems0": {
       "type": "object",
       "required": [
@@ -1404,6 +1643,50 @@ func init() {
         },
         "url": {
           "type": "string"
+        }
+      }
+    },
+    "PanelItemsItems0": {
+      "type": "object",
+      "required": [
+        "encrypted",
+        "queryTerm"
+      ],
+      "properties": {
+        "encrypted": {
+          "type": "boolean"
+        },
+        "operator": {
+          "type": "string",
+          "enum": [
+            "exists",
+            "equals"
+          ]
+        },
+        "queryTerm": {
+          "type": "string",
+          "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/?)$"
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 0
+        }
+      }
+    },
+    "PostCohortsParamsBodyCohort": {
+      "type": "object",
+      "properties": {
+        "cohortName": {
+          "type": "string"
+        },
+        "creationDate": {
+          "type": "number"
+        },
+        "patientSetID": {
+          "type": "number"
+        },
+        "updateDate": {
+          "type": "number"
         }
       }
     },
@@ -1451,6 +1734,20 @@ func init() {
         }
       }
     },
+    "SubGroupDefinitionsItems0": {
+      "type": "object",
+      "properties": {
+        "cohortName": {
+          "type": "string"
+        },
+        "panels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/panel"
+          }
+        }
+      }
+    },
     "UserAuthorizations": {
       "type": "object",
       "properties": {
@@ -1486,7 +1783,7 @@ func init() {
           "description": "i2b2 panels (linked by an AND)",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/ExploreQueryPanelsItems0"
+            "$ref": "#/definitions/panel"
           }
         },
         "type": {
@@ -1511,7 +1808,7 @@ func init() {
           }
         },
         "patientSetID": {
-          "type": "string"
+          "type": "number"
         },
         "status": {
           "type": "string",
@@ -1539,8 +1836,7 @@ func init() {
         "count_per_site_shuffled",
         "count_per_site_shuffled_obfuscated",
         "count_global",
-        "count_global_obfuscated",
-        "patient_set"
+        "count_global_obfuscated"
       ]
     },
     "exploreSearch": {
@@ -1619,6 +1915,25 @@ func init() {
             "concept_text",
             "genomic_annotation"
           ]
+        }
+      }
+    },
+    "panel": {
+      "type": "object",
+      "required": [
+        "not"
+      ],
+      "properties": {
+        "items": {
+          "description": "i2b2 items (linked by an OR)",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PanelItemsItems0"
+          }
+        },
+        "not": {
+          "description": "exclude the i2b2 panel",
+          "type": "boolean"
         }
       }
     },

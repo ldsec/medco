@@ -104,14 +104,6 @@ func NewExploreQueryType(requestedQueryType models.ExploreQueryType) (queryType 
 			Obfuscated:  true,
 			PatientSet:  false,
 		}
-	case models.ExploreQueryTypePatientSet:
-		queryType = ExploreQueryType{
-			PatientList: false,
-			CountType:   Global,
-			Shuffled:    false,
-			Obfuscated:  false,
-			PatientSet:  true,
-		}
 
 	default:
 		err = errors.New("unrecognized query type: " + string(requestedQueryType))

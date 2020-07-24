@@ -14,7 +14,7 @@ import (
 // MedCoSurvivalAnalysisGetSurvivalAnalysisHandler handles /survival-analysis API endpoint
 func MedCoSurvivalAnalysisGetSurvivalAnalysisHandler(param survival_analysis.GetSurvivalAnalysisParams, principal *models.User) middleware.Responder {
 
-	survivalAnalysisQuery := survivalserver.NewQuery(param.Body.ID, param.Body.UserPublicKey, param.Body.PatientSetID, param.Body.PatientGroupIDs, param.Body.TimeCodes)
+	survivalAnalysisQuery := survivalserver.NewQuery(param.Body.UserPublicKey, int(param.Body.SetID), param.Body.SubGroupDefinitions, int(param.Body.TimeLimit), param.Body.TimeGranularity, param.Body.StartConcept, param.Body.StartColumn, param.Body.EndConcept, param.Body.EndColumn)
 
 	if err := survivalAnalysisQuery.Execute(); err != nil {
 		logrus.Error(fmt.Sprintf("Query execution error : %s", err.Error()))
@@ -48,8 +48,6 @@ func MedCoSurvivalAnalysisGetSurvivalAnalysisHandler(param survival_analysis.Get
 			GroupResults: timePoints,
 		})
 	}
-	//logrus.Panicf("hohohoho : %d", len(resultList))
-
 	requestResult := &survival_analysis.GetSurvivalAnalysisOKBody{Results: resultList, Timers: timers}
 
 	return survival_analysis.NewGetSurvivalAnalysisOK().WithPayload(requestResult)

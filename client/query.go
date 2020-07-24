@@ -183,15 +183,15 @@ func (clientQuery *ExploreQuery) generateModel() (queryModel *models.ExploreQuer
 	queryModel = &models.ExploreQuery{
 		Type:          clientQuery.queryType,
 		UserPublicKey: clientQuery.userPublicKey,
-		Panels:        []*models.ExploreQueryPanelsItems0{},
+		Panels:        []*models.Panel{},
 	}
 
 	// query terms
 	true := true
 	for panelIdx, panel := range clientQuery.encPanelsItemKeys {
 
-		panelModel := &models.ExploreQueryPanelsItems0{
-			Items: []*models.ExploreQueryPanelsItems0ItemsItems0{},
+		panelModel := &models.Panel{
+			Items: []*models.PanelItemsItems0{},
 			Not:   &clientQuery.panelsIsNot[panelIdx],
 		}
 
@@ -200,7 +200,7 @@ func (clientQuery *ExploreQuery) generateModel() (queryModel *models.ExploreQuer
 			*encrypted = true
 			queryTerm := new(string)
 			*queryTerm = encItem
-			panelModel.Items = append(panelModel.Items, &models.ExploreQueryPanelsItems0ItemsItems0{
+			panelModel.Items = append(panelModel.Items, &models.PanelItemsItems0{
 				Encrypted: encrypted,
 				Operator:  "exists",
 				QueryTerm: queryTerm,

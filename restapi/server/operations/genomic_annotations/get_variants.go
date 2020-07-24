@@ -8,9 +8,9 @@ package genomic_annotations
 import (
 	"net/http"
 
-	middleware "github.com/go-openapi/runtime/middleware"
-	strfmt "github.com/go-openapi/strfmt"
-	swag "github.com/go-openapi/swag"
+	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
 
 	"github.com/ldsec/medco-connector/restapi/models"
 )
@@ -75,6 +75,7 @@ func (o *GetVariants) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 }
 
 // GetVariantsDefaultBody get variants default body
+//
 // swagger:model GetVariantsDefaultBody
 type GetVariantsDefaultBody struct {
 

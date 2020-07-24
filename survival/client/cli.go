@@ -1,3 +1,4 @@
+/*
 package survivalclient
 
 import (
@@ -133,7 +134,7 @@ func ClientSurvival(token, granularity, survivalType string, limit int64, patien
 	logrus.Debug("Mapping between duration in clear text and encryption of the integer identifier")
 	logrus.Debug(fmt.Sprint(encTimeCodesMap))
 
-	survivalAnalysis, err := NewSurvivalAnalysis(accessToken, patientSetID, patientGroupIDs, encTimeCodes, encType, disableTLSCheck)
+	survivalAnalysis, err := NewSurvivalAnalysis(accessToken, pa, patientGroupIDs, encTimeCodes, encType, disableTLSCheck)
 	if err != nil {
 		logrus.Error(err.Error())
 		return
@@ -232,3 +233,4 @@ func validateIntermediateResults(patientSetIDs map[int]string, timeCodes []strin
 	return errors.New(str)
 
 }
+*/

@@ -9,11 +9,12 @@ import (
 	"encoding/json"
 
 	"github.com/go-openapi/errors"
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/validate"
 )
 
 // ExploreQueryType explore query type
+//
 // swagger:model exploreQueryType
 type ExploreQueryType string
 
@@ -39,9 +40,6 @@ const (
 
 	// ExploreQueryTypeCountGlobalObfuscated captures enum value "count_global_obfuscated"
 	ExploreQueryTypeCountGlobalObfuscated ExploreQueryType = "count_global_obfuscated"
-
-	// ExploreQueryTypePatientSet captures enum value "patient_set"
-	ExploreQueryTypePatientSet ExploreQueryType = "patient_set"
 )
 
 // for schema
@@ -49,7 +47,7 @@ var exploreQueryTypeEnum []interface{}
 
 func init() {
 	var res []ExploreQueryType
-	if err := json.Unmarshal([]byte(`["patient_list","count_per_site","count_per_site_obfuscated","count_per_site_shuffled","count_per_site_shuffled_obfuscated","count_global","count_global_obfuscated","patient_set"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["patient_list","count_per_site","count_per_site_obfuscated","count_per_site_shuffled","count_per_site_shuffled_obfuscated","count_global","count_global_obfuscated"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -58,7 +56,7 @@ func init() {
 }
 
 func (m ExploreQueryType) validateExploreQueryTypeEnum(path, location string, value ExploreQueryType) error {
-	if err := validate.Enum(path, location, value, exploreQueryTypeEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, exploreQueryTypeEnum, true); err != nil {
 		return err
 	}
 	return nil

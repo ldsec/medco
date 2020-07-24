@@ -121,8 +121,6 @@ func extractAuthorizationsFromToken(token *jwt.Token, provider *oidcProvider) (u
 			ua.ExploreQuery = append(ua.ExploreQuery, models.ExploreQueryTypeCountGlobal)
 		case string(models.ExploreQueryTypeCountGlobalObfuscated):
 			ua.ExploreQuery = append(ua.ExploreQuery, models.ExploreQueryTypeCountGlobalObfuscated)
-		case string(models.ExploreQueryTypePatientSet):
-			ua.ExploreQuery = append(ua.ExploreQuery, models.ExploreQueryTypePatientSet)
 
 		default:
 			logrus.Debug("ignored role ", extractedRole)

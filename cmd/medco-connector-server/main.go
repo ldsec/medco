@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	loads "github.com/go-openapi/loads"
+	"github.com/go-openapi/loads"
 	flags "github.com/jessevdk/go-flags"
 	"github.com/ldsec/medco-connector/restapi/server"
 	"github.com/ldsec/medco-connector/restapi/server/operations"

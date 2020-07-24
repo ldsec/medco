@@ -1,12 +1,13 @@
 package handlers
 
 import (
+	"strconv"
+
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/ldsec/medco-connector/restapi/models"
 	"github.com/ldsec/medco-connector/restapi/server/operations/medco_network"
-	"github.com/ldsec/medco-connector/util/server"
+	utilserver "github.com/ldsec/medco-connector/util/server"
 	"github.com/ldsec/medco-connector/wrappers/unlynx"
-	"strconv"
 )
 
 // MedCoNetworkGetMetadataHandler handles /medco/network API endpoint
@@ -17,8 +18,8 @@ func MedCoNetworkGetMetadataHandler(params medco_network.GetMetadataParams, prin
 		idxInt64 := int64(idx)
 		nodes = append(nodes, &medco_network.NodesItems0{
 			Index: &idxInt64,
-			Name: "Node " + strconv.Itoa(idx), // todo: config to specify node name
-			URL: url,
+			Name:  "Node " + strconv.Itoa(idx), // todo: config to specify node name
+			URL:   url,
 		})
 	}
 
@@ -32,7 +33,7 @@ func MedCoNetworkGetMetadataHandler(params medco_network.GetMetadataParams, prin
 	medcoNodeIdxInt64 := int64(utilserver.MedCoNodeIdx)
 	return medco_network.NewGetMetadataOK().WithPayload(&medco_network.GetMetadataOKBody{
 		NodeIndex: &medcoNodeIdxInt64,
-		Nodes: nodes,
+		Nodes:     nodes,
 		PublicKey: pubKey,
 	})
 }

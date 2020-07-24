@@ -9,11 +9,11 @@ import (
 	"net/http"
 	"strconv"
 
-	errors "github.com/go-openapi/errors"
-	middleware "github.com/go-openapi/runtime/middleware"
-	strfmt "github.com/go-openapi/strfmt"
-	swag "github.com/go-openapi/swag"
-	validate "github.com/go-openapi/validate"
+	"github.com/go-openapi/errors"
+	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 
 	"github.com/ldsec/medco-connector/restapi/models"
 )
@@ -78,6 +78,7 @@ func (o *GetMetadata) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 }
 
 // GetMetadataDefaultBody get metadata default body
+//
 // swagger:model GetMetadataDefaultBody
 type GetMetadataDefaultBody struct {
 
@@ -109,6 +110,7 @@ func (o *GetMetadataDefaultBody) UnmarshalBinary(b []byte) error {
 }
 
 // GetMetadataOKBody get metadata o k body
+//
 // swagger:model GetMetadataOKBody
 type GetMetadataOKBody struct {
 
@@ -194,6 +196,7 @@ func (o *GetMetadataOKBody) UnmarshalBinary(b []byte) error {
 }
 
 // NodesItems0 nodes items0
+//
 // swagger:model NodesItems0
 type NodesItems0 struct {
 
