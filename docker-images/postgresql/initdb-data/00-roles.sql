@@ -1,6 +1,6 @@
 CREATE ROLE i2b2 LOGIN PASSWORD 'i2b2';
 CREATE ROLE keycloak LOGIN PASSWORD 'keycloak';
-CREATE ROLE genomicannotations LOGIN PASSWORD 'genomicannotations';
+CREATE ROLE medcoconnector LOGIN PASSWORD 'medcoconnector';
 ALTER USER i2b2 CREATEDB;
 ALTER USER keycloak CREATEDB;
-ALTER USER genomicannotations CREATEDB;
+ALTER USER medcoconnector CREATEDB;
