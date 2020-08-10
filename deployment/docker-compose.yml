@@ -30,7 +30,7 @@ services:
       - MC_DB_PORT=5432
       - MC_DB_USER=medcoconnector
       - MC_DB_PW=medcoconnector
-      - MC_DB_NAME=mcsrv
+      - MC_DB_NAME=medcoconnectorsrv
     volumes:
       - ./configuration-profile:/medco-configuration
 

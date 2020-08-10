@@ -43,7 +43,7 @@ ENV I2B2_HIVE_URL=http://i2b2:8080/i2b2/services \
     MC_DB_PORT=5432 \
     MC_DB_USER=medcoconnector \
     MC_DB_PW=medcoconnector \
-    MC_DB_NAME=medcoconnector
+    MC_DB_NAME=medcoconnectorsrv
 
 EXPOSE 1999
 ENTRYPOINT docker-entrypoint.sh medco-connector-server --write-timeout=${SERVER_HTTP_WRITE_TIMEOUT_SECONDS}s
