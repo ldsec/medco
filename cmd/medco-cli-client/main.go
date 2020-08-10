@@ -190,11 +190,11 @@ func main() {
 			Action: func(c *cli.Context) error {
 				return survivalclient.ClientSurvival(
 					c.GlobalString("token"),
-					c.String("granularity"),
-					c.String("type"),
-					c.Int64("limit"),
-					c.String("set"),
-					c.String("groups"),
+					c.Int("patientSet"),
+					c.String("startConcept"),
+					c.String("startColumn"),
+					c.String("endConcept"),
+					c.String("endColumn"),
 					c.GlobalString("user"),
 					c.GlobalString("password"),
 					c.GlobalBool("disableTLSCheck"),

@@ -8,10 +8,11 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/ldsec/medco-connector/restapi/client/medco_node"
+
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/ldsec/medco-connector/restapi/client"
 	"github.com/ldsec/medco-connector/restapi/client/medco_network"
-	"github.com/ldsec/medco-connector/restapi/client/medco_node"
 	"github.com/ldsec/medco-connector/restapi/models"
 	utilclient "github.com/ldsec/medco-connector/util/client"
 	"github.com/sirupsen/logrus"

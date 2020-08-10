@@ -48,6 +48,11 @@ ENV I2B2_HIVE_URL=http://i2b2:8080/i2b2/services \
     DIRECT_ACCESS_DB_PORT=5432 \
     DIRECT_ACCESS_DB_USER=i2b2 \
     DIRECT_ACCESS_DB_PW=i2b2 \
-    DIRECT_ACCESS_DB_NAME=i2b2medcosrv
+    DIRECT_ACCESS_DB_NAME=i2b2medcosrv \
+    QT_DB_HOST=postgresql \
+    QT_DB_PORT=5432 \
+    QT_DB_USER=medcoqt \
+    QT_DB_PW=medcoqt \
+    QT_DB_NAME=qtmedcosrv
 EXPOSE 1999
 ENTRYPOINT docker-entrypoint.sh medco-connector-server --write-timeout=${SERVER_HTTP_WRITE_TIMEOUT_SECONDS}s

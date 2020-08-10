@@ -1,10 +1,8 @@
-/*
 package survivalclient
 
 import (
 	"errors"
 	"fmt"
-	"strings"
 	"sync"
 	"time"
 
@@ -24,103 +22,22 @@ type ClientResultElement struct {
 }
 
 //ClientSurvival represents the whole survival analysis loop: it gets the time codes and the patient set, the request for the aggregates for the survival analysis and deciphers them
-func ClientSurvival(token, granularity, survivalType string, limit int64, patientSetID string, patientGroupIDsString string, username, password string, disableTLSCheck bool) (err error) {
+func ClientSurvival(token string, patientSetID int, startConcept, startColumn, endConcept, endColumn, username, password string, disableTLSCheck bool) (err error) {
 
 	accessToken, err := GetToken(token, username, password, disableTLSCheck)
 	if err != nil {
 		return
 	}
-	patientGroupIDs := strings.Split(patientGroupIDsString, ",")
-	patientGroupUniqueIDs := map[string]struct{}{}
-	for _, patientGroupID := range patientGroupIDs {
-		if _, alreadyIn := patientGroupUniqueIDs[patientGroupID]; alreadyIn {
-			logrus.Warn("dupplicate group id, skipping")
-		} else {
-			patientGroupUniqueIDs[patientGroupID] = struct{}{}
-		}
-	}
-	patientGroupIDs = []string{}
-	for key := range patientGroupUniqueIDs {
-		patientGroupIDs = append(patientGroupIDs, key)
-	}
-	logrus.Debug("groups : %v", patientGroupIDs)
+
 	var encTimeCodesMap map[string]string
 	var encTimeCodesInverseMap map[string]string
-	var encType string
-	encTypeChan := make(chan string)
-
-	errChan := make(chan error, 2)
 
 	encTimeCodesMapChan := make(chan timeCodesMaps)
-	signalChan := make(chan struct{})
+
 	var barrier sync.WaitGroup
 	barrier.Add(2)
 
-	go func() {
-		logrus.Info("Creating time point maps")
-
-		timeCodes, err := GetTimeCodes(accessToken, granularity, limit, disableTLSCheck)
-		if err != nil {
-			logrus.Error("Time point maps creation error: ", err)
-			barrier.Done()
-			errChan <- err
-
-			return
-		}
-		logrus.Debug("Integer identifier of the time concepts")
-		logrus.Debug(fmt.Sprint(timeCodes))
-		encTimeCodesMap, encTimeCodesInverseMap, err := EncryptTimeCodes(timeCodes)
-		if err != nil {
-			logrus.Error("Time point maps creation error", err)
-			barrier.Done()
-			errChan <- err
-			return
-		}
-		logrus.Info("Time point maps created")
-		barrier.Done()
-		encTimeCodesMapChan <- timeCodesMaps{encTimeCodesMap, encTimeCodesInverseMap}
-
-	}()
-
-	go func() {
-		logrus.Info("Retrieving survival type code")
-		typeCode, err := GetTypeCode(accessToken, survivalType, disableTLSCheck)
-		if err != nil {
-			barrier.Done()
-			errChan <- err
-			return
-		}
-		encType, err := unlynx.EncryptWithCothorityKey(typeCode)
-		if err != nil {
-			barrier.Done()
-			errChan <- err
-			return
-		}
-
-		logrus.Info("Type code retrieved")
-		barrier.Done()
-		encTypeChan <- encType
-
-	}()
-
-	go func() {
-		barrier.Wait()
-		signalChan <- struct{}{}
-	}()
-
-	select {
-	case <-time.After(time.Duration(300) * time.Second):
-		logrus.Panic("NodeExplore Timeout")
-	case <-signalChan:
-		select {
-		case <-errChan:
-		default:
-		}
-	}
-
 	encTimeCodesMaps := <-encTimeCodesMapChan
-
-	encType = <-encTypeChan
 
 	encTimeCodesMap = encTimeCodesMaps[0]
 	encTimeCodesInverseMap = encTimeCodesMaps[1]
@@ -134,7 +51,7 @@ func ClientSurvival(token, granularity, survivalType string, limit int64, patien
 	logrus.Debug("Mapping between duration in clear text and encryption of the integer identifier")
 	logrus.Debug(fmt.Sprint(encTimeCodesMap))
 
-	survivalAnalysis, err := NewSurvivalAnalysis(accessToken, pa, patientGroupIDs, encTimeCodes, encType, disableTLSCheck)
+	survivalAnalysis, err := NewSurvivalAnalysis(accessToken, patientSetID, nil, startConcept, startColumn, endConcept, endColumn, disableTLSCheck)
 	if err != nil {
 		logrus.Error(err.Error())
 		return
@@ -233,4 +150,3 @@ func validateIntermediateResults(patientSetIDs map[int]string, timeCodes []strin
 	return errors.New(str)
 
 }
-*/

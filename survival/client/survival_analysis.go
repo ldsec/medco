@@ -53,7 +53,7 @@ type SurvivalAnalysis struct {
 }
 
 // NewSurvivalAnalysis constructor for survival analysis request
-func NewSurvivalAnalysis(token string, patientSetID int, subGroupDefinitions []*survival_analysis.SubGroupDefinitionsItems0, startConcept, startColumn, endConcept, endColumn string, typeCode string, disableTLSCheck bool) (q *SurvivalAnalysis, err error) {
+func NewSurvivalAnalysis(token string, patientSetID int, subGroupDefinitions []*survival_analysis.SubGroupDefinitionsItems0, startConcept, startColumn, endConcept, endColumn string, disableTLSCheck bool) (q *SurvivalAnalysis, err error) {
 	q = &SurvivalAnalysis{
 		authToken:           token,
 		id:                  "MedCo_Survival_Analysis" + time.Now().Format(time.RFC3339),
