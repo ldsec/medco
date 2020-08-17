@@ -196,6 +196,149 @@ func init() {
         }
       }
     },
+    "/node/analysis/survival/query": {
+      "post": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-survival-analysis"
+            ]
+          }
+        ],
+        "tags": [
+          "survival-analysis"
+        ],
+        "summary": "Send a query to run a survival analysis",
+        "operationId": "survivalAnalysis",
+        "parameters": [
+          {
+            "description": "User public key, patient list and time codes strings for the survival analysis",
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ID": {
+                  "type": "string"
+                },
+                "endColumn": {
+                  "type": "string",
+                  "enum": [
+                    "start_date",
+                    "end_date"
+                  ]
+                },
+                "endConcept": {
+                  "type": "string"
+                },
+                "setID": {
+                  "type": "number"
+                },
+                "startColumn": {
+                  "type": "string",
+                  "enum": [
+                    "start_date",
+                    "end_date"
+                  ]
+                },
+                "startConcept": {
+                  "type": "string"
+                },
+                "subGroupDefinitions": {
+                  "type": "array",
+                  "maxItems": 4,
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "cohortName": {
+                        "type": "string"
+                      },
+                      "panels": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/definitions/panel"
+                        }
+                      }
+                    }
+                  }
+                },
+                "timeGranularity": {
+                  "type": "string",
+                  "enum": [
+                    "day",
+                    "week",
+                    "month",
+                    "year"
+                  ]
+                },
+                "timeLimit": {
+                  "type": "number"
+                },
+                "userPublicKey": {
+                  "type": "string",
+                  "pattern": "^[\\w=-]+$"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Queried survival analysis",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "groupID": {
+                        "type": "string"
+                      },
+                      "groupResults": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "events": {
+                              "type": "object",
+                              "properties": {
+                                "censoringevent": {
+                                  "type": "string"
+                                },
+                                "eventofinterest": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "timepoint": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "timers": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "TODO not found"
+          },
+          "default": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      }
+    },
     "/node/explore/cohorts": {
       "get": {
         "tags": [
@@ -389,149 +532,6 @@ func init() {
         "responses": {
           "200": {
             "$ref": "#/responses/exploreSearchResponse"
-          },
-          "default": {
-            "$ref": "#/responses/errorResponse"
-          }
-        }
-      }
-    },
-    "/survival-analysis": {
-      "post": {
-        "security": [
-          {
-            "medco-jwt": [
-              "medco-survival-analysis"
-            ]
-          }
-        ],
-        "tags": [
-          "survival-analysis"
-        ],
-        "summary": "Send a query to run a survival analysis",
-        "operationId": "getSurvivalAnalysis",
-        "parameters": [
-          {
-            "description": "User public key, patient list and time codes strings for the survival analysis",
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "ID": {
-                  "type": "string"
-                },
-                "endColumn": {
-                  "type": "string",
-                  "enum": [
-                    "start_date",
-                    "end_date"
-                  ]
-                },
-                "endConcept": {
-                  "type": "string"
-                },
-                "setID": {
-                  "type": "number"
-                },
-                "startColumn": {
-                  "type": "string",
-                  "enum": [
-                    "start_date",
-                    "end_date"
-                  ]
-                },
-                "startConcept": {
-                  "type": "string"
-                },
-                "subGroupDefinitions": {
-                  "type": "array",
-                  "maxItems": 4,
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "cohortName": {
-                        "type": "string"
-                      },
-                      "panels": {
-                        "type": "array",
-                        "items": {
-                          "$ref": "#/definitions/panel"
-                        }
-                      }
-                    }
-                  }
-                },
-                "timeGranularity": {
-                  "type": "string",
-                  "enum": [
-                    "day",
-                    "week",
-                    "month",
-                    "year"
-                  ]
-                },
-                "timeLimit": {
-                  "type": "number"
-                },
-                "userPublicKey": {
-                  "type": "string",
-                  "pattern": "^[\\w=-]+$"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Queried survival analysis",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "results": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "groupID": {
-                        "type": "string"
-                      },
-                      "groupResults": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "events": {
-                              "type": "object",
-                              "properties": {
-                                "censoringevent": {
-                                  "type": "string"
-                                },
-                                "eventofinterest": {
-                                  "type": "string"
-                                }
-                              }
-                            },
-                            "timepoint": {
-                              "type": "string"
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                "timers": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "number"
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "TODO not found"
           },
           "default": {
             "$ref": "#/responses/errorResponse"
@@ -1159,6 +1159,119 @@ func init() {
         }
       }
     },
+    "/node/analysis/survival/query": {
+      "post": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-survival-analysis"
+            ]
+          }
+        ],
+        "tags": [
+          "survival-analysis"
+        ],
+        "summary": "Send a query to run a survival analysis",
+        "operationId": "survivalAnalysis",
+        "parameters": [
+          {
+            "description": "User public key, patient list and time codes strings for the survival analysis",
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ID": {
+                  "type": "string"
+                },
+                "endColumn": {
+                  "type": "string",
+                  "enum": [
+                    "start_date",
+                    "end_date"
+                  ]
+                },
+                "endConcept": {
+                  "type": "string"
+                },
+                "setID": {
+                  "type": "number"
+                },
+                "startColumn": {
+                  "type": "string",
+                  "enum": [
+                    "start_date",
+                    "end_date"
+                  ]
+                },
+                "startConcept": {
+                  "type": "string"
+                },
+                "subGroupDefinitions": {
+                  "type": "array",
+                  "maxItems": 4,
+                  "items": {
+                    "$ref": "#/definitions/SubGroupDefinitionsItems0"
+                  }
+                },
+                "timeGranularity": {
+                  "type": "string",
+                  "enum": [
+                    "day",
+                    "week",
+                    "month",
+                    "year"
+                  ]
+                },
+                "timeLimit": {
+                  "type": "number"
+                },
+                "userPublicKey": {
+                  "type": "string",
+                  "pattern": "^[\\w=-]+$"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Queried survival analysis",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/ResultsItems0"
+                  }
+                },
+                "timers": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "TODO not found"
+          },
+          "default": {
+            "description": "Error response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/node/explore/cohorts": {
       "get": {
         "tags": [
@@ -1433,119 +1546,6 @@ func init() {
                 }
               }
             }
-          },
-          "default": {
-            "description": "Error response.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/survival-analysis": {
-      "post": {
-        "security": [
-          {
-            "medco-jwt": [
-              "medco-survival-analysis"
-            ]
-          }
-        ],
-        "tags": [
-          "survival-analysis"
-        ],
-        "summary": "Send a query to run a survival analysis",
-        "operationId": "getSurvivalAnalysis",
-        "parameters": [
-          {
-            "description": "User public key, patient list and time codes strings for the survival analysis",
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "ID": {
-                  "type": "string"
-                },
-                "endColumn": {
-                  "type": "string",
-                  "enum": [
-                    "start_date",
-                    "end_date"
-                  ]
-                },
-                "endConcept": {
-                  "type": "string"
-                },
-                "setID": {
-                  "type": "number"
-                },
-                "startColumn": {
-                  "type": "string",
-                  "enum": [
-                    "start_date",
-                    "end_date"
-                  ]
-                },
-                "startConcept": {
-                  "type": "string"
-                },
-                "subGroupDefinitions": {
-                  "type": "array",
-                  "maxItems": 4,
-                  "items": {
-                    "$ref": "#/definitions/SubGroupDefinitionsItems0"
-                  }
-                },
-                "timeGranularity": {
-                  "type": "string",
-                  "enum": [
-                    "day",
-                    "week",
-                    "month",
-                    "year"
-                  ]
-                },
-                "timeLimit": {
-                  "type": "number"
-                },
-                "userPublicKey": {
-                  "type": "string",
-                  "pattern": "^[\\w=-]+$"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Queried survival analysis",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "results": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/ResultsItems0"
-                  }
-                },
-                "timers": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "number"
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "TODO not found"
           },
           "default": {
             "description": "Error response.",

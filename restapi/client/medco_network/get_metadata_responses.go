@@ -160,7 +160,7 @@ type GetMetadataOKBody struct {
 	NodeIndex *int64 `json:"nodeIndex"`
 
 	// nodes
-	Nodes []*NodesItems0 `json:"nodes"`
+	Nodes []*GetMetadataOKBodyNodesItems0 `json:"nodes"`
 
 	// Aggregated public key of the collective authority.
 	PublicKey string `json:"public-key,omitempty"`
@@ -236,10 +236,10 @@ func (o *GetMetadataOKBody) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-/*NodesItems0 nodes items0
-swagger:model NodesItems0
+/*GetMetadataOKBodyNodesItems0 get metadata o k body nodes items0
+swagger:model GetMetadataOKBodyNodesItems0
 */
-type NodesItems0 struct {
+type GetMetadataOKBodyNodesItems0 struct {
 
 	// index
 	// Required: true
@@ -252,8 +252,8 @@ type NodesItems0 struct {
 	URL string `json:"url,omitempty"`
 }
 
-// Validate validates this nodes items0
-func (o *NodesItems0) Validate(formats strfmt.Registry) error {
+// Validate validates this get metadata o k body nodes items0
+func (o *GetMetadataOKBodyNodesItems0) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := o.validateIndex(formats); err != nil {
@@ -266,7 +266,7 @@ func (o *NodesItems0) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *NodesItems0) validateIndex(formats strfmt.Registry) error {
+func (o *GetMetadataOKBodyNodesItems0) validateIndex(formats strfmt.Registry) error {
 
 	if err := validate.Required("index", "body", o.Index); err != nil {
 		return err
@@ -276,7 +276,7 @@ func (o *NodesItems0) validateIndex(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (o *NodesItems0) MarshalBinary() ([]byte, error) {
+func (o *GetMetadataOKBodyNodesItems0) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -284,8 +284,8 @@ func (o *NodesItems0) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *NodesItems0) UnmarshalBinary(b []byte) error {
-	var res NodesItems0
+func (o *GetMetadataOKBodyNodesItems0) UnmarshalBinary(b []byte) error {
+	var res GetMetadataOKBodyNodesItems0
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

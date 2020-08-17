@@ -11,15 +11,15 @@ import (
 	golangswaggerpaths "path"
 )
 
-// GetSurvivalAnalysisURL generates an URL for the get survival analysis operation
-type GetSurvivalAnalysisURL struct {
+// SurvivalAnalysisURL generates an URL for the survival analysis operation
+type SurvivalAnalysisURL struct {
 	_basePath string
 }
 
 // WithBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *GetSurvivalAnalysisURL) WithBasePath(bp string) *GetSurvivalAnalysisURL {
+func (o *SurvivalAnalysisURL) WithBasePath(bp string) *SurvivalAnalysisURL {
 	o.SetBasePath(bp)
 	return o
 }
@@ -27,15 +27,15 @@ func (o *GetSurvivalAnalysisURL) WithBasePath(bp string) *GetSurvivalAnalysisURL
 // SetBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *GetSurvivalAnalysisURL) SetBasePath(bp string) {
+func (o *SurvivalAnalysisURL) SetBasePath(bp string) {
 	o._basePath = bp
 }
 
 // Build a url path and query string
-func (o *GetSurvivalAnalysisURL) Build() (*url.URL, error) {
+func (o *SurvivalAnalysisURL) Build() (*url.URL, error) {
 	var _result url.URL
 
-	var _path = "/survival-analysis"
+	var _path = "/node/analysis/survival/query"
 
 	_basePath := o._basePath
 	if _basePath == "" {
@@ -47,7 +47,7 @@ func (o *GetSurvivalAnalysisURL) Build() (*url.URL, error) {
 }
 
 // Must is a helper function to panic when the url builder returns an error
-func (o *GetSurvivalAnalysisURL) Must(u *url.URL, err error) *url.URL {
+func (o *SurvivalAnalysisURL) Must(u *url.URL, err error) *url.URL {
 	if err != nil {
 		panic(err)
 	}
@@ -58,17 +58,17 @@ func (o *GetSurvivalAnalysisURL) Must(u *url.URL, err error) *url.URL {
 }
 
 // String returns the string representation of the path with query string
-func (o *GetSurvivalAnalysisURL) String() string {
+func (o *SurvivalAnalysisURL) String() string {
 	return o.Must(o.Build()).String()
 }
 
 // BuildFull builds a full url with scheme, host, path and query string
-func (o *GetSurvivalAnalysisURL) BuildFull(scheme, host string) (*url.URL, error) {
+func (o *SurvivalAnalysisURL) BuildFull(scheme, host string) (*url.URL, error) {
 	if scheme == "" {
-		return nil, errors.New("scheme is required for a full url on GetSurvivalAnalysisURL")
+		return nil, errors.New("scheme is required for a full url on SurvivalAnalysisURL")
 	}
 	if host == "" {
-		return nil, errors.New("host is required for a full url on GetSurvivalAnalysisURL")
+		return nil, errors.New("host is required for a full url on SurvivalAnalysisURL")
 	}
 
 	base, err := o.Build()
@@ -82,6 +82,6 @@ func (o *GetSurvivalAnalysisURL) BuildFull(scheme, host string) (*url.URL, error
 }
 
 // StringFull returns the string representation of a complete url
-func (o *GetSurvivalAnalysisURL) StringFull(scheme, host string) string {
+func (o *SurvivalAnalysisURL) StringFull(scheme, host string) string {
 	return o.Must(o.BuildFull(scheme, host)).String()
 }

@@ -19,7 +19,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
-	"github.com/ldsec/medco-connector/restapi/models"
+	"github.com/ldsec/medco-connector/models"
 	"github.com/ldsec/medco-connector/restapi/server/operations/genomic_annotations"
 	"github.com/ldsec/medco-connector/restapi/server/operations/medco_network"
 	"github.com/ldsec/medco-connector/restapi/server/operations/medco_node"
@@ -38,6 +38,7 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 		PreServerShutdown:   func() {},
 		ServerShutdown:      func() {},
 		spec:                spec,
+		useSwaggerUI:        false,
 		ServeError:          errors.ServeError,
 		BasicAuthenticator:  security.BasicAuth,
 		APIKeyAuthenticator: security.APIKeyAuth,
@@ -62,9 +63,6 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 		MedcoNetworkGetMetadataHandler: medco_network.GetMetadataHandlerFunc(func(params medco_network.GetMetadataParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_network.GetMetadata has not yet been implemented")
 		}),
-		SurvivalAnalysisGetSurvivalAnalysisHandler: survival_analysis.GetSurvivalAnalysisHandlerFunc(func(params survival_analysis.GetSurvivalAnalysisParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation survival_analysis.GetSurvivalAnalysis has not yet been implemented")
-		}),
 		GenomicAnnotationsGetValuesHandler: genomic_annotations.GetValuesHandlerFunc(func(params genomic_annotations.GetValuesParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation genomic_annotations.GetValues has not yet been implemented")
 		}),
@@ -73,6 +71,9 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 		}),
 		MedcoNodePostCohortsHandler: medco_node.PostCohortsHandlerFunc(func(params medco_node.PostCohortsParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_node.PostCohorts has not yet been implemented")
+		}),
+		SurvivalAnalysisSurvivalAnalysisHandler: survival_analysis.SurvivalAnalysisHandlerFunc(func(params survival_analysis.SurvivalAnalysisParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation survival_analysis.SurvivalAnalysis has not yet been implemented")
 		}),
 
 		MedcoJwtAuth: func(token string, scopes []string) (*models.User, error) {
@@ -94,6 +95,7 @@ type MedcoConnectorAPI struct {
 	defaultConsumes string
 	defaultProduces string
 	Middleware      func(middleware.Builder) http.Handler
+	useSwaggerUI    bool
 
 	// BasicAuthenticator generates a runtime.Authenticator from the supplied basic auth function.
 	// It has a default implementation in the security package, however you can replace it for your particular usage.
@@ -130,14 +132,14 @@ type MedcoConnectorAPI struct {
 	MedcoNodeGetExploreQueryHandler medco_node.GetExploreQueryHandler
 	// MedcoNetworkGetMetadataHandler sets the operation handler for the get metadata operation
 	MedcoNetworkGetMetadataHandler medco_network.GetMetadataHandler
-	// SurvivalAnalysisGetSurvivalAnalysisHandler sets the operation handler for the get survival analysis operation
-	SurvivalAnalysisGetSurvivalAnalysisHandler survival_analysis.GetSurvivalAnalysisHandler
 	// GenomicAnnotationsGetValuesHandler sets the operation handler for the get values operation
 	GenomicAnnotationsGetValuesHandler genomic_annotations.GetValuesHandler
 	// GenomicAnnotationsGetVariantsHandler sets the operation handler for the get variants operation
 	GenomicAnnotationsGetVariantsHandler genomic_annotations.GetVariantsHandler
 	// MedcoNodePostCohortsHandler sets the operation handler for the post cohorts operation
 	MedcoNodePostCohortsHandler medco_node.PostCohortsHandler
+	// SurvivalAnalysisSurvivalAnalysisHandler sets the operation handler for the survival analysis operation
+	SurvivalAnalysisSurvivalAnalysisHandler survival_analysis.SurvivalAnalysisHandler
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
 	ServeError func(http.ResponseWriter, *http.Request, error)
@@ -155,6 +157,16 @@ type MedcoConnectorAPI struct {
 
 	// User defined logger function.
 	Logger func(string, ...interface{})
+}
+
+// UseRedoc for documentation at /docs
+func (o *MedcoConnectorAPI) UseRedoc() {
+	o.useSwaggerUI = false
+}
+
+// UseSwaggerUI for documentation at /docs
+func (o *MedcoConnectorAPI) UseSwaggerUI() {
+	o.useSwaggerUI = true
 }
 
 // SetDefaultProduces sets the default produces media type
@@ -223,9 +235,6 @@ func (o *MedcoConnectorAPI) Validate() error {
 	if o.MedcoNetworkGetMetadataHandler == nil {
 		unregistered = append(unregistered, "medco_network.GetMetadataHandler")
 	}
-	if o.SurvivalAnalysisGetSurvivalAnalysisHandler == nil {
-		unregistered = append(unregistered, "survival_analysis.GetSurvivalAnalysisHandler")
-	}
 	if o.GenomicAnnotationsGetValuesHandler == nil {
 		unregistered = append(unregistered, "genomic_annotations.GetValuesHandler")
 	}
@@ -234,6 +243,9 @@ func (o *MedcoConnectorAPI) Validate() error {
 	}
 	if o.MedcoNodePostCohortsHandler == nil {
 		unregistered = append(unregistered, "medco_node.PostCohortsHandler")
+	}
+	if o.SurvivalAnalysisSurvivalAnalysisHandler == nil {
+		unregistered = append(unregistered, "survival_analysis.SurvivalAnalysisHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -353,10 +365,6 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/network"] = medco_network.NewGetMetadata(o.context, o.MedcoNetworkGetMetadataHandler)
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/survival-analysis"] = survival_analysis.NewGetSurvivalAnalysis(o.context, o.SurvivalAnalysisGetSurvivalAnalysisHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
@@ -369,6 +377,10 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/node/explore/cohorts"] = medco_node.NewPostCohorts(o.context, o.MedcoNodePostCohortsHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/node/analysis/survival/query"] = survival_analysis.NewSurvivalAnalysis(o.context, o.SurvivalAnalysisSurvivalAnalysisHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP
@@ -378,6 +390,9 @@ func (o *MedcoConnectorAPI) Serve(builder middleware.Builder) http.Handler {
 
 	if o.Middleware != nil {
 		return o.Middleware(builder)
+	}
+	if o.useSwaggerUI {
+		return o.context.APIHandlerSwaggerUI(builder)
 	}
 	return o.context.APIHandler(builder)
 }

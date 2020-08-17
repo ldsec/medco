@@ -49,7 +49,7 @@ echo  "Initialising query tool databse"
 EOSQL
 SCHEMA=medco_query_tools
 SCHEMA_CHECK=$(psql ${PSQL_PARAMS} -d postgres-X -A -t -c "select count(*) from information_schema.schemata where schema_name = '${SCHEMA}';")
-if [[ "$SCHEMA_CHECK"  -ne "1"]];then
+if  [[ "$SCHEMA_CHECK" -ne "1" ]]; then
 echo "creating medcoqt schema"
 psql $PSQL_PARAMS -d postgres <<-EOSQL
        CREATE SCHEMA '${SCHEMA}'
@@ -97,6 +97,7 @@ CREATE TABLE IF NOT EXISTS '${SCHEMA}'.saved_cohorts
 )
 
 EOSQL
+fi
 fi
 
 exec $@

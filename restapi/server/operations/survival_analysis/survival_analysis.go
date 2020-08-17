@@ -16,43 +16,43 @@ import (
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 
-	"github.com/ldsec/medco-connector/restapi/models"
+	models "github.com/ldsec/medco-connector/restapi/models"
 )
 
-// GetSurvivalAnalysisHandlerFunc turns a function with the right signature into a get survival analysis handler
-type GetSurvivalAnalysisHandlerFunc func(GetSurvivalAnalysisParams, *models.User) middleware.Responder
+// SurvivalAnalysisHandlerFunc turns a function with the right signature into a survival analysis handler
+type SurvivalAnalysisHandlerFunc func(SurvivalAnalysisParams, *models.User) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn GetSurvivalAnalysisHandlerFunc) Handle(params GetSurvivalAnalysisParams, principal *models.User) middleware.Responder {
+func (fn SurvivalAnalysisHandlerFunc) Handle(params SurvivalAnalysisParams, principal *models.User) middleware.Responder {
 	return fn(params, principal)
 }
 
-// GetSurvivalAnalysisHandler interface for that can handle valid get survival analysis params
-type GetSurvivalAnalysisHandler interface {
-	Handle(GetSurvivalAnalysisParams, *models.User) middleware.Responder
+// SurvivalAnalysisHandler interface for that can handle valid survival analysis params
+type SurvivalAnalysisHandler interface {
+	Handle(SurvivalAnalysisParams, *models.User) middleware.Responder
 }
 
-// NewGetSurvivalAnalysis creates a new http.Handler for the get survival analysis operation
-func NewGetSurvivalAnalysis(ctx *middleware.Context, handler GetSurvivalAnalysisHandler) *GetSurvivalAnalysis {
-	return &GetSurvivalAnalysis{Context: ctx, Handler: handler}
+// NewSurvivalAnalysis creates a new http.Handler for the survival analysis operation
+func NewSurvivalAnalysis(ctx *middleware.Context, handler SurvivalAnalysisHandler) *SurvivalAnalysis {
+	return &SurvivalAnalysis{Context: ctx, Handler: handler}
 }
 
-/*GetSurvivalAnalysis swagger:route POST /survival-analysis survival-analysis getSurvivalAnalysis
+/*SurvivalAnalysis swagger:route POST /node/analysis/survival/query survival-analysis survivalAnalysis
 
 Send a query to run a survival analysis
 
 */
-type GetSurvivalAnalysis struct {
+type SurvivalAnalysis struct {
 	Context *middleware.Context
-	Handler GetSurvivalAnalysisHandler
+	Handler SurvivalAnalysisHandler
 }
 
-func (o *GetSurvivalAnalysis) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+func (o *SurvivalAnalysis) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	route, rCtx, _ := o.Context.RouteInfo(r)
 	if rCtx != nil {
 		r = rCtx
 	}
-	var Params = NewGetSurvivalAnalysisParams()
+	var Params = NewSurvivalAnalysisParams()
 
 	uprinc, aCtx, err := o.Context.Authorize(r, route)
 	if err != nil {
@@ -78,10 +78,10 @@ func (o *GetSurvivalAnalysis) ServeHTTP(rw http.ResponseWriter, r *http.Request)
 
 }
 
-// GetSurvivalAnalysisBody get survival analysis body
+// SurvivalAnalysisBody survival analysis body
 //
-// swagger:model GetSurvivalAnalysisBody
-type GetSurvivalAnalysisBody struct {
+// swagger:model SurvivalAnalysisBody
+type SurvivalAnalysisBody struct {
 
 	// ID
 	ID string `json:"ID,omitempty"`
@@ -105,7 +105,7 @@ type GetSurvivalAnalysisBody struct {
 
 	// sub group definitions
 	// Max Items: 4
-	SubGroupDefinitions []*SubGroupDefinitionsItems0 `json:"subGroupDefinitions"`
+	SubGroupDefinitions []*SurvivalAnalysisParamsBodySubGroupDefinitionsItems0 `json:"subGroupDefinitions"`
 
 	// time granularity
 	// Enum: [day week month year]
@@ -119,8 +119,8 @@ type GetSurvivalAnalysisBody struct {
 	UserPublicKey string `json:"userPublicKey,omitempty"`
 }
 
-// Validate validates this get survival analysis body
-func (o *GetSurvivalAnalysisBody) Validate(formats strfmt.Registry) error {
+// Validate validates this survival analysis body
+func (o *SurvivalAnalysisBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := o.validateEndColumn(formats); err != nil {
@@ -149,7 +149,7 @@ func (o *GetSurvivalAnalysisBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-var getSurvivalAnalysisBodyTypeEndColumnPropEnum []interface{}
+var survivalAnalysisBodyTypeEndColumnPropEnum []interface{}
 
 func init() {
 	var res []string
@@ -157,28 +157,28 @@ func init() {
 		panic(err)
 	}
 	for _, v := range res {
-		getSurvivalAnalysisBodyTypeEndColumnPropEnum = append(getSurvivalAnalysisBodyTypeEndColumnPropEnum, v)
+		survivalAnalysisBodyTypeEndColumnPropEnum = append(survivalAnalysisBodyTypeEndColumnPropEnum, v)
 	}
 }
 
 const (
 
-	// GetSurvivalAnalysisBodyEndColumnStartDate captures enum value "start_date"
-	GetSurvivalAnalysisBodyEndColumnStartDate string = "start_date"
+	// SurvivalAnalysisBodyEndColumnStartDate captures enum value "start_date"
+	SurvivalAnalysisBodyEndColumnStartDate string = "start_date"
 
-	// GetSurvivalAnalysisBodyEndColumnEndDate captures enum value "end_date"
-	GetSurvivalAnalysisBodyEndColumnEndDate string = "end_date"
+	// SurvivalAnalysisBodyEndColumnEndDate captures enum value "end_date"
+	SurvivalAnalysisBodyEndColumnEndDate string = "end_date"
 )
 
 // prop value enum
-func (o *GetSurvivalAnalysisBody) validateEndColumnEnum(path, location string, value string) error {
-	if err := validate.EnumCase(path, location, value, getSurvivalAnalysisBodyTypeEndColumnPropEnum, true); err != nil {
+func (o *SurvivalAnalysisBody) validateEndColumnEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, survivalAnalysisBodyTypeEndColumnPropEnum, true); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (o *GetSurvivalAnalysisBody) validateEndColumn(formats strfmt.Registry) error {
+func (o *SurvivalAnalysisBody) validateEndColumn(formats strfmt.Registry) error {
 
 	if swag.IsZero(o.EndColumn) { // not required
 		return nil
@@ -192,7 +192,7 @@ func (o *GetSurvivalAnalysisBody) validateEndColumn(formats strfmt.Registry) err
 	return nil
 }
 
-var getSurvivalAnalysisBodyTypeStartColumnPropEnum []interface{}
+var survivalAnalysisBodyTypeStartColumnPropEnum []interface{}
 
 func init() {
 	var res []string
@@ -200,28 +200,28 @@ func init() {
 		panic(err)
 	}
 	for _, v := range res {
-		getSurvivalAnalysisBodyTypeStartColumnPropEnum = append(getSurvivalAnalysisBodyTypeStartColumnPropEnum, v)
+		survivalAnalysisBodyTypeStartColumnPropEnum = append(survivalAnalysisBodyTypeStartColumnPropEnum, v)
 	}
 }
 
 const (
 
-	// GetSurvivalAnalysisBodyStartColumnStartDate captures enum value "start_date"
-	GetSurvivalAnalysisBodyStartColumnStartDate string = "start_date"
+	// SurvivalAnalysisBodyStartColumnStartDate captures enum value "start_date"
+	SurvivalAnalysisBodyStartColumnStartDate string = "start_date"
 
-	// GetSurvivalAnalysisBodyStartColumnEndDate captures enum value "end_date"
-	GetSurvivalAnalysisBodyStartColumnEndDate string = "end_date"
+	// SurvivalAnalysisBodyStartColumnEndDate captures enum value "end_date"
+	SurvivalAnalysisBodyStartColumnEndDate string = "end_date"
 )
 
 // prop value enum
-func (o *GetSurvivalAnalysisBody) validateStartColumnEnum(path, location string, value string) error {
-	if err := validate.EnumCase(path, location, value, getSurvivalAnalysisBodyTypeStartColumnPropEnum, true); err != nil {
+func (o *SurvivalAnalysisBody) validateStartColumnEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, survivalAnalysisBodyTypeStartColumnPropEnum, true); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (o *GetSurvivalAnalysisBody) validateStartColumn(formats strfmt.Registry) error {
+func (o *SurvivalAnalysisBody) validateStartColumn(formats strfmt.Registry) error {
 
 	if swag.IsZero(o.StartColumn) { // not required
 		return nil
@@ -235,7 +235,7 @@ func (o *GetSurvivalAnalysisBody) validateStartColumn(formats strfmt.Registry) e
 	return nil
 }
 
-func (o *GetSurvivalAnalysisBody) validateSubGroupDefinitions(formats strfmt.Registry) error {
+func (o *SurvivalAnalysisBody) validateSubGroupDefinitions(formats strfmt.Registry) error {
 
 	if swag.IsZero(o.SubGroupDefinitions) { // not required
 		return nil
@@ -266,7 +266,7 @@ func (o *GetSurvivalAnalysisBody) validateSubGroupDefinitions(formats strfmt.Reg
 	return nil
 }
 
-var getSurvivalAnalysisBodyTypeTimeGranularityPropEnum []interface{}
+var survivalAnalysisBodyTypeTimeGranularityPropEnum []interface{}
 
 func init() {
 	var res []string
@@ -274,34 +274,34 @@ func init() {
 		panic(err)
 	}
 	for _, v := range res {
-		getSurvivalAnalysisBodyTypeTimeGranularityPropEnum = append(getSurvivalAnalysisBodyTypeTimeGranularityPropEnum, v)
+		survivalAnalysisBodyTypeTimeGranularityPropEnum = append(survivalAnalysisBodyTypeTimeGranularityPropEnum, v)
 	}
 }
 
 const (
 
-	// GetSurvivalAnalysisBodyTimeGranularityDay captures enum value "day"
-	GetSurvivalAnalysisBodyTimeGranularityDay string = "day"
+	// SurvivalAnalysisBodyTimeGranularityDay captures enum value "day"
+	SurvivalAnalysisBodyTimeGranularityDay string = "day"
 
-	// GetSurvivalAnalysisBodyTimeGranularityWeek captures enum value "week"
-	GetSurvivalAnalysisBodyTimeGranularityWeek string = "week"
+	// SurvivalAnalysisBodyTimeGranularityWeek captures enum value "week"
+	SurvivalAnalysisBodyTimeGranularityWeek string = "week"
 
-	// GetSurvivalAnalysisBodyTimeGranularityMonth captures enum value "month"
-	GetSurvivalAnalysisBodyTimeGranularityMonth string = "month"
+	// SurvivalAnalysisBodyTimeGranularityMonth captures enum value "month"
+	SurvivalAnalysisBodyTimeGranularityMonth string = "month"
 
-	// GetSurvivalAnalysisBodyTimeGranularityYear captures enum value "year"
-	GetSurvivalAnalysisBodyTimeGranularityYear string = "year"
+	// SurvivalAnalysisBodyTimeGranularityYear captures enum value "year"
+	SurvivalAnalysisBodyTimeGranularityYear string = "year"
 )
 
 // prop value enum
-func (o *GetSurvivalAnalysisBody) validateTimeGranularityEnum(path, location string, value string) error {
-	if err := validate.EnumCase(path, location, value, getSurvivalAnalysisBodyTypeTimeGranularityPropEnum, true); err != nil {
+func (o *SurvivalAnalysisBody) validateTimeGranularityEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, survivalAnalysisBodyTypeTimeGranularityPropEnum, true); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (o *GetSurvivalAnalysisBody) validateTimeGranularity(formats strfmt.Registry) error {
+func (o *SurvivalAnalysisBody) validateTimeGranularity(formats strfmt.Registry) error {
 
 	if swag.IsZero(o.TimeGranularity) { // not required
 		return nil
@@ -315,7 +315,7 @@ func (o *GetSurvivalAnalysisBody) validateTimeGranularity(formats strfmt.Registr
 	return nil
 }
 
-func (o *GetSurvivalAnalysisBody) validateUserPublicKey(formats strfmt.Registry) error {
+func (o *SurvivalAnalysisBody) validateUserPublicKey(formats strfmt.Registry) error {
 
 	if swag.IsZero(o.UserPublicKey) { // not required
 		return nil
@@ -329,7 +329,7 @@ func (o *GetSurvivalAnalysisBody) validateUserPublicKey(formats strfmt.Registry)
 }
 
 // MarshalBinary interface implementation
-func (o *GetSurvivalAnalysisBody) MarshalBinary() ([]byte, error) {
+func (o *SurvivalAnalysisBody) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -337,8 +337,8 @@ func (o *GetSurvivalAnalysisBody) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *GetSurvivalAnalysisBody) UnmarshalBinary(b []byte) error {
-	var res GetSurvivalAnalysisBody
+func (o *SurvivalAnalysisBody) UnmarshalBinary(b []byte) error {
+	var res SurvivalAnalysisBody
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -346,22 +346,22 @@ func (o *GetSurvivalAnalysisBody) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-// GetSurvivalAnalysisDefaultBody get survival analysis default body
+// SurvivalAnalysisDefaultBody survival analysis default body
 //
-// swagger:model GetSurvivalAnalysisDefaultBody
-type GetSurvivalAnalysisDefaultBody struct {
+// swagger:model SurvivalAnalysisDefaultBody
+type SurvivalAnalysisDefaultBody struct {
 
 	// message
 	Message string `json:"message,omitempty"`
 }
 
-// Validate validates this get survival analysis default body
-func (o *GetSurvivalAnalysisDefaultBody) Validate(formats strfmt.Registry) error {
+// Validate validates this survival analysis default body
+func (o *SurvivalAnalysisDefaultBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (o *GetSurvivalAnalysisDefaultBody) MarshalBinary() ([]byte, error) {
+func (o *SurvivalAnalysisDefaultBody) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -369,8 +369,8 @@ func (o *GetSurvivalAnalysisDefaultBody) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *GetSurvivalAnalysisDefaultBody) UnmarshalBinary(b []byte) error {
-	var res GetSurvivalAnalysisDefaultBody
+func (o *SurvivalAnalysisDefaultBody) UnmarshalBinary(b []byte) error {
+	var res SurvivalAnalysisDefaultBody
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -378,20 +378,20 @@ func (o *GetSurvivalAnalysisDefaultBody) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-// GetSurvivalAnalysisOKBody get survival analysis o k body
+// SurvivalAnalysisOKBody survival analysis o k body
 //
-// swagger:model GetSurvivalAnalysisOKBody
-type GetSurvivalAnalysisOKBody struct {
+// swagger:model SurvivalAnalysisOKBody
+type SurvivalAnalysisOKBody struct {
 
 	// results
-	Results []*ResultsItems0 `json:"results"`
+	Results []*SurvivalAnalysisOKBodyResultsItems0 `json:"results"`
 
 	// timers
 	Timers map[string]float64 `json:"timers,omitempty"`
 }
 
-// Validate validates this get survival analysis o k body
-func (o *GetSurvivalAnalysisOKBody) Validate(formats strfmt.Registry) error {
+// Validate validates this survival analysis o k body
+func (o *SurvivalAnalysisOKBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := o.validateResults(formats); err != nil {
@@ -404,7 +404,7 @@ func (o *GetSurvivalAnalysisOKBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *GetSurvivalAnalysisOKBody) validateResults(formats strfmt.Registry) error {
+func (o *SurvivalAnalysisOKBody) validateResults(formats strfmt.Registry) error {
 
 	if swag.IsZero(o.Results) { // not required
 		return nil
@@ -418,7 +418,7 @@ func (o *GetSurvivalAnalysisOKBody) validateResults(formats strfmt.Registry) err
 		if o.Results[i] != nil {
 			if err := o.Results[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("getSurvivalAnalysisOK" + "." + "results" + "." + strconv.Itoa(i))
+					return ve.ValidateName("survivalAnalysisOK" + "." + "results" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -430,7 +430,7 @@ func (o *GetSurvivalAnalysisOKBody) validateResults(formats strfmt.Registry) err
 }
 
 // MarshalBinary interface implementation
-func (o *GetSurvivalAnalysisOKBody) MarshalBinary() ([]byte, error) {
+func (o *SurvivalAnalysisOKBody) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -438,8 +438,8 @@ func (o *GetSurvivalAnalysisOKBody) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *GetSurvivalAnalysisOKBody) UnmarshalBinary(b []byte) error {
-	var res GetSurvivalAnalysisOKBody
+func (o *SurvivalAnalysisOKBody) UnmarshalBinary(b []byte) error {
+	var res SurvivalAnalysisOKBody
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -447,20 +447,20 @@ func (o *GetSurvivalAnalysisOKBody) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-// ResultsItems0 results items0
+// SurvivalAnalysisOKBodyResultsItems0 survival analysis o k body results items0
 //
-// swagger:model ResultsItems0
-type ResultsItems0 struct {
+// swagger:model SurvivalAnalysisOKBodyResultsItems0
+type SurvivalAnalysisOKBodyResultsItems0 struct {
 
 	// group ID
 	GroupID string `json:"groupID,omitempty"`
 
 	// group results
-	GroupResults []*ResultsItems0GroupResultsItems0 `json:"groupResults"`
+	GroupResults []*SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0 `json:"groupResults"`
 }
 
-// Validate validates this results items0
-func (o *ResultsItems0) Validate(formats strfmt.Registry) error {
+// Validate validates this survival analysis o k body results items0
+func (o *SurvivalAnalysisOKBodyResultsItems0) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := o.validateGroupResults(formats); err != nil {
@@ -473,7 +473,7 @@ func (o *ResultsItems0) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *ResultsItems0) validateGroupResults(formats strfmt.Registry) error {
+func (o *SurvivalAnalysisOKBodyResultsItems0) validateGroupResults(formats strfmt.Registry) error {
 
 	if swag.IsZero(o.GroupResults) { // not required
 		return nil
@@ -499,7 +499,7 @@ func (o *ResultsItems0) validateGroupResults(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (o *ResultsItems0) MarshalBinary() ([]byte, error) {
+func (o *SurvivalAnalysisOKBodyResultsItems0) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -507,8 +507,8 @@ func (o *ResultsItems0) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *ResultsItems0) UnmarshalBinary(b []byte) error {
-	var res ResultsItems0
+func (o *SurvivalAnalysisOKBodyResultsItems0) UnmarshalBinary(b []byte) error {
+	var res SurvivalAnalysisOKBodyResultsItems0
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -516,20 +516,20 @@ func (o *ResultsItems0) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-// ResultsItems0GroupResultsItems0 results items0 group results items0
+// SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0 survival analysis o k body results items0 group results items0
 //
-// swagger:model ResultsItems0GroupResultsItems0
-type ResultsItems0GroupResultsItems0 struct {
+// swagger:model SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0
+type SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0 struct {
 
 	// events
-	Events *ResultsItems0GroupResultsItems0Events `json:"events,omitempty"`
+	Events *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0Events `json:"events,omitempty"`
 
 	// timepoint
 	Timepoint string `json:"timepoint,omitempty"`
 }
 
-// Validate validates this results items0 group results items0
-func (o *ResultsItems0GroupResultsItems0) Validate(formats strfmt.Registry) error {
+// Validate validates this survival analysis o k body results items0 group results items0
+func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := o.validateEvents(formats); err != nil {
@@ -542,7 +542,7 @@ func (o *ResultsItems0GroupResultsItems0) Validate(formats strfmt.Registry) erro
 	return nil
 }
 
-func (o *ResultsItems0GroupResultsItems0) validateEvents(formats strfmt.Registry) error {
+func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0) validateEvents(formats strfmt.Registry) error {
 
 	if swag.IsZero(o.Events) { // not required
 		return nil
@@ -561,7 +561,7 @@ func (o *ResultsItems0GroupResultsItems0) validateEvents(formats strfmt.Registry
 }
 
 // MarshalBinary interface implementation
-func (o *ResultsItems0GroupResultsItems0) MarshalBinary() ([]byte, error) {
+func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -569,8 +569,8 @@ func (o *ResultsItems0GroupResultsItems0) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *ResultsItems0GroupResultsItems0) UnmarshalBinary(b []byte) error {
-	var res ResultsItems0GroupResultsItems0
+func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0) UnmarshalBinary(b []byte) error {
+	var res SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -578,10 +578,10 @@ func (o *ResultsItems0GroupResultsItems0) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-// ResultsItems0GroupResultsItems0Events results items0 group results items0 events
+// SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0Events survival analysis o k body results items0 group results items0 events
 //
-// swagger:model ResultsItems0GroupResultsItems0Events
-type ResultsItems0GroupResultsItems0Events struct {
+// swagger:model SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0Events
+type SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0Events struct {
 
 	// censoringevent
 	Censoringevent string `json:"censoringevent,omitempty"`
@@ -590,13 +590,13 @@ type ResultsItems0GroupResultsItems0Events struct {
 	Eventofinterest string `json:"eventofinterest,omitempty"`
 }
 
-// Validate validates this results items0 group results items0 events
-func (o *ResultsItems0GroupResultsItems0Events) Validate(formats strfmt.Registry) error {
+// Validate validates this survival analysis o k body results items0 group results items0 events
+func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0Events) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (o *ResultsItems0GroupResultsItems0Events) MarshalBinary() ([]byte, error) {
+func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0Events) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -604,8 +604,8 @@ func (o *ResultsItems0GroupResultsItems0Events) MarshalBinary() ([]byte, error) 
 }
 
 // UnmarshalBinary interface implementation
-func (o *ResultsItems0GroupResultsItems0Events) UnmarshalBinary(b []byte) error {
-	var res ResultsItems0GroupResultsItems0Events
+func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0Events) UnmarshalBinary(b []byte) error {
+	var res SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0Events
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -613,10 +613,10 @@ func (o *ResultsItems0GroupResultsItems0Events) UnmarshalBinary(b []byte) error 
 	return nil
 }
 
-// SubGroupDefinitionsItems0 sub group definitions items0
+// SurvivalAnalysisParamsBodySubGroupDefinitionsItems0 survival analysis params body sub group definitions items0
 //
-// swagger:model SubGroupDefinitionsItems0
-type SubGroupDefinitionsItems0 struct {
+// swagger:model SurvivalAnalysisParamsBodySubGroupDefinitionsItems0
+type SurvivalAnalysisParamsBodySubGroupDefinitionsItems0 struct {
 
 	// cohort name
 	CohortName string `json:"cohortName,omitempty"`
@@ -625,8 +625,8 @@ type SubGroupDefinitionsItems0 struct {
 	Panels []*models.Panel `json:"panels"`
 }
 
-// Validate validates this sub group definitions items0
-func (o *SubGroupDefinitionsItems0) Validate(formats strfmt.Registry) error {
+// Validate validates this survival analysis params body sub group definitions items0
+func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := o.validatePanels(formats); err != nil {
@@ -639,7 +639,7 @@ func (o *SubGroupDefinitionsItems0) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *SubGroupDefinitionsItems0) validatePanels(formats strfmt.Registry) error {
+func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) validatePanels(formats strfmt.Registry) error {
 
 	if swag.IsZero(o.Panels) { // not required
 		return nil
@@ -665,7 +665,7 @@ func (o *SubGroupDefinitionsItems0) validatePanels(formats strfmt.Registry) erro
 }
 
 // MarshalBinary interface implementation
-func (o *SubGroupDefinitionsItems0) MarshalBinary() ([]byte, error) {
+func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -673,8 +673,8 @@ func (o *SubGroupDefinitionsItems0) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *SubGroupDefinitionsItems0) UnmarshalBinary(b []byte) error {
-	var res SubGroupDefinitionsItems0
+func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) UnmarshalBinary(b []byte) error {
+	var res SurvivalAnalysisParamsBodySubGroupDefinitionsItems0
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

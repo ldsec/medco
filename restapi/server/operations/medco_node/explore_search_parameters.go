@@ -13,7 +13,7 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 
-	"github.com/ldsec/medco-connector/restapi/models"
+	"github.com/ldsec/medco-connector/models"
 )
 
 // NewExploreSearchParams creates a new ExploreSearchParams object

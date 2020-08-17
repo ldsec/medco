@@ -10,7 +10,7 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 
-	"github.com/ldsec/medco-connector/restapi/models"
+	"github.com/ldsec/medco-connector/models"
 	"github.com/ldsec/medco-connector/restapi/server/operations"
 	"github.com/ldsec/medco-connector/restapi/server/operations/genomic_annotations"
 	"github.com/ldsec/medco-connector/restapi/server/operations/medco_network"
@@ -33,6 +33,10 @@ func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
 	//
 	// Example:
 	// api.Logger = log.Printf
+
+	api.UseSwaggerUI()
+	// To continue using redoc as your UI, uncomment the following line
+	// api.UseRedoc()
 
 	api.JSONConsumer = runtime.JSONConsumer()
 
@@ -74,11 +78,6 @@ func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
 			return middleware.NotImplemented("operation medco_network.GetMetadata has not yet been implemented")
 		})
 	}
-	if api.SurvivalAnalysisGetSurvivalAnalysisHandler == nil {
-		api.SurvivalAnalysisGetSurvivalAnalysisHandler = survival_analysis.GetSurvivalAnalysisHandlerFunc(func(params survival_analysis.GetSurvivalAnalysisParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation survival_analysis.GetSurvivalAnalysis has not yet been implemented")
-		})
-	}
 	if api.GenomicAnnotationsGetValuesHandler == nil {
 		api.GenomicAnnotationsGetValuesHandler = genomic_annotations.GetValuesHandlerFunc(func(params genomic_annotations.GetValuesParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation genomic_annotations.GetValues has not yet been implemented")
@@ -92,6 +91,11 @@ func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
 	if api.MedcoNodePostCohortsHandler == nil {
 		api.MedcoNodePostCohortsHandler = medco_node.PostCohortsHandlerFunc(func(params medco_node.PostCohortsParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_node.PostCohorts has not yet been implemented")
+		})
+	}
+	if api.SurvivalAnalysisSurvivalAnalysisHandler == nil {
+		api.SurvivalAnalysisSurvivalAnalysisHandler = survival_analysis.SurvivalAnalysisHandlerFunc(func(params survival_analysis.SurvivalAnalysisParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation survival_analysis.SurvivalAnalysis has not yet been implemented")
 		})
 	}
 

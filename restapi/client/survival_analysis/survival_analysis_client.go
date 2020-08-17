@@ -25,29 +25,29 @@ type Client struct {
 
 // ClientService is the interface for Client methods
 type ClientService interface {
-	GetSurvivalAnalysis(params *GetSurvivalAnalysisParams, authInfo runtime.ClientAuthInfoWriter) (*GetSurvivalAnalysisOK, error)
+	SurvivalAnalysis(params *SurvivalAnalysisParams, authInfo runtime.ClientAuthInfoWriter) (*SurvivalAnalysisOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
 
 /*
-  GetSurvivalAnalysis sends a query to run a survival analysis
+  SurvivalAnalysis sends a query to run a survival analysis
 */
-func (a *Client) GetSurvivalAnalysis(params *GetSurvivalAnalysisParams, authInfo runtime.ClientAuthInfoWriter) (*GetSurvivalAnalysisOK, error) {
+func (a *Client) SurvivalAnalysis(params *SurvivalAnalysisParams, authInfo runtime.ClientAuthInfoWriter) (*SurvivalAnalysisOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetSurvivalAnalysisParams()
+		params = NewSurvivalAnalysisParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getSurvivalAnalysis",
+		ID:                 "survivalAnalysis",
 		Method:             "POST",
-		PathPattern:        "/survival-analysis",
+		PathPattern:        "/node/analysis/survival/query",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &GetSurvivalAnalysisReader{formats: a.formats},
+		Reader:             &SurvivalAnalysisReader{formats: a.formats},
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
@@ -55,12 +55,12 @@ func (a *Client) GetSurvivalAnalysis(params *GetSurvivalAnalysisParams, authInfo
 	if err != nil {
 		return nil, err
 	}
-	success, ok := result.(*GetSurvivalAnalysisOK)
+	success, ok := result.(*SurvivalAnalysisOK)
 	if ok {
 		return success, nil
 	}
 	// unexpected success response
-	unexpectedSuccess := result.(*GetSurvivalAnalysisDefault)
+	unexpectedSuccess := result.(*SurvivalAnalysisDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 

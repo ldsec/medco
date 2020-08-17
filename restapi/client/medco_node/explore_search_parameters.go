@@ -15,7 +15,7 @@ import (
 	cr "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 
-	"github.com/ldsec/medco-connector/restapi/models"
+	"github.com/ldsec/medco-connector/models"
 )
 
 // NewExploreSearchParams creates a new ExploreSearchParams object

@@ -3,11 +3,11 @@ package survivalserver
 const sql1 string = `
 SELECT patient_num,start_date 
 FROM observation_fact
-WHERE concept_cd = <start_event_concept_cd> and patient_num IN <list_of_patient_num>
+WHERE concept_cd = $1 and patient_num = ANY($2::integer[])
 `
 const sql2 string = `
 SELECT patient_num,end_date DATE_PART() FROM observation_fact
-WHERE concept_cd = <end_event_concept_cd> and patient_num <IN list_of_patient_num>
+WHERE concept_cd = $3 and patient_num = ANY($2::integer[])
 `
 const sql3 string = `
 SELECT DATE_PART(end_date::timestamp,start_date::timestamp) AS timepoint, COUNT(*) AS event_count
@@ -19,7 +19,7 @@ GROUP BY timepoint
 
 const sql4 string = `
 SELECT patient_num, MAX(end_date) AS end_date
-WHERE patient_num IN <list_of_patient_num> AND patient_num NOT IN (SELECT patient_num FROM (<SQL2>))
+WHERE patient_num patient_num = ANY($2::integer[]) AND patient_num NOT IN (SELECT patient_num FROM (` + sql2 + `))
 GROUP BY patient_num
 `
 

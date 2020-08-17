@@ -13,18 +13,18 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 )
 
-// NewGetSurvivalAnalysisParams creates a new GetSurvivalAnalysisParams object
+// NewSurvivalAnalysisParams creates a new SurvivalAnalysisParams object
 // no default values defined in spec.
-func NewGetSurvivalAnalysisParams() GetSurvivalAnalysisParams {
+func NewSurvivalAnalysisParams() SurvivalAnalysisParams {
 
-	return GetSurvivalAnalysisParams{}
+	return SurvivalAnalysisParams{}
 }
 
-// GetSurvivalAnalysisParams contains all the bound params for the get survival analysis operation
+// SurvivalAnalysisParams contains all the bound params for the survival analysis operation
 // typically these are obtained from a http.Request
 //
-// swagger:parameters getSurvivalAnalysis
-type GetSurvivalAnalysisParams struct {
+// swagger:parameters survivalAnalysis
+type SurvivalAnalysisParams struct {
 
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
@@ -32,21 +32,21 @@ type GetSurvivalAnalysisParams struct {
 	/*User public key, patient list and time codes strings for the survival analysis
 	  In: body
 	*/
-	Body GetSurvivalAnalysisBody
+	Body SurvivalAnalysisBody
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
 // for simple values it will use straight method calls.
 //
-// To ensure default values, the struct must have been initialized with NewGetSurvivalAnalysisParams() beforehand.
-func (o *GetSurvivalAnalysisParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
+// To ensure default values, the struct must have been initialized with NewSurvivalAnalysisParams() beforehand.
+func (o *SurvivalAnalysisParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
 
 	o.HTTPRequest = r
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body GetSurvivalAnalysisBody
+		var body SurvivalAnalysisBody
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			res = append(res, errors.NewParseError("body", "body", "", err))
 		} else {

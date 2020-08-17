@@ -191,7 +191,7 @@ paths:
           $ref: "#/responses/errorResponse"
       security:
         - medco-jwt: ["medco-genomic-annotations"]
-  /survival-analysis:
+  /node/analysis/survival/query:
     post :
       tags:
         - "survival-analysis"
