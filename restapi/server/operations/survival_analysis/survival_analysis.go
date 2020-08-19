@@ -16,7 +16,7 @@ import (
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 
-	models "github.com/ldsec/medco-connector/restapi/models"
+	"github.com/ldsec/medco-connector/models"
 )
 
 // SurvivalAnalysisHandlerFunc turns a function with the right signature into a survival analysis handler
