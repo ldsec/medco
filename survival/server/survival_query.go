@@ -13,7 +13,7 @@ import (
 type Query struct {
 	UserPublicKey       string
 	SetID               int
-	SubGroupDefinitions []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0
+	SubGroupDefinitions []*survival_analysis.SubGroupDefinitionsItems0
 	TimeLimit           int
 	TimeGranularity     string
 	StartConcept        string
@@ -29,7 +29,7 @@ type Query struct {
 // NewQuery query constructor
 func NewQuery(UserPublicKey string,
 	SetID int,
-	SubGroupDefinitions []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0,
+	SubGroupDefinitions []*survival_analysis.SubGroupDefinitionsItems0,
 	TimeLimit int,
 	TimeGranularity string,
 	StartConcept string,

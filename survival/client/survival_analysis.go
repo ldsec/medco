@@ -136,7 +136,7 @@ func (clientSurvivalAnalysis *SurvivalAnalysis) Decrypt(value string) (int64, er
 }
 
 type NodeResult struct {
-	Body      *survival_analysis.GetSurvivalAnalysisOKBody
+	Body      *survival_analysis.SurvivalAnalysisOKBody
 	NodeIndex int
 }
 

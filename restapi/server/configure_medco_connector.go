@@ -10,7 +10,7 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 
-	"github.com/ldsec/medco-connector/models"
+	"github.com/ldsec/medco-connector/restapi/models"
 	"github.com/ldsec/medco-connector/restapi/server/operations"
 	"github.com/ldsec/medco-connector/restapi/server/operations/genomic_annotations"
 	"github.com/ldsec/medco-connector/restapi/server/operations/medco_network"
@@ -33,10 +33,6 @@ func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
 	//
 	// Example:
 	// api.Logger = log.Printf
-
-	api.UseSwaggerUI()
-	// To continue using redoc as your UI, uncomment the following line
-	// api.UseRedoc()
 
 	api.JSONConsumer = runtime.JSONConsumer()
 

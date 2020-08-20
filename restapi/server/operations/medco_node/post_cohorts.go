@@ -13,7 +13,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
-	"github.com/ldsec/medco-connector/models"
+	"github.com/ldsec/medco-connector/restapi/models"
 )
 
 // PostCohortsHandlerFunc turns a function with the right signature into a post cohorts handler

@@ -68,7 +68,7 @@ func NewSqlAccess(envPrefix string) (access *sql.DB, err error) {
 
 	access, err = utilserver.InitializeConnectionToDB(host, int(port), dbName, loginUser, loginPw)
 	if err != nil {
-		logrus.Error("Unable to connect database for direct access to I2B2")
+		logrus.Errorf("Unable to connect database for direct access to I2B2 for host : %s, for port %d", host, port)
 		return
 	}
 	logrus.Info("Connected I2B2 DB for direct access")

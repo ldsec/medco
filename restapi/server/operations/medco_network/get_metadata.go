@@ -15,7 +15,7 @@ import (
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 
-	"github.com/ldsec/medco-connector/models"
+	"github.com/ldsec/medco-connector/restapi/models"
 )
 
 // GetMetadataHandlerFunc turns a function with the right signature into a get metadata handler
@@ -119,7 +119,7 @@ type GetMetadataOKBody struct {
 	NodeIndex *int64 `json:"nodeIndex"`
 
 	// nodes
-	Nodes []*GetMetadataOKBodyNodesItems0 `json:"nodes"`
+	Nodes []*NodesItems0 `json:"nodes"`
 
 	// Aggregated public key of the collective authority.
 	PublicKey string `json:"public-key,omitempty"`
@@ -195,10 +195,10 @@ func (o *GetMetadataOKBody) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-// GetMetadataOKBodyNodesItems0 get metadata o k body nodes items0
+// NodesItems0 nodes items0
 //
-// swagger:model GetMetadataOKBodyNodesItems0
-type GetMetadataOKBodyNodesItems0 struct {
+// swagger:model NodesItems0
+type NodesItems0 struct {
 
 	// index
 	// Required: true
@@ -211,8 +211,8 @@ type GetMetadataOKBodyNodesItems0 struct {
 	URL string `json:"url,omitempty"`
 }
 
-// Validate validates this get metadata o k body nodes items0
-func (o *GetMetadataOKBodyNodesItems0) Validate(formats strfmt.Registry) error {
+// Validate validates this nodes items0
+func (o *NodesItems0) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := o.validateIndex(formats); err != nil {
@@ -225,7 +225,7 @@ func (o *GetMetadataOKBodyNodesItems0) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *GetMetadataOKBodyNodesItems0) validateIndex(formats strfmt.Registry) error {
+func (o *NodesItems0) validateIndex(formats strfmt.Registry) error {
 
 	if err := validate.Required("index", "body", o.Index); err != nil {
 		return err
@@ -235,7 +235,7 @@ func (o *GetMetadataOKBodyNodesItems0) validateIndex(formats strfmt.Registry) er
 }
 
 // MarshalBinary interface implementation
-func (o *GetMetadataOKBodyNodesItems0) MarshalBinary() ([]byte, error) {
+func (o *NodesItems0) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -243,8 +243,8 @@ func (o *GetMetadataOKBodyNodesItems0) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *GetMetadataOKBodyNodesItems0) UnmarshalBinary(b []byte) error {
-	var res GetMetadataOKBodyNodesItems0
+func (o *NodesItems0) UnmarshalBinary(b []byte) error {
+	var res NodesItems0
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
