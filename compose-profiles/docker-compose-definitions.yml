@@ -1,7 +1,7 @@
 version: '2.4'
 services:
   i2b2:
-    image: medco/i2b2:${I2B2_VERSION:-MedCo-v0.3.0}
+    image: medco/i2b2:${I2B2_VERSION:-v1.0.0-MedCo}
     build:
       context: ../docker-images/i2b2
     environment:
@@ -9,7 +9,7 @@ services:
       - I2B2_DB_PORT=5432
       - I2B2_DB_USER=i2b2
       - I2B2_DB_PW=i2b2
-      - I2B2_DB_NAME=i2b2medcosrv
+      - I2B2_DB_NAME=i2b2medco
       - WILDFLY_ADMIN_PASSWORD=admin
       - I2B2_DOMAIN_NAME=i2b2medco
       - I2B2_SERVICE_PASSWORD=pFjy3EjDVwLfT2rB9xkK
@@ -17,10 +17,7 @@ services:
       - AXIS2_LOGLEVEL=INFO
 
   medco-unlynx:
-    image: medco/medco-unlynx:${MEDCO_UNLYNX_VERSION:-v0.3.0}
-    ports:
-    - "2000"
-    - "2001"
+    image: medco/medco-unlynx:${MEDCO_UNLYNX_VERSION:-v1.0.0}
     environment:
     - NODE_IDX=0
     - UNLYNX_DEBUG_LEVEL=1
@@ -28,31 +25,27 @@ services:
     - ../configuration-profiles/dev-local-3nodes:/medco-configuration
 
   nginx:
-    image: medco/nginx:${NGINX_VERSION:-MedCo-v0.3.0}
+    image: medco/nginx:${NGINX_VERSION:-v1.0.0-MedCo}
     build:
       context: ../docker-images/nginx
-    ports:
-      - "80"
-      - "443"
     environment:
       - HTTP_SCHEME=http
       - ALL_TIMEOUTS_SECONDS=600
+      - PROD_CONFIG=false
     volumes:
       - ../docker-images/nginx/www-data:/www-data
       - ../docker-images/nginx/conf.d:/etc/nginx/conf.d
-      - ../configuration-profiles/dev-local-3nodes/group.toml:/medco-configuration/group.toml
 
   postgresql:
     image: postgres:9.6
     environment:
     - POSTGRES_PASSWORD=postgres
-    ports:
-    - "5432"
     volumes:
+    - medcodb:/var/lib/postgresql/data
     - ../docker-images/postgresql/initdb-data:/docker-entrypoint-initdb.d
 
   pg-admin:
-    image: medco/pgadmin4:${PGADMIN_VERSION:-MedCo-v0.3.0}
+    image: medco/pgadmin4:${PGADMIN_VERSION:-v1.0.0-MedCo}
     build:
       context: ../docker-images/pgadmin
     environment:
@@ -60,7 +53,7 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=admin
 
   keycloak:
-    image: medco/keycloak:${KEYCLOAK_VERSION:-MedCo-v0.3.0}
+    image: medco/keycloak:${KEYCLOAK_VERSION:-v1.0.0-MedCo}
     build:
       context: ../docker-images/keycloak
     environment:
@@ -74,9 +67,7 @@ services:
       - DB_PASSWORD=keycloak
 
   glowing-bear-medco:
-    image: medco/glowing-bear-medco:${GLOWING_BEAR_MEDCO_VERSION:-v0.3.0}
-    ports:
-      - "80"
+    image: medco/glowing-bear-medco:${GLOWING_BEAR_MEDCO_VERSION:-v1.0.0}
     environment:
       - GB_MEDCO_NODE_URL=http://localhost/local-3nodes/medco-0
       - GB_KEYCLOAK_URL=http://localhost/auth
@@ -85,9 +76,7 @@ services:
       - GB_FOOTER_TEXT=
 
   medco-connector:
-    image: medco/medco-connector:${MEDCO_CONNECTOR_VERSION:-v0.3.0}
-    ports:
-      - "1999"
+    image: medco/medco-connector:${MEDCO_CONNECTOR_VERSION:-v1.0.0}
     environment:
       - SERVER_HTTP_WRITE_TIMEOUT_SECONDS=600
       - I2B2_HIVE_URL=http://i2b2:8080/i2b2/services
@@ -107,16 +96,16 @@ services:
       - MEDCO_OBFUSCATION_MIN=5
       - MEDCO_NODES_URL=http://localhost/local-3nodes/medco-0,http://localhost/local-3nodes/medco-1,http://localhost/local-3nodes/medco-2
       - MEDCO_NODE_IDX=0
-      - GA_DB_HOST=postgresql
-      - GA_DB_PORT=5432
-      - GA_DB_USER=genomicannotations
-      - GA_DB_PW=genomicannotations
-      - GA_DB_NAME=gamedco
+      - MC_DB_HOST=postgresql
+      - MC_DB_PORT=5432
+      - MC_DB_USER=medcoconnector
+      - MC_DB_PW=medcoconnector
+      - MC_DB_NAME=medcoconnector
     volumes:
       - ../configuration-profiles/dev-local-3nodes:/medco-configuration
 
   medco-cli-client:
-    image: medco/medco-cli-client:${MEDCO_CONNECTOR_VERSION:-v0.3.0}
+    image: medco/medco-cli-client:${MEDCO_CONNECTOR_VERSION:-v1.0.0}
     environment:
       - LOG_LEVEL=3
       - UNLYNX_GROUP_FILE_PATH=/medco-configuration/group.toml
@@ -132,7 +121,7 @@ services:
     network_mode: host
 
   medco-loader:
-    image: medco/medco-loader:${MEDCO_LOADER_VERSION:-v0.3.0}
+    image: medco/medco-loader:${MEDCO_LOADER_VERSION:-v1.0.0}
     environment:
       - LOG_LEVEL=3
       - UNLYNX_GROUP_FILE_PATH=/medco-configuration/group.toml
@@ -142,11 +131,11 @@ services:
       - I2B2_DB_NAME=i2b2medco
       - I2B2_DB_USER=i2b2
       - I2B2_DB_PASSWORD=i2b2
-      - GA_DB_HOST=localhost
-      - GA_DB_PORT=5432
-      - GA_DB_NAME=gamedco
-      - GA_DB_USER=genomicannotations
-      - GA_DB_PASSWORD=genomicannotations
+      - MC_DB_HOST=localhost
+      - MC_DB_PORT=5432
+      - MC_DB_NAME=medcoconnector
+      - MC_DB_USER=medcoconnector
+      - MC_DB_PASSWORD=medcoconnector
     volumes:
       - ../resources/data:/data
       - ../configuration-profiles/dev-local-3nodes:/medco-configuration

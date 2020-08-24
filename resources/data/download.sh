@@ -12,6 +12,8 @@ wget -O ${SCRIPT_FOLDER}/genomic/tcga_cbio/mutation_data.csv ${REPO_URL}/genomic
 wget -O ${SCRIPT_FOLDER}/genomic/tcga_cbio/clinical_data.csv ${REPO_URL}/genomic/tcga_cbio/clinical_data.csv?raw=true
 wget -O ${SCRIPT_FOLDER}/genomic/tcga_cbio/8_mutation_data.csv ${REPO_URL}/genomic/tcga_cbio/8_mutation_data.csv?raw=true
 wget -O ${SCRIPT_FOLDER}/genomic/tcga_cbio/8_clinical_data.csv ${REPO_URL}/genomic/tcga_cbio/8_clinical_data.csv?raw=true
+wget -O ${SCRIPT_FOLDER}/genomic/tcga_cbio/mutation_data_fake.csv ${REPO_URL}/genomic/tcga_cbio/mutation_data_fake.csv?raw=true
+wget -O ${SCRIPT_FOLDER}/genomic/tcga_cbio/clinical_data_fake.csv ${REPO_URL}/genomic/tcga_cbio/clinical_data_fake.csv?raw=true
 wget -O ${SCRIPT_FOLDER}/genomic/sensitive.txt ${REPO_URL}/genomic/sensitive.txt?raw=true
 
 # i2b2 demo (v1) dataset

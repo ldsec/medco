@@ -43,6 +43,7 @@ ENV I2B2_DB_HOST="postgresql" \
 
 # build-time variables
 ENV I2B2_SQL_DIR="/i2b2-sql" \
+    I2B2_COMPRESSED_DATA_DIR="/i2b2-compressed-data" \
     I2B2_DATA_DIR="/i2b2-data" \
     PRE_INIT_SCRIPT_DIR="/pre-init-scripts" \
     I2B2_DATA_VERSION="v1.7.10.0002" \
@@ -61,11 +62,14 @@ USER root
 RUN sed -i 's/Xmx512m/Xmx2048m/g' $JBOSS_HOME/bin/standalone.conf && \
     sed -i 's/MaxMetaspaceSize=256m/MaxMetaspaceSize=1024m/g' $JBOSS_HOME/bin/standalone.conf && \
     chmod +x /usr/local/bin/docker-entrypoint.sh && \
-    mkdir -p "$I2B2_DATA_DIR" "$I2B2_FR_FILES_DIR" && \
+    mkdir -p "$I2B2_COMPRESSED_DATA_DIR" "$I2B2_DATA_DIR" "$I2B2_FR_FILES_DIR" && \
     chown -R jboss:jboss "$I2B2_DATA_DIR" "$JBOSS_HOME" && \
     yum update -y && \
     yum -y install wget git ant postgresql && \
     yum clean all
+RUN git clone --depth 1 --branch "$I2B2_DATA_VERSION" https://github.com/i2b2/i2b2-data.git "$I2B2_DATA_DIR" && \
+    GZIP=-9 tar -cvzf "$I2B2_COMPRESSED_DATA_DIR"/i2b2-data.tar.gz "$I2B2_DATA_DIR" && \
+    rm -rf "$I2B2_DATA_DIR"/{*,.*} || true
 USER jboss
 
 # run
