@@ -7,6 +7,7 @@ services:
     environment:
       - I2B2_DB_NAME=i2b2medcosrv0
       - I2B2_DOMAIN_NAME=i2b2medcosrv0
+      - MC_DB_NAME=medcoconnectorsrv0
       - AXIS2_LOGLEVEL=DEBUG
     ports:
       - "8090:8080"
@@ -50,11 +51,11 @@ services:
       - OIDC_JWT_ISSUERS=http://localhost/auth/realms/master,https://medco-demo.epfl.ch/auth/realms/master
       - OIDC_CLIENT_IDS=medco,medco
       - OIDC_JWT_USER_ID_CLAIMS=preferred_username,preferred_username
-      - DIRECT_ACCESS_DB_HOST=postgresql
-      - DIRECT_ACCESS_DB_PORT=5432
-      - DIRECT_ACCESS_DB_USER=i2b2
-      - DIRECT_ACCESS_DB_PW=i2b2
-      - DIRECT_ACCESS_DB_NAME=i2b2medcosrv0
+      - I2B2_DB_HOST=postgresql
+      - I2B2_DB_PORT=5432
+      - I2B2_DB_USER=i2b2
+      - I2B2_DB_PW=i2b2
+      - I2B2_DB_NAME=i2b2medcosrv0
     networks:
       intra-node-srv0:
       inter-nodes:
@@ -68,6 +69,7 @@ services:
       - I2B2_DB_NAME=i2b2medcosrv1
       - I2B2_DOMAIN_NAME=i2b2medcosrv1
       - AXIS2_LOGLEVEL=DEBUG
+      - MC_DB_NAME=medcoconnectorsrv1
     ports:
       - "8091:8080"
     networks:
@@ -110,11 +112,11 @@ services:
       - OIDC_JWT_ISSUERS=http://localhost/auth/realms/master,https://medco-demo.epfl.ch/auth/realms/master
       - OIDC_CLIENT_IDS=medco,medco
       - OIDC_JWT_USER_ID_CLAIMS=preferred_username,preferred_username
-      - DIRECT_ACCESS_DB_HOST=postgresql
-      - DIRECT_ACCESS_DB_PORT=5432
-      - DIRECT_ACCESS_DB_USER=i2b2
-      - DIRECT_ACCESS_DB_PW=i2b2
-      - DIRECT_ACCESS_DB_NAME=i2b2medcosrv1
+      - I2B2_DB_HOST=postgresql
+      - I2B2_DB_PORT=5432
+      - I2B2_DB_USER=i2b2
+      - I2B2_DB_PW=i2b2
+      - I2B2_DB_NAME=i2b2medcosrv1
     networks:
       intra-node-srv1:
       inter-nodes:
@@ -128,6 +130,7 @@ services:
       - I2B2_DB_NAME=i2b2medcosrv2
       - I2B2_DOMAIN_NAME=i2b2medcosrv2
       - AXIS2_LOGLEVEL=DEBUG
+      - MC_DB_NAME=medcoconnectorsrv2
     ports:
       - "8092:8080"
     networks:
@@ -170,11 +173,11 @@ services:
       - OIDC_JWT_ISSUERS=http://localhost/auth/realms/master,https://medco-demo.epfl.ch/auth/realms/master
       - OIDC_CLIENT_IDS=medco,medco
       - OIDC_JWT_USER_ID_CLAIMS=preferred_username,preferred_username
-      - DIRECT_ACCESS_DB_HOST=postgresql
-      - DIRECT_ACCESS_DB_PORT=5432
-      - DIRECT_ACCESS_DB_USER=i2b2
-      - DIRECT_ACCESS_DB_PW=i2b2
-      - DIRECT_ACCESS_DB_NAME=i2b2medcosrv2
+      - I2B2_DB_HOST=postgresql
+      - I2B2_DB_PORT=5432
+      - I2B2_DB_USER=i2b2
+      - I2B2_DB_PW=i2b2
+      - I2B2_DB_NAME=i2b2medcosrv2
     networks:
       intra-node-srv2:
       inter-nodes:

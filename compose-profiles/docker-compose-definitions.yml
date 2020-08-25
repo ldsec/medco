@@ -15,6 +15,11 @@ services:
       - I2B2_SERVICE_PASSWORD=pFjy3EjDVwLfT2rB9xkK
       - DEFAULT_USER_PASSWORD=demouser
       - AXIS2_LOGLEVEL=INFO
+      - MC_DB_HOST=postgresql
+      - MC_DB_PORT=5432
+      - MC_DB_USER=medcoconnector
+      - MC_DB_PW=medcoconnector
+      - MC_DB_NAME=medcoconnector
 
   medco-unlynx:
     image: medco/medco-unlynx:${MEDCO_UNLYNX_VERSION:-v1.0.0}
@@ -101,6 +106,11 @@ services:
       - MC_DB_USER=medcoconnector
       - MC_DB_PW=medcoconnector
       - MC_DB_NAME=medcoconnector
+      - I2B2_DB_HOST=postgresql
+      - I2B2_DB_PORT=5432
+      - I2B2_DB_USER=i2b2
+      - I2B2_DB_PW=i2b2
+      - I2B2_DB_NAME=i2b2medco
     volumes:
       - ../configuration-profiles/dev-local-3nodes:/medco-configuration
 
