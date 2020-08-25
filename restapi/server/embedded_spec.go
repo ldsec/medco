@@ -231,6 +231,9 @@ func init() {
                 "endConcept": {
                   "type": "string"
                 },
+                "endModifier": {
+                  "type": "string"
+                },
                 "setID": {
                   "type": "number"
                 },
@@ -242,6 +245,9 @@ func init() {
                   ]
                 },
                 "startConcept": {
+                  "type": "string"
+                },
+                "startModifier": {
                   "type": "string"
                 },
                 "subGroupDefinitions": {
@@ -1194,6 +1200,9 @@ func init() {
                 "endConcept": {
                   "type": "string"
                 },
+                "endModifier": {
+                  "type": "string"
+                },
                 "setID": {
                   "type": "number"
                 },
@@ -1205,6 +1214,9 @@ func init() {
                   ]
                 },
                 "startConcept": {
+                  "type": "string"
+                },
+                "startModifier": {
                   "type": "string"
                 },
                 "subGroupDefinitions": {

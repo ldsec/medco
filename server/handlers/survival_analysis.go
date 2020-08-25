@@ -14,7 +14,19 @@ import (
 // MedCoSurvivalAnalysisGetSurvivalAnalysisHandler handles /survival-analysis API endpoint
 func MedCoSurvivalAnalysisGetSurvivalAnalysisHandler(param survival_analysis.SurvivalAnalysisParams, principal *models.User) middleware.Responder {
 
-	survivalAnalysisQuery := survivalserver.NewQuery(param.Body.UserPublicKey, int(param.Body.SetID), param.Body.SubGroupDefinitions, int(param.Body.TimeLimit), param.Body.TimeGranularity, param.Body.StartConcept, param.Body.StartColumn, param.Body.EndConcept, param.Body.EndColumn)
+	survivalAnalysisQuery := survivalserver.NewQuery(
+		param.Body.UserPublicKey,
+		int(param.Body.SetID),
+		param.Body.SubGroupDefinitions,
+		int(param.Body.TimeLimit),
+		param.Body.TimeGranularity,
+		param.Body.StartConcept,
+		param.Body.StartColumn,
+		param.Body.StartModifier,
+		param.Body.EndConcept,
+		param.Body.EndColumn,
+		param.Body.StartModifier,
+	)
 
 	if err := survivalAnalysisQuery.Execute(); err != nil {
 		logrus.Error(fmt.Sprintf("Query execution error : %s", err.Error()))

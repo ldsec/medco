@@ -39,20 +39,11 @@ ENV I2B2_HIVE_URL=http://i2b2:8080/i2b2/services \
     MEDCO_NODES_URL="http://medco-connector-srv0/medco,http://medco-connector-srv1/medco,http://medco-connector-srv2/medco" \
     MEDCO_NODE_IDX=0 \
     MEDCO_OBFUSCATION_MIN=5 \
-    GA_DB_HOST=postgresql \
-    GA_DB_PORT=5432 \
-    GA_DB_USER=genomicannotations \
-    GA_DB_PW=genomicannotations \
-    GA_DB_NAME=gamedcosrv \
-    DIRECT_ACCESS_DB_HOST=postgresql \
-    DIRECT_ACCESS_DB_PORT=5432 \
-    DIRECT_ACCESS_DB_USER=i2b2 \
-    DIRECT_ACCESS_DB_PW=i2b2 \
-    DIRECT_ACCESS_DB_NAME=i2b2medcosrv \
-    QT_DB_HOST=postgresql \
-    QT_DB_PORT=5432 \
-    QT_DB_USER=medcoqt \
-    QT_DB_PW=medcoqt \
-    QT_DB_NAME=qtmedcosrv
+    MC_DB_HOST=postgresql \
+    MC_DB_PORT=5432 \
+    MC_DB_USER=medcoconnector \
+    MC_DB_PW=medcoconnector \
+    MC_DB_NAME=medcoconnectorsrv
+
 EXPOSE 1999
 ENTRYPOINT docker-entrypoint.sh medco-connector-server --write-timeout=${SERVER_HTTP_WRITE_TIMEOUT_SECONDS}s

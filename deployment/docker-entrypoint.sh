@@ -9,66 +9,49 @@ if [[ `ls -1 /medco-configuration/srv*-certificate.crt 2>/dev/null | wc -l` != 0
 fi
 
 # wait for postgres to be available
-export PGPASSWORD="$GA_DB_PW"
-export PSQL_PARAMS="-v ON_ERROR_STOP=1 -h ${GA_DB_HOST} -p ${GA_DB_PORT} -U ${GA_DB_USER}"
+export SCHEMA="query_tools"
+export PGPASSWORD="$MC_DB_PW"
+export PSQL_PARAMS="-v ON_ERROR_STOP=1 -h ${MC_DB_HOST} -p ${MC_DB_PORT} -U ${MC_DB_USER}"
 until psql $PSQL_PARAMS -d postgres -c '\q'; do
   >&2 echo "Waiting for postgresql..."
   sleep 1
 done
 
 # initialize database if it does not exist (credentials must be valid and have create database right)
-DB_CHECK=$(psql ${PSQL_PARAMS} -d postgres -X -A -t -c "select count(*) from pg_database where datname = '${GA_DB_NAME}';")
+DB_CHECK=$(psql ${PSQL_PARAMS} -d postgres -X -A -t -c "select count(*) from pg_database where datname = '${MC_DB_NAME}';")
 if [[ "$DB_CHECK" -ne "1" ]]; then
-echo "Initialising genomic_annotations database"
-    psql $PSQL_PARAMS -d postgres <<-EOSQL
-        CREATE DATABASE ${GA_DB_NAME};
-EOSQL
-psql $PSQL_PARAMS -d "$GA_DB_NAME" <<-EOSQL
-        CREATE SCHEMA genomic_annotations;
-EOSQL
-fi
-
-
-
-
-
-# create medcoqt database for qeuery tool tables
-export PGPASSWORD="$QT_DB_PASSWORD"
-export PSQL_PARAMS="-v ON_ERROR_STOP=1 -h ${QT_DB_HOST} -p ${QT_DB_PORT} -U ${QT_DB_USER}"
-until psql $PSQL_PARAMS -d postgres -c '\q'; do
-  >&2 echo "Waiting for postgresql..."
-  sleep 1
-done
-
-DB_CHECK=$(psql ${PSQL_PARAMS} -d postgres -X -A -t -c "select count(*) from pg_database where datname = '${QT_DB_NAME}';")
-
-if  [[ "$DB_CHECK" -ne "1" ]]; then
-echo  "Initialising query tool databse"
-    psql $PSQL_PARAMS -d postgres <<-EOSQL
-        CREATE DATABASE ${QT_DB_NAME};
-EOSQL
-SCHEMA=medco_query_tools
-SCHEMA_CHECK=$(psql ${PSQL_PARAMS} -d postgres-X -A -t -c "select count(*) from information_schema.schemata where schema_name = '${SCHEMA}';")
-if  [[ "$SCHEMA_CHECK" -ne "1" ]]; then
-echo "creating medcoqt schema"
+echo "Initialising medco connector database"
 psql $PSQL_PARAMS -d postgres <<-EOSQL
-       CREATE SCHEMA '${SCHEMA}'
+    CREATE DATABASE ${MC_DB_NAME};
+EOSQL
+psql $PSQL_PARAMS -d "$MC_DB_NAME" <<-EOSQL
+      CREATE SCHEMA genomic_annotations;
+      CREATE SCHEMA '${SCHEMA}';
 EOSQL
 fi
+
+#create the enum type
+psql $PSQL_PARAMS -d "$MC_DB_NAME" <<-EOSQL
+DO
+\$\$
+BEGIN
+IF  NOT EXISTS (SELECT * FROM pg_type where typname='status_enum') AS type_count  THEN
+CREATE TYPE status_enum AS ENUM ('running','completed','error');
+END IF;
+END
+\$\$
+EOSQL
 
 #create explore query results
-psql $PSQL_PARAMS -d postgres <<-EOSQL
-IF (SELECT COUNT(*) FROM pg_types where typname=status_enum) AS type_count =0 THEN
-CREATE TYPE status_enum AS ENUM (‘running’,’completed’,’error’)
-END IF;
-CREATE TABLE IF NOT EXISTS '${SCHEMA}'.explore_query_results
+psql $PSQL_PARAMS -d "$MC_DB_NAME" <<-EOSQL
+CREATE TABLE IF NOT EXISTS "${SCHEMA}".explore_query_results
 (
     query_id serial NOT NULL,
     query_name character varying(255) NOT NULL,
     user_id character varying(255) NOT NULL,
     query_status status_enum  NOT  NULL,
-    enc_result_set_size bytea,
-    enc_result_set bytea,
+    clear_result_set_size integer,
+    clear_result_set integer[],
     query_definition text,
     i2b2_encrypted_patient_set_id integer,
     i2b2_non_encrypte_patient_set_id integer,
@@ -79,8 +62,8 @@ CREATE TABLE IF NOT EXISTS '${SCHEMA}'.explore_query_results
 EOSQL
 
 #create cohorts table
-psql $PSQL_PARAMS -d postgres <<-EOSQL
-CREATE TABLE IF NOT EXISTS '${SCHEMA}'.saved_cohorts
+psql $PSQL_PARAMS -d "$MC_DB_NAME"<<-EOSQL
+CREATE TABLE IF NOT EXISTS "${SCHEMA}".saved_cohorts
 (
     cohort_id serial NOT NULL,
     user_id character varying(255) NOT NULL,
@@ -90,14 +73,14 @@ CREATE TABLE IF NOT EXISTS '${SCHEMA}'.saved_cohorts
     update_date TIMESTAMP WITHOUT TIME ZONE,
     CONSTRAINT saved_cohorts_pkey PRIMARY KEY (cohort_id),
     CONSTRAINT saved_cohorts_user_id_cohort_name_key UNIQUE (user_id, cohort_name),
-    CONSTRAINT query_tool_fk_psc_ri FOREIGN KEY (qurey_id)
-        REFERENCES '${SCHEMA}'.explore_query_results (query_id) MATCH SIMPLE
+    CONSTRAINT query_tool_fk_psc_ri FOREIGN KEY (query_id)
+        REFERENCES "${SCHEMA}".explore_query_results (query_id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
 )
 
 EOSQL
 fi
-fi
+
 
 exec $@

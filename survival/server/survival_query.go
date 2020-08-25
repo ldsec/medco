@@ -18,8 +18,10 @@ type Query struct {
 	TimeGranularity     string
 	StartConcept        string
 	StartColumn         string
+	StartModifier       string
 	EndConcept          string
 	EndColumn           string
+	EndModifier         string
 	Result              *struct {
 		Timers    map[string]time.Duration
 		EncEvents EventGroups
@@ -34,16 +36,20 @@ func NewQuery(UserPublicKey string,
 	TimeGranularity string,
 	StartConcept string,
 	StartColumn string,
+	StartModifier string,
 	EndConcept string,
-	EndColumn string) *Query {
+	EndColumn string,
+	EndModifier string) *Query {
 	return &Query{SetID: SetID,
 		SubGroupDefinitions: SubGroupDefinitions,
 		TimeLimit:           TimeLimit,
 		TimeGranularity:     TimeGranularity,
 		StartConcept:        StartConcept,
 		StartColumn:         StartColumn,
+		StartModifier:       StartModifier,
 		EndConcept:          EndConcept,
-		EndColumn:           EndColumn}
+		EndColumn:           EndColumn,
+		EndModifier:         EndModifier}
 }
 
 func (q *Query) Execute() error {

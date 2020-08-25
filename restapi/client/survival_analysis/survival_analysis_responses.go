@@ -398,6 +398,9 @@ type SurvivalAnalysisBody struct {
 	// end concept
 	EndConcept string `json:"endConcept,omitempty"`
 
+	// end modifier
+	EndModifier string `json:"endModifier,omitempty"`
+
 	// set ID
 	SetID float64 `json:"setID,omitempty"`
 
@@ -407,6 +410,9 @@ type SurvivalAnalysisBody struct {
 
 	// start concept
 	StartConcept string `json:"startConcept,omitempty"`
+
+	// start modifier
+	StartModifier string `json:"startModifier,omitempty"`
 
 	// sub group definitions
 	// Max Items: 4

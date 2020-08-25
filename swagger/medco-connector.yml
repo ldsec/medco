@@ -234,12 +234,16 @@ paths:
                 - year
             startConcept:
               type: "string"
+            startModifier:
+              type: "string"
             startColumn:
               type: "string"
               enum:
                 - "start_date"
                 - "end_date"
             endConcept:
+              type: "string"
+            endModifier:
               type: "string"
             endColumn:
               type: "string"
