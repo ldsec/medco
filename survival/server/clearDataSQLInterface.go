@@ -1,7 +1,8 @@
 package survivalserver
 
 import (
-	utilserver "github.com/ldsec/medco-connector/util/server"
+	"database/sql"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -10,9 +11,9 @@ type SqlTimePoint struct {
 	localAggregate int
 }
 
-func BuildTimePoints(patientList []int64, startConceptCode string, startConceptColumn string, endConceptCode string, endConceptColumn string) (timePoints []SqlTimePoint, err error) {
+func BuildTimePoints(db *sql.DB, patientList []int64, startConceptCode string, startConceptColumn string, startConceptModifier string, endConceptCode string, endConceptColumn string, endConceptModifier string) (timePoints []SqlTimePoint, err error) {
 	logrus.Debug("SQL query : " + sql6)
-	rows, err := utilserver.DBConnection.Query(sql6)
+	rows, err := db.Query(sql6)
 	if err != nil {
 		return
 	}

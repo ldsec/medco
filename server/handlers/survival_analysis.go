@@ -15,6 +15,7 @@ import (
 func MedCoSurvivalAnalysisGetSurvivalAnalysisHandler(param survival_analysis.SurvivalAnalysisParams, principal *models.User) middleware.Responder {
 
 	survivalAnalysisQuery := survivalserver.NewQuery(
+		principal.ID,
 		param.Body.UserPublicKey,
 		int(param.Body.SetID),
 		param.Body.SubGroupDefinitions,

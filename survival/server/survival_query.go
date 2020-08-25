@@ -3,14 +3,14 @@ package survivalserver
 import (
 	"time"
 
-	"github.com/ldsec/medco-connector/restapi/server/operations/survival_analysis"
+	utilserver "github.com/ldsec/medco-connector/util/server"
 
-	querytools "github.com/ldsec/medco-connector/queryTools"
-	"github.com/sirupsen/logrus"
+	"github.com/ldsec/medco-connector/restapi/server/operations/survival_analysis"
 )
 
 // Query holds the ID of the survival analysis, its parameters and a pointer to its results
 type Query struct {
+	UserId              string
 	UserPublicKey       string
 	SetID               int
 	SubGroupDefinitions []*survival_analysis.SubGroupDefinitionsItems0
@@ -29,7 +29,8 @@ type Query struct {
 }
 
 // NewQuery query constructor
-func NewQuery(UserPublicKey string,
+func NewQuery(UserId,
+	UserPublicKey string,
 	SetID int,
 	SubGroupDefinitions []*survival_analysis.SubGroupDefinitionsItems0,
 	TimeLimit int,
@@ -40,7 +41,9 @@ func NewQuery(UserPublicKey string,
 	EndConcept string,
 	EndColumn string,
 	EndModifier string) *Query {
-	return &Query{SetID: SetID,
+	return &Query{
+		UserId:              UserId,
+		SetID:               SetID,
 		SubGroupDefinitions: SubGroupDefinitions,
 		TimeLimit:           TimeLimit,
 		TimeGranularity:     TimeGranularity,
@@ -54,41 +57,47 @@ func NewQuery(UserPublicKey string,
 
 func (q *Query) Execute() error {
 
-	var groupPatientSetIds []int
+	patientLists := make([][]int64, 0)
+	initialCounts := make([]int64, 0)
 
-	if len(q.SubGroupDefinitions) > 0 {
-		/*
-			the i2b2 explore queries will go here:
-			1)retrieve patient set coll ids from i2b2 qt tables (not from  medco connector)
-			2)execute the query, add the coll ids to the clear text query
-			3) redo the instersection if only crypto queries occured
+	cohort, err := GetPatientList(utilserver.DBConnection, int64(q.SetID), q.UserId)
+	if err != nil {
+		return err
+	}
 
-		*/
-
+	if q.SubGroupDefinitions == nil || len(q.SubGroupDefinitions) == 0 {
+		panels := [][]string{{q.StartConcept}}
+		not := []bool{false}
+		initCount, patientList, err := SubGroupExplore("", 0, panels, not)
+		if err != nil {
+			return err
+		}
+		initialCounts = append(initialCounts, initCount)
+		patientLists = append(patientLists, Intersect(cohort, patientList))
 	} else {
-		groupPatientSetIds = append(groupPatientSetIds, q.SetID)
-	}
-	timePointsMap := make(map[int][]SqlTimePoint)
-	for _, groupID := range groupPatientSetIds {
-		patientNumbers, qtErr := querytools.GetPatientList(groupID)
-		if qtErr != nil {
-			return qtErr
-		}
-		if len(patientNumbers) == 0 {
-			logrus.Debugf("Result instance ID %d is empty", groupID)
-			timePointsMap[groupID] = make([]SqlTimePoint, 0)
-			continue
-		}
+		for i, definition := range q.SubGroupDefinitions {
+			panels := make([][]string, 0)
+			not := make([]bool, 0)
+			for _, panel := range definition.Panels {
+				terms := make([]string, 0)
 
-		timePoints, tpError := BuildTimePoints(patientNumbers, q.StartConcept, q.StartColumn, q.EndConcept, q.EndColumn)
-		if tpError != nil {
-			return tpError
+				negation := *panel.Not
+				for _, term := range panel.Items {
+					terms = append(terms, *term.QueryTerm)
+				}
+
+				panels = append(panels, terms)
+				not = append(not, negation)
+			}
+
+			initialCount, patientList, err := SubGroupExplore("", i, panels, not)
+			patientLists = append(patientLists, Intersect(cohort, patientList))
+			initialCounts = append(initialCounts, initialCount)
+			if err != nil {
+				return err
+			}
 		}
-		timePointsMap[groupID] = timePoints
 	}
-	/*
-		4) add zeros
-	*/
 	return nil
 
 }
