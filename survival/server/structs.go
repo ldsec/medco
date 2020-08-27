@@ -93,7 +93,7 @@ type Result struct {
 }
 
 type TimePointResult struct {
-	TimePoint string
+	TimePoint int
 	Result    Result
 }
 

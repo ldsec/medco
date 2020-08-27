@@ -120,7 +120,7 @@ func NewSurvivalAnalysis(token string, patientSetID int, subGroupDefinitions []*
 
 // EncryptedResults holds a TimePoint and the corresponding encrypted events
 type EncryptedResults struct {
-	TimePoint string
+	TimePoint int
 	Events    Events
 }
 
@@ -191,7 +191,7 @@ nodeLoop:
 
 				var innerList []*EncryptedResults
 				for _, val := range groups.GroupResults {
-					innerList = append(innerList, &EncryptedResults{TimePoint: val.Timepoint,
+					innerList = append(innerList, &EncryptedResults{TimePoint: int(val.Timepoint),
 						Events: Events{EventsOfInterest: val.Events.Eventofinterest,
 							CensoringEvents: val.Events.Censoringevent,
 						}})

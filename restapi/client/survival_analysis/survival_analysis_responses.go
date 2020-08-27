@@ -226,7 +226,7 @@ type ResultsItems0GroupResultsItems0 struct {
 	Events *ResultsItems0GroupResultsItems0Events `json:"events,omitempty"`
 
 	// timepoint
-	Timepoint string `json:"timepoint,omitempty"`
+	Timepoint float64 `json:"timepoint,omitempty"`
 }
 
 // Validate validates this results items0 group results items0

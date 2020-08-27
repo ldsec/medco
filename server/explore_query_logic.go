@@ -2,6 +2,7 @@ package medcoserver
 
 import (
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/ldsec/medco-connector/restapi/models"
@@ -63,13 +64,22 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	}
 
 	// tag query terms
-	timer = time.Now()
-	taggedQueryTerms, ddtTimers, err := unlynx.DDTagValues(q.ID, q.getEncQueryTerms())
-	if err != nil {
-		return
+	encQueryTerms := q.getEncQueryTerms()
+	var taggedQueryTerms map[string]string
+	if len(encQueryTerms) > 0 {
+		timer = time.Now()
+		taggedQueryTermsInner, ddtTimers, ddtErr := unlynx.DDTagValues(q.ID, encQueryTerms)
+		taggedQueryTerms = taggedQueryTermsInner
+		if ddtErr != nil {
+			err = ddtErr
+			return
+		}
+		q.addTimers("medco-connector-DDT", timer, ddtTimers)
+		logrus.Info(q.ID, ": tagged ", len(taggedQueryTerms), " elements with unlynx")
+	} else {
+		taggedQueryTerms = make(map[string]string, 0)
+		logrus.Info(q.ID, ": tagged 0 elements with unlynx")
 	}
-	q.addTimers("medco-connector-DDT", timer, ddtTimers)
-	logrus.Info(q.ID, ": tagged ", len(taggedQueryTerms), " elements with unlynx")
 
 	// i2b2 PSM query with tagged items
 	timer = time.Now()
@@ -237,7 +247,8 @@ func (q *ExploreQuery) getI2b2PsmQueryTerms(taggedQueryTerms map[string]string) 
 				}
 
 			} else {
-				itemKey = *item.QueryTerm
+				itemKey = `\` + strings.ReplaceAll(*item.QueryTerm, "/", `\`)
+
 			}
 			panelsItemKeys[panelIdx] = append(panelsItemKeys[panelIdx], itemKey)
 		}

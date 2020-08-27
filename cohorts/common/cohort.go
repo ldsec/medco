@@ -1,8 +1,10 @@
 package cohortscommon
 
+import "time"
+
 type Cohort struct {
-	CohortId         string
-	ResultInstanceID int
-	CreationDate     int64
-	UpdateDate       int64
+	CohortId     int
+	CohortName   string
+	CreationDate time.Time
+	UpdateDate   time.Time
 }

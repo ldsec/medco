@@ -319,7 +319,7 @@ func init() {
                               }
                             },
                             "timepoint": {
-                              "type": "string"
+                              "type": "number"
                             }
                           }
                         }
@@ -360,17 +360,17 @@ func init() {
               "items": {
                 "type": "object",
                 "properties": {
+                  "cohortId": {
+                    "type": "number"
+                  },
                   "cohortName": {
                     "type": "string"
                   },
                   "creationDate": {
-                    "type": "number"
-                  },
-                  "patientSetID": {
-                    "type": "number"
+                    "type": "string"
                   },
                   "updateDate": {
-                    "type": "number"
+                    "type": "string"
                   }
                 }
               }
@@ -1627,17 +1627,17 @@ func init() {
     "GetCohortsOKBodyItems0": {
       "type": "object",
       "properties": {
+        "cohortId": {
+          "type": "number"
+        },
         "cohortName": {
           "type": "string"
         },
         "creationDate": {
-          "type": "number"
-        },
-        "patientSetID": {
-          "type": "number"
+          "type": "string"
         },
         "updateDate": {
-          "type": "number"
+          "type": "string"
         }
       }
     },
@@ -1731,7 +1731,7 @@ func init() {
           }
         },
         "timepoint": {
-          "type": "string"
+          "type": "number"
         }
       }
     },

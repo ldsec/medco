@@ -1,8 +1,9 @@
 package i2b2
 
 import (
-	"github.com/ldsec/medco-connector/util/server"
 	"testing"
+
+	utilserver "github.com/ldsec/medco-connector/util/server"
 )
 
 func init() {
@@ -45,7 +46,7 @@ func TestExecutePsmQuery(t *testing.T) {
 	if err != nil {
 		t.Fail()
 	}
-	t.Log("count:" + patientCount, "set ID:" + patientSetID)
+	t.Log("count:"+patientCount, "set ID:"+patientSetID)
 }
 
 func TestGetPatientSet(t *testing.T) {

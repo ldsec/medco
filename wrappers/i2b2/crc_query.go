@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	utilserver "github.com/ldsec/medco-connector/util/server"
+	"github.com/ldsec/medco-connector/wrappers/unlynx"
 	"github.com/sirupsen/logrus"
 )
 
@@ -94,9 +95,16 @@ func GetPatientSet(patientSetID string) (patientIDs []string, patientDummyFlags 
 				break
 			}
 		}
-
+		var newFlag string
 		if !dummyFlagFound {
-			logrus.Warn("GetPatientSet: ignored patient ", patient.PatientID, " because of missing dummy flag")
+			logrus.Warn("GetPatientSet: patient ", patient.PatientID, " misses dummy flag. Setting it as a real patient")
+			patientIDs = append(patientIDs, patient.PatientID)
+			newFlag, err = unlynx.EncryptWithCothorityKey(int64(1))
+			if err != nil {
+				return
+			}
+			patientDummyFlags = append(patientDummyFlags, newFlag)
+
 		}
 	}
 

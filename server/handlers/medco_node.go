@@ -95,14 +95,17 @@ func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *m
 			Message: err.Error(),
 		})
 	}
+	if len(cohorts) == 0 {
+		return medco_node.NewGetCohortsNotFound()
+	}
 	payload := &medco_node.GetCohortsOK{}
 	for _, cohort := range cohorts {
 		payload.Payload = append(payload.Payload,
 			&medco_node.GetCohortsOKBodyItems0{
-				CohortName:   cohort.CohortId,
-				PatientSetID: float64(cohort.ResultInstanceID),
-				CreationDate: float64(cohort.CreationDate),
-				UpdateDate:   float64(cohort.UpdateDate),
+				CohortName:   cohort.CohortName,
+				CohortID:     float64(cohort.CohortId),
+				CreationDate: cohort.CreationDate.Format(time.RFC3339),
+				UpdateDate:   cohort.UpdateDate.Format(time.RFC3339),
 			},
 		)
 	}

@@ -16,6 +16,7 @@ func MedCoSurvivalAnalysisGetSurvivalAnalysisHandler(param survival_analysis.Sur
 
 	survivalAnalysisQuery := survivalserver.NewQuery(
 		principal.ID,
+		param.Body.ID,
 		param.Body.UserPublicKey,
 		int(param.Body.SetID),
 		param.Body.SubGroupDefinitions,
@@ -50,7 +51,7 @@ func MedCoSurvivalAnalysisGetSurvivalAnalysisHandler(param survival_analysis.Sur
 
 		timePoints := make([]*survival_analysis.ResultsItems0GroupResultsItems0, 0)
 		for _, timePoint := range group.TimePointResults {
-			timePoints = append(timePoints, &survival_analysis.ResultsItems0GroupResultsItems0{Timepoint: timePoint.TimePoint,
+			timePoints = append(timePoints, &survival_analysis.ResultsItems0GroupResultsItems0{Timepoint: float64(timePoint.TimePoint),
 				Events: &survival_analysis.ResultsItems0GroupResultsItems0Events{
 					Eventofinterest: timePoint.Result.EventValueAgg,
 					Censoringevent:  timePoint.Result.CensoringValueAgg,

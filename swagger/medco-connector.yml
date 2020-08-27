@@ -272,7 +272,7 @@ paths:
                         type: "object"
                         properties:
                           timepoint:
-                            type: "string"
+                            type: "number"
                           events:
                             type: "object"
                             properties:
@@ -306,14 +306,14 @@ paths:
             items:
               type: "object"
               properties:
+                cohortId:
+                  type: "number"
                 cohortName:
                   type: "string"
-                patientSetID:
-                  type: "number"
                 creationDate:
-                  type: "number"
+                  type: "string"
                 updateDate:
-                  type: "number"
+                  type: "string"
         403:
           description: "Not authorized"
         default:

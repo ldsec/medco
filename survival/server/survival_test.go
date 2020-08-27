@@ -110,7 +110,7 @@ func TestBuildTimePoint(t *testing.T) {
 	if err != nil {
 		t.Skip("Unable to connect database for testing", err)
 	}
-	timePoint, err := BuildTimePoints(db, bigList, "A168", "start_date", "@", "A125", "start_date", "@")
+	timePoint, err := BuildTimePoints(db, bigList, "A168", "start_date", "@", "A125", "start_date", "126:1")
 	if err != nil {
 		t.Error("Test Failed", err)
 	}

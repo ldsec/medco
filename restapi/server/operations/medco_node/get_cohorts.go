@@ -111,17 +111,17 @@ func (o *GetCohortsDefaultBody) UnmarshalBinary(b []byte) error {
 // swagger:model GetCohortsOKBodyItems0
 type GetCohortsOKBodyItems0 struct {
 
+	// cohort Id
+	CohortID float64 `json:"cohortId,omitempty"`
+
 	// cohort name
 	CohortName string `json:"cohortName,omitempty"`
 
 	// creation date
-	CreationDate float64 `json:"creationDate,omitempty"`
-
-	// patient set ID
-	PatientSetID float64 `json:"patientSetID,omitempty"`
+	CreationDate string `json:"creationDate,omitempty"`
 
 	// update date
-	UpdateDate float64 `json:"updateDate,omitempty"`
+	UpdateDate string `json:"updateDate,omitempty"`
 }
 
 // Validate validates this get cohorts o k body items0

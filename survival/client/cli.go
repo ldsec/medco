@@ -70,7 +70,7 @@ func ClientSurvival(token string, patientSetID int, startConcept, startColumn, e
 		for _, cipherEvents := range encryptedResults {
 			var clearEventOfInterest int64
 			var clearCensoringEvent int64
-			clearTimePoint, ok := encTimeCodesInverseMap[cipherEvents.TimePoint]
+			clearTimePoint, ok := encTimeCodesInverseMap[string(cipherEvents.TimePoint)]
 			if !ok {
 				err = errors.New("unexpected encrypted time point")
 				return
