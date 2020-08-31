@@ -1,17 +1,31 @@
 package survivalserver
 
-import "database/sql"
+import (
+	"database/sql"
+	"strconv"
+	"strings"
 
-func GetPatientList(db *sql.DB, cohortID int64, userID string) (list []int64, err error) {
-	row := db.QueryRow(getPatientList, string(cohortID), userID)
+	"github.com/sirupsen/logrus"
+)
 
-	err = row.Scan(list)
+func GetPatientList(db *sql.DB, queryID int64, userID string) (list []int64, err error) {
+	logrus.Debugf("patient list argument: cohortID %d, FomatInt(cohortID) %s, userID %s", queryID, strconv.FormatInt(queryID, 10), userID)
+	row := db.QueryRow(getPatientList, userID, strconv.FormatInt(queryID, 10))
+	listString := new(string)
+	err = row.Scan(listString)
+	var val int64
+	for _, elm := range strings.Split(strings.Trim(*listString, "{}"), ",") {
+		val, err = strconv.ParseInt(elm, 10, 64)
+		if err != nil {
+			return
+		}
+		list = append(list, val)
+	}
+
 	return
 }
 
 const getPatientList string = `
-SELECT enc_result_set FROM explore_query_results
-WHERE query_id IN
-(SELECT query_id FROM cohorts
-WHERE user_id=$1 AND cohort_id =$2)
+SELECT clear_result_set FROM query_tools.explore_query_results
+WHERE user_id=$1 AND query_id =$2;
 `

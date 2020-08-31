@@ -110,11 +110,32 @@ func TestBuildTimePoint(t *testing.T) {
 	if err != nil {
 		t.Skip("Unable to connect database for testing", err)
 	}
-	timePoint, err := BuildTimePoints(db, bigList, "A168", "start_date", "@", "A125", "start_date", "126:1")
+	timePoint, err := BuildTimePoints(db, bigList,
+		`A168`,
+		"start_date", "@", `A125`, "start_date", "126:1")
 	if err != nil {
 		t.Error("Test Failed", err)
 	}
 	logrus.Info(timePoint)
+}
+
+func TestGetPatient(t *testing.T) {
+	db, err := sql.Open("postgres", "host=localhost port=5432 user=postgres password=postgres dbname=medcoconnectorsrv0 sslmode=disable")
+	logrus.Info(err)
+	if err != nil {
+		t.Error("Error at creating database connection", err)
+	}
+	err = db.Ping()
+	if err != nil {
+		t.Skip("Unable to connect database for testing", err)
+	}
+	list, err := GetPatientList(db, int64(-1), "test")
+	if err != nil {
+		t.Error(err)
+	}
+	if len(list) != 228 {
+		t.Errorf("expected number of patients: 228. Got %d", len(list))
+	}
 }
 
 const testSql1 string = `

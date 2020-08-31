@@ -266,6 +266,8 @@ paths:
                   properties:
                     groupID:
                       type: "string"
+                    initialCount:
+                      type: "string"
                     groupResults:
                       type : "array"
                       items:
@@ -307,6 +309,8 @@ paths:
               type: "object"
               properties:
                 cohortId:
+                  type: "number"
+                queryId:
                   type: "number"
                 cohortName:
                   type: "string"

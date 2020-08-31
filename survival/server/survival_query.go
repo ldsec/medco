@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	utilserver "github.com/ldsec/medco-connector/util/server"
+	"github.com/sirupsen/logrus"
 
 	querytools "github.com/ldsec/medco-connector/queryTools"
 	"github.com/ldsec/medco-connector/wrappers/unlynx"
@@ -72,15 +72,18 @@ func (q *Query) Execute() error {
 	//build subgroups
 
 	cohort, err := GetPatientList(querytools.ConnectorDB, int64(q.SetID), q.UserId)
+
 	if err != nil {
+		logrus.Error("error while getting patient list")
 		return err
 	}
 
 	if q.SubGroupDefinitions == nil || len(q.SubGroupDefinitions) == 0 {
 		eventGroups = append(eventGroups, &EventGroup{GroupID: q.QueryName + "_FULL_COHORT"})
 		panels := [][]string{{q.StartConcept}}
+		logrus.Debug(q.StartConcept, panels[0][0])
 		not := []bool{false}
-		initCount, patientList, err := SubGroupExplore("", 0, panels, not)
+		initCount, patientList, err := SubGroupExplore(q.QueryName, 0, panels, not)
 		if err != nil {
 			return err
 		}
@@ -89,6 +92,7 @@ func (q *Query) Execute() error {
 		if err != nil {
 			return err
 		}
+		logrus.Debug("initialcount ", initialCountEncrypt)
 		eventGroups[0].EncInitialCount = initialCountEncrypt
 		patientLists = append(patientLists, Intersect(cohort, patientList))
 	} else {
@@ -119,19 +123,39 @@ func (q *Query) Execute() error {
 			if err != nil {
 				return err
 			}
+			logrus.Debug("initialcount ", initialCountEncrypt)
 			eventGroups[i].EncInitialCount = initialCountEncrypt
 		}
 	}
 
+	//get concept and modifier codes from the ontology
+	err = DirectI2B2.Ping()
+
+	if err != nil {
+		logrus.Error("Unable to connect clear project database, ", err)
+		return err
+	}
+	startConceptCode, err := GetCode(DirectI2B2, q.StartConcept)
+	if err != nil {
+		logrus.Error("Error while retrieving concept code, ", err)
+		return err
+	}
 	//get timepoints count for events of interest and censoring events
 
 	//TODO: pad for zero time
-
+	logrus.Debug("patient lists", len(patientLists))
 	for i, patientList := range patientLists {
+		logrus.Debug(i)
+		logrus.Debug(patientList)
+		logrus.Debug(startConceptCode)
+		logrus.Debug(q.StartModifier)
+		logrus.Debug(q.EndConcept)
+		logrus.Debug(q.EndColumn)
+		logrus.Debug(q.EndModifier)
 
-		sqlTimePoints, err := BuildTimePoints(utilserver.DBConnection,
+		sqlTimePoints, err := BuildTimePoints(DirectI2B2,
 			patientList,
-			q.StartConcept,
+			startConceptCode,
 			q.StartColumn,
 			q.StartModifier,
 			q.EndConcept,
@@ -139,21 +163,22 @@ func (q *Query) Execute() error {
 			q.EndModifier,
 		)
 		if err != nil {
+			logrus.Error("error while getting building time points")
 			return err
 		}
-		timePointResults := eventGroups[i].TimePointResults
+		logrus.Debugf("got %d time points", len(sqlTimePoints))
 		//locally encrypt
 		for _, sqlTimePoint := range sqlTimePoints {
 			localEventEncryption, err := unlynx.EncryptWithCothorityKey(int64(sqlTimePoint.localEventAggregate))
 			if err != nil {
 				return err
 			}
-			localCensoringEncryption, err := unlynx.EncryptWithCothorityKey(int64(sqlTimePoint.localEventAggregate))
+			localCensoringEncryption, err := unlynx.EncryptWithCothorityKey(int64(sqlTimePoint.localCensoringAggrete))
 			if err != nil {
 				return err
 			}
 
-			timePointResults = append(timePointResults, &TimePointResult{
+			eventGroups[i].TimePointResults = append(eventGroups[i].TimePointResults, &TimePointResult{
 				TimePoint: sqlTimePoint.timePoint,
 				Result: Result{
 					EventValueAgg:     localEventEncryption,
@@ -164,7 +189,13 @@ func (q *Query) Execute() error {
 	}
 
 	//Key Switch !!
-
+	q.Result = &struct {
+		Timers    map[string]time.Duration
+		EncEvents EventGroups
+	}{}
+	for _, group := range eventGroups {
+		logrus.Trace("eventGroup", *group)
+	}
 	q.Result.EncEvents, _, err = AKSgroups(q.QueryName+"_AGG_AND_KEYSWITCH", eventGroups, q.UserPublicKey)
 
 	return err

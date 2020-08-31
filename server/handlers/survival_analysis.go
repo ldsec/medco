@@ -27,8 +27,9 @@ func MedCoSurvivalAnalysisGetSurvivalAnalysisHandler(param survival_analysis.Sur
 		param.Body.StartModifier,
 		param.Body.EndConcept,
 		param.Body.EndColumn,
-		param.Body.StartModifier,
+		param.Body.EndModifier,
 	)
+	logrus.Debug("survivalAnalysis: ", survivalAnalysisQuery)
 
 	if err := survivalAnalysisQuery.Execute(); err != nil {
 		logrus.Error(fmt.Sprintf("Query execution error : %s", err.Error()))
@@ -45,9 +46,7 @@ func MedCoSurvivalAnalysisGetSurvivalAnalysisHandler(param survival_analysis.Sur
 		timers[timerKey] = timerValue.Seconds()
 	}
 	resultList := make([]*survival_analysis.ResultsItems0, 0)
-	logrus.Debugf("Shiba %v: ", survivalAnalysisQuery.Result.EncEvents)
 	for _, group := range survivalAnalysisQuery.Result.EncEvents {
-		logrus.Debugf("Inu %v: ", group)
 
 		timePoints := make([]*survival_analysis.ResultsItems0GroupResultsItems0, 0)
 		for _, timePoint := range group.TimePointResults {
@@ -59,6 +58,7 @@ func MedCoSurvivalAnalysisGetSurvivalAnalysisHandler(param survival_analysis.Sur
 		}
 		resultList = append(resultList, &survival_analysis.ResultsItems0{
 			GroupID:      group.GroupID,
+			InitialCount: group.EncInitialCount,
 			GroupResults: timePoints,
 		})
 	}

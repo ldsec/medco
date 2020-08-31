@@ -2,11 +2,29 @@ package survivalserver
 
 import (
 	"database/sql"
+	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
 	"github.com/sirupsen/logrus"
 )
+
+var DirectI2B2 *sql.DB
+
+func init() {
+	var err error
+	DirectI2B2, err = sql.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", os.Getenv("I2B2_DB_HOST"), os.Getenv("I2B2_DB_PORT"), os.Getenv("I2B2_DB_USER"), os.Getenv("I2B2_DB_PW"), os.Getenv("I2B2_DB_NAME")))
+	if err != nil {
+		logrus.Error(err)
+	}
+
+	err = DirectI2B2.Ping()
+	if err != nil {
+		logrus.Error(err)
+	}
+
+}
 
 type SqlTimePoint struct {
 	timePoint             int

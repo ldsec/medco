@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/ldsec/medco-connector/wrappers/unlynx"
+	"github.com/sirupsen/logrus"
 )
 
 func AKSgroups(queryID string, eventGroups EventGroups, targetPubKey string) (aksEventGroups EventGroups, time map[string]time.Duration, err error) {
@@ -22,20 +23,26 @@ func AKSgroups(queryID string, eventGroups EventGroups, targetPubKey string) (ak
 
 	for _, group := range eventGroups {
 		timePointResults := []*TimePointResult{}
+
 		for _, res := range group.TimePointResults {
+
 			cumulativeLength++
 			timePointResults = append(timePointResults, &TimePointResult{
 				TimePoint: res.TimePoint,
 				Result:    res.Result,
 			})
 		}
-		eventGroup := &EventGroup{GroupID: group.GroupID, TimePointResults: timePointResults}
+		eventGroup := &EventGroup{EncInitialCount: group.EncInitialCount, GroupID: group.GroupID, TimePointResults: timePointResults}
+
 		sort.Sort(eventGroup)
+
 		aksEventGroups = append(aksEventGroups, eventGroup)
 	}
 
 	if cumulativeLength == 0 {
+
 		err = errors.New("all groups are empty")
+
 		return
 	}
 
@@ -44,6 +51,7 @@ func AKSgroups(queryID string, eventGroups EventGroups, targetPubKey string) (ak
 	// ---------  flattening
 	var flatInputs []string
 	for _, group := range aksEventGroups {
+		flatInputs = append(flatInputs, group.EncInitialCount)
 		for _, timePoint := range group.TimePointResults {
 			flatInputs = append(flatInputs, timePoint.Result.EventValueAgg)
 			flatInputs = append(flatInputs, timePoint.Result.CensoringValueAgg)
@@ -54,17 +62,18 @@ func AKSgroups(queryID string, eventGroups EventGroups, targetPubKey string) (ak
 		err = errors.New("no data to aggregate")
 		return
 	}
+	logrus.Debug("flat inputs", flatInputs)
 
 	var flatOutputs []string
 	flatOutputs, time, err = unlynx.AggregateAndKeySwitchValues(queryID, flatInputs, targetPubKey)
 	if err != nil {
 		return
 	}
-	//logrus.Panicf("aasasdasfasfsafdafsafsa %d", len(flatOutputs))
 
-	position := 0
+	position := 1
 
 	for _, aksEventGroup := range aksEventGroups {
+		aksEventGroup.EncInitialCount = flatOutputs[0]
 		for _, timePoint := range aksEventGroup.TimePointResults {
 
 			timePoint.Result.EventValueAgg = flatOutputs[position]
@@ -73,7 +82,6 @@ func AKSgroups(queryID string, eventGroups EventGroups, targetPubKey string) (ak
 
 		}
 	}
-	//err = fmt.Errorf(" meeeeee %v mmmmmoooooo  %s maaaaaaaaaaa %s    ", aksEventGroups, aksEventGroups[0].GroupID, aksEventGroups[0].TimePointResults[0].TimePoint)
 
 	return
 

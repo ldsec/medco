@@ -7,7 +7,7 @@ import (
 )
 
 func SubGroupExplore(queryName string, subGroupIndex int, panelsItemKeys [][]string, isNot []bool) (int64, []int64, error) {
-	patientCount, patientSetID, err := i2b2.ExecutePsmQuery(queryName+"_SUBGROUP_"+string(subGroupIndex), panelsItemKeys, isNot)
+	patientCount, patientSetID, err := i2b2.ExecutePsmQuery(queryName+"_SUBGROUP_"+strconv.Itoa(subGroupIndex), panelsItemKeys, isNot)
 	if err != nil {
 		return 0, nil, err
 	}

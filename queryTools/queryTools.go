@@ -52,6 +52,7 @@ func GetSavedCohorts(db *sql.DB, userID string) ([]cohortscommon.Cohort, error) 
 		return nil, err
 	}
 	var id int
+	var qid int
 	var name string
 	var createDateString string
 	var createDate time.Time
@@ -59,7 +60,7 @@ func GetSavedCohorts(db *sql.DB, userID string) ([]cohortscommon.Cohort, error) 
 	var updateDate time.Time
 	var cohorts = make([]cohortscommon.Cohort, 0)
 	for rows.Next() {
-		err = rows.Scan(&id, &name, &createDateString, &updateDateString)
+		err = rows.Scan(&id, &qid, &name, &createDateString, &updateDateString)
 		if err != nil {
 			return nil, err
 		}
@@ -73,6 +74,7 @@ func GetSavedCohorts(db *sql.DB, userID string) ([]cohortscommon.Cohort, error) 
 		}
 		cohorts = append(cohorts, cohortscommon.Cohort{
 			CohortId:     id,
+			QueryId:      qid,
 			CohortName:   name,
 			CreationDate: createDate,
 			UpdateDate:   updateDate,

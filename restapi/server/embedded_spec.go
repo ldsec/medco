@@ -323,6 +323,9 @@ func init() {
                             }
                           }
                         }
+                      },
+                      "initialCount": {
+                        "type": "string"
                       }
                     }
                   }
@@ -368,6 +371,9 @@ func init() {
                   },
                   "creationDate": {
                     "type": "string"
+                  },
+                  "queryId": {
+                    "type": "number"
                   },
                   "updateDate": {
                     "type": "string"
@@ -1636,6 +1642,9 @@ func init() {
         "creationDate": {
           "type": "string"
         },
+        "queryId": {
+          "type": "number"
+        },
         "updateDate": {
           "type": "string"
         }
@@ -1713,6 +1722,9 @@ func init() {
           "items": {
             "$ref": "#/definitions/ResultsItems0GroupResultsItems0"
           }
+        },
+        "initialCount": {
+          "type": "string"
         }
       }
     },

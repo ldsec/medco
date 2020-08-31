@@ -3,7 +3,7 @@ package handlers
 import (
 	"time"
 
-	cohortsserver "github.com/ldsec/medco-connector/cohorts/server"
+	querytools "github.com/ldsec/medco-connector/queryTools"
 
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/ldsec/medco-connector/restapi/models"
@@ -89,7 +89,7 @@ func MedCoNodeExploreQueryHandler(params medco_node.ExploreQueryParams, principa
 // MedCoNodeExploreQueryHandler handles /medco/node/explore/query API endpoint
 func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *models.User) middleware.Responder {
 	userID := principal.ID
-	cohorts, err := cohortsserver.GetCohorts(userID)
+	cohorts, err := querytools.GetSavedCohorts(querytools.ConnectorDB, userID)
 	if err != nil {
 		medco_node.NewGetCohortsDefault(500).WithPayload(&medco_node.GetCohortsDefaultBody{
 			Message: err.Error(),
@@ -104,6 +104,7 @@ func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *m
 			&medco_node.GetCohortsOKBodyItems0{
 				CohortName:   cohort.CohortName,
 				CohortID:     float64(cohort.CohortId),
+				QueryID:      float64(cohort.QueryId),
 				CreationDate: cohort.CreationDate.Format(time.RFC3339),
 				UpdateDate:   cohort.UpdateDate.Format(time.RFC3339),
 			},
@@ -115,14 +116,18 @@ func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *m
 }
 
 func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal *models.User) middleware.Responder {
-	cohort := params.Body.Cohort
-	err := cohortsserver.InsertCohorts(principal.ID, cohort.CohortName, int(cohort.PatientSetID), int64(cohort.CreationDate), int64(cohort.UpdateDate))
 
-	if err != nil {
-		return medco_node.NewPostCohortsDefault(500).WithPayload(&medco_node.PostCohortsDefaultBody{
-			Message: err.Error(),
-		})
-	}
+	return middleware.NotImplemented("not implemented")
+	/*
+		cohort := params.Body.Cohort
+		err := cohortsserver.InsertCohorts(principal.ID, cohort.CohortName, int(cohort.PatientSetID), int64(cohort.CreationDate), int64(cohort.UpdateDate))
 
-	return medco_node.NewPostCohortsOK().WithPayload("cohort successfully updated")
+		if err != nil {
+			return medco_node.NewPostCohortsDefault(500).WithPayload(&medco_node.PostCohortsDefaultBody{
+				Message: err.Error(),
+			})
+		}
+
+		return medco_node.NewPostCohortsOK().WithPayload("cohort successfully updated")
+	*/
 }

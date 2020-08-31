@@ -120,6 +120,9 @@ type GetCohortsOKBodyItems0 struct {
 	// creation date
 	CreationDate string `json:"creationDate,omitempty"`
 
+	// query Id
+	QueryID float64 `json:"queryId,omitempty"`
+
 	// update date
 	UpdateDate string `json:"updateDate,omitempty"`
 }

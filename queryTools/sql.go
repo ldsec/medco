@@ -35,6 +35,6 @@ WHERE cohort_id = $1 AND user_id = $2
 `
 
 const getCohorts string = `
-SELECT cohort_id, cohort_name, create_date, update_date FROM query_tools.saved_cohorts
+SELECT cohort_id, query_id, cohort_name, create_date, update_date FROM query_tools.saved_cohorts
 WHERE user_id = $1
 `

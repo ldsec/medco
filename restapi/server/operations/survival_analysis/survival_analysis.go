@@ -88,6 +88,9 @@ type ResultsItems0 struct {
 
 	// group results
 	GroupResults []*ResultsItems0GroupResultsItems0 `json:"groupResults"`
+
+	// initial count
+	InitialCount string `json:"initialCount,omitempty"`
 }
 
 // Validate validates this results items0
