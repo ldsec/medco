@@ -2,12 +2,14 @@ package survivalserver
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/ldsec/medco-connector/wrappers/i2b2"
 )
 
 func SubGroupExplore(queryName string, subGroupIndex int, panelsItemKeys [][]string, isNot []bool) (int64, []int64, error) {
-	patientCount, patientSetID, err := i2b2.ExecutePsmQuery(queryName+"_SUBGROUP_"+strconv.Itoa(subGroupIndex), panelsItemKeys, isNot)
+
+	patientCount, patientSetID, err := i2b2.ExecutePsmQuery(queryName+"_SUBGROUP_"+strconv.Itoa(subGroupIndex), backSlashFormat(panelsItemKeys), isNot)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -47,4 +49,16 @@ func Intersect(x []int64, y []int64) []int64 {
 	}
 
 	return result
+}
+
+//TODO this is redundant with query logic
+func backSlashFormat(panelsItemKeys [][]string) [][]string {
+	//table access start with two backslashs
+	resPanels := panelsItemKeys
+	for i, panel := range panelsItemKeys {
+		for j, item := range panel {
+			resPanels[i][j] = `\` + strings.Join(strings.Split(item, "/"), `\`)
+		}
+	}
+	return resPanels
 }

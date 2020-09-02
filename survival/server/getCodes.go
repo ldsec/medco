@@ -10,10 +10,10 @@ import (
 //TODO use I2B2 ONT messaging
 
 func GetCode(db *sql.DB, path string) (string, error) {
-	tokens := strings.Split(path, `\`)
-	table := tokens[2]
+	tokens := strings.Split(path, "/")
+	table := tokens[1]
 	logrus.Debug("table", strings.ToLower(table))
-	fullName := `\` + strings.Join(tokens[3:], `\`)
+	fullName := `\` + strings.Join(tokens[2:], `\`)
 	var res string
 	logrus.Debug("fullName", fullName)
 	row := db.QueryRow(sqlConcept, fullName)

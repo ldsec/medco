@@ -138,6 +138,14 @@ func TestGetPatient(t *testing.T) {
 	}
 }
 
+func TestBackSlashFormat(t *testing.T) {
+	res := backSlashFormat([][]string{{"/TABLE/Item/"}})
+	if res[0][0] != `\\TABLE\Item\` {
+		t.Error(`Expected \\TABLE\Item\, got ` + res[0][0])
+	}
+
+}
+
 const testSql1 string = `
 SELECT patient_num,start_date 
 FROM survival_test.observation_fact

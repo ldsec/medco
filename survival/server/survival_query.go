@@ -100,10 +100,13 @@ func (q *Query) Execute() error {
 			eventGroups = append(eventGroups, &EventGroup{GroupID: q.QueryName + fmt.Sprintf("_GROUP_%d", i)})
 			panels := make([][]string, 0)
 			not := make([]bool, 0)
+			panels = append(panels, []string{q.StartConcept})
+			not = append(not, false)
 			for _, panel := range definition.Panels {
 				terms := make([]string, 0)
 
 				negation := *panel.Not
+
 				for _, term := range panel.Items {
 					terms = append(terms, *term.QueryTerm)
 				}
@@ -112,9 +115,10 @@ func (q *Query) Execute() error {
 				not = append(not, negation)
 			}
 
-			initialCount, patientList, err := SubGroupExplore("", i, panels, not)
+			initialCount, patientList, err := SubGroupExplore(q.QueryName, i, panels, not)
 			patientLists = append(patientLists, Intersect(cohort, patientList))
 			initialCounts = append(initialCounts, initialCount)
+			logrus.Debug("Initial Counts", initialCounts)
 			if err != nil {
 				return err
 			}

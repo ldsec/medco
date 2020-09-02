@@ -70,10 +70,11 @@ func AKSgroups(queryID string, eventGroups EventGroups, targetPubKey string) (ak
 		return
 	}
 
-	position := 1
+	position := 0
 
 	for _, aksEventGroup := range aksEventGroups {
-		aksEventGroup.EncInitialCount = flatOutputs[0]
+		aksEventGroup.EncInitialCount = flatOutputs[position]
+		position++
 		for _, timePoint := range aksEventGroup.TimePointResults {
 
 			timePoint.Result.EventValueAgg = flatOutputs[position]
