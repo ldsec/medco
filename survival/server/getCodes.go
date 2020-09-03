@@ -1,29 +1,25 @@
 package survivalserver
 
 import (
-	"database/sql"
-	"strings"
-
-	"github.com/sirupsen/logrus"
+	"github.com/ldsec/medco-connector/wrappers/i2b2"
+	"github.com/pkg/errors"
 )
 
 //TODO use I2B2 ONT messaging
 
-func GetCode(db *sql.DB, path string) (string, error) {
-	tokens := strings.Split(path, "/")
-	table := tokens[1]
-	logrus.Debug("table", strings.ToLower(table))
-	fullName := `\` + strings.Join(tokens[2:], `\`)
-	var res string
-	logrus.Debug("fullName", fullName)
-	row := db.QueryRow(sqlConcept, fullName)
-	err := row.Scan(&res)
+func GetCode(path string) (string, error) {
+	res, err := i2b2.GetOntologyTermInfo(path)
+	if err != nil {
+		return "", err
+	}
+	if len(res) != 1 {
+		return "", errors.Errorf("Result length of GetOntologyTermInfo is expected to be 1. Got: %d", len(res))
+	}
 
-	return res, err
+	if res[0].Code == "" {
+		return "", errors.New("Code is empty")
+	}
+
+	return res[0].Code, nil
 
 }
-
-const sqlConcept = `
-SELECT c_basecode FROM medco_ont.e2etest
-WHERE c_fullname = $1;
-`

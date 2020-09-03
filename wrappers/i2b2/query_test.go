@@ -16,6 +16,15 @@ func init() {
 }
 
 // warning: all tests need the dev-local-3nodes medco deployment running locally, loaded with default data
+func TestGetTermInfo(t *testing.T) {
+	results, err := GetOntologyTermInfo("/SPHN/SPHNv2020.1/FophDiagnosis/")
+	if err != nil {
+		t.Error(err)
+	}
+	if results[0].Code != "A168" {
+		t.Errorf("Expected basecode A168, got %s", results[0].Code)
+	}
+}
 
 // test ontology search query
 func TestGetOntologyChildrenRoot(t *testing.T) {

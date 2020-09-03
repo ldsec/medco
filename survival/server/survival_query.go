@@ -71,13 +71,15 @@ func (q *Query) Execute() error {
 
 	//build subgroups
 
+	timer := time.Now()
 	cohort, err := GetPatientList(querytools.ConnectorDB, int64(q.SetID), q.UserId)
+	q.addTimers("medco-connector-get-patient-list", timer)
 
 	if err != nil {
 		logrus.Error("error while getting patient list")
 		return err
 	}
-
+	timer = time.Now()
 	if q.SubGroupDefinitions == nil || len(q.SubGroupDefinitions) == 0 {
 		eventGroups = append(eventGroups, &EventGroup{GroupID: q.QueryName + "_FULL_COHORT"})
 		panels := [][]string{{q.StartConcept}}
@@ -131,6 +133,7 @@ func (q *Query) Execute() error {
 			eventGroups[i].EncInitialCount = initialCountEncrypt
 		}
 	}
+	q.addTimers("medco-connector-i2b2-explore-queries", timer)
 
 	//get concept and modifier codes from the ontology
 	err = DirectI2B2.Ping()
@@ -139,7 +142,7 @@ func (q *Query) Execute() error {
 		logrus.Error("Unable to connect clear project database, ", err)
 		return err
 	}
-	startConceptCode, err := GetCode(DirectI2B2, q.StartConcept)
+	startConceptCode, err := GetCode(q.StartConcept)
 	if err != nil {
 		logrus.Error("Error while retrieving concept code, ", err)
 		return err
@@ -148,6 +151,7 @@ func (q *Query) Execute() error {
 
 	//TODO: pad for zero time
 	logrus.Debug("patient lists", len(patientLists))
+	timer = time.Now()
 	for i, patientList := range patientLists {
 		logrus.Debug(i)
 		logrus.Debug(patientList)
@@ -167,7 +171,7 @@ func (q *Query) Execute() error {
 			q.EndModifier,
 		)
 		if err != nil {
-			logrus.Error("error while getting building time points")
+			logrus.Error("error while getting building time points", timer)
 			return err
 		}
 		logrus.Debugf("got %d time points", len(sqlTimePoints))
@@ -191,8 +195,10 @@ func (q *Query) Execute() error {
 		}
 
 	}
+	q.addTimers("medco-connector-timepoint-queries", timer)
 
 	//Key Switch !!
+
 	q.Result = &struct {
 		Timers    map[string]time.Duration
 		EncEvents EventGroups
@@ -200,12 +206,24 @@ func (q *Query) Execute() error {
 	for _, group := range eventGroups {
 		logrus.Trace("eventGroup", *group)
 	}
+	timer = time.Now()
 	q.Result.EncEvents, _, err = AKSgroups(q.QueryName+"_AGG_AND_KEYSWITCH", eventGroups, q.UserPublicKey)
-
+	q.addTimers("medco-connector-aggregate-and-key-switch", timer)
 	return err
 
 }
 
+// addTimers adds timers to the query results
+func (q *Query) addTimers(timerName string, since time.Time) {
+	if timerName != "" {
+		q.Result.Timers[timerName] = time.Since(since)
+	}
+}
+
 func (q *Query) PrintTimers() {
+	logrus.Debug("timer, duration:")
+	for timerName, duration := range q.Result.Timers {
+		logrus.Debug(timerName, " , ", duration.Milliseconds)
+	}
 
 }

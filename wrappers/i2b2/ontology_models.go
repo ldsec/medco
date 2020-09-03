@@ -5,6 +5,19 @@ import (
 )
 
 // NewOntReqGetCategoriesMessageBody returns a new request object for i2b2 categories (ontology root nodes)
+func NewOntReqGetTermInfoMessageBody(path string) Request {
+	body := OntReqGetTermInfoMessageBody{}
+	body.GetTermInfo.Hiddens = "false"
+	body.GetTermInfo.Blob = "true"
+	body.GetTermInfo.Synonyms = "false"
+	body.GetTermInfo.Max = "200"
+	body.GetTermInfo.Type = "core"
+	body.GetTermInfo.Self = path
+
+	return NewRequestWithBody(body)
+}
+
+// NewOntReqGetCategoriesMessageBody returns a new request object for i2b2 categories (ontology root nodes)
 func NewOntReqGetCategoriesMessageBody() Request {
 	body := OntReqGetCategoriesMessageBody{}
 	body.GetCategories.Hiddens = "false"
@@ -19,16 +32,29 @@ func NewOntReqGetCategoriesMessageBody() Request {
 func NewOntReqGetChildrenMessageBody(path string) Request {
 	body := OntReqGetChildrenMessageBody{}
 	body.GetChildren.Parent = path
-	body.GetChildren.Hiddens= "false"
-	body.GetChildren.Blob= "true"
-	body.GetChildren.Synonyms= "false"
-	body.GetChildren.Max= "200"
-	body.GetChildren.Type= "core"
+	body.GetChildren.Hiddens = "false"
+	body.GetChildren.Blob = "true"
+	body.GetChildren.Synonyms = "false"
+	body.GetChildren.Max = "200"
+	body.GetChildren.Type = "core"
 
 	return NewRequestWithBody(body)
 }
 
 // --- request
+
+// OntReqGetCategoriesMessageBody is an i2b2 XML message body for ontology categories request
+type OntReqGetTermInfoMessageBody struct {
+	XMLName     xml.Name `xml:"message_body"`
+	GetTermInfo struct {
+		Max      string `xml:"max,attr"`
+		Hiddens  string `xml:"hiddens,attr"`
+		Synonyms string `xml:"synonyms,attr"`
+		Type     string `xml:"type,attr"`
+		Blob     string `xml:"blob,attr"`
+		Self     string `xml:"self"`
+	} `xml:"ontns:get_term_info"`
+}
 
 // OntReqGetCategoriesMessageBody is an i2b2 XML message body for ontology categories request
 type OntReqGetCategoriesMessageBody struct {
@@ -38,8 +64,7 @@ type OntReqGetCategoriesMessageBody struct {
 		Synonyms string `xml:"synonyms,attr"`
 		Type     string `xml:"type,attr"`
 		Blob     string `xml:"blob,attr"`
-	}`xml:"ontns:get_categories"`
-
+	} `xml:"ontns:get_categories"`
 }
 
 // OntReqGetChildrenMessageBody is an i2b2 XML message for ontology children request
@@ -52,48 +77,48 @@ type OntReqGetChildrenMessageBody struct {
 		Type     string `xml:"type,attr"`
 		Blob     string `xml:"blob,attr"`
 		Parent   string `xml:"parent"`
-	}`xml:"ontns:get_children"`
+	} `xml:"ontns:get_children"`
 }
 
 // --- response
 
 // OntRespConceptsMessageBody is an i2b2 XML message body for ontology concepts response
 type OntRespConceptsMessageBody struct {
-	XMLName  xml.Name `xml:"message_body"`
+	XMLName  xml.Name  `xml:"message_body"`
 	Concepts []Concept `xml:"concepts>concept"`
 }
 
 // Concept is an i2b2 XML concept
 type Concept struct {
-	Level            string `xml:"level"`
-	Key              string `xml:"key"`
-	Name             string `xml:"name"`
-	SynonymCd        string `xml:"synonym_cd"`
-	Visualattributes string `xml:"visualattributes"`
-	Totalnum         string `xml:"totalnum"`
-	Basecode         string `xml:"basecode"`
+	Level            string      `xml:"level"`
+	Key              string      `xml:"key"`
+	Name             string      `xml:"name"`
+	SynonymCd        string      `xml:"synonym_cd"`
+	Visualattributes string      `xml:"visualattributes"`
+	Totalnum         string      `xml:"totalnum"`
+	Basecode         string      `xml:"basecode"`
 	Metadataxml      Metadataxml `xml:"metadataxml"`
-	Facttablecolumn  string `xml:"facttablecolumn"`
-	Tablename        string `xml:"tablename"`
-	Columnname       string `xml:"columnname"`
-	Columndatatype   string `xml:"columndatatype"`
-	Operator         string `xml:"operator"`
-	Dimcode          string `xml:"dimcode"`
-	Comment          string `xml:"comment"`
-	Tooltip          string `xml:"tooltip"`
-	UpdateDate       string `xml:"update_date"`
-	DownloadDate     string `xml:"download_date"`
-	ImportDate       string `xml:"import_date"`
-	SourcesystemCd   string `xml:"sourcesystem_cd"`
-	ValuetypeCd      string `xml:"valuetype_cd"`
+	Facttablecolumn  string      `xml:"facttablecolumn"`
+	Tablename        string      `xml:"tablename"`
+	Columnname       string      `xml:"columnname"`
+	Columndatatype   string      `xml:"columndatatype"`
+	Operator         string      `xml:"operator"`
+	Dimcode          string      `xml:"dimcode"`
+	Comment          string      `xml:"comment"`
+	Tooltip          string      `xml:"tooltip"`
+	UpdateDate       string      `xml:"update_date"`
+	DownloadDate     string      `xml:"download_date"`
+	ImportDate       string      `xml:"import_date"`
+	SourcesystemCd   string      `xml:"sourcesystem_cd"`
+	ValuetypeCd      string      `xml:"valuetype_cd"`
 }
 
 // Metadataxml is an i2b2 XML metadata entity
 type Metadataxml struct {
 	XMLName       xml.Name `xml:"metadataxml"`
 	ValueMetadata struct {
-		EncryptedType string `xml:"EncryptedType"`
-		NodeEncryptID string `xml:"NodeEncryptID"`
+		EncryptedType      string `xml:"EncryptedType"`
+		NodeEncryptID      string `xml:"NodeEncryptID"`
 		ChildrenEncryptIDs string `xml:"ChildrenEncryptIDs"`
 
 		// todo: other elements not unmarshaled, add it to add support for other types
