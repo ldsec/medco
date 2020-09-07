@@ -110,3 +110,43 @@ func GetPatientSet(patientSetID string) (patientIDs []string, patientDummyFlags 
 
 	return
 }
+
+// NoAddedGetPatientSet retrieves an i2b2 patient set, without adding new flags when they miss one
+func NoAddedGetPatientSet(patientSetID string) (patientIDs []string, patientDummyFlags []string, err error) {
+
+	// craft and execute request
+	xmlResponse := &Response{
+		MessageBody: &CrcPdoRespMessageBody{},
+	}
+
+	err = i2b2XMLRequest(
+		utilserver.I2b2HiveURL+"/QueryToolService/pdorequest",
+		NewCrcPdoReqFromInputList(patientSetID),
+		xmlResponse,
+	)
+
+	if err != nil {
+		return
+	}
+
+	// extract patient data
+	for _, patient := range xmlResponse.MessageBody.(*CrcPdoRespMessageBody).Response.PatientData.PatientSet.Patient {
+
+		dummyFlagFound := false
+		for _, patientColumn := range patient.Param {
+			if patientColumn.Column == "enc_dummy_flag_cd" && len(patientColumn.Text) > 0 {
+				patientIDs = append(patientIDs, patient.PatientID)
+				patientDummyFlags = append(patientDummyFlags, patientColumn.Text)
+				dummyFlagFound = true
+				break
+			}
+		}
+		if !dummyFlagFound {
+			//logrus.Warn("GetPatientSet: patient ", patient.PatientID, " misses dummy flag.")
+			patientIDs = append(patientIDs, patient.PatientID)
+
+		}
+	}
+
+	return
+}

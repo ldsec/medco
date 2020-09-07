@@ -407,22 +407,17 @@ func init() {
             "schema": {
               "type": "object",
               "properties": {
-                "cohort": {
-                  "type": "object",
-                  "properties": {
-                    "cohortName": {
-                      "type": "string"
-                    },
-                    "creationDate": {
-                      "type": "number"
-                    },
-                    "patientSetID": {
-                      "type": "number"
-                    },
-                    "updateDate": {
-                      "type": "number"
-                    }
-                  }
+                "cohortName": {
+                  "type": "string"
+                },
+                "creationDate": {
+                  "type": "string"
+                },
+                "patientSetID": {
+                  "type": "number"
+                },
+                "updateDate": {
+                  "type": "string"
                 }
               }
             }
@@ -430,7 +425,7 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "Updated cohorts",
+            "description": "Updated cohort",
             "schema": {
               "type": "string"
             }
@@ -1340,22 +1335,17 @@ func init() {
             "schema": {
               "type": "object",
               "properties": {
-                "cohort": {
-                  "type": "object",
-                  "properties": {
-                    "cohortName": {
-                      "type": "string"
-                    },
-                    "creationDate": {
-                      "type": "number"
-                    },
-                    "patientSetID": {
-                      "type": "number"
-                    },
-                    "updateDate": {
-                      "type": "number"
-                    }
-                  }
+                "cohortName": {
+                  "type": "string"
+                },
+                "creationDate": {
+                  "type": "string"
+                },
+                "patientSetID": {
+                  "type": "number"
+                },
+                "updateDate": {
+                  "type": "string"
                 }
               }
             }
@@ -1363,7 +1353,7 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "Updated cohorts",
+            "description": "Updated cohort",
             "schema": {
               "type": "string"
             }
@@ -1691,23 +1681,6 @@ func init() {
         "value": {
           "type": "string",
           "maxLength": 0
-        }
-      }
-    },
-    "PostCohortsParamsBodyCohort": {
-      "type": "object",
-      "properties": {
-        "cohortName": {
-          "type": "string"
-        },
-        "creationDate": {
-          "type": "number"
-        },
-        "patientSetID": {
-          "type": "number"
-        },
-        "updateDate": {
-          "type": "number"
         }
       }
     },

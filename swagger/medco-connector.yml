@@ -338,21 +338,18 @@ paths:
           schema:
             type: "object"
             properties:
-              cohort:
-                type: "object"
-                properties:
-                  cohortName:
-                    type: "string"
-                  patientSetID:
-                    type: "number"
-                  creationDate:
-                    type: "number"
-                  updateDate:
-                    type: "number"
+              cohortName:
+                type: "string"
+              patientSetID:
+                type: "number"
+              creationDate:
+                type: "string"
+              updateDate:
+                type: "string"
        
       responses:
         200:
-          description: "Updated cohorts"
+          description: "Updated cohort"
           schema:
             type: "string"
         403:

@@ -14,7 +14,7 @@ import (
 // PostCohortsOKCode is the HTTP code returned for type PostCohortsOK
 const PostCohortsOKCode int = 200
 
-/*PostCohortsOK Updated cohorts
+/*PostCohortsOK Updated cohort
 
 swagger:response postCohortsOK
 */

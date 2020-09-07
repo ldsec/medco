@@ -8,7 +8,6 @@ package medco_node
 import (
 	"net/http"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
@@ -80,39 +79,21 @@ func (o *PostCohorts) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 // swagger:model PostCohortsBody
 type PostCohortsBody struct {
 
-	// cohort
-	Cohort *PostCohortsParamsBodyCohort `json:"cohort,omitempty"`
+	// cohort name
+	CohortName string `json:"cohortName,omitempty"`
+
+	// creation date
+	CreationDate string `json:"creationDate,omitempty"`
+
+	// patient set ID
+	PatientSetID float64 `json:"patientSetID,omitempty"`
+
+	// update date
+	UpdateDate string `json:"updateDate,omitempty"`
 }
 
 // Validate validates this post cohorts body
 func (o *PostCohortsBody) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := o.validateCohort(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (o *PostCohortsBody) validateCohort(formats strfmt.Registry) error {
-
-	if swag.IsZero(o.Cohort) { // not required
-		return nil
-	}
-
-	if o.Cohort != nil {
-		if err := o.Cohort.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("body" + "." + "cohort")
-			}
-			return err
-		}
-	}
-
 	return nil
 }
 
@@ -159,47 +140,6 @@ func (o *PostCohortsDefaultBody) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (o *PostCohortsDefaultBody) UnmarshalBinary(b []byte) error {
 	var res PostCohortsDefaultBody
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*o = res
-	return nil
-}
-
-// PostCohortsParamsBodyCohort post cohorts params body cohort
-//
-// swagger:model PostCohortsParamsBodyCohort
-type PostCohortsParamsBodyCohort struct {
-
-	// cohort name
-	CohortName string `json:"cohortName,omitempty"`
-
-	// creation date
-	CreationDate float64 `json:"creationDate,omitempty"`
-
-	// patient set ID
-	PatientSetID float64 `json:"patientSetID,omitempty"`
-
-	// update date
-	UpdateDate float64 `json:"updateDate,omitempty"`
-}
-
-// Validate validates this post cohorts params body cohort
-func (o *PostCohortsParamsBodyCohort) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (o *PostCohortsParamsBodyCohort) MarshalBinary() ([]byte, error) {
-	if o == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(o)
-}
-
-// UnmarshalBinary interface implementation
-func (o *PostCohortsParamsBodyCohort) UnmarshalBinary(b []byte) error {
-	var res PostCohortsParamsBodyCohort
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

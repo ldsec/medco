@@ -23,18 +23,24 @@ WHERE query_instance_id = $1
 `
 
 const insertCohort string = `
-INSERT INTO query_tools.saved_cohorts(cohort_id,user_id,query_id,cohort_name,create_date,update_date)
-VALUES ($1,$2,$3,$4)
+INSERT INTO query_tools.saved_cohorts(user_id,query_id,cohort_name,create_date,update_date)
+VALUES ($1,$2,$3,$4,$5)
+ON CONFLICT (user_id,cohort_name) DO UPDATE SET query_id = $2, update_date=$5
 RETURNING cohort_id
 `
 
 const updateCohort string = `
 UPDATE query_tools.saved_cohorts
-SET (update_date) $3
+SET query_id=$3, update_date= $4
 WHERE cohort_id = $1 AND user_id = $2
 `
 
 const getCohorts string = `
 SELECT cohort_id, query_id, cohort_name, create_date, update_date FROM query_tools.saved_cohorts
 WHERE user_id = $1
+`
+
+const getDate string = `
+SELECT update_date FROM query_tools.saved_cohorts
+WHERE user_id =$1 and cohort_id=$2
 `

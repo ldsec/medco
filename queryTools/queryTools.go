@@ -88,3 +88,28 @@ func GetSavedCohorts(db *sql.DB, userID string) ([]cohortscommon.Cohort, error) 
 	logrus.Infof("Got %d cohorts", len(cohorts))
 	return cohorts, nil
 }
+
+func GetDate(db *sql.DB, userID string, cohortID int) (time.Time, error) {
+	row := db.QueryRow(getDate, userID, cohortID)
+	timeString := new(string)
+	err := row.Scan(timeString)
+	if err != nil {
+		return time.Now(), err
+	}
+
+	timeParsed, err := time.Parse(time.RFC3339, *timeString)
+
+	return timeParsed, err
+
+}
+
+func InsertCohort(db *sql.DB, userID string, queryID int, cohortName string, createDate, updateDate time.Time) (int, error) {
+	row := db.QueryRow(insertCohort, userID, queryID, cohortName, createDate, updateDate)
+	res := new(string)
+	err := row.Scan(res)
+	if err != nil {
+		return -1, err
+	}
+	cohortID, err := strconv.Atoi(*res)
+	return cohortID, err
+}

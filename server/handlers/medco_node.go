@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"time"
 
 	querytools "github.com/ldsec/medco-connector/queryTools"
@@ -117,17 +118,36 @@ func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *m
 
 func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal *models.User) middleware.Responder {
 
-	return middleware.NotImplemented("not implemented")
-	/*
-		cohort := params.Body.Cohort
-		err := cohortsserver.InsertCohorts(principal.ID, cohort.CohortName, int(cohort.PatientSetID), int64(cohort.CreationDate), int64(cohort.UpdateDate))
+	cohort := params.Body
 
-		if err != nil {
-			return medco_node.NewPostCohortsDefault(500).WithPayload(&medco_node.PostCohortsDefaultBody{
-				Message: err.Error(),
-			})
+	creationDate, err := time.Parse(time.RFC3339, cohort.CreationDate)
+	if err != nil {
+		return medco_node.NewPostCohortsDefault(500).WithPayload(&medco_node.PostCohortsDefaultBody{
+			Message: fmt.Sprintf("String %s is not a date with RF3339 layout", cohort.CreationDate),
+		})
+	}
+	updateDate, err := time.Parse(time.RFC3339, cohort.UpdateDate)
+	if err != nil {
+		return medco_node.NewPostCohortsDefault(500).WithPayload(&medco_node.PostCohortsDefaultBody{
+			Message: fmt.Sprintf("String %s is not a date with RF3339 layout", cohort.UpdateDate),
+		})
+	}
+	cohorts, err := querytools.GetSavedCohorts(querytools.ConnectorDB, principal.ID)
+	if err != nil {
+		return medco_node.NewPostCohortsDefault(500).WithPayload(&medco_node.PostCohortsDefaultBody{
+			Message: err.Error(),
+		})
+	}
+	for _, existingCohort := range cohorts {
+		if existingCohort.CohortName == cohort.CohortName {
+			lastUpdate, _ := time.Parse(time.RFC3339, cohort.UpdateDate)
+			if lastUpdate.After(updateDate) {
+				return medco_node.NewPostCohortsInternalServerError()
+			}
+			break
 		}
+	}
+	querytools.InsertCohort(querytools.ConnectorDB, principal.ID, int(cohort.PatientSetID), cohort.CohortName, creationDate, updateDate)
 
-		return medco_node.NewPostCohortsOK().WithPayload("cohort successfully updated")
-	*/
+	return medco_node.NewPostCohortsOK().WithPayload("cohorts successfully updated")
 }
