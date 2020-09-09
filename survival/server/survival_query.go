@@ -2,6 +2,7 @@ package survivalserver
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -31,6 +32,7 @@ type Query struct {
 	Result              *struct {
 		Timers    map[string]time.Duration
 		EncEvents EventGroups
+		timerLock *sync.Mutex
 	}
 }
 
@@ -65,8 +67,10 @@ func NewQuery(UserId,
 		Result: &struct {
 			Timers    map[string]time.Duration
 			EncEvents EventGroups
+			timerLock *sync.Mutex
 		}{}}
 	res.Result.Timers = make(map[string]time.Duration)
+	res.Result.timerLock = &sync.Mutex{}
 	return res
 }
 
@@ -129,143 +133,142 @@ func (q *Query) Execute() error {
 		}
 
 	}
-	/*
-		if q.SubGroupDefinitions == nil || len(q.SubGroupDefinitions) == 0 {
-			eventGroups = append(eventGroups, &EventGroup{GroupID: q.QueryName + "_FULL_COHORT"})
-			panels := [][]string{{q.StartConcept}}
-			logrus.Debug(q.StartConcept, panels[0][0])
-			not := []bool{false}
-			timer = time.Now()
-			initCount, patientList, err := SubGroupExplore(q.QueryName, 0, panels, not)
-			q.addTimers("medco-connector-i2b2-query-group0", timer)
-			if err != nil {
-				return err
-			}
-			initialCounts = append(initialCounts, initCount)
-			timer = time.Now()
-			initialCountEncrypt, err := unlynx.EncryptWithCothorityKey(initCount)
-			if err != nil {
-				return err
-			}
-			q.addTimers("medco-connector-encrypt-init-count-group0", timer)
-			logrus.Debug("initialcount ", initialCountEncrypt)
-			eventGroups[0].EncInitialCount = initialCountEncrypt
-			patientLists = append(patientLists, Intersect(cohort, patientList))
-		}
-	*/
+	waitGroup := &sync.WaitGroup{}
+	waitGroup.Add(len(definitions))
+	channels := make([]chan *EventGroup, len(definitions))
+	errChan := make(chan error, len(definitions))
+	signal := make(chan struct{})
 
 	for i, definition := range definitions {
-		eventGroups = append(eventGroups, &EventGroup{GroupID: q.QueryName + fmt.Sprintf("_GROUP_%d", i)})
-		panels := make([][]string, 0)
-		not := make([]bool, 0)
-		panels = append(panels, []string{q.StartConcept})
-		not = append(not, false)
-		for _, panel := range definition.Panels {
-			terms := make([]string, 0)
+		channels[i] = make(chan *EventGroup, 1)
+		go func(i int, definition *survival_analysis.SubGroupDefinitionsItems0) {
+			defer waitGroup.Done()
 
-			negation := *panel.Not
+			newEventGroup := &EventGroup{GroupID: q.QueryName + fmt.Sprintf("_GROUP_%d", i)}
+			panels := make([][]string, 0)
+			not := make([]bool, 0)
+			panels = append(panels, []string{q.StartConcept})
+			not = append(not, false)
+			for _, panel := range definition.Panels {
+				terms := make([]string, 0)
 
-			for _, term := range panel.Items {
-				terms = append(terms, *term.QueryTerm)
+				negation := *panel.Not
+
+				for _, term := range panel.Items {
+					terms = append(terms, *term.QueryTerm)
+				}
+
+				panels = append(panels, terms)
+				not = append(not, negation)
 			}
 
-			panels = append(panels, terms)
-			not = append(not, negation)
-		}
+			timer = time.Now()
+			initialCount, patientList, err := SubGroupExplore(q.QueryName, i, panels, not)
+			q.addTimers(fmt.Sprintf("medco-connector-i2b2-query-group%d", i), timer)
+			patientList = Intersect(cohort, patientList)
+			patientLists = append(patientLists, patientList)
+			initialCounts = append(initialCounts, initialCount)
+			logrus.Debug("Initial Counts", initialCounts)
+			if err != nil {
+				errChan <- err
+				return
+			}
+			timer = time.Now()
+			initialCountEncrypt, err := unlynx.EncryptWithCothorityKey(initialCount)
+			q.addTimers(fmt.Sprintf("medco-connector-encrypt-init-count-group%d", i), timer)
+			if err != nil {
+				errChan <- err
+				return
+			}
+			logrus.Debug("initialcount ", initialCountEncrypt)
+			newEventGroup.EncInitialCount = initialCountEncrypt
+			timer = time.Now()
+			sqlTimePoints, err := BuildTimePoints(DirectI2B2,
+				patientList,
+				startConceptCode,
+				q.StartColumn,
+				q.StartModifier,
+				q.EndConcept,
+				q.EndColumn,
+				q.EndModifier,
+			)
+			q.addTimers(fmt.Sprintf("medco-connector-build-timepoints%d", i), timer)
+			if err != nil {
+				logrus.Error("error while getting building time points", timer)
+				errChan <- err
+				return
+			}
+			logrus.Debugf("got %d time points", len(sqlTimePoints))
+			//locally encrypt
+			timePointsSet := make(map[int](struct{}))
+			for _, sqlTimePoint := range sqlTimePoints {
+				if sqlTimePoint.timePoint <= q.TimeLimit {
+					timePointsSet[sqlTimePoint.timePoint] = struct{}{}
+					localEventEncryption, err := unlynx.EncryptWithCothorityKey(int64(sqlTimePoint.localEventAggregate))
+					if err != nil {
+						errChan <- err
+						return
+					}
+					localCensoringEncryption, err := unlynx.EncryptWithCothorityKey(int64(sqlTimePoint.localCensoringAggrete))
+					if err != nil {
+						errChan <- err
+					}
 
-		timer = time.Now()
-		initialCount, patientList, err := SubGroupExplore(q.QueryName, i, panels, not)
-		q.addTimers(fmt.Sprintf("medco-connector-i2b2-query-group%d", i), timer)
-		patientLists = append(patientLists, Intersect(cohort, patientList))
-		initialCounts = append(initialCounts, initialCount)
-		logrus.Debug("Initial Counts", initialCounts)
-		if err != nil {
-			return err
-		}
-		timer = time.Now()
-		initialCountEncrypt, err := unlynx.EncryptWithCothorityKey(initialCount)
-		q.addTimers(fmt.Sprintf("medco-connector-encrypt-init-count-group%d", i), timer)
-		if err != nil {
-			return err
-		}
-		logrus.Debug("initialcount ", initialCountEncrypt)
-		eventGroups[i].EncInitialCount = initialCountEncrypt
+					newEventGroup.TimePointResults = append(newEventGroup.TimePointResults, &TimePointResult{
+						TimePoint: sqlTimePoint.timePoint,
+						Result: Result{
+							EventValueAgg:     localEventEncryption,
+							CensoringValueAgg: localCensoringEncryption,
+						}})
+				}
+			}
+
+			//get timepoints count for events of interest and censoring events
+
+			//TODO: pad for zero time
+			timer = time.Now()
+
+			//TODO this put a full vector from 0 to time limit, with a lot of zero encrypted points
+			for j := 0; j < q.TimeLimit; j++ {
+				if _, isIn := timePointsSet[j]; !isIn {
+
+					zeroEncrypt, err := unlynx.EncryptWithCothorityKey(int64(0))
+					if err != nil {
+						errChan <- err
+						return
+					}
+					zeroEncrypt1, err := unlynx.EncryptWithCothorityKey(int64(0))
+					if err != nil {
+						errChan <- err
+						return
+					}
+					newEventGroup.TimePointResults = append(newEventGroup.TimePointResults, &TimePointResult{
+						TimePoint: j,
+						Result: Result{
+							EventValueAgg:     zeroEncrypt,
+							CensoringValueAgg: zeroEncrypt1,
+						}})
+				}
+			}
+			q.addTimers(fmt.Sprintf("encrypt-zero-events%d", i), timer)
+			channels[i] <- newEventGroup
+		}(i, definition)
+
 	}
-
-	//get timepoints count for events of interest and censoring events
-
-	//TODO: pad for zero time
-	logrus.Debug("patient lists", len(patientLists))
-	timer = time.Now()
-	for i, patientList := range patientLists {
-		logrus.Debug(i)
-		logrus.Debug(patientList)
-		logrus.Debug(startConceptCode)
-		logrus.Debug(q.StartModifier)
-		logrus.Debug(q.EndConcept)
-		logrus.Debug(q.EndColumn)
-		logrus.Debug(q.EndModifier)
-
-		sqlTimePoints, err := BuildTimePoints(DirectI2B2,
-			patientList,
-			startConceptCode,
-			q.StartColumn,
-			q.StartModifier,
-			q.EndConcept,
-			q.EndColumn,
-			q.EndModifier,
-		)
-		if err != nil {
-			logrus.Error("error while getting building time points", timer)
-			return err
-		}
-		logrus.Debugf("got %d time points", len(sqlTimePoints))
-		//locally encrypt
-		timePointsSet := make(map[int](struct{}))
-		for _, sqlTimePoint := range sqlTimePoints {
-			if sqlTimePoint.timePoint <= q.TimeLimit {
-				timePointsSet[sqlTimePoint.timePoint] = struct{}{}
-				localEventEncryption, err := unlynx.EncryptWithCothorityKey(int64(sqlTimePoint.localEventAggregate))
-				if err != nil {
-					return err
-				}
-				localCensoringEncryption, err := unlynx.EncryptWithCothorityKey(int64(sqlTimePoint.localCensoringAggrete))
-				if err != nil {
-					return err
-				}
-
-				eventGroups[i].TimePointResults = append(eventGroups[i].TimePointResults, &TimePointResult{
-					TimePoint: sqlTimePoint.timePoint,
-					Result: Result{
-						EventValueAgg:     localEventEncryption,
-						CensoringValueAgg: localCensoringEncryption,
-					}})
-			}
-		}
-
-		//TODO this put a full vector from 0 to time limit, with a lot of zero encrypted points
-		for j := 0; j < q.TimeLimit; j++ {
-			if _, isIn := timePointsSet[j]; !isIn {
-
-				zeroEncrypt, err := unlynx.EncryptWithCothorityKey(int64(0))
-				if err != nil {
-					return err
-				}
-				zeroEncrypt1, err := unlynx.EncryptWithCothorityKey(int64(0))
-				if err != nil {
-					return err
-				}
-				eventGroups[i].TimePointResults = append(eventGroups[i].TimePointResults, &TimePointResult{
-					TimePoint: j,
-					Result: Result{
-						EventValueAgg:     zeroEncrypt,
-						CensoringValueAgg: zeroEncrypt1,
-					}})
-			}
-		}
-
+	go func() {
+		waitGroup.Wait()
+		signal <- struct{}{}
+	}()
+	select {
+	case err := <-errChan:
+		return err
+	case <-signal:
+		break
 	}
-	q.addTimers("medco-connector-timepoint-queries", timer)
+	for _, channel := range channels {
+
+		eventGroups = append(eventGroups, <-channel)
+	}
 
 	//TODO this put a full vector from 0 to time limit, with a lot of zero encrypted points
 
@@ -284,14 +287,18 @@ func (q *Query) Execute() error {
 // addTimers adds timers to the query results
 func (q *Query) addTimers(timerName string, since time.Time) {
 	if timerName != "" {
+		q.Result.timerLock.Lock()
 		q.Result.Timers[timerName] = time.Since(since)
+		q.Result.timerLock.Unlock()
 	}
 }
 
 func (q *Query) PrintTimers() {
 	logrus.Debug("timer, duration:")
+	q.Result.timerLock.Lock()
 	for timerName, duration := range q.Result.Timers {
 		logrus.Debug(timerName, " , ", duration.Milliseconds())
 	}
+	q.Result.timerLock.Unlock()
 
 }
