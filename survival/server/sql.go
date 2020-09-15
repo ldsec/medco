@@ -1,5 +1,23 @@
 package survivalserver
 
+/*
+
+Recap of arguments:
+
+$1 start event concept code
+
+$2 start event modifier code
+
+$3 list of patient in cohort or sub group
+
+$4 end event concept code
+
+$5 end event modifier code
+
+$6 max time limit in day
+
+*/
+
 const sql1 string = `
 SELECT patient_num,start_date 
 FROM i2b2demodata_i2b2.observation_fact
@@ -26,11 +44,12 @@ GROUP BY patient_num
 `
 
 const sql5 string = `
-SELECT DATE_PART('day', end_date::timestamp - start_date::timestamp) AS timepoint, COUNT(*) AS censoring_count
+SELECT * FROM (SELECT DATE_PART('day', end_date::timestamp - start_date::timestamp) AS timepoint, COUNT(*) AS censoring_count
 FROM (` + sql4 + `) AS x
 INNER JOIN  (` + sql1 + `) AS y
-ON x.patient_num = y.patient_num
-GROUP BY timepoint
+ON (x.patient_num = y.patient_num)
+GROUP BY timepoint) AS z
+WHERE timepoint < $6
 `
 
 const sql6 string = `

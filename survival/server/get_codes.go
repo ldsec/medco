@@ -5,8 +5,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-//TODO use I2B2 ONT messaging
-
+// GetCode takes the full path of a I2B2 concept and returns its code
 func GetCode(path string) (string, error) {
 	res, err := i2b2.GetOntologyTermInfo(path)
 	if err != nil {

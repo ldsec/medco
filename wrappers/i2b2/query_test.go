@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	utilserver "github.com/ldsec/medco-connector/util/server"
+	"github.com/stretchr/testify/assert"
 )
 
 func init() {
@@ -17,13 +18,11 @@ func init() {
 
 // warning: all tests need the dev-local-3nodes medco deployment running locally, loaded with default data
 func TestGetTermInfo(t *testing.T) {
-	results, err := GetOntologyTermInfo("/SPHN/SPHNv2020.1/FophDiagnosis/")
+	results, err := GetOntologyTermInfo("/E2ETEST/e2etest/3/")
 	if err != nil {
 		t.Error(err)
 	}
-	if results[0].Code != "A168" {
-		t.Errorf("Expected basecode A168, got %s", results[0].Code)
-	}
+	assert.Equal(t, "ENC_ID:3", results[0].Code)
 }
 
 // test ontology search query

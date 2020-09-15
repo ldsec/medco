@@ -4,7 +4,7 @@ import (
 	"encoding/xml"
 )
 
-// NewOntReqGetCategoriesMessageBody returns a new request object for i2b2 categories (ontology root nodes)
+// NewOntReqGetTermInfoMessageBody returns a new request object for i2b2 get term info (information about node)
 func NewOntReqGetTermInfoMessageBody(path string) Request {
 	body := OntReqGetTermInfoMessageBody{}
 	body.GetTermInfo.Hiddens = "false"
@@ -43,7 +43,7 @@ func NewOntReqGetChildrenMessageBody(path string) Request {
 
 // --- request
 
-// OntReqGetCategoriesMessageBody is an i2b2 XML message body for ontology categories request
+// OntReqGetTermInfoMessageBody is an i2b2 XML message body for ontology term info request
 type OntReqGetTermInfoMessageBody struct {
 	XMLName     xml.Name `xml:"message_body"`
 	GetTermInfo struct {

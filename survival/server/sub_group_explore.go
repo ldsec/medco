@@ -7,6 +7,7 @@ import (
 	"github.com/ldsec/medco-connector/wrappers/i2b2"
 )
 
+// SubGroupExplore executes an I2B2 Explore query with panelsItemKeys and isNot as definition
 func SubGroupExplore(queryName string, subGroupIndex int, panelsItemKeys [][]string, isNot []bool) (int64, []int64, error) {
 
 	patientCount, patientSetID, err := i2b2.ExecutePsmQuery(queryName+"_SUBGROUP_"+strconv.Itoa(subGroupIndex), backSlashFormat(panelsItemKeys), isNot)
@@ -35,6 +36,7 @@ func SubGroupExplore(queryName string, subGroupIndex int, panelsItemKeys [][]str
 
 }
 
+// Intersect returns the intersection of two sets of int64
 func Intersect(x []int64, y []int64) []int64 {
 	set := make(map[int64]struct{})
 	for _, elm := range x {
@@ -51,7 +53,6 @@ func Intersect(x []int64, y []int64) []int64 {
 	return result
 }
 
-//TODO this is redundant with query logic
 func backSlashFormat(panelsItemKeys [][]string) [][]string {
 	//table access start with two backslashs
 	resPanels := panelsItemKeys

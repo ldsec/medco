@@ -1,27 +1,49 @@
 package survivalserver
 
-func Expansion(timePoints []SqlTimePoint, timeLimit int) []SqlTimePoint {
-	res := make([]SqlTimePoint, timeLimit)
-	availableTimePoints := make(map[int][2]int, len(timePoints))
+import (
+	"fmt"
+
+	survivalcommon "github.com/ldsec/medco-connector/survival/common"
+)
+
+// Expansion takes a slice of SQLTimepoints and add encryption of zeros for events of interest and censoring events for each missing relative time from 0 to timeLimit.
+// Relative times greater than timeLimit are discarded.
+func Expansion(timePoints survivalcommon.TimePoints, timeLimitDay int, granularity string) (survivalcommon.TimePoints, error) {
+	var timeLimit int
+	if granFunction, isIn := granularityFunctions[granularity]; isIn {
+		timeLimit = granFunction(timeLimitDay)
+	} else {
+		return nil, fmt.Errorf("granularity %s is not implemented", granularity)
+	}
+
+	res := make(survivalcommon.TimePoints, timeLimit)
+	availableTimePoints := make(map[int]struct {
+		EventsOfInterest int64
+		CensoringEvents  int64
+	}, len(timePoints))
 	for _, timePoint := range timePoints {
 
-		availableTimePoints[timePoint.timePoint] = [2]int{timePoint.localEventAggregate, timePoint.localCensoringAggrete}
+		availableTimePoints[timePoint.Time] = timePoint.Events
 	}
 	for i := 0; i < timeLimit; i++ {
 		if events, ok := availableTimePoints[i]; ok {
-			res[i] = SqlTimePoint{
-				timePoint:             i,
-				localEventAggregate:   events[0],
-				localCensoringAggrete: events[1],
+			res[i] = survivalcommon.TimePoint{
+				Time:   i,
+				Events: events,
 			}
 		} else {
-			res[i] = SqlTimePoint{
-				timePoint:             i,
-				localEventAggregate:   0,
-				localCensoringAggrete: 0,
+			res[i] = survivalcommon.TimePoint{
+				Time: i,
+				Events: struct {
+					EventsOfInterest int64
+					CensoringEvents  int64
+				}{
+					EventsOfInterest: 0,
+					CensoringEvents:  0,
+				},
 			}
 		}
 
 	}
-	return res
+	return res, nil
 }

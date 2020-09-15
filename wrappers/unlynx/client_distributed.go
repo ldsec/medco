@@ -13,7 +13,7 @@ import (
 
 // DDTagValues makes request through unlynx to compute distributed deterministic tags of encrypted values
 func DDTagValues(queryName string, values []string) (taggedValues map[string]string, times map[string]time.Duration, err error) {
-	unlynxClient, cothorityRoster := NewUnlynxClient()
+	unlynxClient, cothorityRoster := newUnlynxClient()
 
 	// deserialize values
 	desValues, err := deserializeCipherVector(values)
@@ -73,7 +73,7 @@ func KeySwitchValue(queryName string, value string, targetPubKey string) (string
 
 // KeySwitchValues makes request through unlynx to key switch encrypted values
 func KeySwitchValues(queryName string, values []string, targetPubKey string) (keySwitchedValues []string, times map[string]time.Duration, err error) {
-	unlynxClient, cothorityRoster := NewUnlynxClient()
+	unlynxClient, cothorityRoster := newUnlynxClient()
 
 	// deserialize values and target public key
 	desValues, err := deserializeCipherVector(values)
@@ -129,7 +129,7 @@ func KeySwitchValues(queryName string, values []string, targetPubKey string) (ke
 
 // ShuffleAndKeySwitchValue makes request through unlynx to shuffle and key switch one value per node
 func ShuffleAndKeySwitchValue(queryName string, value string, targetPubKey string) (shuffledKsValue string, times map[string]time.Duration, err error) {
-	unlynxClient, cothorityRoster := NewUnlynxClient()
+	unlynxClient, cothorityRoster := newUnlynxClient()
 
 	// deserialize value and target public key
 	desValue := libunlynx.CipherText{}
@@ -184,9 +184,9 @@ func ShuffleAndKeySwitchValue(queryName string, value string, targetPubKey strin
 	return
 }
 
-// AggregateAndKeySwitchValues makes request through unlynx to aggregate and key switch one value per node
+// AggregateAndKeySwitchValues makes request through unlynx to aggregate and key switch a slice of values per node
 func AggregateAndKeySwitchValues(queryName string, values []string, targetPubKey string) (aggValues []string, times map[string]time.Duration, err error) {
-	unlynxClient, cothorityRoster := NewUnlynxClient()
+	unlynxClient, cothorityRoster := newUnlynxClient()
 
 	// deserialize value and target public key
 	desValues, err := deserializeCipherVector(values)
@@ -240,6 +240,7 @@ func AggregateAndKeySwitchValues(queryName string, values []string, targetPubKey
 	return
 }
 
+// AggregateAndKeySwitchValue makes request through unlynx to aggregate and key switch one value per node
 func AggregateAndKeySwitchValue(queryName string, value string, targetPubKey string) (aggValue string, times map[string]time.Duration, err error) {
 	values := []string{value}
 	var aggValues []string

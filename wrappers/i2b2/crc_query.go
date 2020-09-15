@@ -142,7 +142,7 @@ func NoAddedGetPatientSet(patientSetID string) (patientIDs []string, patientDumm
 			}
 		}
 		if !dummyFlagFound {
-			//logrus.Warn("GetPatientSet: patient ", patient.PatientID, " misses dummy flag.")
+			logrus.Warn("GetPatientSet: patient ", patient.PatientID, " misses dummy flag.")
 			patientIDs = append(patientIDs, patient.PatientID)
 
 		}

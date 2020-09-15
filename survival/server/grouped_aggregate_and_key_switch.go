@@ -9,6 +9,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// AKSgroups takes an EventGroups instance and flattens its content.
+// Resulting slice is sent with the target pulbic key to Unlynx for and Aggregate-And-Keyswitch protocol.
+// The slice output by the protocol is itself restructered in an EventGroups instance.
 func AKSgroups(queryID string, eventGroups EventGroups, targetPubKey string) (aksEventGroups EventGroups, time map[string]time.Duration, err error) {
 
 	if len(eventGroups) == 0 {
@@ -57,7 +60,7 @@ func AKSgroups(queryID string, eventGroups EventGroups, targetPubKey string) (ak
 			flatInputs = append(flatInputs, timePoint.Result.CensoringValueAgg)
 		}
 	}
-	//TODO already tested
+
 	if len(flatInputs) == 0 {
 		err = errors.New("no data to aggregate")
 		return

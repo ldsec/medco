@@ -1,7 +1,6 @@
 package querytools
 
 import (
-	"database/sql"
 	"testing"
 	"time"
 
@@ -9,7 +8,7 @@ import (
 )
 
 func TestGetPatientList(t *testing.T) {
-	testDB, err := sql.Open("postgres", "host=localhost port=5432 user=postgres password=postgres dbname=medcoconnectorsrv0 sslmode=disable")
+	testDB, err := DBResolver("MC_DB_HOST", "medcoconnectorsrv0")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -33,7 +32,7 @@ func TestGetPatientList(t *testing.T) {
 }
 
 func TestGetSavedCohorts(t *testing.T) {
-	testDB, err := sql.Open("postgres", "host=localhost port=5432 user=postgres password=postgres dbname=medcoconnectorsrv0 sslmode=disable")
+	testDB, err := DBResolver("MC_DB_HOST", "medcoconnectorsrv0")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -47,7 +46,7 @@ func TestGetSavedCohorts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	assert.Equal(t, len(cohorts), 1)
+	assert.Equal(t, true, len(cohorts) > 0)
 	//change user_id
 
 	cohorts, err = GetSavedCohorts(testDB, "testestest")
@@ -60,7 +59,7 @@ func TestGetSavedCohorts(t *testing.T) {
 }
 
 func TestGetDate(t *testing.T) {
-	testDB, err := sql.Open("postgres", "host=localhost port=5432 user=postgres password=postgres dbname=medcoconnectorsrv0 sslmode=disable")
+	testDB, err := DBResolver("MC_DB_HOST", "medcoconnectorsrv0")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -95,7 +94,7 @@ func TestGetDate(t *testing.T) {
 }
 
 func TestInsertCohort(t *testing.T) {
-	testDB, err := sql.Open("postgres", "host=localhost port=5432 user=postgres password=postgres dbname=medcoconnectorsrv0 sslmode=disable")
+	testDB, err := DBResolver("MC_DB_HOST", "medcoconnectorsrv0")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -116,9 +115,9 @@ func TestInsertCohort(t *testing.T) {
 
 	found := false
 	for _, cohort := range cohorts {
-		if cohort.CohortId == cohortID {
+		if cohort.CohortID == cohortID {
 			found = true
-			assert.Equal(t, cohortID, cohort.CohortId)
+			assert.Equal(t, cohortID, cohort.CohortID)
 			assert.Equal(t, "testCohort2", cohort.CohortName)
 			assert.Equal(t, now.Format(time.Stamp), cohort.UpdateDate.Format(time.Stamp))
 			break

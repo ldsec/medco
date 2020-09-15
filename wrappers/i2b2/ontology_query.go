@@ -2,6 +2,7 @@ package i2b2
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -10,13 +11,14 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// GetOntologyTermInfo makes request to get infromation about a node given its path
 func GetOntologyTermInfo(path string) (results []*models.ExploreSearchResultElement, err error) {
 	path = strings.TrimSpace(path)
 	xmlResponse := &Response{
 		MessageBody: &OntRespConceptsMessageBody{},
 	}
 	if len(path) == 0 {
-		err = errors.New("empty path")
+		err = fmt.Errorf("empty path")
 		logrus.Error(err)
 		return
 	}

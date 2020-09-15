@@ -1,7 +1,7 @@
 package unlynx
 
 import (
-	"github.com/ldsec/medco-connector/util/server"
+	utilserver "github.com/ldsec/medco-connector/util/server"
 	libunlynx "github.com/ldsec/unlynx/lib"
 	stats "github.com/r0fls/gostats"
 	"github.com/sirupsen/logrus"
@@ -22,7 +22,7 @@ func LocallyAggregateValues(values []string) (agg string, err error) {
 	}
 
 	// local aggregation
-	aggregate :=  &deserialized[0]
+	aggregate := &deserialized[0]
 	for i := 1; i < len(deserialized); i++ {
 		aggregate.Add(*aggregate, deserialized[i])
 	}
@@ -47,7 +47,7 @@ func LocallyMultiplyScalar(encValue string, scalar int64) (res string, err error
 	result := libunlynx.CipherText{}
 	result.MulCipherTextbyScalar(deserialized, libunlynx.SuiTe.Scalar().SetInt64(scalar))
 
-	res, err =  result.Serialize()
+	res, err = result.Serialize()
 	if err != nil {
 		logrus.Error("unlynx error serializing: ", err)
 	}
@@ -77,7 +77,7 @@ func LocallyObfuscateValue(encValue string, obfuscationParam int, pubKey string)
 
 // EncryptWithCothorityKey encrypts an integer with the public key of the cothority
 func EncryptWithCothorityKey(value int64) (encrypted string, err error) {
-	_, cothorityRoster := NewUnlynxClient()
+	_, cothorityRoster := newUnlynxClient()
 	encrypted, err = libunlynx.EncryptInt(cothorityRoster.Aggregate, value).Serialize()
 	if err != nil {
 		logrus.Error("unlynx failed serializing encrypted value: ", err)
@@ -140,7 +140,7 @@ func GenerateKeyPair() (pubKey string, privKey string, err error) {
 
 // GetCothorityKey returns the aggregated cothority public key
 func GetCothorityKey() (key string, err error) {
-	_, cothorityRoster := NewUnlynxClient()
+	_, cothorityRoster := newUnlynxClient()
 	key, err = libunlynx.SerializePoint(cothorityRoster.Aggregate)
 	if err != nil {
 		logrus.Error("unlynx error serializing public aggregate key: ", err)

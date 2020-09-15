@@ -52,7 +52,7 @@ func deserializeCipherVector(cipherTexts []string) (cipherVector libunlynx.Ciphe
 }
 
 // newUnlynxClient creates a new client to communicate with unlynx
-func NewUnlynxClient() (unlynxClient *servicesmedco.API, cothorityRoster *onet.Roster) {
+func newUnlynxClient() (unlynxClient *servicesmedco.API, cothorityRoster *onet.Roster) {
 
 	// initialize medco client
 	groupFile, err := os.Open(utilserver.UnlynxGroupFilePath)
@@ -76,7 +76,7 @@ func NewUnlynxClient() (unlynxClient *servicesmedco.API, cothorityRoster *onet.R
 
 // getEncryptedZero returns an encrypted zero
 func getEncryptedZero() (serializedZero string, err error) {
-	_, cothorityRoster := NewUnlynxClient()
+	_, cothorityRoster := newUnlynxClient()
 	encZero := libunlynx.EncryptInt(cothorityRoster.Aggregate, 0)
 	serializedZero, err = encZero.Serialize()
 	if err != nil {

@@ -7,7 +7,6 @@ package models
 
 import (
 	"encoding/json"
-	"strconv"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
@@ -34,7 +33,7 @@ type ExploreQueryResultElement struct {
 	Status string `json:"status,omitempty"`
 
 	// timers
-	Timers []*ExploreQueryResultElementTimersItems0 `json:"timers"`
+	Timers Timers `json:"timers,omitempty"`
 }
 
 // Validate validates this explore query result element
@@ -110,20 +109,11 @@ func (m *ExploreQueryResultElement) validateTimers(formats strfmt.Registry) erro
 		return nil
 	}
 
-	for i := 0; i < len(m.Timers); i++ {
-		if swag.IsZero(m.Timers[i]) { // not required
-			continue
+	if err := m.Timers.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("timers")
 		}
-
-		if m.Timers[i] != nil {
-			if err := m.Timers[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("timers" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
+		return err
 	}
 
 	return nil
@@ -140,60 +130,6 @@ func (m *ExploreQueryResultElement) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (m *ExploreQueryResultElement) UnmarshalBinary(b []byte) error {
 	var res ExploreQueryResultElement
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*m = res
-	return nil
-}
-
-// ExploreQueryResultElementTimersItems0 explore query result element timers items0
-//
-// swagger:model ExploreQueryResultElementTimersItems0
-type ExploreQueryResultElementTimersItems0 struct {
-
-	// milliseconds
-	// Required: true
-	Milliseconds *int64 `json:"milliseconds"`
-
-	// name
-	Name string `json:"name,omitempty"`
-}
-
-// Validate validates this explore query result element timers items0
-func (m *ExploreQueryResultElementTimersItems0) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateMilliseconds(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *ExploreQueryResultElementTimersItems0) validateMilliseconds(formats strfmt.Registry) error {
-
-	if err := validate.Required("milliseconds", "body", m.Milliseconds); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (m *ExploreQueryResultElementTimersItems0) MarshalBinary() ([]byte, error) {
-	if m == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(m)
-}
-
-// UnmarshalBinary interface implementation
-func (m *ExploreQueryResultElementTimersItems0) UnmarshalBinary(b []byte) error {
-	var res ExploreQueryResultElementTimersItems0
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

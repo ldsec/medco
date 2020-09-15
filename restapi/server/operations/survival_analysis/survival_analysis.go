@@ -159,7 +159,7 @@ type ResultsItems0GroupResultsItems0 struct {
 	Events *ResultsItems0GroupResultsItems0Events `json:"events,omitempty"`
 
 	// timepoint
-	Timepoint float64 `json:"timepoint,omitempty"`
+	Timepoint int64 `json:"timepoint,omitempty"`
 }
 
 // Validate validates this results items0 group results items0
@@ -324,10 +324,6 @@ type SurvivalAnalysisBody struct {
 	// ID
 	ID string `json:"ID,omitempty"`
 
-	// end column
-	// Enum: [start_date end_date]
-	EndColumn string `json:"endColumn,omitempty"`
-
 	// end concept
 	EndConcept string `json:"endConcept,omitempty"`
 
@@ -335,11 +331,7 @@ type SurvivalAnalysisBody struct {
 	EndModifier string `json:"endModifier,omitempty"`
 
 	// set ID
-	SetID float64 `json:"setID,omitempty"`
-
-	// start column
-	// Enum: [start_date end_date]
-	StartColumn string `json:"startColumn,omitempty"`
+	SetID int64 `json:"setID,omitempty"`
 
 	// start concept
 	StartConcept string `json:"startConcept,omitempty"`
@@ -356,7 +348,7 @@ type SurvivalAnalysisBody struct {
 	TimeGranularity string `json:"timeGranularity,omitempty"`
 
 	// time limit
-	TimeLimit float64 `json:"timeLimit,omitempty"`
+	TimeLimit int64 `json:"timeLimit,omitempty"`
 
 	// user public key
 	// Pattern: ^[\w=-]+$
@@ -366,14 +358,6 @@ type SurvivalAnalysisBody struct {
 // Validate validates this survival analysis body
 func (o *SurvivalAnalysisBody) Validate(formats strfmt.Registry) error {
 	var res []error
-
-	if err := o.validateEndColumn(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := o.validateStartColumn(formats); err != nil {
-		res = append(res, err)
-	}
 
 	if err := o.validateSubGroupDefinitions(formats); err != nil {
 		res = append(res, err)
@@ -390,92 +374,6 @@ func (o *SurvivalAnalysisBody) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-var survivalAnalysisBodyTypeEndColumnPropEnum []interface{}
-
-func init() {
-	var res []string
-	if err := json.Unmarshal([]byte(`["start_date","end_date"]`), &res); err != nil {
-		panic(err)
-	}
-	for _, v := range res {
-		survivalAnalysisBodyTypeEndColumnPropEnum = append(survivalAnalysisBodyTypeEndColumnPropEnum, v)
-	}
-}
-
-const (
-
-	// SurvivalAnalysisBodyEndColumnStartDate captures enum value "start_date"
-	SurvivalAnalysisBodyEndColumnStartDate string = "start_date"
-
-	// SurvivalAnalysisBodyEndColumnEndDate captures enum value "end_date"
-	SurvivalAnalysisBodyEndColumnEndDate string = "end_date"
-)
-
-// prop value enum
-func (o *SurvivalAnalysisBody) validateEndColumnEnum(path, location string, value string) error {
-	if err := validate.EnumCase(path, location, value, survivalAnalysisBodyTypeEndColumnPropEnum, true); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (o *SurvivalAnalysisBody) validateEndColumn(formats strfmt.Registry) error {
-
-	if swag.IsZero(o.EndColumn) { // not required
-		return nil
-	}
-
-	// value enum
-	if err := o.validateEndColumnEnum("body"+"."+"endColumn", "body", o.EndColumn); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-var survivalAnalysisBodyTypeStartColumnPropEnum []interface{}
-
-func init() {
-	var res []string
-	if err := json.Unmarshal([]byte(`["start_date","end_date"]`), &res); err != nil {
-		panic(err)
-	}
-	for _, v := range res {
-		survivalAnalysisBodyTypeStartColumnPropEnum = append(survivalAnalysisBodyTypeStartColumnPropEnum, v)
-	}
-}
-
-const (
-
-	// SurvivalAnalysisBodyStartColumnStartDate captures enum value "start_date"
-	SurvivalAnalysisBodyStartColumnStartDate string = "start_date"
-
-	// SurvivalAnalysisBodyStartColumnEndDate captures enum value "end_date"
-	SurvivalAnalysisBodyStartColumnEndDate string = "end_date"
-)
-
-// prop value enum
-func (o *SurvivalAnalysisBody) validateStartColumnEnum(path, location string, value string) error {
-	if err := validate.EnumCase(path, location, value, survivalAnalysisBodyTypeStartColumnPropEnum, true); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (o *SurvivalAnalysisBody) validateStartColumn(formats strfmt.Registry) error {
-
-	if swag.IsZero(o.StartColumn) { // not required
-		return nil
-	}
-
-	// value enum
-	if err := o.validateStartColumnEnum("body"+"."+"startColumn", "body", o.StartColumn); err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -631,7 +529,7 @@ type SurvivalAnalysisOKBody struct {
 	Results []*ResultsItems0 `json:"results"`
 
 	// timers
-	Timers map[string]float64 `json:"timers,omitempty"`
+	Timers models.Timers `json:"timers"`
 }
 
 // Validate validates this survival analysis o k body
@@ -639,6 +537,10 @@ func (o *SurvivalAnalysisOKBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := o.validateResults(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateTimers(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -668,6 +570,22 @@ func (o *SurvivalAnalysisOKBody) validateResults(formats strfmt.Registry) error 
 			}
 		}
 
+	}
+
+	return nil
+}
+
+func (o *SurvivalAnalysisOKBody) validateTimers(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.Timers) { // not required
+		return nil
+	}
+
+	if err := o.Timers.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("survivalAnalysisOK" + "." + "timers")
+		}
+		return err
 	}
 
 	return nil

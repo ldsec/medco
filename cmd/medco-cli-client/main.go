@@ -83,28 +83,56 @@ func main() {
 
 	//--- survival analysis command flags
 	survivalAnalysisFlag := []cli.Flag{
-		cli.StringFlag{
-			Name:  "granularity, r",
-			Usage: "Granularity",
-			Value: "year",
+		// TODO as CLI is ran in a docker container, some adjustments are needed for I/O files to work
+		//cli.StringFlag{
+		//	Name:  "parameterFile, p",
+		//	Usage: "YAML parameter file URL",
+		//	Value: "",
+		//},
+		//cli.StringFlag{
+		//	Name:  "resultFile, r",
+		//	Usage: "Output file for the result CSV. Printed to stdout if omitted.",
+		//	Value: "",
+		//},
+		//cli.StringFlag{
+		//	Name:  "dumpFile, d",
+		//	Usage: "Output file for the timers CSV. Printed to stdout if omitted.",
+		//	Value: "",
+		//},
+		cli.IntFlag{
+			Name:     "limit, l",
+			Usage:    "Max limit of survival analysis.",
+			Required: true,
 		},
-		cli.Int64Flag{
-			Name:  "limit, l",
-			Usage: "Limit ",
-			Value: 10,
+		cli.StringFlag{
+			Name:  "granularity, g",
+			Usage: "Time resolution, one of [day, week, month, year]",
+			Value: "day",
+		},
+		// this is supposed to be a required argument, but we need -1 for testing, and -1 is not possible to pass as an argument here
+		cli.IntFlag{
+			Name:  "cohortID, c",
+			Usage: "Cohort identifier",
+			Value: -1,
 		},
 		cli.StringFlag{
-			Name:  "set, s",
-			Usage: "Set ",
+			Name:     "startConcept, s",
+			Usage:    "Survival start concept",
+			Required: true},
+		cli.StringFlag{
+			Name:  "startModifier, x",
+			Usage: "Survival start modifier",
+			Value: "@",
 		},
 		cli.StringFlag{
-			Name:  "groups, g",
-			Usage: "Groups",
+			Name:     "endConcept, e",
+			Usage:    "Survival end concept",
+			Required: true,
 		},
 		cli.StringFlag{
-			Name:  "type, t",
-			Usage: "Type",
-			Value: "tumor-progression-free",
+			Name:  "endModifier, y",
+			Usage: "Survival end modifier",
+			Value: "@",
 		},
 	}
 
@@ -185,20 +213,26 @@ func main() {
 			Aliases:     []string{"srva"},
 			Usage:       "Run a survival analysis",
 			Flags:       survivalAnalysisFlag,
-			ArgsUsage:   "[-r granularity] [-l limit] [-t type ] [-g groups]",
+			ArgsUsage:   "-l limit [-g granularity] -c cohortID -s startConcept [-x startModifier] -e endConcept -y endModifier",
 			Description: "Returns the points of the survival curve",
 			Action: func(c *cli.Context) error {
-				return survivalclient.ClientSurvival(
+				return survivalclient.ExecuteClientSurvival(
 					c.GlobalString("token"),
-					c.Int("patientSet"),
-					c.String("startConcept"),
-					c.String("startColumn"),
-					c.String("endConcept"),
-					c.String("endColumn"),
+					"",
 					c.GlobalString("user"),
 					c.GlobalString("password"),
 					c.GlobalBool("disableTLSCheck"),
+					"",
+					"",
+					c.Int("limit"),
+					c.Int("cohortID"),
+					c.String("granularity"),
+					c.String("startConcept"),
+					c.String("startModifier"),
+					c.String("endConcept"),
+					c.String("endModifier"),
 				)
+
 			},
 		},
 	}

@@ -14,9 +14,9 @@ func NewCrcPsmReqFromQueryDef(queryName string, panelsItemKeys [][]string, panel
 	// PSM header
 	psmHeader := PsmHeader{
 		PatientSetLimit: "0",
-		EstimatedTime: "0",
-		QueryMode: "optimize_without_temp_table",
-		RequestType: "CRC_QRY_runQueryInstance_fromQueryDefinition",
+		EstimatedTime:   "0",
+		QueryMode:       "optimize_without_temp_table",
+		RequestType:     "CRC_QRY_runQueryInstance_fromQueryDefinition",
 	}
 	psmHeader.User.Text = utilserver.I2b2LoginUser
 	psmHeader.User.Group = utilserver.I2b2LoginDomain
@@ -26,12 +26,12 @@ func NewCrcPsmReqFromQueryDef(queryName string, panelsItemKeys [][]string, panel
 
 	psmRequest := PsmRequestFromQueryDef{
 		Type: "crcpsmns:query_definition_requestType",
-		Xsi: "http://www.w3.org/2001/XMLSchema-instance",
+		Xsi:  "http://www.w3.org/2001/XMLSchema-instance",
 
-		QueryName: queryName,
-		QueryID: queryName,
+		QueryName:        queryName,
+		QueryID:          queryName,
 		QueryDescription: "Query from MedCo connector (" + queryName + ")",
-		QueryTiming: "ANY",
+		QueryTiming:      "ANY",
 		SpecificityScale: "0",
 	}
 
@@ -43,10 +43,10 @@ func NewCrcPsmReqFromQueryDef(queryName string, panelsItemKeys [][]string, panel
 		}
 
 		panel := Panel{
-			PanelNumber: strconv.Itoa(p + 1),
-			PanelAccuracyScale: "100",
-			Invert: invert,
-			PanelTiming: "ANY",
+			PanelNumber:          strconv.Itoa(p + 1),
+			PanelAccuracyScale:   "100",
+			Invert:               invert,
+			PanelTiming:          "ANY",
 			TotalItemOccurrences: "1",
 		}
 
@@ -64,7 +64,7 @@ func NewCrcPsmReqFromQueryDef(queryName string, panelsItemKeys [][]string, panel
 	for i, resultOutput := range resultOutputs {
 		psmRequest.ResultOutputs = append(psmRequest.ResultOutputs, ResultOutput{
 			PriorityIndex: strconv.Itoa(i + 1),
-			Name: string(resultOutput),
+			Name:          string(resultOutput),
 		})
 
 	}
@@ -79,7 +79,7 @@ func NewCrcPsmReqFromQueryDef(queryName string, panelsItemKeys [][]string, panel
 
 // CrcPsmReqFromQueryDefMessageBody is an i2b2 XML message body for CRC PSM request from query definition
 type CrcPsmReqFromQueryDefMessageBody struct {
-	XMLName       xml.Name `xml:"message_body"`
+	XMLName xml.Name `xml:"message_body"`
 
 	PsmHeader  PsmHeader              `xml:"crcpsmns:psmheader"`
 	PsmRequest PsmRequestFromQueryDef `xml:"crcpsmns:request"`
@@ -87,7 +87,7 @@ type CrcPsmReqFromQueryDefMessageBody struct {
 
 // PsmHeader is an i2b2 XML header for PSM request
 type PsmHeader struct {
-	User    struct {
+	User struct {
 		Text  string `xml:",chardata"`
 		Group string `xml:"group,attr"`
 		Login string `xml:"login,attr"`
@@ -101,15 +101,15 @@ type PsmHeader struct {
 
 // PsmRequestFromQueryDef is an i2b2 XML PSM request from query definition
 type PsmRequestFromQueryDef struct {
-	Type    string   `xml:"xsi:type,attr"`
-	Xsi     string   `xml:"xmlns:xsi,attr"`
+	Type string `xml:"xsi:type,attr"`
+	Xsi  string `xml:"xmlns:xsi,attr"`
 
-	QueryName        string   `xml:"query_definition>query_name"`
-	QueryDescription string   `xml:"query_definition>query_description"`
-	QueryID			 string   `xml:"query_definition>query_id"`
-	QueryTiming      string   `xml:"query_definition>query_timing"`
-	SpecificityScale string   `xml:"query_definition>specificity_scale"`
-	Panels            []Panel `xml:"query_definition>panel"`
+	QueryName        string  `xml:"query_definition>query_name"`
+	QueryDescription string  `xml:"query_definition>query_description"`
+	QueryID          string  `xml:"query_definition>query_id"`
+	QueryTiming      string  `xml:"query_definition>query_timing"`
+	SpecificityScale string  `xml:"query_definition>specificity_scale"`
+	Panels           []Panel `xml:"query_definition>panel"`
 
 	ResultOutputs []ResultOutput `xml:"result_output_list>result_output"`
 }
@@ -122,7 +122,7 @@ type Panel struct {
 	PanelTiming          string `xml:"panel_timing"`
 	TotalItemOccurrences string `xml:"total_item_occurrences"`
 
-	Items 				 []Item `xml:"item"`
+	Items []Item `xml:"item"`
 }
 
 // Item is an i2b2 XML item
@@ -160,10 +160,10 @@ const (
 
 // CrcPsmRespMessageBody is an i2b2 XML message body for CRC PSM response
 type CrcPsmRespMessageBody struct {
-	XMLName  xml.Name `xml:"message_body"`
+	XMLName xml.Name `xml:"message_body"`
 
 	Response struct {
-		Type        string   `xml:"type,attr"`
+		Type string `xml:"type,attr"`
 
 		Status []struct {
 			Text string `xml:",chardata"`
@@ -196,7 +196,7 @@ type CrcPsmRespMessageBody struct {
 			} `xml:"query_status_type"`
 		} `xml:"query_instance"`
 
-		QueryResultInstances [] QueryResultInstance `xml:"query_result_instance"`
+		QueryResultInstances []QueryResultInstance `xml:"query_result_instance"`
 	} `xml:"response"`
 }
 

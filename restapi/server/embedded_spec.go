@@ -221,13 +221,6 @@ func init() {
                 "ID": {
                   "type": "string"
                 },
-                "endColumn": {
-                  "type": "string",
-                  "enum": [
-                    "start_date",
-                    "end_date"
-                  ]
-                },
                 "endConcept": {
                   "type": "string"
                 },
@@ -235,14 +228,7 @@ func init() {
                   "type": "string"
                 },
                 "setID": {
-                  "type": "number"
-                },
-                "startColumn": {
-                  "type": "string",
-                  "enum": [
-                    "start_date",
-                    "end_date"
-                  ]
+                  "type": "integer"
                 },
                 "startConcept": {
                   "type": "string"
@@ -278,7 +264,7 @@ func init() {
                   ]
                 },
                 "timeLimit": {
-                  "type": "number"
+                  "type": "integer"
                 },
                 "userPublicKey": {
                   "type": "string",
@@ -319,7 +305,7 @@ func init() {
                               }
                             },
                             "timepoint": {
-                              "type": "number"
+                              "type": "integer"
                             }
                           }
                         }
@@ -331,10 +317,7 @@ func init() {
                   }
                 },
                 "timers": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "number"
-                  }
+                  "$ref": "#/definitions/timers"
                 }
               }
             }
@@ -601,22 +584,7 @@ func init() {
           ]
         },
         "timers": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": [
-              "milliseconds"
-            ],
-            "properties": {
-              "milliseconds": {
-                "type": "integer",
-                "format": "int64"
-              },
-              "name": {
-                "type": "string"
-              }
-            }
-          }
+          "$ref": "#/definitions/timers"
         }
       }
     },
@@ -761,6 +729,24 @@ func init() {
         "medco-genomic-annotations",
         "medco-survival-analysis"
       ]
+    },
+    "timers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "milliseconds"
+        ],
+        "properties": {
+          "milliseconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      }
     },
     "user": {
       "type": "object",
@@ -1191,13 +1177,6 @@ func init() {
                 "ID": {
                   "type": "string"
                 },
-                "endColumn": {
-                  "type": "string",
-                  "enum": [
-                    "start_date",
-                    "end_date"
-                  ]
-                },
                 "endConcept": {
                   "type": "string"
                 },
@@ -1205,14 +1184,7 @@ func init() {
                   "type": "string"
                 },
                 "setID": {
-                  "type": "number"
-                },
-                "startColumn": {
-                  "type": "string",
-                  "enum": [
-                    "start_date",
-                    "end_date"
-                  ]
+                  "type": "integer"
                 },
                 "startConcept": {
                   "type": "string"
@@ -1237,7 +1209,7 @@ func init() {
                   ]
                 },
                 "timeLimit": {
-                  "type": "number"
+                  "type": "integer"
                 },
                 "userPublicKey": {
                   "type": "string",
@@ -1260,10 +1232,7 @@ func init() {
                   }
                 },
                 "timers": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "number"
-                  }
+                  "$ref": "#/definitions/timers"
                 }
               }
             }
@@ -1582,21 +1551,6 @@ func init() {
         }
       }
     },
-    "ExploreQueryResultElementTimersItems0": {
-      "type": "object",
-      "required": [
-        "milliseconds"
-      ],
-      "properties": {
-        "milliseconds": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "name": {
-          "type": "string"
-        }
-      }
-    },
     "ExploreSearchResultElementMedcoEncryption": {
       "type": "object",
       "required": [
@@ -1716,7 +1670,7 @@ func init() {
           }
         },
         "timepoint": {
-          "type": "number"
+          "type": "integer"
         }
       }
     },
@@ -1742,6 +1696,21 @@ func init() {
           "items": {
             "$ref": "#/definitions/panel"
           }
+        }
+      }
+    },
+    "TimersItems0": {
+      "type": "object",
+      "required": [
+        "milliseconds"
+      ],
+      "properties": {
+        "milliseconds": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
         }
       }
     },
@@ -1817,10 +1786,7 @@ func init() {
           ]
         },
         "timers": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ExploreQueryResultElementTimersItems0"
-          }
+          "$ref": "#/definitions/timers"
         }
       }
     },
@@ -1942,6 +1908,12 @@ func init() {
         "medco-genomic-annotations",
         "medco-survival-analysis"
       ]
+    },
+    "timers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/TimersItems0"
+      }
     },
     "user": {
       "type": "object",

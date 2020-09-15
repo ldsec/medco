@@ -210,21 +210,21 @@ paths:
               type: "string"
               pattern: '^[\w=-]+$'
             setID:
-              type: "number"
+              type: "integer"
             subGroupDefinitions:
               type : "array"
               items:
                 type: "object"
                 properties:
                   cohortName:
-                    type: 'string'
+                    type: "string"
                   panels:
                     type: "array"
                     items:
                       $ref: '#/definitions/panel'
               maxItems: 4
             timeLimit:
-              type: "number"
+              type: "integer"
             timeGranularity:
               type: "string"
               enum:
@@ -236,22 +236,10 @@ paths:
               type: "string"
             startModifier:
               type: "string"
-            startColumn:
-              type: "string"
-              enum:
-                - "start_date"
-                - "end_date"
             endConcept:
               type: "string"
             endModifier:
               type: "string"
-            endColumn:
-              type: "string"
-              enum:
-                - "start_date"
-                - "end_date"
-          
-
 
       responses:
         200:
@@ -274,7 +262,7 @@ paths:
                         type: "object"
                         properties:
                           timepoint:
-                            type: "number"
+                            type: "integer"
                           events:
                             type: "object"
                             properties:
@@ -283,9 +271,7 @@ paths:
                               censoringevent:
                                 type: "string"
               timers:
-                type: "object"
-                additionalProperties:
-                  type: "number"
+                $ref: "#/definitions/timers"
 
         404:
           description: "TODO not found"
@@ -588,16 +574,8 @@ definitions:
       patientSetID:
         type: "number"
       timers:
-        type: "array"
-        items:
-          type: "object"
-          required: [milliseconds]
-          properties:
-            name:
-              type: "string"
-            milliseconds:
-              type: "integer"
-              format: "int64"
+        $ref: "#/definitions/timers"
+        
 
   restApiAuthorization:
     type: "string"
@@ -625,3 +603,15 @@ definitions:
             type: "array"
             items:
               $ref: "#/definitions/exploreQueryType"
+  
+  timers:
+    type: "array"
+    items:
+      type: "object"
+      required: [milliseconds]
+      properties:
+        name:
+          type: "string"
+        milliseconds:
+          type: "integer"
+          format: "int64"

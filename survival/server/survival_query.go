@@ -1,13 +1,16 @@
 package survivalserver
 
 import (
+	"encoding/base64"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/sirupsen/logrus"
 
 	querytools "github.com/ldsec/medco-connector/queryTools"
+	utilcommon "github.com/ldsec/medco-connector/util/common"
 	"github.com/ldsec/medco-connector/wrappers/unlynx"
 
 	"github.com/ldsec/medco-connector/restapi/models"
@@ -16,7 +19,7 @@ import (
 
 // Query holds the ID of the survival analysis, its parameters and a pointer to its results
 type Query struct {
-	UserId              string
+	UserID              string
 	UserPublicKey       string
 	QueryName           string
 	SetID               int
@@ -24,20 +27,17 @@ type Query struct {
 	TimeLimit           int
 	TimeGranularity     string
 	StartConcept        string
-	StartColumn         string
 	StartModifier       string
 	EndConcept          string
-	EndColumn           string
 	EndModifier         string
 	Result              *struct {
-		Timers    map[string]time.Duration
+		Timers    utilcommon.Timers
 		EncEvents EventGroups
-		timerLock *sync.Mutex
 	}
 }
 
 // NewQuery query constructor
-func NewQuery(UserId,
+func NewQuery(UserID,
 	QueryName,
 	UserPublicKey string,
 	SetID int,
@@ -45,46 +45,42 @@ func NewQuery(UserId,
 	TimeLimit int,
 	TimeGranularity string,
 	StartConcept string,
-	StartColumn string,
 	StartModifier string,
 	EndConcept string,
-	EndColumn string,
 	EndModifier string) *Query {
 	res := &Query{
 		UserPublicKey:       UserPublicKey,
-		UserId:              UserId,
+		UserID:              UserID,
 		QueryName:           QueryName,
 		SetID:               SetID,
 		SubGroupDefinitions: SubGroupDefinitions,
 		TimeLimit:           TimeLimit,
 		TimeGranularity:     TimeGranularity,
 		StartConcept:        StartConcept,
-		StartColumn:         StartColumn,
 		StartModifier:       StartModifier,
 		EndConcept:          EndConcept,
-		EndColumn:           EndColumn,
 		EndModifier:         EndModifier,
 		Result: &struct {
-			Timers    map[string]time.Duration
+			Timers    utilcommon.Timers
 			EncEvents EventGroups
-			timerLock *sync.Mutex
 		}{}}
 	res.Result.Timers = make(map[string]time.Duration)
-	res.Result.timerLock = &sync.Mutex{}
+
 	return res
 }
 
+// Execute runs the survival analysis query
 func (q *Query) Execute() error {
 
 	patientLists := make([][]int64, 0)
 	initialCounts := make([]int64, 0)
 	eventGroups := make(EventGroups, 0)
 
-	//build subgroups
+	// --- build subgroups
 
 	timer := time.Now()
-	cohort, err := GetPatientList(querytools.ConnectorDB, int64(q.SetID), q.UserId)
-	q.addTimers("medco-connector-get-patient-list", timer)
+	cohort, err := querytools.GetPatientList(querytools.ConnectorDB, q.UserID, int64(q.SetID))
+	q.Result.Timers.AddTimers("medco-connector-get-patient-list", timer, nil)
 	logrus.Debug("got patients")
 
 	if err != nil {
@@ -92,7 +88,7 @@ func (q *Query) Execute() error {
 		return err
 	}
 
-	//get concept and modifier codes from the ontology
+	// --- get concept and modifier codes from the ontology
 	err = DirectI2B2.Ping()
 
 	if err != nil {
@@ -100,6 +96,11 @@ func (q *Query) Execute() error {
 		return err
 	}
 	startConceptCode, err := GetCode(q.StartConcept)
+	if err != nil {
+		logrus.Error("Error while retrieving concept code, ", err)
+		return err
+	}
+	endConceptCode, err := GetCode(q.EndConcept)
 	if err != nil {
 		logrus.Error("Error while retrieving concept code, ", err)
 		return err
@@ -135,14 +136,21 @@ func (q *Query) Execute() error {
 	}
 	waitGroup := &sync.WaitGroup{}
 	waitGroup.Add(len(definitions))
-	channels := make([]chan *EventGroup, len(definitions))
+	channels := make([]chan struct {
+		*EventGroup
+		utilcommon.Timers
+	}, len(definitions))
 	errChan := make(chan error, len(definitions))
 	signal := make(chan struct{})
 
 	for i, definition := range definitions {
-		channels[i] = make(chan *EventGroup, 1)
+		channels[i] = make(chan struct {
+			*EventGroup
+			utilcommon.Timers
+		}, 1)
 		go func(i int, definition *survival_analysis.SubGroupDefinitionsItems0) {
 			defer waitGroup.Done()
+			timers := utilcommon.NewTimers()
 
 			newEventGroup := &EventGroup{GroupID: q.QueryName + fmt.Sprintf("_GROUP_%d", i)}
 			panels := make([][]string, 0)
@@ -164,7 +172,7 @@ func (q *Query) Execute() error {
 
 			timer = time.Now()
 			initialCount, patientList, err := SubGroupExplore(q.QueryName, i, panels, not)
-			q.addTimers(fmt.Sprintf("medco-connector-i2b2-query-group%d", i), timer)
+			timers.AddTimers(fmt.Sprintf("medco-connector-i2b2-query-group%d", i), timer, nil)
 			patientList = Intersect(cohort, patientList)
 			patientLists = append(patientLists, patientList)
 			initialCounts = append(initialCounts, initialCount)
@@ -175,7 +183,7 @@ func (q *Query) Execute() error {
 			}
 			timer = time.Now()
 			initialCountEncrypt, err := unlynx.EncryptWithCothorityKey(initialCount)
-			q.addTimers(fmt.Sprintf("medco-connector-encrypt-init-count-group%d", i), timer)
+			timers.AddTimers(fmt.Sprintf("medco-connector-encrypt-init-count-group%d", i), timer, nil)
 			if err != nil {
 				errChan <- err
 				return
@@ -186,72 +194,71 @@ func (q *Query) Execute() error {
 			sqlTimePoints, err := BuildTimePoints(DirectI2B2,
 				patientList,
 				startConceptCode,
-				q.StartColumn,
 				q.StartModifier,
-				q.EndConcept,
-				q.EndColumn,
+				endConceptCode,
 				q.EndModifier,
+				q.TimeLimit,
 			)
-			q.addTimers(fmt.Sprintf("medco-connector-build-timepoints%d", i), timer)
+			timers.AddTimers(fmt.Sprintf("medco-connector-build-timepoints%d", i), timer, nil)
 			if err != nil {
 				logrus.Error("error while getting building time points", timer)
 				errChan <- err
 				return
 			}
 			logrus.Debugf("got %d time points", len(sqlTimePoints))
-			//locally encrypt
-			timePointsSet := make(map[int](struct{}))
-			for _, sqlTimePoint := range sqlTimePoints {
-				if sqlTimePoint.timePoint <= q.TimeLimit {
-					timePointsSet[sqlTimePoint.timePoint] = struct{}{}
-					localEventEncryption, err := unlynx.EncryptWithCothorityKey(int64(sqlTimePoint.localEventAggregate))
-					if err != nil {
-						errChan <- err
-						return
-					}
-					localCensoringEncryption, err := unlynx.EncryptWithCothorityKey(int64(sqlTimePoint.localCensoringAggrete))
-					if err != nil {
-						errChan <- err
-					}
-
-					newEventGroup.TimePointResults = append(newEventGroup.TimePointResults, &TimePointResult{
-						TimePoint: sqlTimePoint.timePoint,
-						Result: Result{
-							EventValueAgg:     localEventEncryption,
-							CensoringValueAgg: localCensoringEncryption,
-						}})
-				}
-			}
-
-			//get timepoints count for events of interest and censoring events
-
-			//TODO: pad for zero time
+			logrus.Tracef("%+v", sqlTimePoints)
+			// ---change time resolution
 			timer = time.Now()
-
-			//TODO this put a full vector from 0 to time limit, with a lot of zero encrypted points
-			for j := 0; j < q.TimeLimit; j++ {
-				if _, isIn := timePointsSet[j]; !isIn {
-
-					zeroEncrypt, err := unlynx.EncryptWithCothorityKey(int64(0))
-					if err != nil {
-						errChan <- err
-						return
-					}
-					zeroEncrypt1, err := unlynx.EncryptWithCothorityKey(int64(0))
-					if err != nil {
-						errChan <- err
-						return
-					}
-					newEventGroup.TimePointResults = append(newEventGroup.TimePointResults, &TimePointResult{
-						TimePoint: j,
-						Result: Result{
-							EventValueAgg:     zeroEncrypt,
-							CensoringValueAgg: zeroEncrypt1,
-						}})
-				}
+			sqlTimePoints, err = granularity(sqlTimePoints, q.TimeGranularity)
+			if err != nil {
+				logrus.Error("Error while changing granularity")
+				errChan <- err
+				return
 			}
-			q.addTimers(fmt.Sprintf("encrypt-zero-events%d", i), timer)
-			channels[i] <- newEventGroup
+			timers.AddTimers(fmt.Sprintf("medco-connector-change-timepoints-to-new-resolution%d", i), timer, nil)
+			logrus.Debugf("changed resolution for %s,  got %d timepoints", q.TimeGranularity, len(sqlTimePoints))
+			logrus.Tracef("time points with resolution %s %+v", q.TimeGranularity, sqlTimePoints)
+
+			// --- expand
+			timer = time.Now()
+			sqlTimePoints, err = Expansion(sqlTimePoints, q.TimeLimit, q.TimeGranularity)
+			if err != nil {
+				logrus.Error("Error while expanding")
+				errChan <- err
+				return
+			}
+			timers.AddTimers(fmt.Sprintf("medco-connector-expansion%d", i), timer, nil)
+			logrus.Debugf("expanded to %d timepoints", len(sqlTimePoints))
+			logrus.Tracef("expanded time points %v", sqlTimePoints)
+
+			//locally encrypt
+			timer = time.Now()
+			for _, sqlTimePoint := range sqlTimePoints {
+
+				localEventEncryption, err := unlynx.EncryptWithCothorityKey(sqlTimePoint.Events.EventsOfInterest)
+				if err != nil {
+					errChan <- err
+					return
+				}
+				localCensoringEncryption, err := unlynx.EncryptWithCothorityKey(sqlTimePoint.Events.CensoringEvents)
+				if err != nil {
+					errChan <- err
+				}
+
+				newEventGroup.TimePointResults = append(newEventGroup.TimePointResults, &TimePointResult{
+					TimePoint: sqlTimePoint.Time,
+					Result: Result{
+						EventValueAgg:     localEventEncryption,
+						CensoringValueAgg: localCensoringEncryption,
+					}})
+
+			}
+			logrus.Tracef("Eventt groups %v", newEventGroup)
+			timers.AddTimers(fmt.Sprintf("medco-connector-local-encryption%d", i), timer, nil)
+			channels[i] <- struct {
+				*EventGroup
+				utilcommon.Timers
+			}{newEventGroup, timers}
 		}(i, definition)
 
 	}
@@ -266,39 +273,71 @@ func (q *Query) Execute() error {
 		break
 	}
 	for _, channel := range channels {
+		chanResult := <-channel
 
-		eventGroups = append(eventGroups, <-channel)
+		eventGroups = append(eventGroups, chanResult.EventGroup)
+		q.Result.Timers.AddTimers("", timer, chanResult.Timers)
 	}
 
-	//TODO this put a full vector from 0 to time limit, with a lot of zero encrypted points
-
-	//Key Switch !!
+	// aggregate and key switch locally encrypted results
 
 	for _, group := range eventGroups {
-		logrus.Trace("eventGroup", *group)
+		logrus.Tracef("eventGroup %v", group)
 	}
 	timer = time.Now()
-	q.Result.EncEvents, _, err = AKSgroups(q.QueryName+"_AGG_AND_KEYSWITCH", eventGroups, q.UserPublicKey)
-	q.addTimers("medco-connector-aggregate-and-key-switch", timer)
+	var aksTimers utilcommon.Timers
+	q.Result.EncEvents, aksTimers, err = AKSgroups(q.QueryName+"_AGG_AND_KEYSWITCH", eventGroups, q.UserPublicKey)
+	q.Result.Timers.AddTimers("medco-connector-aggregate-and-key-switch", timer, aksTimers)
 	return err
-
 }
 
-// addTimers adds timers to the query results
-func (q *Query) addTimers(timerName string, since time.Time) {
-	if timerName != "" {
-		q.Result.timerLock.Lock()
-		q.Result.Timers[timerName] = time.Since(since)
-		q.Result.timerLock.Unlock()
+// Validate checks members of a Query instance for early error detection.
+// Heading and trailing spaces are silently trimmed. Granularity string is silently written in lower case.
+// If any other wrong member can be defaulted, a warning message is printed, otherwise an error is returned.
+func (q *Query) Validate() error {
+	q.StartConcept = strings.TrimSpace(q.StartConcept)
+	if q.StartConcept == "" {
+		return fmt.Errorf("emtpy start concept path")
 	}
-}
-
-func (q *Query) PrintTimers() {
-	logrus.Debug("timer, duration:")
-	q.Result.timerLock.Lock()
-	for timerName, duration := range q.Result.Timers {
-		logrus.Debug(timerName, " , ", duration.Milliseconds())
+	q.StartModifier = strings.TrimSpace(q.StartModifier)
+	if q.StartModifier == "" {
+		logrus.Warn("empty start concept, defaulte to \"@\"")
 	}
-	q.Result.timerLock.Unlock()
+	q.QueryName = strings.TrimSpace(q.QueryName)
+	if q.QueryName == "" {
+		return fmt.Errorf("empty query name")
+	}
+	q.EndConcept = strings.TrimSpace(q.EndConcept)
+	if q.EndConcept == "" {
+		return fmt.Errorf("empty end concept path")
+	}
+	q.EndModifier = strings.TrimSpace(q.EndModifier)
+	if q.EndModifier == "" {
+		logrus.Warn("empty end modifier, defaulted to \"@\"")
+	}
+	q.UserID = strings.TrimSpace(q.UserID)
+	if q.UserID == "" {
+		return fmt.Errorf("empty user name")
+	}
+	q.TimeGranularity = strings.ToLower(strings.TrimSpace(q.TimeGranularity))
+	if q.TimeGranularity == "" {
+		return fmt.Errorf("empty granularity")
+	}
+	if _, isIn := granularityFunctions[q.TimeGranularity]; !isIn {
+		granularities := make([]string, 0, len(granularityFunctions))
+		for name := range granularityFunctions {
+			granularities = append(granularities, name)
+		}
+		return fmt.Errorf("granularity %s not implemented, must be one of %v", q.TimeGranularity, granularities)
+	}
+	q.UserPublicKey = strings.TrimSpace(q.UserPublicKey)
+	if q.UserPublicKey == "" {
+		return fmt.Errorf("empty user public key")
+	}
+	_, err := base64.URLEncoding.DecodeString(q.UserPublicKey)
+	if err != nil {
+		return fmt.Errorf("user public key is not valid against the alternate RFC4648 base64 for URL: %s", err.Error())
+	}
+	return nil
 
 }

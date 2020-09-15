@@ -4,17 +4,18 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
-	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+
+	"github.com/sirupsen/logrus"
 )
 
 // oidcTokenResp contains the response to an OIDC token request
 type oidcTokenResp struct {
 	AccessToken string `json:"access_token"`
-	TokenType string `json:"token_type"`
-	Scope string `json:"scope"`
+	TokenType   string `json:"token_type"`
+	Scope       string `json:"scope"`
 }
 
 // RetrieveAccessToken requests JWT from OIDC provider
@@ -30,9 +31,9 @@ func RetrieveAccessToken(username string, password string, disableTLSCheck bool)
 
 	httpResp, err := httpClient.PostForm(OidcReqTokenURL, url.Values{
 		"grant_type": {"password"},
-		"client_id": {OidcReqTokenClientID},
-		"username": {username},
-		"password": {password},
+		"client_id":  {OidcReqTokenClientID},
+		"username":   {username},
+		"password":   {password},
 	})
 
 	if err != nil {
@@ -57,4 +58,17 @@ func RetrieveAccessToken(username string, password string, disableTLSCheck bool)
 	logrus.Info("OIDC request token successfully authenticated")
 	logrus.Debug("OIDC request token: " + parsedResp.AccessToken)
 	return parsedResp.AccessToken, nil
+}
+
+// RetrieveOrGetNewAccessToken requests JWT from OIDC provider if given token is empty
+func RetrieveOrGetNewAccessToken(token string, username string, password string, disableTLSCheck bool) (accessToken string, err error) {
+
+	if len(token) > 0 {
+		accessToken = token
+		return
+	}
+	logrus.Debug("No token provided, requesting token for user ", username, ", disable TLS check: ", disableTLSCheck)
+	accessToken, err = RetrieveAccessToken(username, password, disableTLSCheck)
+	return
+
 }

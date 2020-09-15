@@ -66,14 +66,7 @@ func MedCoNodeExploreQueryHandler(params medco_node.ExploreQueryParams, principa
 	}
 
 	// parse timers
-	timers := make([]*models.ExploreQueryResultElementTimersItems0, 0)
-	for timerName, timerDuration := range query.Result.Timers {
-		milliseconds := int64(timerDuration / time.Millisecond)
-		timers = append(timers, &models.ExploreQueryResultElementTimersItems0{
-			Name:         timerName,
-			Milliseconds: &milliseconds,
-		})
-	}
+	timers := query.Result.Timers.TimersToAPIModel()
 
 	return medco_node.NewExploreQueryOK().WithPayload(&medco_node.ExploreQueryOKBody{
 		ID:    query.ID,
@@ -87,7 +80,7 @@ func MedCoNodeExploreQueryHandler(params medco_node.ExploreQueryParams, principa
 		}})
 }
 
-// MedCoNodeExploreQueryHandler handles /medco/node/explore/query API endpoint
+// MedCoNodeGetCohortsHandler handles GET /medco/node/explore/cohorts  API endpoint
 func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *models.User) middleware.Responder {
 	userID := principal.ID
 	cohorts, err := querytools.GetSavedCohorts(querytools.ConnectorDB, userID)
@@ -104,8 +97,8 @@ func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *m
 		payload.Payload = append(payload.Payload,
 			&medco_node.GetCohortsOKBodyItems0{
 				CohortName:   cohort.CohortName,
-				CohortID:     float64(cohort.CohortId),
-				QueryID:      float64(cohort.QueryId),
+				CohortID:     float64(cohort.CohortID),
+				QueryID:      float64(cohort.QueryID),
 				CreationDate: cohort.CreationDate.Format(time.RFC3339),
 				UpdateDate:   cohort.UpdateDate.Format(time.RFC3339),
 			},
@@ -116,6 +109,7 @@ func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *m
 
 }
 
+// MedCoNodePostCohortsHandler handles POST /medco/node/explore/cohorts  API endpoint
 func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal *models.User) middleware.Responder {
 
 	cohort := params.Body

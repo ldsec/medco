@@ -23,34 +23,32 @@ func MedCoSurvivalAnalysisGetSurvivalAnalysisHandler(param survival_analysis.Sur
 		int(param.Body.TimeLimit),
 		param.Body.TimeGranularity,
 		param.Body.StartConcept,
-		param.Body.StartColumn,
 		param.Body.StartModifier,
 		param.Body.EndConcept,
-		param.Body.EndColumn,
 		param.Body.EndModifier,
 	)
 	logrus.Debug("survivalAnalysis: ", survivalAnalysisQuery)
-
-	if err := survivalAnalysisQuery.Execute(); err != nil {
-		logrus.Error(fmt.Sprintf("Query execution error : %s", err.Error()))
+	err := survivalAnalysisQuery.Validate()
+	if err != nil {
+		err = fmt.Errorf("query validation error: %s", err.Error())
+		logrus.Error(err)
 		return survival_analysis.NewSurvivalAnalysisDefault(500).WithPayload(&survival_analysis.SurvivalAnalysisDefaultBody{Message: err.Error()})
 	}
-	survivalAnalysisQuery.PrintTimers()
+	err = survivalAnalysisQuery.Execute()
+
+	if err != nil {
+		err = fmt.Errorf("query execution error: %s", err.Error())
+		logrus.Error(err)
+		return survival_analysis.NewSurvivalAnalysisDefault(500).WithPayload(&survival_analysis.SurvivalAnalysisDefaultBody{Message: err.Error()})
+	}
 	results := survivalAnalysisQuery.Result
 
-	timers := make(map[string]float64, len(results.Timers))
-	for timerKey, timerValue := range results.Timers {
-		if _, exists := timers[timerKey]; exists {
-			logrus.Warn("timer for " + timerKey + " already exists, previous value will be lost")
-		}
-		timers[timerKey] = timerValue.Seconds()
-	}
 	resultList := make([]*survival_analysis.ResultsItems0, 0)
 	for _, group := range survivalAnalysisQuery.Result.EncEvents {
 
 		timePoints := make([]*survival_analysis.ResultsItems0GroupResultsItems0, 0)
 		for _, timePoint := range group.TimePointResults {
-			timePoints = append(timePoints, &survival_analysis.ResultsItems0GroupResultsItems0{Timepoint: float64(timePoint.TimePoint),
+			timePoints = append(timePoints, &survival_analysis.ResultsItems0GroupResultsItems0{Timepoint: int64(timePoint.TimePoint),
 				Events: &survival_analysis.ResultsItems0GroupResultsItems0Events{
 					Eventofinterest: timePoint.Result.EventValueAgg,
 					Censoringevent:  timePoint.Result.CensoringValueAgg,
@@ -62,7 +60,11 @@ func MedCoSurvivalAnalysisGetSurvivalAnalysisHandler(param survival_analysis.Sur
 			GroupResults: timePoints,
 		})
 	}
-	requestResult := &survival_analysis.SurvivalAnalysisOKBody{Results: resultList, Timers: timers}
+
+	//parse timers
+	modelsTimers := results.Timers.TimersToAPIModel()
+
+	requestResult := &survival_analysis.SurvivalAnalysisOKBody{Results: resultList, Timers: modelsTimers}
 
 	return survival_analysis.NewSurvivalAnalysisOK().WithPayload(requestResult)
 
