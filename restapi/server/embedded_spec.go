@@ -483,9 +483,12 @@ func init() {
         "type": {
           "type": "string",
           "enum": [
-            "container",
             "concept",
+            "concept_container",
+            "concept_folder",
             "modifier",
+            "modifier_container",
+            "modifier_folder",
             "genomic_annotation"
           ]
         }
@@ -1340,9 +1343,12 @@ func init() {
         "type": {
           "type": "string",
           "enum": [
-            "container",
             "concept",
+            "concept_container",
+            "concept_folder",
             "modifier",
+            "modifier_container",
+            "modifier_folder",
             "genomic_annotation"
           ]
         }

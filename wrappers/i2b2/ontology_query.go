@@ -26,7 +26,7 @@ func GetOntologyChildren(path string) (results []*models.ExploreSearchResultElem
 
 	} else if path == "/" {
 		err = i2b2XMLRequest(
-			utilserver.I2b2HiveURL+ "/OntologyService/getCategories",
+			utilserver.I2b2HiveURL+"/OntologyService/getCategories",
 			NewOntReqGetCategoriesMessageBody(),
 			xmlResponse,
 		)
@@ -36,7 +36,7 @@ func GetOntologyChildren(path string) (results []*models.ExploreSearchResultElem
 
 	} else {
 		err = i2b2XMLRequest(
-			utilserver.I2b2HiveURL+ "/OntologyService/getChildren",
+			utilserver.I2b2HiveURL+"/OntologyService/getChildren",
 			NewOntReqGetChildrenMessageBody(convertPathToI2b2Format(path)),
 			xmlResponse,
 		)
@@ -47,13 +47,81 @@ func GetOntologyChildren(path string) (results []*models.ExploreSearchResultElem
 
 	// generate result from response
 	i2b2Concepts := xmlResponse.MessageBody.(*OntRespConceptsMessageBody).Concepts
-	results = make([]*models.ExploreSearchResultElement, 0)
+	results = make([]*models.ExploreSearchResultElement, 0, len(i2b2Concepts))
 	for _, concept := range i2b2Concepts {
 		parsedConcept, err := parseI2b2Concept(concept)
 		if err != nil {
 			return nil, err
 		}
 		results = append(results, parsedConcept)
+	}
+
+	return
+}
+
+// GetOntologyModifiers retrieves the modifiers that apply to self
+func GetOntologyModifiers(self string) (results []*models.ExploreSearchResultElement, err error) {
+
+	// craft and make request
+	self = convertPathToI2b2Format(strings.TrimSpace(self))
+
+	xmlResponse := &Response{
+		MessageBody: &OntRespModifiersMessageBody{},
+	}
+
+	err = i2b2XMLRequest(
+		utilserver.I2b2HiveURL+"/OntologyService/getModifiers",
+		NewOntReqGetModifiersMessageBody(self),
+		xmlResponse,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// generate result from response
+	i2b2Modifiers := xmlResponse.MessageBody.(*OntRespModifiersMessageBody).Modifiers
+	results = make([]*models.ExploreSearchResultElement, 0, len(i2b2Modifiers))
+	for _, modifier := range i2b2Modifiers {
+		parsedModifier, err := parseI2b2Modifier(modifier)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, parsedModifier)
+	}
+
+	return
+}
+
+// GetOntologyModifierChildren retrieves the children of the parent modifier which have a certain appliedPath and which apply to appliedConcept
+func GetOntologyModifierChildren(parent, appliedPath, appliedConcept string) (results []*models.ExploreSearchResultElement, err error) {
+
+	// craft and make request
+	parent = convertPathToI2b2Format(strings.TrimSpace(parent))
+	appliedPath = convertPathToI2b2Format(strings.TrimSpace(appliedPath))[1:]
+	appliedConcept = convertPathToI2b2Format(strings.TrimSpace(appliedConcept))
+
+	xmlResponse := &Response{
+		MessageBody: &OntRespModifiersMessageBody{},
+	}
+
+	err = i2b2XMLRequest(
+		utilserver.I2b2HiveURL+"/OntologyService/getModifierChildren",
+		NewOntReqGetModifierChildrenMessageBody(parent, appliedPath, appliedConcept),
+		xmlResponse,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// generate result from response
+	i2b2Modifiers := xmlResponse.MessageBody.(*OntRespModifiersMessageBody).Modifiers
+	results = make([]*models.ExploreSearchResultElement, 0, len(i2b2Modifiers))
+	for _, modifier := range i2b2Modifiers {
+		parsedModifier, err := parseI2b2Modifier(modifier)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, parsedModifier)
 	}
 
 	return
@@ -71,15 +139,15 @@ func parseI2b2Concept(concept Concept) (result *models.ExploreSearchResultElemen
 	false := false
 
 	result = &models.ExploreSearchResultElement{
-		Name: concept.Name,
+		Name:        concept.Name,
 		DisplayName: concept.Name,
-		Code: concept.Basecode,
+		Code:        concept.Basecode,
 		MedcoEncryption: &models.ExploreSearchResultElementMedcoEncryption{
-			Encrypted: &false,
+			Encrypted:   &false,
 			ChildrenIds: []int64{},
 		},
 		Metadata: nil,
-		Path: convertPathFromI2b2Format(concept.Key),
+		Path:     convertPathFromI2b2Format(concept.Key),
 		//Type: models.SearchResultElementTypeConcept,
 		//Leaf: false,
 	}
@@ -89,19 +157,27 @@ func parseI2b2Concept(concept Concept) (result *models.ExploreSearchResultElemen
 	case 'L':
 		result.Leaf = &true
 		result.Type = models.ExploreSearchResultElementTypeConcept
+	case 'R':
+		result.Leaf = &true
+		result.Type = models.ExploreSearchResultElementTypeModifier
 
 	// i2b2 container
 	case 'C':
 		result.Leaf = &false
-		result.Type = models.ExploreSearchResultElementTypeContainer
+		result.Type = models.ExploreSearchResultElementTypeConceptContainer
+	case 'O':
+		result.Leaf = &false
+		result.Type = models.ExploreSearchResultElementTypeModifierContainer
 
 	// i2b2 folder (& default)
 	default:
 		fallthrough
 	case 'F':
 		result.Leaf = &false
-		result.Type = models.ExploreSearchResultElementTypeConcept
-
+		result.Type = models.ExploreSearchResultElementTypeConceptFolder
+	case 'D':
+		result.Leaf = &false
+		result.Type = models.ExploreSearchResultElementTypeModifierFolder
 	}
 
 	splitCode := strings.Split(concept.Basecode, ":")
@@ -110,7 +186,7 @@ func parseI2b2Concept(concept Concept) (result *models.ExploreSearchResultElemen
 	if splitCode[0] == "ENC_ID" {
 		result.MedcoEncryption.Encrypted = &true
 
-		if  parsedCode, parseErr := strconv.ParseInt(splitCode[1], 10, 64); parseErr != nil {
+		if parsedCode, parseErr := strconv.ParseInt(splitCode[1], 10, 64); parseErr != nil {
 			logrus.Error("Malformed concept could not be parsed: ", concept.Basecode, "error: ", parseErr)
 			return nil, parseErr
 		} else if len(splitCode) != 2 {
@@ -121,7 +197,7 @@ func parseI2b2Concept(concept Concept) (result *models.ExploreSearchResultElemen
 			result.MedcoEncryption.ID = &parsedCode
 		}
 
-	// if concept from loader v1 encrypted (from metadata xml)
+		// if concept from loader v1 encrypted (from metadata xml)
 	} else if concept.Metadataxml.ValueMetadata.EncryptedType != "" {
 		result.MedcoEncryption.Encrypted = &true
 
@@ -148,7 +224,7 @@ func parseI2b2Concept(concept Concept) (result *models.ExploreSearchResultElemen
 			}
 		}
 
-	// if genomic concept from data loader v0 (from concept code)
+		// if genomic concept from data loader v0 (from concept code)
 	} else if splitCode[0] == "GEN" {
 		result.Type = models.ExploreSearchResultElementTypeGenomicAnnotation
 
@@ -161,6 +237,12 @@ func parseI2b2Concept(concept Concept) (result *models.ExploreSearchResultElemen
 	}
 
 	return
+}
+
+func parseI2b2Modifier(modifier Modifier) (result *models.ExploreSearchResultElement, err error) {
+
+	return parseI2b2Concept(Concept(modifier))
+
 }
 
 func convertPathToI2b2Format(path string) string {
