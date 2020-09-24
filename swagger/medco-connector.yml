@@ -4,7 +4,7 @@ info:
   version: "1.0.0"
   title: "MedCo Connector"
   contact:
-    email: "medco-dev@listes.epfl.ch"
+    email: "medco@epfl.ch"
   license:
     name: "EULA"
     url: "https://raw.githubusercontent.com/ldsec/medco-connector/master/LICENSE"
@@ -309,9 +309,7 @@ definitions:
         enum:
           - container
           - concept
-          - concept_numeric
-          - concept_enum
-          - concept_text
+          - modifier
           - genomic_annotation
       leaf:
         type: "boolean"
@@ -337,14 +335,6 @@ definitions:
     properties:
       type:
         $ref: "#/definitions/exploreQueryType"
-      differentialPrivacy:
-        type: "object"
-        description: "differential privacy query parameters (todo)"
-        properties:
-          queryBudget:
-            type: "number"
-            minimum: 0
-            maximum: 0
       userPublicKey:
         type: "string"
         pattern: '^[\w=-]+$'
@@ -376,6 +366,9 @@ definitions:
                   value:
                     type: "string"
                     maxLength: 0
+                  modifier:
+                    type: "string"
+                    pattern: '^([\w=-]+)$|^((\/[^\/]+)+\/?)$'
                   encrypted:
                     type: "boolean"
 

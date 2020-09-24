@@ -9,14 +9,14 @@ import (
 	"encoding/json"
 	"strconv"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 )
 
 // ExploreQueryResultElement explore query result element
+//
 // swagger:model exploreQueryResultElement
 type ExploreQueryResultElement struct {
 
@@ -81,7 +81,7 @@ const (
 
 // prop value enum
 func (m *ExploreQueryResultElement) validateStatusEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, exploreQueryResultElementTypeStatusPropEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, exploreQueryResultElementTypeStatusPropEnum, true); err != nil {
 		return err
 	}
 	return nil
@@ -145,6 +145,7 @@ func (m *ExploreQueryResultElement) UnmarshalBinary(b []byte) error {
 }
 
 // ExploreQueryResultElementTimersItems0 explore query result element timers items0
+//
 // swagger:model ExploreQueryResultElementTimersItems0
 type ExploreQueryResultElementTimersItems0 struct {
 

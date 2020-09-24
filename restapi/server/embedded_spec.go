@@ -32,7 +32,7 @@ func init() {
     "description": "API of the MedCo connector, that orchestrates the query at the MedCo node and provides information about the MedCo network.",
     "title": "MedCo Connector",
     "contact": {
-      "email": "medco-dev@listes.epfl.ch"
+      "email": "medco@epfl.ch"
     },
     "license": {
       "name": "EULA",
@@ -302,15 +302,6 @@ func init() {
     "exploreQuery": {
       "description": "MedCo-Explore query",
       "properties": {
-        "differentialPrivacy": {
-          "description": "differential privacy query parameters (todo)",
-          "type": "object",
-          "properties": {
-            "queryBudget": {
-              "type": "number"
-            }
-          }
-        },
         "panels": {
           "description": "i2b2 panels (linked by an AND)",
           "type": "array",
@@ -332,6 +323,10 @@ func init() {
                   "properties": {
                     "encrypted": {
                       "type": "boolean"
+                    },
+                    "modifier": {
+                      "type": "string",
+                      "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/?)$"
                     },
                     "operator": {
                       "type": "string",
@@ -490,9 +485,7 @@ func init() {
           "enum": [
             "container",
             "concept",
-            "concept_numeric",
-            "concept_enum",
-            "concept_text",
+            "modifier",
             "genomic_annotation"
           ]
         }
@@ -696,7 +689,7 @@ func init() {
     "description": "API of the MedCo connector, that orchestrates the query at the MedCo node and provides information about the MedCo network.",
     "title": "MedCo Connector",
     "contact": {
-      "email": "medco-dev@listes.epfl.ch"
+      "email": "medco@epfl.ch"
     },
     "license": {
       "name": "EULA",
@@ -882,21 +875,7 @@ func init() {
                 "nodes": {
                   "type": "array",
                   "items": {
-                    "type": "object",
-                    "required": [
-                      "index"
-                    ],
-                    "properties": {
-                      "index": {
-                        "type": "integer"
-                      },
-                      "name": {
-                        "type": "string"
-                      },
-                      "url": {
-                        "type": "string"
-                      }
-                    }
+                    "$ref": "#/definitions/NodesItems0"
                   }
                 },
                 "public-key": {
@@ -1110,65 +1089,136 @@ func init() {
     }
   },
   "definitions": {
+    "ExploreQueryPanelsItems0": {
+      "type": "object",
+      "required": [
+        "not"
+      ],
+      "properties": {
+        "items": {
+          "description": "i2b2 items (linked by an OR)",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ExploreQueryPanelsItems0ItemsItems0"
+          }
+        },
+        "not": {
+          "description": "exclude the i2b2 panel",
+          "type": "boolean"
+        }
+      }
+    },
+    "ExploreQueryPanelsItems0ItemsItems0": {
+      "type": "object",
+      "required": [
+        "encrypted",
+        "queryTerm"
+      ],
+      "properties": {
+        "encrypted": {
+          "type": "boolean"
+        },
+        "modifier": {
+          "type": "string",
+          "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/?)$"
+        },
+        "operator": {
+          "type": "string",
+          "enum": [
+            "exists",
+            "equals"
+          ]
+        },
+        "queryTerm": {
+          "type": "string",
+          "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/?)$"
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 0
+        }
+      }
+    },
+    "ExploreQueryResultElementTimersItems0": {
+      "type": "object",
+      "required": [
+        "milliseconds"
+      ],
+      "properties": {
+        "milliseconds": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "ExploreSearchResultElementMedcoEncryption": {
+      "type": "object",
+      "required": [
+        "encrypted",
+        "id"
+      ],
+      "properties": {
+        "childrenIds": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "encrypted": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "NodesItems0": {
+      "type": "object",
+      "required": [
+        "index"
+      ],
+      "properties": {
+        "index": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      }
+    },
+    "UserAuthorizations": {
+      "type": "object",
+      "properties": {
+        "exploreQuery": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/exploreQueryType"
+          }
+        },
+        "restApi": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/restApiAuthorization"
+          }
+        }
+      }
+    },
     "exploreQuery": {
       "description": "MedCo-Explore query",
       "properties": {
-        "differentialPrivacy": {
-          "description": "differential privacy query parameters (todo)",
-          "type": "object",
-          "properties": {
-            "queryBudget": {
-              "type": "number",
-              "maximum": 0,
-              "minimum": 0
-            }
-          }
-        },
         "panels": {
           "description": "i2b2 panels (linked by an AND)",
           "type": "array",
           "items": {
-            "type": "object",
-            "required": [
-              "not"
-            ],
-            "properties": {
-              "items": {
-                "description": "i2b2 items (linked by an OR)",
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "required": [
-                    "encrypted",
-                    "queryTerm"
-                  ],
-                  "properties": {
-                    "encrypted": {
-                      "type": "boolean"
-                    },
-                    "operator": {
-                      "type": "string",
-                      "enum": [
-                        "exists",
-                        "equals"
-                      ]
-                    },
-                    "queryTerm": {
-                      "type": "string",
-                      "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/?)$"
-                    },
-                    "value": {
-                      "type": "string",
-                      "maxLength": 0
-                    }
-                  }
-                }
-              },
-              "not": {
-                "description": "exclude the i2b2 panel",
-                "type": "boolean"
-              }
-            }
+            "$ref": "#/definitions/ExploreQueryPanelsItems0"
           }
         },
         "type": {
@@ -1204,19 +1254,7 @@ func init() {
         "timers": {
           "type": "array",
           "items": {
-            "type": "object",
-            "required": [
-              "milliseconds"
-            ],
-            "properties": {
-              "milliseconds": {
-                "type": "integer",
-                "format": "int64"
-              },
-              "name": {
-                "type": "string"
-              }
-            }
+            "$ref": "#/definitions/ExploreQueryResultElementTimersItems0"
           }
         }
       }
@@ -1304,9 +1342,7 @@ func init() {
           "enum": [
             "container",
             "concept",
-            "concept_numeric",
-            "concept_enum",
-            "concept_text",
+            "modifier",
             "genomic_annotation"
           ]
         }

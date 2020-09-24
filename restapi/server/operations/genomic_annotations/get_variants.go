@@ -8,11 +8,11 @@ package genomic_annotations
 import (
 	"net/http"
 
-	middleware "github.com/go-openapi/runtime/middleware"
-	strfmt "github.com/go-openapi/strfmt"
-	swag "github.com/go-openapi/swag"
+	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
 
-	models "github.com/ldsec/medco-connector/restapi/models"
+	"github.com/ldsec/medco-connector/restapi/models"
 )
 
 // GetVariantsHandlerFunc turns a function with the right signature into a get variants handler
@@ -75,6 +75,7 @@ func (o *GetVariants) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 }
 
 // GetVariantsDefaultBody get variants default body
+//
 // swagger:model GetVariantsDefaultBody
 type GetVariantsDefaultBody struct {
 

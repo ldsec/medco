@@ -6,7 +6,7 @@ swagger-gen: swagger
 	swagger generate server \
 		--server-package=restapi/server \
 		--model-package=restapi/models \
-		--principal=models.User \
+		--principal=github.com/ldsec/medco-connector/restapi/models.User \
 		--target=./ \
 		--spec=./swagger/medco-connector.yml \
 		--name=medco-connector
@@ -14,7 +14,7 @@ swagger-gen: swagger
 		--client-package=restapi/client \
 		--existing-models=github.com/ldsec/medco-connector/restapi/models \
 		--skip-models \
-		--principal=models.User \
+		--principal=github.com/ldsec/medco-connector/restapi/models.User \
 		--target=./ \
 		--spec=./swagger/medco-connector.yml \
 		--name=medco-cli \

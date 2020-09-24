@@ -8,12 +8,12 @@ package medco_node
 import (
 	"net/http"
 
-	errors "github.com/go-openapi/errors"
-	middleware "github.com/go-openapi/runtime/middleware"
-	strfmt "github.com/go-openapi/strfmt"
-	swag "github.com/go-openapi/swag"
+	"github.com/go-openapi/errors"
+	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
 
-	models "github.com/ldsec/medco-connector/restapi/models"
+	"github.com/ldsec/medco-connector/restapi/models"
 )
 
 // GetExploreQueryHandlerFunc turns a function with the right signature into a get explore query handler
@@ -76,6 +76,7 @@ func (o *GetExploreQuery) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 }
 
 // GetExploreQueryDefaultBody get explore query default body
+//
 // swagger:model GetExploreQueryDefaultBody
 type GetExploreQueryDefaultBody struct {
 
@@ -107,6 +108,7 @@ func (o *GetExploreQueryDefaultBody) UnmarshalBinary(b []byte) error {
 }
 
 // GetExploreQueryOKBody get explore query o k body
+//
 // swagger:model GetExploreQueryOKBody
 type GetExploreQueryOKBody struct {
 

@@ -8,8 +8,7 @@ package client
 import (
 	"github.com/go-openapi/runtime"
 	httptransport "github.com/go-openapi/runtime/client"
-
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 
 	"github.com/ldsec/medco-connector/restapi/client/genomic_annotations"
 	"github.com/ldsec/medco-connector/restapi/client/medco_network"
@@ -58,13 +57,9 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *MedcoCli {
 
 	cli := new(MedcoCli)
 	cli.Transport = transport
-
 	cli.GenomicAnnotations = genomic_annotations.New(transport, formats)
-
 	cli.MedcoNetwork = medco_network.New(transport, formats)
-
 	cli.MedcoNode = medco_node.New(transport, formats)
-
 	return cli
 }
 
@@ -109,11 +104,11 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 
 // MedcoCli is a client for medco cli
 type MedcoCli struct {
-	GenomicAnnotations *genomic_annotations.Client
+	GenomicAnnotations genomic_annotations.ClientService
 
-	MedcoNetwork *medco_network.Client
+	MedcoNetwork medco_network.ClientService
 
-	MedcoNode *medco_node.Client
+	MedcoNode medco_node.ClientService
 
 	Transport runtime.ClientTransport
 }
@@ -121,11 +116,7 @@ type MedcoCli struct {
 // SetTransport changes the transport on the client and all its subresources
 func (c *MedcoCli) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
-
 	c.GenomicAnnotations.SetTransport(transport)
-
 	c.MedcoNetwork.SetTransport(transport)
-
 	c.MedcoNode.SetTransport(transport)
-
 }

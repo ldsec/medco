@@ -8,14 +8,14 @@ package models
 import (
 	"encoding/json"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 )
 
 // ExploreSearch explore search
+//
 // swagger:model exploreSearch
 type ExploreSearch struct {
 
@@ -83,7 +83,7 @@ const (
 
 // prop value enum
 func (m *ExploreSearch) validateTypeEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, exploreSearchTypeTypePropEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, exploreSearchTypeTypePropEnum, true); err != nil {
 		return err
 	}
 	return nil

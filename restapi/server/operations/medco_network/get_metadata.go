@@ -9,13 +9,13 @@ import (
 	"net/http"
 	"strconv"
 
-	errors "github.com/go-openapi/errors"
-	middleware "github.com/go-openapi/runtime/middleware"
-	strfmt "github.com/go-openapi/strfmt"
-	swag "github.com/go-openapi/swag"
-	validate "github.com/go-openapi/validate"
+	"github.com/go-openapi/errors"
+	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 
-	models "github.com/ldsec/medco-connector/restapi/models"
+	"github.com/ldsec/medco-connector/restapi/models"
 )
 
 // GetMetadataHandlerFunc turns a function with the right signature into a get metadata handler
@@ -78,6 +78,7 @@ func (o *GetMetadata) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 }
 
 // GetMetadataDefaultBody get metadata default body
+//
 // swagger:model GetMetadataDefaultBody
 type GetMetadataDefaultBody struct {
 
@@ -109,6 +110,7 @@ func (o *GetMetadataDefaultBody) UnmarshalBinary(b []byte) error {
 }
 
 // GetMetadataOKBody get metadata o k body
+//
 // swagger:model GetMetadataOKBody
 type GetMetadataOKBody struct {
 
@@ -117,7 +119,7 @@ type GetMetadataOKBody struct {
 	NodeIndex *int64 `json:"nodeIndex"`
 
 	// nodes
-	Nodes []*NodesItems0 `json:"nodes"`
+	Nodes []*GetMetadataOKBodyNodesItems0 `json:"nodes"`
 
 	// Aggregated public key of the collective authority.
 	PublicKey string `json:"public-key,omitempty"`
@@ -193,9 +195,10 @@ func (o *GetMetadataOKBody) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-// NodesItems0 nodes items0
-// swagger:model NodesItems0
-type NodesItems0 struct {
+// GetMetadataOKBodyNodesItems0 get metadata o k body nodes items0
+//
+// swagger:model GetMetadataOKBodyNodesItems0
+type GetMetadataOKBodyNodesItems0 struct {
 
 	// index
 	// Required: true
@@ -208,8 +211,8 @@ type NodesItems0 struct {
 	URL string `json:"url,omitempty"`
 }
 
-// Validate validates this nodes items0
-func (o *NodesItems0) Validate(formats strfmt.Registry) error {
+// Validate validates this get metadata o k body nodes items0
+func (o *GetMetadataOKBodyNodesItems0) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := o.validateIndex(formats); err != nil {
@@ -222,7 +225,7 @@ func (o *NodesItems0) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *NodesItems0) validateIndex(formats strfmt.Registry) error {
+func (o *GetMetadataOKBodyNodesItems0) validateIndex(formats strfmt.Registry) error {
 
 	if err := validate.Required("index", "body", o.Index); err != nil {
 		return err
@@ -232,7 +235,7 @@ func (o *NodesItems0) validateIndex(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (o *NodesItems0) MarshalBinary() ([]byte, error) {
+func (o *GetMetadataOKBodyNodesItems0) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -240,8 +243,8 @@ func (o *NodesItems0) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *NodesItems0) UnmarshalBinary(b []byte) error {
-	var res NodesItems0
+func (o *GetMetadataOKBodyNodesItems0) UnmarshalBinary(b []byte) error {
+	var res GetMetadataOKBodyNodesItems0
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

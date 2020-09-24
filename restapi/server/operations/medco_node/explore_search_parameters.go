@@ -13,7 +13,7 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 
-	models "github.com/ldsec/medco-connector/restapi/models"
+	"github.com/ldsec/medco-connector/restapi/models"
 )
 
 // NewExploreSearchParams creates a new ExploreSearchParams object
@@ -53,7 +53,7 @@ func (o *ExploreSearchParams) BindRequest(r *http.Request, route *middleware.Mat
 		var body models.ExploreSearch
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
-				res = append(res, errors.Required("searchRequest", "body"))
+				res = append(res, errors.Required("searchRequest", "body", ""))
 			} else {
 				res = append(res, errors.NewParseError("searchRequest", "body", "", err))
 			}
@@ -68,7 +68,7 @@ func (o *ExploreSearchParams) BindRequest(r *http.Request, route *middleware.Mat
 			}
 		}
 	} else {
-		res = append(res, errors.Required("searchRequest", "body"))
+		res = append(res, errors.Required("searchRequest", "body", ""))
 	}
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

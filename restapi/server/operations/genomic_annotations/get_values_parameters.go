@@ -11,10 +11,9 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
-
-	strfmt "github.com/go-openapi/strfmt"
 )
 
 // NewGetValuesParams creates a new GetValuesParams object
@@ -162,7 +161,7 @@ func (o *GetValuesParams) validateLimit(formats strfmt.Registry) error {
 // bindValue binds and validates parameter Value from query.
 func (o *GetValuesParams) bindValue(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
-		return errors.Required("value", "query")
+		return errors.Required("value", "query", rawData)
 	}
 	var raw string
 	if len(rawData) > 0 {

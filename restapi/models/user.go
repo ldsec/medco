@@ -8,13 +8,13 @@ package models
 import (
 	"strconv"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // User user
+//
 // swagger:model user
 type User struct {
 
@@ -79,6 +79,7 @@ func (m *User) UnmarshalBinary(b []byte) error {
 }
 
 // UserAuthorizations user authorizations
+//
 // swagger:model UserAuthorizations
 type UserAuthorizations struct {
 

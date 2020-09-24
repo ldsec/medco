@@ -8,14 +8,14 @@ package models
 import (
 	"encoding/json"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 )
 
 // ExploreSearchResultElement explore search result element
+//
 // swagger:model exploreSearchResultElement
 type ExploreSearchResultElement struct {
 
@@ -42,7 +42,7 @@ type ExploreSearchResultElement struct {
 	Path string `json:"path,omitempty"`
 
 	// type
-	// Enum: [container concept concept_numeric concept_enum concept_text genomic_annotation]
+	// Enum: [container concept modifier genomic_annotation]
 	Type string `json:"type,omitempty"`
 }
 
@@ -99,7 +99,7 @@ var exploreSearchResultElementTypeTypePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["container","concept","concept_numeric","concept_enum","concept_text","genomic_annotation"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["container","concept","modifier","genomic_annotation"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -115,14 +115,8 @@ const (
 	// ExploreSearchResultElementTypeConcept captures enum value "concept"
 	ExploreSearchResultElementTypeConcept string = "concept"
 
-	// ExploreSearchResultElementTypeConceptNumeric captures enum value "concept_numeric"
-	ExploreSearchResultElementTypeConceptNumeric string = "concept_numeric"
-
-	// ExploreSearchResultElementTypeConceptEnum captures enum value "concept_enum"
-	ExploreSearchResultElementTypeConceptEnum string = "concept_enum"
-
-	// ExploreSearchResultElementTypeConceptText captures enum value "concept_text"
-	ExploreSearchResultElementTypeConceptText string = "concept_text"
+	// ExploreSearchResultElementTypeModifier captures enum value "modifier"
+	ExploreSearchResultElementTypeModifier string = "modifier"
 
 	// ExploreSearchResultElementTypeGenomicAnnotation captures enum value "genomic_annotation"
 	ExploreSearchResultElementTypeGenomicAnnotation string = "genomic_annotation"
@@ -130,7 +124,7 @@ const (
 
 // prop value enum
 func (m *ExploreSearchResultElement) validateTypeEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, exploreSearchResultElementTypeTypePropEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, exploreSearchResultElementTypeTypePropEnum, true); err != nil {
 		return err
 	}
 	return nil
@@ -169,6 +163,7 @@ func (m *ExploreSearchResultElement) UnmarshalBinary(b []byte) error {
 }
 
 // ExploreSearchResultElementMedcoEncryption explore search result element medco encryption
+//
 // swagger:model ExploreSearchResultElementMedcoEncryption
 type ExploreSearchResultElementMedcoEncryption struct {
 

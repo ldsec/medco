@@ -12,9 +12,8 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
-
-	strfmt "github.com/go-openapi/strfmt"
 )
 
 // NewExploreQueryParams creates a new ExploreQueryParams object
@@ -69,7 +68,7 @@ func (o *ExploreQueryParams) BindRequest(r *http.Request, route *middleware.Matc
 		var body ExploreQueryBody
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
-				res = append(res, errors.Required("queryRequest", "body"))
+				res = append(res, errors.Required("queryRequest", "body", ""))
 			} else {
 				res = append(res, errors.NewParseError("queryRequest", "body", "", err))
 			}
@@ -84,7 +83,7 @@ func (o *ExploreQueryParams) BindRequest(r *http.Request, route *middleware.Matc
 			}
 		}
 	} else {
-		res = append(res, errors.Required("queryRequest", "body"))
+		res = append(res, errors.Required("queryRequest", "body", ""))
 	}
 	qSync, qhkSync, _ := qs.GetOK("sync")
 	if err := o.bindSync(qSync, qhkSync, route.Formats); err != nil {

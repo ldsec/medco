@@ -7,12 +7,11 @@ package genomic_annotations
 
 import (
 	"github.com/go-openapi/runtime"
-
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 )
 
 // New creates a new genomic annotations API client.
-func New(transport runtime.ClientTransport, formats strfmt.Registry) *Client {
+func New(transport runtime.ClientTransport, formats strfmt.Registry) ClientService {
 	return &Client{transport: transport, formats: formats}
 }
 
@@ -24,8 +23,17 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientService is the interface for Client methods
+type ClientService interface {
+	GetValues(params *GetValuesParams, authInfo runtime.ClientAuthInfoWriter) (*GetValuesOK, error)
+
+	GetVariants(params *GetVariantsParams, authInfo runtime.ClientAuthInfoWriter) (*GetVariantsOK, error)
+
+	SetTransport(transport runtime.ClientTransport)
+}
+
 /*
-GetValues gets genomic annotations values
+  GetValues gets genomic annotations values
 */
 func (a *Client) GetValues(params *GetValuesParams, authInfo runtime.ClientAuthInfoWriter) (*GetValuesOK, error) {
 	// TODO: Validate the params before sending
@@ -59,7 +67,7 @@ func (a *Client) GetValues(params *GetValuesParams, authInfo runtime.ClientAuthI
 }
 
 /*
-GetVariants gets variants corresponding to a genomic annotation value
+  GetVariants gets variants corresponding to a genomic annotation value
 */
 func (a *Client) GetVariants(params *GetVariantsParams, authInfo runtime.ClientAuthInfoWriter) (*GetVariantsOK, error) {
 	// TODO: Validate the params before sending

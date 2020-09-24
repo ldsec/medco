@@ -7,12 +7,11 @@ package medco_node
 
 import (
 	"github.com/go-openapi/runtime"
-
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 )
 
 // New creates a new medco node API client.
-func New(transport runtime.ClientTransport, formats strfmt.Registry) *Client {
+func New(transport runtime.ClientTransport, formats strfmt.Registry) ClientService {
 	return &Client{transport: transport, formats: formats}
 }
 
@@ -24,8 +23,19 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientService is the interface for Client methods
+type ClientService interface {
+	ExploreQuery(params *ExploreQueryParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreQueryOK, error)
+
+	ExploreSearch(params *ExploreSearchParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreSearchOK, error)
+
+	GetExploreQuery(params *GetExploreQueryParams, authInfo runtime.ClientAuthInfoWriter) (*GetExploreQueryOK, error)
+
+	SetTransport(transport runtime.ClientTransport)
+}
+
 /*
-ExploreQuery meds co explore query to the node
+  ExploreQuery meds co explore query to the node
 */
 func (a *Client) ExploreQuery(params *ExploreQueryParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreQueryOK, error) {
 	// TODO: Validate the params before sending
@@ -59,7 +69,7 @@ func (a *Client) ExploreQuery(params *ExploreQueryParams, authInfo runtime.Clien
 }
 
 /*
-ExploreSearch searches through the ontology for med co explore query terms
+  ExploreSearch searches through the ontology for med co explore query terms
 */
 func (a *Client) ExploreSearch(params *ExploreSearchParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreSearchOK, error) {
 	// TODO: Validate the params before sending
@@ -93,7 +103,7 @@ func (a *Client) ExploreSearch(params *ExploreSearchParams, authInfo runtime.Cli
 }
 
 /*
-GetExploreQuery gets status and result of a med co explore query
+  GetExploreQuery gets status and result of a med co explore query
 */
 func (a *Client) GetExploreQuery(params *GetExploreQueryParams, authInfo runtime.ClientAuthInfoWriter) (*GetExploreQueryOK, error) {
 	// TODO: Validate the params before sending

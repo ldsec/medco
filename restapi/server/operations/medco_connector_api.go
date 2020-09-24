@@ -10,20 +10,19 @@ import (
 	"net/http"
 	"strings"
 
-	errors "github.com/go-openapi/errors"
-	loads "github.com/go-openapi/loads"
-	runtime "github.com/go-openapi/runtime"
-	middleware "github.com/go-openapi/runtime/middleware"
-	security "github.com/go-openapi/runtime/security"
-	spec "github.com/go-openapi/spec"
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/errors"
+	"github.com/go-openapi/loads"
+	"github.com/go-openapi/runtime"
+	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/runtime/security"
+	"github.com/go-openapi/spec"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
+	"github.com/ldsec/medco-connector/restapi/models"
 	"github.com/ldsec/medco-connector/restapi/server/operations/genomic_annotations"
 	"github.com/ldsec/medco-connector/restapi/server/operations/medco_network"
 	"github.com/ldsec/medco-connector/restapi/server/operations/medco_node"
-
-	models "github.com/ldsec/medco-connector/restapi/models"
 )
 
 // NewMedcoConnectorAPI creates a new MedcoConnector instance
@@ -35,37 +34,41 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 		defaultProduces:     "application/json",
 		customConsumers:     make(map[string]runtime.Consumer),
 		customProducers:     make(map[string]runtime.Producer),
+		PreServerShutdown:   func() {},
 		ServerShutdown:      func() {},
 		spec:                spec,
+		useSwaggerUI:        false,
 		ServeError:          errors.ServeError,
 		BasicAuthenticator:  security.BasicAuth,
 		APIKeyAuthenticator: security.APIKeyAuth,
 		BearerAuthenticator: security.BearerAuth,
-		JSONConsumer:        runtime.JSONConsumer(),
-		JSONProducer:        runtime.JSONProducer(),
+
+		JSONConsumer: runtime.JSONConsumer(),
+
+		JSONProducer: runtime.JSONProducer(),
+
 		MedcoNodeExploreQueryHandler: medco_node.ExploreQueryHandlerFunc(func(params medco_node.ExploreQueryParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation MedcoNodeExploreQuery has not yet been implemented")
+			return middleware.NotImplemented("operation medco_node.ExploreQuery has not yet been implemented")
 		}),
 		MedcoNodeExploreSearchHandler: medco_node.ExploreSearchHandlerFunc(func(params medco_node.ExploreSearchParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation MedcoNodeExploreSearch has not yet been implemented")
+			return middleware.NotImplemented("operation medco_node.ExploreSearch has not yet been implemented")
 		}),
 		MedcoNodeGetExploreQueryHandler: medco_node.GetExploreQueryHandlerFunc(func(params medco_node.GetExploreQueryParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation MedcoNodeGetExploreQuery has not yet been implemented")
+			return middleware.NotImplemented("operation medco_node.GetExploreQuery has not yet been implemented")
 		}),
 		MedcoNetworkGetMetadataHandler: medco_network.GetMetadataHandlerFunc(func(params medco_network.GetMetadataParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation MedcoNetworkGetMetadata has not yet been implemented")
+			return middleware.NotImplemented("operation medco_network.GetMetadata has not yet been implemented")
 		}),
 		GenomicAnnotationsGetValuesHandler: genomic_annotations.GetValuesHandlerFunc(func(params genomic_annotations.GetValuesParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation GenomicAnnotationsGetValues has not yet been implemented")
+			return middleware.NotImplemented("operation genomic_annotations.GetValues has not yet been implemented")
 		}),
 		GenomicAnnotationsGetVariantsHandler: genomic_annotations.GetVariantsHandlerFunc(func(params genomic_annotations.GetVariantsParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation GenomicAnnotationsGetVariants has not yet been implemented")
+			return middleware.NotImplemented("operation genomic_annotations.GetVariants has not yet been implemented")
 		}),
 
 		MedcoJwtAuth: func(token string, scopes []string) (*models.User, error) {
 			return nil, errors.NotImplemented("oauth2 bearer auth (medco-jwt) has not yet been implemented")
 		},
-
 		// default authorizer is authorized meaning no requests are blocked
 		APIAuthorizer: security.Authorized(),
 	}
@@ -82,6 +85,7 @@ type MedcoConnectorAPI struct {
 	defaultConsumes string
 	defaultProduces string
 	Middleware      func(middleware.Builder) http.Handler
+	useSwaggerUI    bool
 
 	// BasicAuthenticator generates a runtime.Authenticator from the supplied basic auth function.
 	// It has a default implementation in the security package, however you can replace it for your particular usage.
@@ -93,10 +97,12 @@ type MedcoConnectorAPI struct {
 	// It has a default implementation in the security package, however you can replace it for your particular usage.
 	BearerAuthenticator func(string, security.ScopedTokenAuthentication) runtime.Authenticator
 
-	// JSONConsumer registers a consumer for a "application/json" mime type
+	// JSONConsumer registers a consumer for the following mime types:
+	//   - application/json
 	JSONConsumer runtime.Consumer
 
-	// JSONProducer registers a producer for a "application/json" mime type
+	// JSONProducer registers a producer for the following mime types:
+	//   - application/json
 	JSONProducer runtime.Producer
 
 	// MedcoJwtAuth registers a function that takes an access token and a collection of required scopes and returns a principal
@@ -118,10 +124,13 @@ type MedcoConnectorAPI struct {
 	GenomicAnnotationsGetValuesHandler genomic_annotations.GetValuesHandler
 	// GenomicAnnotationsGetVariantsHandler sets the operation handler for the get variants operation
 	GenomicAnnotationsGetVariantsHandler genomic_annotations.GetVariantsHandler
-
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
 	ServeError func(http.ResponseWriter, *http.Request, error)
+
+	// PreServerShutdown is called before the HTTP(S) server is shutdown
+	// This allows for custom functions to get executed before the HTTP(S) server stops accepting traffic
+	PreServerShutdown func()
 
 	// ServerShutdown is called when the HTTP(S) server is shut down and done
 	// handling all active connections and does not accept connections any more
@@ -132,6 +141,16 @@ type MedcoConnectorAPI struct {
 
 	// User defined logger function.
 	Logger func(string, ...interface{})
+}
+
+// UseRedoc for documentation at /docs
+func (o *MedcoConnectorAPI) UseRedoc() {
+	o.useSwaggerUI = false
+}
+
+// UseSwaggerUI for documentation at /docs
+func (o *MedcoConnectorAPI) UseSwaggerUI() {
+	o.useSwaggerUI = true
 }
 
 // SetDefaultProduces sets the default produces media type
@@ -188,23 +207,18 @@ func (o *MedcoConnectorAPI) Validate() error {
 	if o.MedcoNodeExploreQueryHandler == nil {
 		unregistered = append(unregistered, "medco_node.ExploreQueryHandler")
 	}
-
 	if o.MedcoNodeExploreSearchHandler == nil {
 		unregistered = append(unregistered, "medco_node.ExploreSearchHandler")
 	}
-
 	if o.MedcoNodeGetExploreQueryHandler == nil {
 		unregistered = append(unregistered, "medco_node.GetExploreQueryHandler")
 	}
-
 	if o.MedcoNetworkGetMetadataHandler == nil {
 		unregistered = append(unregistered, "medco_network.GetMetadataHandler")
 	}
-
 	if o.GenomicAnnotationsGetValuesHandler == nil {
 		unregistered = append(unregistered, "genomic_annotations.GetValuesHandler")
 	}
-
 	if o.GenomicAnnotationsGetVariantsHandler == nil {
 		unregistered = append(unregistered, "genomic_annotations.GetVariantsHandler")
 	}
@@ -223,13 +237,10 @@ func (o *MedcoConnectorAPI) ServeErrorFor(operationID string) func(http.Response
 
 // AuthenticatorsFor gets the authenticators for the specified security schemes
 func (o *MedcoConnectorAPI) AuthenticatorsFor(schemes map[string]spec.SecurityScheme) map[string]runtime.Authenticator {
-
 	result := make(map[string]runtime.Authenticator)
 	for name := range schemes {
 		switch name {
-
 		case "medco-jwt":
-
 			result[name] = o.BearerAuthenticator(name, func(token string, scopes []string) (interface{}, error) {
 				return o.MedcoJwtAuth(token, scopes)
 			})
@@ -237,26 +248,21 @@ func (o *MedcoConnectorAPI) AuthenticatorsFor(schemes map[string]spec.SecuritySc
 		}
 	}
 	return result
-
 }
 
 // Authorizer returns the registered authorizer
 func (o *MedcoConnectorAPI) Authorizer() runtime.Authorizer {
-
 	return o.APIAuthorizer
-
 }
 
-// ConsumersFor gets the consumers for the specified media types
+// ConsumersFor gets the consumers for the specified media types.
+// MIME type parameters are ignored here.
 func (o *MedcoConnectorAPI) ConsumersFor(mediaTypes []string) map[string]runtime.Consumer {
-
-	result := make(map[string]runtime.Consumer)
+	result := make(map[string]runtime.Consumer, len(mediaTypes))
 	for _, mt := range mediaTypes {
 		switch mt {
-
 		case "application/json":
 			result["application/json"] = o.JSONConsumer
-
 		}
 
 		if c, ok := o.customConsumers[mt]; ok {
@@ -264,19 +270,16 @@ func (o *MedcoConnectorAPI) ConsumersFor(mediaTypes []string) map[string]runtime
 		}
 	}
 	return result
-
 }
 
-// ProducersFor gets the producers for the specified media types
+// ProducersFor gets the producers for the specified media types.
+// MIME type parameters are ignored here.
 func (o *MedcoConnectorAPI) ProducersFor(mediaTypes []string) map[string]runtime.Producer {
-
-	result := make(map[string]runtime.Producer)
+	result := make(map[string]runtime.Producer, len(mediaTypes))
 	for _, mt := range mediaTypes {
 		switch mt {
-
 		case "application/json":
 			result["application/json"] = o.JSONProducer
-
 		}
 
 		if p, ok := o.customProducers[mt]; ok {
@@ -284,7 +287,6 @@ func (o *MedcoConnectorAPI) ProducersFor(mediaTypes []string) map[string]runtime
 		}
 	}
 	return result
-
 }
 
 // HandlerFor gets a http.Handler for the provided operation method and path
@@ -314,7 +316,6 @@ func (o *MedcoConnectorAPI) Context() *middleware.Context {
 
 func (o *MedcoConnectorAPI) initHandlerCache() {
 	o.Context() // don't care about the result, just that the initialization happened
-
 	if o.handlers == nil {
 		o.handlers = make(map[string]map[string]http.Handler)
 	}
@@ -323,32 +324,26 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/node/explore/query"] = medco_node.NewExploreQuery(o.context, o.MedcoNodeExploreQueryHandler)
-
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/node/explore/search"] = medco_node.NewExploreSearch(o.context, o.MedcoNodeExploreSearchHandler)
-
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/node/explore/query/{queryId}"] = medco_node.NewGetExploreQuery(o.context, o.MedcoNodeGetExploreQueryHandler)
-
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/network"] = medco_network.NewGetMetadata(o.context, o.MedcoNetworkGetMetadataHandler)
-
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/genomic-annotations/{annotation}"] = genomic_annotations.NewGetValues(o.context, o.GenomicAnnotationsGetValuesHandler)
-
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/genomic-annotations/{annotation}/{value}"] = genomic_annotations.NewGetVariants(o.context, o.GenomicAnnotationsGetVariantsHandler)
-
 }
 
 // Serve creates a http handler to serve the API over HTTP
@@ -358,6 +353,9 @@ func (o *MedcoConnectorAPI) Serve(builder middleware.Builder) http.Handler {
 
 	if o.Middleware != nil {
 		return o.Middleware(builder)
+	}
+	if o.useSwaggerUI {
+		return o.context.APIHandlerSwaggerUI(builder)
 	}
 	return o.context.APIHandler(builder)
 }
@@ -377,4 +375,16 @@ func (o *MedcoConnectorAPI) RegisterConsumer(mediaType string, consumer runtime.
 // RegisterProducer allows you to add (or override) a producer for a media type.
 func (o *MedcoConnectorAPI) RegisterProducer(mediaType string, producer runtime.Producer) {
 	o.customProducers[mediaType] = producer
+}
+
+// AddMiddlewareFor adds a http middleware to existing handler
+func (o *MedcoConnectorAPI) AddMiddlewareFor(method, path string, builder middleware.Builder) {
+	um := strings.ToUpper(method)
+	if path == "/" {
+		path = ""
+	}
+	o.Init()
+	if h, ok := o.handlers[um][path]; ok {
+		o.handlers[method][path] = builder(h)
+	}
 }

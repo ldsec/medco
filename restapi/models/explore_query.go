@@ -9,19 +9,16 @@ import (
 	"encoding/json"
 	"strconv"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 )
 
 // ExploreQuery MedCo-Explore query
+//
 // swagger:model exploreQuery
 type ExploreQuery struct {
-
-	// differential privacy
-	DifferentialPrivacy *ExploreQueryDifferentialPrivacy `json:"differentialPrivacy,omitempty"`
 
 	// i2b2 panels (linked by an AND)
 	Panels []*ExploreQueryPanelsItems0 `json:"panels"`
@@ -38,10 +35,6 @@ type ExploreQuery struct {
 func (m *ExploreQuery) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateDifferentialPrivacy(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if err := m.validatePanels(formats); err != nil {
 		res = append(res, err)
 	}
@@ -57,24 +50,6 @@ func (m *ExploreQuery) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *ExploreQuery) validateDifferentialPrivacy(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.DifferentialPrivacy) { // not required
-		return nil
-	}
-
-	if m.DifferentialPrivacy != nil {
-		if err := m.DifferentialPrivacy.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("differentialPrivacy")
-			}
-			return err
-		}
-	}
-
 	return nil
 }
 
@@ -150,66 +125,8 @@ func (m *ExploreQuery) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-// ExploreQueryDifferentialPrivacy differential privacy query parameters (todo)
-// swagger:model ExploreQueryDifferentialPrivacy
-type ExploreQueryDifferentialPrivacy struct {
-
-	// query budget
-	// Maximum: 0
-	// Minimum: 0
-	QueryBudget *float64 `json:"queryBudget,omitempty"`
-}
-
-// Validate validates this explore query differential privacy
-func (m *ExploreQueryDifferentialPrivacy) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateQueryBudget(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *ExploreQueryDifferentialPrivacy) validateQueryBudget(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.QueryBudget) { // not required
-		return nil
-	}
-
-	if err := validate.Minimum("differentialPrivacy"+"."+"queryBudget", "body", float64(*m.QueryBudget), 0, false); err != nil {
-		return err
-	}
-
-	if err := validate.Maximum("differentialPrivacy"+"."+"queryBudget", "body", float64(*m.QueryBudget), 0, false); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (m *ExploreQueryDifferentialPrivacy) MarshalBinary() ([]byte, error) {
-	if m == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(m)
-}
-
-// UnmarshalBinary interface implementation
-func (m *ExploreQueryDifferentialPrivacy) UnmarshalBinary(b []byte) error {
-	var res ExploreQueryDifferentialPrivacy
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*m = res
-	return nil
-}
-
 // ExploreQueryPanelsItems0 explore query panels items0
+//
 // swagger:model ExploreQueryPanelsItems0
 type ExploreQueryPanelsItems0 struct {
 
@@ -292,12 +209,17 @@ func (m *ExploreQueryPanelsItems0) UnmarshalBinary(b []byte) error {
 }
 
 // ExploreQueryPanelsItems0ItemsItems0 explore query panels items0 items items0
+//
 // swagger:model ExploreQueryPanelsItems0ItemsItems0
 type ExploreQueryPanelsItems0ItemsItems0 struct {
 
 	// encrypted
 	// Required: true
 	Encrypted *bool `json:"encrypted"`
+
+	// modifier
+	// Pattern: ^([\w=-]+)$|^((\/[^\/]+)+\/?)$
+	Modifier string `json:"modifier,omitempty"`
 
 	// operator
 	// Enum: [exists equals]
@@ -318,6 +240,10 @@ func (m *ExploreQueryPanelsItems0ItemsItems0) Validate(formats strfmt.Registry) 
 	var res []error
 
 	if err := m.validateEncrypted(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateModifier(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -348,6 +274,19 @@ func (m *ExploreQueryPanelsItems0ItemsItems0) validateEncrypted(formats strfmt.R
 	return nil
 }
 
+func (m *ExploreQueryPanelsItems0ItemsItems0) validateModifier(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Modifier) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("modifier", "body", string(m.Modifier), `^([\w=-]+)$|^((\/[^\/]+)+\/?)$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 var exploreQueryPanelsItems0ItemsItems0TypeOperatorPropEnum []interface{}
 
 func init() {
@@ -371,7 +310,7 @@ const (
 
 // prop value enum
 func (m *ExploreQueryPanelsItems0ItemsItems0) validateOperatorEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, exploreQueryPanelsItems0ItemsItems0TypeOperatorPropEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, exploreQueryPanelsItems0ItemsItems0TypeOperatorPropEnum, true); err != nil {
 		return err
 	}
 	return nil

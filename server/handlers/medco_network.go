@@ -12,10 +12,10 @@ import (
 // MedCoNetworkGetMetadataHandler handles /medco/network API endpoint
 func MedCoNetworkGetMetadataHandler(params medco_network.GetMetadataParams, principal *models.User) middleware.Responder {
 
-	nodes := make([]*medco_network.NodesItems0, 0)
+	nodes := make([]*medco_network.GetMetadataOKBodyNodesItems0, 0)
 	for idx, url := range utilserver.MedCoNodesURL {
 		idxInt64 := int64(idx)
-		nodes = append(nodes, &medco_network.NodesItems0{
+		nodes = append(nodes, &medco_network.GetMetadataOKBodyNodesItems0{
 			Index: &idxInt64,
 			Name: "Node " + strconv.Itoa(idx), // todo: config to specify node name
 			URL: url,
