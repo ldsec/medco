@@ -96,11 +96,16 @@ services:
       - MEDCO_OBFUSCATION_MIN=5
       - MEDCO_NODES_URL=http://localhost/local-3nodes/medco-0,http://localhost/local-3nodes/medco-1,http://localhost/local-3nodes/medco-2
       - MEDCO_NODE_IDX=0
-      - GA_DB_HOST=postgresql
-      - GA_DB_PORT=5432
-      - GA_DB_USER=genomicannotations
-      - GA_DB_PW=genomicannotations
-      - GA_DB_NAME=gamedco
+      - MC_DB_HOST=postgresql
+      - MC_DB_PORT=5432
+      - MC_DB_USER=medcoconnector
+      - MC_DB_PW=medcoconnector
+      - MC_DB_NAME=medcoconnector
+      - I2B2_DB_HOST=postgresql
+      - I2B2_DB_PORT=5432
+      - I2B2_DB_USER=i2b2
+      - I2B2_DB_PW=i2b2
+      - I2B2_DB_NAME=i2b2medco
     volumes:
       - ../configuration-profiles/dev-local-3nodes:/medco-configuration
 
@@ -131,11 +136,11 @@ services:
       - I2B2_DB_NAME=i2b2medco
       - I2B2_DB_USER=i2b2
       - I2B2_DB_PASSWORD=i2b2
-      - GA_DB_HOST=localhost
-      - GA_DB_PORT=5432
-      - GA_DB_NAME=gamedco
-      - GA_DB_USER=genomicannotations
-      - GA_DB_PASSWORD=genomicannotations
+      - MC_DB_HOST=localhost
+      - MC_DB_PORT=5432
+      - MC_DB_NAME=medcoconnector
+      - MC_DB_USER=medcoconnector
+      - MC_DB_PASSWORD=medcoconnector
     volumes:
       - ../resources/data:/data
       - ../configuration-profiles/dev-local-3nodes:/medco-configuration
