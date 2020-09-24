@@ -3,31 +3,12 @@ package querytools
 import (
 	"database/sql"
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 	"time"
 
-	_ "github.com/lib/pq" //postgres driver
 	"github.com/sirupsen/logrus"
 )
-
-// ConnectorDB refers to medco connector postgres database
-var ConnectorDB *sql.DB
-
-func init() {
-	var err error
-	ConnectorDB, err = sql.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", os.Getenv("MC_DB_HOST"), os.Getenv("MC_DB_PORT"), os.Getenv("MC_DB_USER"), os.Getenv("MC_DB_PW"), os.Getenv("MC_DB_NAME")))
-	if err != nil {
-		logrus.Error(err)
-	}
-
-	err = ConnectorDB.Ping()
-	if err != nil {
-		logrus.Error(err)
-	}
-
-}
 
 // GetPatientList runs a SQL query on db and returns the list of patient IDs for given queryID and userID
 func GetPatientList(db *sql.DB, userID string, resultInstanceID int64) (patientNums []int64, err error) {

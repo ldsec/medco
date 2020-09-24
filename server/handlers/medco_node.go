@@ -83,7 +83,7 @@ func MedCoNodeExploreQueryHandler(params medco_node.ExploreQueryParams, principa
 // MedCoNodeGetCohortsHandler handles GET /medco/node/explore/cohorts  API endpoint
 func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *models.User) middleware.Responder {
 	userID := principal.ID
-	cohorts, err := querytools.GetSavedCohorts(querytools.ConnectorDB, userID)
+	cohorts, err := querytools.GetSavedCohorts(utilserver.DBConnection, userID)
 	if err != nil {
 		medco_node.NewGetCohortsDefault(500).WithPayload(&medco_node.GetCohortsDefaultBody{
 			Message: err.Error(),
@@ -126,7 +126,7 @@ func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal 
 			Message: fmt.Sprintf("String %s is not a date with RF3339 layout", cohort.UpdateDate),
 		})
 	}
-	cohorts, err := querytools.GetSavedCohorts(querytools.ConnectorDB, principal.ID)
+	cohorts, err := querytools.GetSavedCohorts(utilserver.DBConnection, principal.ID)
 	if err != nil {
 		return medco_node.NewPostCohortsDefault(500).WithPayload(&medco_node.PostCohortsDefaultBody{
 			Message: err.Error(),
@@ -141,7 +141,7 @@ func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal 
 			break
 		}
 	}
-	querytools.InsertCohort(querytools.ConnectorDB, principal.ID, int(cohort.PatientSetID), cohort.CohortName, creationDate, updateDate)
+	querytools.InsertCohort(utilserver.DBConnection, principal.ID, int(cohort.PatientSetID), cohort.CohortName, creationDate, updateDate)
 
 	return medco_node.NewPostCohortsOK().WithPayload("cohorts successfully updated")
 }

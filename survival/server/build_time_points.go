@@ -2,8 +2,6 @@ package survivalserver
 
 import (
 	"database/sql"
-	"fmt"
-	"os"
 	"strconv"
 	"strings"
 
@@ -11,23 +9,6 @@ import (
 
 	"github.com/sirupsen/logrus"
 )
-
-// DirectI2B2 refers to psql connection to I2B2 DB
-var DirectI2B2 *sql.DB
-
-func init() {
-	var err error
-	DirectI2B2, err = sql.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", os.Getenv("I2B2_DB_HOST"), os.Getenv("I2B2_DB_PORT"), os.Getenv("I2B2_DB_USER"), os.Getenv("I2B2_DB_PW"), os.Getenv("I2B2_DB_NAME")))
-	if err != nil {
-		logrus.Error(err)
-	}
-
-	err = DirectI2B2.Ping()
-	if err != nil {
-		logrus.Error(err)
-	}
-
-}
 
 // BuildTimePoints execute a SQL query that returns event counts per time point, for given input patient set, start and end  concept codes and modifiers
 func BuildTimePoints(db *sql.DB, patientList []int64, startConceptCode string, startConceptModifier string, endConceptCode string, endConceptModifier string, timeLimit int) (timePoints survivalcommon.TimePoints, err error) {

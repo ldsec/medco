@@ -11,6 +11,7 @@ import (
 
 	querytools "github.com/ldsec/medco-connector/queryTools"
 	utilcommon "github.com/ldsec/medco-connector/util/common"
+	utilserver "github.com/ldsec/medco-connector/util/server"
 	"github.com/ldsec/medco-connector/wrappers/unlynx"
 
 	"github.com/ldsec/medco-connector/restapi/models"
@@ -79,7 +80,7 @@ func (q *Query) Execute() error {
 	// --- build subgroups
 
 	timer := time.Now()
-	cohort, err := querytools.GetPatientList(querytools.ConnectorDB, q.UserID, int64(q.SetID))
+	cohort, err := querytools.GetPatientList(utilserver.DBConnection, q.UserID, int64(q.SetID))
 	q.Result.Timers.AddTimers("medco-connector-get-patient-list", timer, nil)
 	logrus.Debug("got patients")
 
@@ -89,7 +90,7 @@ func (q *Query) Execute() error {
 	}
 
 	// --- get concept and modifier codes from the ontology
-	err = DirectI2B2.Ping()
+	err = utilserver.I2B2DBConnection.Ping()
 
 	if err != nil {
 		logrus.Error("Unable to connect clear project database, ", err)
@@ -191,7 +192,7 @@ func (q *Query) Execute() error {
 			logrus.Debug("initialcount ", initialCountEncrypt)
 			newEventGroup.EncInitialCount = initialCountEncrypt
 			timer = time.Now()
-			sqlTimePoints, err := BuildTimePoints(DirectI2B2,
+			sqlTimePoints, err := BuildTimePoints(utilserver.I2B2DBConnection,
 				patientList,
 				startConceptCode,
 				q.StartModifier,
