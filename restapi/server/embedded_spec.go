@@ -397,7 +397,7 @@ func init() {
                   "type": "string"
                 },
                 "patientSetID": {
-                  "type": "number"
+                  "type": "integer"
                 },
                 "updateDate": {
                   "type": "string"
@@ -572,7 +572,7 @@ func init() {
           }
         },
         "patientSetID": {
-          "type": "number"
+          "type": "integer"
         },
         "status": {
           "type": "string",
@@ -1311,7 +1311,7 @@ func init() {
                   "type": "string"
                 },
                 "patientSetID": {
-                  "type": "number"
+                  "type": "integer"
                 },
                 "updateDate": {
                   "type": "string"
@@ -1774,7 +1774,7 @@ func init() {
           }
         },
         "patientSetID": {
-          "type": "number"
+          "type": "integer"
         },
         "status": {
           "type": "string",

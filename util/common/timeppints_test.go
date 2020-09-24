@@ -1,4 +1,4 @@
-package survivalcommon
+package utilcommon
 
 import (
 	"sort"

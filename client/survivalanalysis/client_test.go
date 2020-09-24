@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	survivalcommon "github.com/ldsec/medco-connector/survival/common"
+	utilcommon "github.com/ldsec/medco-connector/util/common"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -115,7 +115,7 @@ var testEncryptedResults = EncryptedResults{
 var testDecryptedResults = ClearResults{
 	{GroupID: "testGroup1",
 		InitialCount: 50,
-		TimePoints: survivalcommon.TimePoints{
+		TimePoints: utilcommon.TimePoints{
 			{
 				Time: 1,
 				Events: struct {

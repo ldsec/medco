@@ -9,7 +9,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	querytools "github.com/ldsec/medco-connector/queryTools"
+	"github.com/ldsec/medco-connector/server/querytools"
 	utilcommon "github.com/ldsec/medco-connector/util/common"
 	utilserver "github.com/ldsec/medco-connector/util/server"
 	"github.com/ldsec/medco-connector/wrappers/unlynx"

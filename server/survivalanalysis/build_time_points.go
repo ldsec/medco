@@ -5,13 +5,13 @@ import (
 	"strconv"
 	"strings"
 
-	survivalcommon "github.com/ldsec/medco-connector/survival/common"
+	utilcommon "github.com/ldsec/medco-connector/util/common"
 
 	"github.com/sirupsen/logrus"
 )
 
 // BuildTimePoints execute a SQL query that returns event counts per time point, for given input patient set, start and end  concept codes and modifiers
-func BuildTimePoints(db *sql.DB, patientList []int64, startConceptCode string, startConceptModifier string, endConceptCode string, endConceptModifier string, timeLimit int) (timePoints survivalcommon.TimePoints, err error) {
+func BuildTimePoints(db *sql.DB, patientList []int64, startConceptCode string, startConceptModifier string, endConceptCode string, endConceptModifier string, timeLimit int) (timePoints utilcommon.TimePoints, err error) {
 	logrus.Debug("SQL query : " + sql6)
 	pList := make([]string, len(patientList))
 	for i, pNum := range patientList {
@@ -26,7 +26,7 @@ func BuildTimePoints(db *sql.DB, patientList []int64, startConceptCode string, s
 	eventsString := new(string)
 	censoringString := new(string)
 	for rows.Next() {
-		sqlTimePoint := survivalcommon.TimePoint{}
+		sqlTimePoint := utilcommon.TimePoint{}
 		scanErr := rows.Scan(timePointString, eventsString, censoringString)
 		if scanErr != nil {
 			err = scanErr

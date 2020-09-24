@@ -3,7 +3,7 @@ package handlers
 import (
 	"fmt"
 
-	survivalserver "github.com/ldsec/medco-connector/survival/server"
+	survivalserver "github.com/ldsec/medco-connector/server/survivalanalysis"
 
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/ldsec/medco-connector/restapi/models"

@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"time"
 
-	querytools "github.com/ldsec/medco-connector/queryTools"
+	medcoserver "github.com/ldsec/medco-connector/server/explore"
+	"github.com/ldsec/medco-connector/server/querytools"
 
 	"github.com/go-openapi/runtime/middleware"
+
 	"github.com/ldsec/medco-connector/restapi/models"
 	"github.com/ldsec/medco-connector/restapi/server/operations/medco_node"
-	medcoserver "github.com/ldsec/medco-connector/server"
+
 	utilserver "github.com/ldsec/medco-connector/util/server"
 	"github.com/ldsec/medco-connector/wrappers/i2b2"
 )
@@ -74,7 +76,7 @@ func MedCoNodeExploreQueryHandler(params medco_node.ExploreQueryParams, principa
 		Result: &models.ExploreQueryResultElement{
 			EncryptedCount:       query.Result.EncCount,
 			EncryptedPatientList: query.Result.EncPatientList,
-			PatientSetID:         float64(query.Result.PatientSetID),
+			PatientSetID:         int64(query.Result.PatientSetID),
 			Timers:               timers,
 			Status:               models.ExploreQueryResultElementStatusAvailable,
 		}})

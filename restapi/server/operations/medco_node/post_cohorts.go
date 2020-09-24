@@ -86,7 +86,7 @@ type PostCohortsBody struct {
 	CreationDate string `json:"creationDate,omitempty"`
 
 	// patient set ID
-	PatientSetID float64 `json:"patientSetID,omitempty"`
+	PatientSetID int64 `json:"patientSetID,omitempty"`
 
 	// update date
 	UpdateDate string `json:"updateDate,omitempty"`

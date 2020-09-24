@@ -4,9 +4,10 @@ import (
 	"os"
 	"strings"
 
-	survivalclient "github.com/ldsec/medco-connector/survival/client"
+	medcoclient "github.com/ldsec/medco-connector/client/explore"
 
-	medcoclient "github.com/ldsec/medco-connector/client"
+	survivalclient "github.com/ldsec/medco-connector/client/survivalanalysis"
+
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 )

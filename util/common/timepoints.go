@@ -1,4 +1,4 @@
-package survivalcommon
+package utilcommon
 
 // TimePoint contains a relative time, the numbers of events of interest and censoring events occured at that time
 type TimePoint struct {

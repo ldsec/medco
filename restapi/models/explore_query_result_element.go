@@ -26,7 +26,7 @@ type ExploreQueryResultElement struct {
 	EncryptedPatientList []string `json:"encryptedPatientList"`
 
 	// patient set ID
-	PatientSetID float64 `json:"patientSetID,omitempty"`
+	PatientSetID int64 `json:"patientSetID,omitempty"`
 
 	// status
 	// Enum: [queued pending error available]

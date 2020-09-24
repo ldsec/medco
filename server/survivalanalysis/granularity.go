@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math"
 
-	survivalcommon "github.com/ldsec/medco-connector/survival/common"
+	utilcommon "github.com/ldsec/medco-connector/util/common"
 )
 
 const (
@@ -20,7 +20,7 @@ var granularityFunctions = map[string]func(int) int{
 	"year":  year,
 }
 
-func granularity(points survivalcommon.TimePoints, granularity string) (survivalcommon.TimePoints, error) {
+func granularity(points utilcommon.TimePoints, granularity string) (utilcommon.TimePoints, error) {
 	if granFunction, isIn := granularityFunctions[granularity]; isIn {
 		return binTimePoint(points, granFunction), nil
 	}
@@ -44,7 +44,7 @@ func year(val int) int {
 	return ceil(val, dInYear)
 }
 
-func binTimePoint(timePoints survivalcommon.TimePoints, groupingFunction func(int) int) survivalcommon.TimePoints {
+func binTimePoint(timePoints utilcommon.TimePoints, groupingFunction func(int) int) utilcommon.TimePoints {
 	bins := make(map[int]struct {
 		EventsOfInterest int64
 		CensoringEvents  int64
@@ -71,9 +71,9 @@ func binTimePoint(timePoints survivalcommon.TimePoints, groupingFunction func(in
 		}
 	}
 
-	newSQLTimePoints := make(survivalcommon.TimePoints, 0)
+	newSQLTimePoints := make(utilcommon.TimePoints, 0)
 	for time, agg := range bins {
-		newSQLTimePoints = append(newSQLTimePoints, survivalcommon.TimePoint{
+		newSQLTimePoints = append(newSQLTimePoints, utilcommon.TimePoint{
 			Time: time,
 			Events: struct {
 				EventsOfInterest int64

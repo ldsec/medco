@@ -3,12 +3,12 @@ package survivalserver
 import (
 	"fmt"
 
-	survivalcommon "github.com/ldsec/medco-connector/survival/common"
+	utilcommon "github.com/ldsec/medco-connector/util/common"
 )
 
 // Expansion takes a slice of SQLTimepoints and add encryption of zeros for events of interest and censoring events for each missing relative time from 0 to timeLimit.
 // Relative times greater than timeLimit are discarded.
-func Expansion(timePoints survivalcommon.TimePoints, timeLimitDay int, granularity string) (survivalcommon.TimePoints, error) {
+func Expansion(timePoints utilcommon.TimePoints, timeLimitDay int, granularity string) (utilcommon.TimePoints, error) {
 	var timeLimit int
 	if granFunction, isIn := granularityFunctions[granularity]; isIn {
 		timeLimit = granFunction(timeLimitDay)
@@ -16,7 +16,7 @@ func Expansion(timePoints survivalcommon.TimePoints, timeLimitDay int, granulari
 		return nil, fmt.Errorf("granularity %s is not implemented", granularity)
 	}
 
-	res := make(survivalcommon.TimePoints, timeLimit)
+	res := make(utilcommon.TimePoints, timeLimit)
 	availableTimePoints := make(map[int]struct {
 		EventsOfInterest int64
 		CensoringEvents  int64
@@ -27,12 +27,12 @@ func Expansion(timePoints survivalcommon.TimePoints, timeLimitDay int, granulari
 	}
 	for i := 0; i < timeLimit; i++ {
 		if events, ok := availableTimePoints[i]; ok {
-			res[i] = survivalcommon.TimePoint{
+			res[i] = utilcommon.TimePoint{
 				Time:   i,
 				Events: events,
 			}
 		} else {
-			res[i] = survivalcommon.TimePoint{
+			res[i] = utilcommon.TimePoint{
 				Time: i,
 				Events: struct {
 					EventsOfInterest int64
