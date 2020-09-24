@@ -125,21 +125,27 @@ func parseI2b2Concept(concept Concept) (result *models.ExploreSearchResultElemen
 	} else if concept.Metadataxml.ValueMetadata.EncryptedType != "" {
 		result.MedcoEncryption.Encrypted = &true
 
-		parsedNodeID, parseErr := strconv.ParseInt(concept.Metadataxml.ValueMetadata.NodeEncryptID, 10, 64)
-		if parseErr != nil {
-			logrus.Error("Malformed ID could not be parsed: ", concept.Metadataxml.ValueMetadata.NodeEncryptID, "error: ", parseErr)
-			return nil, parseErr
+		// node ID
+		if concept.Metadataxml.ValueMetadata.NodeEncryptID != "" {
+			parsedNodeID, parseErr := strconv.ParseInt(concept.Metadataxml.ValueMetadata.NodeEncryptID, 10, 64)
+			if parseErr != nil {
+				logrus.Error("Malformed ID could not be parsed: ", concept.Metadataxml.ValueMetadata.NodeEncryptID, "error: ", parseErr)
+				// if error: not interrupting
+			}
+			result.MedcoEncryption.ID = &parsedNodeID
 		}
 
-		result.MedcoEncryption.ID = &parsedNodeID
-		for _, childEncryptIDString := range strings.Split(concept.Metadataxml.ValueMetadata.ChildrenEncryptIDs, ",") {
+		// children nodes IDs
+		if concept.Metadataxml.ValueMetadata.ChildrenEncryptIDs != "" {
+			for _, childEncryptIDString := range strings.Split(concept.Metadataxml.ValueMetadata.ChildrenEncryptIDs, ";") {
 
-			childEncryptID, parseErr := strconv.ParseInt(childEncryptIDString, 10, 64)
-			if parseErr != nil {
-				logrus.Error("Malformed ID could not be parsed: ", childEncryptIDString, "error: ", parseErr)
-				return nil, parseErr
+				childEncryptID, parseErr := strconv.ParseInt(childEncryptIDString, 10, 64)
+				if parseErr != nil {
+					logrus.Error("Malformed ID could not be parsed: ", childEncryptIDString, "error: ", parseErr)
+					// if error: not interrupting
+				}
+				result.MedcoEncryption.ChildrenIds = append(result.MedcoEncryption.ChildrenIds, childEncryptID)
 			}
-			result.MedcoEncryption.ChildrenIds = append(result.MedcoEncryption.ChildrenIds, childEncryptID)
 		}
 
 	// if genomic concept from data loader v0 (from concept code)
