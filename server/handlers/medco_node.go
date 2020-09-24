@@ -42,7 +42,7 @@ func MedCoNodeExploreQueryHandler(params medco_node.ExploreQueryParams, principa
 	}
 
 	// create query
-	query, err := medcoserver.NewExploreQuery(params.QueryRequest.ID, params.QueryRequest.Query)
+	query, err := medcoserver.NewExploreQuery(params.QueryRequest.ID, params.QueryRequest.Query, principal.ID)
 	if err != nil {
 		return medco_node.NewExploreQueryDefault(400).WithPayload(&medco_node.ExploreQueryDefaultBody{
 			Message: "Bad query: " + err.Error(),

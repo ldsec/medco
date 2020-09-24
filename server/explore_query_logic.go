@@ -1,10 +1,12 @@
 package medcoserver
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
+	querytools "github.com/ldsec/medco-connector/queryTools"
 	utilcommon "github.com/ldsec/medco-connector/util/common"
 
 	"github.com/ldsec/medco-connector/restapi/models"
@@ -20,9 +22,10 @@ import (
 
 // ExploreQuery represents an i2b2-MedCo query to be executed
 type ExploreQuery struct {
-	ID     string
-	Query  *models.ExploreQuery
-	Result struct {
+	ID       string
+	Query    *models.ExploreQuery
+	UserName string
+	Result   struct {
 		EncCount       string
 		EncPatientList []string
 		Timers         utilcommon.Timers
@@ -31,10 +34,11 @@ type ExploreQuery struct {
 }
 
 // NewExploreQuery creates a new query object and checks its validity
-func NewExploreQuery(queryName string, query *models.ExploreQuery) (new ExploreQuery, err error) {
+func NewExploreQuery(queryName string, query *models.ExploreQuery, userName string) (new ExploreQuery, err error) {
 	new = ExploreQuery{
-		ID:    queryName,
-		Query: query,
+		ID:       queryName,
+		Query:    query,
+		UserName: userName,
 	}
 	new.Result.Timers = utilcommon.NewTimers()
 	return new, new.isValid()
@@ -44,6 +48,19 @@ func NewExploreQuery(queryName string, query *models.ExploreQuery) (new ExploreQ
 func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	overallTimer := time.Now()
 	var timer time.Time
+
+	// create medco connector result instance
+	queryDefinition, err := q.Query.MarshalBinary()
+	if err != nil {
+		err = fmt.Errorf("while marshalling query: %s", err.Error())
+		return
+	}
+	queryID, err := querytools.InsertExploreResultInstance(querytools.ConnectorDB, q.UserName, q.ID, string(queryDefinition))
+	if err != nil {
+		err = fmt.Errorf("while inserting explore result instance: %s", err.Error())
+		return
+	}
+	defer func(e error) { querytools.UpdateErrorExploreResultInstance(querytools.ConnectorDB, queryID) }(err)
 
 	// todo: breakdown in i2b2 / count / patient list
 
@@ -81,6 +98,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	if err != nil {
 		return
 	}
+
 	q.Result.Timers.AddTimers("medco-connector-i2b2-PSM", timer, nil)
 	logrus.Info(q.ID, ": got ", patientCount, " in patient set ", patientSetID, " with i2b2")
 
@@ -164,16 +182,31 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	}
 
 	//optionally return the patient set ID
+	patientSetIDNum, err := strconv.Atoi(patientSetID)
+	if err != nil {
+		return
+	}
+
 	if queryType.PatientSet {
 		logrus.Info(q.ID, ": patient set id requested")
-		patientSetIDNum, convErr := strconv.Atoi(patientSetID)
-		err = convErr
+
+		q.Result.PatientSetID = queryID
+	}
+
+	//update medco connector result instance
+	pCount, err := strconv.Atoi(patientCount)
+	if err != nil {
+		return
+	}
+	pIDs := make([]int, len(patientIDs))
+	for i, patientID := range patientIDs {
+		pIDs[i], err = strconv.Atoi(patientID)
 		if err != nil {
 			return
 		}
-
-		q.Result.PatientSetID = patientSetIDNum
 	}
+
+	querytools.UpdateExploreResultInstance(querytools.ConnectorDB, queryID, pCount, pIDs, nil, &patientSetIDNum)
 
 	q.Result.Timers.AddTimers("medco-connector-overall", overallTimer, nil)
 	return

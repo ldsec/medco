@@ -6,20 +6,31 @@ WHERE query_id = (SELECT query_id FROM query_tools.saved_cohorts WHERE user_id =
 `
 
 const insertExploreResultInstance string = `
-INSERT INTO query_tools.explre_query_results(user_id,query_name, query_status,query_definition)
+INSERT INTO query_tools.explore_query_results(user_id,query_name, query_status,query_definition)
 VALUES ($1,$2,'running',$3)
 RETURNING query_id
 `
 
-const updateExploreResultInstance string = `
-UPDATE medco_query_tools.qt_query_instance
-SET (clear_result_set_size, clear_result_set,query_status,i2b2_encrypted_patient_set_id,i2b2_non_encrypted_patient_set_id)=$2, $3, 'completed', $4, $5
-WHERE query_instance_id = $1
+const updateExploreResultInstanceBoth string = `
+UPDATE query_tools.explore_query_results
+SET clear_result_set_size=$2, clear_result_set=$3, query_status='completed' , i2b2_encrypted_patient_set_id=$4, i2b2_non_encrypted_patient_set_id=$5
+WHERE query_id = $1 AND status = 'running'
 `
+const updateExploreResultInstanceOnlyClear string = `
+UPDATE query_tools.explore_query_results
+SET clear_result_set_size=$2, clear_result_set=$3, query_status='completed' ,i2b2_non_encrypted_patient_set_id=$4
+WHERE query_id = $1 AND query_status = 'running'
+`
+const updateExploreResultInstanceOnlyEncrypted string = `
+UPDATE query_tools.explore_query_results
+SET clear_result_set_size=$2, clear_result_set=$3, query_status='completed' ,i2b2_encrypted_patient_set_id=$4
+WHERE query_id = $1 AND query_status = 'running'
+`
+
 const updateErrorExploreQueryInstance string = `
-UPDATE medco_query_tools.qt_query_instance
-SET (query_status,i2b2_encrypted_patient_set_id,i2b2_non_encrypted_patient_set_id)='error',$2,$3
-WHERE query_instance_id = $1
+UPDATE query_tools.explore_query_results
+SET query_status='error'
+WHERE query_id = $1 AND query_status = 'running'
 `
 
 const insertCohort string = `

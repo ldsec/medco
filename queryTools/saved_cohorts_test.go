@@ -136,3 +136,8 @@ func TestInsertCohort(t *testing.T) {
 	}
 
 }
+
+const cohortDeletion = `
+DELETE FROM query_tools.saved_cohorts
+WHERE cohort_id = $1
+`
