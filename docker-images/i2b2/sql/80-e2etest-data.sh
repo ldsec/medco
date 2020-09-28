@@ -75,6 +75,26 @@ psql $PSQL_PARAMS -d "$I2B2_DB_NAME" <<-EOSQL
                 'concept_cd', 'concept_dimension', 'concept_path',
                 'T', 'LIKE', '\e2etest\3\', 'E2E Concept 3', '\e2etest\3\',
                 'NOW()', 'NOW()', 'NOW()', 'ENC_ID', '@', 'ENC_ID:3'
+            ), (
+                '1', '\modifiers\', 'E2E Modifiers test', 'N', 'DA', '0',
+                'modifier_cd', 'modifier_dimension', 'modifier_path',
+                'T', 'LIKE', '\modifiers\', 'End-To-End Modifiers Test', '\modifiers\',
+                'NOW()', 'NOW()', 'NOW()', 'ENC_ID', '\e2etest\%', 'ENC_ID:4'
+            ), (
+                '2', '\modifiers\1\', 'E2E Modifier 1', 'N', 'RA', '0',
+                'modifier_cd', 'modifier_dimension', 'modifier_path',
+                'T', 'LIKE', '\modifiers\1\', 'E2E Modifier 1', '\modifiers\1\',
+                'NOW()', 'NOW()', 'NOW()', 'ENC_ID', '\e2etest\1\', 'ENC_ID:5'
+            ), (
+                '2', '\modifiers\2\', 'E2E Modifier 2', 'N', 'RA', '0',
+                'modifier_cd', 'modifier_dimension', 'modifier_path',
+                'T', 'LIKE', '\modifiers\2\', 'E2E Modifier 2', '\modifiers\2\',
+                'NOW()', 'NOW()', 'NOW()', 'ENC_ID', '\e2etest\2\', 'ENC_ID:6'
+            ), (
+                '2', '\modifiers\3\', 'E2E Modifier 3', 'N', 'RA', '0',
+                'modifier_cd', 'modifier_dimension', 'modifier_path',
+                'T', 'LIKE', '\modifiers\3\', 'E2E Modifier 3', '\modifiers\3\',
+                'NOW()', 'NOW()', 'NOW()', 'ENC_ID', '\e2etest\3\', 'ENC_ID:7'
             );
 
     -- medco_ont.sensitive_tagged
@@ -147,6 +167,14 @@ psql $PSQL_PARAMS -d "$I2B2_DB_NAME" <<-EOSQL
             ('\medco\tagged\15a9a62d50d8239a1a133544403980fc97468b8479917f96b24373cdf4397e11\', 'TAG_ID:11', 'NOW()', '1'),
             ('\medco\tagged\a757856f859fa5f82f5164b33459e89a1a84a213cdb11a3e3bc7df460a495b3e\', 'TAG_ID:12', 'NOW()', '1'),
             ('\medco\tagged\84ff65ad621ebeba9b7ef1c68967ae023cb0487415a0b2061baecefbd0da67ba\', 'TAG_ID:13', 'NOW()', '1');
+
+    -- i2b2demodata_i2b2.modifier_dimension
+    insert into i2b2demodata_i2b2.modifier_dimension
+        (modifier_path, modifier_cd, import_date, upload_id) values
+            ('\modifiers\', 'ENC_ID:4', 'NOW()', '1'),
+            ('\modifiers\1\', 'ENC_ID:5', 'NOW()', '1'),
+            ('\modifiers\2\', 'ENC_ID:6', 'NOW()', '1'),
+            ('\modifiers\3\', 'ENC_ID:7', 'NOW()', '1');
 
     -- i2b2demodata_i2b2.provider_dimension
     insert into i2b2demodata_i2b2.provider_dimension
