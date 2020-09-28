@@ -77,7 +77,7 @@ func (q *Query) Execute() error {
 	initialCounts := make([]int64, 0)
 	eventGroups := make(EventGroups, 0)
 
-	// --- build subgroups
+	// --- cohort patient list
 
 	timer := time.Now()
 	cohort, err := querytools.GetPatientList(utilserver.DBConnection, q.UserID, int64(q.SetID))
@@ -106,6 +106,8 @@ func (q *Query) Execute() error {
 		logrus.Error("Error while retrieving concept code, ", err)
 		return err
 	}
+
+	// --- build sub groups
 
 	definitions := q.SubGroupDefinitions
 	if q.SubGroupDefinitions == nil || len(q.SubGroupDefinitions) == 0 {
