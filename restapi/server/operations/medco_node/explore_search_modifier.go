@@ -17,40 +17,40 @@ import (
 	"github.com/ldsec/medco-connector/restapi/models"
 )
 
-// ExploreSearchHandlerFunc turns a function with the right signature into a explore search handler
-type ExploreSearchHandlerFunc func(ExploreSearchParams, *models.User) middleware.Responder
+// ExploreSearchModifierHandlerFunc turns a function with the right signature into a explore search modifier handler
+type ExploreSearchModifierHandlerFunc func(ExploreSearchModifierParams, *models.User) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn ExploreSearchHandlerFunc) Handle(params ExploreSearchParams, principal *models.User) middleware.Responder {
+func (fn ExploreSearchModifierHandlerFunc) Handle(params ExploreSearchModifierParams, principal *models.User) middleware.Responder {
 	return fn(params, principal)
 }
 
-// ExploreSearchHandler interface for that can handle valid explore search params
-type ExploreSearchHandler interface {
-	Handle(ExploreSearchParams, *models.User) middleware.Responder
+// ExploreSearchModifierHandler interface for that can handle valid explore search modifier params
+type ExploreSearchModifierHandler interface {
+	Handle(ExploreSearchModifierParams, *models.User) middleware.Responder
 }
 
-// NewExploreSearch creates a new http.Handler for the explore search operation
-func NewExploreSearch(ctx *middleware.Context, handler ExploreSearchHandler) *ExploreSearch {
-	return &ExploreSearch{Context: ctx, Handler: handler}
+// NewExploreSearchModifier creates a new http.Handler for the explore search modifier operation
+func NewExploreSearchModifier(ctx *middleware.Context, handler ExploreSearchModifierHandler) *ExploreSearchModifier {
+	return &ExploreSearchModifier{Context: ctx, Handler: handler}
 }
 
-/*ExploreSearch swagger:route POST /node/explore/search medco-node exploreSearch
+/*ExploreSearchModifier swagger:route POST /node/explore/search/modifier medco-node exploreSearchModifier
 
-Search through the ontology for MedCo-Explore query terms.
+Returns the children of a modifier
 
 */
-type ExploreSearch struct {
+type ExploreSearchModifier struct {
 	Context *middleware.Context
-	Handler ExploreSearchHandler
+	Handler ExploreSearchModifierHandler
 }
 
-func (o *ExploreSearch) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+func (o *ExploreSearchModifier) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	route, rCtx, _ := o.Context.RouteInfo(r)
 	if rCtx != nil {
 		r = rCtx
 	}
-	var Params = NewExploreSearchParams()
+	var Params = NewExploreSearchModifierParams()
 
 	uprinc, aCtx, err := o.Context.Authorize(r, route)
 	if err != nil {
@@ -76,22 +76,22 @@ func (o *ExploreSearch) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 }
 
-// ExploreSearchDefaultBody explore search default body
+// ExploreSearchModifierDefaultBody explore search modifier default body
 //
-// swagger:model ExploreSearchDefaultBody
-type ExploreSearchDefaultBody struct {
+// swagger:model ExploreSearchModifierDefaultBody
+type ExploreSearchModifierDefaultBody struct {
 
 	// message
 	Message string `json:"message,omitempty"`
 }
 
-// Validate validates this explore search default body
-func (o *ExploreSearchDefaultBody) Validate(formats strfmt.Registry) error {
+// Validate validates this explore search modifier default body
+func (o *ExploreSearchModifierDefaultBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (o *ExploreSearchDefaultBody) MarshalBinary() ([]byte, error) {
+func (o *ExploreSearchModifierDefaultBody) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -99,8 +99,8 @@ func (o *ExploreSearchDefaultBody) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *ExploreSearchDefaultBody) UnmarshalBinary(b []byte) error {
-	var res ExploreSearchDefaultBody
+func (o *ExploreSearchModifierDefaultBody) UnmarshalBinary(b []byte) error {
+	var res ExploreSearchModifierDefaultBody
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -108,20 +108,20 @@ func (o *ExploreSearchDefaultBody) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-// ExploreSearchOKBody explore search o k body
+// ExploreSearchModifierOKBody explore search modifier o k body
 //
-// swagger:model ExploreSearchOKBody
-type ExploreSearchOKBody struct {
+// swagger:model ExploreSearchModifierOKBody
+type ExploreSearchModifierOKBody struct {
 
 	// results
 	Results []*models.ExploreSearchResultElement `json:"results"`
 
 	// search
-	Search *models.ExploreSearch `json:"search,omitempty"`
+	Search *models.ExploreSearchModifier `json:"search,omitempty"`
 }
 
-// Validate validates this explore search o k body
-func (o *ExploreSearchOKBody) Validate(formats strfmt.Registry) error {
+// Validate validates this explore search modifier o k body
+func (o *ExploreSearchModifierOKBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := o.validateResults(formats); err != nil {
@@ -138,7 +138,7 @@ func (o *ExploreSearchOKBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *ExploreSearchOKBody) validateResults(formats strfmt.Registry) error {
+func (o *ExploreSearchModifierOKBody) validateResults(formats strfmt.Registry) error {
 
 	if swag.IsZero(o.Results) { // not required
 		return nil
@@ -152,7 +152,7 @@ func (o *ExploreSearchOKBody) validateResults(formats strfmt.Registry) error {
 		if o.Results[i] != nil {
 			if err := o.Results[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("exploreSearchOK" + "." + "results" + "." + strconv.Itoa(i))
+					return ve.ValidateName("exploreSearchModifierOK" + "." + "results" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -163,7 +163,7 @@ func (o *ExploreSearchOKBody) validateResults(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *ExploreSearchOKBody) validateSearch(formats strfmt.Registry) error {
+func (o *ExploreSearchModifierOKBody) validateSearch(formats strfmt.Registry) error {
 
 	if swag.IsZero(o.Search) { // not required
 		return nil
@@ -172,7 +172,7 @@ func (o *ExploreSearchOKBody) validateSearch(formats strfmt.Registry) error {
 	if o.Search != nil {
 		if err := o.Search.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("exploreSearchOK" + "." + "search")
+				return ve.ValidateName("exploreSearchModifierOK" + "." + "search")
 			}
 			return err
 		}
@@ -182,7 +182,7 @@ func (o *ExploreSearchOKBody) validateSearch(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (o *ExploreSearchOKBody) MarshalBinary() ([]byte, error) {
+func (o *ExploreSearchModifierOKBody) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -190,8 +190,8 @@ func (o *ExploreSearchOKBody) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *ExploreSearchOKBody) UnmarshalBinary(b []byte) error {
-	var res ExploreSearchOKBody
+func (o *ExploreSearchModifierOKBody) UnmarshalBinary(b []byte) error {
+	var res ExploreSearchModifierOKBody
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

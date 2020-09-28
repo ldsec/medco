@@ -35,6 +35,24 @@ func TestGetOntologyChildrenNode(t *testing.T) {
 	t.Log(*results[0].MedcoEncryption)
 }
 
+func TestGetOntologyModifiers(t *testing.T) {
+
+	results, err := GetOntologyModifiers("/E2ETEST/e2etest/1/")
+	if err != nil {
+		t.Fail()
+	}
+	t.Log(*results[0].MedcoEncryption)
+}
+
+func TestGetOntologyModifierChildren(t *testing.T) {
+
+	results, err := GetOntologyModifierChildren("/E2ETEST/modifiers/", "/e2etest/%", "/E2ETEST/e2etest/1/")
+	if err != nil {
+		t.Fail()
+	}
+	t.Log(*results[0].MedcoEncryption)
+}
+
 func TestExecutePsmQuery(t *testing.T) {
 
 	patientCount, patientSetID, err := ExecutePsmQuery(
@@ -45,7 +63,7 @@ func TestExecutePsmQuery(t *testing.T) {
 	if err != nil {
 		t.Fail()
 	}
-	t.Log("count:" + patientCount, "set ID:" + patientSetID)
+	t.Log("count:"+patientCount, "set ID:"+patientSetID)
 }
 
 func TestGetPatientSet(t *testing.T) {

@@ -16,46 +16,46 @@ import (
 	"github.com/ldsec/medco-connector/restapi/models"
 )
 
-// NewExploreSearchParams creates a new ExploreSearchParams object
+// NewExploreSearchConceptParams creates a new ExploreSearchConceptParams object
 // no default values defined in spec.
-func NewExploreSearchParams() ExploreSearchParams {
+func NewExploreSearchConceptParams() ExploreSearchConceptParams {
 
-	return ExploreSearchParams{}
+	return ExploreSearchConceptParams{}
 }
 
-// ExploreSearchParams contains all the bound params for the explore search operation
+// ExploreSearchConceptParams contains all the bound params for the explore search concept operation
 // typically these are obtained from a http.Request
 //
-// swagger:parameters exploreSearch
-type ExploreSearchParams struct {
+// swagger:parameters exploreSearchConcept
+type ExploreSearchConceptParams struct {
 
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
 
-	/*MedCo-Explore ontology search request.
+	/*MedCo-Explore ontology search concept request.
 	  Required: true
 	  In: body
 	*/
-	SearchRequest *models.ExploreSearch
+	SearchConceptRequest *models.ExploreSearchConcept
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
 // for simple values it will use straight method calls.
 //
-// To ensure default values, the struct must have been initialized with NewExploreSearchParams() beforehand.
-func (o *ExploreSearchParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
+// To ensure default values, the struct must have been initialized with NewExploreSearchConceptParams() beforehand.
+func (o *ExploreSearchConceptParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
 
 	o.HTTPRequest = r
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body models.ExploreSearch
+		var body models.ExploreSearchConcept
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
-				res = append(res, errors.Required("searchRequest", "body", ""))
+				res = append(res, errors.Required("searchConceptRequest", "body", ""))
 			} else {
-				res = append(res, errors.NewParseError("searchRequest", "body", "", err))
+				res = append(res, errors.NewParseError("searchConceptRequest", "body", "", err))
 			}
 		} else {
 			// validate body object
@@ -64,11 +64,11 @@ func (o *ExploreSearchParams) BindRequest(r *http.Request, route *middleware.Mat
 			}
 
 			if len(res) == 0 {
-				o.SearchRequest = &body
+				o.SearchConceptRequest = &body
 			}
 		}
 	} else {
-		res = append(res, errors.Required("searchRequest", "body", ""))
+		res = append(res, errors.Required("searchConceptRequest", "body", ""))
 	}
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

@@ -11,7 +11,6 @@ require (
 	github.com/go-openapi/swag v0.19.9
 	github.com/go-openapi/validate v0.19.11
 	github.com/go-swagger/go-swagger v0.25.0 // indirect
-	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/ldsec/medco-loader v1.0.0
 	github.com/ldsec/medco-unlynx v1.0.0

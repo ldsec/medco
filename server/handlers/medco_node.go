@@ -10,18 +10,34 @@ import (
 	"time"
 )
 
-// MedCoNodeExploreSearchHandler handles /medco/node/explore/search API endpoint
-func MedCoNodeExploreSearchHandler(params medco_node.ExploreSearchParams, principal *models.User) middleware.Responder {
+// MedCoNodeExploreSearchHandler handles the /medco/node/explore/search/concept API endpoint
+func MedCoNodeExploreSearchConceptHandler(params medco_node.ExploreSearchConceptParams, principal *models.User) middleware.Responder {
 
-	searchResult, err := i2b2.GetOntologyChildren(*params.SearchRequest.Path)
+	searchResult, err := i2b2.GetOntologyChildren(*params.SearchConceptRequest.Path)
 	if err != nil {
-		return medco_node.NewExploreSearchDefault(500).WithPayload(&medco_node.ExploreSearchDefaultBody{
+		return medco_node.NewExploreSearchConceptDefault(500).WithPayload(&medco_node.ExploreSearchConceptDefaultBody{
 			Message: err.Error(),
 		})
 	}
 
-	return medco_node.NewExploreSearchOK().WithPayload(&medco_node.ExploreSearchOKBody{
-		Search: params.SearchRequest,
+	return medco_node.NewExploreSearchConceptOK().WithPayload(&medco_node.ExploreSearchConceptOKBody{
+		Search:  params.SearchConceptRequest,
+		Results: searchResult,
+	})
+}
+
+// MedCoNodeExploreSearchModifierHandler handles the /medco/node/explore/search/modifier API endpoint
+func MedCoNodeExploreSearchModifierHandler(params medco_node.ExploreSearchModifierParams, principal *models.User) middleware.Responder {
+
+	searchResult, err := i2b2.GetOntologyModifierChildren(*params.SearchModifierRequest.Path, *params.SearchModifierRequest.AppliedPath, *params.SearchModifierRequest.AppliedConcept)
+	if err != nil {
+		return medco_node.NewExploreSearchModifierDefault(500).WithPayload(&medco_node.ExploreSearchModifierDefaultBody{
+			Message: err.Error(),
+		})
+	}
+
+	return medco_node.NewExploreSearchModifierOK().WithPayload(&medco_node.ExploreSearchModifierOKBody{
+		Search:  params.SearchModifierRequest,
 		Results: searchResult,
 	})
 }
@@ -66,18 +82,18 @@ func MedCoNodeExploreQueryHandler(params medco_node.ExploreQueryParams, principa
 	for timerName, timerDuration := range query.Result.Timers {
 		milliseconds := int64(timerDuration / time.Millisecond)
 		timers = append(timers, &models.ExploreQueryResultElementTimersItems0{
-			Name: timerName,
+			Name:         timerName,
 			Milliseconds: &milliseconds,
 		})
 	}
 
 	return medco_node.NewExploreQueryOK().WithPayload(&medco_node.ExploreQueryOKBody{
-		ID:     query.ID,
-		Query:  params.QueryRequest.Query,
+		ID:    query.ID,
+		Query: params.QueryRequest.Query,
 		Result: &models.ExploreQueryResultElement{
-			EncryptedCount: query.Result.EncCount,
+			EncryptedCount:       query.Result.EncCount,
 			EncryptedPatientList: query.Result.EncPatientList,
-			Timers: timers,
-			Status: models.ExploreQueryResultElementStatusAvailable,
-	}})
+			Timers:               timers,
+			Status:               models.ExploreQueryResultElementStatusAvailable,
+		}})
 }

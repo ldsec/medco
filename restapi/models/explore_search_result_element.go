@@ -42,7 +42,7 @@ type ExploreSearchResultElement struct {
 	Path string `json:"path,omitempty"`
 
 	// type
-	// Enum: [container concept modifier genomic_annotation]
+	// Enum: [concept concept_container concept_folder modifier modifier_container modifier_folder genomic_annotation]
 	Type string `json:"type,omitempty"`
 }
 
@@ -99,7 +99,7 @@ var exploreSearchResultElementTypeTypePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["container","concept","modifier","genomic_annotation"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["concept","concept_container","concept_folder","modifier","modifier_container","modifier_folder","genomic_annotation"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -109,14 +109,23 @@ func init() {
 
 const (
 
-	// ExploreSearchResultElementTypeContainer captures enum value "container"
-	ExploreSearchResultElementTypeContainer string = "container"
-
 	// ExploreSearchResultElementTypeConcept captures enum value "concept"
 	ExploreSearchResultElementTypeConcept string = "concept"
 
+	// ExploreSearchResultElementTypeConceptContainer captures enum value "concept_container"
+	ExploreSearchResultElementTypeConceptContainer string = "concept_container"
+
+	// ExploreSearchResultElementTypeConceptFolder captures enum value "concept_folder"
+	ExploreSearchResultElementTypeConceptFolder string = "concept_folder"
+
 	// ExploreSearchResultElementTypeModifier captures enum value "modifier"
 	ExploreSearchResultElementTypeModifier string = "modifier"
+
+	// ExploreSearchResultElementTypeModifierContainer captures enum value "modifier_container"
+	ExploreSearchResultElementTypeModifierContainer string = "modifier_container"
+
+	// ExploreSearchResultElementTypeModifierFolder captures enum value "modifier_folder"
+	ExploreSearchResultElementTypeModifierFolder string = "modifier_folder"
 
 	// ExploreSearchResultElementTypeGenomicAnnotation captures enum value "genomic_annotation"
 	ExploreSearchResultElementTypeGenomicAnnotation string = "genomic_annotation"

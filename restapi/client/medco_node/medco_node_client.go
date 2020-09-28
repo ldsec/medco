@@ -27,7 +27,9 @@ type Client struct {
 type ClientService interface {
 	ExploreQuery(params *ExploreQueryParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreQueryOK, error)
 
-	ExploreSearch(params *ExploreSearchParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreSearchOK, error)
+	ExploreSearchConcept(params *ExploreSearchConceptParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreSearchConceptOK, error)
+
+	ExploreSearchModifier(params *ExploreSearchModifierParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreSearchModifierOK, error)
 
 	GetExploreQuery(params *GetExploreQueryParams, authInfo runtime.ClientAuthInfoWriter) (*GetExploreQueryOK, error)
 
@@ -69,23 +71,23 @@ func (a *Client) ExploreQuery(params *ExploreQueryParams, authInfo runtime.Clien
 }
 
 /*
-  ExploreSearch searches through the ontology for med co explore query terms
+  ExploreSearchConcept returns the children concepts and modifiers of a concept
 */
-func (a *Client) ExploreSearch(params *ExploreSearchParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreSearchOK, error) {
+func (a *Client) ExploreSearchConcept(params *ExploreSearchConceptParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreSearchConceptOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewExploreSearchParams()
+		params = NewExploreSearchConceptParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "exploreSearch",
+		ID:                 "exploreSearchConcept",
 		Method:             "POST",
-		PathPattern:        "/node/explore/search",
+		PathPattern:        "/node/explore/search/concept",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &ExploreSearchReader{formats: a.formats},
+		Reader:             &ExploreSearchConceptReader{formats: a.formats},
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
@@ -93,12 +95,46 @@ func (a *Client) ExploreSearch(params *ExploreSearchParams, authInfo runtime.Cli
 	if err != nil {
 		return nil, err
 	}
-	success, ok := result.(*ExploreSearchOK)
+	success, ok := result.(*ExploreSearchConceptOK)
 	if ok {
 		return success, nil
 	}
 	// unexpected success response
-	unexpectedSuccess := result.(*ExploreSearchDefault)
+	unexpectedSuccess := result.(*ExploreSearchConceptDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+  ExploreSearchModifier returns the children of a modifier
+*/
+func (a *Client) ExploreSearchModifier(params *ExploreSearchModifierParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreSearchModifierOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewExploreSearchModifierParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "exploreSearchModifier",
+		Method:             "POST",
+		PathPattern:        "/node/explore/search/modifier",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &ExploreSearchModifierReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*ExploreSearchModifierOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*ExploreSearchModifierDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
