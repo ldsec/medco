@@ -43,22 +43,37 @@ paths:
       security:
        - medco-jwt: ["medco-network"]
 
-
-  /node/explore/search:
+  /node/explore/search/concept:
     post:
       tags:
         - "medco-node"
-      summary: "Search through the ontology for MedCo-Explore query terms."
-      operationId: "exploreSearch"
+      summary: "Returns the children (concepts and modifiers) of a concept"
+      operationId: "exploreSearchConcept"
       parameters:
-        - $ref: "#/parameters/exploreSearchRequest"
+        - $ref: "#/parameters/exploreSearchConceptRequest"
       responses:
         200:
-          $ref: "#/responses/exploreSearchResponse"
+          $ref: "#/responses/exploreSearchConceptResponse"
         default:
           $ref: "#/responses/errorResponse"
       security:
-        - medco-jwt: ["medco-explore"]
+        - medco-jwt: [ "medco-explore" ]
+
+  /node/explore/search/modifier:
+    post:
+      tags:
+        - "medco-node"
+      summary: "Returns the children of a modifier"
+      operationId: "exploreSearchModifier"
+      parameters:
+        - $ref: "#/parameters/exploreSearchModifierRequest"
+      responses:
+        200:
+          $ref: "#/responses/exploreSearchModifierResponse"
+        default:
+          $ref: "#/responses/errorResponse"
+      security:
+        - medco-jwt: [ "medco-explore" ]
 
   /node/explore/query:
     post:
@@ -198,13 +213,21 @@ securityDefinitions:
     description: "MedCo JWT token."
 
 parameters:
-  exploreSearchRequest:
+  exploreSearchConceptRequest:
     in: "body"
-    name: "searchRequest"
-    description: "MedCo-Explore ontology search request."
+    name: "searchConceptRequest"
+    description: "MedCo-Explore ontology search concept request."
     required: true
     schema:
-      $ref: "#/definitions/exploreSearch"
+      $ref: "#/definitions/exploreSearchConcept"
+
+  exploreSearchModifierRequest:
+    in: "body"
+    name: "searchModifierRequest"
+    description: "MedCo-Explore ontology search modifier request."
+    required: true
+    schema:
+      $ref: "#/definitions/exploreSearchModifier"
 
   exploreQueryRequest:
     in: "body"
@@ -253,13 +276,25 @@ responses:
         nodeIndex:
           type: "integer"
 
-  exploreSearchResponse:
-    description: "MedCo-Explore search query response."
+  exploreSearchConceptResponse:
+    description: "MedCo-Explore search concept query response."
     schema:
       type: "object"
       properties:
         search:
-          $ref: "#/definitions/exploreSearch"
+          $ref: "#/definitions/exploreSearchConcept"
+        results:
+          type: "array"
+          items:
+            $ref: "#/definitions/exploreSearchResultElement"
+
+  exploreSearchModifierResponse:
+    description: "MedCo-Explore search modifier query response."
+    schema:
+      type: "object"
+      properties:
+        search:
+          $ref: "#/definitions/exploreSearchModifier"
         results:
           type: "array"
           items:
@@ -278,17 +313,29 @@ responses:
           $ref: "#/definitions/exploreQueryResultElement"
 
 definitions:
-  exploreSearch:
+  exploreSearchConcept:
     type: "object"
     required:
       - path
     properties:
-      type:
-        type: "string"
-        enum:
-          - children
-          - metadata
       path:
+        type: "string"
+        pattern: '^\/$|^((\/[^\/]+)+\/?)$'
+
+  exploreSearchModifier:
+    type: "object"
+    required:
+      - path
+      - appliedPath
+      - appliedConcept
+    properties:
+      path:
+        type: "string"
+        pattern: '^\/$|^((\/[^\/]+)+\/?)$'
+      appliedPath:
+        type: "string"
+        pattern: '^\/$|^((\/[^\/]+)+\/?)$'
+      appliedConcept:
         type: "string"
         pattern: '^\/$|^((\/[^\/]+)+\/?)$'
 
