@@ -1,5 +1,6 @@
-.PHONY: test test_go_fmt test_go_lint test_go
-test: test_go_fmt test_go_lint test_go
+.PHONY: test test_go_fmt test_go_lint test_go test_codecov
+test_travis: test_go_fmt test_go_lint test_codecov
+test_local: test_go_fmt test_go_lint test_go
 
 test_go_fmt:
 	@echo Checking correct formatting of files
@@ -30,6 +31,11 @@ test_go_lint:
 test_go:
 	go test -v -race -short -p=1 ./...
 
+test_codecov:
+	./scripts/coveralls.sh
+
+# ---
+.PHONY:	test_unlynx_loop swagger swagger-gen
 test_unlynx_loop:
 	for i in $$( seq 100 ); \
 		do echo "******* Run $$i"; echo; \
@@ -37,7 +43,6 @@ test_unlynx_loop:
 		( cat run.log; exit 1 ) || exit 1; \
 	done
 
-# generate/update go server based on swagger specifications
 swagger-gen: swagger
 	swagger validate ./connector/swagger/medco-connector.yml
 	swagger generate server \
@@ -57,7 +62,6 @@ swagger-gen: swagger
 		--name=medco-cli \
 		--default-scheme=https
 
-.PHONY:	swagger
 swagger:
 	@if ! which swagger >/dev/null; then \
 		go install github.com/go-swagger/go-swagger/cmd/swagger && \
