@@ -1,9 +1,9 @@
 package medcoserver
 
 import (
-	"github.com/ldsec/medco-connector/restapi/models"
-	"github.com/ldsec/medco-connector/wrappers/i2b2"
-	"github.com/ldsec/medco-connector/wrappers/unlynx"
+	"github.com/ldsec/medco/connector/restapi/models"
+	"github.com/ldsec/medco/connector/wrappers/i2b2"
+	"github.com/ldsec/medco/connector/wrappers/unlynx"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"strconv"

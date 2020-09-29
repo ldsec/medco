@@ -2,7 +2,7 @@ package medcoserver
 
 import (
 	"errors"
-	"github.com/ldsec/medco-connector/restapi/models"
+	"github.com/ldsec/medco/connector/restapi/models"
 )
 
 // ExploreQueryType encodes the requested results from the query

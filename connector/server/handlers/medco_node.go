@@ -2,11 +2,11 @@ package handlers
 
 import (
 	"github.com/go-openapi/runtime/middleware"
-	"github.com/ldsec/medco-connector/restapi/models"
-	"github.com/ldsec/medco-connector/restapi/server/operations/medco_node"
-	"github.com/ldsec/medco-connector/server"
-	"github.com/ldsec/medco-connector/util/server"
-	"github.com/ldsec/medco-connector/wrappers/i2b2"
+	"github.com/ldsec/medco/connector/restapi/models"
+	"github.com/ldsec/medco/connector/restapi/server/operations/medco_node"
+	"github.com/ldsec/medco/connector/server"
+	"github.com/ldsec/medco/connector/util/server"
+	"github.com/ldsec/medco/connector/wrappers/i2b2"
 	"time"
 )
 

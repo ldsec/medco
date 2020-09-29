@@ -2,8 +2,8 @@ package loadergenomic_test
 
 import (
 	"encoding/base64"
-	"github.com/ldsec/medco-loader/loader"
-	"github.com/ldsec/medco-loader/loader/genomic"
+	"github.com/ldsec/medco/loader/loader"
+	"github.com/ldsec/medco/loader/loader/genomic"
 	"github.com/ldsec/unlynx/lib"
 	"github.com/stretchr/testify/assert"
 	"go.dedis.ch/onet/v3"

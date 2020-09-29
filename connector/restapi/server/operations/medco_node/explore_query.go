@@ -14,7 +14,7 @@ import (
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 
-	"github.com/ldsec/medco-connector/restapi/models"
+	"github.com/ldsec/medco/connector/restapi/models"
 )
 
 // ExploreQueryHandlerFunc turns a function with the right signature into a explore query handler

@@ -15,7 +15,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
-	"github.com/ldsec/medco-connector/restapi/models"
+	"github.com/ldsec/medco/connector/restapi/models"
 )
 
 // ExploreSearchConceptReader is a Reader for the ExploreSearchConcept structure.

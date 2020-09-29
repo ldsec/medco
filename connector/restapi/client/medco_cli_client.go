@@ -10,9 +10,9 @@ import (
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 
-	"github.com/ldsec/medco-connector/restapi/client/genomic_annotations"
-	"github.com/ldsec/medco-connector/restapi/client/medco_network"
-	"github.com/ldsec/medco-connector/restapi/client/medco_node"
+	"github.com/ldsec/medco/connector/restapi/client/genomic_annotations"
+	"github.com/ldsec/medco/connector/restapi/client/medco_network"
+	"github.com/ldsec/medco/connector/restapi/client/medco_node"
 )
 
 // Default medco cli HTTP client.

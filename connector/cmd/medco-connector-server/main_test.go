@@ -11,8 +11,8 @@ import (
 
 	"github.com/go-openapi/runtime/security"
 
-	"github.com/ldsec/medco-connector/restapi/models"
-	"github.com/ldsec/medco-connector/util/server"
+	"github.com/ldsec/medco/connector/restapi/models"
+	"github.com/ldsec/medco/connector/util/server"
 
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/runtime"
@@ -20,11 +20,11 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.dedis.ch/onet/v3/log"
 
-	"github.com/ldsec/medco-connector/restapi/server"
-	"github.com/ldsec/medco-connector/restapi/server/operations"
-	"github.com/ldsec/medco-connector/restapi/server/operations/genomic_annotations"
-	"github.com/ldsec/medco-connector/restapi/server/operations/medco_network"
-	"github.com/ldsec/medco-connector/restapi/server/operations/medco_node"
+	"github.com/ldsec/medco/connector/restapi/server"
+	"github.com/ldsec/medco/connector/restapi/server/operations"
+	"github.com/ldsec/medco/connector/restapi/server/operations/genomic_annotations"
+	"github.com/ldsec/medco/connector/restapi/server/operations/medco_network"
+	"github.com/ldsec/medco/connector/restapi/server/operations/medco_node"
 )
 
 func TestNetwork(t *testing.T) {

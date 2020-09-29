@@ -2,8 +2,8 @@ package unlynx
 
 import (
 	"errors"
-	"github.com/ldsec/medco-connector/util/server"
-	"github.com/ldsec/medco-unlynx/services"
+	"github.com/ldsec/medco/connector/util/server"
+	"github.com/ldsec/medco/unlynx/services"
 	"github.com/ldsec/unlynx/lib"
 	"github.com/sirupsen/logrus"
 	"strconv"

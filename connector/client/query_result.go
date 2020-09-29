@@ -1,8 +1,8 @@
 package medcoclient
 
 import (
-	"github.com/ldsec/medco-connector/restapi/models"
-	"github.com/ldsec/medco-connector/wrappers/unlynx"
+	"github.com/ldsec/medco/connector/restapi/models"
+	"github.com/ldsec/medco/connector/wrappers/unlynx"
 	"github.com/sirupsen/logrus"
 	"time"
 )

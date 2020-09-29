@@ -3,7 +3,7 @@ package i2b2
 import (
 	"encoding/xml"
 	"errors"
-	"github.com/ldsec/medco-connector/util/server"
+	"github.com/ldsec/medco/connector/util/server"
 	"strconv"
 	"strings"
 )

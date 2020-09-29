@@ -4,8 +4,8 @@ package server
 
 import (
 	"crypto/tls"
-	"github.com/ldsec/medco-connector/server/handlers"
-	"github.com/ldsec/medco-connector/util/server"
+	"github.com/ldsec/medco/connector/server/handlers"
+	"github.com/ldsec/medco/connector/util/server"
 	"github.com/sirupsen/logrus"
 	"net/http"
 
@@ -13,12 +13,12 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 
-	"github.com/ldsec/medco-connector/restapi/server/operations"
-	"github.com/ldsec/medco-connector/restapi/server/operations/genomic_annotations"
-	"github.com/ldsec/medco-connector/restapi/server/operations/medco_network"
-	"github.com/ldsec/medco-connector/restapi/server/operations/medco_node"
+	"github.com/ldsec/medco/connector/restapi/server/operations"
+	"github.com/ldsec/medco/connector/restapi/server/operations/genomic_annotations"
+	"github.com/ldsec/medco/connector/restapi/server/operations/medco_network"
+	"github.com/ldsec/medco/connector/restapi/server/operations/medco_node"
 
-	"github.com/ldsec/medco-connector/restapi/models"
+	"github.com/ldsec/medco/connector/restapi/models"
 )
 
 //go:generate swagger generate server --target ../../../medco-connector --name MedcoConnector --spec ../../swagger/medco-connector.yml --model-package restapi/models --server-package restapi/server --principal models.User

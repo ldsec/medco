@@ -15,7 +15,7 @@ import (
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 
-	"github.com/ldsec/medco-connector/restapi/models"
+	"github.com/ldsec/medco/connector/restapi/models"
 )
 
 // ExploreQueryReader is a Reader for the ExploreQuery structure.

@@ -3,9 +3,9 @@ package medcoclient
 import (
 	"crypto/tls"
 	httptransport "github.com/go-openapi/runtime/client"
-	"github.com/ldsec/medco-connector/restapi/client"
-	"github.com/ldsec/medco-connector/restapi/client/genomic_annotations"
-	utilclient "github.com/ldsec/medco-connector/util/client"
+	"github.com/ldsec/medco/connector/restapi/client"
+	"github.com/ldsec/medco/connector/restapi/client/genomic_annotations"
+	utilclient "github.com/ldsec/medco/connector/util/client"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"net/url"

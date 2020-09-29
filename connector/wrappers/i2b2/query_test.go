@@ -1,7 +1,7 @@
 package i2b2
 
 import (
-	"github.com/ldsec/medco-connector/util/server"
+	"github.com/ldsec/medco/connector/util/server"
 	"testing"
 )
 

@@ -3,9 +3,9 @@ package handlers
 import (
 	"errors"
 	"github.com/go-openapi/runtime/middleware"
-	"github.com/ldsec/medco-connector/restapi/models"
-	"github.com/ldsec/medco-connector/restapi/server/operations/genomic_annotations"
-	utilserver "github.com/ldsec/medco-connector/util/server"
+	"github.com/ldsec/medco/connector/restapi/models"
+	"github.com/ldsec/medco/connector/restapi/server/operations/genomic_annotations"
+	utilserver "github.com/ldsec/medco/connector/util/server"
 	"github.com/sirupsen/logrus"
 	"strings"
 )

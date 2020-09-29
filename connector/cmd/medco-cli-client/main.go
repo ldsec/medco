@@ -1,7 +1,7 @@
 package main
 
 import (
-	medcoclient "github.com/ldsec/medco-connector/client"
+	medcoclient "github.com/ldsec/medco/connector/client"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 	"os"

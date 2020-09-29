@@ -19,10 +19,10 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
-	"github.com/ldsec/medco-connector/restapi/models"
-	"github.com/ldsec/medco-connector/restapi/server/operations/genomic_annotations"
-	"github.com/ldsec/medco-connector/restapi/server/operations/medco_network"
-	"github.com/ldsec/medco-connector/restapi/server/operations/medco_node"
+	"github.com/ldsec/medco/connector/restapi/models"
+	"github.com/ldsec/medco/connector/restapi/server/operations/genomic_annotations"
+	"github.com/ldsec/medco/connector/restapi/server/operations/medco_network"
+	"github.com/ldsec/medco/connector/restapi/server/operations/medco_node"
 )
 
 // NewMedcoConnectorAPI creates a new MedcoConnector instance

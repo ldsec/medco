@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"github.com/ldsec/medco-connector/restapi/server/operations/genomic_annotations"
-	utilserver "github.com/ldsec/medco-connector/util/server"
+	"github.com/ldsec/medco/connector/restapi/server/operations/genomic_annotations"
+	utilserver "github.com/ldsec/medco/connector/util/server"
 	"github.com/sirupsen/logrus"
 	"testing"
 )

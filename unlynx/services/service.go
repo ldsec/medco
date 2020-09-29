@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/BurntSushi/toml"
 	"github.com/fanliao/go-concurrentMap"
-	"github.com/ldsec/medco-unlynx/protocols"
+	"github.com/ldsec/medco/unlynx/protocols"
 	"github.com/ldsec/unlynx/lib"
 	"github.com/ldsec/unlynx/protocols"
 	"go.dedis.ch/kyber/v3"

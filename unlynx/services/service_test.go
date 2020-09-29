@@ -1,7 +1,7 @@
 package servicesmedco_test
 
 import (
-	"github.com/ldsec/medco-unlynx/services"
+	"github.com/ldsec/medco/unlynx/services"
 	"github.com/ldsec/unlynx/lib"
 	"github.com/stretchr/testify/assert"
 	"go.dedis.ch/kyber/v3"

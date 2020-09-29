@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/ldsec/medco-unlynx/services"
+	"github.com/ldsec/medco/unlynx/services"
 	libunlynx "github.com/ldsec/unlynx/lib"
 	"github.com/urfave/cli"
 	"go.dedis.ch/kyber/v3"
