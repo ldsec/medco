@@ -1,0 +1,229 @@
+version: '2.4'
+services:
+  i2b2-srv0:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: i2b2
+    environment:
+      - I2B2_DB_NAME=i2b2medcosrv0
+      - I2B2_DOMAIN_NAME=i2b2medcosrv0
+      - AXIS2_LOGLEVEL=DEBUG
+    ports:
+      - "8090:8080"
+    networks:
+      intra-node-srv0:
+        aliases:
+          - i2b2
+      inter-nodes:
+        ipv4_address: 172.31.0.100
+
+  medco-unlynx-srv0:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: medco-unlynx
+    ports:
+      - "2000:2000"
+      - "2001:2001"
+    environment:
+      - NODE_IDX=0
+      - UNLYNX_DEBUG_LEVEL=3
+    networks:
+      intra-node-srv0:
+      inter-nodes:
+        ipv4_address: 172.31.0.101
+
+  medco-connector-srv0:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: medco-connector
+    ports:
+      - "1990:1999"
+    environment:
+      - I2B2_HIVE_URL=http://i2b2-srv0:8080/i2b2/services
+      - I2B2_LOGIN_DOMAIN=i2b2medcosrv0
+      - I2B2_LOGIN_USER=e2etest
+      - I2B2_LOGIN_PASSWORD=e2etest
+      - LOG_LEVEL=5
+      - MEDCO_NODE_IDX=0
+      - MC_DB_NAME=medcoconnectorsrv0
+      - OIDC_JWKS_URLS=http://keycloak:8080/auth/realms/master/protocol/openid-connect/certs,https://medco-demo.epfl.ch/auth/realms/master/protocol/openid-connect/certs
+      - OIDC_JWT_ISSUERS=http://localhost/auth/realms/master,https://medco-demo.epfl.ch/auth/realms/master
+      - OIDC_CLIENT_IDS=medco,medco
+      - OIDC_JWT_USER_ID_CLAIMS=preferred_username,preferred_username
+      - I2B2_DB_NAME=i2b2medcosrv0
+    networks:
+      intra-node-srv0:
+      inter-nodes:
+        ipv4_address: 172.31.0.102
+
+  i2b2-srv1:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: i2b2
+    environment:
+      - I2B2_DB_NAME=i2b2medcosrv1
+      - I2B2_DOMAIN_NAME=i2b2medcosrv1
+      - AXIS2_LOGLEVEL=DEBUG
+    ports:
+      - "8091:8080"
+    networks:
+      intra-node-srv1:
+        aliases:
+          - i2b2
+      inter-nodes:
+        ipv4_address: 172.31.0.110
+
+  medco-unlynx-srv1:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: medco-unlynx
+    ports:
+      - "2002:2002"
+      - "2003:2003"
+    environment:
+      - NODE_IDX=1
+      - UNLYNX_DEBUG_LEVEL=3
+    networks:
+      intra-node-srv1:
+      inter-nodes:
+          ipv4_address: 172.31.0.111
+
+  medco-connector-srv1:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: medco-connector
+    ports:
+      - "1991:1999"
+    environment:
+      - I2B2_HIVE_URL=http://i2b2-srv1:8080/i2b2/services
+      - I2B2_LOGIN_DOMAIN=i2b2medcosrv1
+      - I2B2_LOGIN_USER=e2etest
+      - I2B2_LOGIN_PASSWORD=e2etest
+      - LOG_LEVEL=5
+      - MEDCO_NODE_IDX=1
+      - MC_DB_NAME=medcoconnectorsrv1
+      - OIDC_JWKS_URLS=http://keycloak:8080/auth/realms/master/protocol/openid-connect/certs,https://medco-demo.epfl.ch/auth/realms/master/protocol/openid-connect/certs
+      - OIDC_JWT_ISSUERS=http://localhost/auth/realms/master,https://medco-demo.epfl.ch/auth/realms/master
+      - OIDC_CLIENT_IDS=medco,medco
+      - OIDC_JWT_USER_ID_CLAIMS=preferred_username,preferred_username
+      - I2B2_DB_NAME=i2b2medcosrv1
+    networks:
+      intra-node-srv1:
+      inter-nodes:
+        ipv4_address: 172.31.0.112
+
+  i2b2-srv2:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: i2b2
+    environment:
+      - I2B2_DB_NAME=i2b2medcosrv2
+      - I2B2_DOMAIN_NAME=i2b2medcosrv2
+      - AXIS2_LOGLEVEL=DEBUG
+    ports:
+      - "8092:8080"
+    networks:
+      intra-node-srv2:
+        aliases:
+          - i2b2
+      inter-nodes:
+        ipv4_address: 172.31.0.120
+
+  medco-unlynx-srv2:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: medco-unlynx
+    ports:
+      - "2004:2004"
+      - "2005:2005"
+    environment:
+      - NODE_IDX=2
+      - UNLYNX_DEBUG_LEVEL=3
+    networks:
+      intra-node-srv2:
+      inter-nodes:
+        ipv4_address: 172.31.0.121
+
+  medco-connector-srv2:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: medco-connector
+    ports:
+      - "1992:1999"
+    environment:
+      - I2B2_HIVE_URL=http://i2b2-srv2:8080/i2b2/services
+      - I2B2_LOGIN_DOMAIN=i2b2medcosrv2
+      - I2B2_LOGIN_USER=e2etest
+      - I2B2_LOGIN_PASSWORD=e2etest
+      - LOG_LEVEL=5
+      - MEDCO_NODE_IDX=2
+      - MC_DB_NAME=medcoconnectorsrv2
+      - OIDC_JWKS_URLS=http://keycloak:8080/auth/realms/master/protocol/openid-connect/certs,https://medco-demo.epfl.ch/auth/realms/master/protocol/openid-connect/certs
+      - OIDC_JWT_ISSUERS=http://localhost/auth/realms/master,https://medco-demo.epfl.ch/auth/realms/master
+      - OIDC_CLIENT_IDS=medco,medco
+      - OIDC_JWT_USER_ID_CLAIMS=preferred_username,preferred_username
+      - I2B2_DB_NAME=i2b2medcosrv2
+    networks:
+      intra-node-srv2:
+      inter-nodes:
+        ipv4_address: 172.31.0.122
+
+  nginx:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: nginx
+    ports:
+    - "80:80"
+    networks:
+      intra-node-srv0:
+      inter-nodes:
+        ipv4_address: 172.31.0.200
+
+  postgresql:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: postgresql
+    ports:
+      - "5432:5432"
+    networks:
+      inter-nodes:
+        ipv4_address: 172.31.0.202
+
+  pg-admin:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: pg-admin
+    ports:
+      - "81:80"
+    networks:
+      inter-nodes:
+        ipv4_address: 172.31.0.203
+
+  keycloak:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: keycloak
+    ports:
+      - "8081:8080"
+    depends_on:
+      - postgresql
+    networks:
+      inter-nodes:
+        ipv4_address: 172.31.0.204
+
+networks:
+  inter-nodes:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.31.0.0/24
+
+  intra-node-srv0:
+    driver: bridge
+  intra-node-srv1:
+    driver: bridge
+  intra-node-srv2:
+    driver: bridge
+
+volumes:
+  medcodb:

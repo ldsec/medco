@@ -1,0 +1,30 @@
+sudo: required
+language: minimal
+services:
+  - docker
+  - postgresql
+
+notifications:
+  email: false
+
+env:
+  #MEDCO_DB_NUMBER is the number of databases used in the profile that will be tested
+  - MEDCO_DB_NUMBER=9 MEDCO_DB_HOST=localhost MEDCO_DB_PORT=5432 MEDCO_DB_USER=postgres MEDCO_DB_PASSWORD=postgres MEDCO_DB_NAME=postgres MEDCO_USER_USERNAME=test MEDCO_USER_PASSWORD=test
+
+
+before_install:
+  - cd ~/build/ldsec/medco-deployment/resources/data
+  - bash download.sh
+  - cd ~/build/ldsec/medco-deployment/compose-profiles/dev-local-3nodes
+  - docker-compose build
+  - docker-compose -f docker-compose.tools.yml pull medco-cli-client medco-loader-srv0 medco-loader-srv1 medco-loader-srv2
+
+install:
+  - docker-compose up -d
+  - bash ~/build/ldsec/medco-deployment/resources/utility-scripts/wait_for_startup.sh $MEDCO_DB_NUMBER $MEDCO_DB_HOST $MEDCO_DB_PORT $MEDCO_DB_USER $MEDCO_DB_PASSWORD $MEDCO_DB_NAME
+  - docker-compose -f docker-compose.tools.yml run medco-loader-srv0 v0 --ont_clinical /data/genomic/tcga_cbio/8_clinical_data.csv --sen /data/genomic/sensitive.txt --ont_genomic /data/genomic/tcga_cbio/8_mutation_data.csv --clinical /data/genomic/tcga_cbio/8_clinical_data.csv --genomic /data/genomic/tcga_cbio/8_mutation_data.csv --output /data/
+  - docker-compose -f docker-compose.tools.yml run medco-loader-srv1 v0 --ont_clinical /data/genomic/tcga_cbio/8_clinical_data.csv --sen /data/genomic/sensitive.txt --ont_genomic /data/genomic/tcga_cbio/8_mutation_data.csv --clinical /data/genomic/tcga_cbio/8_clinical_data.csv --genomic /data/genomic/tcga_cbio/8_mutation_data.csv --output /data/
+  - docker-compose -f docker-compose.tools.yml run medco-loader-srv2 v0 --ont_clinical /data/genomic/tcga_cbio/8_clinical_data.csv --sen /data/genomic/sensitive.txt --ont_genomic /data/genomic/tcga_cbio/8_mutation_data.csv --clinical /data/genomic/tcga_cbio/8_clinical_data.csv --genomic /data/genomic/tcga_cbio/8_mutation_data.csv --output /data/
+
+script:
+  - bash ~/build/ldsec/medco-deployment/resources/utility-scripts/test_e2e.sh $MEDCO_USER_USERNAME $MEDCO_USER_PASSWORD

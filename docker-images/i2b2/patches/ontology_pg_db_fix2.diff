@@ -1,0 +1,79 @@
+diff --git a/edu.harvard.i2b2.crc/src/server/edu/harvard/i2b2/crc/loader/dao/UploadStatusDAO.java b/edu.harvard.i2b2.crc/src/server/edu/harvard/i2b2/crc/loader/dao/UploadStatusDAO.java
+index 7642920..4361246 100755
+--- a/edu.harvard.i2b2.crc/src/server/edu/harvard/i2b2/crc/loader/dao/UploadStatusDAO.java
++++ b/edu.harvard.i2b2.crc/src/server/edu/harvard/i2b2/crc/loader/dao/UploadStatusDAO.java
+@@ -86,7 +86,27 @@ public class UploadStatusDAO extends CRCLoaderDAO implements UploadStatusDAOI {
+ 	public void dropTempTable(String tempTable) {
+ 		final String sql = "{call " + getDbSchemaName()
+ 				+ "REMOVE_TEMP_TABLE(?)}";
+-		jdbcTemplate.update(sql, new Object[] { tempTable });
++
++		Connection conn = null;
++		try {
++			conn = getDataSource().getConnection();
++			CallableStatement callStmt = conn.prepareCall(sql);
++			callStmt.setString(1, tempTable);
++			callStmt.execute();
++		} catch (SQLException e) {
++			e.printStackTrace();
++			log.error("Error while execuring sql", e);
++		} finally {
++			if (conn != null) {
++				try {
++					conn.close();
++				} catch (SQLException sqlEx) {
++					sqlEx.printStackTrace();
++					log.error("Error while closing connection", sqlEx);
++				}
++			}
++		}
++
+ 	}
+ 
+ 	/**
+@@ -523,7 +543,8 @@ public class UploadStatusDAO extends CRCLoaderDAO implements UploadStatusDAOI {
+ 						+ " transform_name) "
+ 						+ " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)";
+ 			} else if (dataSourceLookup.getServerType().equalsIgnoreCase(
+-					LoaderDAOFactoryHelper.ORACLE)) {
++					LoaderDAOFactoryHelper.ORACLE) || dataSourceLookup.getServerType().equalsIgnoreCase(
++					LoaderDAOFactoryHelper.POSTGRESQL)) {
+ 				sql = "INSERT INTO " + schemaName + "upload_status ("
+ 						+ " upload_id," + " upload_label, " + " user_id, "
+ 						+ " source_cd, " + " no_of_record, "
+@@ -537,7 +558,8 @@ public class UploadStatusDAO extends CRCLoaderDAO implements UploadStatusDAOI {
+ 			this.setDataSource(dataSource);
+ 
+ 			if (dataSourceLookup.getServerType().equalsIgnoreCase(
+-					LoaderDAOFactoryHelper.ORACLE)) {
++					LoaderDAOFactoryHelper.ORACLE) || dataSourceLookup.getServerType().equalsIgnoreCase(
++					LoaderDAOFactoryHelper.POSTGRESQL)) {
+ 				declareParameter(new SqlParameter(Types.INTEGER));
+ 			}
+ 			declareParameter(new SqlParameter(Types.VARCHAR));
+@@ -593,6 +615,25 @@ public class UploadStatusDAO extends CRCLoaderDAO implements UploadStatusDAOI {
+ 						uploadStatus.getTransformName() };
+ 				update(objs);
+ 				uploadId = getJdbcTemplate().queryForInt("SELECT @@IDENTITY");
++			} else if (dataSourceLookup.getServerType().equalsIgnoreCase(
++					LoaderDAOFactoryHelper.POSTGRESQL)) {
++
++				uploadId = getJdbcTemplate().queryForInt(
++						"select nextval('upload_status_upload_id_seq')");
++				uploadStatus.setUploadId(uploadId);
++				objs = new Object[] { uploadStatus.getUploadId(),
++						uploadStatus.getUploadLabel(),
++						uploadStatus.getUserId(), uploadStatus.getSourceCd(),
++						uploadStatus.getNoOfRecord(),
++						uploadStatus.getDeletedRecord(),
++						uploadStatus.getLoadedRecord(),
++						uploadStatus.getLoadDate(), uploadStatus.getEndDate(),
++						uploadStatus.getLoadStatus(),
++						uploadStatus.getInputFileName(),
++						uploadStatus.getLogFileName(),
++						uploadStatus.getMessage(),
++						uploadStatus.getTransformName() };
++				update(objs);
+ 			}
+ 
+ 			uploadStatus.setUploadId(uploadId);
