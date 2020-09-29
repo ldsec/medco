@@ -3,8 +3,8 @@ services:
   medco-loader:
     image: medco/medco-loader:dev
     build:
-      context: ../
-      dockerfile: deployment/Dockerfile
+      context: ../..
+      dockerfile: Dockerfile
     volumes:
       - ~/medco-loader/data/genomic:/dataset
       - ~/medco-deployment/configuration-profiles/dev-local-3nodes:/medco-configuration
