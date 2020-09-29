@@ -1,5 +1,6 @@
 .DS_Store
 configuration-profiles/dev/
-resources/data/
+test/data/*
+!test/data/download.sh
 compose-profiles/test-network-*
 configuration-profiles/test-network-*

@@ -3,7 +3,7 @@ services:
   i2b2:
     image: medco/i2b2:${I2B2_VERSION:-v1.0.0-MedCo}
     build:
-      context: ../docker-images/i2b2
+      context: ../build/package/i2b2
     environment:
       - I2B2_DB_HOST=postgresql
       - I2B2_DB_PORT=5432
@@ -27,7 +27,7 @@ services:
   nginx:
     image: medco/nginx:${NGINX_VERSION:-v1.0.0-MedCo}
     build:
-      context: ../docker-images/nginx
+      context: ../build/package/nginx
     environment:
       - HTTP_SCHEME=http
       - ALL_TIMEOUTS_SECONDS=600
@@ -47,7 +47,7 @@ services:
   pg-admin:
     image: medco/pgadmin4:${PGADMIN_VERSION:-v1.0.0-MedCo}
     build:
-      context: ../docker-images/pgadmin
+      context: ../build/package/pgadmin
     environment:
       - PGADMIN_DEFAULT_EMAIL=admin
       - PGADMIN_DEFAULT_PASSWORD=admin
@@ -55,7 +55,7 @@ services:
   keycloak:
     image: medco/keycloak:${KEYCLOAK_VERSION:-v1.0.0-MedCo}
     build:
-      context: ../docker-images/keycloak
+      context: ../build/package/keycloak
     environment:
       - KEYCLOAK_USER=keycloak
       - KEYCLOAK_PASSWORD=keycloak
