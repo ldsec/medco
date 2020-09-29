@@ -58,30 +58,6 @@ func (o *GetCohortsOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pr
 	}
 }
 
-// GetCohortsForbiddenCode is the HTTP code returned for type GetCohortsForbidden
-const GetCohortsForbiddenCode int = 403
-
-/*GetCohortsForbidden Not authorized
-
-swagger:response getCohortsForbidden
-*/
-type GetCohortsForbidden struct {
-}
-
-// NewGetCohortsForbidden creates GetCohortsForbidden with default headers values
-func NewGetCohortsForbidden() *GetCohortsForbidden {
-
-	return &GetCohortsForbidden{}
-}
-
-// WriteResponse to the client
-func (o *GetCohortsForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
-
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
-	rw.WriteHeader(403)
-}
-
 // GetCohortsNotFoundCode is the HTTP code returned for type GetCohortsNotFound
 const GetCohortsNotFoundCode int = 404
 

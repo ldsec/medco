@@ -24,7 +24,7 @@ type ExploreQueryType struct {
 	// todo: include differential privacy requested
 
 	// PatientSet  encodes if the patient set are needed further
-	PatientSet bool
+	PatientSetID bool
 }
 
 // CountType encodes the type of count, either global or per site
@@ -44,65 +44,65 @@ func NewExploreQueryType(requestedQueryType models.ExploreQueryType) (queryType 
 	switch requestedQueryType {
 	case models.ExploreQueryTypePatientList:
 		queryType = ExploreQueryType{
-			PatientList: true,
-			CountType:   PerSite,
-			Shuffled:    false,
-			Obfuscated:  false,
-			PatientSet:  false,
+			PatientList:  true,
+			CountType:    PerSite,
+			Shuffled:     false,
+			Obfuscated:   false,
+			PatientSetID: true,
 		}
 
 	case models.ExploreQueryTypeCountPerSite:
 		queryType = ExploreQueryType{
-			PatientList: false,
-			CountType:   PerSite,
-			Shuffled:    false,
-			Obfuscated:  false,
-			PatientSet:  false,
+			PatientList:  false,
+			CountType:    PerSite,
+			Shuffled:     false,
+			Obfuscated:   false,
+			PatientSetID: false,
 		}
 
 	case models.ExploreQueryTypeCountPerSiteObfuscated:
 		queryType = ExploreQueryType{
-			PatientList: false,
-			CountType:   PerSite,
-			Shuffled:    false,
-			Obfuscated:  true,
-			PatientSet:  false,
+			PatientList:  false,
+			CountType:    PerSite,
+			Shuffled:     false,
+			Obfuscated:   true,
+			PatientSetID: false,
 		}
 
 	case models.ExploreQueryTypeCountPerSiteShuffled:
 		queryType = ExploreQueryType{
-			PatientList: false,
-			CountType:   PerSite,
-			Shuffled:    true,
-			Obfuscated:  false,
-			PatientSet:  false,
+			PatientList:  false,
+			CountType:    PerSite,
+			Shuffled:     true,
+			Obfuscated:   false,
+			PatientSetID: false,
 		}
 
 	case models.ExploreQueryTypeCountPerSiteShuffledObfuscated:
 		queryType = ExploreQueryType{
-			PatientList: false,
-			CountType:   PerSite,
-			Shuffled:    true,
-			Obfuscated:  true,
-			PatientSet:  false,
+			PatientList:  false,
+			CountType:    PerSite,
+			Shuffled:     true,
+			Obfuscated:   true,
+			PatientSetID: false,
 		}
 
 	case models.ExploreQueryTypeCountGlobal:
 		queryType = ExploreQueryType{
-			PatientList: false,
-			CountType:   Global,
-			Shuffled:    false,
-			Obfuscated:  false,
-			PatientSet:  false,
+			PatientList:  false,
+			CountType:    Global,
+			Shuffled:     false,
+			Obfuscated:   false,
+			PatientSetID: false,
 		}
 
 	case models.ExploreQueryTypeCountGlobalObfuscated:
 		queryType = ExploreQueryType{
-			PatientList: false,
-			CountType:   Global,
-			Shuffled:    false,
-			Obfuscated:  true,
-			PatientSet:  false,
+			PatientList:  false,
+			CountType:    Global,
+			Shuffled:     false,
+			Obfuscated:   true,
+			PatientSetID: false,
 		}
 
 	default:

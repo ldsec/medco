@@ -75,10 +75,13 @@ func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
 	// /genomic-annotations/{annotation}/{value}
 	api.GenomicAnnotationsGetVariantsHandler = genomic_annotations.GetVariantsHandlerFunc(handlers.MedCoGenomicAnnotationsGetVariantsHandler)
 
+	// /node/explore/cohorts
 	api.MedcoNodeGetCohortsHandler = medco_node.GetCohortsHandlerFunc(handlers.MedCoNodeGetCohortsHandler)
 
+	// /node/explore/cohorts
 	api.MedcoNodePostCohortsHandler = medco_node.PostCohortsHandlerFunc(handlers.MedCoNodePostCohortsHandler)
 
+	// /node/analysis/survival/query
 	api.SurvivalAnalysisSurvivalAnalysisHandler = survival_analysis.SurvivalAnalysisHandlerFunc(handlers.MedCoSurvivalAnalysisGetSurvivalAnalysisHandler)
 
 	api.ServerShutdown = func() {}

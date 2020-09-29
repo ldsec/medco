@@ -28,12 +28,6 @@ func (o *GetCohortsReader) ReadResponse(response runtime.ClientResponse, consume
 			return nil, err
 		}
 		return result, nil
-	case 403:
-		result := NewGetCohortsForbidden()
-		if err := result.readResponse(response, consumer, o.formats); err != nil {
-			return nil, err
-		}
-		return nil, result
 	case 404:
 		result := NewGetCohortsNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -79,27 +73,6 @@ func (o *GetCohortsOK) readResponse(response runtime.ClientResponse, consumer ru
 	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
 		return err
 	}
-
-	return nil
-}
-
-// NewGetCohortsForbidden creates a GetCohortsForbidden with default headers values
-func NewGetCohortsForbidden() *GetCohortsForbidden {
-	return &GetCohortsForbidden{}
-}
-
-/*GetCohortsForbidden handles this case with default header values.
-
-Not authorized
-*/
-type GetCohortsForbidden struct {
-}
-
-func (o *GetCohortsForbidden) Error() string {
-	return fmt.Sprintf("[GET /node/explore/cohorts][%d] getCohortsForbidden ", 403)
-}
-
-func (o *GetCohortsForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	return nil
 }

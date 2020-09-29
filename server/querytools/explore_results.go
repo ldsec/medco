@@ -5,100 +5,9 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/sirupsen/logrus"
 )
-
-// GetPatientList runs a SQL query on db and returns the list of patient IDs for given queryID and userID
-func GetPatientList(db *sql.DB, userID string, resultInstanceID int64) (patientNums []int64, err error) {
-	row := db.QueryRow(getPatientList, userID, resultInstanceID)
-	patientNumsString := new(string)
-	err = row.Scan(patientNumsString)
-	var pNum int64
-	logrus.Tracef("Got response %s", *patientNumsString)
-	for _, pID := range strings.Split(strings.Trim(*patientNumsString, "{}"), ",") {
-
-		pNum, err = strconv.ParseInt(pID, 10, 64)
-		if err != nil {
-			return
-		}
-		patientNums = append(patientNums, pNum)
-	}
-
-	return
-}
-
-// GetSavedCohorts runs a SQL query on db and returns the list of saved cohorts for given queryID and userID
-func GetSavedCohorts(db *sql.DB, userID string) ([]Cohort, error) {
-	rows, err := db.Query(getCohorts, userID)
-	if err != nil {
-		return nil, err
-	}
-	var id int
-	var qid int
-	var name string
-	var createDateString string
-	var createDate time.Time
-	var updateDateString string
-	var updateDate time.Time
-	var cohorts = make([]Cohort, 0)
-	for rows.Next() {
-		err = rows.Scan(&id, &qid, &name, &createDateString, &updateDateString)
-		if err != nil {
-			return nil, err
-		}
-		createDate, err = time.Parse(time.RFC3339, createDateString)
-		if err != nil {
-			return nil, err
-		}
-		updateDate, err = time.Parse(time.RFC3339, updateDateString)
-		if err != nil {
-			return nil, err
-		}
-		cohorts = append(cohorts, Cohort{
-			CohortID:     id,
-			QueryID:      qid,
-			CohortName:   name,
-			CreationDate: createDate,
-			UpdateDate:   updateDate,
-		})
-	}
-	err = rows.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	logrus.Infof("Got %d cohorts", len(cohorts))
-	return cohorts, nil
-}
-
-// GetDate runs a SQL query on db and returns the update date of cohort corresponding to  cohortID
-func GetDate(db *sql.DB, userID string, cohortID int) (time.Time, error) {
-	row := db.QueryRow(getDate, userID, cohortID)
-	timeString := new(string)
-	err := row.Scan(timeString)
-	if err != nil {
-		return time.Now(), err
-	}
-
-	timeParsed, err := time.Parse(time.RFC3339, *timeString)
-
-	return timeParsed, err
-
-}
-
-// InsertCohort runs a SQL query to either insert a new cohort or update an existing one
-func InsertCohort(db *sql.DB, userID string, queryID int, cohortName string, createDate, updateDate time.Time) (int, error) {
-	row := db.QueryRow(insertCohort, userID, queryID, cohortName, createDate, updateDate)
-	res := new(string)
-	err := row.Scan(res)
-	if err != nil {
-		return -1, err
-	}
-	cohortID, err := strconv.Atoi(*res)
-	return cohortID, err
-}
 
 // InsertExploreResultInstance is called when the query is created. A new row is inserted in explore query results table with status 'running'.
 func InsertExploreResultInstance(db *sql.DB, userID, queryName, queryDefinition string) (int, error) {
@@ -170,3 +79,36 @@ func UpdateErrorExploreResultInstance(db *sql.DB, queryID int) error {
 	}
 	return err
 }
+
+const getPatientList string = `
+SELECT clear_result_set FROM query_tools.explore_query_results
+WHERE query_id = (SELECT query_id FROM query_tools.saved_cohorts WHERE user_id = $1 AND cohort_id = $2 AND query_status = 'completed');
+`
+
+const insertExploreResultInstance string = `
+INSERT INTO query_tools.explore_query_results(user_id,query_name, query_status,query_definition)
+VALUES ($1,$2,'running',$3)
+RETURNING query_id
+`
+
+const updateExploreResultInstanceBoth string = `
+UPDATE query_tools.explore_query_results
+SET clear_result_set_size=$2, clear_result_set=$3, query_status='completed' , i2b2_encrypted_patient_set_id=$4, i2b2_non_encrypted_patient_set_id=$5
+WHERE query_id = $1 AND status = 'running'
+`
+const updateExploreResultInstanceOnlyClear string = `
+UPDATE query_tools.explore_query_results
+SET clear_result_set_size=$2, clear_result_set=$3, query_status='completed' ,i2b2_non_encrypted_patient_set_id=$4
+WHERE query_id = $1 AND query_status = 'running'
+`
+const updateExploreResultInstanceOnlyEncrypted string = `
+UPDATE query_tools.explore_query_results
+SET clear_result_set_size=$2, clear_result_set=$3, query_status='completed' ,i2b2_encrypted_patient_set_id=$4
+WHERE query_id = $1 AND query_status = 'running'
+`
+
+const updateErrorExploreQueryInstance string = `
+UPDATE query_tools.explore_query_results
+SET query_status='error'
+WHERE query_id = $1 AND query_status = 'running'
+`

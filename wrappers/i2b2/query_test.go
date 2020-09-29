@@ -59,7 +59,7 @@ func TestExecutePsmQuery(t *testing.T) {
 
 func TestGetPatientSet(t *testing.T) {
 
-	patientIDs, patientDummyFlags, err := GetPatientSet("9")
+	patientIDs, patientDummyFlags, err := GetPatientSet("9", true)
 	if err != nil {
 		t.Fail()
 	}

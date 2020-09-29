@@ -8,9 +8,9 @@ import (
 )
 
 func TestExpansion(t *testing.T) {
-	res, err := Expansion(timePoints, 15, "notATimeResolution")
+	res, err := expansion(timePoints, 15, "notATimeResolution")
 	assert.Error(t, err)
-	res, err = Expansion(timePoints, 15, "day")
+	res, err = expansion(timePoints, 15, "day")
 	if err != nil {
 		t.Error(err)
 	}

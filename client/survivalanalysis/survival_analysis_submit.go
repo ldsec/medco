@@ -13,8 +13,6 @@ import (
 	utilclient "github.com/ldsec/medco-connector/util/client"
 )
 
-//for client !!
-
 func (clientSurvivalAnalysis *SurvivalAnalysis) submitToNode(nodeIdx int) (results *survival_analysis.SurvivalAnalysisOKBody, err error) {
 
 	params := survival_analysis.NewSurvivalAnalysisParamsWithTimeout(time.Duration(utilclient.QueryTimeoutSeconds) * time.Second)

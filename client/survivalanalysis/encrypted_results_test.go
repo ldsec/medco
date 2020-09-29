@@ -1,37 +1,14 @@
 package survivalclient
 
 import (
-	"os"
 	"testing"
 
 	utilcommon "github.com/ldsec/medco-connector/util/common"
 	"github.com/stretchr/testify/assert"
 )
 
-const testParamFile string = "testParams.yaml"
 const testPubKey = "mNd1d91GTy4wI0ZNgN7pTPo89GG7d_oOrGCPRUNG4gE="
 const testPrivateKey = "NMfXoUyb1yRSY3goHboUK9HEbMSvuzEmQTRHO_eZSAk="
-
-func TestNewParametersFromFile(t *testing.T) {
-	file, err := os.Open(testParamFile)
-	if err != nil {
-		if os.IsNotExist(err) {
-			t.Skip("test parameter files does not exiss")
-		} else {
-			t.Error(err)
-		}
-	}
-	err = file.Close()
-	assert.NoError(t, err)
-
-	_, err = NewParametersFromFile("./thisFileDoesNotExist")
-	assert.Error(t, err)
-
-	params, err := NewParametersFromFile(testParamFile)
-	assert.NoError(t, err)
-	assert.Equal(t, parameters, params)
-
-}
 
 func TestDecryptGroup(t *testing.T) {
 	decrypted, err := testEncryptedResults.Decrypt(testPrivateKey)
@@ -48,48 +25,6 @@ func TestDecryptGroup(t *testing.T) {
 
 }
 
-var parameters = &Parameters{
-	TimeResolution:       "day",
-	TimeLimit:            19,
-	CohortID:             -1,
-	StartConceptPath:     "/any/start/path/",
-	StartConceptModifier: "anyStartMCode",
-	EndConceptPath:       "/any/end/path/",
-	EndConceptModifier:   "anyEndMCode",
-	Cohorts: []*struct {
-		Panels []*struct {
-			Not   bool     "yaml:\"not\""
-			Paths []string "yaml:\"paths\""
-		} "yaml:\"panels\""
-	}{
-		{
-			Panels: []*struct {
-				Not   bool     "yaml:\"not\""
-				Paths []string "yaml:\"paths\""
-			}{
-				{
-					Not:   false,
-					Paths: []string{"/path/1/", "/path/2/"},
-				},
-				{
-					Not:   true,
-					Paths: []string{"/path/3/"},
-				},
-			},
-		},
-		{
-			Panels: []*struct {
-				Not   bool     "yaml:\"not\""
-				Paths []string "yaml:\"paths\""
-			}{
-				{
-					Not:   false,
-					Paths: []string{"/path/4/"},
-				},
-			},
-		},
-	},
-}
 var testEncryptedResults = EncryptedResults{
 	{GroupID: "testGroup1",
 		EncryptedInitialCount: "YKu4hdlub0k7VKrHmVEMwDTnNLEcuHypqrhTfvXK9ABDGR4f1jw7vHhO3jNViQI4I-W8tGu8G2FpjamnEyN1OA==",

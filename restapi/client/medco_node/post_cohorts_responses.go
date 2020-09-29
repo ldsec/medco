@@ -28,18 +28,6 @@ func (o *PostCohortsReader) ReadResponse(response runtime.ClientResponse, consum
 			return nil, err
 		}
 		return result, nil
-	case 403:
-		result := NewPostCohortsForbidden()
-		if err := result.readResponse(response, consumer, o.formats); err != nil {
-			return nil, err
-		}
-		return nil, result
-	case 404:
-		result := NewPostCohortsNotFound()
-		if err := result.readResponse(response, consumer, o.formats); err != nil {
-			return nil, err
-		}
-		return nil, result
 	case 500:
 		result := NewPostCohortsInternalServerError()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -68,65 +56,13 @@ func NewPostCohortsOK() *PostCohortsOK {
 Updated cohort
 */
 type PostCohortsOK struct {
-	Payload string
 }
 
 func (o *PostCohortsOK) Error() string {
-	return fmt.Sprintf("[POST /node/explore/cohorts][%d] postCohortsOK  %+v", 200, o.Payload)
-}
-
-func (o *PostCohortsOK) GetPayload() string {
-	return o.Payload
+	return fmt.Sprintf("[POST /node/explore/cohorts][%d] postCohortsOK ", 200)
 }
 
 func (o *PostCohortsOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
-
-	// response payload
-	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
-		return err
-	}
-
-	return nil
-}
-
-// NewPostCohortsForbidden creates a PostCohortsForbidden with default headers values
-func NewPostCohortsForbidden() *PostCohortsForbidden {
-	return &PostCohortsForbidden{}
-}
-
-/*PostCohortsForbidden handles this case with default header values.
-
-Not authorized
-*/
-type PostCohortsForbidden struct {
-}
-
-func (o *PostCohortsForbidden) Error() string {
-	return fmt.Sprintf("[POST /node/explore/cohorts][%d] postCohortsForbidden ", 403)
-}
-
-func (o *PostCohortsForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
-
-	return nil
-}
-
-// NewPostCohortsNotFound creates a PostCohortsNotFound with default headers values
-func NewPostCohortsNotFound() *PostCohortsNotFound {
-	return &PostCohortsNotFound{}
-}
-
-/*PostCohortsNotFound handles this case with default header values.
-
-User not found
-*/
-type PostCohortsNotFound struct {
-}
-
-func (o *PostCohortsNotFound) Error() string {
-	return fmt.Sprintf("[POST /node/explore/cohorts][%d] postCohortsNotFound ", 404)
-}
-
-func (o *PostCohortsNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	return nil
 }
@@ -138,7 +74,7 @@ func NewPostCohortsInternalServerError() *PostCohortsInternalServerError {
 
 /*PostCohortsInternalServerError handles this case with default header values.
 
-DB has been updated since last importation
+DB has been updated since last importation. Try GET /node/explore/cohorts to fetch the most recent entries
 */
 type PostCohortsInternalServerError struct {
 }

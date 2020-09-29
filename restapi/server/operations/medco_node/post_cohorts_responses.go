@@ -19,11 +19,6 @@ const PostCohortsOKCode int = 200
 swagger:response postCohortsOK
 */
 type PostCohortsOK struct {
-
-	/*
-	  In: Body
-	*/
-	Payload string `json:"body,omitempty"`
 }
 
 // NewPostCohortsOK creates PostCohortsOK with default headers values
@@ -32,79 +27,18 @@ func NewPostCohortsOK() *PostCohortsOK {
 	return &PostCohortsOK{}
 }
 
-// WithPayload adds the payload to the post cohorts o k response
-func (o *PostCohortsOK) WithPayload(payload string) *PostCohortsOK {
-	o.Payload = payload
-	return o
-}
-
-// SetPayload sets the payload to the post cohorts o k response
-func (o *PostCohortsOK) SetPayload(payload string) {
-	o.Payload = payload
-}
-
 // WriteResponse to the client
 func (o *PostCohortsOK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
+	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
+
 	rw.WriteHeader(200)
-	payload := o.Payload
-	if err := producer.Produce(rw, payload); err != nil {
-		panic(err) // let the recovery middleware deal with this
-	}
-}
-
-// PostCohortsForbiddenCode is the HTTP code returned for type PostCohortsForbidden
-const PostCohortsForbiddenCode int = 403
-
-/*PostCohortsForbidden Not authorized
-
-swagger:response postCohortsForbidden
-*/
-type PostCohortsForbidden struct {
-}
-
-// NewPostCohortsForbidden creates PostCohortsForbidden with default headers values
-func NewPostCohortsForbidden() *PostCohortsForbidden {
-
-	return &PostCohortsForbidden{}
-}
-
-// WriteResponse to the client
-func (o *PostCohortsForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
-
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
-	rw.WriteHeader(403)
-}
-
-// PostCohortsNotFoundCode is the HTTP code returned for type PostCohortsNotFound
-const PostCohortsNotFoundCode int = 404
-
-/*PostCohortsNotFound User not found
-
-swagger:response postCohortsNotFound
-*/
-type PostCohortsNotFound struct {
-}
-
-// NewPostCohortsNotFound creates PostCohortsNotFound with default headers values
-func NewPostCohortsNotFound() *PostCohortsNotFound {
-
-	return &PostCohortsNotFound{}
-}
-
-// WriteResponse to the client
-func (o *PostCohortsNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
-
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
-	rw.WriteHeader(404)
 }
 
 // PostCohortsInternalServerErrorCode is the HTTP code returned for type PostCohortsInternalServerError
 const PostCohortsInternalServerErrorCode int = 500
 
-/*PostCohortsInternalServerError DB has been updated since last importation
+/*PostCohortsInternalServerError DB has been updated since last importation. Try GET /node/explore/cohorts to fetch the most recent entries
 
 swagger:response postCohortsInternalServerError
 */

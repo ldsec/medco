@@ -105,7 +105,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 
 	// i2b2 PDO query to get the dummy flags
 	timer = time.Now()
-	patientIDs, patientDummyFlags, err := i2b2.GetPatientSet(patientSetID)
+	patientIDs, patientDummyFlags, err := i2b2.GetPatientSet(patientSetID, true)
 	if err != nil {
 		return
 	}
@@ -126,13 +126,13 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	var ksCountTimers map[string]time.Duration
 	if queryType.CountType == Global {
 		logrus.Info(q.ID, ": global aggregate requested")
-		encCount, ksCountTimers, err = unlynx.AggregateAndKeySwitchValue(q.ID, aggPatientFlags, string(q.Query.UserPublicKey))
+		encCount, ksCountTimers, err = unlynx.AggregateAndKeySwitchValue(q.ID, aggPatientFlags, q.Query.UserPublicKey)
 	} else if queryType.Shuffled {
 		logrus.Info(q.ID, ": count per site requested, shuffle enabled")
-		encCount, ksCountTimers, err = unlynx.ShuffleAndKeySwitchValue(q.ID, aggPatientFlags, string(q.Query.UserPublicKey))
+		encCount, ksCountTimers, err = unlynx.ShuffleAndKeySwitchValue(q.ID, aggPatientFlags, q.Query.UserPublicKey)
 	} else {
 		logrus.Info(q.ID, ": count per site requested, shuffle disabled")
-		encCount, ksCountTimers, err = unlynx.KeySwitchValue(q.ID, aggPatientFlags, string(q.Query.UserPublicKey))
+		encCount, ksCountTimers, err = unlynx.KeySwitchValue(q.ID, aggPatientFlags, q.Query.UserPublicKey)
 	}
 	if err != nil {
 		return
@@ -188,7 +188,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 		return
 	}
 
-	if queryType.PatientSet {
+	if queryType.PatientSetID {
 		logrus.Info(q.ID, ": patient set id requested")
 
 		q.Result.PatientSetID = queryID

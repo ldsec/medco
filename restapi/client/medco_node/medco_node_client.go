@@ -175,7 +175,7 @@ func (a *Client) GetExploreQuery(params *GetExploreQueryParams, authInfo runtime
 }
 
 /*
-  PostCohorts updates cohorts list with a new or modified cohort
+  PostCohorts adds a new cohort or update an existing one
 */
 func (a *Client) PostCohorts(params *PostCohortsParams, authInfo runtime.ClientAuthInfoWriter) (*PostCohortsOK, error) {
 	// TODO: Validate the params before sending

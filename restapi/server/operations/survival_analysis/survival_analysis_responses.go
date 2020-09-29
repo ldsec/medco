@@ -55,30 +55,6 @@ func (o *SurvivalAnalysisOK) WriteResponse(rw http.ResponseWriter, producer runt
 	}
 }
 
-// SurvivalAnalysisNotFoundCode is the HTTP code returned for type SurvivalAnalysisNotFound
-const SurvivalAnalysisNotFoundCode int = 404
-
-/*SurvivalAnalysisNotFound TODO not found
-
-swagger:response survivalAnalysisNotFound
-*/
-type SurvivalAnalysisNotFound struct {
-}
-
-// NewSurvivalAnalysisNotFound creates SurvivalAnalysisNotFound with default headers values
-func NewSurvivalAnalysisNotFound() *SurvivalAnalysisNotFound {
-
-	return &SurvivalAnalysisNotFound{}
-}
-
-// WriteResponse to the client
-func (o *SurvivalAnalysisNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
-
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
-	rw.WriteHeader(404)
-}
-
 /*SurvivalAnalysisDefault Error response.
 
 swagger:response survivalAnalysisDefault

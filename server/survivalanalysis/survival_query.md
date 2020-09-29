@@ -17,7 +17,7 @@ Cohort ID | integer | analysis is run on that patient set
 User ID | string | patient set retrieval
 User public key | string (base64) | encryption of results
 
-I2B2 selection panel is defined in [swagger definitions](https://github.com/ldsec/medco-connector/blob/dev-survival/swagger/medco-connector.yml#L519).
+I2B2 selection panel is defined in [swagger definitions](https://github.com/ldsec/medco-connector/blob/dev-survival/swagger/medco-connector.yml#L513).
 
 In changes to come, users will be able to indifferently use concept path or modifier path for events.
 

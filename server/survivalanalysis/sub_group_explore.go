@@ -14,7 +14,7 @@ func SubGroupExplore(queryName string, subGroupIndex int, panelsItemKeys [][]str
 	if err != nil {
 		return 0, nil, err
 	}
-	patientIDs, _, err := i2b2.NoAddedGetPatientSet(patientSetID)
+	patientIDs, _, err := i2b2.GetPatientSet(patientSetID, false)
 	if err != nil {
 		return 0, nil, err
 	}

@@ -214,7 +214,7 @@ func main() {
 			Aliases:     []string{"srva"},
 			Usage:       "Run a survival analysis",
 			Flags:       survivalAnalysisFlag,
-			ArgsUsage:   "-l limit [-g granularity] -c cohortID -s startConcept [-x startModifier] -e endConcept -y endModifier",
+			ArgsUsage:   "-l limit [-g granularity] [-c cohortID] -s startConcept [-x startModifier] -e endConcept [-y endModifier]",
 			Description: "Returns the points of the survival curve",
 			Action: func(c *cli.Context) error {
 				return survivalclient.ExecuteClientSurvival(

@@ -35,7 +35,7 @@ func NewPostCohorts(ctx *middleware.Context, handler PostCohortsHandler) *PostCo
 
 /*PostCohorts swagger:route POST /node/explore/cohorts medco-node postCohorts
 
-Update cohorts list with a new or modified cohort
+Add a new cohort or update an existing one
 
 */
 type PostCohorts struct {

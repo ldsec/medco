@@ -88,11 +88,8 @@ func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *m
 	cohorts, err := querytools.GetSavedCohorts(utilserver.DBConnection, userID)
 	if err != nil {
 		medco_node.NewGetCohortsDefault(500).WithPayload(&medco_node.GetCohortsDefaultBody{
-			Message: err.Error(),
+			Message: "Get cohort execution error: " + err.Error(),
 		})
-	}
-	if len(cohorts) == 0 {
-		return medco_node.NewGetCohortsNotFound()
 	}
 	payload := &medco_node.GetCohortsOK{}
 	for _, cohort := range cohorts {
@@ -118,32 +115,37 @@ func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal 
 
 	creationDate, err := time.Parse(time.RFC3339, cohort.CreationDate)
 	if err != nil {
-		return medco_node.NewPostCohortsDefault(500).WithPayload(&medco_node.PostCohortsDefaultBody{
+		return medco_node.NewPostCohortsDefault(400).WithPayload(&medco_node.PostCohortsDefaultBody{
 			Message: fmt.Sprintf("String %s is not a date with RF3339 layout", cohort.CreationDate),
 		})
 	}
 	updateDate, err := time.Parse(time.RFC3339, cohort.UpdateDate)
 	if err != nil {
-		return medco_node.NewPostCohortsDefault(500).WithPayload(&medco_node.PostCohortsDefaultBody{
+		return medco_node.NewPostCohortsDefault(400).WithPayload(&medco_node.PostCohortsDefaultBody{
 			Message: fmt.Sprintf("String %s is not a date with RF3339 layout", cohort.UpdateDate),
 		})
 	}
 	cohorts, err := querytools.GetSavedCohorts(utilserver.DBConnection, principal.ID)
 	if err != nil {
 		return medco_node.NewPostCohortsDefault(500).WithPayload(&medco_node.PostCohortsDefaultBody{
-			Message: err.Error(),
+			Message: "Get cohort execution error: " + err.Error(),
 		})
 	}
 	for _, existingCohort := range cohorts {
 		if existingCohort.CohortName == cohort.CohortName {
-			lastUpdate, _ := time.Parse(time.RFC3339, cohort.UpdateDate)
-			if lastUpdate.After(updateDate) {
-				return medco_node.NewPostCohortsInternalServerError()
+			if existingCohort.UpdateDate.After(updateDate) {
+				return medco_node.NewPostCohortsDefault(400).WithPayload(&medco_node.PostCohortsDefaultBody{
+					Message: fmt.Sprintf(
+						"Cohort %s  has a more recent date in DB %s, provided %s",
+						cohort.CohortName,
+						cohort.UpdateDate,
+						existingCohort.UpdateDate.Format(time.RFC3339)),
+				})
 			}
 			break
 		}
 	}
 	querytools.InsertCohort(utilserver.DBConnection, principal.ID, int(cohort.PatientSetID), cohort.CohortName, creationDate, updateDate)
 
-	return medco_node.NewPostCohortsOK().WithPayload("cohorts successfully updated")
+	return medco_node.NewPostCohortsOK()
 }

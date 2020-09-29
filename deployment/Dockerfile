@@ -10,6 +10,8 @@ RUN CGO_ENABLED=0 go install -v ./cmd/medco-connector-server/...
 FROM golang:1.13-alpine as release
 
 COPY deployment/docker-entrypoint.sh /usr/local/bin/
+RUN mkdir /usr/local/bin/querytools
+COPY deployment/querytools /usr/local/bin/querytools
 RUN apk update && apk add bash postgresql && rm -rf /var/cache/apk/* && \
     chmod a+x /usr/local/bin/docker-entrypoint.sh
 
@@ -43,12 +45,12 @@ ENV I2B2_HIVE_URL=http://i2b2:8080/i2b2/services \
     MC_DB_PORT=5432 \
     MC_DB_USER=medcoconnector \
     MC_DB_PW=medcoconnector \
-    MC_DB_NAME=medcoconnectorsrv \
+    MC_DB_NAME=medcoconnector \
     I2B2_DB_HOST=postgresql \
     I2B2_DB_PORT=5432 \
     I2B2_DB_USER=i2b2 \
     I2B2_DB_PW=i2b2 \
-    I2B2_DB_NAME=i2b2medcosrv
+    I2B2_DB_NAME=i2b2medco
 
 EXPOSE 1999
 ENTRYPOINT docker-entrypoint.sh medco-connector-server --write-timeout=${SERVER_HTTP_WRITE_TIMEOUT_SECONDS}s

@@ -66,53 +66,7 @@ func ExecutePsmQuery(queryName string, panelsItemKeys [][]string, panelsIsNot []
 }
 
 // GetPatientSet retrieves an i2b2 patient set
-func GetPatientSet(patientSetID string) (patientIDs []string, patientDummyFlags []string, err error) {
-
-	// craft and execute request
-	xmlResponse := &Response{
-		MessageBody: &CrcPdoRespMessageBody{},
-	}
-
-	err = i2b2XMLRequest(
-		utilserver.I2b2HiveURL+"/QueryToolService/pdorequest",
-		NewCrcPdoReqFromInputList(patientSetID),
-		xmlResponse,
-	)
-
-	if err != nil {
-		return
-	}
-
-	// extract patient data
-	for _, patient := range xmlResponse.MessageBody.(*CrcPdoRespMessageBody).Response.PatientData.PatientSet.Patient {
-
-		dummyFlagFound := false
-		for _, patientColumn := range patient.Param {
-			if patientColumn.Column == "enc_dummy_flag_cd" && len(patientColumn.Text) > 0 {
-				patientIDs = append(patientIDs, patient.PatientID)
-				patientDummyFlags = append(patientDummyFlags, patientColumn.Text)
-				dummyFlagFound = true
-				break
-			}
-		}
-		var newFlag string
-		if !dummyFlagFound {
-			logrus.Warn("GetPatientSet: patient ", patient.PatientID, " misses dummy flag. Setting it as a real patient")
-			patientIDs = append(patientIDs, patient.PatientID)
-			newFlag, err = unlynx.EncryptWithCothorityKey(int64(1))
-			if err != nil {
-				return
-			}
-			patientDummyFlags = append(patientDummyFlags, newFlag)
-
-		}
-	}
-
-	return
-}
-
-// NoAddedGetPatientSet retrieves an i2b2 patient set, without adding new flags when they miss one
-func NoAddedGetPatientSet(patientSetID string) (patientIDs []string, patientDummyFlags []string, err error) {
+func GetPatientSet(patientSetID string, generateDummyFlags bool) (patientIDs []string, patientDummyFlags []string, err error) {
 
 	// craft and execute request
 	xmlResponse := &Response{
@@ -142,11 +96,19 @@ func NoAddedGetPatientSet(patientSetID string) (patientIDs []string, patientDumm
 			}
 		}
 		if !dummyFlagFound {
-			logrus.Warn("GetPatientSet: patient ", patient.PatientID, " misses dummy flag.")
 			patientIDs = append(patientIDs, patient.PatientID)
-
+			if generateDummyFlags {
+				var realPatientFlag string
+				realPatientFlag, err = unlynx.EncryptWithCothorityKey(int64(1))
+				if err != nil {
+					return
+				}
+				patientDummyFlags = append(patientDummyFlags, realPatientFlag)
+				logrus.Warn("GetPatientSet: patient ", patient.PatientID, " misses dummy flag. Setting it as a real patient")
+			} else {
+				logrus.Warn("GetPatientSet: patient ", patient.PatientID, " misses dummy flag.")
+			}
 		}
 	}
-
 	return
 }

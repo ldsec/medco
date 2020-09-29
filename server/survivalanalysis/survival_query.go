@@ -7,11 +7,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
 	"github.com/ldsec/medco-connector/server/querytools"
 	utilcommon "github.com/ldsec/medco-connector/util/common"
 	utilserver "github.com/ldsec/medco-connector/util/server"
+	"github.com/ldsec/medco-connector/wrappers/i2b2"
 	"github.com/ldsec/medco-connector/wrappers/unlynx"
 
 	"github.com/ldsec/medco-connector/restapi/models"
@@ -96,12 +98,12 @@ func (q *Query) Execute() error {
 		logrus.Error("Unable to connect clear project database, ", err)
 		return err
 	}
-	startConceptCode, err := GetCode(q.StartConcept)
+	startConceptCode, err := getCode(q.StartConcept)
 	if err != nil {
 		logrus.Error("Error while retrieving concept code, ", err)
 		return err
 	}
-	endConceptCode, err := GetCode(q.EndConcept)
+	endConceptCode, err := getCode(q.EndConcept)
 	if err != nil {
 		logrus.Error("Error while retrieving concept code, ", err)
 		return err
@@ -224,7 +226,7 @@ func (q *Query) Execute() error {
 
 			// --- expand
 			timer = time.Now()
-			sqlTimePoints, err = Expansion(sqlTimePoints, q.TimeLimit, q.TimeGranularity)
+			sqlTimePoints, err = expansion(sqlTimePoints, q.TimeLimit, q.TimeGranularity)
 			if err != nil {
 				logrus.Error("Error while expanding")
 				errChan <- err
@@ -342,5 +344,65 @@ func (q *Query) Validate() error {
 		return fmt.Errorf("user public key is not valid against the alternate RFC4648 base64 for URL: %s", err.Error())
 	}
 	return nil
+
+}
+
+// expansion takes a slice of SQLTimepoints and add encryption of zeros for events of interest and censoring events for each missing relative time from 0 to timeLimit.
+// Relative times greater than timeLimit are discarded.
+func expansion(timePoints utilcommon.TimePoints, timeLimitDay int, granularity string) (utilcommon.TimePoints, error) {
+	var timeLimit int
+	if granFunction, isIn := granularityFunctions[granularity]; isIn {
+		timeLimit = granFunction(timeLimitDay)
+	} else {
+		return nil, fmt.Errorf("granularity %s is not implemented", granularity)
+	}
+
+	res := make(utilcommon.TimePoints, timeLimit)
+	availableTimePoints := make(map[int]struct {
+		EventsOfInterest int64
+		CensoringEvents  int64
+	}, len(timePoints))
+	for _, timePoint := range timePoints {
+
+		availableTimePoints[timePoint.Time] = timePoint.Events
+	}
+	for i := 0; i < timeLimit; i++ {
+		if events, ok := availableTimePoints[i]; ok {
+			res[i] = utilcommon.TimePoint{
+				Time:   i,
+				Events: events,
+			}
+		} else {
+			res[i] = utilcommon.TimePoint{
+				Time: i,
+				Events: struct {
+					EventsOfInterest int64
+					CensoringEvents  int64
+				}{
+					EventsOfInterest: 0,
+					CensoringEvents:  0,
+				},
+			}
+		}
+
+	}
+	return res, nil
+}
+
+// getCode takes the full path of a I2B2 concept and returns its code
+func getCode(path string) (string, error) {
+	res, err := i2b2.GetOntologyTermInfo(path)
+	if err != nil {
+		return "", err
+	}
+	if len(res) != 1 {
+		return "", errors.Errorf("Result length of GetOntologyTermInfo is expected to be 1. Got: %d", len(res))
+	}
+
+	if res[0].Code == "" {
+		return "", errors.New("Code is empty")
+	}
+
+	return res[0].Code, nil
 
 }

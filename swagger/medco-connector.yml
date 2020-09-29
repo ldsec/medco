@@ -198,83 +198,11 @@ paths:
       summary: "Send a query to run a survival analysis"
       operationId: "survivalAnalysis"
       parameters:
-      - in: "body"
-        description: "User public key, patient list and time codes strings for the survival analysis"
-        name: "body"
-        schema:
-          type: "object"
-          properties:
-            ID:
-              type: "string"
-            userPublicKey:
-              type: "string"
-              pattern: '^[\w=-]+$'
-            setID:
-              type: "integer"
-            subGroupDefinitions:
-              type : "array"
-              items:
-                type: "object"
-                properties:
-                  cohortName:
-                    type: "string"
-                  panels:
-                    type: "array"
-                    items:
-                      $ref: '#/definitions/panel'
-              maxItems: 4
-            timeLimit:
-              type: "integer"
-            timeGranularity:
-              type: "string"
-              enum:
-                - day
-                - week
-                - month
-                - year
-            startConcept:
-              type: "string"
-            startModifier:
-              type: "string"
-            endConcept:
-              type: "string"
-            endModifier:
-              type: "string"
+      - $ref: "#/parameters/survivalAnalysisRequest"
 
       responses:
         200:
-          description: "Queried survival analysis"
-          schema:
-            type: "object"
-            properties:
-              results:
-                type: "array"
-                items:
-                  type: "object"
-                  properties:
-                    groupID:
-                      type: "string"
-                    initialCount:
-                      type: "string"
-                    groupResults:
-                      type : "array"
-                      items:
-                        type: "object"
-                        properties:
-                          timepoint:
-                            type: "integer"
-                          events:
-                            type: "object"
-                            properties:
-                              eventofinterest:
-                                type: "string"
-                              censoringevent:
-                                type: "string"
-              timers:
-                $ref: "#/definitions/timers"
-
-        404:
-          description: "TODO not found"
+          $ref: "#/responses/survivalAnalysisResponse"
         default:
           $ref: '#/responses/errorResponse'
       security:
@@ -288,26 +216,7 @@ paths:
       operationId: "getCohorts"
       responses:
         200:
-          description: "Queried cohorts"
-          schema:
-            type: "array"
-            items:
-              type: "object"
-              properties:
-                cohortId:
-                  type: "number"
-                queryId:
-                  type: "number"
-                cohortName:
-                  type: "string"
-                creationDate:
-                  type: "string"
-                updateDate:
-                  type: "string"
-        403:
-          description: "Not authorized"
-        default:
-          $ref: '#/responses/errorResponse'
+          $ref: '#/responses/getCohortsResponse'
         404:
           description: "User not found"
         default:
@@ -315,39 +224,16 @@ paths:
     post:
       tags:
         - "medco-node"
-      summary: "Update cohorts list with a new or modified cohort"
+      summary: "Add a new cohort or update an existing one"
       operationId: "postCohorts"
       parameters:
-        - in: "body"
-          description: "Cohort that has been updated or created"
-          name: "body"
-          schema:
-            type: "object"
-            properties:
-              cohortName:
-                type: "string"
-              patientSetID:
-                type: "integer"
-              creationDate:
-                type: "string"
-              updateDate:
-                type: "string"
+        - $ref: '#/parameters/cohortsRequest'
        
       responses:
         200:
           description: "Updated cohort"
-          schema:
-            type: "string"
-        403:
-          description: "Not authorized"
-        default:
-          $ref: '#/responses/errorResponse'
-        404:
-          description: "User not found"
-        default:
-          $ref: '#/responses/errorResponse'
         500:
-          description: "DB has been updated since last importation"
+          description: "DB has been updated since last importation. Try GET /node/explore/cohorts to fetch the most recent entries"
         default:
           $ref: '#/responses/errorResponse'
                    
@@ -382,6 +268,65 @@ parameters:
           pattern: '^[\w:-]+$'
         query:
           $ref: "#/definitions/exploreQuery"
+  cohortsRequest:
+    in: "body"
+    description: "Cohort that has been updated or created"
+    name: "body"
+    schema:
+      type: "object"
+      properties:
+        cohortName:
+          type: "string"
+        patientSetID:
+          type: "integer"
+        creationDate:
+          type: "string"
+        updateDate:
+          type: "string"
+
+  survivalAnalysisRequest:
+    in: "body"
+    description: "User public key, patient list and time codes strings for the survival analysis"
+    name: "body"
+    schema:
+      type: "object"
+      properties:
+        ID:
+          type: "string"
+        userPublicKey:
+          type: "string"
+          pattern: '^[\w=-]+$'
+        setID:
+          type: "integer"
+        subGroupDefinitions:
+          type : "array"
+          items:
+            type: "object"
+            properties:
+              cohortName:
+                type: "string"
+              panels:
+                type: "array"
+                items:
+                  $ref: '#/definitions/panel'
+          maxItems: 4
+        timeLimit:
+          type: "integer"
+        timeGranularity:
+          type: "string"
+          enum:
+            - day
+            - week
+            - month
+            - year
+        startConcept:
+          type: "string"
+        startModifier:
+          type: "string"
+        endConcept:
+          type: "string"
+        endModifier:
+          type: "string"
 
 responses:
   errorResponse:
@@ -439,6 +384,55 @@ responses:
           $ref: "#/definitions/exploreQuery"
         result:
           $ref: "#/definitions/exploreQueryResultElement"
+  
+  getCohortsResponse:
+    description: "Queried cohorts"
+    schema:
+      type: "array"
+      items:
+        type: "object"
+        properties:
+          cohortId:
+            type: "number"
+          queryId:
+            type: "number"
+          cohortName:
+            type: "string"
+          creationDate:
+            type: "string"
+          updateDate:
+            type: "string"
+
+  survivalAnalysisResponse:
+    description: "Queried survival analysis"
+    schema:
+      type: "object"
+      properties:
+        results:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              groupID:
+                type: "string"
+              initialCount:
+                type: "string"
+              groupResults:
+                type : "array"
+                items:
+                  type: "object"
+                  properties:
+                    timepoint:
+                      type: "integer"
+                    events:
+                      type: "object"
+                      properties:
+                        eventofinterest:
+                          type: "string"
+                        censoringevent:
+                          type: "string"
+        timers:
+          $ref: "#/definitions/timers"
 
 definitions:
   exploreSearch:

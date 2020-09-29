@@ -212,118 +212,12 @@ func init() {
         "operationId": "survivalAnalysis",
         "parameters": [
           {
-            "description": "User public key, patient list and time codes strings for the survival analysis",
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "ID": {
-                  "type": "string"
-                },
-                "endConcept": {
-                  "type": "string"
-                },
-                "endModifier": {
-                  "type": "string"
-                },
-                "setID": {
-                  "type": "integer"
-                },
-                "startConcept": {
-                  "type": "string"
-                },
-                "startModifier": {
-                  "type": "string"
-                },
-                "subGroupDefinitions": {
-                  "type": "array",
-                  "maxItems": 4,
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "cohortName": {
-                        "type": "string"
-                      },
-                      "panels": {
-                        "type": "array",
-                        "items": {
-                          "$ref": "#/definitions/panel"
-                        }
-                      }
-                    }
-                  }
-                },
-                "timeGranularity": {
-                  "type": "string",
-                  "enum": [
-                    "day",
-                    "week",
-                    "month",
-                    "year"
-                  ]
-                },
-                "timeLimit": {
-                  "type": "integer"
-                },
-                "userPublicKey": {
-                  "type": "string",
-                  "pattern": "^[\\w=-]+$"
-                }
-              }
-            }
+            "$ref": "#/parameters/survivalAnalysisRequest"
           }
         ],
         "responses": {
           "200": {
-            "description": "Queried survival analysis",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "results": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "groupID": {
-                        "type": "string"
-                      },
-                      "groupResults": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "events": {
-                              "type": "object",
-                              "properties": {
-                                "censoringevent": {
-                                  "type": "string"
-                                },
-                                "eventofinterest": {
-                                  "type": "string"
-                                }
-                              }
-                            },
-                            "timepoint": {
-                              "type": "integer"
-                            }
-                          }
-                        }
-                      },
-                      "initialCount": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                },
-                "timers": {
-                  "$ref": "#/definitions/timers"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "TODO not found"
+            "$ref": "#/responses/survivalAnalysisResponse"
           },
           "default": {
             "$ref": "#/responses/errorResponse"
@@ -340,33 +234,7 @@ func init() {
         "operationId": "getCohorts",
         "responses": {
           "200": {
-            "description": "Queried cohorts",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "cohortId": {
-                    "type": "number"
-                  },
-                  "cohortName": {
-                    "type": "string"
-                  },
-                  "creationDate": {
-                    "type": "string"
-                  },
-                  "queryId": {
-                    "type": "number"
-                  },
-                  "updateDate": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Not authorized"
+            "$ref": "#/responses/getCohortsResponse"
           },
           "404": {
             "description": "User not found"
@@ -380,47 +248,19 @@ func init() {
         "tags": [
           "medco-node"
         ],
-        "summary": "Update cohorts list with a new or modified cohort",
+        "summary": "Add a new cohort or update an existing one",
         "operationId": "postCohorts",
         "parameters": [
           {
-            "description": "Cohort that has been updated or created",
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "cohortName": {
-                  "type": "string"
-                },
-                "creationDate": {
-                  "type": "string"
-                },
-                "patientSetID": {
-                  "type": "integer"
-                },
-                "updateDate": {
-                  "type": "string"
-                }
-              }
-            }
+            "$ref": "#/parameters/cohortsRequest"
           }
         ],
         "responses": {
           "200": {
-            "description": "Updated cohort",
-            "schema": {
-              "type": "string"
-            }
-          },
-          "403": {
-            "description": "Not authorized"
-          },
-          "404": {
-            "description": "User not found"
+            "description": "Updated cohort"
           },
           "500": {
-            "description": "DB has been updated since last importation"
+            "description": "DB has been updated since last importation. Try GET /node/explore/cohorts to fetch the most recent entries"
           },
           "default": {
             "$ref": "#/responses/errorResponse"
@@ -778,6 +618,28 @@ func init() {
     }
   },
   "parameters": {
+    "cohortsRequest": {
+      "description": "Cohort that has been updated or created",
+      "name": "body",
+      "in": "body",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "cohortName": {
+            "type": "string"
+          },
+          "creationDate": {
+            "type": "string"
+          },
+          "patientSetID": {
+            "type": "integer"
+          },
+          "updateDate": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "exploreQueryRequest": {
       "description": "MedCo-Explore query request.",
       "name": "queryRequest",
@@ -803,6 +665,68 @@ func init() {
       "required": true,
       "schema": {
         "$ref": "#/definitions/exploreSearch"
+      }
+    },
+    "survivalAnalysisRequest": {
+      "description": "User public key, patient list and time codes strings for the survival analysis",
+      "name": "body",
+      "in": "body",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "string"
+          },
+          "endConcept": {
+            "type": "string"
+          },
+          "endModifier": {
+            "type": "string"
+          },
+          "setID": {
+            "type": "integer"
+          },
+          "startConcept": {
+            "type": "string"
+          },
+          "startModifier": {
+            "type": "string"
+          },
+          "subGroupDefinitions": {
+            "type": "array",
+            "maxItems": 4,
+            "items": {
+              "type": "object",
+              "properties": {
+                "cohortName": {
+                  "type": "string"
+                },
+                "panels": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/panel"
+                  }
+                }
+              }
+            }
+          },
+          "timeGranularity": {
+            "type": "string",
+            "enum": [
+              "day",
+              "week",
+              "month",
+              "year"
+            ]
+          },
+          "timeLimit": {
+            "type": "integer"
+          },
+          "userPublicKey": {
+            "type": "string",
+            "pattern": "^[\\w=-]+$"
+          }
+        }
       }
     }
   },
@@ -852,6 +776,32 @@ func init() {
         }
       }
     },
+    "getCohortsResponse": {
+      "description": "Queried cohorts",
+      "schema": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "cohortId": {
+              "type": "number"
+            },
+            "cohortName": {
+              "type": "string"
+            },
+            "creationDate": {
+              "type": "string"
+            },
+            "queryId": {
+              "type": "number"
+            },
+            "updateDate": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
     "networkMetadataResponse": {
       "description": "Network metadata (public key and nodes list).",
       "schema": {
@@ -886,6 +836,53 @@ func init() {
           "public-key": {
             "description": "Aggregated public key of the collective authority.",
             "type": "string"
+          }
+        }
+      }
+    },
+    "survivalAnalysisResponse": {
+      "description": "Queried survival analysis",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "groupID": {
+                  "type": "string"
+                },
+                "groupResults": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "events": {
+                        "type": "object",
+                        "properties": {
+                          "censoringevent": {
+                            "type": "string"
+                          },
+                          "eventofinterest": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "timepoint": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "initialCount": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "timers": {
+            "$ref": "#/definitions/timers"
           }
         }
       }
@@ -1237,9 +1234,6 @@ func init() {
               }
             }
           },
-          "404": {
-            "description": "TODO not found"
-          },
           "default": {
             "description": "Error response.",
             "schema": {
@@ -1271,9 +1265,6 @@ func init() {
               }
             }
           },
-          "403": {
-            "description": "Not authorized"
-          },
           "404": {
             "description": "User not found"
           },
@@ -1294,7 +1285,7 @@ func init() {
         "tags": [
           "medco-node"
         ],
-        "summary": "Update cohorts list with a new or modified cohort",
+        "summary": "Add a new cohort or update an existing one",
         "operationId": "postCohorts",
         "parameters": [
           {
@@ -1322,19 +1313,10 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "Updated cohort",
-            "schema": {
-              "type": "string"
-            }
-          },
-          "403": {
-            "description": "Not authorized"
-          },
-          "404": {
-            "description": "User not found"
+            "description": "Updated cohort"
           },
           "500": {
-            "description": "DB has been updated since last importation"
+            "description": "DB has been updated since last importation. Try GET /node/explore/cohorts to fetch the most recent entries"
           },
           "default": {
             "description": "Error response.",
@@ -1945,6 +1927,28 @@ func init() {
     }
   },
   "parameters": {
+    "cohortsRequest": {
+      "description": "Cohort that has been updated or created",
+      "name": "body",
+      "in": "body",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "cohortName": {
+            "type": "string"
+          },
+          "creationDate": {
+            "type": "string"
+          },
+          "patientSetID": {
+            "type": "integer"
+          },
+          "updateDate": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "exploreQueryRequest": {
       "description": "MedCo-Explore query request.",
       "name": "queryRequest",
@@ -1970,6 +1974,68 @@ func init() {
       "required": true,
       "schema": {
         "$ref": "#/definitions/exploreSearch"
+      }
+    },
+    "survivalAnalysisRequest": {
+      "description": "User public key, patient list and time codes strings for the survival analysis",
+      "name": "body",
+      "in": "body",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "string"
+          },
+          "endConcept": {
+            "type": "string"
+          },
+          "endModifier": {
+            "type": "string"
+          },
+          "setID": {
+            "type": "integer"
+          },
+          "startConcept": {
+            "type": "string"
+          },
+          "startModifier": {
+            "type": "string"
+          },
+          "subGroupDefinitions": {
+            "type": "array",
+            "maxItems": 4,
+            "items": {
+              "type": "object",
+              "properties": {
+                "cohortName": {
+                  "type": "string"
+                },
+                "panels": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/panel"
+                  }
+                }
+              }
+            }
+          },
+          "timeGranularity": {
+            "type": "string",
+            "enum": [
+              "day",
+              "week",
+              "month",
+              "year"
+            ]
+          },
+          "timeLimit": {
+            "type": "integer"
+          },
+          "userPublicKey": {
+            "type": "string",
+            "pattern": "^[\\w=-]+$"
+          }
+        }
       }
     }
   },
@@ -2019,6 +2085,32 @@ func init() {
         }
       }
     },
+    "getCohortsResponse": {
+      "description": "Queried cohorts",
+      "schema": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "cohortId": {
+              "type": "number"
+            },
+            "cohortName": {
+              "type": "string"
+            },
+            "creationDate": {
+              "type": "string"
+            },
+            "queryId": {
+              "type": "number"
+            },
+            "updateDate": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
     "networkMetadataResponse": {
       "description": "Network metadata (public key and nodes list).",
       "schema": {
@@ -2053,6 +2145,53 @@ func init() {
           "public-key": {
             "description": "Aggregated public key of the collective authority.",
             "type": "string"
+          }
+        }
+      }
+    },
+    "survivalAnalysisResponse": {
+      "description": "Queried survival analysis",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "groupID": {
+                  "type": "string"
+                },
+                "groupResults": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "events": {
+                        "type": "object",
+                        "properties": {
+                          "censoringevent": {
+                            "type": "string"
+                          },
+                          "eventofinterest": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "timepoint": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "initialCount": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "timers": {
+            "$ref": "#/definitions/timers"
           }
         }
       }

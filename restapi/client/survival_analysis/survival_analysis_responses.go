@@ -34,12 +34,6 @@ func (o *SurvivalAnalysisReader) ReadResponse(response runtime.ClientResponse, c
 			return nil, err
 		}
 		return result, nil
-	case 404:
-		result := NewSurvivalAnalysisNotFound()
-		if err := result.readResponse(response, consumer, o.formats); err != nil {
-			return nil, err
-		}
-		return nil, result
 	default:
 		result := NewSurvivalAnalysisDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -81,27 +75,6 @@ func (o *SurvivalAnalysisOK) readResponse(response runtime.ClientResponse, consu
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
-
-	return nil
-}
-
-// NewSurvivalAnalysisNotFound creates a SurvivalAnalysisNotFound with default headers values
-func NewSurvivalAnalysisNotFound() *SurvivalAnalysisNotFound {
-	return &SurvivalAnalysisNotFound{}
-}
-
-/*SurvivalAnalysisNotFound handles this case with default header values.
-
-TODO not found
-*/
-type SurvivalAnalysisNotFound struct {
-}
-
-func (o *SurvivalAnalysisNotFound) Error() string {
-	return fmt.Sprintf("[POST /node/analysis/survival/query][%d] survivalAnalysisNotFound ", 404)
-}
-
-func (o *SurvivalAnalysisNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	return nil
 }

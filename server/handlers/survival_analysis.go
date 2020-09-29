@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"fmt"
-
 	survivalserver "github.com/ldsec/medco-connector/server/survivalanalysis"
 
 	"github.com/go-openapi/runtime/middleware"
@@ -30,16 +28,19 @@ func MedCoSurvivalAnalysisGetSurvivalAnalysisHandler(param survival_analysis.Sur
 	logrus.Debug("survivalAnalysis: ", survivalAnalysisQuery)
 	err := survivalAnalysisQuery.Validate()
 	if err != nil {
-		err = fmt.Errorf("query validation error: %s", err.Error())
 		logrus.Error(err)
-		return survival_analysis.NewSurvivalAnalysisDefault(500).WithPayload(&survival_analysis.SurvivalAnalysisDefaultBody{Message: err.Error()})
+		return survival_analysis.NewSurvivalAnalysisDefault(400).WithPayload(
+			&survival_analysis.SurvivalAnalysisDefaultBody{
+				Message: "Survival query validation error:" + err.Error()})
 	}
 	err = survivalAnalysisQuery.Execute()
 
 	if err != nil {
-		err = fmt.Errorf("query execution error: %s", err.Error())
 		logrus.Error(err)
-		return survival_analysis.NewSurvivalAnalysisDefault(500).WithPayload(&survival_analysis.SurvivalAnalysisDefaultBody{Message: err.Error()})
+		return survival_analysis.NewSurvivalAnalysisDefault(500).WithPayload(
+			&survival_analysis.SurvivalAnalysisDefaultBody{
+				Message: "Survival query execution error:" + err.Error()})
+
 	}
 	results := survivalAnalysisQuery.Result
 
