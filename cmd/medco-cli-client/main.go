@@ -36,22 +36,9 @@ func main() {
 			Name:  "disableTLSCheck",
 			Usage: "Disable check of TLS certificates",
 		},
-	}
-
-	// --- search command flags
-	//searchCommandFlags := []cli.Flag{
-	//	cli.StringFlag{
-	//		Name:  "path",
-	//		Usage: "File containing the query definition",
-	//
-	//	},
-	//}
-
-	//--- query command flags
-	queryCommandFlags := []cli.Flag{
 		cli.StringFlag{
-			Name:  "resultFile, r",
-			Usage: "Output file for the result CSV. Printed to stdout if omitted.",
+			Name:  "outputFile, o",
+			Usage: "Output file for the result. Printed to stdout if omitted.",
 			Value: "",
 		},
 	}
@@ -80,20 +67,44 @@ func main() {
 
 	// --- app commands
 	cliApp.Commands = []cli.Command{
-		//{
-		//	Name:    "search",
-		//	Aliases: []string{"s"},
-		//	Usage:   "Browse the MedCo tree ontology",
-		//	Action:  encryptIntFromApp,
-		//	Flags:   searchCommandFlags,
-		//	ArgsUsage: "",
-		//
-		//},
+		{
+			Name:      "concept-children",
+			Aliases:   []string{"conc"},
+			Usage:     "Get the children (concepts and modifiers) of a concept",
+			ArgsUsage: "conceptPath",
+			Action: func(c *cli.Context) error {
+				return medcoclient.ExecuteClientSearchConcept(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.Args().Get(0),
+					c.GlobalString(("outputFile")),
+					c.GlobalBool("disableTLSCheck"))
+			},
+		},
+
+		{
+			Name:      "modifier-children",
+			Aliases:   []string{"modc"},
+			Usage:     "Get the children of a modifier",
+			ArgsUsage: "modifierPath appliedPath appliedConcept",
+			Action: func(c *cli.Context) error {
+				return medcoclient.ExecuteClientSearchModifier(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.Args().Get(0),
+					c.Args().Get(1),
+					c.Args().Get(2),
+					c.GlobalString(("outputFile")),
+					c.GlobalBool("disableTLSCheck"))
+			},
+		},
+
 		{
 			Name:    "query",
 			Aliases: []string{"q"},
 			Usage:   "Query the MedCo network",
-			Flags:   queryCommandFlags,
 			ArgsUsage: "[patient_list|count_per_site|count_per_site_obfuscated|count_per_site_shuffled|" +
 				"count_per_site_shuffled_obfuscated|count_global|count_global_obfuscated] [query string]",
 			Action: func(c *cli.Context) error {
@@ -103,18 +114,18 @@ func main() {
 					c.GlobalString("password"),
 					c.Args().First(),
 					strings.Join(c.Args().Tail(), " "),
-					c.String("resultFile"),
+					c.GlobalString("outputFile"),
 					c.GlobalBool("disableTLSCheck"),
 				)
 			},
 		},
 
 		{
-			Name:      "genomic-annotations-get-values",
-			Aliases:   []string{"gval"},
-			Usage:     "Get genomic annotations values",
+			Name:      "ga-get-values",
+			Aliases:   []string{"ga-val"},
+			Usage:     "Get the values of the genomic annotations of type *annotation* whose values contain *value*",
 			Flags:     genomicAnnotationsGetValuesFlag,
-			ArgsUsage: "[-l limit] [annotation] [value]",
+			ArgsUsage: "[-l limit] annotation value",
 			Action: func(c *cli.Context) error {
 				return medcoclient.ExecuteClientGenomicAnnotationsGetValues(
 					c.GlobalString("token"),
@@ -129,11 +140,11 @@ func main() {
 		},
 
 		{
-			Name:      "genomic-annotations-get-variants",
-			Aliases:   []string{"gvar"},
-			Usage:     "Get genomic annotations variants",
+			Name:      "ga-get-variant",
+			Aliases:   []string{"ga-var"},
+			Usage:     "Get the variant ID of the genomic annotation of type *annotation* and value *value*",
 			Flags:     genomicAnnotationsGetVariantsFlag,
-			ArgsUsage: "[-z zygosity] [-e] [annotation] [value]",
+			ArgsUsage: "[-z zygosity] [-e] annotation value",
 			Description: "zygosity can be either heterozygous, homozygous, unknown or a combination of the three separated by |\n" +
 				"If omitted, the command will execute as if zygosity was equal to \"heterozygous|homozygous|unknown|\"",
 			Action: func(c *cli.Context) error {

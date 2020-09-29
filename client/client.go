@@ -18,19 +18,13 @@ import (
 	"time"
 )
 
-// ExecuteClientQuery execute and display the results of the MedCo client query
+// ExecuteClientQuery executes and displays the result of the MedCo client query
 func ExecuteClientQuery(token, username, password, queryType, queryString, resultOutputFilePath string, disableTLSCheck bool) (err error) {
 
 	// get token
-	var accessToken string
-	if len(token) > 0 {
-		accessToken = token
-	} else {
-		logrus.Debug("No token provided, requesting token for user ", username, ", disable TLS check: ", disableTLSCheck)
-		accessToken, err = utilclient.RetrieveAccessToken(username, password, disableTLSCheck)
-		if err != nil {
-			return
-		}
+	accessToken, err := getAccessToken(token, username, password, disableTLSCheck)
+	if err != nil {
+		return err
 	}
 
 	// parse query type
@@ -281,19 +275,91 @@ func loadQueryFile(queryFilePath string) (queryTerms []int64, err error) {
 	return
 }
 
+// ExecuteClientSearchConcept executes and displays the result of the MedCo sconcept search
+func ExecuteClientSearchConcept(token, username, password, conceptPath, resultOutputFilePath string, disableTLSCheck bool) (err error) {
+
+	// get token
+	accessToken, err := getAccessToken(token, username, password, disableTLSCheck)
+	if err != nil {
+		return err
+	}
+
+	// execute search
+	clientSearchConcept, err := NewExploreSearchConcept(accessToken, conceptPath, disableTLSCheck)
+	if err != nil {
+		return err
+	}
+
+	result, err := clientSearchConcept.Execute()
+	if err != nil {
+		return
+	}
+
+	output := "PATH" + "\t" + "TYPE" + "\n"
+	for _, child := range result.Payload.Results {
+		output += child.Path + "\t" + child.Type + "\n"
+	}
+
+	if resultOutputFilePath == "" {
+		fmt.Println(output)
+	} else {
+		outputFile, err := os.Create(resultOutputFilePath)
+		if err != nil {
+			logrus.Error("error opening file: ", err)
+		}
+		outputFile.WriteString(output)
+		outputFile.Close()
+	}
+
+	return
+}
+
+// ExecuteClientSearchModifier executes and displays the result of the MedCo modifier search
+func ExecuteClientSearchModifier(token, username, password, modifierPath, appliedPath, appliedConcept, resultOutputFilePath string, disableTLSCheck bool) (err error) {
+
+	// get token
+	accessToken, err := getAccessToken(token, username, password, disableTLSCheck)
+	if err != nil {
+		return err
+	}
+
+	// execute search
+	clientSearchConcept, err := NewExploreSearchModifier(accessToken, modifierPath, appliedPath, appliedConcept, disableTLSCheck)
+	if err != nil {
+		return err
+	}
+
+	result, err := clientSearchConcept.Execute()
+	if err != nil {
+		return
+	}
+
+	output := "PATH" + "\t" + "TYPE" + "\n"
+	for _, child := range result.Payload.Results {
+		output += child.Path + "\t" + child.Type + "\n"
+	}
+
+	if resultOutputFilePath == "" {
+		fmt.Println(output)
+	} else {
+		outputFile, err := os.Create(resultOutputFilePath)
+		if err != nil {
+			logrus.Error("error opening file: ", err)
+		}
+		outputFile.WriteString(output)
+		outputFile.Close()
+	}
+
+	return
+}
+
 // ExecuteClientGenomicAnnotationsGetValues displays the genomic annotations values matching the "annotation" parameter
 func ExecuteClientGenomicAnnotationsGetValues(token, username, password, annotation, value string, limit int64, disableTLSCheck bool) (err error) {
 
 	// get token
-	var accessToken string
-	if len(token) > 0 {
-		accessToken = token
-	} else {
-		logrus.Debug("No token provided, requesting token for user ", username, ", disable TLS check: ", disableTLSCheck)
-		accessToken, err = utilclient.RetrieveAccessToken(username, password, disableTLSCheck)
-		if err != nil {
-			return
-		}
+	accessToken, err := getAccessToken(token, username, password, disableTLSCheck)
+	if err != nil {
+		return err
 	}
 
 	// execute query
@@ -319,15 +385,9 @@ func ExecuteClientGenomicAnnotationsGetValues(token, username, password, annotat
 func ExecuteClientGenomicAnnotationsGetVariants(token, username, password, annotation, value string, zygosity string, encrypted bool, disableTLSCheck bool) (err error) {
 
 	// get token
-	var accessToken string
-	if len(token) > 0 {
-		accessToken = token
-	} else {
-		logrus.Debug("No token provided, requesting token for user ", username, ", disable TLS check: ", disableTLSCheck)
-		accessToken, err = utilclient.RetrieveAccessToken(username, password, disableTLSCheck)
-		if err != nil {
-			return
-		}
+	accessToken, err := getAccessToken(token, username, password, disableTLSCheck)
+	if err != nil {
+		return err
 	}
 
 	// execute query
@@ -347,4 +407,14 @@ func ExecuteClientGenomicAnnotationsGetVariants(token, username, password, annot
 
 	return
 
+}
+
+func getAccessToken(token, username, password string, disableTLSCheck bool) (accessToken string, err error) {
+	if len(token) > 0 {
+		accessToken = token
+	} else {
+		logrus.Debug("No token provided, requesting token for user ", username, ", disable TLS check: ", disableTLSCheck)
+		accessToken, err = utilclient.RetrieveAccessToken(username, password, disableTLSCheck)
+	}
+	return
 }
