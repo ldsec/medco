@@ -64,7 +64,7 @@ func TestExploreSearch(t *testing.T) {
 		req = rCtx
 
 		log.Lvlf2("checking for %t with body: %s", test.ok, body)
-		err := ctx.BindValidRequest(req, ri, &medco_node.ExploreSearchParams{})
+		err := ctx.BindValidRequest(req, ri, &medco_node.ExploreSearchConceptParams{})
 		require.Equal(t, test.ok, err == nil, "wrong result for %+v: %s",
 			test, err)
 	}

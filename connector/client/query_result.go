@@ -9,15 +9,15 @@ import (
 
 // ExploreQueryResult contains the decrypted results of a node
 type ExploreQueryResult struct {
-	Count int64
+	Count       int64
 	PatientList []int64
-	Times map[string]time.Duration
+	Times       map[string]time.Duration
 }
 
 // newQueryResult parses a query result from a node and decrypts its fields
 func newQueryResult(nodeResult *models.ExploreQueryResultElement, privateKey string) (parsedResult *ExploreQueryResult, err error) {
 	parsedResult = &ExploreQueryResult{
-		Times: make( map[string]time.Duration),
+		Times: make(map[string]time.Duration),
 	}
 
 	// decrypt count

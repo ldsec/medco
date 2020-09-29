@@ -23,15 +23,15 @@ func DDTagValues(queryName string, values []string) (taggedValues map[string]str
 	// execute DDT
 	type DDTResults struct {
 		Results []libunlynx.GroupingKey
-		Times servicesmedco.TimeResults
-		Err error
+		Times   servicesmedco.TimeResults
+		Err     error
 	}
 	ddtResultsChan := make(chan DDTResults)
 
 	go func() {
 		_, ddtResults, ddtTimes, ddtErr := unlynxClient.SendSurveyDDTRequestTerms(
 			cothorityRoster,
-			servicesmedco.SurveyID(queryName + "_DDT"),
+			servicesmedco.SurveyID(queryName+"_DDT"),
 			desValues,
 			false,
 			false,
@@ -89,15 +89,15 @@ func KeySwitchValues(queryName string, values []string, targetPubKey string) (ke
 	// execute key switching request
 	type KSResults struct {
 		Results libunlynx.CipherVector
-		Times servicesmedco.TimeResults
-		Err error
+		Times   servicesmedco.TimeResults
+		Err     error
 	}
 	ksResultsChan := make(chan KSResults)
 
 	go func() {
 		_, ksResult, ksTimes, ksErr := unlynxClient.SendSurveyKSRequest(
 			cothorityRoster,
-			servicesmedco.SurveyID(queryName + "_KS"),
+			servicesmedco.SurveyID(queryName+"_KS"),
 			desTargetKey,
 			desValues,
 			false,
@@ -146,15 +146,15 @@ func ShuffleAndKeySwitchValue(queryName string, value string, targetPubKey strin
 	// execute shuffle and key switching request
 	type ShuffleKSResults struct {
 		Results libunlynx.CipherText
-		Times servicesmedco.TimeResults
-		Err error
+		Times   servicesmedco.TimeResults
+		Err     error
 	}
 	shuffleKsResultsChan := make(chan ShuffleKSResults)
 
 	go func() {
 		_, shuffleKsResult, shuffleKsTimes, shuffleKsErr := unlynxClient.SendSurveyShuffleRequest(
 			cothorityRoster,
-			servicesmedco.SurveyID(queryName + "_SHUFFLE"),
+			servicesmedco.SurveyID(queryName+"_SHUFFLE"),
 			desTargetKey,
 			&desValue,
 			false,
@@ -183,13 +183,12 @@ func ShuffleAndKeySwitchValue(queryName string, value string, targetPubKey strin
 	return
 }
 
-// AggregateAndKeySwitchValue makes request through unlynx to aggregate and key switch one value per node
-func AggregateAndKeySwitchValue(queryName string, value string, targetPubKey string) (aggValue string, times map[string]time.Duration, err error) {
+// AggregateAndKeySwitchValues makes request through unlynx to aggregate and key switch a slice of values per node
+func AggregateAndKeySwitchValues(queryName string, values []string, targetPubKey string) (aggValues []string, times map[string]time.Duration, err error) {
 	unlynxClient, cothorityRoster := newUnlynxClient()
 
 	// deserialize value and target public key
-	desValue := libunlynx.CipherText{}
-	err = desValue.Deserialize(value)
+	desValues, err := deserializeCipherVector(values)
 	if err != nil {
 		return
 	}
@@ -202,18 +201,18 @@ func AggregateAndKeySwitchValue(queryName string, value string, targetPubKey str
 
 	// execute shuffle and key switching request
 	type AggKSResults struct {
-		Results libunlynx.CipherText
-		Times servicesmedco.TimeResults
-		Err error
+		Results libunlynx.CipherVector
+		Times   servicesmedco.TimeResults
+		Err     error
 	}
 	aggKsResultsChan := make(chan AggKSResults)
 
 	go func() {
 		_, aggKsResult, aggKsTimes, aggKsErr := unlynxClient.SendSurveyAggRequest(
 			cothorityRoster,
-			servicesmedco.SurveyID(queryName + "_AGG"),
+			servicesmedco.SurveyID(queryName+"_AGG"),
 			desTargetKey,
-			desValue,
+			desValues,
 			false,
 		)
 		aggKsResultsChan <- AggKSResults{aggKsResult, aggKsTimes, aggKsErr}
@@ -227,7 +226,7 @@ func AggregateAndKeySwitchValue(queryName string, value string, targetPubKey str
 
 		} else {
 			times = aggKsResult.Times.MapTR
-			aggValue, err = aggKsResult.Results.Serialize()
+			aggValues, err = serializeCipherVector(aggKsResult.Results)
 			if err != nil {
 				logrus.Error("unlynx error serializing: ", err)
 			}
@@ -237,5 +236,14 @@ func AggregateAndKeySwitchValue(queryName string, value string, targetPubKey str
 		err = errors.New("unlynx timeout")
 		logrus.Error(err)
 	}
+	return
+}
+
+// AggregateAndKeySwitchValue makes request through unlynx to aggregate and key switch one value per node
+func AggregateAndKeySwitchValue(queryName string, value string, targetPubKey string) (aggValue string, times map[string]time.Duration, err error) {
+	values := []string{value}
+	var aggValues []string
+	aggValues, times, err = AggregateAndKeySwitchValues(queryName, values, targetPubKey)
+	aggValue = aggValues[0]
 	return
 }

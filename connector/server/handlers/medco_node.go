@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// MedCoNodeExploreSearchHandler handles the /medco/node/explore/search/concept API endpoint
+// MedCoNodeExploreSearchConceptHandler handles the /medco/node/explore/search/concept API endpoint
 func MedCoNodeExploreSearchConceptHandler(params medco_node.ExploreSearchConceptParams, principal *models.User) middleware.Responder {
 
 	searchResult, err := i2b2.GetOntologyChildren(*params.SearchConceptRequest.Path)

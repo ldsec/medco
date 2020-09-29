@@ -17,8 +17,8 @@ func MedCoNetworkGetMetadataHandler(params medco_network.GetMetadataParams, prin
 		idxInt64 := int64(idx)
 		nodes = append(nodes, &medco_network.GetMetadataOKBodyNodesItems0{
 			Index: &idxInt64,
-			Name: "Node " + strconv.Itoa(idx), // todo: config to specify node name
-			URL: url,
+			Name:  "Node " + strconv.Itoa(idx), // todo: config to specify node name
+			URL:   url,
 		})
 	}
 
@@ -32,7 +32,7 @@ func MedCoNetworkGetMetadataHandler(params medco_network.GetMetadataParams, prin
 	medcoNodeIdxInt64 := int64(utilserver.MedCoNodeIdx)
 	return medco_network.NewGetMetadataOK().WithPayload(&medco_network.GetMetadataOKBody{
 		NodeIndex: &medcoNodeIdxInt64,
-		Nodes: nodes,
+		Nodes:     nodes,
 		PublicKey: pubKey,
 	})
 }

@@ -13,8 +13,8 @@ import (
 // oidcTokenResp contains the response to an OIDC token request
 type oidcTokenResp struct {
 	AccessToken string `json:"access_token"`
-	TokenType string `json:"token_type"`
-	Scope string `json:"scope"`
+	TokenType   string `json:"token_type"`
+	Scope       string `json:"scope"`
 }
 
 // RetrieveAccessToken requests JWT from OIDC provider
@@ -30,9 +30,9 @@ func RetrieveAccessToken(username string, password string, disableTLSCheck bool)
 
 	httpResp, err := httpClient.PostForm(OidcReqTokenURL, url.Values{
 		"grant_type": {"password"},
-		"client_id": {OidcReqTokenClientID},
-		"username": {username},
-		"password": {password},
+		"client_id":  {OidcReqTokenClientID},
+		"username":   {username},
+		"password":   {password},
 	})
 
 	if err != nil {

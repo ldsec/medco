@@ -40,9 +40,9 @@ func NewCrcPdoReqFromInputList(patientSetID string) Request {
 
 // CrcPdoReqFromInputListMessageBody is an i2b2 XML message body for CRC PDO request from input list
 type CrcPdoReqFromInputListMessageBody struct {
-	XMLName       xml.Name `xml:"message_body"`
+	XMLName xml.Name `xml:"message_body"`
 
-	PdoHeader  PdoHeader              `xml:"crcpdons:pdoheader"`
+	PdoHeader  PdoHeader               `xml:"crcpdons:pdoheader"`
 	PdoRequest PdoRequestFromInputList `xml:"crcpdons:request"`
 }
 
@@ -55,8 +55,8 @@ type PdoHeader struct {
 
 // PdoRequestFromInputList is an i2b2 XML PDO request - from input list
 type PdoRequestFromInputList struct {
-	Type    string   `xml:"xsi:type,attr"`
-	Xsi     string   `xml:"xmlns:xsi,attr"`
+	Type string `xml:"xsi:type,attr"`
+	Xsi  string `xml:"xmlns:xsi,attr"`
 
 	// todo: extend to support more queries
 
@@ -69,11 +69,11 @@ type PdoRequestFromInputList struct {
 	} `xml:"input_list"`
 
 	OutputOption struct {
-		Name string `xml:"name,attr"`
+		Name       string `xml:"name,attr"`
 		PatientSet struct {
-			Select string `xml:"select,attr"`
+			Select   string `xml:"select,attr"`
 			OnlyKeys string `xml:"onlykeys,attr"`
-			Blob string `xml:"blob,attr"`
+			Blob     string `xml:"blob,attr"`
 			TechData string `xml:"techdata,attr"`
 		} `xml:"patient_set,omitempty"`
 	} `xml:"output_option"`
@@ -83,7 +83,7 @@ type PdoRequestFromInputList struct {
 
 // CrcPdoRespMessageBody is an i2b2 XML message body for CRC PDO response
 type CrcPdoRespMessageBody struct {
-	XMLName  xml.Name `xml:"message_body"`
+	XMLName xml.Name `xml:"message_body"`
 
 	Response struct {
 		Xsi         string `xml:"xsi,attr"`

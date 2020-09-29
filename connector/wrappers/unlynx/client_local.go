@@ -22,7 +22,7 @@ func LocallyAggregateValues(values []string) (agg string, err error) {
 	}
 
 	// local aggregation
-	aggregate :=  &deserialized[0]
+	aggregate := &deserialized[0]
 	for i := 1; i < len(deserialized); i++ {
 		aggregate.Add(*aggregate, deserialized[i])
 	}
@@ -47,7 +47,7 @@ func LocallyMultiplyScalar(encValue string, scalar int64) (res string, err error
 	result := libunlynx.CipherText{}
 	result.MulCipherTextbyScalar(deserialized, libunlynx.SuiTe.Scalar().SetInt64(scalar))
 
-	res, err =  result.Serialize()
+	res, err = result.Serialize()
 	if err != nil {
 		logrus.Error("unlynx error serializing: ", err)
 	}
