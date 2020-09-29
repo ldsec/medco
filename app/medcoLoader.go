@@ -231,14 +231,14 @@ func main() {
 	cliApp.Commands = []cli.Command{
 		// BEGIN CLIENT: DATA LOADER ----------
 		{
-			Name:    "v0",
+			Name:    "genomic",
 			Aliases: []string{"v0"},
 			Usage:   "Load genomic data (e.g. tcga_bio dataset)",
 			Flags:   loaderFlagsv0,
 			Action:  loadV0,
 		},
 		{
-			Name:    "v1",
+			Name:    "i2b2",
 			Aliases: []string{"v1"},
 			Usage:   "Convert existing i2b2 data model",
 			Flags:   loaderFlagsv1,
