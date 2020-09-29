@@ -17,9 +17,16 @@ services:
       - AXIS2_LOGLEVEL=INFO
 
   medco-unlynx:
-    image: medco/medco-unlynx:${MEDCO_UNLYNX_VERSION:-v1.0.0}
+    image: medco/medco:${MEDCO_VERSION:-v1.0.0}
+    build:
+      context: ../
+      dockerfile: ../build/package/medco/Dockerfile
+    command: medco-unlynx
+    ports:
+      - "2000"
+      - "2001"
     environment:
-    - NODE_IDX=0
+    - MEDCO_NODE_IDX=0
     - UNLYNX_DEBUG_LEVEL=1
     volumes:
     - ../configuration-profiles/dev-local-3nodes:/medco-configuration
@@ -76,7 +83,13 @@ services:
       - GB_FOOTER_TEXT=
 
   medco-connector:
-    image: medco/medco-connector:${MEDCO_CONNECTOR_VERSION:-v1.0.0}
+    image: medco/medco:${MEDCO_VERSION:-v1.0.0}
+    build:
+      context: ../
+      dockerfile: ../build/package/medco/Dockerfile
+    command: medco-connector-server
+    ports:
+      - "1999"
     environment:
       - SERVER_HTTP_WRITE_TIMEOUT_SECONDS=600
       - I2B2_HIVE_URL=http://i2b2:8080/i2b2/services
@@ -99,18 +112,24 @@ services:
       - MC_DB_HOST=postgresql
       - MC_DB_PORT=5432
       - MC_DB_USER=medcoconnector
-      - MC_DB_PW=medcoconnector
+      - MC_DB_PASSWORD=medcoconnector
       - MC_DB_NAME=medcoconnector
       - I2B2_DB_HOST=postgresql
       - I2B2_DB_PORT=5432
       - I2B2_DB_USER=i2b2
-      - I2B2_DB_PW=i2b2
+      - I2B2_DB_PASSWORD=i2b2
       - I2B2_DB_NAME=i2b2medco
     volumes:
       - ../configuration-profiles/dev-local-3nodes:/medco-configuration
 
   medco-cli-client:
-    image: medco/medco-cli-client:${MEDCO_CONNECTOR_VERSION:-v1.0.0}
+    image: medco/medco:${MEDCO_VERSION:-v1.0.0}
+    build:
+      context: ../
+      dockerfile: ../build/package/medco/Dockerfile
+    entrypoint: medco-cli-client
+    command: >-
+      tbd: some default example query
     environment:
       - LOG_LEVEL=3
       - UNLYNX_GROUP_FILE_PATH=/medco-configuration/group.toml
@@ -126,11 +145,21 @@ services:
     network_mode: host
 
   medco-loader:
-    image: medco/medco-loader:${MEDCO_LOADER_VERSION:-v1.0.0}
+    image: medco/medco:${MEDCO_VERSION:-v1.0.0}
+    build:
+      context: ../
+      dockerfile: ../build/package/medco/Dockerfile
+    entrypoint: medco-loader
+    command: >-
+      -debug 2 v0 --group /medco-configuration/group.toml --entryPointIdx 0
+      --ont_clinical /dataset/tcga_cbio/clinical_data.csv --sen /dataset/sensitive.txt
+      --ont_genomic /dataset/tcga_cbio/videodemo_mutation_data.csv --clinical /dataset/tcga_cbio/clinical_data.csv
+      --genomic /dataset/tcga_cbio/videodemo_mutation_data.csv --output /dataset/ --dbHost localhost --dbPort 5432
+      --dbName i2b2medcosrv0 --dbUser i2b2 --dbPassword i2b2
     environment:
       - LOG_LEVEL=3
       - UNLYNX_GROUP_FILE_PATH=/medco-configuration/group.toml
-      - UNLYNX_GROUP_FILE_IDX=0
+      - MEDCO_NODE_IDX=0
       - I2B2_DB_HOST=localhost
       - I2B2_DB_PORT=5432
       - I2B2_DB_NAME=i2b2medco

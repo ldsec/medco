@@ -39,20 +39,20 @@ const (
 	// #---- V0 ----#
 
 	// genomic annotations database settings
-	optionGaDBhost      = "gaDbHost"
-	optionGaDBhostShort = "gaH"
+	optionMcDBhost      = "mcDbHost"
+	optionMcDBhostShort = "mcH"
 
-	optionGaDBport      = "gaDbPort"
-	optionGaDBportShort = "gaP"
+	optionMcDBport      = "mcDbPort"
+	optionMcDBportShort = "mcP"
 
-	optionGaDBname      = "gaDbName"
-	optionGaDBnameShort = "gaN"
+	optionMcDBname      = "mcDbName"
+	optionMcDBnameShort = "mcN"
 
-	optionGaDBuser      = "gaDbUser"
-	optionGaDBuserShort = "gaU"
+	optionMcDBuser      = "mcDbUser"
+	optionMcDBuserShort = "mcU"
 
-	optionGaDBpassword      = "gaDbPassword"
-	optionGaDBpasswordShort = "gaPw"
+	optionMcDBpassword      = "mcDbPassword"
+	optionMcDBpasswordShort = "mcPw"
 
 	// DefaultOntologyClinical is the name of the default clinical file (dataset)
 	DefaultOntologyClinical = "../../data/genomic/tcga_cbio/clinical_data.csv"
@@ -124,7 +124,7 @@ func main() {
 		cli.IntFlag{
 			Name:   optionEntryPointIdx + ", " + optionEntryPointIdxShort,
 			Usage:  "Index (relative to the group definition file) of the collective authority server to load the data",
-			EnvVar: "UNLYNX_GROUP_FILE_IDX",
+			EnvVar: "MEDCO_NODE_IDX",
 		},
 		cli.StringFlag{
 			Name:   optionI2b2DBhost + ", " + optionI2b2DBhostShort,
@@ -184,29 +184,29 @@ func main() {
 			Usage: "Output path for the .csv files",
 		},
 		cli.StringFlag{
-			Name:   optionGaDBhost + ", " + optionGaDBhostShort,
-			Usage:  "Genomic annotations database hostname",
-			EnvVar: "GA_DB_HOST",
+			Name:   optionMcDBhost + ", " + optionMcDBhostShort,
+			Usage:  "MedCo Connector database hostname",
+			EnvVar: "MC_DB_HOST",
 		},
 		cli.IntFlag{
-			Name:   optionGaDBport + ", " + optionGaDBportShort,
-			Usage:  "Genomic annotations database port",
-			EnvVar: "GA_DB_PORT",
+			Name:   optionMcDBport + ", " + optionMcDBportShort,
+			Usage:  "MedCo Connector database port",
+			EnvVar: "MC_DB_PORT",
 		},
 		cli.StringFlag{
-			Name:   optionGaDBname + ", " + optionGaDBnameShort,
-			Usage:  "Genomic annotations database name",
-			EnvVar: "GA_DB_NAME",
+			Name:   optionMcDBname + ", " + optionMcDBnameShort,
+			Usage:  "MedCo Connector database name",
+			EnvVar: "MC_DB_NAME",
 		},
 		cli.StringFlag{
-			Name:   optionGaDBuser + ", " + optionGaDBuserShort,
-			Usage:  "Genomic annotations database user",
-			EnvVar: "GA_DB_USER",
+			Name:   optionMcDBuser + ", " + optionMcDBuserShort,
+			Usage:  "MedCo Connector database user",
+			EnvVar: "MC_DB_USER",
 		},
 		cli.StringFlag{
-			Name:   optionGaDBpassword + ", " + optionGaDBpasswordShort,
-			Usage:  "Genomic annotations database password",
-			EnvVar: "GA_DB_PASSWORD",
+			Name:   optionMcDBpassword + ", " + optionMcDBpasswordShort,
+			Usage:  "MedCo Connector database password",
+			EnvVar: "MC_DB_PASSWORD",
 		},
 	}
 	loaderFlagsv0 = append(loaderFlagsCommon, loaderFlagsv0...)
