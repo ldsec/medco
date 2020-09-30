@@ -21,10 +21,10 @@ PRIV_KEY="${5-}"
 PROFILE_NAME="test-network-${NETWORK_NAME}-node${NODE_IDX}"
 SCRIPT_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 MEDCO_UNLYNX_VER="v1.0.0"
-CONF_FOLDER="${SCRIPT_FOLDER}/../../../configuration-profiles/${PROFILE_NAME}"
-COMPOSE_FOLDER="${SCRIPT_FOLDER}/../../../compose-profiles/${PROFILE_NAME}"
-if [[ -d ${CONF_FOLDER} ]] || [[ -d ${COMPOSE_FOLDER} ]]; then
-    echo "The compose and/or configuration profile folder exists. Aborting."
+COMPOSE_FOLDER="${SCRIPT_FOLDER}/../../../deployments/${PROFILE_NAME}"
+CONF_FOLDER="${COMPOSE_FOLDER}/configuration"
+if [[ -d ${COMPOSE_FOLDER} ]]; then
+    echo "The profile folder exists. Aborting."
     exit 2
 fi
 
@@ -36,7 +36,7 @@ echo "### Dependency on OpenSSL check, script will abort if not found"
 which openssl
 
 # ===================== pre-requisites ======================
-mkdir "${CONF_FOLDER}" "${COMPOSE_FOLDER}"
+mkdir "${COMPOSE_FOLDER}" "${CONF_FOLDER}"
 echo -n "${NODE_DNS_NAME}" > "${CONF_FOLDER}/srv${NODE_IDX}-nodednsname.txt"
 
 

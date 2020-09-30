@@ -6,6 +6,8 @@ services:
       service: medco-cli-client
     environment:
       - LOG_LEVEL=5
+    volumes:
+      - ./configuration:/medco-configuration
 
   medco-loader-srv0:
     extends:
@@ -22,6 +24,8 @@ services:
       - I2B2_DB_NAME=i2b2medcosrv0
       - MC_DB_NAME=medcoconnectorsrv0
       - UNLYNX_GROUP_FILE_IDX=0
+    volumes:
+      - ./configuration:/medco-configuration
 
   medco-loader-srv1:
     extends:
@@ -38,6 +42,8 @@ services:
       - I2B2_DB_NAME=i2b2medcosrv1
       - MC_DB_NAME=medcoconnectorsrv1
       - UNLYNX_GROUP_FILE_IDX=1
+    volumes:
+      - ./configuration:/medco-configuration
 
   medco-loader-srv2:
     extends:
@@ -54,3 +60,5 @@ services:
       - I2B2_DB_NAME=i2b2medcosrv2
       - MC_DB_NAME=medcoconnectorsrv2
       - UNLYNX_GROUP_FILE_IDX=2
+    volumes:
+      - ./configuration:/medco-configuration
