@@ -10,7 +10,7 @@ jobs:
         - make download_test_data
         - make docker_images_build_dev
       install:
-        - docker-compose up -d
+        - docker-compose -f ~/build/ldsec/medco-deployment/compose-profiles/dev-local-3nodes up -d
         - bash ~/build/ldsec/medco/test/wait_for_startup.sh $MEDCO_DB_NUMBER $MEDCO_DB_HOST $MEDCO_DB_PORT $MEDCO_DB_USER $MEDCO_DB_PASSWORD $MEDCO_DB_NAME
       script:
         - docker-compose -f docker-compose.tools.yml run medco-loader-srv0 v0 --ont_clinical /data/genomic/tcga_cbio/8_clinical_data.csv --sen /data/genomic/sensitive.txt --ont_genomic /data/genomic/tcga_cbio/8_mutation_data.csv --clinical /data/genomic/tcga_cbio/8_clinical_data.csv --genomic /data/genomic/tcga_cbio/8_mutation_data.csv --output /data/
