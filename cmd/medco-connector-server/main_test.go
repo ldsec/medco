@@ -38,25 +38,24 @@ func TestNetwork(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func TestExploreSearch(t *testing.T) {
+func TestExploreSearchConcept(t *testing.T) {
 	for _, test := range []struct {
 		ok      bool
-		reqType string
 		reqPath string
 	}{
-		{false, "child", ""},
-		{true, "children", "/"},
-		{false, "children", ""},
-		{true, "children", "/abc/def"},
-		{true, "children", "/abc/def/"},
-		{true, "children", "/abc/def/asdasdas"},
-		{false, "children", "abc/def/"},
-		{false, "children", "//def/"},
-		{false, "children", "///"},
+		{false, ""},
+		{true, "/"},
+		{false, ""},
+		{true, "/abc/def"},
+		{true, "/abc/def/"},
+		{true, "/abc/def/asdasdas"},
+		{false, "abc/def/"},
+		{false, "//def/"},
+		{false, "///"},
 	} {
-		body := fmt.Sprintf(`{"type":"%s", "path":"%s"}`,
-			test.reqType, test.reqPath)
-		ctx, req := getContextRequest(t, "POST", "/node/explore/search",
+		body := fmt.Sprintf(`{"path":"%s"}`,
+			test.reqPath)
+		ctx, req := getContextRequest(t, "POST", "/node/explore/search/concept",
 			body)
 
 		ri, rCtx, ok := ctx.RouteInfo(req)
@@ -269,11 +268,17 @@ func TestAuthorizations(t *testing.T) {
 		{true, "", "/network", models.RestAPIAuthorizationMedcoNetwork},
 		{false, "", "/network", models.RestAPIAuthorizationMedcoExplore},
 		{false, "", "/network", models.RestAPIAuthorizationMedcoGenomicAnnotations},
-		{false, "POST", "/node/explore/search",
+		{false, "POST", "/node/explore/search/concept",
 			models.RestAPIAuthorizationMedcoNetwork},
-		{true, "POST", "/node/explore/search",
+		{true, "POST", "/node/explore/search/concept",
 			models.RestAPIAuthorizationMedcoExplore},
-		{false, "POST", "/node/explore/search",
+		{false, "POST", "/node/explore/search/concept",
+			models.RestAPIAuthorizationMedcoGenomicAnnotations},
+		{false, "POST", "/node/explore/search/modifier",
+			models.RestAPIAuthorizationMedcoNetwork},
+		{true, "POST", "/node/explore/search/modifier",
+			models.RestAPIAuthorizationMedcoExplore},
+		{false, "POST", "/node/explore/search/modifier",
 			models.RestAPIAuthorizationMedcoGenomicAnnotations},
 		{false, "", "/genomic-annotations/abc",
 			models.RestAPIAuthorizationMedcoNetwork},

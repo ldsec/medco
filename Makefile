@@ -5,8 +5,9 @@ docker_images_build_dev:
 	docker-compose -f docker-compose.yml -f docker-compose.tools.yml build
 
 # test commands
-.PHONY: test test_go_fmt test_go_lint test_go test_codecov
-test_travis: test_go_fmt test_go_lint test_codecov
+.PHONY: test test_go_fmt test_go_lint test_go test_codecov_unit test_codecov_e2e
+test_travis_unit: test_go_fmt test_go_lint test_codecov_unit
+test_travis_e2e: test_codecov_e2e
 test_local: test_go_fmt test_go_lint test_go
 
 test_go_fmt:
@@ -38,11 +39,14 @@ test_go_lint:
 test_go:
 	go test -v -race -short -p=1 ./...
 
-test_codecov:
-	./test/coveralls.sh
+test_codecov_unit:
+	./test/coveralls.sh "./connector/wrappers/i2b2 ./connector/wrappers/unlynx ./connector/server/handlers"
+
+test_codecov_e2e:
+	./test/coveralls.sh "" "./connector/wrappers/i2b2 ./connector/wrappers/unlynx ./connector/server/handlers"
 
 # utility commands
-.PHONY:	test_unlynx_loop swagger swagger-gen download_test_data
+.PHONY:	test_unlynx_loop swagger swagger-gen download_test_data load_test_data
 test_unlynx_loop:
 	for i in $$( seq 100 ); \
 		do echo "******* Run $$i"; echo; \
@@ -77,3 +81,9 @@ swagger:
 
 download_test_data:
 	./test/data/download.sh genomic_small
+	./test/data/download.sh i2b2
+
+load_test_data:
+	docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-loader-srv0 v0 --ont_clinical /data/genomic/tcga_cbio/8_clinical_data.csv --sen /data/genomic/sensitive.txt --ont_genomic /data/genomic/tcga_cbio/8_mutation_data.csv --clinical /data/genomic/tcga_cbio/8_clinical_data.csv --genomic /data/genomic/tcga_cbio/8_mutation_data.csv --output /data/
+	docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-loader-srv1 v0 --ont_clinical /data/genomic/tcga_cbio/8_clinical_data.csv --sen /data/genomic/sensitive.txt --ont_genomic /data/genomic/tcga_cbio/8_mutation_data.csv --clinical /data/genomic/tcga_cbio/8_clinical_data.csv --genomic /data/genomic/tcga_cbio/8_mutation_data.csv --output /data/
+	docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-loader-srv2 v0 --ont_clinical /data/genomic/tcga_cbio/8_clinical_data.csv --sen /data/genomic/sensitive.txt --ont_genomic /data/genomic/tcga_cbio/8_mutation_data.csv --clinical /data/genomic/tcga_cbio/8_clinical_data.csv --genomic /data/genomic/tcga_cbio/8_mutation_data.csv --output /data/

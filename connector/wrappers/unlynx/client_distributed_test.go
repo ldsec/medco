@@ -35,9 +35,12 @@ func init() {
 	}
 
 	cothorityRoster = group.Roster
+
 }
 
+// warning: does now work on mac
 func TestGetQueryTermsDDT(t *testing.T) {
+
 	encryptedInt0, err := libunlynx.EncryptInt(cothorityRoster.Aggregate, 366).Serialize()
 	if err != nil {
 		t.Fail()

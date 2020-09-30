@@ -21,7 +21,7 @@ services:
       - LOG_LEVEL=5
       - I2B2_DB_NAME=i2b2medcosrv0
       - MC_DB_NAME=medcoconnectorsrv0
-      - UNLYNX_GROUP_FILE_IDX=0
+      - MEDCO_NODE_IDX=0
 
   medco-loader-srv1:
     extends:
@@ -37,7 +37,7 @@ services:
       - LOG_LEVEL=5
       - I2B2_DB_NAME=i2b2medcosrv1
       - MC_DB_NAME=medcoconnectorsrv1
-      - UNLYNX_GROUP_FILE_IDX=1
+      - MEDCO_NODE_IDX=1
 
   medco-loader-srv2:
     extends:
@@ -53,4 +53,4 @@ services:
       - LOG_LEVEL=5
       - I2B2_DB_NAME=i2b2medcosrv2
       - MC_DB_NAME=medcoconnectorsrv2
-      - UNLYNX_GROUP_FILE_IDX=2
+      - MEDCO_NODE_IDX=2

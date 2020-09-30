@@ -18,8 +18,8 @@ import (
 func init() {
 	dpath := os.Getenv("DEFAULT_DATA_PATH")
 	if dpath == "" {
-		DefaultDataPath = "../../data/"
-		log.Warn("Couldn't parse DEFAULT_DATA_PATH, using default value: ", "../../data/")
+		DefaultDataPath = "../../test/data/"
+		log.Warn("Couldn't parse DEFAULT_DATA_PATH, using default value: ", DefaultDataPath)
 	} else {
 		DefaultDataPath = dpath
 	}

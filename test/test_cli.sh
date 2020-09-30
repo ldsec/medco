@@ -34,8 +34,8 @@ query5="3 OR 6 AND 9 AND 12 OR 15"
 resultQuery5="$(printf -- "count\n2\n2\n2")"
 
 test1 () {
-  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD $1 $2
-  result="$(awk -F "\"*,\"*" '{print $2}' ../result.csv)"
+  docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD $1 $2
+  result="$(awk -F "\"*,\"*" '{print $2}' deployments/result.csv)"
   if [ "${result}" != "${3}" ];
   then
   echo "$1 $2: test failed"
@@ -45,7 +45,7 @@ test1 () {
 }
 
 test2 () {
-  result="$(docker-compose -f docker-compose.tools.yml run -e LOG_LEVEL=1 -e CONN_TIMEOUT=10m medco-cli-client --user $USERNAME --password $PASSWORD $1 $2 | sed 's/.$//')"
+  result="$(docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run -e LOG_LEVEL=1 -e CONN_TIMEOUT=10m medco-cli-client --user $USERNAME --password $PASSWORD $1 $2 | sed 's/.$//')"
   if [ "${result}" != "${3}" ];
   then
   echo "$1 $2: test failed"

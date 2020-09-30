@@ -57,7 +57,7 @@ func TestExecutePsmQuery(t *testing.T) {
 
 	patientCount, patientSetID, err := ExecutePsmQuery(
 		"testQuery",
-		[][]string{{`\\SENSITIVE_TAGGED\medco\tagged\09bc15e0d90046c102199f1b4d20eef9ee91b2ea3fd4608303775d000dd1248c\`}},
+		[][]string{{`\\SENSITIVE_TAGGED\medco\tagged\fa15afdd3ce192fffde16d4ed10690b206d7cc95bfce778797cc9a05c312a35d\`}},
 		[]bool{false},
 	)
 	if err != nil {
