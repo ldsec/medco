@@ -1,8 +1,6 @@
-configuration-profiles/dev/
 test/data/*
 !test/data/download.sh
-compose-profiles/test-network-*
-configuration-profiles/test-network-*
+deployments/test-network-*
 
 # generic files and folder exclude
 *.exe
@@ -30,3 +28,4 @@ _testmain.go
 *.gob
 .DS_Store
 .idea/
+coverage.txt
