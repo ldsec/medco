@@ -8,7 +8,7 @@ import (
 	"github.com/ldsec/medco/connector/restapi/models"
 	utilclient "github.com/ldsec/medco/connector/util/client"
 	"github.com/ldsec/medco/connector/wrappers/unlynx"
-	"github.com/ldsec/medco/loader/loader/identifiers"
+	"github.com/ldsec/medco/loader/identifiers"
 	"github.com/sirupsen/logrus"
 	"io"
 	"os"

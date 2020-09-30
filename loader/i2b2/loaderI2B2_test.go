@@ -1,8 +1,8 @@
 package loaderi2b2_test
 
 import (
-	"github.com/ldsec/medco/loader/loader"
-	"github.com/ldsec/medco/loader/loader/i2b2"
+	loader "github.com/ldsec/medco/loader"
+	"github.com/ldsec/medco/loader/i2b2"
 	"github.com/ldsec/unlynx/lib"
 	"github.com/stretchr/testify/assert"
 	"go.dedis.ch/kyber/v3"

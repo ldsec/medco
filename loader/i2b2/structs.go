@@ -98,20 +98,20 @@ type MedCoOntology struct {
 	SynonymCD        string
 	VisualAttributes string
 	TotalNum         string
-	BaseCode         string
-	MetadataXML      string
-	FactTableColumn  string
-	Tablename        string
-	ColumnName       string
-	ColumnDataType   string
-	Operator         string
-	DimCode          string
-	Comment          string
-	Tooltip          string
-	AdminColumns     AdministrativeColumns
-	ValueTypeCD      string
-	AppliedPath      string
-	ExclusionCD      string
+	BaseCode        string
+	MetadataXML     string
+	FactTableColumn string
+	Tablename       string
+	ColumnName      string
+	ColumnDataType  string
+	Operator        string
+	DimCode         string
+	Comment         string
+	Tooltip         string
+	AdminColumns    AdministrativeColumns
+	ValueTypeCD     string
+	AppliedPath     string
+	ExclusionCD     string
 }
 
 // ToCSVText writes the MedCoOntology object in a way that can be added to a .csv file - "","","", etc.
@@ -184,21 +184,21 @@ type LocalOntology struct {
 	VisualAttributes string
 	TotalNum         string
 	BaseCode         string
-	MetadataXML      string
-	FactTableColumn  string
-	Tablename        string
-	ColumnName       string
-	ColumnDataType   string
-	Operator         string
-	DimCode          string
-	Comment          string
-	Tooltip          string
-	AppliedPath      string
-	AdminColumns     AdministrativeColumns
-	ValueTypeCD      string
-	ExclusionCD      string
-	Path             string
-	Symbol           string
+	MetadataXML     string
+	FactTableColumn string
+	Tablename       string
+	ColumnName      string
+	ColumnDataType  string
+	Operator        string
+	DimCode         string
+	Comment         string
+	Tooltip         string
+	AppliedPath     string
+	AdminColumns    AdministrativeColumns
+	ValueTypeCD     string
+	ExclusionCD     string
+	Path            string
+	Symbol          string
 
 	// this only exists in the sensitive tagged
 	PCoriBasecode string
