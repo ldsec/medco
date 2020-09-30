@@ -39,7 +39,7 @@ test_go:
 	go test -v -race -short -p=1 ./...
 
 test_codecov:
-	./scripts/coveralls.sh
+	./test/coveralls.sh
 
 # utility commands
 .PHONY:	test_unlynx_loop swagger swagger-gen download_test_data
