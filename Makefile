@@ -1,3 +1,10 @@
+# build commands
+.PHONY: docker_images_build_dev
+docker_images_build_dev:
+	cd "deployments/dev-local-3nodes"; \
+	docker-compose -f docker-compose.yml -f docker-compose.tools.yml build
+
+# test commands
 .PHONY: test test_go_fmt test_go_lint test_go test_codecov
 test_travis: test_go_fmt test_go_lint test_codecov
 test_local: test_go_fmt test_go_lint test_go
@@ -34,8 +41,8 @@ test_go:
 test_codecov:
 	./scripts/coveralls.sh
 
-# ---
-.PHONY:	test_unlynx_loop swagger swagger-gen
+# utility commands
+.PHONY:	test_unlynx_loop swagger swagger-gen download_test_data
 test_unlynx_loop:
 	for i in $$( seq 100 ); \
 		do echo "******* Run $$i"; echo; \
@@ -67,3 +74,6 @@ swagger:
 		go install github.com/go-swagger/go-swagger/cmd/swagger && \
 		echo "swagger installed"; \
 	fi
+
+download_test_data:
+	./test/data/download.sh genomic_small
