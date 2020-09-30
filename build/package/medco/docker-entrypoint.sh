@@ -23,10 +23,10 @@ if [[ "$1" = "medco-connector-server" ]]; then
   echo "Initialising genomic_annotations database"
       psql $PSQL_PARAMS -d postgres <<-EOSQL
           CREATE DATABASE ${GA_DB_NAME};
-  EOSQL
+EOSQL
   psql $PSQL_PARAMS -d "$GA_DB_NAME" <<-EOSQL
           CREATE SCHEMA genomic_annotations;
-  EOSQL
+EOSQL
   fi
 
   EXEC="${EXEC} --write-timeout=${SERVER_HTTP_WRITE_TIMEOUT_SECONDS}s"

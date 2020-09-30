@@ -20,7 +20,7 @@ services:
     image: medco/medco:${MEDCO_VERSION:-v1.0.0}
     build:
       context: ../
-      dockerfile: ../build/package/medco/Dockerfile
+      dockerfile: build/package/medco/Dockerfile
     command: medco-unlynx
     ports:
       - "2000"
@@ -29,7 +29,7 @@ services:
     - MEDCO_NODE_IDX=0
     - UNLYNX_DEBUG_LEVEL=1
     volumes:
-    - ../configuration-profiles/dev-local-3nodes:/medco-configuration
+    - ./configuration:/medco-configuration
 
   nginx:
     image: medco/nginx:${NGINX_VERSION:-v1.0.0-MedCo}
@@ -40,8 +40,8 @@ services:
       - ALL_TIMEOUTS_SECONDS=600
       - PROD_CONFIG=false
     volumes:
-      - ../docker-images/nginx/www-data:/www-data
-      - ../docker-images/nginx/conf.d:/etc/nginx/conf.d
+      - ../build/package/nginx/www-data:/www-data
+      - ../build/package/nginx/conf.d:/etc/nginx/conf.d
 
   postgresql:
     image: postgres:9.6
@@ -49,7 +49,7 @@ services:
     - POSTGRES_PASSWORD=postgres
     volumes:
     - medcodb:/var/lib/postgresql/data
-    - ../docker-images/postgresql/initdb-data:/docker-entrypoint-initdb.d
+    - ../build/package/postgresql/initdb-data:/docker-entrypoint-initdb.d
 
   pg-admin:
     image: medco/pgadmin4:${PGADMIN_VERSION:-v1.0.0-MedCo}
@@ -86,7 +86,7 @@ services:
     image: medco/medco:${MEDCO_VERSION:-v1.0.0}
     build:
       context: ../
-      dockerfile: ../build/package/medco/Dockerfile
+      dockerfile: build/package/medco/Dockerfile
     command: medco-connector-server
     ports:
       - "1999"
@@ -120,13 +120,13 @@ services:
       - I2B2_DB_PASSWORD=i2b2
       - I2B2_DB_NAME=i2b2medco
     volumes:
-      - ../configuration-profiles/dev-local-3nodes:/medco-configuration
+      - ./configuration:/medco-configuration
 
   medco-cli-client:
     image: medco/medco:${MEDCO_VERSION:-v1.0.0}
     build:
       context: ../
-      dockerfile: ../build/package/medco/Dockerfile
+      dockerfile: build/package/medco/Dockerfile
     entrypoint: medco-cli-client
     command: >-
       tbd: some default example query
@@ -140,7 +140,7 @@ services:
       - OIDC_REQ_TOKEN_URL=http://localhost/auth/realms/master/protocol/openid-connect/token
       - OIDC_REQ_TOKEN_CLIENT_ID=medco
     volumes:
-      - ../configuration-profiles/dev-local-3nodes:/medco-configuration
+      - ./configuration:/medco-configuration
       - ./:/results
     network_mode: host
 
@@ -148,7 +148,7 @@ services:
     image: medco/medco:${MEDCO_VERSION:-v1.0.0}
     build:
       context: ../
-      dockerfile: ../build/package/medco/Dockerfile
+      dockerfile: build/package/medco/Dockerfile
     entrypoint: medco-loader
     command: >-
       -debug 2 v0 --group /medco-configuration/group.toml --entryPointIdx 0
@@ -171,6 +171,6 @@ services:
       - MC_DB_USER=medcoconnector
       - MC_DB_PASSWORD=medcoconnector
     volumes:
-      - ../resources/data:/data
-      - ../configuration-profiles/dev-local-3nodes:/medco-configuration
+      - ../test/data:/data
+      - ./configuration:/medco-configuration
     network_mode: host

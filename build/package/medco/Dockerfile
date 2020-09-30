@@ -20,7 +20,7 @@ RUN CGO_ENABLED=0 go install -v ./cmd/...
 # -------------------------------------------
 FROM golang:1.14-alpine as release
 
-COPY deployment/docker-entrypoint.sh /usr/local/bin/
+COPY build/package/medco/docker-entrypoint.sh /usr/local/bin/
 RUN apk update && apk add bash postgresql && rm -rf /var/cache/apk/* && \
     chmod a+x /usr/local/bin/docker-entrypoint.sh
 COPY --from=build /go/bin /go/bin
@@ -74,11 +74,4 @@ ENV CLIENT_QUERY_TIMEOUT_SECONDS=660 \
 
 VOLUME "/medco-configuration"
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["ls -l", "/go/bin"]
-
-CHANGED: todo
-UNLYNX_GROUP_FILE_IDX in loader
-NODE_IDX in unlynx
-CONN_TIMEOUT in unlynx enlevé
-GA_DB_PW > GA_DB_PASSWORD in connector
-GA_DB > MC_DB in medco connector + medco loader
+CMD ["ls -1 /go/bin"]
