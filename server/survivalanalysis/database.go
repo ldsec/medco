@@ -10,8 +10,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// BuildTimePoints execute a SQL query that returns event counts per time point, for given input patient set, start and end  concept codes and modifiers
-func BuildTimePoints(db *sql.DB, patientList []int64, startConceptCode string, startConceptModifier string, endConceptCode string, endConceptModifier string, timeLimit int) (timePoints utilcommon.TimePoints, err error) {
+// buildTimePoints execute a SQL query that returns event counts per time point, for given input patient set, start and end  concept codes and modifiers
+func buildTimePoints(db *sql.DB, patientList []int64, startConceptCode string, startConceptModifier string, endConceptCode string, endConceptModifier string, timeLimit int) (timePoints utilcommon.TimePoints, err error) {
 	logrus.Debug("SQL query : " + sql6)
 	pList := make([]string, len(patientList))
 	for i, pNum := range patientList {

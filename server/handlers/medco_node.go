@@ -5,7 +5,7 @@ import (
 	"time"
 
 	medcoserver "github.com/ldsec/medco-connector/server/explore"
-	"github.com/ldsec/medco-connector/server/querytools"
+	querytoolsserver "github.com/ldsec/medco-connector/server/querytools"
 
 	"github.com/go-openapi/runtime/middleware"
 
@@ -85,7 +85,7 @@ func MedCoNodeExploreQueryHandler(params medco_node.ExploreQueryParams, principa
 // MedCoNodeGetCohortsHandler handles GET /medco/node/explore/cohorts  API endpoint
 func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *models.User) middleware.Responder {
 	userID := principal.ID
-	cohorts, err := querytools.GetSavedCohorts(utilserver.DBConnection, userID)
+	cohorts, err := querytoolsserver.GetSavedCohorts(utilserver.DBConnection, userID)
 	if err != nil {
 		medco_node.NewGetCohortsDefault(500).WithPayload(&medco_node.GetCohortsDefaultBody{
 			Message: "Get cohort execution error: " + err.Error(),
@@ -96,8 +96,8 @@ func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *m
 		payload.Payload = append(payload.Payload,
 			&medco_node.GetCohortsOKBodyItems0{
 				CohortName:   cohort.CohortName,
-				CohortID:     float64(cohort.CohortID),
-				QueryID:      float64(cohort.QueryID),
+				CohortID:     int64(cohort.CohortID),
+				QueryID:      int64(cohort.QueryID),
 				CreationDate: cohort.CreationDate.Format(time.RFC3339),
 				UpdateDate:   cohort.UpdateDate.Format(time.RFC3339),
 			},
@@ -125,7 +125,7 @@ func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal 
 			Message: fmt.Sprintf("String %s is not a date with RF3339 layout", cohort.UpdateDate),
 		})
 	}
-	cohorts, err := querytools.GetSavedCohorts(utilserver.DBConnection, principal.ID)
+	cohorts, err := querytoolsserver.GetSavedCohorts(utilserver.DBConnection, principal.ID)
 	if err != nil {
 		return medco_node.NewPostCohortsDefault(500).WithPayload(&medco_node.PostCohortsDefaultBody{
 			Message: "Get cohort execution error: " + err.Error(),
@@ -145,7 +145,7 @@ func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal 
 			break
 		}
 	}
-	querytools.InsertCohort(utilserver.DBConnection, principal.ID, int(cohort.PatientSetID), cohort.CohortName, creationDate, updateDate)
+	querytoolsserver.InsertCohort(utilserver.DBConnection, principal.ID, int(cohort.PatientSetID), cohort.CohortName, creationDate, updateDate)
 
 	return medco_node.NewPostCohortsOK()
 }

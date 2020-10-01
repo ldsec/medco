@@ -1,10 +1,12 @@
-package querytools
+package querytoolsserver
 
 import (
 	"database/sql"
 	"strconv"
 	"strings"
 	"time"
+
+	utilcommon "github.com/ldsec/medco-connector/util/common"
 
 	"github.com/sirupsen/logrus"
 )
@@ -29,7 +31,7 @@ func GetPatientList(db *sql.DB, userID string, resultInstanceID int64) (patientN
 }
 
 // GetSavedCohorts runs a SQL query on db and returns the list of saved cohorts for given queryID and userID
-func GetSavedCohorts(db *sql.DB, userID string) ([]Cohort, error) {
+func GetSavedCohorts(db *sql.DB, userID string) ([]utilcommon.Cohort, error) {
 	rows, err := db.Query(getCohorts, userID)
 	if err != nil {
 		return nil, err
@@ -41,7 +43,7 @@ func GetSavedCohorts(db *sql.DB, userID string) ([]Cohort, error) {
 	var createDate time.Time
 	var updateDateString string
 	var updateDate time.Time
-	var cohorts = make([]Cohort, 0)
+	var cohorts = make([]utilcommon.Cohort, 0)
 	for rows.Next() {
 		err = rows.Scan(&id, &qid, &name, &createDateString, &updateDateString)
 		if err != nil {
@@ -55,7 +57,7 @@ func GetSavedCohorts(db *sql.DB, userID string) ([]Cohort, error) {
 		if err != nil {
 			return nil, err
 		}
-		cohorts = append(cohorts, Cohort{
+		cohorts = append(cohorts, utilcommon.Cohort{
 			CohortID:     id,
 			QueryID:      qid,
 			CohortName:   name,

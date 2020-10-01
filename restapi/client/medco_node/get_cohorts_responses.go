@@ -178,7 +178,7 @@ swagger:model GetCohortsOKBodyItems0
 type GetCohortsOKBodyItems0 struct {
 
 	// cohort Id
-	CohortID float64 `json:"cohortId,omitempty"`
+	CohortID int64 `json:"cohortId,omitempty"`
 
 	// cohort name
 	CohortName string `json:"cohortName,omitempty"`
@@ -187,7 +187,7 @@ type GetCohortsOKBodyItems0 struct {
 	CreationDate string `json:"creationDate,omitempty"`
 
 	// query Id
-	QueryID float64 `json:"queryId,omitempty"`
+	QueryID int64 `json:"queryId,omitempty"`
 
 	// update date
 	UpdateDate string `json:"updateDate,omitempty"`

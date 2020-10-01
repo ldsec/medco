@@ -1,4 +1,4 @@
-package querytools
+package utilcommon
 
 import "time"
 

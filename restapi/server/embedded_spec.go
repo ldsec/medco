@@ -784,7 +784,7 @@ func init() {
           "type": "object",
           "properties": {
             "cohortId": {
-              "type": "number"
+              "type": "integer"
             },
             "cohortName": {
               "type": "string"
@@ -793,7 +793,7 @@ func init() {
               "type": "string"
             },
             "queryId": {
-              "type": "number"
+              "type": "integer"
             },
             "updateDate": {
               "type": "string"
@@ -1560,7 +1560,7 @@ func init() {
       "type": "object",
       "properties": {
         "cohortId": {
-          "type": "number"
+          "type": "integer"
         },
         "cohortName": {
           "type": "string"
@@ -1569,7 +1569,7 @@ func init() {
           "type": "string"
         },
         "queryId": {
-          "type": "number"
+          "type": "integer"
         },
         "updateDate": {
           "type": "string"
@@ -2093,7 +2093,7 @@ func init() {
           "type": "object",
           "properties": {
             "cohortId": {
-              "type": "number"
+              "type": "integer"
             },
             "cohortName": {
               "type": "string"
@@ -2102,7 +2102,7 @@ func init() {
               "type": "string"
             },
             "queryId": {
-              "type": "number"
+              "type": "integer"
             },
             "updateDate": {
               "type": "string"

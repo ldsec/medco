@@ -393,9 +393,9 @@ responses:
         type: "object"
         properties:
           cohortId:
-            type: "number"
+            type: "integer"
           queryId:
-            type: "number"
+            type: "integer"
           cohortName:
             type: "string"
           creationDate:

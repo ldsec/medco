@@ -10,7 +10,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
-	"github.com/ldsec/medco-connector/server/querytools"
+	querytoolsserver "github.com/ldsec/medco-connector/server/querytools"
 	utilcommon "github.com/ldsec/medco-connector/util/common"
 	utilserver "github.com/ldsec/medco-connector/util/server"
 	"github.com/ldsec/medco-connector/wrappers/i2b2"
@@ -82,7 +82,7 @@ func (q *Query) Execute() error {
 	// --- cohort patient list
 
 	timer := time.Now()
-	cohort, err := querytools.GetPatientList(utilserver.DBConnection, q.UserID, int64(q.SetID))
+	cohort, err := querytoolsserver.GetPatientList(utilserver.DBConnection, q.UserID, int64(q.SetID))
 	q.Result.Timers.AddTimers("medco-connector-get-patient-list", timer, nil)
 	logrus.Debug("got patients")
 
@@ -196,7 +196,9 @@ func (q *Query) Execute() error {
 			logrus.Debug("initialcount ", initialCountEncrypt)
 			newEventGroup.EncInitialCount = initialCountEncrypt
 			timer = time.Now()
-			sqlTimePoints, err := BuildTimePoints(utilserver.I2B2DBConnection,
+
+			//  --- sql query on observation fact table
+			sqlTimePoints, err := buildTimePoints(utilserver.I2B2DBConnection,
 				patientList,
 				startConceptCode,
 				q.StartModifier,
@@ -212,7 +214,8 @@ func (q *Query) Execute() error {
 			}
 			logrus.Debugf("got %d time points", len(sqlTimePoints))
 			logrus.Tracef("%+v", sqlTimePoints)
-			// ---change time resolution
+
+			// --- change time resolution
 			timer = time.Now()
 			sqlTimePoints, err = granularity(sqlTimePoints, q.TimeGranularity)
 			if err != nil {

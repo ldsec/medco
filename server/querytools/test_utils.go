@@ -1,4 +1,4 @@
-package querytools
+package querytoolsserver
 
 import (
 	"database/sql"

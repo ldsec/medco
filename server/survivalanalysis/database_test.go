@@ -3,7 +3,7 @@ package survivalserver
 import (
 	"testing"
 
-	"github.com/ldsec/medco-connector/server/querytools"
+	querytoolsserver "github.com/ldsec/medco-connector/server/querytools"
 	utilcommon "github.com/ldsec/medco-connector/util/common"
 
 	_ "github.com/lib/pq"
@@ -14,7 +14,7 @@ import (
 // tests are aimed at unit tests run at development time. It is not expected to succeed in CI or other automated run env
 
 func TestBuildTimePoint(t *testing.T) {
-	db, err := querytools.DBResolver("I2B2_DB_HOST", "i2b2medcosrv0")
+	db, err := querytoolsserver.DBResolver("I2B2_DB_HOST", "i2b2medcosrv0")
 	logrus.Info(err)
 	if err != nil {
 		t.Fatal("Error at creating database connection", err)
@@ -23,7 +23,7 @@ func TestBuildTimePoint(t *testing.T) {
 	if err != nil {
 		t.Fatal("Unable to connect database for testing", err)
 	}
-	timePoints, err := BuildTimePoints(db, bigList,
+	timePoints, err := buildTimePoints(db, bigList,
 		`A168`,
 		"@", `A125`, "126:1", 2000)
 	if err != nil {

@@ -17,7 +17,7 @@ func (clientSurvivalAnalysis *SurvivalAnalysis) submitToNode(nodeIdx int) (resul
 
 	params := survival_analysis.NewSurvivalAnalysisParamsWithTimeout(time.Duration(utilclient.QueryTimeoutSeconds) * time.Second)
 
-	body := &survival_analysis.SurvivalAnalysisBody{
+	body := survival_analysis.SurvivalAnalysisBody{
 		ID:                  clientSurvivalAnalysis.id,
 		UserPublicKey:       clientSurvivalAnalysis.userPublicKey,
 		SetID:               int64(clientSurvivalAnalysis.patientSetID),
@@ -29,7 +29,7 @@ func (clientSurvivalAnalysis *SurvivalAnalysis) submitToNode(nodeIdx int) (resul
 		TimeGranularity:     strings.ToLower(clientSurvivalAnalysis.granularity),
 		TimeLimit:           int64(clientSurvivalAnalysis.limit),
 	}
-	params.SetBody(*body)
+	params.SetBody(body)
 	response, err := clientSurvivalAnalysis.httpMedCoClients[nodeIdx].SurvivalAnalysis.SurvivalAnalysis(params, httptransport.BearerToken(clientSurvivalAnalysis.authToken))
 
 	if err != nil {
