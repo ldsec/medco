@@ -15,8 +15,8 @@ SECRETS="${3-}"
 PROFILE_NAME="test-network-${NETWORK_NAME}-node${NODE_IDX}"
 SCRIPT_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 MEDCO_UNLYNX_VER="v1.0.0"
-CONF_FOLDER="${SCRIPT_FOLDER}/../../../configuration-profiles/${PROFILE_NAME}"
-COMPOSE_FOLDER="${SCRIPT_FOLDER}/../../../compose-profiles/${PROFILE_NAME}"
+COMPOSE_FOLDER="${SCRIPT_FOLDER}/../../../deployments/${PROFILE_NAME}"
+CONF_FOLDER="${COMPOSE_FOLDER}/configuration"
 if [[ ! -d ${CONF_FOLDER} ]] || [[ ! -d ${COMPOSE_FOLDER} ]] || [[ -f ${CONF_FOLDER}/group.toml ]]; then
     echo "The compose or configuration profile folder does not exist, or the step 2 has already been executed. Aborting."
     exit 2

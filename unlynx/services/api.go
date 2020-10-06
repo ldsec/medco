@@ -1,7 +1,6 @@
 package servicesmedco
 
 import (
-	"fmt"
 	"github.com/ldsec/unlynx/lib"
 	"go.dedis.ch/kyber/v3"
 	"go.dedis.ch/kyber/v3/util/key"
@@ -52,7 +51,6 @@ func (c *API) SendSurveyDDTRequestTerms(entities *onet.Roster, surveyID SurveyID
 	}
 
 	resp := ResultDDT{}
-	fmt.Println(c.entryPoint.Address)
 	err := c.SendProtobuf(c.entryPoint, &sdq, &resp)
 	if err != nil {
 		return nil, nil, TimeResults{}, err

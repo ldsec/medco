@@ -6,6 +6,8 @@ services:
       service: medco-cli-client
     environment:
       - LOG_LEVEL=5
+    volumes:
+      - ./configuration:/medco-configuration
 
   medco-loader-srv0:
     extends:

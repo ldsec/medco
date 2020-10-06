@@ -33,7 +33,7 @@ func loadV0(c *cli.Context) error {
 	groupFilePath := c.String(optionGroupFile)
 	entryPointIdx := c.Int(optionEntryPointIdx)
 	sensitiveFilePath := c.String(optionSensitiveFile)
-	replaySize := c.Int("replay") // TODO: no such option in the loader. Add there? Delete here?
+	replaySize := c.Int("replay")
 	outputPath := c.String(optionOutputPath)
 
 	// i2b2 db settings

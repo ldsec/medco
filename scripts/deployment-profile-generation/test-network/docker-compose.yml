@@ -17,9 +17,9 @@ services:
       - "2000:2000"
       - "2001:2001"
     environment:
-      - NODE_IDX=${MEDCO_NODE_IDX:?}
+      - MEDCO_NODE_IDX=${MEDCO_NODE_IDX:?}
     volumes:
-      - ../../configuration-profiles/${MEDCO_PROFILE_NAME:?}:/medco-configuration
+      - ./configuration:/medco-configuration
 
   medco-connector:
     extends:
@@ -34,7 +34,7 @@ services:
       - OIDC_JWT_USER_ID_CLAIMS=${OIDC_JWT_USER_ID_CLAIMS:?}
       - MEDCO_NODES_URL=${MEDCO_NODES_URL:?}
     volumes:
-      - ../../configuration-profiles/${MEDCO_PROFILE_NAME:?}:/medco-configuration
+      - ./configuration:/medco-configuration
 
   glowing-bear-medco:
     extends:
@@ -57,9 +57,9 @@ services:
     environment:
       - HTTP_SCHEME=https
     volumes:
-      - ../../configuration-profiles/${MEDCO_PROFILE_NAME:?}/group.toml:/medco-configuration/group.toml
-      - ../../configuration-profiles/${MEDCO_PROFILE_NAME:?}/certificate.crt:/medco-configuration/certificate.crt
-      - ../../configuration-profiles/${MEDCO_PROFILE_NAME:?}/certificate.key:/medco-configuration/certificate.key
+      - ./configuration/group.toml:/medco-configuration/group.toml
+      - ./configuration/certificate.crt:/medco-configuration/certificate.crt
+      - ./configuration/certificate.key:/medco-configuration/certificate.key
 
   postgresql:
     extends:
