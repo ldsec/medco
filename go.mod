@@ -23,6 +23,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/r0fls/gostats v0.0.0-20180711082619-e793b1fda35c
 	github.com/sirupsen/logrus v1.6.0
+	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/stretchr/testify v1.6.1
 	github.com/urfave/cli v1.22.4
 	go.dedis.ch/kyber/v3 v3.0.12
@@ -30,7 +31,6 @@ require (
 	go.etcd.io/bbolt v1.3.5 // indirect
 	go.mongodb.org/mongo-driver v1.4.1 // indirect
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a // indirect
-	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
 	golang.org/x/net v0.0.0-20200923182212-328152dc79b1
 	golang.org/x/sys v0.0.0-20200923182605-d9f96fdee20d // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
