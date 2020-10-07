@@ -29,7 +29,6 @@ jobs:
       - name: Run go test
         run: make test_codecov_unit
 
-    asdasdasd
   e2e-tests:
     name: End-to-end tests
     runs-on: ubuntu-latest
