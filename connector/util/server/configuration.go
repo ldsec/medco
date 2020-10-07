@@ -121,12 +121,12 @@ func init() {
 	}
 	MedCoObfuscationMin = int(obf)
 
-	DBHost = os.Getenv("GA_DB_HOST")
-	DBName = os.Getenv("GA_DB_NAME")
-	DBLoginUser = os.Getenv("GA_DB_USER")
-	DBLoginPassword = os.Getenv("GA_DB_PASSWORD")
+	DBHost = os.Getenv("MC_DB_HOST")
+	DBName = os.Getenv("MC_DB_NAME")
+	DBLoginUser = os.Getenv("MC_DB_USER")
+	DBLoginPassword = os.Getenv("MC_DB_PASSWORD")
 
-	dbPort, err := strconv.ParseInt(os.Getenv("GA_DB_PORT"), 10, 64)
+	dbPort, err := strconv.ParseInt(os.Getenv("MC_DB_PORT"), 10, 64)
 	if err != nil || dbPort < 0 || dbPort > 65535 {
 		logrus.Warn("invalid DB port, defaulted")
 		dbPort = 5432

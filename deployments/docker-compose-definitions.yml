@@ -28,6 +28,8 @@ services:
     environment:
     - MEDCO_NODE_IDX=0
     - UNLYNX_DEBUG_LEVEL=1
+    volumes:
+      - ./dev-local-3nodes/configuration:/medco-configuration
 
   nginx:
     image: medco/nginx:${NGINX_VERSION:-v1.0.0-MedCo}
@@ -117,6 +119,8 @@ services:
       - I2B2_DB_USER=i2b2
       - I2B2_DB_PASSWORD=i2b2
       - I2B2_DB_NAME=i2b2medco
+    volumes:
+      - ./dev-local-3nodes/configuration:/medco-configuration
 
   medco-cli-client:
     image: medco/medco:${MEDCO_VERSION:-v1.0.0}
@@ -136,6 +140,7 @@ services:
       - OIDC_REQ_TOKEN_URL=http://localhost/auth/realms/master/protocol/openid-connect/token
       - OIDC_REQ_TOKEN_CLIENT_ID=medco
     volumes:
+      - ./dev-local-3nodes/configuration:/medco-configuration
       - ./:/results
     network_mode: host
 
@@ -166,5 +171,6 @@ services:
       - MC_DB_USER=medcoconnector
       - MC_DB_PASSWORD=medcoconnector
     volumes:
+      - ./dev-local-3nodes/configuration:/medco-configuration
       - ../test/data:/data
     network_mode: host

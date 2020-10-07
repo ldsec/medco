@@ -23,8 +23,8 @@ import (
 func init() {
 	dpath := os.Getenv("DEFAULT_DATA_PATH")
 	if dpath == "" {
-		DefaultDataPath = "../../data/"
-		log.Warn("Couldn't parse DEFAULT_DATA_PATH, using default value: ", "../../data/")
+		DefaultDataPath = "../../test/data/"
+		log.Warn("Couldn't parse DEFAULT_DATA_PATH, using default value: ", DefaultDataPath)
 	} else {
 		DefaultDataPath = dpath
 	}
@@ -320,7 +320,7 @@ func LoadGenomicData(el *onet.Roster, entryPointIdx int, fOntClinical, fOntGenom
 }
 
 // GenerateLoadingOntologyScript creates a load ontology .sql script
-func GenerateLoadingOntologyScript(i2b2DB loader.DBSettings, gaDB loader.DBSettings) error {
+func GenerateLoadingOntologyScript(i2b2DB loader.DBSettings, mcDB loader.DBSettings) error {
 	fp, err := os.Create(FileBashPath[0])
 	if err != nil {
 		return err
@@ -495,8 +495,8 @@ func GenerateLoadingOntologyScript(i2b2DB loader.DBSettings, gaDB loader.DBSetti
 	loading += "COMMIT;\n"
 	loading += "EOSQL"
 
-	loading += "\n \n" + `PGPASSWORD=` + gaDB.DBpassword + ` psql -v ON_ERROR_STOP=1 -h "` + gaDB.DBhost +
-		`" -U "` + gaDB.DBuser + `" -p ` + strconv.FormatInt(int64(gaDB.DBport), 10) + ` -d "` + gaDB.DBname + `" <<-EOSQL` + "\n"
+	loading += "\n \n" + `PGPASSWORD=` + mcDB.DBpassword + ` psql -v ON_ERROR_STOP=1 -h "` + mcDB.DBhost +
+		`" -U "` + mcDB.DBuser + `" -p ` + strconv.FormatInt(int64(mcDB.DBport), 10) + ` -d "` + mcDB.DBname + `" <<-EOSQL` + "\n"
 
 	loading += "BEGIN;\n"
 
@@ -515,11 +515,11 @@ func GenerateLoadingOntologyScript(i2b2DB loader.DBSettings, gaDB loader.DBSetti
 				gene_value character varying(255) NOT NULL PRIMARY KEY);
 		
 				-- permissions
-				ALTER TABLE genomic_annotations.genomic_annotations OWNER TO $GA_DB_USER;
-				ALTER TABLE genomic_annotations.annotation_names OWNER TO $GA_DB_USER;
-				ALTER TABLE genomic_annotations.gene_values OWNER TO $GA_DB_USER;
-				GRANT ALL on schema genomic_annotations to $GA_DB_USER;
-				GRANT ALL privileges on all tables in schema genomic_annotations to $GA_DB_USER;` + "\n"
+				ALTER TABLE genomic_annotations.genomic_annotations OWNER TO $MC_DB_USER;
+				ALTER TABLE genomic_annotations.annotation_names OWNER TO $MC_DB_USER;
+				ALTER TABLE genomic_annotations.gene_values OWNER TO $MC_DB_USER;
+				GRANT ALL on schema genomic_annotations to $MC_DB_USER;
+				GRANT ALL privileges on all tables in schema genomic_annotations to $MC_DB_USER;` + "\n"
 
 	//TODO: Delete this please
 	loading += "TRUNCATE " + TablenamesOntology[2] + ";\n"
