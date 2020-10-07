@@ -35,14 +35,14 @@ jobs:
     needs: go-tests
 
     env:
-      - MEDCO_DB_NUMBER=9 # the number of databases used in the profile that will be tested
-      - MEDCO_DB_HOST=localhost
-      - MEDCO_DB_PORT=5432
-      - MEDCO_DB_USER=postgres
-      - MEDCO_DB_PASSWORD=postgres
-      - MEDCO_DB_NAME=postgres
-      - MEDCO_USER_USERNAME=test
-      - MEDCO_USER_PASSWORD=test
+      MEDCO_DB_NUMBER=9 # the number of databases used in the profile that will be tested
+      MEDCO_DB_HOST=localhost
+      MEDCO_DB_PORT=5432
+      MEDCO_DB_USER=postgres
+      MEDCO_DB_PASSWORD=postgres
+      MEDCO_DB_NAME=postgres
+      MEDCO_USER_USERNAME=test
+      MEDCO_USER_PASSWORD=test
 
     steps:
       - name: Checkout code
