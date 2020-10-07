@@ -1,3 +1,5 @@
+MEDCO_VERSION := $(shell git describe --tags --always --dirty)
+
 # build commands
 .PHONY: docker_images_build_dev
 docker_images_build_dev:
@@ -5,9 +7,8 @@ docker_images_build_dev:
 	docker-compose -f docker-compose.yml -f docker-compose.tools.yml build
 
 # test commands
-.PHONY: test test_go_fmt test_go_lint test_go test_codecov
-test_travis: test_go_fmt test_go_lint test_codecov
-test_local: test_go_fmt test_go_lint test_go
+.PHONY: test_go test_go_fmt test_go_lint test_go_unit
+test_go: test_go_fmt test_go_lint test_go_unit
 
 test_go_fmt:
 	@echo Checking correct formatting of files
@@ -25,7 +26,7 @@ test_go_fmt:
 test_go_lint:
 	@echo Checking linting of files
 	@{ \
-		go install golang.org/x/lint/golint; \
+		GO111MODULE=off go get -u golang.org/x/lint/golint; \
 		el="_test.go"; \
 		lintfiles=$$( golint ./... | egrep -v "$$el" ); \
 		if [ -n "$$lintfiles" ]; then \
@@ -35,14 +36,14 @@ test_go_lint:
 		fi \
 	}
 
-test_go:
+test_go_unit:
 	go test -v -race -short -p=1 ./...
 
 test_codecov:
 	./test/coveralls.sh
 
 # utility commands
-.PHONY:	test_unlynx_loop swagger swagger-gen download_test_data
+.PHONY:	test_unlynx_loop swagger swagger-gen download_test_data version
 test_unlynx_loop:
 	for i in $$( seq 100 ); \
 		do echo "******* Run $$i"; echo; \
@@ -77,3 +78,6 @@ swagger:
 
 download_test_data:
 	./test/data/download.sh genomic_small
+
+version:
+	@echo $(MEDCO_VERSION)
