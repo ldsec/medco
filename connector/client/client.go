@@ -270,7 +270,7 @@ func loadQueryFile(queryFilePath string) (queryTerms []int64, err error) {
 			}
 
 		} else {
-			err = errors.New("dataset with " + string(len(queryTermFields)) + " fields is not supported")
+			err = errors.New("dataset with " + fmt.Sprint(len(queryTermFields)) + " fields is not supported")
 			logrus.Error(err)
 			return
 		}

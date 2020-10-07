@@ -2,6 +2,7 @@ package loaderi2b2
 
 import (
 	"encoding/csv"
+	"fmt"
 	"github.com/ldsec/medco/loader"
 	"github.com/ldsec/medco/unlynx/services"
 	"github.com/ldsec/unlynx/lib"
@@ -797,7 +798,7 @@ func ParseLocalTable(group *onet.Roster, entryPointIdx int, name string) error {
 
 					// if the ID does not yet exist
 					if _, ok := MapConceptPathToTag[lo.Fullname]; !ok {
-						MapConceptPathToTag[lo.Fullname] = TagAndID{Tag: libunlynx.GroupingKey(-1), TagID: -1}
+						MapConceptPathToTag[lo.Fullname] = TagAndID{Tag: libunlynx.GroupingKey(fmt.Sprint(-1)), TagID: -1}
 						listConceptCD = append(listConceptCD, lo.Fullname)
 						allSensitiveConceptIDs = append(allSensitiveConceptIDs, IDConcepts)
 					}

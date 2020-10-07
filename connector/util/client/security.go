@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
@@ -41,7 +42,7 @@ func RetrieveAccessToken(username string, password string, disableTLSCheck bool)
 	}
 
 	if httpResp.StatusCode != 200 {
-		err = errors.New("OIDC request token error (code " + string(httpResp.StatusCode) + ")")
+		err = errors.New("OIDC request token error (code " + fmt.Sprint(httpResp.StatusCode) + ")")
 		logrus.Error(err)
 		return
 	}
