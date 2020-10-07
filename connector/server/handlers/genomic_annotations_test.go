@@ -23,13 +23,14 @@ var hugoGeneSymbolGetVariantsResult = []string{"-7039476204566471680", "-7039476
 func init() {
 	utilserver.DBHost = "localhost"
 	utilserver.DBPort = 5432
-	utilserver.DBName = "gamedcosrv0"
-	utilserver.DBLoginUser = "genomicannotations"
-	utilserver.DBLoginPassword = "genomicannotations"
+	utilserver.DBName = "medcoconnectorsrv0"
+	utilserver.DBLoginUser = "medcoconnector"
+	utilserver.DBLoginPassword = "medcoconnector"
 	utilserver.SetLogLevel("5")
 }
 
 func TestDBConnection(t *testing.T) {
+
 	var err error
 	utilserver.DBConnection, err = utilserver.InitializeConnectionToDB(utilserver.DBHost, utilserver.DBPort, utilserver.DBName, utilserver.DBLoginUser, utilserver.DBLoginPassword)
 	if err != nil {

@@ -26,32 +26,32 @@ import (
 func loadV0(c *cli.Context) error {
 
 	// data set file paths
-	clinicalOntologyPath := c.String("ont_clinical")
-	genomicOntologyPath := c.String("ont_genomic")
-	clinicalFilePath := c.String("clinical")
-	genomicFilePath := c.String("genomic")
-	groupFilePath := c.String("group")
-	entryPointIdx := c.Int("entryPointIdx")
-	sensitiveFilePath := c.String("sensitive")
+	clinicalOntologyPath := c.String(optionOntologyClinical)
+	genomicOntologyPath := c.String(optionOntologyGenomic)
+	clinicalFilePath := c.String(optionClinicalFile)
+	genomicFilePath := c.String(optionGenomicFile)
+	groupFilePath := c.String(optionGroupFile)
+	entryPointIdx := c.Int(optionEntryPointIdx)
+	sensitiveFilePath := c.String(optionSensitiveFile)
 	replaySize := c.Int("replay")
-	outputPath := c.String("output")
+	outputPath := c.String(optionOutputPath)
 
 	// i2b2 db settings
-	i2b2DbHost := c.String("i2b2DbHost")
-	i2b2DbPort := c.Int("i2b2DbPort")
-	i2b2DbName := c.String("i2b2DbName")
-	i2b2DbUser := c.String("i2b2DbUser")
-	i2b2DbPassword := c.String("i2b2DbPassword")
+	i2b2DbHost := c.String(optionI2b2DBhost)
+	i2b2DbPort := c.Int(optionI2b2DBport)
+	i2b2DbName := c.String(optionI2b2DBname)
+	i2b2DbUser := c.String(optionI2b2DBuser)
+	i2b2DbPassword := c.String(optionI2b2DBpassword)
 
-	// genomic annotations db settings
-	gaDbHost := c.String("gaDbHost")
-	gaDbPort := c.Int("gaDbPort")
-	gaDbName := c.String("gaDbName")
-	gaDbUser := c.String("gaDbUser")
-	gaDbPassword := c.String("gaDbPassword")
+	// medco connector db settings
+	mcDbHost := c.String(optionMcDBhost)
+	mcDbPort := c.Int(optionMcDBport)
+	mcDbName := c.String(optionMcDBname)
+	mcDbUser := c.String(optionMcDBuser)
+	mcDbPassword := c.String(optionMcDBpassword)
 
 	i2b2DB := loader.DBSettings{DBhost: i2b2DbHost, DBport: i2b2DbPort, DBname: i2b2DbName, DBuser: i2b2DbUser, DBpassword: i2b2DbPassword}
-	gaDB := loader.DBSettings{DBhost: gaDbHost, DBport: gaDbPort, DBname: gaDbName, DBuser: gaDbUser, DBpassword: gaDbPassword}
+	gaDB := loader.DBSettings{DBhost: mcDbHost, DBport: mcDbPort, DBname: mcDbName, DBuser: mcDbUser, DBpassword: mcDbPassword}
 
 	// check if db connection works
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", i2b2DbHost, i2b2DbPort, i2b2DbUser, i2b2DbPassword, i2b2DbName)
@@ -63,11 +63,11 @@ func loadV0(c *cli.Context) error {
 	}
 	db.Close()
 
-	psqlInfo = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", gaDbHost, gaDbPort, gaDbUser, gaDbPassword, gaDbName)
+	psqlInfo = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", mcDbHost, mcDbPort, mcDbUser, mcDbPassword, mcDbName)
 	db, err = sql.Open("postgres", psqlInfo)
 	err = db.Ping()
 	if err != nil {
-		log.Error("Error while connecting to genomic annotations database", err)
+		log.Error("Error while connecting to medco connector database", err)
 		return cli.NewExitError(err, 1)
 	}
 	db.Close()
