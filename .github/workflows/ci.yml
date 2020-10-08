@@ -32,7 +32,6 @@ jobs:
   e2e-tests:
     name: End-to-end tests
     runs-on: ubuntu-latest
-    needs: go-tests
 
     env:
       MEDCO_DB_NUMBER: 9 # the number of databases used in the profile that will be tested
