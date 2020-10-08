@@ -98,7 +98,28 @@ func InsertCohort(db *sql.DB, userID string, queryID int, cohortName string, cre
 		return -1, err
 	}
 	cohortID, err := strconv.Atoi(*res)
+	if err != nil {
+		return -1, err
+	}
 	return cohortID, err
+}
+
+// DoesCohortExist check whether a cohort exists for provided user ID and a cohort name.
+func DoesCohortExist(db *sql.DB, userID, cohortName string) (bool, error) {
+	row := db.QueryRow(doesCohortExist, userID, cohortName)
+	res := new(string)
+	err := row.Scan(res)
+	if err != nil {
+		return false, err
+	}
+	cohortNumber, err := strconv.Atoi(*res)
+	return cohortNumber > 0, err
+}
+
+// RemoveCohort deletes cohort
+func RemoveCohort(db *sql.DB, userID, cohortName string) error {
+	_, err := db.Exec(removeCohort, userID, cohortName)
+	return err
 }
 
 const insertCohort string = `
@@ -122,4 +143,14 @@ WHERE user_id = $1
 const getDate string = `
 SELECT update_date FROM query_tools.saved_cohorts
 WHERE user_id =$1 and cohort_id=$2
+`
+
+const doesCohortExist string = `
+SELECT COUNT(cohort_id) FROM query_tools.saved_cohorts
+WHERE user_id = $1 and cohort_name = $2
+`
+
+const removeCohort string = `
+DELETE FROM query_tools.saved_cohorts
+WHERE user_id = $1 AND cohort_name = $2
 `

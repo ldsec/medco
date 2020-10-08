@@ -10,7 +10,6 @@ import (
 
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/ldsec/medco-connector/restapi/client"
-	"github.com/ldsec/medco-connector/restapi/client/medco_network"
 	"github.com/ldsec/medco-connector/restapi/client/medco_node"
 	utilclient "github.com/ldsec/medco-connector/util/client"
 	"github.com/sirupsen/logrus"
@@ -34,32 +33,12 @@ func NewPostCohorts(token string, patientSetID []int, cohortName string, disable
 		cohortName:   cohortName,
 		patientSetID: patientSetID,
 	}
-	parsedURL, err := url.Parse(utilclient.MedCoConnectorURL)
 
-	// TODO code replication
-	if err != nil {
-		logrus.Error("cannot parse MedCo connector URL: ", err)
-		return
-	}
-	if err != nil {
-		logrus.Error("cannot parse MedCo connector URL: ", err)
-		return
-	}
+	getMetadataResp, err := utilclient.MetaData(token, disableTLSCheck)
 
-	transport := httptransport.New(parsedURL.Host, parsedURL.Path, []string{parsedURL.Scheme})
-	transport.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: disableTLSCheck}
-
-	getMetadataResp, err := client.New(transport, nil).MedcoNetwork.GetMetadata(
-		medco_network.NewGetMetadataParamsWithTimeout(30*time.Second),
-		httptransport.BearerToken(token),
-	)
-	if err != nil {
-		logrus.Error("get network metadata request error: ", err)
-		return
-	}
 	nofNodes := len(getMetadataResp.Payload.Nodes)
 	if len(patientSetID) != nofNodes {
-		err = fmt.Errorf("number provided patient set IDs must be the same as that of MedCo nodes: provided %d, connected nodes %d", len(patientSetID), nofNodes)
+		err = fmt.Errorf("number of provided patient set IDs must be the same as that of MedCo nodes: provided %d, connected nodes %d", len(patientSetID), nofNodes)
 		logrus.Error(err)
 		return
 	}
@@ -95,7 +74,7 @@ func (postCohorts *PostCohorts) Execute() (err error) {
 		go func(idx int) {
 			res, Error := postCohorts.submitToNode(idx)
 			if Error != nil {
-				logrus.Errorf("Survival analysis exection error : %s", Error)
+				logrus.Errorf("Query tool exection error : %s", Error)
 				errChan <- Error
 			} else {
 

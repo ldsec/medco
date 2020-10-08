@@ -4,6 +4,8 @@ import (
 	"os"
 	"strings"
 
+	querytoolsclient "github.com/ldsec/medco-connector/client/querytools"
+
 	medcoclient "github.com/ldsec/medco-connector/client/explore"
 
 	survivalclient "github.com/ldsec/medco-connector/client/survivalanalysis"
@@ -137,6 +139,31 @@ func main() {
 		},
 	}
 
+	//--- query tools command flags
+	postCohortFlag := []cli.Flag{
+		// cli.IntSlice produces wrong results
+		cli.StringFlag{
+			Name:     "patientSetIDs, p",
+			Usage:    "List of patient set IDs, there must be one per node",
+			Required: true,
+		},
+		cli.StringFlag{
+			Name:     "cohortName, c",
+			Usage:    "Name of the new cohort",
+			Required: true,
+		},
+	}
+
+	//--- query tools command flags
+	removeCohortFlag := []cli.Flag{
+		// cli.IntSlice produces wrong results
+		cli.StringFlag{
+			Name:     "cohortName, c",
+			Usage:    "Name of the new cohort",
+			Required: true,
+		},
+	}
+
 	// --- app commands
 	cliApp.Commands = []cli.Command{
 		//{
@@ -234,6 +261,59 @@ func main() {
 					c.String("endModifier"),
 				)
 
+			},
+		},
+
+		{
+			Name:        "get-query-tools",
+			Aliases:     []string{"getqt"},
+			Usage:       "get cohorts",
+			Description: "Gets the list of cohorts.",
+			Action: func(c *cli.Context) error {
+				return querytoolsclient.ExecuteGetCohorts(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.GlobalBool("disableTLSCheck"),
+					"",
+				)
+			},
+		},
+
+		{
+			Name:        "post-query-tools",
+			Aliases:     []string{"postqt"},
+			Usage:       "Update a cohort or create a new one.",
+			Flags:       postCohortFlag,
+			ArgsUsage:   "-c cohortName -p patientSetIDs",
+			Description: "Updates a cohort or creates a new cohorts with given name. The patient set IDs corresponds to explore query result IDs.",
+			Action: func(c *cli.Context) error {
+				return querytoolsclient.ExecutePostCohorts(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.String("cohortName"),
+					c.String("patientSetIDs"),
+					c.GlobalBool("disableTLSCheck"),
+				)
+			},
+		},
+
+		{
+			Name:        "remove-query-tools",
+			Aliases:     []string{"rmqt"},
+			Usage:       "Remove a cohort.",
+			Flags:       removeCohortFlag,
+			ArgsUsage:   "-c cohortName",
+			Description: "Removes a cohort for a given name. If the user does not have a cohort with this name in DB, an error is sent.",
+			Action: func(c *cli.Context) error {
+				return querytoolsclient.ExecuteRemoveCohorts(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.String("cohortName"),
+					c.GlobalBool("disableTLSCheck"),
+				)
 			},
 		},
 	}

@@ -6,6 +6,7 @@ import (
 
 	medcoserver "github.com/ldsec/medco-connector/server/explore"
 	querytoolsserver "github.com/ldsec/medco-connector/server/querytools"
+	"github.com/sirupsen/logrus"
 
 	"github.com/go-openapi/runtime/middleware"
 
@@ -113,6 +114,20 @@ func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal 
 
 	cohort := params.Body
 
+	hasID, err := querytoolsserver.CheckQueryID(utilserver.DBConnection, principal.ID, int(cohort.PatientSetID))
+	if err != nil {
+		return medco_node.NewPostCohortsDefault(500).WithPayload(&medco_node.PostCohortsDefaultBody{
+			Message: fmt.Sprintf("During execution of CheckQueryID"),
+		})
+	}
+	logrus.Trace("has ID", hasID)
+
+	if !hasID {
+		return medco_node.NewPostCohortsDefault(400).WithPayload(&medco_node.PostCohortsDefaultBody{
+			Message: fmt.Sprintf("User does not have a stored query result with ID: %d", cohort.PatientSetID),
+		})
+	}
+
 	creationDate, err := time.Parse(time.RFC3339, cohort.CreationDate)
 	if err != nil {
 		return medco_node.NewPostCohortsDefault(400).WithPayload(&medco_node.PostCohortsDefaultBody{
@@ -148,4 +163,35 @@ func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal 
 	querytoolsserver.InsertCohort(utilserver.DBConnection, principal.ID, int(cohort.PatientSetID), cohort.CohortName, creationDate, updateDate)
 
 	return medco_node.NewPostCohortsOK()
+}
+
+// MedCoNodeDeleteCohortsHandler handles DELETE /medco/node/explore/cohorts  API endpoint
+func MedCoNodeDeleteCohortsHandler(params medco_node.DeleteCohortsParams, principal *models.User) middleware.Responder {
+	cohortName := params.Body
+	user := principal.ID
+
+	// check if cohort exists
+	hasCohort, err := querytoolsserver.DoesCohortExist(utilserver.DBConnection, user, cohortName)
+	if err != nil {
+		return medco_node.NewDeleteCohortsDefault(500).WithPayload(&medco_node.DeleteCohortsDefaultBody{
+			Message: "Delete cohort execution error: " + err.Error(),
+		})
+	}
+	logrus.Trace("hasCohort", hasCohort)
+	if !hasCohort {
+		return medco_node.NewDeleteCohortsDefault(400).WithPayload(&medco_node.DeleteCohortsDefaultBody{
+			Message: "Cohort does not exist",
+		})
+	}
+
+	// delete the cohorts
+	err = querytoolsserver.RemoveCohort(utilserver.DBConnection, user, cohortName)
+	if err != nil {
+		return medco_node.NewDeleteCohortsDefault(500).WithPayload(&medco_node.DeleteCohortsDefaultBody{
+			Message: "Delete cohort execution error: " + err.Error(),
+		})
+	}
+
+	return medco_node.NewDeleteCohortsOK()
+
 }

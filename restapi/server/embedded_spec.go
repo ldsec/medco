@@ -266,6 +266,32 @@ func init() {
             "$ref": "#/responses/errorResponse"
           }
         }
+      },
+      "delete": {
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Delete a cohort if it exists",
+        "operationId": "deleteCohorts",
+        "parameters": [
+          {
+            "description": "Name of the cohort to delete",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted cohort"
+          },
+          "default": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
       }
     },
     "/node/explore/query": {
@@ -622,6 +648,7 @@ func init() {
       "description": "Cohort that has been updated or created",
       "name": "body",
       "in": "body",
+      "required": true,
       "schema": {
         "type": "object",
         "properties": {
@@ -671,6 +698,7 @@ func init() {
       "description": "User public key, patient list and time codes strings for the survival analysis",
       "name": "body",
       "in": "body",
+      "required": true,
       "schema": {
         "type": "object",
         "properties": {
@@ -1168,6 +1196,7 @@ func init() {
             "description": "User public key, patient list and time codes strings for the survival analysis",
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
               "type": "object",
               "properties": {
@@ -1292,6 +1321,7 @@ func init() {
             "description": "Cohort that has been updated or created",
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
               "type": "object",
               "properties": {
@@ -1317,6 +1347,40 @@ func init() {
           },
           "500": {
             "description": "DB has been updated since last importation. Try GET /node/explore/cohorts to fetch the most recent entries"
+          },
+          "default": {
+            "description": "Error response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Delete a cohort if it exists",
+        "operationId": "deleteCohorts",
+        "parameters": [
+          {
+            "description": "Name of the cohort to delete",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted cohort"
           },
           "default": {
             "description": "Error response.",
@@ -1931,6 +1995,7 @@ func init() {
       "description": "Cohort that has been updated or created",
       "name": "body",
       "in": "body",
+      "required": true,
       "schema": {
         "type": "object",
         "properties": {
@@ -1980,6 +2045,7 @@ func init() {
       "description": "User public key, patient list and time codes strings for the survival analysis",
       "name": "body",
       "in": "body",
+      "required": true,
       "schema": {
         "type": "object",
         "properties": {

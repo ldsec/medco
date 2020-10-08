@@ -13,7 +13,6 @@ import (
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 	"github.com/ldsec/medco-connector/restapi/client"
-	"github.com/ldsec/medco-connector/restapi/client/medco_network"
 	utilclient "github.com/ldsec/medco-connector/util/client"
 	utilcommon "github.com/ldsec/medco-connector/util/common"
 	"github.com/ldsec/medco-connector/wrappers/unlynx"
@@ -67,23 +66,7 @@ func NewSurvivalAnalysis(token string, patientSetID int, subGroupDefinitions []*
 		timers:              make(map[string]time.Duration),
 	}
 
-	parsedURL, err := url.Parse(utilclient.MedCoConnectorURL)
-	if err != nil {
-		logrus.Error("cannot parse MedCo connector URL: ", err)
-		return
-	}
-
-	transport := httptransport.New(parsedURL.Host, parsedURL.Path, []string{parsedURL.Scheme})
-	transport.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: disableTLSCheck}
-
-	getMetadataResp, err := client.New(transport, nil).MedcoNetwork.GetMetadata(
-		medco_network.NewGetMetadataParamsWithTimeout(30*time.Second),
-		httptransport.BearerToken(token),
-	)
-	if err != nil {
-		logrus.Error("get network metadata request error: ", err)
-		return
-	}
+	getMetadataResp, err := utilclient.MetaData(token, disableTLSCheck)
 
 	q.httpMedCoClients = make([]*client.MedcoCli, len(getMetadataResp.Payload.Nodes))
 	for _, node := range getMetadataResp.Payload.Nodes {

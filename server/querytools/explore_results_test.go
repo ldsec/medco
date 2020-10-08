@@ -3,11 +3,16 @@ package querytoolsserver
 import (
 	"testing"
 
+	_ "github.com/lib/pq"
+
 	"github.com/stretchr/testify/assert"
 )
 
 func TestExploreResults(t *testing.T) {
 	testDB, err := DBResolver("MC_DB_HOST", "medcoconnectorsrv0")
+	if err != nil {
+		t.Fatal(err)
+	}
 	err = testDB.Ping()
 	if err != nil {
 		t.Fatal(err)
@@ -38,6 +43,26 @@ func TestExploreResults(t *testing.T) {
 	// cannot call more than once for the same query id
 	err = UpdateErrorExploreResultInstance(testDB, queryIDError)
 	assert.Error(t, err)
+
+}
+
+func TestCheckQueryID(t *testing.T) {
+	testDB, err := DBResolver("MC_DB_HOST", "medcoconnectorsrv0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = testDB.Ping()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	hasID, err := CheckQueryID(testDB, "test", -1)
+	assert.Equal(t, true, hasID)
+	assert.NoError(t, err)
+
+	hasID, err = CheckQueryID(testDB, "test", -10)
+	assert.Equal(t, false, hasID)
+	assert.NoError(t, err)
 
 }
 

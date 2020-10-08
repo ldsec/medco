@@ -236,7 +236,23 @@ paths:
           description: "DB has been updated since last importation. Try GET /node/explore/cohorts to fetch the most recent entries"
         default:
           $ref: '#/responses/errorResponse'
-                   
+    delete:
+      tags:
+        - "medco-node"
+      summary: "Delete a cohort if it exists"
+      operationId: "deleteCohorts"
+      parameters:
+        - in: "body"
+          description: "Name of the cohort to delete"
+          required: true
+          name: "body"
+          schema: 
+            type: "string"
+      responses:
+        200:
+          description: "Deleted cohort"
+        default:
+          $ref: '#/responses/errorResponse'
 
 
 securityDefinitions:
@@ -272,6 +288,7 @@ parameters:
     in: "body"
     description: "Cohort that has been updated or created"
     name: "body"
+    required: true
     schema:
       type: "object"
       properties:
@@ -288,6 +305,7 @@ parameters:
     in: "body"
     description: "User public key, patient list and time codes strings for the survival analysis"
     name: "body"
+    required: true
     schema:
       type: "object"
       properties:

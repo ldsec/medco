@@ -80,6 +80,22 @@ func UpdateErrorExploreResultInstance(db *sql.DB, queryID int) error {
 	return err
 }
 
+// CheckQueryID checks whether the user really has a query before inserting a new cohort defined by that query's id
+func CheckQueryID(db *sql.DB, userID string, queryID int) (bool, error) {
+	row := db.QueryRow(checkQueryID, userID, queryID)
+	res := new(string)
+	err := row.Scan(res)
+	if err != nil {
+		return false, err
+	}
+	count, err := strconv.Atoi(*res)
+	if err != nil {
+		return false, err
+	}
+	return (count > 0), err
+
+}
+
 const getPatientList string = `
 SELECT clear_result_set FROM query_tools.explore_query_results
 WHERE query_id = (SELECT query_id FROM query_tools.saved_cohorts WHERE user_id = $1 AND cohort_id = $2 AND query_status = 'completed');
@@ -111,4 +127,9 @@ const updateErrorExploreQueryInstance string = `
 UPDATE query_tools.explore_query_results
 SET query_status='error'
 WHERE query_id = $1 AND query_status = 'running'
+`
+
+const checkQueryID string = `
+SELECT COUNT(query_id) FROM query_tools.explore_query_results
+WHERE user_id = $1 AND query_id = $2
 `

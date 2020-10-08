@@ -93,7 +93,7 @@ func TestGetDate(t *testing.T) {
 
 }
 
-func TestInsertCohort(t *testing.T) {
+func TestInsertCohortAndRemoveCohort(t *testing.T) {
 	testDB, err := DBResolver("MC_DB_HOST", "medcoconnectorsrv0")
 	if err != nil {
 		t.Fatal(err)
@@ -109,9 +109,7 @@ func TestInsertCohort(t *testing.T) {
 	}
 
 	cohorts, err := GetSavedCohorts(testDB, "test")
-	if err != nil {
-		t.Error("Debugging GetSavedCohorts is needed")
-	}
+	assert.NoError(t, err)
 
 	found := false
 	for _, cohort := range cohorts {
@@ -126,18 +124,33 @@ func TestInsertCohort(t *testing.T) {
 
 	assert.Equal(t, found, true)
 
+	err = RemoveCohort(testDB, "test", "testCohort2")
+	assert.NoError(t, err)
+
+	err = RemoveCohort(testDB, "test", "testCohort2")
+	assert.NoError(t, err)
+
+}
+
+func TestDoesCohortExist(t *testing.T) {
+	testDB, err := DBResolver("MC_DB_HOST", "medcoconnectorsrv0")
+	if err != nil {
+		t.Fatal(err)
+	}
 	err = testDB.Ping()
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = testDB.Close()
-	if err != nil {
-		t.Fatal(err)
-	}
 
+	exists, err := DoesCohortExist(testDB, "test", "testCohort")
+	assert.NoError(t, err)
+	assert.Equal(t, true, exists)
+
+	exists, err = DoesCohortExist(testDB, "test", "IForSureDoNotExist")
+	assert.NoError(t, err)
+	assert.Equal(t, false, exists)
+
+	exists, err = DoesCohortExist(testDB, "IForSureDoNotExist", "testCohort")
+	assert.NoError(t, err)
+	assert.Equal(t, false, exists)
 }
-
-const cohortDeletion = `
-DELETE FROM query_tools.saved_cohorts
-WHERE cohort_id = $1
-`

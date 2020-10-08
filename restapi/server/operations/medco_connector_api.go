@@ -47,6 +47,9 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 
 		JSONProducer: runtime.JSONProducer(),
 
+		MedcoNodeDeleteCohortsHandler: medco_node.DeleteCohortsHandlerFunc(func(params medco_node.DeleteCohortsParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation medco_node.DeleteCohorts has not yet been implemented")
+		}),
 		MedcoNodeExploreQueryHandler: medco_node.ExploreQueryHandlerFunc(func(params medco_node.ExploreQueryParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_node.ExploreQuery has not yet been implemented")
 		}),
@@ -120,6 +123,8 @@ type MedcoConnectorAPI struct {
 	// APIAuthorizer provides access control (ACL/RBAC/ABAC) by providing access to the request and authenticated principal
 	APIAuthorizer runtime.Authorizer
 
+	// MedcoNodeDeleteCohortsHandler sets the operation handler for the delete cohorts operation
+	MedcoNodeDeleteCohortsHandler medco_node.DeleteCohortsHandler
 	// MedcoNodeExploreQueryHandler sets the operation handler for the explore query operation
 	MedcoNodeExploreQueryHandler medco_node.ExploreQueryHandler
 	// MedcoNodeExploreSearchHandler sets the operation handler for the explore search operation
@@ -208,6 +213,9 @@ func (o *MedcoConnectorAPI) Validate() error {
 		unregistered = append(unregistered, "MedcoJwtAuth")
 	}
 
+	if o.MedcoNodeDeleteCohortsHandler == nil {
+		unregistered = append(unregistered, "medco_node.DeleteCohortsHandler")
+	}
 	if o.MedcoNodeExploreQueryHandler == nil {
 		unregistered = append(unregistered, "medco_node.ExploreQueryHandler")
 	}
@@ -333,6 +341,10 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 		o.handlers = make(map[string]map[string]http.Handler)
 	}
 
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/node/explore/cohorts"] = medco_node.NewDeleteCohorts(o.context, o.MedcoNodeDeleteCohortsHandler)
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}

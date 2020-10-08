@@ -25,6 +25,8 @@ type Client struct {
 
 // ClientService is the interface for Client methods
 type ClientService interface {
+	DeleteCohorts(params *DeleteCohortsParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteCohortsOK, error)
+
 	ExploreQuery(params *ExploreQueryParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreQueryOK, error)
 
 	ExploreSearch(params *ExploreSearchParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreSearchOK, error)
@@ -36,6 +38,40 @@ type ClientService interface {
 	PostCohorts(params *PostCohortsParams, authInfo runtime.ClientAuthInfoWriter) (*PostCohortsOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
+}
+
+/*
+  DeleteCohorts deletes a cohort if it exists
+*/
+func (a *Client) DeleteCohorts(params *DeleteCohortsParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteCohortsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteCohortsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteCohorts",
+		Method:             "DELETE",
+		PathPattern:        "/node/explore/cohorts",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &DeleteCohortsReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*DeleteCohortsOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*DeleteCohortsDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
 /*
