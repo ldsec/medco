@@ -11,8 +11,8 @@ import (
 
 	"github.com/go-openapi/runtime/security"
 
-	"github.com/ldsec/medco-connector/restapi/models"
-	"github.com/ldsec/medco-connector/util/server"
+	"github.com/ldsec/medco/connector/restapi/models"
+	"github.com/ldsec/medco/connector/util/server"
 
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/runtime"
@@ -20,11 +20,11 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.dedis.ch/onet/v3/log"
 
-	"github.com/ldsec/medco-connector/restapi/server"
-	"github.com/ldsec/medco-connector/restapi/server/operations"
-	"github.com/ldsec/medco-connector/restapi/server/operations/genomic_annotations"
-	"github.com/ldsec/medco-connector/restapi/server/operations/medco_network"
-	"github.com/ldsec/medco-connector/restapi/server/operations/medco_node"
+	"github.com/ldsec/medco/connector/restapi/server"
+	"github.com/ldsec/medco/connector/restapi/server/operations"
+	"github.com/ldsec/medco/connector/restapi/server/operations/genomic_annotations"
+	"github.com/ldsec/medco/connector/restapi/server/operations/medco_network"
+	"github.com/ldsec/medco/connector/restapi/server/operations/medco_node"
 )
 
 func TestNetwork(t *testing.T) {
@@ -38,25 +38,24 @@ func TestNetwork(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func TestExploreSearch(t *testing.T) {
+func TestExploreSearchConcept(t *testing.T) {
 	for _, test := range []struct {
 		ok      bool
-		reqType string
 		reqPath string
 	}{
-		{false, "child", ""},
-		{true, "children", "/"},
-		{false, "children", ""},
-		{true, "children", "/abc/def"},
-		{true, "children", "/abc/def/"},
-		{true, "children", "/abc/def/asdasdas"},
-		{false, "children", "abc/def/"},
-		{false, "children", "//def/"},
-		{false, "children", "///"},
+		{false, ""},
+		{true, "/"},
+		{false, ""},
+		{true, "/abc/def"},
+		{true, "/abc/def/"},
+		{true, "/abc/def/asdasdas"},
+		{false, "abc/def/"},
+		{false, "//def/"},
+		{false, "///"},
 	} {
-		body := fmt.Sprintf(`{"type":"%s", "path":"%s"}`,
-			test.reqType, test.reqPath)
-		ctx, req := getContextRequest(t, "POST", "/node/explore/search",
+		body := fmt.Sprintf(`{"path":"%s"}`,
+			test.reqPath)
+		ctx, req := getContextRequest(t, "POST", "/node/explore/search/concept",
 			body)
 
 		ri, rCtx, ok := ctx.RouteInfo(req)
@@ -64,7 +63,7 @@ func TestExploreSearch(t *testing.T) {
 		req = rCtx
 
 		log.Lvlf2("checking for %t with body: %s", test.ok, body)
-		err := ctx.BindValidRequest(req, ri, &medco_node.ExploreSearchParams{})
+		err := ctx.BindValidRequest(req, ri, &medco_node.ExploreSearchConceptParams{})
 		require.Equal(t, test.ok, err == nil, "wrong result for %+v: %s",
 			test, err)
 	}
@@ -269,11 +268,17 @@ func TestAuthorizations(t *testing.T) {
 		{true, "", "/network", models.RestAPIAuthorizationMedcoNetwork},
 		{false, "", "/network", models.RestAPIAuthorizationMedcoExplore},
 		{false, "", "/network", models.RestAPIAuthorizationMedcoGenomicAnnotations},
-		{false, "POST", "/node/explore/search",
+		{false, "POST", "/node/explore/search/concept",
 			models.RestAPIAuthorizationMedcoNetwork},
-		{true, "POST", "/node/explore/search",
+		{true, "POST", "/node/explore/search/concept",
 			models.RestAPIAuthorizationMedcoExplore},
-		{false, "POST", "/node/explore/search",
+		{false, "POST", "/node/explore/search/concept",
+			models.RestAPIAuthorizationMedcoGenomicAnnotations},
+		{false, "POST", "/node/explore/search/modifier",
+			models.RestAPIAuthorizationMedcoNetwork},
+		{true, "POST", "/node/explore/search/modifier",
+			models.RestAPIAuthorizationMedcoExplore},
+		{false, "POST", "/node/explore/search/modifier",
 			models.RestAPIAuthorizationMedcoGenomicAnnotations},
 		{false, "", "/genomic-annotations/abc",
 			models.RestAPIAuthorizationMedcoNetwork},

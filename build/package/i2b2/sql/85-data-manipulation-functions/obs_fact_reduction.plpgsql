@@ -1,0 +1,14 @@
+-- pl/pgsql function to delete rows from observation_fact table
+
+SET search_path TO i2b2demodata_i2b2;
+CREATE FUNCTION obs_fact_reduction(new_nb_rows bigint) RETURNS VOID AS $$
+BEGIN
+  SET search_path TO i2b2demodata_i2b2;
+
+  CREATE TABLE observation_fact_tmp AS SELECT * FROM observation_fact LIMIT new_nb_rows;
+  DROP TABLE observation_fact;
+  ALTER TABLE observation_fact_tmp RENAME TO observation_fact;
+  ALTER TABLE observation_fact OWNER TO i2b2;
+
+END;
+$$ LANGUAGE plpgsql;

@@ -1,0 +1,35 @@
+jobs:
+  include:
+    - language: go
+      go: "1.14"
+      services:
+        - docker
+        - postgresql
+      env:
+        # MEDCO_DB_NUMBER is the number of databases used in the profile that will be tested
+        - MEDCO_DB_NUMBER=9 MEDCO_DB_HOST=localhost MEDCO_DB_PORT=5432 MEDCO_DB_USER=postgres MEDCO_DB_PASSWORD=postgres MEDCO_DB_NAME=postgres MEDCO_USER_USERNAME=test MEDCO_USER_PASSWORD=test
+      before_install:
+        - make docker_images_build_dev
+        - cd ~/build/ldsec/medco-connector/
+        - sudo /etc/init.d/postgresql stop
+        - make download_test_data
+      install:
+        - docker-compose -f deployments/dev-local-3nodes/docker-compose.yml up -d
+        - bash test/wait_for_startup.sh $MEDCO_DB_NUMBER $MEDCO_DB_HOST $MEDCO_DB_PORT $MEDCO_DB_USER $MEDCO_DB_PASSWORD $MEDCO_DB_NAME
+      script:
+        - make load_test_data
+        - make test_travis_e2e
+        - bash test/test_cli.sh $MEDCO_USER_USERNAME $MEDCO_USER_PASSWORD
+
+    - language: go
+      go: "1.14"
+      install:
+        - make download_test_data
+      script:
+        - make test_travis_unit
+      after_success:
+        - GO111MODULE=off go get -u github.com/mattn/goveralls
+        - $GOPATH/bin/goveralls -coverprofile=profile.cov -service=travis-ci
+
+notifications:
+  email: false

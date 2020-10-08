@@ -1,57 +1,66 @@
-# medco-connector
-*medco-connector* orchestrates the MedCo query at the clinical site. It communicates with [*medco-unlynx*](https://github.com/ldsec/medco-unlynx) to execute the distributed cryptographic protocols.
+[![Build Status](https://travis-ci.org/ldsec/medco.svg?branch=master)](https://travis-ci.org/ldsec/medco) 
+[![Go Report Card](https://goreportcard.com/badge/github.com/ldsec/medco)](https://goreportcard.com/report/github.com/ldsec/medco) 
+[![Coverage Status](https://coveralls.io/repos/github/ldsec/medco/badge.svg?branch=master)](https://coveralls.io/github/ldsec/medco?branch=master)
+
+# MedCo
+You can find more information about the MedCo project [here](https://medco.epfl.ch/).
+For further details, support, and contacts, you can check the [MedCo Technical Documentation](https://ldsec.gitbook.io/medco-documentation/).
+
+## Source code organization
+It follows the Golang standard project layout.
+- *build/package*: docker images definitions
+    - *i2b2*: i2b2 docker
+    - *keycloak*: keycloak docker
+    - *nginx*: nginx docker
+    - *pgadmin*: pgadmin docker
+    - *postgresql*: postgresql docker
+    - *medco*: MedCo binaries docker
+- *cmd*: binaries
+    - *medco-cli-client*: REST API CLI client
+    - *medco-connector-server*: REST API server
+    - *medco-loader*: ETL tool
+    - *medco-unlynx*: Unlynx server
+- *connector*: implementation of the REST API server
+- *deployments*: docker-compose files, parameters and configuration for different deployment profiles
+    - *[dev-local-3nodes](https://ldsec.gitbook.io/medco-documentation/system-administrator-guide/deployment/local-development-deployment)*: profile that deploys 3 MedCo nodes on a single machine for development purposes
+    - *[test-local-3nodes](https://ldsec.gitbook.io/medco-documentation/system-administrator-guide/deployment/local-test-deployment)*: profile that deploys 3 MedCo nodes on a single machine for test purposes
+- *loader*: implementation of the ETL tool
+- *scripts*: various utility scripts
+    - *profile-generation-scripts*: scripts to generate various deployment profiles files
+        - *test-network*: scripts to generate the deployment profiles files for the [Network Test Deployment](https://ldsec.gitbook.io/medco-documentation/system-administrator-guide/deployment/network-test-deployment) profile
+- *test*: testing scripts
+    - *test/data*: script to download the test datasets
+- *unlynx*: implementation of the unlynx wrapper
 
 ## Getting started
-Run the following commands to download and build the *medco-connector* module.
+A description of the available deployment profiles, along with a detailed guide on how to use them, is available 
+[here](https://ldsec.gitbook.io/medco-documentation/system-administrator-guide/deployment).
+
+### Building docker images
+Run the following commands to build the MedCo docker images from source.
 ```shell
-git clone https://github.com/ldsec/medco-connector.git
-cd medco-connector/deployment/
-docker-compose build
-``` 
+git clone https://github.com/ldsec/medco.git
+cd medco/deployments/dev-local-3nodes
+docker-compose -f docker-compose.yml -f docker-compose.tools.yml build
+```
 
-## How to use it
-*medco-connector* is part of the MedCo stack. To use it, you need to have the whole MedCo stack up and running on your machine. To achieve that you can follow, for example, the [Local Development Deployment guide](https://ldsec.gitbook.io/medco-documentation/system-administrator-guide/deployment/local-development-deployment). 
-
-The *medco-connector* APIs are defined using [go-swagger](https://github.com/go-swagger/go-swagger). To modify them, you must modify the `swagger/medco-connector.yml` file. To re-generate the server and client code you can run:
+### Downloading docker images
+Run the following commands to download the MedCo docker images.
 ```shell
-make swagger-gen
-``` 
+git clone https://github.com/ldsec/medco.git
+cd medco/deployments/test-local-3nodes
+docker-compose -f docker-compose.yml -f docker-compose.tools.yml pull
+```
 
-## How to use the medco-cli-client
-*medco-connector* provides a client command-line interface to interact with the *medco-connector* APIs.
+### How to load data
+A detailed up-to-date guide on how to use the *medco-loader* is available 
+[here](https://ldsec.gitbook.io/medco-documentation/system-administrators/data-loading).
+
+### How to use the medco-cli-client
+MedCo provides a client command-line interface to interact with the *connector* APIs.
 
 To learn how to use it, check the [CLI documentation](https://ldsec.gitbook.io/medco-documentation/system-administrators/cli).
 
-## Source code organization
-
-MedCo Connector uses [go-swagger](https://github.com/go-swagger/go-swagger) to generate server, client and models code.
-As such, the code is organized around the Swagger definitions located in 
-[swagger/medco-connector.yml](swagger/medco-connector.yml).
-
-- *client*: client logic
-- *cmd*: runnable applications
-    - *cmd/medco-cli-client*: client application
-    - *cmd/medco-connector-server*: server application
-- *deployment*: docker image definition and docker-compose deployment
-- *restapi*: go-swagger generated code for REST API
-    - *restapi/client*: client-related generated code
-    - *restapi/models*: generated models
-    - *restapi/server*: server-related generated code
-- *server*: server logic
-    - *server/handlers*: server REST API endpoints handlers
-- *swagger*: swagger REST API definitions
-- *util*: utility code (configuration, security, etc.)
-    - *client*: client-related utility code
-    - *server*: server-related utility code
-- *wrappers*: client library wrappers for external service (i2b2, unlynx, etc.)
-
-## Useful information
-*medco-connector* is part of the MedCo system.
-
-You can find more information about the MedCo project [here](https://medco.epfl.ch/).
-
-For further details, support, and contacts, you can check the [MedCo Technical Documentation](https://ldsec.gitbook.io/medco-documentation/).
-
 ## License
-*medco-connector* is licensed under a End User Software License Agreement ('EULA') for non-commercial use.
+*medco-deployment* is licensed under a End User Software License Agreement ('EULA') for non-commercial use.
 If you need more information, please contact us.
