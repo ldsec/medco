@@ -6,6 +6,9 @@ import (
 	"strconv"
 )
 
+// SearchTimeoutSeconds is the timeout for the client query in seconds (default to 3 minutes)
+var SearchTimeoutSeconds int64
+
 // QueryTimeoutSeconds is the timeout for the client query in seconds (default to 3 minutes)
 var QueryTimeoutSeconds int64
 
@@ -23,6 +26,12 @@ var OidcReqTokenClientID string
 
 func init() {
 	var err error
+
+	SearchTimeoutSeconds, err = strconv.ParseInt(os.Getenv("CLIENT_SEARCH_TIMEOUT_SECONDS"), 10, 64)
+	if err != nil || QueryTimeoutSeconds < 0 {
+		logrus.Warn("invalid client search timeout")
+		QueryTimeoutSeconds = 10
+	}
 
 	QueryTimeoutSeconds, err = strconv.ParseInt(os.Getenv("CLIENT_QUERY_TIMEOUT_SECONDS"), 10, 64)
 	if err != nil || QueryTimeoutSeconds < 0 {

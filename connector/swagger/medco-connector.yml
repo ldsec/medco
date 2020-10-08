@@ -41,7 +41,7 @@ paths:
         default:
           $ref: "#/responses/errorResponse"
       security:
-       - medco-jwt: ["medco-network"]
+        - medco-jwt: ["medco-network"]
 
   /node/explore/search/concept:
     post:

@@ -66,7 +66,8 @@ ENV HOST=0.0.0.0 \
 ENV UNLYNX_DEBUG_LEVEL="1"
 
 # medco-cli-client
-ENV CLIENT_QUERY_TIMEOUT_SECONDS=660 \
+ENV CLIENT_SEARCH_TIMEOUT_SECONDS=10 \
+    CLIENT_QUERY_TIMEOUT_SECONDS=660 \
     CLIENT_GENOMIC_ANNOTATIONS_QUERY_TIMEOUT_SECONDS=10 \
     MEDCO_CONNECTOR_URL=http://medco-connector-srv0/medco \
     OIDC_REQ_TOKEN_URL=http://keycloak:8080/auth/realms/master/protocol/openid-connect/token \

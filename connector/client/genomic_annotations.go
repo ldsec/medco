@@ -22,10 +22,8 @@ type GenomicAnnotationsGetValues struct {
 	authToken string
 
 	annotation string
-
-	value string
-
-	limit *int64
+	value      string
+	limit      *int64
 }
 
 // GenomicAnnotationsGetVariants is a MedCo client genomic-annotations get-variants request
@@ -37,12 +35,9 @@ type GenomicAnnotationsGetVariants struct {
 	authToken string
 
 	annotation string
-
-	value string
-
-	zygosity []string
-
-	encrypted *bool
+	value      string
+	zygosity   []string
+	encrypted  *bool
 }
 
 // NewGenomicAnnotationsGetValues creates a new MedCo client genomic-annotations get-values request
@@ -97,21 +92,6 @@ func NewGenomicAnnotationsGetVariants(authToken, annotation, value string, zygos
 // Execute executes the MedCo client get-values query
 func (clientGenomicAnnotationsGetValues *GenomicAnnotationsGetValues) Execute() (result []string, err error) {
 
-	result, err = clientGenomicAnnotationsGetValues.submitToNode()
-	return
-
-}
-
-// Execute executes the MedCo client get-variants query
-func (clientGenomicAnnotationsGetVariants *GenomicAnnotationsGetVariants) Execute() (result []string, err error) {
-
-	result, err = clientGenomicAnnotationsGetVariants.submitToNode()
-	return
-
-}
-
-func (clientGenomicAnnotationsGetValues *GenomicAnnotationsGetValues) submitToNode() (result []string, err error) {
-
 	params := genomic_annotations.NewGetValuesParamsWithTimeout(time.Duration(utilclient.GenomicAnnotationsQueryTimeoutSeconds) * time.Second)
 	params.Annotation = clientGenomicAnnotationsGetValues.annotation
 	params.Value = clientGenomicAnnotationsGetValues.value
@@ -130,7 +110,8 @@ func (clientGenomicAnnotationsGetValues *GenomicAnnotationsGetValues) submitToNo
 
 }
 
-func (clientGenomicAnnotationsGetVariants *GenomicAnnotationsGetVariants) submitToNode() (result []string, err error) {
+// Execute executes the MedCo client get-variants query
+func (clientGenomicAnnotationsGetVariants *GenomicAnnotationsGetVariants) Execute() (result []string, err error) {
 
 	params := genomic_annotations.NewGetVariantsParamsWithTimeout(time.Duration(utilclient.GenomicAnnotationsQueryTimeoutSeconds) * time.Second)
 	params.Annotation = clientGenomicAnnotationsGetVariants.annotation
