@@ -4,10 +4,11 @@ set -Eeuo pipefail
 USERNAME=${1:-test}
 PASSWORD=${2:-test}
 
+# note: expected without any \n nor \r
 variantNameGetValuesValue="5238"
-variantNameGetValuesResult="$(printf "16:75238144:C>C\n6:52380882:G>G")"
+variantNameGetValuesResult="16:75238144:C>C6:52380882:G>G"
 proteinChangeGetValuesValue="g32"
-proteinChangeGetValuesResult="$(printf "G325R\nG32E")"
+proteinChangeGetValuesResult="G325RG32E"
 proteinChangeGetValuesValue2="7cfs*"
 proteinChangeGetValuesResult2="S137Cfs*28"
 hugoGeneSymbolGetValuesValue="tr5"
@@ -18,8 +19,8 @@ variantNameGetVariantsResult="-4530899676219565056"
 proteinChangeGetVariantsValue="G325R"
 proteinChangeGetVariantsResult="-2429151887266669568"
 hugoGeneSymbolGetVariantsValue="HTR5A"
-hugoGeneSymbolGetVariantsResult1="$(printf -- "-7039476204566471680\n-7039476580443220992\n-7039476780159200256")"
-hugoGeneSymbolGetVariantsResult2="$(printf -- "-7039476204566471680\n-7039476580443220992")"
+hugoGeneSymbolGetVariantsResult1="-7039476204566471680-7039476580443220992-7039476780159200256"
+hugoGeneSymbolGetVariantsResult2="-7039476204566471680-7039476580443220992"
 hugoGeneSymbolGetVariantsResult3="-7039476780159200256"
 
 query1="1 AND 2"
@@ -45,7 +46,7 @@ test1 () {
 }
 
 test2 () {
-  result="$(docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run -e LOG_LEVEL=1 -e CONN_TIMEOUT=10m medco-cli-client --user $USERNAME --password $PASSWORD $1 $2 | sed 's/.$//')"
+  result="$(docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run -e LOG_LEVEL=1 -e CONN_TIMEOUT=10m medco-cli-client --user $USERNAME --password $PASSWORD $1 $2 | sed 's/.$//' | tr -d '\r\n')"
   if [ "${result}" != "${3}" ];
   then
   echo "$1 $2: test failed"
