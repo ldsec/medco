@@ -68,7 +68,7 @@ test2 () {
 }
 
 test3 () {
-  result="$(docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run -e LOG_LEVEL=1 -e CONN_TIMEOUT=10m medco-cli-client --user $USERNAME --password $PASSWORD $1 $2 | sed 's/.$//' | tr -d '\r\n\t ')"
+  result="$(docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run -e LOG_LEVEL=1 -e CONN_TIMEOUT=10m medco-cli-client --user $USERNAME --password $PASSWORD $1 $2 | tr -d '\r\n\t ')"
   if [ "${result}" != "${3}" ];
   then
   echo "$1 $2: test failed"
