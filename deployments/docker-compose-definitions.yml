@@ -134,6 +134,7 @@ services:
       - LOG_LEVEL=3
       - UNLYNX_GROUP_FILE_PATH=/medco-configuration/group.toml
       - MEDCO_NODE_IDX=0
+      - CLIENT_SEARCH_TIMEOUT_SECONDS=10
       - CLIENT_QUERY_TIMEOUT_SECONDS=660
       - CLIENT_GENOMIC_ANNOTATIONS_QUERY_TIMEOUT_SECONDS=10
       - MEDCO_CONNECTOR_URL=http://localhost/local-3nodes/medco-0

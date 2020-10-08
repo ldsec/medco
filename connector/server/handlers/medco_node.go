@@ -13,16 +13,27 @@ import (
 // MedCoNodeExploreSearchConceptHandler handles the /medco/node/explore/search/concept API endpoint
 func MedCoNodeExploreSearchConceptHandler(params medco_node.ExploreSearchConceptParams, principal *models.User) middleware.Responder {
 
-	searchResult, err := i2b2.GetOntologyChildren(*params.SearchConceptRequest.Path)
+	searchResult1, err := i2b2.GetOntologyChildren(*params.SearchConceptRequest.Path)
 	if err != nil {
 		return medco_node.NewExploreSearchConceptDefault(500).WithPayload(&medco_node.ExploreSearchConceptDefaultBody{
 			Message: err.Error(),
 		})
 	}
 
+	var searchResult2 []*models.ExploreSearchResultElement
+
+	if *params.SearchConceptRequest.Path != "/" {
+		searchResult2, err = i2b2.GetOntologyModifiers(*params.SearchConceptRequest.Path)
+		if err != nil {
+			return medco_node.NewExploreSearchConceptDefault(500).WithPayload(&medco_node.ExploreSearchConceptDefaultBody{
+				Message: err.Error(),
+			})
+		}
+	}
+
 	return medco_node.NewExploreSearchConceptOK().WithPayload(&medco_node.ExploreSearchConceptOKBody{
 		Search:  params.SearchConceptRequest,
-		Results: searchResult,
+		Results: append(searchResult1, searchResult2...),
 	})
 }
 
