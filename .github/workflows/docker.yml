@@ -44,56 +44,46 @@ jobs:
           echo ::set-output name=version::${VERSION}
 
       - name: Build and push medco
-        id: docker_build
         uses: docker/build-push-action@v2
         with:
           context: ./build/package/medco
           push: ${{ github.event_name != 'pull_request' }}
-          tags: |
-          ghcr.io/ldsec/medco:${{ steps.get_version.outputs.version }}
+          tags: ghcr.io/ldsec/medco:${{ steps.get_version.outputs.version }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
 
       - name: Build and push i2b2
-        id: docker_build
         uses: docker/build-push-action@v2
         with:
           context: ./build/package/i2b2
           push: ${{ github.event_name != 'pull_request' }}
-          tags: |
-          ghcr.io/ldsec/i2b2-medco:${{ steps.get_version.outputs.version }}
+          tags: ghcr.io/ldsec/i2b2-medco:${{ steps.get_version.outputs.version }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
 
       - name: Build and push keycloak
-        id: docker_build
         uses: docker/build-push-action@v2
         with:
           context: ./build/package/keycloak
           push: ${{ github.event_name != 'pull_request' }}
-          tags: |
-          ghcr.io/ldsec/keycloak-medco:${{ steps.get_version.outputs.version }}
+          tags: ghcr.io/ldsec/keycloak-medco:${{ steps.get_version.outputs.version }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
 
       - name: Build and push nginx
-        id: docker_build
         uses: docker/build-push-action@v2
         with:
           context: ./build/package/nginx
           push: ${{ github.event_name != 'pull_request' }}
-          tags: |
-          ghcr.io/ldsec/nginx-medco:${{ steps.get_version.outputs.version }}
+          tags: ghcr.io/ldsec/nginx-medco:${{ steps.get_version.outputs.version }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
 
       - name: Build and push pgadmin
-        id: docker_build
         uses: docker/build-push-action@v2
         with:
           context: ./build/package/pgadmin
           push: ${{ github.event_name != 'pull_request' }}
-          tags: |
-          ghcr.io/ldsec/pgadmin-medco:${{ steps.get_version.outputs.version }}
+          tags: ghcr.io/ldsec/pgadmin-medco:${{ steps.get_version.outputs.version }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
