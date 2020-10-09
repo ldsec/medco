@@ -55,7 +55,7 @@ jobs:
       - name: Build and push i2b2
         uses: docker/build-push-action@v2
         with:
-          file: ./build/package/i2b2/Dockerfile
+          context: ./build/package/i2b2/
           push: ${{ github.event_name != 'pull_request' }}
           tags: ghcr.io/ldsec/i2b2-medco:${{ steps.get_version.outputs.version }}
           cache-from: type=local,src=/tmp/.buildx-cache
@@ -64,7 +64,7 @@ jobs:
       - name: Build and push keycloak
         uses: docker/build-push-action@v2
         with:
-          file: ./build/package/keycloak/Dockerfile
+          context: ./build/package/keycloak/
           push: ${{ github.event_name != 'pull_request' }}
           tags: ghcr.io/ldsec/keycloak-medco:${{ steps.get_version.outputs.version }}
           cache-from: type=local,src=/tmp/.buildx-cache
@@ -73,7 +73,7 @@ jobs:
       - name: Build and push nginx
         uses: docker/build-push-action@v2
         with:
-          file: ./build/package/nginx/Dockerfile
+          context: ./build/package/nginx/
           push: ${{ github.event_name != 'pull_request' }}
           tags: ghcr.io/ldsec/nginx-medco:${{ steps.get_version.outputs.version }}
           cache-from: type=local,src=/tmp/.buildx-cache
@@ -82,7 +82,7 @@ jobs:
       - name: Build and push pgadmin
         uses: docker/build-push-action@v2
         with:
-          file: ./build/package/pgadmin/Dockerfile
+          context: ./build/package/pgadmin/
           push: ${{ github.event_name != 'pull_request' }}
           tags: ghcr.io/ldsec/pgadmin-medco:${{ steps.get_version.outputs.version }}
           cache-from: type=local,src=/tmp/.buildx-cache
