@@ -26,7 +26,17 @@ if [[ "$1" = "medco-connector-server" ]]; then
 EOSQL
   psql $PSQL_PARAMS -d "$MC_DB_NAME" <<-EOSQL
           CREATE SCHEMA genomic_annotations;
+          CREATE SCHEMA query_tools;
 EOSQL
+
+# create tables for query tools for storing results from MedCo Explore queries
+echo "create query tools tables"
+bash /usr/local/bin/querytools/create_query_tools_tables.sh
+
+# load e2e test data for survival analysis
+echo "loading test data"
+bash /usr/local/bin/querytools/load_test_cohort.sh
+
   fi
 
   EXEC="${EXEC} --write-timeout=${SERVER_HTTP_WRITE_TIMEOUT_SECONDS}s"

@@ -21,6 +21,7 @@ RUN CGO_ENABLED=0 go install -v ./cmd/...
 FROM golang:1.14-alpine as release
 
 COPY build/package/medco/docker-entrypoint.sh /usr/local/bin/
+COPY scripts/querytools /usr/local/bin/querytools
 RUN apk update && apk add bash postgresql && rm -rf /var/cache/apk/* && \
     chmod a+x /usr/local/bin/docker-entrypoint.sh
 COPY --from=build /go/bin /go/bin
