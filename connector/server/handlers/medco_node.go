@@ -1,13 +1,18 @@
 package handlers
 
 import (
+	"fmt"
+	"time"
+
+	querytoolsserver "github.com/ldsec/medco/connector/server/querytools"
+
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/ldsec/medco/connector/restapi/models"
 	"github.com/ldsec/medco/connector/restapi/server/operations/medco_node"
-	"github.com/ldsec/medco/connector/server"
-	"github.com/ldsec/medco/connector/util/server"
+	medcoserver "github.com/ldsec/medco/connector/server/explore"
+	utilserver "github.com/ldsec/medco/connector/util/server"
 	"github.com/ldsec/medco/connector/wrappers/i2b2"
-	"time"
+	"github.com/sirupsen/logrus"
 )
 
 // MedCoNodeExploreSearchConceptHandler handles the /medco/node/explore/search/concept API endpoint
@@ -65,7 +70,7 @@ func MedCoNodeExploreQueryHandler(params medco_node.ExploreQueryParams, principa
 	}
 
 	// create query
-	query, err := medcoserver.NewExploreQuery(params.QueryRequest.ID, params.QueryRequest.Query)
+	query, err := medcoserver.NewExploreQuery(params.QueryRequest.ID, params.QueryRequest.Query, principal.ID)
 	if err != nil {
 		return medco_node.NewExploreQueryDefault(400).WithPayload(&medco_node.ExploreQueryDefaultBody{
 			Message: "Bad query: " + err.Error(),
@@ -89,14 +94,7 @@ func MedCoNodeExploreQueryHandler(params medco_node.ExploreQueryParams, principa
 	}
 
 	// parse timers
-	timers := make([]*models.ExploreQueryResultElementTimersItems0, 0)
-	for timerName, timerDuration := range query.Result.Timers {
-		milliseconds := int64(timerDuration / time.Millisecond)
-		timers = append(timers, &models.ExploreQueryResultElementTimersItems0{
-			Name:         timerName,
-			Milliseconds: &milliseconds,
-		})
-	}
+	timers := query.Result.Timers.TimersToAPIModel()
 
 	return medco_node.NewExploreQueryOK().WithPayload(&medco_node.ExploreQueryOKBody{
 		ID:    query.ID,
@@ -107,4 +105,117 @@ func MedCoNodeExploreQueryHandler(params medco_node.ExploreQueryParams, principa
 			Timers:               timers,
 			Status:               models.ExploreQueryResultElementStatusAvailable,
 		}})
+}
+
+// MedCoNodeGetCohortsHandler handles GET /medco/node/explore/cohorts  API endpoint
+func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *models.User) middleware.Responder {
+	userID := principal.ID
+	cohorts, err := querytoolsserver.GetSavedCohorts(utilserver.DBConnection, userID)
+	if err != nil {
+		medco_node.NewGetCohortsDefault(500).WithPayload(&medco_node.GetCohortsDefaultBody{
+			Message: "Get cohort execution error: " + err.Error(),
+		})
+	}
+	payload := &medco_node.GetCohortsOK{}
+	for _, cohort := range cohorts {
+		payload.Payload = append(payload.Payload,
+			&medco_node.GetCohortsOKBodyItems0{
+				CohortName:   cohort.CohortName,
+				CohortID:     int64(cohort.CohortID),
+				QueryID:      int64(cohort.QueryID),
+				CreationDate: cohort.CreationDate.Format(time.RFC3339),
+				UpdateDate:   cohort.UpdateDate.Format(time.RFC3339),
+			},
+		)
+	}
+
+	return medco_node.NewGetCohortsOK().WithPayload(payload.Payload)
+
+}
+
+// MedCoNodePostCohortsHandler handles POST /medco/node/explore/cohorts  API endpoint
+func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal *models.User) middleware.Responder {
+
+	cohort := params.Body
+
+	hasID, err := querytoolsserver.CheckQueryID(utilserver.DBConnection, principal.ID, int(cohort.PatientSetID))
+	if err != nil {
+		return medco_node.NewPostCohortsDefault(500).WithPayload(&medco_node.PostCohortsDefaultBody{
+			Message: fmt.Sprintf("During execution of CheckQueryID"),
+		})
+	}
+	logrus.Trace("has ID", hasID)
+
+	if !hasID {
+		return medco_node.NewPostCohortsDefault(400).WithPayload(&medco_node.PostCohortsDefaultBody{
+			Message: fmt.Sprintf("User does not have a stored query result with ID: %d", cohort.PatientSetID),
+		})
+	}
+
+	creationDate, err := time.Parse(time.RFC3339, cohort.CreationDate)
+	if err != nil {
+		return medco_node.NewPostCohortsDefault(400).WithPayload(&medco_node.PostCohortsDefaultBody{
+			Message: fmt.Sprintf("String %s is not a date with RF3339 layout", cohort.CreationDate),
+		})
+	}
+	updateDate, err := time.Parse(time.RFC3339, cohort.UpdateDate)
+	if err != nil {
+		return medco_node.NewPostCohortsDefault(400).WithPayload(&medco_node.PostCohortsDefaultBody{
+			Message: fmt.Sprintf("String %s is not a date with RF3339 layout", cohort.UpdateDate),
+		})
+	}
+	cohorts, err := querytoolsserver.GetSavedCohorts(utilserver.DBConnection, principal.ID)
+	if err != nil {
+		return medco_node.NewPostCohortsDefault(500).WithPayload(&medco_node.PostCohortsDefaultBody{
+			Message: "Get cohort execution error: " + err.Error(),
+		})
+	}
+	for _, existingCohort := range cohorts {
+		if existingCohort.CohortName == cohort.CohortName {
+			if existingCohort.UpdateDate.After(updateDate) {
+				return medco_node.NewPostCohortsDefault(400).WithPayload(&medco_node.PostCohortsDefaultBody{
+					Message: fmt.Sprintf(
+						"Cohort %s  has a more recent date in DB %s, provided %s",
+						cohort.CohortName,
+						cohort.UpdateDate,
+						existingCohort.UpdateDate.Format(time.RFC3339)),
+				})
+			}
+			break
+		}
+	}
+	querytoolsserver.InsertCohort(utilserver.DBConnection, principal.ID, int(cohort.PatientSetID), cohort.CohortName, creationDate, updateDate)
+
+	return medco_node.NewPostCohortsOK()
+}
+
+// MedCoNodeDeleteCohortsHandler handles DELETE /medco/node/explore/cohorts  API endpoint
+func MedCoNodeDeleteCohortsHandler(params medco_node.DeleteCohortsParams, principal *models.User) middleware.Responder {
+	cohortName := params.Body
+	user := principal.ID
+
+	// check if cohort exists
+	hasCohort, err := querytoolsserver.DoesCohortExist(utilserver.DBConnection, user, cohortName)
+	if err != nil {
+		return medco_node.NewDeleteCohortsDefault(500).WithPayload(&medco_node.DeleteCohortsDefaultBody{
+			Message: "Delete cohort execution error: " + err.Error(),
+		})
+	}
+	logrus.Trace("hasCohort", hasCohort)
+	if !hasCohort {
+		return medco_node.NewDeleteCohortsDefault(400).WithPayload(&medco_node.DeleteCohortsDefaultBody{
+			Message: "Cohort does not exist",
+		})
+	}
+
+	// delete the cohorts
+	err = querytoolsserver.RemoveCohort(utilserver.DBConnection, user, cohortName)
+	if err != nil {
+		return medco_node.NewDeleteCohortsDefault(500).WithPayload(&medco_node.DeleteCohortsDefaultBody{
+			Message: "Delete cohort execution error: " + err.Error(),
+		})
+	}
+
+	return medco_node.NewDeleteCohortsOK()
+
 }

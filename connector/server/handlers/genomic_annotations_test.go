@@ -1,10 +1,11 @@
 package handlers
 
 import (
+	"testing"
+
 	"github.com/ldsec/medco/connector/restapi/server/operations/genomic_annotations"
 	utilserver "github.com/ldsec/medco/connector/util/server"
 	"github.com/sirupsen/logrus"
-	"testing"
 )
 
 var variantNameGetValuesValue = "5238"
@@ -81,7 +82,7 @@ func TestGenomicAnnotationsGetVariants(t *testing.T) {
 
 }
 
-func testGenomicAnnotationsGetValues(query_type string, query_value string, query_result []string, t *testing.T) {
+func testGenomicAnnotationsGetValues(queryType string, queryValue string, queryResult []string, t *testing.T) {
 
 	TestDBConnection(t)
 
@@ -90,8 +91,8 @@ func testGenomicAnnotationsGetValues(query_type string, query_value string, quer
 	params := genomic_annotations.NewGetValuesParams()
 	var err error
 
-	params.Annotation = query_type
-	params.Value = query_value
+	params.Annotation = queryType
+	params.Value = queryValue
 
 	query, _ := buildGetValuesQuery(params)
 	rows, err := utilserver.DBConnection.Query(query, params.Annotation, params.Value, *params.Limit)
@@ -111,14 +112,14 @@ func testGenomicAnnotationsGetValues(query_type string, query_value string, quer
 		annotations = append(annotations, annotation)
 	}
 
-	if !areEqual(annotations, query_result) {
-		logrus.Error("Wrong " + query_type + " query result")
+	if !areEqual(annotations, queryResult) {
+		logrus.Error("Wrong " + queryType + " query result")
 		t.Fail()
 	}
 
 }
 
-func testGenomicAnnotationsGetVariants(query_type string, query_value string, zygosity []string, query_result []string, t *testing.T) {
+func testGenomicAnnotationsGetVariants(queryType string, queryValue string, zygosity []string, queryResult []string, t *testing.T) {
 
 	TestDBConnection(t)
 
@@ -128,8 +129,8 @@ func testGenomicAnnotationsGetVariants(query_type string, query_value string, zy
 
 	params := genomic_annotations.NewGetVariantsParams()
 
-	params.Annotation = query_type
-	params.Value = query_value
+	params.Annotation = queryType
+	params.Value = queryValue
 	params.Zygosity = zygosity
 
 	zygosityStr := ""
@@ -158,8 +159,8 @@ func testGenomicAnnotationsGetVariants(query_type string, query_value string, zy
 		variants = append(variants, variant)
 	}
 
-	if !areEqual(variants, query_result) {
-		logrus.Error("Wrong " + query_type + " query result")
+	if !areEqual(variants, queryResult) {
+		logrus.Error("Wrong " + queryType + " query result")
 		t.Fail()
 	}
 

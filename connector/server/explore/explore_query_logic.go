@@ -1,13 +1,21 @@
 package medcoserver
 
 import (
+	"fmt"
+	"strconv"
+	"strings"
+	"time"
+
+	utilserver "github.com/ldsec/medco/connector/util/server"
+
+	querytoolsserver "github.com/ldsec/medco/connector/server/querytools"
+
 	"github.com/ldsec/medco/connector/restapi/models"
+	utilcommon "github.com/ldsec/medco/connector/util/common"
 	"github.com/ldsec/medco/connector/wrappers/i2b2"
 	"github.com/ldsec/medco/connector/wrappers/unlynx"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"strconv"
-	"time"
 )
 
 // todo: log query (with associated status)
@@ -15,42 +23,45 @@ import (
 
 // ExploreQuery represents an i2b2-MedCo query to be executed
 type ExploreQuery struct {
-	ID     string
-	Query  *models.ExploreQuery
-	Result struct {
+	ID       string
+	Query    *models.ExploreQuery
+	UserName string
+	Result   struct {
 		EncCount       string
 		EncPatientList []string
-		Timers         map[string]time.Duration
+		Timers         utilcommon.Timers
+		PatientSetID   int
 	}
 }
 
 // NewExploreQuery creates a new query object and checks its validity
-func NewExploreQuery(queryName string, query *models.ExploreQuery) (new ExploreQuery, err error) {
+func NewExploreQuery(queryName string, query *models.ExploreQuery, userName string) (new ExploreQuery, err error) {
 	new = ExploreQuery{
-		ID:    queryName,
-		Query: query,
+		ID:       queryName,
+		Query:    query,
+		UserName: userName,
 	}
-	new.Result.Timers = make(map[string]time.Duration)
+	new.Result.Timers = utilcommon.NewTimers()
 	return new, new.isValid()
-}
-
-// addTimers adds timers to the query results
-func (q *ExploreQuery) addTimers(timerName string, since time.Time, additionalTimers map[string]time.Duration) {
-	if timerName != "" {
-		q.Result.Timers[timerName] = time.Since(since)
-	}
-
-	if additionalTimers != nil {
-		for k, v := range additionalTimers {
-			q.Result.Timers[k] = v
-		}
-	}
 }
 
 // Execute implements the I2b2 MedCo query logic
 func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	overallTimer := time.Now()
 	var timer time.Time
+
+	// create medco connector result instance
+	queryDefinition, err := q.Query.MarshalBinary()
+	if err != nil {
+		err = fmt.Errorf("while marshalling query: %s", err.Error())
+		return
+	}
+	queryID, err := querytoolsserver.InsertExploreResultInstance(utilserver.DBConnection, q.UserName, q.ID, string(queryDefinition))
+	if err != nil {
+		err = fmt.Errorf("while inserting explore result instance: %s", err.Error())
+		return
+	}
+	defer func(e error) { querytoolsserver.UpdateErrorExploreResultInstance(utilserver.DBConnection, queryID) }(err)
 
 	// todo: breakdown in i2b2 / count / patient list
 
@@ -60,13 +71,22 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	}
 
 	// tag query terms
-	timer = time.Now()
-	taggedQueryTerms, ddtTimers, err := unlynx.DDTagValues(q.ID, q.getEncQueryTerms())
-	if err != nil {
-		return
+	encQueryTerms := q.getEncQueryTerms()
+	var taggedQueryTerms map[string]string
+	if len(encQueryTerms) > 0 {
+		timer = time.Now()
+		taggedQueryTermsInner, ddtTimers, ddtErr := unlynx.DDTagValues(q.ID, encQueryTerms)
+		taggedQueryTerms = taggedQueryTermsInner
+		if ddtErr != nil {
+			err = ddtErr
+			return
+		}
+		q.Result.Timers.AddTimers("medco-connector-DDT", timer, ddtTimers)
+		logrus.Info(q.ID, ": tagged ", len(taggedQueryTerms), " elements with unlynx")
+	} else {
+		taggedQueryTerms = make(map[string]string, 0)
+		logrus.Info(q.ID, ": tagged 0 elements with unlynx")
 	}
-	q.addTimers("medco-connector-DDT", timer, ddtTimers)
-	logrus.Info(q.ID, ": tagged ", len(taggedQueryTerms), " elements with unlynx")
 
 	// i2b2 PSM query with tagged items
 	timer = time.Now()
@@ -79,16 +99,17 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	if err != nil {
 		return
 	}
-	q.addTimers("medco-connector-i2b2-PSM", timer, nil)
+
+	q.Result.Timers.AddTimers("medco-connector-i2b2-PSM", timer, nil)
 	logrus.Info(q.ID, ": got ", patientCount, " in patient set ", patientSetID, " with i2b2")
 
 	// i2b2 PDO query to get the dummy flags
 	timer = time.Now()
-	patientIDs, patientDummyFlags, err := i2b2.GetPatientSet(patientSetID)
+	patientIDs, patientDummyFlags, err := i2b2.GetPatientSet(patientSetID, true)
 	if err != nil {
 		return
 	}
-	q.addTimers("medco-connector-i2b2-PDO", timer, nil)
+	q.Result.Timers.AddTimers("medco-connector-i2b2-PDO", timer, nil)
 	logrus.Info(q.ID, ": got ", len(patientIDs), " patient IDs and ", len(patientDummyFlags), " dummy flags with i2b2")
 
 	// aggregate patient dummy flags
@@ -97,7 +118,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	if err != nil {
 		return
 	}
-	q.addTimers("medco-connector-local-agg", timer, nil)
+	q.Result.Timers.AddTimers("medco-connector-local-agg", timer, nil)
 
 	// compute and key switch count (returns optionally global aggregate or shuffled results)
 	timer = time.Now()
@@ -116,17 +137,17 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	if err != nil {
 		return
 	}
-	q.addTimers("medco-connector-unlynx-key-switch-count", timer, ksCountTimers)
+	q.Result.Timers.AddTimers("medco-connector-unlynx-key-switch-count", timer, ksCountTimers)
 
 	// optionally obfuscate the count
 	if queryType.Obfuscated {
 		logrus.Info(q.ID, ": (local) obfuscation requested")
 		timer = time.Now()
-		encCount, err = unlynx.LocallyObfuscateValue(encCount, 5, q.Query.UserPublicKey) // todo: fixed distribution to make dynamic
+		encCount, err = unlynx.LocallyObfuscateValue(encCount, 5, string(q.Query.UserPublicKey)) // todo: fixed distribution to make dynamic
 		if err != nil {
 			return
 		}
-		q.addTimers("medco-connector-local-obfuscation", timer, nil)
+		q.Result.Timers.AddTimers("medco-connector-local-obfuscation", timer, nil)
 	}
 
 	logrus.Info(q.ID, ": processed count")
@@ -147,21 +168,45 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 			}
 
 			logrus.Info(q.ID, ": masked ", len(maskedPatientIDs), " patient IDs")
-			q.addTimers("medco-connector-local-patient-list-masking", timer, nil)
+			q.Result.Timers.AddTimers("medco-connector-local-patient-list-masking", timer, nil)
 
 			// key switch the masked patient IDs
 			timer = time.Now()
-			ksMaskedPatientIDs, ksPatientListTimers, err := unlynx.KeySwitchValues(q.ID, maskedPatientIDs, q.Query.UserPublicKey)
+			ksMaskedPatientIDs, ksPatientListTimers, err := unlynx.KeySwitchValues(q.ID, maskedPatientIDs, string(q.Query.UserPublicKey))
 			if err != nil {
 				return err
 			}
-			q.addTimers("medco-connector-unlynx-key-switch-patient-list", timer, ksPatientListTimers)
+			q.Result.Timers.AddTimers("medco-connector-unlynx-key-switch-patient-list", timer, ksPatientListTimers)
 			q.Result.EncPatientList = ksMaskedPatientIDs
 			logrus.Info(q.ID, ": key switched patient IDs")
 		}
+
+		logrus.Info(q.ID, ": query ID id requested")
+
+		q.Result.PatientSetID = queryID
 	}
 
-	q.addTimers("medco-connector-overall", overallTimer, nil)
+	//update medco connector result instance
+	pCount, err := strconv.Atoi(patientCount)
+	if err != nil {
+		return
+	}
+	pIDs := make([]int, len(patientIDs))
+	for i, patientID := range patientIDs {
+		pIDs[i], err = strconv.Atoi(patientID)
+		if err != nil {
+			return
+		}
+	}
+
+	patientSetIDNum, err := strconv.Atoi(patientSetID)
+	if err != nil {
+		return err
+	}
+
+	querytoolsserver.UpdateExploreResultInstance(utilserver.DBConnection, queryID, pCount, pIDs, nil, &patientSetIDNum)
+
+	q.Result.Timers.AddTimers("medco-connector-overall", overallTimer, nil)
 	return
 }
 
@@ -222,7 +267,8 @@ func (q *ExploreQuery) getI2b2PsmQueryTerms(taggedQueryTerms map[string]string) 
 				}
 
 			} else {
-				itemKey = *item.QueryTerm
+				itemKey = `\` + strings.ReplaceAll(*item.QueryTerm, "/", `\`)
+
 			}
 			panelsItemKeys[panelIdx] = append(panelsItemKeys[panelIdx], itemKey)
 		}

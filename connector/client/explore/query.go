@@ -3,17 +3,17 @@ package medcoclient
 import (
 	"crypto/tls"
 	"errors"
-	httptransport "github.com/go-openapi/runtime/client"
-	"github.com/ldsec/medco/connector/restapi/client"
-	"github.com/ldsec/medco/connector/restapi/client/medco_network"
-	"github.com/ldsec/medco/connector/restapi/client/medco_node"
-	"github.com/ldsec/medco/connector/restapi/models"
-	"github.com/ldsec/medco/connector/util/client"
-	"github.com/ldsec/medco/connector/wrappers/unlynx"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"net/url"
 	"time"
+
+	httptransport "github.com/go-openapi/runtime/client"
+	"github.com/ldsec/medco/connector/restapi/client"
+	"github.com/ldsec/medco/connector/restapi/client/medco_node"
+	"github.com/ldsec/medco/connector/restapi/models"
+	utilclient "github.com/ldsec/medco/connector/util/client"
+	"github.com/ldsec/medco/connector/wrappers/unlynx"
+	"github.com/sirupsen/logrus"
 )
 
 // ExploreQuery is a MedCo client explore query
@@ -48,21 +48,9 @@ func NewExploreQuery(authToken string, queryType models.ExploreQueryType, encPan
 	}
 
 	// retrieve network information
-	parsedURL, err := url.Parse(utilclient.MedCoConnectorURL)
+	getMetadataResp, err := utilclient.MetaData(authToken, disableTLSCheck)
 	if err != nil {
-		logrus.Error("cannot parse MedCo connector URL: ", err)
-		return
-	}
-
-	transport := httptransport.New(parsedURL.Host, parsedURL.Path, []string{parsedURL.Scheme})
-	transport.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: disableTLSCheck}
-
-	getMetadataResp, err := client.New(transport, nil).MedcoNetwork.GetMetadata(
-		medco_network.NewGetMetadataParamsWithTimeout(30*time.Second),
-		httptransport.BearerToken(authToken),
-	)
-	if err != nil {
-		logrus.Error("get network metadata request error: ", err)
+		logrus.Error(err)
 		return
 	}
 
@@ -95,41 +83,45 @@ func NewExploreQuery(authToken string, queryType models.ExploreQueryType, encPan
 	return
 }
 
+type nodeResult struct {
+	Body      *models.ExploreQueryResultElement
+	NodeIndex int
+}
+
 // Execute executes the MedCo client query synchronously on all the nodes
 func (clientQuery *ExploreQuery) Execute() (nodesResult map[int]*ExploreQueryResult, err error) {
 
-	queryResultsChan := make(chan *models.ExploreQueryResultElement)
+	queryResultsChan := make(chan nodeResult)
 	queryErrChan := make(chan error)
 
 	// execute requests on all nodes
 	for idx := range clientQuery.httpMedCoClients {
-		idxLocal := idx
-		go func() {
+		go func(idxLocal int) {
 
 			queryResult, err := clientQuery.submitToNode(idxLocal)
 			if err != nil {
 				queryErrChan <- err
 			} else {
-				queryResultsChan <- queryResult
+				queryResultsChan <- nodeResult{Body: queryResult, NodeIndex: idxLocal}
 			}
 
-		}()
+		}(idx)
 	}
 
 	// parse the results as they come, or interrupt if one of them errors, or if a timeout occurs
 	timeout := time.After(time.Duration(utilclient.QueryTimeoutSeconds) * time.Second)
 	nodesResult = make(map[int]*ExploreQueryResult)
 forLoop:
-	for nodeIdx := range clientQuery.httpMedCoClients {
+	for range clientQuery.httpMedCoClients {
 		select {
 		case queryResult := <-queryResultsChan:
-			parsedQueryResult, err := newQueryResult(queryResult, clientQuery.userPrivateKey)
+			parsedQueryResult, err := newQueryResult(queryResult.Body, clientQuery.userPrivateKey)
 			if err != nil {
 				return nil, err
 			}
 
-			nodesResult[nodeIdx] = parsedQueryResult
-			logrus.Info("MedCo client explore query successful for node ", nodeIdx)
+			nodesResult[queryResult.NodeIndex] = parsedQueryResult
+			logrus.Info("MedCo client explore query successful for node ", queryResult.NodeIndex)
 
 			if len(nodesResult) == len(clientQuery.httpMedCoClients) {
 				logrus.Info("MedCo client explore query successful for all resources")
@@ -182,23 +174,27 @@ func (clientQuery *ExploreQuery) generateModel() (queryModel *models.ExploreQuer
 	queryModel = &models.ExploreQuery{
 		Type:          clientQuery.queryType,
 		UserPublicKey: clientQuery.userPublicKey,
-		Panels:        []*models.ExploreQueryPanelsItems0{},
+		Panels:        []*models.Panel{},
 	}
 
 	// query terms
 	true := true
 	for panelIdx, panel := range clientQuery.encPanelsItemKeys {
 
-		panelModel := &models.ExploreQueryPanelsItems0{
-			Items: []*models.ExploreQueryPanelsItems0ItemsItems0{},
+		panelModel := &models.Panel{
+			Items: []*models.PanelItemsItems0{},
 			Not:   &clientQuery.panelsIsNot[panelIdx],
 		}
 
 		for _, encItem := range panel {
-			panelModel.Items = append(panelModel.Items, &models.ExploreQueryPanelsItems0ItemsItems0{
-				Encrypted: &true,
+			encrypted := new(bool)
+			*encrypted = true
+			queryTerm := new(string)
+			*queryTerm = encItem
+			panelModel.Items = append(panelModel.Items, &models.PanelItemsItems0{
+				Encrypted: encrypted,
 				Operator:  "exists",
-				QueryTerm: &encItem,
+				QueryTerm: queryTerm,
 				Value:     "",
 			})
 

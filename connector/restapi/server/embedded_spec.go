@@ -196,6 +196,104 @@ func init() {
         }
       }
     },
+    "/node/analysis/survival/query": {
+      "post": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-survival-analysis"
+            ]
+          }
+        ],
+        "tags": [
+          "survival-analysis"
+        ],
+        "summary": "Send a query to run a survival analysis",
+        "operationId": "survivalAnalysis",
+        "parameters": [
+          {
+            "$ref": "#/parameters/survivalAnalysisRequest"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/survivalAnalysisResponse"
+          },
+          "default": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      }
+    },
+    "/node/explore/cohorts": {
+      "get": {
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Retrieve cohort names and patient set IDs",
+        "operationId": "getCohorts",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/getCohortsResponse"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "default": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Add a new cohort or update an existing one",
+        "operationId": "postCohorts",
+        "parameters": [
+          {
+            "$ref": "#/parameters/cohortsRequest"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated cohort"
+          },
+          "500": {
+            "description": "DB has been updated since last importation. Try GET /node/explore/cohorts to fetch the most recent entries"
+          },
+          "default": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Delete a cohort if it exists",
+        "operationId": "deleteCohorts",
+        "parameters": [
+          {
+            "description": "Name of the cohort to delete",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted cohort"
+          },
+          "default": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      }
+    },
     "/node/explore/query": {
       "post": {
         "security": [
@@ -335,50 +433,7 @@ func init() {
           "description": "i2b2 panels (linked by an AND)",
           "type": "array",
           "items": {
-            "type": "object",
-            "required": [
-              "not"
-            ],
-            "properties": {
-              "items": {
-                "description": "i2b2 items (linked by an OR)",
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "required": [
-                    "encrypted",
-                    "queryTerm"
-                  ],
-                  "properties": {
-                    "encrypted": {
-                      "type": "boolean"
-                    },
-                    "modifier": {
-                      "type": "string",
-                      "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/?)$"
-                    },
-                    "operator": {
-                      "type": "string",
-                      "enum": [
-                        "exists",
-                        "equals"
-                      ]
-                    },
-                    "queryTerm": {
-                      "type": "string",
-                      "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/?)$"
-                    },
-                    "value": {
-                      "type": "string"
-                    }
-                  }
-                }
-              },
-              "not": {
-                "description": "exclude the i2b2 panel",
-                "type": "boolean"
-              }
-            }
+            "$ref": "#/definitions/panel"
           }
         },
         "type": {
@@ -402,6 +457,9 @@ func init() {
             "type": "string"
           }
         },
+        "patientSetID": {
+          "type": "integer"
+        },
         "status": {
           "type": "string",
           "enum": [
@@ -412,22 +470,7 @@ func init() {
           ]
         },
         "timers": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": [
-              "milliseconds"
-            ],
-            "properties": {
-              "milliseconds": {
-                "type": "integer",
-                "format": "int64"
-              },
-              "name": {
-                "type": "string"
-              }
-            }
-          }
+          "$ref": "#/definitions/timers"
         }
       }
     },
@@ -538,13 +581,78 @@ func init() {
         }
       }
     },
+    "panel": {
+      "type": "object",
+      "required": [
+        "not"
+      ],
+      "properties": {
+        "items": {
+          "description": "i2b2 items (linked by an OR)",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "encrypted",
+              "queryTerm"
+            ],
+            "properties": {
+              "encrypted": {
+                "type": "boolean"
+              },
+              "modifier": {
+                "type": "string",
+                "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/?)$"
+              },
+              "operator": {
+                "type": "string",
+                "enum": [
+                  "exists",
+                  "equals"
+                ]
+              },
+              "queryTerm": {
+                "type": "string",
+                "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/?)$"
+              },
+              "value": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "not": {
+          "description": "exclude the i2b2 panel",
+          "type": "boolean"
+        }
+      }
+    },
     "restApiAuthorization": {
       "type": "string",
       "enum": [
         "medco-network",
         "medco-explore",
-        "medco-genomic-annotations"
+        "medco-genomic-annotations",
+        "medco-survival-analysis"
       ]
+    },
+    "timers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "milliseconds"
+        ],
+        "properties": {
+          "milliseconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      }
     },
     "user": {
       "type": "object",
@@ -576,6 +684,29 @@ func init() {
     }
   },
   "parameters": {
+    "cohortsRequest": {
+      "description": "Cohort that has been updated or created",
+      "name": "body",
+      "in": "body",
+      "required": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "cohortName": {
+            "type": "string"
+          },
+          "creationDate": {
+            "type": "string"
+          },
+          "patientSetID": {
+            "type": "integer"
+          },
+          "updateDate": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "exploreQueryRequest": {
       "description": "MedCo-Explore query request.",
       "name": "queryRequest",
@@ -610,6 +741,69 @@ func init() {
       "required": true,
       "schema": {
         "$ref": "#/definitions/exploreSearchModifier"
+      }
+    },
+    "survivalAnalysisRequest": {
+      "description": "User public key, patient list and time codes strings for the survival analysis",
+      "name": "body",
+      "in": "body",
+      "required": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "string"
+          },
+          "endConcept": {
+            "type": "string"
+          },
+          "endModifier": {
+            "type": "string"
+          },
+          "setID": {
+            "type": "integer"
+          },
+          "startConcept": {
+            "type": "string"
+          },
+          "startModifier": {
+            "type": "string"
+          },
+          "subGroupDefinitions": {
+            "type": "array",
+            "maxItems": 4,
+            "items": {
+              "type": "object",
+              "properties": {
+                "cohortName": {
+                  "type": "string"
+                },
+                "panels": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/panel"
+                  }
+                }
+              }
+            }
+          },
+          "timeGranularity": {
+            "type": "string",
+            "enum": [
+              "day",
+              "week",
+              "month",
+              "year"
+            ]
+          },
+          "timeLimit": {
+            "type": "integer"
+          },
+          "userPublicKey": {
+            "type": "string",
+            "pattern": "^[\\w=-]+$"
+          }
+        }
       }
     }
   },
@@ -676,6 +870,32 @@ func init() {
         }
       }
     },
+    "getCohortsResponse": {
+      "description": "Queried cohorts",
+      "schema": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "cohortId": {
+              "type": "integer"
+            },
+            "cohortName": {
+              "type": "string"
+            },
+            "creationDate": {
+              "type": "string"
+            },
+            "queryId": {
+              "type": "integer"
+            },
+            "updateDate": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
     "networkMetadataResponse": {
       "description": "Network metadata (public key and nodes list).",
       "schema": {
@@ -713,6 +933,53 @@ func init() {
           }
         }
       }
+    },
+    "survivalAnalysisResponse": {
+      "description": "Queried survival analysis",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "groupID": {
+                  "type": "string"
+                },
+                "groupResults": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "events": {
+                        "type": "object",
+                        "properties": {
+                          "censoringevent": {
+                            "type": "string"
+                          },
+                          "eventofinterest": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "timepoint": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "initialCount": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "timers": {
+            "$ref": "#/definitions/timers"
+          }
+        }
+      }
     }
   },
   "securityDefinitions": {
@@ -740,6 +1007,10 @@ func init() {
     {
       "description": "Genomic Annotations Query API",
       "name": "genomic-annotations"
+    },
+    {
+      "description": "Survival analysis API",
+      "name": "survival-analysis"
     }
   ],
   "externalDocs": {
@@ -957,6 +1228,225 @@ func init() {
                 }
               }
             }
+          },
+          "default": {
+            "description": "Error response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/node/analysis/survival/query": {
+      "post": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-survival-analysis"
+            ]
+          }
+        ],
+        "tags": [
+          "survival-analysis"
+        ],
+        "summary": "Send a query to run a survival analysis",
+        "operationId": "survivalAnalysis",
+        "parameters": [
+          {
+            "description": "User public key, patient list and time codes strings for the survival analysis",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ID": {
+                  "type": "string"
+                },
+                "endConcept": {
+                  "type": "string"
+                },
+                "endModifier": {
+                  "type": "string"
+                },
+                "setID": {
+                  "type": "integer"
+                },
+                "startConcept": {
+                  "type": "string"
+                },
+                "startModifier": {
+                  "type": "string"
+                },
+                "subGroupDefinitions": {
+                  "type": "array",
+                  "maxItems": 4,
+                  "items": {
+                    "$ref": "#/definitions/SubGroupDefinitionsItems0"
+                  }
+                },
+                "timeGranularity": {
+                  "type": "string",
+                  "enum": [
+                    "day",
+                    "week",
+                    "month",
+                    "year"
+                  ]
+                },
+                "timeLimit": {
+                  "type": "integer"
+                },
+                "userPublicKey": {
+                  "type": "string",
+                  "pattern": "^[\\w=-]+$"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Queried survival analysis",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/ResultsItems0"
+                  }
+                },
+                "timers": {
+                  "$ref": "#/definitions/timers"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/node/explore/cohorts": {
+      "get": {
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Retrieve cohort names and patient set IDs",
+        "operationId": "getCohorts",
+        "responses": {
+          "200": {
+            "description": "Queried cohorts",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/GetCohortsOKBodyItems0"
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "default": {
+            "description": "Error response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Add a new cohort or update an existing one",
+        "operationId": "postCohorts",
+        "parameters": [
+          {
+            "description": "Cohort that has been updated or created",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "cohortName": {
+                  "type": "string"
+                },
+                "creationDate": {
+                  "type": "string"
+                },
+                "patientSetID": {
+                  "type": "integer"
+                },
+                "updateDate": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated cohort"
+          },
+          "500": {
+            "description": "DB has been updated since last importation. Try GET /node/explore/cohorts to fetch the most recent entries"
+          },
+          "default": {
+            "description": "Error response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Delete a cohort if it exists",
+        "operationId": "deleteCohorts",
+        "parameters": [
+          {
+            "description": "Name of the cohort to delete",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted cohort"
           },
           "default": {
             "description": "Error response.",
@@ -1219,26 +1709,67 @@ func init() {
     }
   },
   "definitions": {
-    "ExploreQueryPanelsItems0": {
+    "ExploreSearchResultElementMedcoEncryption": {
       "type": "object",
       "required": [
-        "not"
+        "encrypted",
+        "id"
       ],
       "properties": {
-        "items": {
-          "description": "i2b2 items (linked by an OR)",
+        "childrenIds": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/ExploreQueryPanelsItems0ItemsItems0"
+            "type": "integer",
+            "format": "int64"
           }
         },
-        "not": {
-          "description": "exclude the i2b2 panel",
+        "encrypted": {
           "type": "boolean"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64"
         }
       }
     },
-    "ExploreQueryPanelsItems0ItemsItems0": {
+    "GetCohortsOKBodyItems0": {
+      "type": "object",
+      "properties": {
+        "cohortId": {
+          "type": "integer"
+        },
+        "cohortName": {
+          "type": "string"
+        },
+        "creationDate": {
+          "type": "string"
+        },
+        "queryId": {
+          "type": "integer"
+        },
+        "updateDate": {
+          "type": "string"
+        }
+      }
+    },
+    "NodesItems0": {
+      "type": "object",
+      "required": [
+        "index"
+      ],
+      "properties": {
+        "index": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      }
+    },
+    "PanelItemsItems0": {
       "type": "object",
       "required": [
         "encrypted",
@@ -1269,7 +1800,68 @@ func init() {
         }
       }
     },
-    "ExploreQueryResultElementTimersItems0": {
+    "ResultsItems0": {
+      "type": "object",
+      "properties": {
+        "groupID": {
+          "type": "string"
+        },
+        "groupResults": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ResultsItems0GroupResultsItems0"
+          }
+        },
+        "initialCount": {
+          "type": "string"
+        }
+      }
+    },
+    "ResultsItems0GroupResultsItems0": {
+      "type": "object",
+      "properties": {
+        "events": {
+          "type": "object",
+          "properties": {
+            "censoringevent": {
+              "type": "string"
+            },
+            "eventofinterest": {
+              "type": "string"
+            }
+          }
+        },
+        "timepoint": {
+          "type": "integer"
+        }
+      }
+    },
+    "ResultsItems0GroupResultsItems0Events": {
+      "type": "object",
+      "properties": {
+        "censoringevent": {
+          "type": "string"
+        },
+        "eventofinterest": {
+          "type": "string"
+        }
+      }
+    },
+    "SubGroupDefinitionsItems0": {
+      "type": "object",
+      "properties": {
+        "cohortName": {
+          "type": "string"
+        },
+        "panels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/panel"
+          }
+        }
+      }
+    },
+    "TimersItems0": {
       "type": "object",
       "required": [
         "milliseconds"
@@ -1280,46 +1872,6 @@ func init() {
           "format": "int64"
         },
         "name": {
-          "type": "string"
-        }
-      }
-    },
-    "ExploreSearchResultElementMedcoEncryption": {
-      "type": "object",
-      "required": [
-        "encrypted",
-        "id"
-      ],
-      "properties": {
-        "childrenIds": {
-          "type": "array",
-          "items": {
-            "type": "integer",
-            "format": "int64"
-          }
-        },
-        "encrypted": {
-          "type": "boolean"
-        },
-        "id": {
-          "type": "integer",
-          "format": "int64"
-        }
-      }
-    },
-    "NodesItems0": {
-      "type": "object",
-      "required": [
-        "index"
-      ],
-      "properties": {
-        "index": {
-          "type": "integer"
-        },
-        "name": {
-          "type": "string"
-        },
-        "url": {
           "type": "string"
         }
       }
@@ -1348,7 +1900,7 @@ func init() {
           "description": "i2b2 panels (linked by an AND)",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/ExploreQueryPanelsItems0"
+            "$ref": "#/definitions/panel"
           }
         },
         "type": {
@@ -1372,6 +1924,9 @@ func init() {
             "type": "string"
           }
         },
+        "patientSetID": {
+          "type": "integer"
+        },
         "status": {
           "type": "string",
           "enum": [
@@ -1382,10 +1937,7 @@ func init() {
           ]
         },
         "timers": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ExploreQueryResultElementTimersItems0"
-          }
+          "$ref": "#/definitions/timers"
         }
       }
     },
@@ -1496,13 +2048,39 @@ func init() {
         }
       }
     },
+    "panel": {
+      "type": "object",
+      "required": [
+        "not"
+      ],
+      "properties": {
+        "items": {
+          "description": "i2b2 items (linked by an OR)",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PanelItemsItems0"
+          }
+        },
+        "not": {
+          "description": "exclude the i2b2 panel",
+          "type": "boolean"
+        }
+      }
+    },
     "restApiAuthorization": {
       "type": "string",
       "enum": [
         "medco-network",
         "medco-explore",
-        "medco-genomic-annotations"
+        "medco-genomic-annotations",
+        "medco-survival-analysis"
       ]
+    },
+    "timers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/TimersItems0"
+      }
     },
     "user": {
       "type": "object",
@@ -1534,6 +2112,29 @@ func init() {
     }
   },
   "parameters": {
+    "cohortsRequest": {
+      "description": "Cohort that has been updated or created",
+      "name": "body",
+      "in": "body",
+      "required": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "cohortName": {
+            "type": "string"
+          },
+          "creationDate": {
+            "type": "string"
+          },
+          "patientSetID": {
+            "type": "integer"
+          },
+          "updateDate": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "exploreQueryRequest": {
       "description": "MedCo-Explore query request.",
       "name": "queryRequest",
@@ -1568,6 +2169,69 @@ func init() {
       "required": true,
       "schema": {
         "$ref": "#/definitions/exploreSearchModifier"
+      }
+    },
+    "survivalAnalysisRequest": {
+      "description": "User public key, patient list and time codes strings for the survival analysis",
+      "name": "body",
+      "in": "body",
+      "required": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "string"
+          },
+          "endConcept": {
+            "type": "string"
+          },
+          "endModifier": {
+            "type": "string"
+          },
+          "setID": {
+            "type": "integer"
+          },
+          "startConcept": {
+            "type": "string"
+          },
+          "startModifier": {
+            "type": "string"
+          },
+          "subGroupDefinitions": {
+            "type": "array",
+            "maxItems": 4,
+            "items": {
+              "type": "object",
+              "properties": {
+                "cohortName": {
+                  "type": "string"
+                },
+                "panels": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/panel"
+                  }
+                }
+              }
+            }
+          },
+          "timeGranularity": {
+            "type": "string",
+            "enum": [
+              "day",
+              "week",
+              "month",
+              "year"
+            ]
+          },
+          "timeLimit": {
+            "type": "integer"
+          },
+          "userPublicKey": {
+            "type": "string",
+            "pattern": "^[\\w=-]+$"
+          }
+        }
       }
     }
   },
@@ -1634,6 +2298,32 @@ func init() {
         }
       }
     },
+    "getCohortsResponse": {
+      "description": "Queried cohorts",
+      "schema": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "cohortId": {
+              "type": "integer"
+            },
+            "cohortName": {
+              "type": "string"
+            },
+            "creationDate": {
+              "type": "string"
+            },
+            "queryId": {
+              "type": "integer"
+            },
+            "updateDate": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
     "networkMetadataResponse": {
       "description": "Network metadata (public key and nodes list).",
       "schema": {
@@ -1671,6 +2361,53 @@ func init() {
           }
         }
       }
+    },
+    "survivalAnalysisResponse": {
+      "description": "Queried survival analysis",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "groupID": {
+                  "type": "string"
+                },
+                "groupResults": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "events": {
+                        "type": "object",
+                        "properties": {
+                          "censoringevent": {
+                            "type": "string"
+                          },
+                          "eventofinterest": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "timepoint": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "initialCount": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "timers": {
+            "$ref": "#/definitions/timers"
+          }
+        }
+      }
     }
   },
   "securityDefinitions": {
@@ -1698,6 +2435,10 @@ func init() {
     {
       "description": "Genomic Annotations Query API",
       "name": "genomic-annotations"
+    },
+    {
+      "description": "Survival analysis API",
+      "name": "survival-analysis"
     }
   ],
   "externalDocs": {

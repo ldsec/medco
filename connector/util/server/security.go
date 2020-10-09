@@ -102,6 +102,8 @@ func extractAuthorizationsFromToken(token *jwt.Token, provider *oidcProvider) (u
 			ua.RestAPI = append(ua.RestAPI, models.RestAPIAuthorizationMedcoExplore)
 		case string(models.RestAPIAuthorizationMedcoGenomicAnnotations):
 			ua.RestAPI = append(ua.RestAPI, models.RestAPIAuthorizationMedcoGenomicAnnotations)
+		case string(models.RestAPIAuthorizationMedcoSurvivalAnalysis):
+			ua.RestAPI = append(ua.RestAPI, models.RestAPIAuthorizationMedcoSurvivalAnalysis)
 
 		// explore query type authorizations
 		case string(models.ExploreQueryTypePatientList):

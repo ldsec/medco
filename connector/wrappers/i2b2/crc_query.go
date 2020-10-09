@@ -2,7 +2,9 @@ package i2b2
 
 import (
 	"errors"
-	"github.com/ldsec/medco/connector/util/server"
+
+	utilserver "github.com/ldsec/medco/connector/util/server"
+	"github.com/ldsec/medco/connector/wrappers/unlynx"
 	"github.com/sirupsen/logrus"
 )
 
@@ -64,7 +66,7 @@ func ExecutePsmQuery(queryName string, panelsItemKeys [][]string, panelsIsNot []
 }
 
 // GetPatientSet retrieves an i2b2 patient set
-func GetPatientSet(patientSetID string) (patientIDs []string, patientDummyFlags []string, err error) {
+func GetPatientSet(patientSetID string, generateDummyFlags bool) (patientIDs []string, patientDummyFlags []string, err error) {
 
 	// craft and execute request
 	xmlResponse := &Response{
@@ -93,11 +95,20 @@ func GetPatientSet(patientSetID string) (patientIDs []string, patientDummyFlags 
 				break
 			}
 		}
-
 		if !dummyFlagFound {
-			logrus.Warn("GetPatientSet: ignored patient ", patient.PatientID, " because of missing dummy flag")
+			patientIDs = append(patientIDs, patient.PatientID)
+			if generateDummyFlags {
+				var realPatientFlag string
+				realPatientFlag, err = unlynx.EncryptWithCothorityKey(int64(1))
+				if err != nil {
+					return
+				}
+				patientDummyFlags = append(patientDummyFlags, realPatientFlag)
+				logrus.Warn("GetPatientSet: patient ", patient.PatientID, " misses dummy flag. Setting it as a real patient")
+			} else {
+				logrus.Warn("GetPatientSet: patient ", patient.PatientID, " misses dummy flag.")
+			}
 		}
 	}
-
 	return
 }

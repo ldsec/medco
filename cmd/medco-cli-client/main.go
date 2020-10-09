@@ -1,11 +1,12 @@
 package main
 
 import (
-	medcoclient "github.com/ldsec/medco/connector/client"
-	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
 	"os"
 	"strings"
+
+	medcoclient "github.com/ldsec/medco/connector/client/explore"
+	"github.com/sirupsen/logrus"
+	"github.com/urfave/cli"
 )
 
 func main() {

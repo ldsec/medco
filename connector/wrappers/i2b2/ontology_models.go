@@ -4,6 +4,19 @@ import (
 	"encoding/xml"
 )
 
+// NewOntReqGetTermInfoMessageBody returns a new request object for i2b2 get term info (information about node)
+func NewOntReqGetTermInfoMessageBody(path string) Request {
+	body := OntReqGetTermInfoMessageBody{}
+	body.GetTermInfo.Hiddens = "false"
+	body.GetTermInfo.Blob = "true"
+	body.GetTermInfo.Synonyms = "false"
+	body.GetTermInfo.Max = "200"
+	body.GetTermInfo.Type = "core"
+	body.GetTermInfo.Self = path
+
+	return NewRequestWithBody(body)
+}
+
 // NewOntReqGetCategoriesMessageBody returns a new request object for i2b2 categories (ontology root nodes)
 func NewOntReqGetCategoriesMessageBody() Request {
 	body := OntReqGetCategoriesMessageBody{}
@@ -68,6 +81,19 @@ type baseMessageBody struct {
 	Type     string `xml:"type,attr,omitempty"`
 	Blob     string `xml:"blob,attr,omitempty"`
 	Max      string `xml:"max,attr,omitempty"`
+}
+
+// OntReqGetTermInfoMessageBody is an i2b2 XML message body for ontology term info request
+type OntReqGetTermInfoMessageBody struct {
+	XMLName     xml.Name `xml:"message_body"`
+	GetTermInfo struct {
+		Max      string `xml:"max,attr"`
+		Hiddens  string `xml:"hiddens,attr"`
+		Synonyms string `xml:"synonyms,attr"`
+		Type     string `xml:"type,attr"`
+		Blob     string `xml:"blob,attr"`
+		Self     string `xml:"self"`
+	} `xml:"ontns:get_term_info"`
 }
 
 // OntReqGetCategoriesMessageBody is an i2b2 XML message body for ontology categories request

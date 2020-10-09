@@ -13,6 +13,7 @@ import (
 	"github.com/ldsec/medco/connector/restapi/client/genomic_annotations"
 	"github.com/ldsec/medco/connector/restapi/client/medco_network"
 	"github.com/ldsec/medco/connector/restapi/client/medco_node"
+	"github.com/ldsec/medco/connector/restapi/client/survival_analysis"
 )
 
 // Default medco cli HTTP client.
@@ -60,6 +61,7 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *MedcoCli {
 	cli.GenomicAnnotations = genomic_annotations.New(transport, formats)
 	cli.MedcoNetwork = medco_network.New(transport, formats)
 	cli.MedcoNode = medco_node.New(transport, formats)
+	cli.SurvivalAnalysis = survival_analysis.New(transport, formats)
 	return cli
 }
 
@@ -110,6 +112,8 @@ type MedcoCli struct {
 
 	MedcoNode medco_node.ClientService
 
+	SurvivalAnalysis survival_analysis.ClientService
+
 	Transport runtime.ClientTransport
 }
 
@@ -119,4 +123,5 @@ func (c *MedcoCli) SetTransport(transport runtime.ClientTransport) {
 	c.GenomicAnnotations.SetTransport(transport)
 	c.MedcoNetwork.SetTransport(transport)
 	c.MedcoNode.SetTransport(transport)
+	c.SurvivalAnalysis.SetTransport(transport)
 }

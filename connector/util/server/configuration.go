@@ -71,6 +71,24 @@ var DBLoginPassword string
 // DBConnection is the connection to the database
 var DBConnection *sql.DB
 
+// I2B2DBHost is the host of the I2B2 DB
+var I2B2DBHost string
+
+// I2B2DBPort is the number of the port used by the I2B2 DB
+var I2B2DBPort int
+
+// I2B2DBName is the name of the I2B2 database
+var I2B2DBName string
+
+// I2B2DBLoginUser is the I2B2 database login user
+var I2B2DBLoginUser string
+
+// I2B2DBLoginPassword is the I2B2 database login password
+var I2B2DBLoginPassword string
+
+// I2B2DBConnection is the connection to the i2b2 database
+var I2B2DBConnection *sql.DB
+
 func init() {
 	SetLogLevel(os.Getenv("LOG_LEVEL"))
 
@@ -136,6 +154,24 @@ func init() {
 	DBConnection, err = InitializeConnectionToDB(DBHost, DBPort, DBName, DBLoginUser, DBLoginPassword)
 	if err != nil {
 		logrus.Error("Impossible to initialize connection to DB")
+		return
+	}
+
+	I2B2DBHost = os.Getenv("I2B2_DB_HOST")
+	I2B2DBName = os.Getenv("I2B2_DB_NAME")
+	I2B2DBLoginUser = os.Getenv("I2B2_DB_USER")
+	I2B2DBLoginPassword = os.Getenv("I2B2_DB_PW")
+
+	I2B2dbPort, err := strconv.ParseInt(os.Getenv("I2B2_DB_PORT"), 10, 64)
+	if err != nil || I2B2dbPort < 0 || I2B2dbPort > 65535 {
+		logrus.Warn("invalid DB port, defaulted")
+		I2B2dbPort = 5432
+	}
+	I2B2DBPort = int(I2B2dbPort)
+
+	I2B2DBConnection, err = InitializeConnectionToDB(I2B2DBHost, I2B2DBPort, I2B2DBName, I2B2DBLoginUser, I2B2DBLoginPassword)
+	if err != nil {
+		logrus.Error("Impossible to initialize connection to I2B2 DB")
 		return
 	}
 }
