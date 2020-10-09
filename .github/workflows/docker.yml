@@ -46,7 +46,7 @@ jobs:
       - name: Build and push medco
         uses: docker/build-push-action@v2
         with:
-          context: ./build/package/medco
+          file: ./build/package/medco/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ghcr.io/ldsec/medco:${{ steps.get_version.outputs.version }}
           cache-from: type=local,src=/tmp/.buildx-cache
@@ -55,7 +55,7 @@ jobs:
       - name: Build and push i2b2
         uses: docker/build-push-action@v2
         with:
-          context: ./build/package/i2b2
+          file: ./build/package/i2b2/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ghcr.io/ldsec/i2b2-medco:${{ steps.get_version.outputs.version }}
           cache-from: type=local,src=/tmp/.buildx-cache
@@ -64,7 +64,7 @@ jobs:
       - name: Build and push keycloak
         uses: docker/build-push-action@v2
         with:
-          context: ./build/package/keycloak
+          file: ./build/package/keycloak/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ghcr.io/ldsec/keycloak-medco:${{ steps.get_version.outputs.version }}
           cache-from: type=local,src=/tmp/.buildx-cache
@@ -73,7 +73,7 @@ jobs:
       - name: Build and push nginx
         uses: docker/build-push-action@v2
         with:
-          context: ./build/package/nginx
+          file: ./build/package/nginx/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ghcr.io/ldsec/nginx-medco:${{ steps.get_version.outputs.version }}
           cache-from: type=local,src=/tmp/.buildx-cache
@@ -82,7 +82,7 @@ jobs:
       - name: Build and push pgadmin
         uses: docker/build-push-action@v2
         with:
-          context: ./build/package/pgadmin
+          file: ./build/package/pgadmin/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ghcr.io/ldsec/pgadmin-medco:${{ steps.get_version.outputs.version }}
           cache-from: type=local,src=/tmp/.buildx-cache
