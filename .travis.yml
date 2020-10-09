@@ -10,7 +10,7 @@ jobs:
         - MEDCO_DB_NUMBER=9 MEDCO_DB_HOST=localhost MEDCO_DB_PORT=5432 MEDCO_DB_USER=postgres MEDCO_DB_PASSWORD=postgres MEDCO_DB_NAME=postgres MEDCO_USER_USERNAME=test MEDCO_USER_PASSWORD=test
       before_install:
         - make docker_images_build_dev
-        - cd ~/build/ldsec/medco-connector/
+        - cd ~/build/ldsec/medco/
         - sudo /etc/init.d/postgresql stop
         - make download_test_data
       install:
