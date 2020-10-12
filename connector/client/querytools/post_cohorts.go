@@ -35,6 +35,10 @@ func NewPostCohorts(token string, patientSetID []int, cohortName string, disable
 	}
 
 	getMetadataResp, err := utilclient.MetaData(token, disableTLSCheck)
+	if err != nil {
+		logrus.Error(err)
+		return
+	}
 
 	nofNodes := len(getMetadataResp.Payload.Nodes)
 	if len(patientSetID) != nofNodes {
@@ -74,7 +78,7 @@ func (postCohorts *PostCohorts) Execute() (err error) {
 		go func(idx int) {
 			res, Error := postCohorts.submitToNode(idx)
 			if Error != nil {
-				logrus.Errorf("Query tool exection error : %s", Error)
+				logrus.Errorf("Query tool execution error : %s", Error)
 				errChan <- Error
 			} else {
 
@@ -104,7 +108,7 @@ func (postCohorts *PostCohorts) Execute() (err error) {
 func (postCohorts *PostCohorts) submitToNode(nodeIdx int) (*medco_node.PostCohortsOK, error) {
 	creationDate := time.Now()
 	updateDate := time.Now()
-	params := medco_node.NewPostCohortsParamsWithTimeout(time.Duration(utilclient.GenomicAnnotationsQueryTimeoutSeconds) * time.Second)
+	params := medco_node.NewPostCohortsParamsWithTimeout(time.Duration(utilclient.QueryTimeoutSeconds) * time.Second)
 	body := medco_node.PostCohortsBody{
 		CohortName:   postCohorts.cohortName,
 		CreationDate: creationDate.Format(time.RFC3339),

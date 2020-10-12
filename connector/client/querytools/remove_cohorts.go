@@ -33,6 +33,10 @@ func NewRemoveCohorts(token string, cohortName string, disableTLSCheck bool) (re
 	}
 
 	getMetadataResp, err := utilclient.MetaData(token, disableTLSCheck)
+	if err != nil {
+		logrus.Error(err)
+		return
+	}
 
 	removeCohorts.httpMedCoClients = make([]*client.MedcoCli, len(getMetadataResp.Payload.Nodes))
 	for _, node := range getMetadataResp.Payload.Nodes {
@@ -66,7 +70,7 @@ func (removeCohorts *RemoveCohorts) Execute() (err error) {
 		go func(idx int) {
 			res, Error := removeCohorts.submitToNode(idx)
 			if Error != nil {
-				logrus.Errorf("Query tool exection error : %s", Error)
+				logrus.Errorf("Query tool execution error : %s", Error)
 				errChan <- Error
 			} else {
 
@@ -96,7 +100,7 @@ func (removeCohorts *RemoveCohorts) Execute() (err error) {
 
 func (removeCohorts *RemoveCohorts) submitToNode(nodeIdx int) (*medco_node.DeleteCohortsOK, error) {
 
-	params := medco_node.NewDeleteCohortsParamsWithTimeout(time.Duration(utilclient.GenomicAnnotationsQueryTimeoutSeconds) * time.Second)
+	params := medco_node.NewDeleteCohortsParamsWithTimeout(time.Duration(utilclient.QueryTimeoutSeconds) * time.Second)
 
 	params.Body = removeCohorts.cohortName
 

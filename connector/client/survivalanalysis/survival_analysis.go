@@ -67,6 +67,10 @@ func NewSurvivalAnalysis(token string, patientSetID int, subGroupDefinitions []*
 	}
 
 	getMetadataResp, err := utilclient.MetaData(token, disableTLSCheck)
+	if err != nil {
+		logrus.Error(err)
+		return
+	}
 
 	q.httpMedCoClients = make([]*client.MedcoCli, len(getMetadataResp.Payload.Nodes))
 	for _, node := range getMetadataResp.Payload.Nodes {

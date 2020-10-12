@@ -16,7 +16,7 @@ EOSQL
 
 #create explore query results
 psql $PSQL_PARAMS -d "$MC_DB_NAME" <<-EOSQL
-CREATE TABLE IF NOT EXISTS "${QUERY_TOOLS_SCHEMA}".explore_query_results
+CREATE TABLE IF NOT EXISTS query_tools.explore_query_results
 (
     query_id serial NOT NULL,
     query_name character varying(255) NOT NULL,
@@ -35,7 +35,7 @@ EOSQL
 
 #create cohorts table
 psql $PSQL_PARAMS -d "$MC_DB_NAME"<<-EOSQL
-CREATE TABLE IF NOT EXISTS "${QUERY_TOOLS_SCHEMA}".saved_cohorts
+CREATE TABLE IF NOT EXISTS query_tools.saved_cohorts
 (
     cohort_id serial NOT NULL,
     user_id character varying(255) NOT NULL,
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS "${QUERY_TOOLS_SCHEMA}".saved_cohorts
     CONSTRAINT saved_cohorts_pkey PRIMARY KEY (cohort_id),
     CONSTRAINT saved_cohorts_user_id_cohort_name_key UNIQUE (user_id, cohort_name),
     CONSTRAINT query_tool_fk_psc_ri FOREIGN KEY (query_id)
-        REFERENCES "${QUERY_TOOLS_SCHEMA}".explore_query_results (query_id) MATCH SIMPLE
+        REFERENCES query_tools.explore_query_results (query_id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
 )

@@ -2,12 +2,13 @@ package utilserver
 
 import (
 	"database/sql"
-	"github.com/sirupsen/logrus"
-	onetLog "go.dedis.ch/onet/v3/log"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/sirupsen/logrus"
+	onetLog "go.dedis.ch/onet/v3/log"
 )
 
 // LogLevel is the log level, assuming the same convention as the cothority / unlynx log levels:
@@ -160,7 +161,7 @@ func init() {
 	I2B2DBHost = os.Getenv("I2B2_DB_HOST")
 	I2B2DBName = os.Getenv("I2B2_DB_NAME")
 	I2B2DBLoginUser = os.Getenv("I2B2_DB_USER")
-	I2B2DBLoginPassword = os.Getenv("I2B2_DB_PW")
+	I2B2DBLoginPassword = os.Getenv("I2B2_DB_PASSWORD")
 
 	I2B2dbPort, err := strconv.ParseInt(os.Getenv("I2B2_DB_PORT"), 10, 64)
 	if err != nil || I2B2dbPort < 0 || I2B2dbPort > 65535 {

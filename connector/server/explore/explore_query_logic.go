@@ -57,11 +57,16 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 		return
 	}
 	queryID, err := querytoolsserver.InsertExploreResultInstance(utilserver.DBConnection, q.UserName, q.ID, string(queryDefinition))
+	logrus.Debugf("Creating Explore Result Instance : %d", queryID)
 	if err != nil {
 		err = fmt.Errorf("while inserting explore result instance: %s", err.Error())
 		return
 	}
-	defer func(e error) { querytoolsserver.UpdateErrorExploreResultInstance(utilserver.DBConnection, queryID) }(err)
+	defer func(e error) {
+		if e != nil {
+			querytoolsserver.UpdateErrorExploreResultInstance(utilserver.DBConnection, queryID)
+		}
+	}(err)
 
 	// todo: breakdown in i2b2 / count / patient list
 
@@ -181,7 +186,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 			logrus.Info(q.ID, ": key switched patient IDs")
 		}
 
-		logrus.Info(q.ID, ": query ID id requested")
+		logrus.Info(q.ID, ": patient set ID requested")
 
 		q.Result.PatientSetID = queryID
 	}

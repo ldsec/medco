@@ -4,6 +4,9 @@ import (
 	"os"
 	"strings"
 
+	querytoolsclient "github.com/ldsec/medco/connector/client/querytools"
+	survivalclient "github.com/ldsec/medco/connector/client/survivalanalysis"
+
 	medcoclient "github.com/ldsec/medco/connector/client/explore"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -63,6 +66,85 @@ func main() {
 		cli.BoolFlag{
 			Name:  "encrypted, e",
 			Usage: "Return encrypted variant id",
+		},
+	}
+	//--- survival analysis command flags
+	survivalAnalysisFlag := []cli.Flag{
+		// TODO as CLI is ran in a docker container, some adjustments are needed for I/O files to work
+		//cli.StringFlag{
+		//	Name:  "parameterFile, p",
+		//	Usage: "YAML parameter file URL",
+		//	Value: "",
+		//},
+		//cli.StringFlag{
+		//	Name:  "resultFile, r",
+		//	Usage: "Output file for the result CSV. Printed to stdout if omitted.",
+		//	Value: "",
+		//},
+		//cli.StringFlag{
+		//	Name:  "dumpFile, d",
+		//	Usage: "Output file for the timers CSV. Printed to stdout if omitted.",
+		//	Value: "",
+		//},
+		cli.IntFlag{
+			Name:     "limit, l",
+			Usage:    "Max limit of survival analysis.",
+			Required: true,
+		},
+		cli.StringFlag{
+			Name:  "granularity, g",
+			Usage: "Time resolution, one of [day, week, month, year]",
+			Value: "day",
+		},
+		// this is supposed to be a required argument, but we need -1 for testing, and -1 is not possible to pass as an argument here
+		cli.IntFlag{
+			Name:  "cohortID, c",
+			Usage: "Cohort identifier",
+			Value: -1,
+		},
+		cli.StringFlag{
+			Name:     "startConcept, s",
+			Usage:    "Survival start concept",
+			Required: true},
+		cli.StringFlag{
+			Name:  "startModifier, x",
+			Usage: "Survival start modifier",
+			Value: "@",
+		},
+		cli.StringFlag{
+			Name:     "endConcept, e",
+			Usage:    "Survival end concept",
+			Required: true,
+		},
+		cli.StringFlag{
+			Name:  "endModifier, y",
+			Usage: "Survival end modifier",
+			Value: "@",
+		},
+	}
+
+	//--- query tools command flags
+	postCohortFlag := []cli.Flag{
+		// cli.IntSlice produces wrong results
+		cli.StringFlag{
+			Name:     "patientSetIDs, p",
+			Usage:    "List of patient set IDs, there must be one per node",
+			Required: true,
+		},
+		cli.StringFlag{
+			Name:     "cohortName, c",
+			Usage:    "Name of the new cohort",
+			Required: true,
+		},
+	}
+
+	//--- query tools command flags
+	removeCohortFlag := []cli.Flag{
+		// cli.IntSlice produces wrong results
+		cli.StringFlag{
+			Name:     "cohortName, c",
+			Usage:    "Name of the new cohort",
+			Required: true,
 		},
 	}
 
@@ -157,6 +239,86 @@ func main() {
 					c.Args().Get(1),
 					c.String("zygosity"),
 					c.Bool("encrypted"),
+					c.GlobalBool("disableTLSCheck"),
+				)
+			},
+		},
+		{
+			Name:        "survival-analysis",
+			Aliases:     []string{"srva"},
+			Usage:       "Run a survival analysis",
+			Flags:       survivalAnalysisFlag,
+			ArgsUsage:   "-l limit [-g granularity] [-c cohortID] -s startConcept [-x startModifier] -e endConcept [-y endModifier]",
+			Description: "Returns the points of the survival curve",
+			Action: func(c *cli.Context) error {
+				return survivalclient.ExecuteClientSurvival(
+					c.GlobalString("token"),
+					"",
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.GlobalBool("disableTLSCheck"),
+					"",
+					"",
+					c.Int("limit"),
+					c.Int("cohortID"),
+					c.String("granularity"),
+					c.String("startConcept"),
+					c.String("startModifier"),
+					c.String("endConcept"),
+					c.String("endModifier"),
+				)
+
+			},
+		},
+
+		{
+			Name:        "get-query-tools",
+			Aliases:     []string{"getqt"},
+			Usage:       "get cohorts",
+			Description: "Gets the list of cohorts.",
+			Action: func(c *cli.Context) error {
+				return querytoolsclient.ExecuteGetCohorts(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.GlobalBool("disableTLSCheck"),
+					"",
+				)
+			},
+		},
+
+		{
+			Name:        "post-query-tools",
+			Aliases:     []string{"postqt"},
+			Usage:       "Update a cohort or create a new one.",
+			Flags:       postCohortFlag,
+			ArgsUsage:   "-c cohortName -p patientSetIDs",
+			Description: "Updates a cohort or creates a new cohorts with given name. The patient set IDs corresponds to explore query result IDs.",
+			Action: func(c *cli.Context) error {
+				return querytoolsclient.ExecutePostCohorts(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.String("cohortName"),
+					c.String("patientSetIDs"),
+					c.GlobalBool("disableTLSCheck"),
+				)
+			},
+		},
+
+		{
+			Name:        "remove-query-tools",
+			Aliases:     []string{"rmqt"},
+			Usage:       "Remove a cohort.",
+			Flags:       removeCohortFlag,
+			ArgsUsage:   "-c cohortName",
+			Description: "Removes a cohort for a given name. If the user does not have a cohort with this name in DB, an error is sent.",
+			Action: func(c *cli.Context) error {
+				return querytoolsclient.ExecuteRemoveCohorts(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.String("cohortName"),
 					c.GlobalBool("disableTLSCheck"),
 				)
 			},

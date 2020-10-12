@@ -36,6 +36,10 @@ func NewGetCohorts(token string, disableTLSCheck bool) (getCohorts *GetCohorts, 
 	}
 
 	getMetadataResp, err := utilclient.MetaData(token, disableTLSCheck)
+	if err != nil {
+		logrus.Error(err)
+		return
+	}
 
 	getCohorts.httpMedCoClients = make([]*client.MedcoCli, len(getMetadataResp.Payload.Nodes))
 	for _, node := range getMetadataResp.Payload.Nodes {
@@ -75,7 +79,7 @@ func (getCohorts *GetCohorts) Execute() (results [][]utilcommon.Cohort, err erro
 		go func(idx int) {
 			res, Error := getCohorts.submitToNode(idx)
 			if Error != nil {
-				logrus.Errorf("Survival analysis exection error : %s", Error)
+				logrus.Errorf("Get cohort execution error : %s", Error)
 				errChan <- Error
 			} else {
 
@@ -108,7 +112,7 @@ func (getCohorts *GetCohorts) Execute() (results [][]utilcommon.Cohort, err erro
 
 func (getCohorts *GetCohorts) submitToNode(nodeIdx int) ([]*medco_node.GetCohortsOKBodyItems0, error) {
 	//TODO timeout
-	params := medco_node.NewGetCohortsParamsWithTimeout(time.Duration(utilclient.GenomicAnnotationsQueryTimeoutSeconds) * time.Second)
+	params := medco_node.NewGetCohortsParamsWithTimeout(time.Duration(utilclient.QueryTimeoutSeconds) * time.Second)
 	response, err := getCohorts.httpMedCoClients[nodeIdx].MedcoNode.GetCohorts(params, httptransport.BearerToken(getCohorts.authToken))
 	if err != nil {
 		return nil, err

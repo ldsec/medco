@@ -15,7 +15,7 @@ import (
 
 func (clientSurvivalAnalysis *SurvivalAnalysis) submitToNode(nodeIdx int) (results *survival_analysis.SurvivalAnalysisOKBody, err error) {
 
-	params := survival_analysis.NewSurvivalAnalysisParamsWithTimeout(time.Duration(utilclient.QueryTimeoutSeconds) * time.Second)
+	params := survival_analysis.NewSurvivalAnalysisParamsWithTimeout(time.Duration(utilclient.SurvivalAnalysisTimeoutSeconds) * time.Second)
 
 	body := survival_analysis.SurvivalAnalysisBody{
 		ID:                  clientSurvivalAnalysis.id,
