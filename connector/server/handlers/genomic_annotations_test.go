@@ -21,23 +21,23 @@ var proteinChangeGetVariantsResult = []string{"-2429151887266669568"}
 var hugoGeneSymbolGetVariantsResult = []string{"-7039476204566471680", "-7039476580443220992", "-7039476780159200256"}
 
 func init() {
-	utilserver.DBHost = "localhost"
-	utilserver.DBPort = 5432
-	utilserver.DBName = "medcoconnectorsrv0"
-	utilserver.DBLoginUser = "medcoconnector"
-	utilserver.DBLoginPassword = "medcoconnector"
+	utilserver.MedcoDBHost = "localhost"
+	utilserver.MedcoDBPort = 5432
+	utilserver.MedcoDBName = "medcoconnectorsrv0"
+	utilserver.MedcoDBLoginUser = "medcoconnector"
+	utilserver.MedcoDBLoginPassword = "medcoconnector"
 	utilserver.SetLogLevel("5")
 }
 
 func TestDBConnection(t *testing.T) {
 
 	var err error
-	utilserver.DBConnection, err = utilserver.InitializeConnectionToDB(utilserver.DBHost, utilserver.DBPort, utilserver.DBName, utilserver.DBLoginUser, utilserver.DBLoginPassword)
+	utilserver.MedcoDBConnection, err = utilserver.InitializeConnectionToDB(utilserver.MedcoDBHost, utilserver.MedcoDBPort, utilserver.MedcoDBName, utilserver.MedcoDBLoginUser, utilserver.MedcoDBLoginPassword)
 	if err != nil {
 		t.Fail()
 	}
 
-	err = utilserver.DBConnection.Ping()
+	err = utilserver.MedcoDBConnection.Ping()
 	if err != nil {
 		logrus.Error("Impossible to connect to DB " + err.Error())
 		t.Fail()
@@ -94,7 +94,7 @@ func testGenomicAnnotationsGetValues(query_type string, query_value string, quer
 	params.Value = query_value
 
 	query, _ := buildGetValuesQuery(params)
-	rows, err := utilserver.DBConnection.Query(query, params.Annotation, params.Value, *params.Limit)
+	rows, err := utilserver.MedcoDBConnection.Query(query, params.Annotation, params.Value, *params.Limit)
 	if err != nil {
 		logrus.Error("Query execution error " + err.Error())
 		t.Fail()
@@ -142,7 +142,7 @@ func testGenomicAnnotationsGetVariants(query_type string, query_value string, zy
 	}
 
 	query, _ := buildGetVariantsQuery(params)
-	rows, err := utilserver.DBConnection.Query(query, params.Annotation, params.Value, zygosityStr, false)
+	rows, err := utilserver.MedcoDBConnection.Query(query, params.Annotation, params.Value, zygosityStr, false)
 	if err != nil {
 		logrus.Error("Query execution error " + err.Error())
 		t.Fail()

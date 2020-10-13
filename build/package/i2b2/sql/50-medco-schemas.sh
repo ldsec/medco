@@ -1,6 +1,6 @@
 #!/bin/bash
 set -Eeuo pipefail
-# create schemas for medco ontology and genomic annotations
+# create schemas for medco ontology
 
 function initSchema {
     DB_NAME="$1"

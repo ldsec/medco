@@ -160,6 +160,51 @@ func main() {
 				)
 			},
 		},
+
+		{
+			Name:    "node-status",
+			Aliases: []string{"nod-stat"},
+			Usage:   "Get node status",
+			Action: func(c *cli.Context) error {
+				return medcoclient.ExecuteClientGetNodeStatus(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.GlobalString("outputFile"),
+					c.GlobalBool("disableTLSCheck"),
+				)
+			},
+		},
+
+		{
+			Name:    "network-info",
+			Aliases: []string{"net-info"},
+			Usage:   "Get network info metadata",
+			Action: func(c *cli.Context) error {
+				return medcoclient.ExecuteClientGetNetwork(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.GlobalString("outputFile"),
+					c.GlobalBool("disableTLSCheck"),
+				)
+			},
+		},
+
+		{
+			Name:    "network-status",
+			Aliases: []string{"net-stat"},
+			Usage:   "Get network status",
+			Action: func(c *cli.Context) error {
+				return medcoclient.ExecuteClientGetNetworkStatus(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.GlobalString("outputFile"),
+					c.GlobalBool("disableTLSCheck"),
+				)
+			},
+		},
 	}
 
 	//cliApp.Before = func(c *cli.Context) error {

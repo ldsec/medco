@@ -118,6 +118,20 @@ paths:
       security:
         - medco-jwt: ["medco-explore"]
 
+  /node/status:
+    get:
+      tags:
+        - "medco-node"
+      summary: "Get info about node status."
+      operationId: "getNodeStatus"
+      responses:
+        200:
+          $ref: "#/responses/statusResponse"
+        default:
+          $ref: "#/responses/errorResponse"
+      security:
+        - medco-jwt: ["medco-node-status"]
+
   /genomic-annotations/{annotation}:
     get:
       tags:
@@ -312,6 +326,16 @@ responses:
         result:
           $ref: "#/definitions/exploreQueryResultElement"
 
+  statusResponse:
+    description: "Node status response."
+    schema:
+      type: "object"
+      properties:
+        statusOK:
+          type: "boolean"
+        message:
+          type: "string"
+
 definitions:
   exploreSearchConcept:
     type: "object"
@@ -467,6 +491,7 @@ definitions:
       - medco-network
       - medco-explore
       - medco-genomic-annotations
+      - medco-node-status
 
   user:
     type: "object"

@@ -13,7 +13,7 @@ import (
 // MedCoGenomicAnnotationsGetValuesHandler handles /medco/genomic-annotations/{annotation} API endpoint
 func MedCoGenomicAnnotationsGetValuesHandler(params genomic_annotations.GetValuesParams, principal *models.User) middleware.Responder {
 
-	err := utilserver.DBConnection.Ping()
+	err := utilserver.MedcoDBConnection.Ping()
 	if err != nil {
 		logrus.Error("Impossible to connect to DB: " + err.Error())
 		return genomic_annotations.NewGetValuesDefault(500).WithPayload(&genomic_annotations.GetValuesDefaultBody{
@@ -30,7 +30,7 @@ func MedCoGenomicAnnotationsGetValuesHandler(params genomic_annotations.GetValue
 	}
 
 	//escaping * characters
-	rows, err := utilserver.DBConnection.Query(query, params.Annotation, strings.ReplaceAll(params.Value, "*", "\\*"), *params.Limit)
+	rows, err := utilserver.MedcoDBConnection.Query(query, params.Annotation, strings.ReplaceAll(params.Value, "*", "\\*"), *params.Limit)
 	if err != nil {
 		logrus.Error("Query execution error: " + err.Error())
 		return genomic_annotations.NewGetValuesDefault(500).WithPayload(&genomic_annotations.GetValuesDefaultBody{
@@ -60,7 +60,7 @@ func MedCoGenomicAnnotationsGetValuesHandler(params genomic_annotations.GetValue
 // MedCoGenomicAnnotationsGetVariantsHandler handles /medco/genomic-annotations/{annotation}/{value} API endpoint
 func MedCoGenomicAnnotationsGetVariantsHandler(params genomic_annotations.GetVariantsParams, principal *models.User) middleware.Responder {
 
-	err := utilserver.DBConnection.Ping()
+	err := utilserver.MedcoDBConnection.Ping()
 	if err != nil {
 		logrus.Error("Impossible to connect to DB: " + err.Error())
 		return genomic_annotations.NewGetVariantsDefault(500).WithPayload(&genomic_annotations.GetVariantsDefaultBody{
@@ -84,7 +84,7 @@ func MedCoGenomicAnnotationsGetVariantsHandler(params genomic_annotations.GetVar
 		return genomic_annotations.NewGetVariantsNotFound()
 	}
 
-	rows, err := utilserver.DBConnection.Query(query, params.Annotation, params.Value, zygosityStr, *params.Encrypted)
+	rows, err := utilserver.MedcoDBConnection.Query(query, params.Annotation, params.Value, zygosityStr, *params.Encrypted)
 	if err != nil {
 		logrus.Error("Query execution error: " + err.Error())
 		return genomic_annotations.NewGetValuesDefault(500).WithPayload(&genomic_annotations.GetValuesDefaultBody{
@@ -116,13 +116,13 @@ func MedCoGenomicAnnotationsGetVariantsHandler(params genomic_annotations.GetVar
 
 // annotationExists checks in the database if the annotation exists
 func annotationExists(annotationName string) (exists bool, err error) {
-	err = utilserver.DBConnection.Ping()
+	err = utilserver.MedcoDBConnection.Ping()
 	if err != nil {
 		logrus.Error("Impossible to connect to DB: " + err.Error())
 		return
 	}
 
-	res, err := utilserver.DBConnection.Query("SELECT genomic_annotations.ga_annotationexists($1)", annotationName)
+	res, err := utilserver.MedcoDBConnection.Query("SELECT genomic_annotations.ga_annotationexists($1)", annotationName)
 	if err != nil {
 		logrus.Error("Query execution error: " + err.Error())
 		return
@@ -165,13 +165,4 @@ func buildGetVariantsQuery(params genomic_annotations.GetVariantsParams) (string
 	}
 
 	return "SELECT genomic_annotations.ga_getvariants($1,$2,$3,$4)", nil
-}
-
-func contains(slice []string, value string) bool {
-	for _, s := range slice {
-		if s == value {
-			return true
-		}
-	}
-	return false
 }

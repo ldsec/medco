@@ -5,6 +5,7 @@ import (
 	"github.com/ldsec/medco/connector/restapi/models"
 	"github.com/ldsec/medco/connector/restapi/server/operations/medco_node"
 	"github.com/ldsec/medco/connector/server"
+	"github.com/ldsec/medco/connector/server/node"
 	"github.com/ldsec/medco/connector/util/server"
 	"github.com/ldsec/medco/connector/wrappers/i2b2"
 	"time"
@@ -53,7 +54,7 @@ func MedCoNodeExploreSearchModifierHandler(params medco_node.ExploreSearchModifi
 	})
 }
 
-// MedCoNodeExploreQueryHandler handles /medco/node/explore/query API endpoint
+// MedCoNodeExploreQueryHandler handles the /medco/node/explore/query API endpoint
 func MedCoNodeExploreQueryHandler(params medco_node.ExploreQueryParams, principal *models.User) middleware.Responder {
 
 	// authorizations of query
@@ -107,4 +108,16 @@ func MedCoNodeExploreQueryHandler(params medco_node.ExploreQueryParams, principa
 			Timers:               timers,
 			Status:               models.ExploreQueryResultElementStatusAvailable,
 		}})
+}
+
+// MedCoGetNodeStatusHandler the handles /medco/node/status API endpoint
+func MedCoGetNodeStatusHandler(params medco_node.GetNodeStatusParams, principal *models.User) middleware.Responder {
+
+	message, status := node.CheckStatus()
+
+	return medco_node.NewGetNodeStatusOK().WithPayload(&medco_node.GetNodeStatusOKBody{
+		Message:  message,
+		StatusOK: status,
+	})
+
 }

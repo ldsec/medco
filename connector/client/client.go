@@ -3,8 +3,10 @@ package medcoclient
 import (
 	"bufio"
 	"encoding/csv"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/ldsec/medco/connector/restapi/client/medco_network"
 	"github.com/ldsec/medco/connector/restapi/models"
 	utilclient "github.com/ldsec/medco/connector/util/client"
 	"github.com/ldsec/medco/connector/wrappers/unlynx"
@@ -19,7 +21,7 @@ import (
 )
 
 // ExecuteClientQuery executes and displays the result of the MedCo client query
-func ExecuteClientQuery(token, username, password, queryType, queryString, resultOutputFilePath string, disableTLSCheck bool) (err error) {
+func ExecuteClientQuery(token, username, password, queryType, queryString, outputFilePath string, disableTLSCheck bool) (err error) {
 
 	// get token
 	accessToken, err := getAccessToken(token, username, password, disableTLSCheck)
@@ -68,19 +70,328 @@ func ExecuteClientQuery(token, username, password, queryType, queryString, resul
 
 	// output results
 	var output io.Writer
-	if resultOutputFilePath == "" {
+	if outputFilePath == "" {
 		output = os.Stdout
 	} else {
-		output, err = os.Create(resultOutputFilePath)
+		output, err = os.Create(outputFilePath)
 		if err != nil {
 			logrus.Error("error opening file: ", err)
 		}
-		err = os.Chmod(resultOutputFilePath, 0777)
+		err = os.Chmod(outputFilePath, 0777)
 		if err != nil {
 			logrus.Error("error setting permissions on file: ", err)
 		}
 	}
 	err = printResultsCSV(nodesResult, output)
+	return
+}
+
+// ExecuteClientSearchConcept executes and displays the result of the MedCo concept search
+func ExecuteClientSearchConcept(token, username, password, conceptPath, outputFilePath string, disableTLSCheck bool) (err error) {
+
+	// get token
+	accessToken, err := getAccessToken(token, username, password, disableTLSCheck)
+	if err != nil {
+		return err
+	}
+
+	// execute search
+	clientSearchConcept, err := NewExploreSearchConcept(accessToken, conceptPath, disableTLSCheck)
+	if err != nil {
+		return err
+	}
+
+	result, err := clientSearchConcept.Execute()
+	if err != nil {
+		return
+	}
+
+	output := "PATH" + "\t" + "TYPE" + "\n"
+	for _, child := range result.Payload.Results {
+		output += child.Path + "\t" + child.Type + "\n"
+	}
+
+	if outputFilePath == "" {
+		fmt.Println(output)
+	} else {
+		outputFile, err := os.Create(outputFilePath)
+		if err != nil {
+			logrus.Error("error opening file: ", err)
+		}
+		outputFile.WriteString(output)
+		outputFile.Close()
+	}
+
+	return
+}
+
+// ExecuteClientSearchModifier executes and displays the result of the MedCo modifier search
+func ExecuteClientSearchModifier(token, username, password, modifierPath, appliedPath, appliedConcept, outputFilePath string, disableTLSCheck bool) (err error) {
+
+	// get token
+	accessToken, err := getAccessToken(token, username, password, disableTLSCheck)
+	if err != nil {
+		return err
+	}
+
+	// execute search
+	clientSearchConcept, err := NewExploreSearchModifier(accessToken, modifierPath, appliedPath, appliedConcept, disableTLSCheck)
+	if err != nil {
+		return err
+	}
+
+	result, err := clientSearchConcept.Execute()
+	if err != nil {
+		return
+	}
+
+	output := "PATH" + "\t" + "TYPE" + "\n"
+	for _, child := range result.Payload.Results {
+		output += child.Path + "\t" + child.Type + "\n"
+	}
+
+	if outputFilePath == "" {
+		fmt.Println(output)
+	} else {
+		outputFile, err := os.Create(outputFilePath)
+		if err != nil {
+			logrus.Error("error opening file: ", err)
+		}
+		outputFile.WriteString(output)
+		outputFile.Close()
+	}
+
+	return
+}
+
+// ExecuteClientGenomicAnnotationsGetValues displays the genomic annotations values matching the annotation parameter
+func ExecuteClientGenomicAnnotationsGetValues(token, username, password, annotation, value string, limit int64, disableTLSCheck bool) (err error) {
+
+	// get token
+	accessToken, err := getAccessToken(token, username, password, disableTLSCheck)
+	if err != nil {
+		return err
+	}
+
+	// execute query
+	clientGenomicAnnotationsGetValues, err := NewGenomicAnnotationsGetValues(accessToken, annotation, value, &limit, disableTLSCheck)
+	if err != nil {
+		return
+	}
+
+	result, err := clientGenomicAnnotationsGetValues.Execute()
+	if err != nil {
+		return
+	}
+
+	for _, annotation := range result {
+		fmt.Printf("%s\n", annotation)
+	}
+
+	return
+
+}
+
+// ExecuteClientGenomicAnnotationsGetVariants displays the variant ids corresponding to the annotation and value parameters
+func ExecuteClientGenomicAnnotationsGetVariants(token, username, password, annotation, value string, zygosity string, encrypted bool, disableTLSCheck bool) (err error) {
+
+	// get token
+	accessToken, err := getAccessToken(token, username, password, disableTLSCheck)
+	if err != nil {
+		return err
+	}
+
+	// execute query
+	clientGenomicAnnotationsGetVariants, err := NewGenomicAnnotationsGetVariants(accessToken, annotation, value, zygosity, &encrypted, disableTLSCheck)
+	if err != nil {
+		return
+	}
+
+	result, err := clientGenomicAnnotationsGetVariants.Execute()
+	if err != nil {
+		return
+	}
+
+	for _, variant := range result {
+		fmt.Printf("%s\n", variant)
+	}
+
+	return
+
+}
+
+// ExecuteClientGetNodeStatus executes and displays the result of the GetNodeStatus request
+func ExecuteClientGetNodeStatus(token, username, password, outputFilePath string, disableTLSCheck bool) (err error) {
+
+	// get token
+	accessToken, err := getAccessToken(token, username, password, disableTLSCheck)
+	if err != nil {
+		return err
+	}
+
+	message, _, err := executeClientGetNodeStatusLogic(accessToken, "", disableTLSCheck)
+	if err != nil {
+		return
+	}
+
+	if outputFilePath == "" {
+		fmt.Printf(message)
+	} else {
+		var file *os.File
+		file, err = os.Create(outputFilePath)
+		if err != nil {
+			logrus.Error("Error while opening output file")
+			return
+		}
+		file.WriteString(message)
+		file.Close()
+	}
+
+	return
+
+}
+
+// ExecuteClientGetNetwork executes and displays the result of the GetNetwork request
+func ExecuteClientGetNetwork(token, username, password, outputFilePath string, disableTLSCheck bool) (err error) {
+
+	// get token
+	accessToken, err := getAccessToken(token, username, password, disableTLSCheck)
+	if err != nil {
+		return err
+	}
+
+	result, _, _ := executeClientGetNetworkLogic(accessToken, disableTLSCheck)
+	if err != nil {
+		return
+	}
+
+	output, err := json.Marshal(result)
+	if err != nil {
+		logrus.Error(err)
+	}
+
+	if outputFilePath == "" {
+		fmt.Printf(string(output) + "\n")
+	} else {
+		var file *os.File
+		file, err = os.Create(outputFilePath)
+		if err != nil {
+			logrus.Error("Error while opening output file")
+			return
+		}
+		file.WriteString(string(output))
+		file.Close()
+	}
+
+	return
+
+}
+
+// ExecuteClientGetNetworkStatus executes and displays the result of the GetNetworkStatus request
+func ExecuteClientGetNetworkStatus(token, username, password, outputFilePath string, disableTLSCheck bool) (err error) {
+
+	// get token
+	accessToken, err := getAccessToken(token, username, password, disableTLSCheck)
+	if err != nil {
+		return err
+	}
+
+	_, medcoConnectorsURL, err := executeClientGetNetworkLogic(accessToken, disableTLSCheck)
+	if err != nil {
+		return
+	}
+
+	output := ""
+	statusOK := true
+
+	var nodeMessage string
+	var nodeStatus bool
+
+	for _, url := range medcoConnectorsURL {
+		logrus.Info("Sending GetNodeStatus request to node: " + url)
+		output += url + ": "
+		nodeMessage, nodeStatus, err = executeClientGetNodeStatusLogic(accessToken, url, false)
+		if err != nil {
+			output += err.Error() + "\n"
+		} else {
+			if nodeStatus {
+				output += "OK\n"
+			} else {
+				output += "\n" + nodeMessage
+			}
+			statusOK = statusOK && nodeStatus
+		}
+	}
+
+	output = "MedCo Network Status\n" +
+		"--------------------\n" +
+		output
+
+	if outputFilePath == "" {
+		fmt.Printf(output)
+	} else {
+		var file *os.File
+		file, err = os.Create(outputFilePath)
+		if err != nil {
+			logrus.Error("Error while opening output file")
+			return
+		}
+		file.WriteString(output)
+		file.Close()
+	}
+
+	return
+
+}
+
+func executeClientGetNetworkLogic(accessToken string, disableTLSCheck bool) (*medco_network.GetMetadataOKBody, []string, error) {
+
+	clientGetNetwork, err := NewGetNetwork(accessToken, disableTLSCheck)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	result, err := clientGetNetwork.Execute()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var urls []string
+
+	for _, node := range result.Nodes {
+		urls = append(urls, node.URL)
+	}
+
+	return result, urls, nil
+
+}
+
+func executeClientGetNodeStatusLogic(accessToken, url string, disableTLSCheck bool) (string, bool, error) {
+
+	clientGetStatus, err := NewGetNodeStatus(accessToken, url, disableTLSCheck)
+	if err != nil {
+		return "", false, err
+	}
+
+	result, err := clientGetStatus.Execute()
+	if err != nil {
+		return "", false, err
+	}
+
+	message := "MedCo Node Status\n" +
+		"----------------\n" +
+		result.Message
+
+	return message, result.StatusOK, nil
+}
+
+func getAccessToken(token, username, password string, disableTLSCheck bool) (accessToken string, err error) {
+	if len(token) > 0 {
+		accessToken = token
+	} else {
+		logrus.Debug("No token provided, requesting token for user ", username, ", disable TLS check: ", disableTLSCheck)
+		accessToken, err = utilclient.RetrieveAccessToken(username, password, disableTLSCheck)
+	}
 	return
 }
 
@@ -272,149 +583,5 @@ func loadQueryFile(queryFilePath string) (queryTerms []int64, err error) {
 		queryTerms = append(queryTerms, queryTerm)
 	}
 
-	return
-}
-
-// ExecuteClientSearchConcept executes and displays the result of the MedCo sconcept search
-func ExecuteClientSearchConcept(token, username, password, conceptPath, resultOutputFilePath string, disableTLSCheck bool) (err error) {
-
-	// get token
-	accessToken, err := getAccessToken(token, username, password, disableTLSCheck)
-	if err != nil {
-		return err
-	}
-
-	// execute search
-	clientSearchConcept, err := NewExploreSearchConcept(accessToken, conceptPath, disableTLSCheck)
-	if err != nil {
-		return err
-	}
-
-	result, err := clientSearchConcept.Execute()
-	if err != nil {
-		return
-	}
-
-	output := "PATH" + "\t" + "TYPE" + "\n"
-	for _, child := range result.Payload.Results {
-		output += child.Path + "\t" + child.Type + "\n"
-	}
-
-	if resultOutputFilePath == "" {
-		fmt.Println(output)
-	} else {
-		outputFile, err := os.Create(resultOutputFilePath)
-		if err != nil {
-			logrus.Error("error opening file: ", err)
-		}
-		outputFile.WriteString(output)
-		outputFile.Close()
-	}
-
-	return
-}
-
-// ExecuteClientSearchModifier executes and displays the result of the MedCo modifier search
-func ExecuteClientSearchModifier(token, username, password, modifierPath, appliedPath, appliedConcept, resultOutputFilePath string, disableTLSCheck bool) (err error) {
-
-	// get token
-	accessToken, err := getAccessToken(token, username, password, disableTLSCheck)
-	if err != nil {
-		return err
-	}
-
-	// execute search
-	clientSearchConcept, err := NewExploreSearchModifier(accessToken, modifierPath, appliedPath, appliedConcept, disableTLSCheck)
-	if err != nil {
-		return err
-	}
-
-	result, err := clientSearchConcept.Execute()
-	if err != nil {
-		return
-	}
-
-	output := "PATH" + "\t" + "TYPE" + "\n"
-	for _, child := range result.Payload.Results {
-		output += child.Path + "\t" + child.Type + "\n"
-	}
-
-	if resultOutputFilePath == "" {
-		fmt.Println(output)
-	} else {
-		outputFile, err := os.Create(resultOutputFilePath)
-		if err != nil {
-			logrus.Error("error opening file: ", err)
-		}
-		outputFile.WriteString(output)
-		outputFile.Close()
-	}
-
-	return
-}
-
-// ExecuteClientGenomicAnnotationsGetValues displays the genomic annotations values matching the "annotation" parameter
-func ExecuteClientGenomicAnnotationsGetValues(token, username, password, annotation, value string, limit int64, disableTLSCheck bool) (err error) {
-
-	// get token
-	accessToken, err := getAccessToken(token, username, password, disableTLSCheck)
-	if err != nil {
-		return err
-	}
-
-	// execute query
-	clientGenomicAnnotationsGetValues, err := NewGenomicAnnotationsGetValues(accessToken, annotation, value, &limit, disableTLSCheck)
-	if err != nil {
-		return
-	}
-
-	result, err := clientGenomicAnnotationsGetValues.Execute()
-	if err != nil {
-		return
-	}
-
-	for _, annotation := range result {
-		fmt.Printf("%s\n", annotation)
-	}
-
-	return
-
-}
-
-// ExecuteClientGenomicAnnotationsGetVariants displays the variant ids corresponding to the annotation and value parameters
-func ExecuteClientGenomicAnnotationsGetVariants(token, username, password, annotation, value string, zygosity string, encrypted bool, disableTLSCheck bool) (err error) {
-
-	// get token
-	accessToken, err := getAccessToken(token, username, password, disableTLSCheck)
-	if err != nil {
-		return err
-	}
-
-	// execute query
-	clientGenomicAnnotationsGetVariants, err := NewGenomicAnnotationsGetVariants(accessToken, annotation, value, zygosity, &encrypted, disableTLSCheck)
-	if err != nil {
-		return
-	}
-
-	result, err := clientGenomicAnnotationsGetVariants.Execute()
-	if err != nil {
-		return
-	}
-
-	for _, variant := range result {
-		fmt.Printf("%s\n", variant)
-	}
-
-	return
-
-}
-
-func getAccessToken(token, username, password string, disableTLSCheck bool) (accessToken string, err error) {
-	if len(token) > 0 {
-		accessToken = token
-	} else {
-		logrus.Debug("No token provided, requesting token for user ", username, ", disable TLS check: ", disableTLSCheck)
-		accessToken, err = utilclient.RetrieveAccessToken(username, password, disableTLSCheck)
-	}
 	return
 }

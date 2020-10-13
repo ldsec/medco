@@ -51,6 +51,7 @@ ENV HOST=0.0.0.0 \
     I2B2_LOGIN_PROJECT=MedCo \
     I2B2_LOGIN_USER=e2etest \
     I2B2_LOGIN_PASSWORD=e2etest \
+    MC_SQL_DIR="/mc-sql" \
     I2B2_WAIT_TIME_SECONDS=300 \
     UNLYNX_TIMEOUT_SECONDS=300 \
     OIDC_JWKS_URLS=http://keycloak:8080/auth/realms/master/protocol/openid-connect/certs \
@@ -62,6 +63,8 @@ ENV HOST=0.0.0.0 \
     MEDCO_NODES_URL="http://medco-connector-srv0/medco,http://medco-connector-srv1/medco,http://medco-connector-srv2/medco" \
     MEDCO_OBFUSCATION_MIN=5
 
+COPY build/package/medco/sql "$MC_SQL_DIR"
+
 # medco-unlynx
 ENV UNLYNX_DEBUG_LEVEL="1"
 
@@ -69,6 +72,8 @@ ENV UNLYNX_DEBUG_LEVEL="1"
 ENV CLIENT_SEARCH_TIMEOUT_SECONDS=10 \
     CLIENT_QUERY_TIMEOUT_SECONDS=660 \
     CLIENT_GENOMIC_ANNOTATIONS_QUERY_TIMEOUT_SECONDS=10 \
+    CLIENT_GET_NODE_STATUS_TIMEOUT_SECONDS=60 \
+    CLIENT_GET_NETWORK_TIMEOUT_SECONDS=60 \
     MEDCO_CONNECTOR_URL=http://medco-connector-srv0/medco \
     OIDC_REQ_TOKEN_URL=http://keycloak:8080/auth/realms/master/protocol/openid-connect/token \
     OIDC_REQ_TOKEN_CLIENT_ID=medco

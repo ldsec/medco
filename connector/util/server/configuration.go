@@ -53,23 +53,45 @@ var JwksTimeout time.Duration
 // MedCoObfuscationMin is the minimum variance passed to the random distribution for the obfuscation
 var MedCoObfuscationMin int
 
-// DBHost is the host of the DB
-var DBHost string
+//---MedCo database settings
 
-// DBPort is the number of the port used by the DB
-var DBPort int
+// MedcoDBHost is the host of the MedCo DB
+var MedcoDBHost string
 
-// DBName is the name of the database
-var DBName string
+// MedcoDBPort is the number of the port used by the MedCo DB
+var MedcoDBPort int
 
-// DBLoginUser is the database login user
-var DBLoginUser string
+// MedcoDBName is the name of the MedCo DB
+var MedcoDBName string
 
-// DBLoginPassword is the database login password
-var DBLoginPassword string
+// MedcoDBLoginUser is the database login user
+var MedcoDBLoginUser string
 
-// DBConnection is the connection to the database
-var DBConnection *sql.DB
+// MedcoDBLoginPassword is the database login password
+var MedcoDBLoginPassword string
+
+// MedcoDBConnection is the connection to the database
+var MedcoDBConnection *sql.DB
+
+//---i2b2 database settings
+
+// I2b2DBHost is the host of the i2b2 DB
+var I2b2DBHost string
+
+// I2b2DBPort is the number of the port used by the i2b2 DB
+var I2b2DBPort int
+
+// I2b2DBName is the name of the i2b2 database
+var I2b2DBName string
+
+// I2b2DBLoginUser is the i2b2 database login user
+var I2b2DBLoginUser string
+
+// I2b2DBLoginPassword is the i2b2 database login password
+var I2b2DBLoginPassword string
+
+// I2b2DBConnection is the connection to the i2b2 database
+var I2b2DBConnection *sql.DB
 
 func init() {
 	SetLogLevel(os.Getenv("LOG_LEVEL"))
@@ -121,21 +143,39 @@ func init() {
 	}
 	MedCoObfuscationMin = int(obf)
 
-	DBHost = os.Getenv("MC_DB_HOST")
-	DBName = os.Getenv("MC_DB_NAME")
-	DBLoginUser = os.Getenv("MC_DB_USER")
-	DBLoginPassword = os.Getenv("MC_DB_PASSWORD")
+	MedcoDBHost = os.Getenv("MC_DB_HOST")
+	MedcoDBName = os.Getenv("MC_DB_NAME")
+	MedcoDBLoginUser = os.Getenv("MC_DB_USER")
+	MedcoDBLoginPassword = os.Getenv("MC_DB_PASSWORD")
 
 	dbPort, err := strconv.ParseInt(os.Getenv("MC_DB_PORT"), 10, 64)
 	if err != nil || dbPort < 0 || dbPort > 65535 {
 		logrus.Warn("invalid DB port, defaulted")
 		dbPort = 5432
 	}
-	DBPort = int(dbPort)
+	MedcoDBPort = int(dbPort)
 
-	DBConnection, err = InitializeConnectionToDB(DBHost, DBPort, DBName, DBLoginUser, DBLoginPassword)
+	MedcoDBConnection, err = InitializeConnectionToDB(MedcoDBHost, MedcoDBPort, MedcoDBName, MedcoDBLoginUser, MedcoDBLoginPassword)
 	if err != nil {
-		logrus.Error("Impossible to initialize connection to DB")
+		logrus.Error("Impossible to initialize connection to MedCo DB")
+		return
+	}
+
+	I2b2DBHost = os.Getenv("I2B2_DB_HOST")
+	I2b2DBName = os.Getenv("I2B2_DB_NAME")
+	I2b2DBLoginUser = os.Getenv("I2B2_DB_USER")
+	I2b2DBLoginPassword = os.Getenv("I2B2_DB_PASSWORD")
+
+	dbPort, err = strconv.ParseInt(os.Getenv("I2B2_DB_PORT"), 10, 64)
+	if err != nil || dbPort < 0 || dbPort > 65535 {
+		logrus.Warn("invalid DB port, defaulted")
+		dbPort = 5432
+	}
+	I2b2DBPort = int(dbPort)
+
+	I2b2DBConnection, err = InitializeConnectionToDB(I2b2DBHost, I2b2DBPort, I2b2DBName, I2b2DBLoginUser, I2b2DBLoginPassword)
+	if err != nil {
+		logrus.Error("Impossible to initialize connection to i2b2 DB")
 		return
 	}
 }

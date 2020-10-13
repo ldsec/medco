@@ -76,6 +76,9 @@ func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
 	// /genomic-annotations/{annotation}/{value}
 	api.GenomicAnnotationsGetVariantsHandler = genomic_annotations.GetVariantsHandlerFunc(handlers.MedCoGenomicAnnotationsGetVariantsHandler)
 
+	// /medco/node/status
+	api.MedcoNodeGetNodeStatusHandler = medco_node.GetNodeStatusHandlerFunc(handlers.MedCoGetNodeStatusHandler)
+
 	api.ServerShutdown = func() {}
 
 	return setupGlobalMiddleware(api.Serve(setupMiddlewares))

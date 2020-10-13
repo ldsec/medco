@@ -14,6 +14,12 @@ resultSearchConceptChildren2="PATHTYPE/E2ETEST/e2etest/1/concept/E2ETEST/e2etest
 searchModifierChildren="/E2ETEST/modifiers/ /e2etest/% /E2ETEST/e2etest/1/"
 resultSearchModifierChildren="PATHTYPE/E2ETEST/modifiers/1/modifier"
 
+resultNodeStatus="MedCoNodeStatus----------------i2b2:OKUnlynx:OKGenomicannotations:OK"
+
+resultNetworkInfo="{\"nodeIndex\":0,\"nodes\":[{\"index\":0,\"name\":\"Node0\",\"url\":\"http://localhost/local-3nodes/medco-0\"},{\"index\":1,\"name\":\"Node1\",\"url\":\"http://localhost/local-3nodes/medco-1\"},{\"index\":2,\"name\":\"Node2\",\"url\":\"http://localhost/local-3nodes/medco-2\"}],\"public-key\":\"GKrufk6bsuMwegxcPqr7B1aFWKit1szJlugZ01HkSPA=\"}"
+
+resultNetworkStatus="MedCoNetworkStatus--------------------http://localhost/local-3nodes/medco-0:OKhttp://localhost/local-3nodes/medco-1:OKhttp://localhost/local-3nodes/medco-2:OK"
+
 # test2
 query1="1 AND 2"
 resultQuery1="$(printf -- "count\n8\n8\n8")"
@@ -46,7 +52,7 @@ hugoGeneSymbolGetVariantsResult2="-7039476204566471680-7039476580443220992"
 hugoGeneSymbolGetVariantsResult3="-7039476780159200256"
 
 test1 () {
-  docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /results/result.csv $1 $2
+  docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD -o /results/result.csv $1 $2
   result="$(cat deployments/result.csv | tr -d '\r\n\t ')"
   if [ "${result}" != "${3}" ];
   then
@@ -57,7 +63,7 @@ test1 () {
 }
 
 test2 () {
- docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /results/result.csv $1 $2
+ docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD -o /results/result.csv $1 $2
   result="$(awk -F "\"*,\"*" '{print $2}' deployments/result.csv)"
   if [ "${result}" != "${3}" ];
   then
@@ -85,6 +91,18 @@ test1 "concept-children" "${searchConceptChildren2}" "${resultSearchConceptChild
 echo "Testing modifier-children..."
 
 test1 "modifier-children" "${searchModifierChildren}" "${resultSearchModifierChildren}"
+
+echo "Testing node-status..."
+
+test1 "node-status" "" "${resultNodeStatus}"
+
+echo "Testing network-info..."
+
+test1 "network-info" "" "${resultNetworkInfo}"
+
+echo "Testing network-status..."
+
+test1 "network-status" "" "${resultNetworkStatus}"
 
 echo "Testing query..."
 

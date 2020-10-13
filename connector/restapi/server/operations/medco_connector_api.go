@@ -62,6 +62,9 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 		MedcoNetworkGetMetadataHandler: medco_network.GetMetadataHandlerFunc(func(params medco_network.GetMetadataParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_network.GetMetadata has not yet been implemented")
 		}),
+		MedcoNodeGetNodeStatusHandler: medco_node.GetNodeStatusHandlerFunc(func(params medco_node.GetNodeStatusParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation medco_node.GetNodeStatus has not yet been implemented")
+		}),
 		GenomicAnnotationsGetValuesHandler: genomic_annotations.GetValuesHandlerFunc(func(params genomic_annotations.GetValuesParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation genomic_annotations.GetValues has not yet been implemented")
 		}),
@@ -125,6 +128,8 @@ type MedcoConnectorAPI struct {
 	MedcoNodeGetExploreQueryHandler medco_node.GetExploreQueryHandler
 	// MedcoNetworkGetMetadataHandler sets the operation handler for the get metadata operation
 	MedcoNetworkGetMetadataHandler medco_network.GetMetadataHandler
+	// MedcoNodeGetNodeStatusHandler sets the operation handler for the get node status operation
+	MedcoNodeGetNodeStatusHandler medco_node.GetNodeStatusHandler
 	// GenomicAnnotationsGetValuesHandler sets the operation handler for the get values operation
 	GenomicAnnotationsGetValuesHandler genomic_annotations.GetValuesHandler
 	// GenomicAnnotationsGetVariantsHandler sets the operation handler for the get variants operation
@@ -223,6 +228,9 @@ func (o *MedcoConnectorAPI) Validate() error {
 	}
 	if o.MedcoNetworkGetMetadataHandler == nil {
 		unregistered = append(unregistered, "medco_network.GetMetadataHandler")
+	}
+	if o.MedcoNodeGetNodeStatusHandler == nil {
+		unregistered = append(unregistered, "medco_node.GetNodeStatusHandler")
 	}
 	if o.GenomicAnnotationsGetValuesHandler == nil {
 		unregistered = append(unregistered, "genomic_annotations.GetValuesHandler")
@@ -348,6 +356,10 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/network"] = medco_network.NewGetMetadata(o.context, o.MedcoNetworkGetMetadataHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/node/status"] = medco_node.NewGetNodeStatus(o.context, o.MedcoNodeGetNodeStatusHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
