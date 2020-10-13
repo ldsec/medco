@@ -73,7 +73,7 @@ func (removeCohorts *RemoveCohorts) Execute() (err error) {
 				logrus.Errorf("Query tool execution error : %s", Error)
 				errChan <- Error
 			} else {
-
+				logrus.Debugf("Node %d successfully removed cohort", idx)
 				resultChan <- res
 			}
 		}(idx)

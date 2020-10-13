@@ -82,7 +82,7 @@ func (getCohorts *GetCohorts) Execute() (results [][]utilcommon.Cohort, err erro
 				logrus.Errorf("Get cohort execution error : %s", Error)
 				errChan <- Error
 			} else {
-
+				logrus.Debugf("Node %d got cohorts %+v", idx, res)
 				resultChan <- nodeResult{cohorts: res, nodeIndex: idx}
 			}
 		}(idx)

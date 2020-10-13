@@ -81,6 +81,7 @@ func (postCohorts *PostCohorts) Execute() (err error) {
 				logrus.Errorf("Query tool execution error : %s", Error)
 				errChan <- Error
 			} else {
+				logrus.Debugf("Node %d successfully posted cohort", idx)
 
 				resultChan <- res
 			}
