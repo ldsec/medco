@@ -8,8 +8,6 @@ docker_images_build_dev:
 
 # test commands
 .PHONY: test test_go_fmt test_go_lint test_codecov_unit test_codecov_e2e
-test_travis_unit: test_go_fmt test_go_lint test_codecov_unit
-test_travis_e2e: test_codecov_e2e
 test_local: test_go_fmt test_go_lint test_go_unit
 
 test_go_fmt:
