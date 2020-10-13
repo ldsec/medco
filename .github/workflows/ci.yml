@@ -5,7 +5,7 @@ on:
 
 jobs:
   go-tests:
-    name: Code beautification and unit tests
+    name: Code beautification, unit tests and code coverage
     runs-on: ubuntu-latest
 
     steps:
@@ -35,6 +35,8 @@ jobs:
         run: go get github.com/mattn/goveralls
 
       - name: Send coverage
+        env:
+          COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: goveralls -coverprofile=profile.cov -service=github
 
   e2e-tests:
