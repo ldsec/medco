@@ -41,7 +41,7 @@ elif [[ "$DATASET" = "i2b2" ]]; then
   wget -O ${SCRIPT_FOLDER}/i2b2/original/table_access.csv ${REPO_URL}/i2b2/original/table_access.csv?raw=true
   wget -O ${SCRIPT_FOLDER}/i2b2/original/visit_dimension.csv ${REPO_URL}/i2b2/original/visit_dimension.csv?raw=true
   wget -O ${SCRIPT_FOLDER}/i2b2/original/concept_dimension.csv ${REPO_URL}/i2b2/original/concept_dimension.csv?raw=true
-    wget -O ${SCRIPT_FOLDER}/i2b2/original/modifier_dimension.csv ${REPO_URL}/i2b2/original/modifier_dimension.csv?raw=true
+  wget -O ${SCRIPT_FOLDER}/i2b2/original/modifier_dimension.csv ${REPO_URL}/i2b2/original/modifier_dimension.csv?raw=true
   wget -O ${SCRIPT_FOLDER}/i2b2/sensitive.txt ${REPO_URL}/i2b2/sensitive.txt?raw=true
   wget -O ${SCRIPT_FOLDER}/i2b2/files.toml ${REPO_URL}/i2b2/files.toml?raw=true
 else

@@ -17,10 +17,10 @@ type DBSettings struct {
 	DBname     string
 }
 
-// ExecuteScript executes a .sh script with a specific path
-func ExecuteScript(path string) error {
+// ExecuteScript executes a script with a specific path
+func ExecuteScript(command string, args ...string) error {
 	// Display just the stderr if an error occurs
-	cmd := exec.Command("/bin/sh", path)
+	cmd := exec.Command(command, args...)
 	var stdBuffer bytes.Buffer
 	mw := io.MultiWriter(os.Stdout, &stdBuffer)
 

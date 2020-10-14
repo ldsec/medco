@@ -13,7 +13,8 @@ EOSQL
 }
 
 # init demo i2b2 database
-initSchema $I2B2_DB_NAME i2b2demodata_i2b2
+initSchema $I2B2_DB_NAME i2b2demodata_i2b2_non_sensitive
+initSchema $I2B2_DB_NAME i2b2demodata_i2b2_sensitive
 initSchema $I2B2_DB_NAME i2b2imdata
 initSchema $I2B2_DB_NAME i2b2metadata_i2b2
 initSchema $I2B2_DB_NAME i2b2workdata
