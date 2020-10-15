@@ -5,7 +5,7 @@ on:
 
 jobs:
   go-tests:
-    name: Code beautification and unit tests
+    name: Code beautification, unit tests and code coverage
     runs-on: ubuntu-latest
 
     steps:
@@ -28,6 +28,16 @@ jobs:
 
       - name: Run go test
         run: make test_codecov_unit
+
+      - name: Install goveralls
+        env:
+          GO111MODULE: off
+        run: go get github.com/mattn/goveralls
+
+      - name: Send coverage
+        env:
+          COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: goveralls -coverprofile=profile.cov -service=github
 
   e2e-tests:
     name: End-to-end tests
@@ -62,7 +72,7 @@ jobs:
         run: make load_test_data
 
       - name: Run unit tests depending on deployment
-        run: make test_travis_e2e
+        run: make test_codecov_e2e
 
       - name: Run e2e queries
         run: bash test/test_cli.sh $MEDCO_USER_USERNAME $MEDCO_USER_PASSWORD
