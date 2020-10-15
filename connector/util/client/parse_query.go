@@ -64,7 +64,7 @@ func ParseQueryString(queryString string) (panelsItemKeys [][]int64, panelsIsNot
 				queryItem = strings.TrimSpace(queryItem)
 				parsedInt, parsedErr := strconv.ParseInt(queryItem, 10, 64)
 				if parsedErr != nil {
-					logrus.Debug("Caught exception from strconv %s: ", parsedErr)
+					logrus.Debugf("Caught exception from strconv %s: ", parsedErr.Error())
 				}
 
 				// case 2: simple integer
@@ -133,7 +133,7 @@ func loadQueryFile(queryFilePath string) (queryTerms []int64, err error) {
 			}
 
 		} else {
-			err = errors.New("dataset with " + string(len(queryTermFields)) + " fields is not supported")
+			err = errors.New("dataset with " + strconv.Itoa(len(queryTermFields)) + " fields is not supported")
 			logrus.Error(err)
 			return
 		}
