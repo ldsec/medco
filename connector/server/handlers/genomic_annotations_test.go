@@ -22,27 +22,7 @@ var proteinChangeGetVariantsResult = []string{"-2429151887266669568"}
 var hugoGeneSymbolGetVariantsResult = []string{"-7039476204566471680", "-7039476580443220992", "-7039476780159200256"}
 
 func init() {
-	utilserver.DBHost = "localhost"
-	utilserver.DBPort = 5432
-	utilserver.DBName = "medcoconnectorsrv0"
-	utilserver.DBLoginUser = "medcoconnector"
-	utilserver.DBLoginPassword = "medcoconnector"
-	utilserver.SetLogLevel("5")
-}
-
-func TestDBConnection(t *testing.T) {
-
-	var err error
-	utilserver.DBConnection, err = utilserver.InitializeConnectionToDB(utilserver.DBHost, utilserver.DBPort, utilserver.DBName, utilserver.DBLoginUser, utilserver.DBLoginPassword)
-	if err != nil {
-		t.Fail()
-	}
-
-	err = utilserver.DBConnection.Ping()
-	if err != nil {
-		logrus.Error("Impossible to connect to DB " + err.Error())
-		t.Fail()
-	}
+	utilserver.SetForTesting()
 }
 
 // warning: this test needs the dev-local-3nodes medco deployment running locally, loaded with default data
@@ -84,7 +64,7 @@ func TestGenomicAnnotationsGetVariants(t *testing.T) {
 
 func testGenomicAnnotationsGetValues(queryType string, queryValue string, queryResult []string, t *testing.T) {
 
-	TestDBConnection(t)
+	utilserver.TestDBConnection(t)
 
 	var annotations []string
 	var annotation string
@@ -121,7 +101,7 @@ func testGenomicAnnotationsGetValues(queryType string, queryValue string, queryR
 
 func testGenomicAnnotationsGetVariants(queryType string, queryValue string, zygosity []string, queryResult []string, t *testing.T) {
 
-	TestDBConnection(t)
+	utilserver.TestDBConnection(t)
 
 	var variants []string
 	var variant string

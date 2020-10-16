@@ -111,7 +111,7 @@ func MedCoNodeExploreQueryHandler(params medco_node.ExploreQueryParams, principa
 // MedCoNodeGetCohortsHandler handles GET /medco/node/explore/cohorts  API endpoint
 func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *models.User) middleware.Responder {
 	userID := principal.ID
-	cohorts, err := querytoolsserver.GetSavedCohorts(utilserver.DBConnection, userID)
+	cohorts, err := querytoolsserver.GetSavedCohorts(userID)
 	if err != nil {
 		medco_node.NewGetCohortsDefault(500).WithPayload(&medco_node.GetCohortsDefaultBody{
 			Message: "Get cohort execution error: " + err.Error(),
@@ -139,7 +139,7 @@ func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal 
 
 	cohort := params.Body
 
-	hasID, err := querytoolsserver.CheckQueryID(utilserver.DBConnection, principal.ID, int(cohort.PatientSetID))
+	hasID, err := querytoolsserver.CheckQueryID(principal.ID, int(cohort.PatientSetID))
 	if err != nil {
 		return medco_node.NewPostCohortsDefault(500).WithPayload(&medco_node.PostCohortsDefaultBody{
 			Message: fmt.Sprintf("During execution of CheckQueryID"),
@@ -165,7 +165,7 @@ func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal 
 			Message: fmt.Sprintf("String %s is not a date with RF3339 layout", cohort.UpdateDate),
 		})
 	}
-	cohorts, err := querytoolsserver.GetSavedCohorts(utilserver.DBConnection, principal.ID)
+	cohorts, err := querytoolsserver.GetSavedCohorts(principal.ID)
 	if err != nil {
 		return medco_node.NewPostCohortsDefault(500).WithPayload(&medco_node.PostCohortsDefaultBody{
 			Message: "Get cohort execution error: " + err.Error(),
@@ -185,7 +185,7 @@ func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal 
 			break
 		}
 	}
-	querytoolsserver.InsertCohort(utilserver.DBConnection, principal.ID, int(cohort.PatientSetID), cohort.CohortName, creationDate, updateDate)
+	querytoolsserver.InsertCohort(principal.ID, int(cohort.PatientSetID), cohort.CohortName, creationDate, updateDate)
 
 	return medco_node.NewPostCohortsOK()
 }
@@ -196,7 +196,7 @@ func MedCoNodeDeleteCohortsHandler(params medco_node.DeleteCohortsParams, princi
 	user := principal.ID
 
 	// check if cohort exists
-	hasCohort, err := querytoolsserver.DoesCohortExist(utilserver.DBConnection, user, cohortName)
+	hasCohort, err := querytoolsserver.DoesCohortExist(user, cohortName)
 	if err != nil {
 		return medco_node.NewDeleteCohortsDefault(500).WithPayload(&medco_node.DeleteCohortsDefaultBody{
 			Message: "Delete cohort execution error: " + err.Error(),
@@ -210,7 +210,7 @@ func MedCoNodeDeleteCohortsHandler(params medco_node.DeleteCohortsParams, princi
 	}
 
 	// delete the cohorts
-	err = querytoolsserver.RemoveCohort(utilserver.DBConnection, user, cohortName)
+	err = querytoolsserver.RemoveCohort(user, cohortName)
 	if err != nil {
 		return medco_node.NewDeleteCohortsDefault(500).WithPayload(&medco_node.DeleteCohortsDefaultBody{
 			Message: "Delete cohort execution error: " + err.Error(),

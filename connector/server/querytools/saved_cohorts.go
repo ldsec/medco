@@ -1,19 +1,19 @@
 package querytoolsserver
 
 import (
-	"database/sql"
 	"strconv"
 	"strings"
 	"time"
 
 	utilcommon "github.com/ldsec/medco/connector/util/common"
+	utilserver "github.com/ldsec/medco/connector/util/server"
 
 	"github.com/sirupsen/logrus"
 )
 
 // GetPatientList runs a SQL query on db and returns the list of patient IDs for given queryID and userID
-func GetPatientList(db *sql.DB, userID string, resultInstanceID int64) (patientNums []int64, err error) {
-	row := db.QueryRow(getPatientList, userID, resultInstanceID)
+func GetPatientList(userID string, resultInstanceID int64) (patientNums []int64, err error) {
+	row := utilserver.DBConnection.QueryRow(getPatientList, userID, resultInstanceID)
 	patientNumsString := new(string)
 	err = row.Scan(patientNumsString)
 	var pNum int64
@@ -31,8 +31,8 @@ func GetPatientList(db *sql.DB, userID string, resultInstanceID int64) (patientN
 }
 
 // GetSavedCohorts runs a SQL query on db and returns the list of saved cohorts for given queryID and userID
-func GetSavedCohorts(db *sql.DB, userID string) ([]utilcommon.Cohort, error) {
-	rows, err := db.Query(getCohorts, userID)
+func GetSavedCohorts(userID string) ([]utilcommon.Cohort, error) {
+	rows, err := utilserver.DBConnection.Query(getCohorts, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -75,8 +75,8 @@ func GetSavedCohorts(db *sql.DB, userID string) ([]utilcommon.Cohort, error) {
 }
 
 // GetDate runs a SQL query on db and returns the update date of cohort corresponding to  cohortID
-func GetDate(db *sql.DB, userID string, cohortID int) (time.Time, error) {
-	row := db.QueryRow(getDate, userID, cohortID)
+func GetDate(userID string, cohortID int) (time.Time, error) {
+	row := utilserver.DBConnection.QueryRow(getDate, userID, cohortID)
 	timeString := new(string)
 	err := row.Scan(timeString)
 	if err != nil {
@@ -90,8 +90,8 @@ func GetDate(db *sql.DB, userID string, cohortID int) (time.Time, error) {
 }
 
 // InsertCohort runs a SQL query to either insert a new cohort or update an existing one
-func InsertCohort(db *sql.DB, userID string, queryID int, cohortName string, createDate, updateDate time.Time) (int, error) {
-	row := db.QueryRow(insertCohort, userID, queryID, cohortName, createDate, updateDate)
+func InsertCohort(userID string, queryID int, cohortName string, createDate, updateDate time.Time) (int, error) {
+	row := utilserver.DBConnection.QueryRow(insertCohort, userID, queryID, cohortName, createDate, updateDate)
 	res := new(string)
 	err := row.Scan(res)
 	if err != nil {
@@ -105,8 +105,8 @@ func InsertCohort(db *sql.DB, userID string, queryID int, cohortName string, cre
 }
 
 // DoesCohortExist check whether a cohort exists for provided user ID and a cohort name.
-func DoesCohortExist(db *sql.DB, userID, cohortName string) (bool, error) {
-	row := db.QueryRow(doesCohortExist, userID, cohortName)
+func DoesCohortExist(userID, cohortName string) (bool, error) {
+	row := utilserver.DBConnection.QueryRow(doesCohortExist, userID, cohortName)
 	res := new(string)
 	err := row.Scan(res)
 	if err != nil {
@@ -117,8 +117,8 @@ func DoesCohortExist(db *sql.DB, userID, cohortName string) (bool, error) {
 }
 
 // RemoveCohort deletes cohort
-func RemoveCohort(db *sql.DB, userID, cohortName string) error {
-	_, err := db.Exec(removeCohort, userID, cohortName)
+func RemoveCohort(userID, cohortName string) error {
+	_, err := utilserver.DBConnection.Exec(removeCohort, userID, cohortName)
 	return err
 }
 

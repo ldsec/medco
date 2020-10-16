@@ -4,72 +4,46 @@ import (
 	"testing"
 	"time"
 
+	utilserver "github.com/ldsec/medco/connector/util/server"
 	"github.com/stretchr/testify/assert"
 )
 
+func init() {
+	utilserver.SetForTesting()
+}
+
 func TestGetPatientList(t *testing.T) {
-	testDB, err := DBResolver("MC_DB_HOST", "medcoconnectorsrv0")
-	if err != nil {
-		t.Fatal(err)
-	}
+	utilserver.TestDBConnection(t)
 
-	err = testDB.Ping()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	pList, err := GetPatientList(testDB, "test", int64(-1))
+	pList, err := GetPatientList("test", int64(-1))
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(pList) != 228 {
 		t.Fatalf("Expected 228 patients, got: %d", len(pList))
 	}
-	err = testDB.Close()
-	if err != nil {
-		t.Fatal(err)
-	}
+
 }
 
 func TestGetSavedCohorts(t *testing.T) {
-	testDB, err := DBResolver("MC_DB_HOST", "medcoconnectorsrv0")
-	if err != nil {
-		t.Fatal(err)
-	}
+	utilserver.TestDBConnection(t)
 
-	err = testDB.Ping()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	cohorts, err := GetSavedCohorts(testDB, "test")
+	cohorts, err := GetSavedCohorts("test")
 	if err != nil {
 		t.Fatal(err)
 	}
 	assert.Equal(t, true, len(cohorts) > 0)
 	//change user_id
 
-	cohorts, err = GetSavedCohorts(testDB, "testestest")
+	cohorts, err = GetSavedCohorts("testestest")
 	assert.Equal(t, len(cohorts), 0)
-	err = testDB.Close()
-	if err != nil {
-		t.Fatal(err)
-	}
 
 }
 
 func TestGetDate(t *testing.T) {
-	testDB, err := DBResolver("MC_DB_HOST", "medcoconnectorsrv0")
-	if err != nil {
-		t.Fatal(err)
-	}
+	utilserver.TestDBConnection(t)
 
-	err = testDB.Ping()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	updateDate, err := GetDate(testDB, "test", -1)
+	updateDate, err := GetDate("test", -1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -80,35 +54,23 @@ func TestGetDate(t *testing.T) {
 	assert.Equal(t, expectedDate, updateDate)
 
 	//change cohort_id
-	updateDate, err = GetDate(testDB, "test", -2)
+	updateDate, err = GetDate("test", -2)
 	assert.Error(t, err)
 	//change user_id
-	updateDate, err = GetDate(testDB, "testestest", -1)
+	updateDate, err = GetDate("testestest", -1)
 	assert.Error(t, err)
-
-	err = testDB.Close()
-	if err != nil {
-		t.Fatal(err)
-	}
-
 }
 
 func TestInsertCohortAndRemoveCohort(t *testing.T) {
-	testDB, err := DBResolver("MC_DB_HOST", "medcoconnectorsrv0")
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = testDB.Ping()
-	if err != nil {
-		t.Fatal(err)
-	}
+	utilserver.TestDBConnection(t)
+
 	now := time.Now()
-	cohortID, err := InsertCohort(testDB, "test", -1, "testCohort2", now, now)
+	cohortID, err := InsertCohort("test", -1, "testCohort2", now, now)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	cohorts, err := GetSavedCohorts(testDB, "test")
+	cohorts, err := GetSavedCohorts("test")
 	assert.NoError(t, err)
 
 	found := false
@@ -124,33 +86,26 @@ func TestInsertCohortAndRemoveCohort(t *testing.T) {
 
 	assert.Equal(t, found, true)
 
-	err = RemoveCohort(testDB, "test", "testCohort2")
+	err = RemoveCohort("test", "testCohort2")
 	assert.NoError(t, err)
 
-	err = RemoveCohort(testDB, "test", "testCohort2")
+	err = RemoveCohort("test", "testCohort2")
 	assert.NoError(t, err)
 
 }
 
 func TestDoesCohortExist(t *testing.T) {
-	testDB, err := DBResolver("MC_DB_HOST", "medcoconnectorsrv0")
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = testDB.Ping()
-	if err != nil {
-		t.Fatal(err)
-	}
+	utilserver.TestDBConnection(t)
 
-	exists, err := DoesCohortExist(testDB, "test", "testCohort")
+	exists, err := DoesCohortExist("test", "testCohort")
 	assert.NoError(t, err)
 	assert.Equal(t, true, exists)
 
-	exists, err = DoesCohortExist(testDB, "test", "IForSureDoNotExist")
+	exists, err = DoesCohortExist("test", "IForSureDoNotExist")
 	assert.NoError(t, err)
 	assert.Equal(t, false, exists)
 
-	exists, err = DoesCohortExist(testDB, "IForSureDoNotExist", "testCohort")
+	exists, err = DoesCohortExist("IForSureDoNotExist", "testCohort")
 	assert.NoError(t, err)
 	assert.Equal(t, false, exists)
 }

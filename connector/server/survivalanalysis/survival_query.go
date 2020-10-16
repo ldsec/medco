@@ -82,7 +82,7 @@ func (q *Query) Execute() error {
 	// --- cohort patient list
 
 	timer := time.Now()
-	cohort, err := querytoolsserver.GetPatientList(utilserver.DBConnection, q.UserID, int64(q.SetID))
+	cohort, err := querytoolsserver.GetPatientList(q.UserID, int64(q.SetID))
 	q.Result.Timers.AddTimers("medco-connector-get-patient-list", timer, nil)
 	logrus.Debug("got patients")
 
@@ -198,7 +198,7 @@ func (q *Query) Execute() error {
 			timer = time.Now()
 
 			//  --- sql query on observation fact table
-			sqlTimePoints, err := buildTimePoints(utilserver.I2B2DBConnection,
+			sqlTimePoints, err := buildTimePoints(
 				patientList,
 				startConceptCode,
 				q.StartModifier,

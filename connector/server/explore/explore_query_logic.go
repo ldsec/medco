@@ -6,8 +6,6 @@ import (
 	"strings"
 	"time"
 
-	utilserver "github.com/ldsec/medco/connector/util/server"
-
 	querytoolsserver "github.com/ldsec/medco/connector/server/querytools"
 
 	"github.com/ldsec/medco/connector/restapi/models"
@@ -56,7 +54,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 		err = fmt.Errorf("while marshalling query: %s", err.Error())
 		return
 	}
-	queryID, err := querytoolsserver.InsertExploreResultInstance(utilserver.DBConnection, q.UserName, q.ID, string(queryDefinition))
+	queryID, err := querytoolsserver.InsertExploreResultInstance(q.UserName, q.ID, string(queryDefinition))
 	logrus.Debugf("Creating Explore Result Instance : %d", queryID)
 	if err != nil {
 		err = fmt.Errorf("while inserting explore result instance: %s", err.Error())
@@ -64,7 +62,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	}
 	defer func(e error) {
 		if e != nil {
-			querytoolsserver.UpdateErrorExploreResultInstance(utilserver.DBConnection, queryID)
+			querytoolsserver.UpdateErrorExploreResultInstance(queryID)
 		}
 	}(err)
 
@@ -209,7 +207,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 		return err
 	}
 
-	querytoolsserver.UpdateExploreResultInstance(utilserver.DBConnection, queryID, pCount, pIDs, nil, &patientSetIDNum)
+	querytoolsserver.UpdateExploreResultInstance(queryID, pCount, pIDs, nil, &patientSetIDNum)
 
 	q.Result.Timers.AddTimers("medco-connector-overall", overallTimer, nil)
 	return

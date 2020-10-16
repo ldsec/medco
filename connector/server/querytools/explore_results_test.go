@@ -3,64 +3,57 @@ package querytoolsserver
 import (
 	"testing"
 
+	utilserver "github.com/ldsec/medco/connector/util/server"
+
 	_ "github.com/lib/pq"
 
 	"github.com/stretchr/testify/assert"
 )
 
+func init() {
+	utilserver.SetForTesting()
+}
+
 func TestExploreResults(t *testing.T) {
-	testDB, err := DBResolver("MC_DB_HOST", "medcoconnectorsrv0")
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = testDB.Ping()
-	if err != nil {
-		t.Fatal(err)
-	}
-	queryID, err := InsertExploreResultInstance(testDB, "test", "name1", "")
+	utilserver.TestDBConnection(t)
+
+	queryID, err := InsertExploreResultInstance("test", "name1", "")
 	assert.NoError(t, err)
 
-	defer testDB.Exec(exploreResultDeletion, queryID)
+	defer utilserver.DBConnection.Exec(exploreResultDeletion, queryID)
 
 	// both sets undefined
-	err = UpdateExploreResultInstance(testDB, queryID, 0, []int{1, 2, 3}, nil, nil)
+	err = UpdateExploreResultInstance(queryID, 0, []int{1, 2, 3}, nil, nil)
 	assert.Error(t, err)
 	set := new(int)
 	*set = -1
-	err = UpdateExploreResultInstance(testDB, queryID, 0, []int{1, 2, 3}, set, nil)
+	err = UpdateExploreResultInstance(queryID, 0, []int{1, 2, 3}, set, nil)
 	assert.NoError(t, err)
 
 	// cannot call more than once for the same query id
-	err = UpdateExploreResultInstance(testDB, queryID, 0, []int{1, 2, 3}, set, nil)
+	err = UpdateExploreResultInstance(queryID, 0, []int{1, 2, 3}, set, nil)
 	assert.Error(t, err)
 
-	queryIDError, err := InsertExploreResultInstance(testDB, "test", "name2", "")
+	queryIDError, err := InsertExploreResultInstance("test", "name2", "")
 	assert.NoError(t, err)
-	defer testDB.Exec(exploreResultDeletion, queryIDError)
+	defer utilserver.DBConnection.Exec(exploreResultDeletion, queryIDError)
 
-	err = UpdateErrorExploreResultInstance(testDB, queryIDError)
+	err = UpdateErrorExploreResultInstance(queryIDError)
 	assert.NoError(t, err)
 	// cannot call more than once for the same query id
-	err = UpdateErrorExploreResultInstance(testDB, queryIDError)
+	err = UpdateErrorExploreResultInstance(queryIDError)
 	assert.Error(t, err)
 
 }
 
 func TestCheckQueryID(t *testing.T) {
-	testDB, err := DBResolver("MC_DB_HOST", "medcoconnectorsrv0")
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = testDB.Ping()
-	if err != nil {
-		t.Fatal(err)
-	}
+	utilserver.TestDBConnection(t)
 
-	hasID, err := CheckQueryID(testDB, "test", -1)
+	hasID, err := CheckQueryID("test", -1)
 	assert.Equal(t, true, hasID)
 	assert.NoError(t, err)
 
-	hasID, err = CheckQueryID(testDB, "test", -10)
+	hasID, err = CheckQueryID("test", -10)
 	assert.Equal(t, false, hasID)
 	assert.NoError(t, err)
 
