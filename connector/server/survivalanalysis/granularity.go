@@ -13,6 +13,13 @@ const (
 	dInYear  = 365
 )
 
+var granularityValues = map[string]int{
+	"day":   1,
+	"week":  dInWeek,
+	"month": dInMonth,
+	"year":  dInYear,
+}
+
 var granularityFunctions = map[string]func(int) int{
 	"day":   func(x int) int { return x },
 	"week":  week,

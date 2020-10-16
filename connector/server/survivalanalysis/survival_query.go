@@ -78,6 +78,7 @@ func (q *Query) Execute() error {
 	patientLists := make([][]int64, 0)
 	initialCounts := make([]int64, 0)
 	eventGroups := make(EventGroups, 0)
+	timeLimitInDays := q.TimeLimit * granularityValues[q.TimeGranularity]
 
 	// --- cohort patient list
 
@@ -204,7 +205,7 @@ func (q *Query) Execute() error {
 				q.StartModifier,
 				endConceptCode,
 				q.EndModifier,
-				q.TimeLimit,
+				timeLimitInDays,
 			)
 			timers.AddTimers(fmt.Sprintf("medco-connector-build-timepoints%d", i), timer, nil)
 			if err != nil {
@@ -229,7 +230,7 @@ func (q *Query) Execute() error {
 
 			// --- expand
 			timer = time.Now()
-			sqlTimePoints, err = expansion(sqlTimePoints, q.TimeLimit, q.TimeGranularity)
+			sqlTimePoints, err = expansion(sqlTimePoints, timeLimitInDays, q.TimeGranularity)
 			if err != nil {
 				logrus.Error("Error while expanding")
 				errChan <- err
@@ -352,6 +353,7 @@ func (q *Query) Validate() error {
 
 // expansion takes a slice of SQLTimepoints and add encryption of zeros for events of interest and censoring events for each missing relative time from 0 to timeLimit.
 // Relative times greater than timeLimit are discarded.
+// Note that the time limit unit for this function is day.
 func expansion(timePoints utilcommon.TimePoints, timeLimitDay int, granularity string) (utilcommon.TimePoints, error) {
 	var timeLimit int
 	if granFunction, isIn := granularityFunctions[granularity]; isIn {

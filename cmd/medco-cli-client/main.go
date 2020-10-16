@@ -88,7 +88,7 @@ func main() {
 		//},
 		cli.IntFlag{
 			Name:     "limit, l",
-			Usage:    "Max limit of survival analysis.",
+			Usage:    "Max limit of survival analysis. Unit depends on chosen granularity, default: day",
 			Required: true,
 		},
 		cli.StringFlag{
