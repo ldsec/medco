@@ -69,7 +69,7 @@ jobs:
           bash test/wait_for_startup.sh $MEDCO_DB_NUMBER $MEDCO_DB_HOST $MEDCO_DB_PORT $MEDCO_DB_USER $MEDCO_DB_PASSWORD $MEDCO_DB_NAME
 
       - name: Load data in deployment
-        run: make load_test_data
+        run: make -C deployments/dev-local-3nodes load_test_data
 
       - name: Run unit tests depending on deployment
         run: make test_codecov_e2e
