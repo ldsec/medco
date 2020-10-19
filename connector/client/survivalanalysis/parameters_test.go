@@ -33,7 +33,7 @@ func TestNewParametersFromFile(t *testing.T) {
 var parameters = &Parameters{
 	TimeResolution:       "day",
 	TimeLimit:            19,
-	CohortID:             -1,
+	CohortName:           "anyName",
 	StartConceptPath:     "/any/start/path/",
 	StartConceptModifier: "anyStartMCode",
 	EndConceptPath:       "/any/end/path/",

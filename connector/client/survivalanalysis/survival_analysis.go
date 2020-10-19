@@ -30,7 +30,7 @@ type SurvivalAnalysis struct {
 
 	id string
 
-	patientSetID int
+	cohortName string
 
 	startConceptPath    string
 	startModifierCode   string
@@ -50,11 +50,11 @@ type SurvivalAnalysis struct {
 }
 
 // NewSurvivalAnalysis constructor for survival analysis request
-func NewSurvivalAnalysis(token string, patientSetID int, subGroupDefinitions []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0, limit int, granularity, startConcept, startModifier, endConcept, endModifier string, disableTLSCheck bool) (q *SurvivalAnalysis, err error) {
+func NewSurvivalAnalysis(token string, cohortName string, subGroupDefinitions []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0, limit int, granularity, startConcept, startModifier, endConcept, endModifier string, disableTLSCheck bool) (q *SurvivalAnalysis, err error) {
 	q = &SurvivalAnalysis{
 		authToken:           token,
 		id:                  "MedCo_Survival_Analysis" + time.Now().Format(time.RFC3339),
-		patientSetID:        patientSetID,
+		cohortName:          cohortName,
 		subGroupDefinitions: subGroupDefinitions,
 		startConceptPath:    startConcept,
 		startModifierCode:   startModifier,

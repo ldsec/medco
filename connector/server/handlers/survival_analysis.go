@@ -16,7 +16,7 @@ func MedCoSurvivalAnalysisHandler(param survival_analysis.SurvivalAnalysisParams
 		principal.ID,
 		param.Body.ID,
 		param.Body.UserPublicKey,
-		int(param.Body.SetID),
+		param.Body.CohortName,
 		param.Body.SubGroupDefinitions,
 		int(param.Body.TimeLimit),
 		param.Body.TimeGranularity,

@@ -86,14 +86,15 @@ type SurvivalAnalysisBody struct {
 	// ID
 	ID string `json:"ID,omitempty"`
 
+	// cohort name
+	// Pattern: ^\w+$
+	CohortName string `json:"cohortName,omitempty"`
+
 	// end concept
 	EndConcept string `json:"endConcept,omitempty"`
 
 	// end modifier
 	EndModifier string `json:"endModifier,omitempty"`
-
-	// set ID
-	SetID int64 `json:"setID,omitempty"`
 
 	// start concept
 	StartConcept string `json:"startConcept,omitempty"`
@@ -121,6 +122,10 @@ type SurvivalAnalysisBody struct {
 func (o *SurvivalAnalysisBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := o.validateCohortName(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := o.validateSubGroupDefinitions(formats); err != nil {
 		res = append(res, err)
 	}
@@ -136,6 +141,19 @@ func (o *SurvivalAnalysisBody) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (o *SurvivalAnalysisBody) validateCohortName(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.CohortName) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("body"+"."+"cohortName", "body", string(o.CohortName), `^\w+$`); err != nil {
+		return err
+	}
+
 	return nil
 }
 

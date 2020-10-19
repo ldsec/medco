@@ -12,7 +12,7 @@ import (
 type Parameters struct {
 	TimeResolution       string `yaml:"time_resolution"`
 	TimeLimit            int    `yaml:"time_limit"`
-	CohortID             int    `yaml:"cohort_id"`
+	CohortName           string `yaml:"cohort_name"`
 	StartConceptPath     string `yaml:"start_concept_path"`
 	StartConceptModifier string `yaml:"start_concept_modifier"`
 	EndConceptPath       string `yaml:"end_concept_path"`

@@ -263,6 +263,7 @@ paths:
           name: "body"
           schema: 
             type: "string"
+            pattern: '^\w+$'
       responses:
         200:
           description: "Deleted cohort"
@@ -317,6 +318,7 @@ parameters:
       properties:
         cohortName:
           type: "string"
+          pattern: '^\w+$'
         patientSetID:
           type: "integer"
         creationDate:
@@ -337,8 +339,9 @@ parameters:
         userPublicKey:
           type: "string"
           pattern: '^[\w=-]+$'
-        setID:
-          type: "integer"
+        cohortName:
+          type: "string"
+          pattern: '^\w+$'
         subGroupDefinitions:
           type : "array"
           items:

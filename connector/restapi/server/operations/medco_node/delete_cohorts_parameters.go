@@ -12,6 +12,8 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/validate"
 )
 
 // NewDeleteCohortsParams creates a new DeleteCohortsParams object
@@ -32,6 +34,7 @@ type DeleteCohortsParams struct {
 
 	/*Name of the cohort to delete
 	  Required: true
+	  Pattern: ^\w+$
 	  In: body
 	*/
 	Body string
@@ -56,8 +59,11 @@ func (o *DeleteCohortsParams) BindRequest(r *http.Request, route *middleware.Mat
 				res = append(res, errors.NewParseError("body", "body", "", err))
 			}
 		} else {
-			// no validation required on inline body
+			// validate inline body
 			o.Body = body
+			if err := o.validateBodyBody(route.Formats); err != nil {
+				res = append(res, err)
+			}
 		}
 	} else {
 		res = append(res, errors.Required("body", "body", ""))
@@ -65,5 +71,15 @@ func (o *DeleteCohortsParams) BindRequest(r *http.Request, route *middleware.Mat
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+// validateBodyBody validates an inline body parameter
+func (o *DeleteCohortsParams) validateBodyBody(formats strfmt.Registry) error {
+
+	if err := validate.Pattern("body", "body", o.Body, `^\w+$`); err != nil {
+		return err
+	}
+
 	return nil
 }

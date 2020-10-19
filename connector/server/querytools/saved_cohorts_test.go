@@ -15,7 +15,7 @@ func init() {
 func TestGetPatientList(t *testing.T) {
 	utilserver.TestDBConnection(t)
 
-	pList, err := GetPatientList("test", int64(-1))
+	pList, err := GetPatientList("test", "testCohort")
 	if err != nil {
 		t.Fatal(err)
 	}

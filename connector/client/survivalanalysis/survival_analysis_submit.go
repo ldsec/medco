@@ -20,7 +20,7 @@ func (clientSurvivalAnalysis *SurvivalAnalysis) submitToNode(nodeIdx int) (resul
 	body := survival_analysis.SurvivalAnalysisBody{
 		ID:                  clientSurvivalAnalysis.id,
 		UserPublicKey:       clientSurvivalAnalysis.userPublicKey,
-		SetID:               int64(clientSurvivalAnalysis.patientSetID),
+		CohortName:          clientSurvivalAnalysis.cohortName,
 		SubGroupDefinitions: clientSurvivalAnalysis.subGroupDefinitions,
 		StartConcept:        clientSurvivalAnalysis.startConceptPath,
 		StartModifier:       clientSurvivalAnalysis.startModifierCode,

@@ -280,7 +280,8 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^\\w+$"
             }
           }
         ],
@@ -693,7 +694,8 @@ func init() {
         "type": "object",
         "properties": {
           "cohortName": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^\\w+$"
           },
           "creationDate": {
             "type": "string"
@@ -754,14 +756,15 @@ func init() {
           "ID": {
             "type": "string"
           },
+          "cohortName": {
+            "type": "string",
+            "pattern": "^\\w+$"
+          },
           "endConcept": {
             "type": "string"
           },
           "endModifier": {
             "type": "string"
-          },
-          "setID": {
-            "type": "integer"
           },
           "startConcept": {
             "type": "string"
@@ -1269,14 +1272,15 @@ func init() {
                 "ID": {
                   "type": "string"
                 },
+                "cohortName": {
+                  "type": "string",
+                  "pattern": "^\\w+$"
+                },
                 "endConcept": {
                   "type": "string"
                 },
                 "endModifier": {
                   "type": "string"
-                },
-                "setID": {
-                  "type": "integer"
                 },
                 "startConcept": {
                   "type": "string"
@@ -1392,7 +1396,8 @@ func init() {
               "type": "object",
               "properties": {
                 "cohortName": {
-                  "type": "string"
+                  "type": "string",
+                  "pattern": "^\\w+$"
                 },
                 "creationDate": {
                   "type": "string"
@@ -1440,7 +1445,8 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^\\w+$"
             }
           }
         ],
@@ -2121,7 +2127,8 @@ func init() {
         "type": "object",
         "properties": {
           "cohortName": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^\\w+$"
           },
           "creationDate": {
             "type": "string"
@@ -2182,14 +2189,15 @@ func init() {
           "ID": {
             "type": "string"
           },
+          "cohortName": {
+            "type": "string",
+            "pattern": "^\\w+$"
+          },
           "endConcept": {
             "type": "string"
           },
           "endModifier": {
             "type": "string"
-          },
-          "setID": {
-            "type": "integer"
           },
           "startConcept": {
             "type": "string"

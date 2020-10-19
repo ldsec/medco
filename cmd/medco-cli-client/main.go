@@ -97,10 +97,10 @@ func main() {
 			Value: "day",
 		},
 		// this is supposed to be a required argument, but we need -1 for testing, and -1 is not possible to pass as an argument here
-		cli.IntFlag{
-			Name:  "cohortID, c",
-			Usage: "Cohort identifier",
-			Value: -1,
+		cli.StringFlag{
+			Name:     "cohortName, c",
+			Usage:    "Cohort identifier",
+			Required: true,
 		},
 		cli.StringFlag{
 			Name:     "startConcept, s",
@@ -248,7 +248,7 @@ func main() {
 			Aliases:     []string{"srva"},
 			Usage:       "Run a survival analysis",
 			Flags:       survivalAnalysisFlag,
-			ArgsUsage:   "-l limit [-g granularity] [-c cohortID] -s startConcept [-x startModifier] -e endConcept [-y endModifier]",
+			ArgsUsage:   "-l limit [-g granularity] -c cohortName -s startConcept [-x startModifier] -e endConcept [-y endModifier]",
 			Description: "Returns the points of the survival curve",
 			Action: func(c *cli.Context) error {
 				return survivalclient.ExecuteClientSurvival(
@@ -260,7 +260,7 @@ func main() {
 					"",
 					"",
 					c.Int("limit"),
-					c.Int("cohortID"),
+					c.String("cohortName"),
 					c.String("granularity"),
 					c.String("startConcept"),
 					c.String("startModifier"),

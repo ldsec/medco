@@ -31,7 +31,7 @@ type ClientResultElement struct {
 }
 
 // ExecuteClientSurvival creates a survival analysis form parameters given in parameter file, and makes a call to the API to executes this query
-func ExecuteClientSurvival(token, parameterFileURL, username, password string, disableTLSCheck bool, resultFile string, timerFile string, limit int, cohortID int, granularity, startConcept, startModifier, endConcept, endModifier string) (err error) {
+func ExecuteClientSurvival(token, parameterFileURL, username, password string, disableTLSCheck bool, resultFile string, timerFile string, limit int, cohortName string, granularity, startConcept, startModifier, endConcept, endModifier string) (err error) {
 
 	//initialize onjects and channels
 	clientTimers := utilcommon.NewTimers()
@@ -104,7 +104,7 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 			parameters = &Parameters{
 				granularity,
 				limit,
-				cohortID,
+				cohortName,
 				startConcept,
 				startModifier,
 				endConcept,
@@ -154,7 +154,7 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 	logrus.Debug("executing query")
 	query, err := NewSurvivalAnalysis(
 		accessToken,
-		parameters.CohortID,
+		parameters.CohortName,
 		panels,
 		parameters.TimeLimit,
 		parameters.TimeResolution,

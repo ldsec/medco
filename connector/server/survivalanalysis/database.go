@@ -71,6 +71,9 @@ $6 max time limit in day
 
 */
 
+// TODO find better names or com
+// prepare those functions in DB
+
 const sql1 string = `
 SELECT patient_num,start_date 
 FROM i2b2demodata_i2b2.observation_fact

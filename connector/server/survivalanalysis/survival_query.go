@@ -25,7 +25,7 @@ type Query struct {
 	UserID              string
 	UserPublicKey       string
 	QueryName           string
-	SetID               int
+	CohortName          string
 	SubGroupDefinitions []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0
 	TimeLimit           int
 	TimeGranularity     string
@@ -43,7 +43,7 @@ type Query struct {
 func NewQuery(UserID,
 	QueryName,
 	UserPublicKey string,
-	SetID int,
+	CohortName string,
 	SubGroupDefinitions []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0,
 	TimeLimit int,
 	TimeGranularity string,
@@ -55,7 +55,7 @@ func NewQuery(UserID,
 		UserPublicKey:       UserPublicKey,
 		UserID:              UserID,
 		QueryName:           QueryName,
-		SetID:               SetID,
+		CohortName:          CohortName,
 		SubGroupDefinitions: SubGroupDefinitions,
 		TimeLimit:           TimeLimit,
 		TimeGranularity:     TimeGranularity,
@@ -83,7 +83,7 @@ func (q *Query) Execute() error {
 	// --- cohort patient list
 
 	timer := time.Now()
-	cohort, err := querytoolsserver.GetPatientList(q.UserID, int64(q.SetID))
+	cohort, err := querytoolsserver.GetPatientList(q.UserID, q.CohortName)
 	q.Result.Timers.AddTimers("medco-connector-get-patient-list", timer, nil)
 	logrus.Debug("got patients")
 

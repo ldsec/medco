@@ -12,8 +12,8 @@ import (
 )
 
 // GetPatientList runs a SQL query on db and returns the list of patient IDs for given queryID and userID
-func GetPatientList(userID string, resultInstanceID int64) (patientNums []int64, err error) {
-	row := utilserver.DBConnection.QueryRow(getPatientList, userID, resultInstanceID)
+func GetPatientList(userID string, cohortName string) (patientNums []int64, err error) {
+	row := utilserver.DBConnection.QueryRow(getPatientList, userID, cohortName)
 	patientNumsString := new(string)
 	err = row.Scan(patientNumsString)
 	var pNum int64

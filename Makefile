@@ -40,10 +40,10 @@ test_go_unit:
 	go test -v -race -short -p=1 ./...
 
 test_codecov_unit:
-	./test/coveralls.sh "./connector/wrappers/i2b2 ./connector/wrappers/unlynx ./connector/server/handlers"
+	./test/coveralls.sh "./connector/wrappers/i2b2 ./connector/wrappers/unlynx ./connector/server/handlers ./connector/server/survivalanalysis"
 
 test_codecov_e2e:
-	./test/coveralls.sh "" "./connector/wrappers/i2b2 ./connector/wrappers/unlynx ./connector/server/handlers"
+	./test/coveralls.sh "" "./connector/wrappers/i2b2 ./connector/wrappers/unlynx ./connector/server/handlers ./connector/server/survivalanalysis"
 
 # utility commands
 .PHONY:	test_unlynx_loop swagger swagger-gen download_test_data load_test_data version

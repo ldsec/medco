@@ -1,6 +1,6 @@
 time_resolution: "day"
 time_limit: 19
-cohort_id: -1
+cohort_name: "anyName"
 start_concept_path: "/any/start/path/"
 start_concept_modifier: "anyStartMCode"
 end_concept_path: "/any/end/path/"

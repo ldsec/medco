@@ -9,9 +9,11 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // PostCohortsReader is a Reader for the PostCohorts structure.
@@ -136,6 +138,7 @@ swagger:model PostCohortsBody
 type PostCohortsBody struct {
 
 	// cohort name
+	// Pattern: ^\w+$
 	CohortName string `json:"cohortName,omitempty"`
 
 	// creation date
@@ -150,6 +153,28 @@ type PostCohortsBody struct {
 
 // Validate validates this post cohorts body
 func (o *PostCohortsBody) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateCohortName(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *PostCohortsBody) validateCohortName(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.CohortName) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("body"+"."+"cohortName", "body", string(o.CohortName), `^\w+$`); err != nil {
+		return err
+	}
+
 	return nil
 }
 
