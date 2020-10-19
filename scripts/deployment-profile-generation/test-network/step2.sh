@@ -14,7 +14,7 @@ SECRETS="${3-}"
 # convenience variables
 PROFILE_NAME="test-network-${NETWORK_NAME}-node${NODE_IDX}"
 SCRIPT_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-MEDCO_UNLYNX_VER="v1.0.0"
+MEDCO_DOCKER="ghcr.io/ldsec/medco:$(make --no-print-directory -C ../../../ version)"
 COMPOSE_FOLDER="${SCRIPT_FOLDER}/../../../deployments/${PROFILE_NAME}"
 CONF_FOLDER="${COMPOSE_FOLDER}/configuration"
 if [[ ! -d ${CONF_FOLDER} ]] || [[ ! -d ${COMPOSE_FOLDER} ]] || [[ -f ${CONF_FOLDER}/group.toml ]]; then
@@ -37,16 +37,16 @@ echo "### Archives extracted"
 # ===================== unlynx keys ====================
 echo "### Generating group.toml and aggregate.txt files"
 cat "${CONF_FOLDER}"/srv*-public.toml > "${CONF_FOLDER}/group.toml"
-docker run -v "${CONF_FOLDER}:/medco-configuration" -u "$(id -u):$(id -g)" "medco/medco-unlynx:${MEDCO_UNLYNX_VER}" \
+docker run -v "${CONF_FOLDER}:/medco-configuration" -u "$(id -u):$(id -g)" "${MEDCO_DOCKER}" medco-unlynx \
     server getAggregateKey --file "/medco-configuration/group.toml"
 echo "### group.toml and aggregate.txt files generated"
 
 echo "### Generating secrets"
 if [[ -z ${SECRETS} ]]; then
-    docker run -v "${CONF_FOLDER}:/medco-configuration" -u "$(id -u):$(id -g)" "medco/medco-unlynx:${MEDCO_UNLYNX_VER}" \
+    docker run -v "${CONF_FOLDER}:/medco-configuration" -u "$(id -u):$(id -g)" "${MEDCO_DOCKER}" medco-unlynx \
         server generateTaggingSecrets --file "/medco-configuration/group.toml" --nodeIndex "${NODE_IDX}"
 else
-    docker run -v "${CONF_FOLDER}:/medco-configuration" -u "$(id -u):$(id -g)" "medco/medco-unlynx:${MEDCO_UNLYNX_VER}" \
+    docker run -v "${CONF_FOLDER}:/medco-configuration" -u "$(id -u):$(id -g)" "${MEDCO_DOCKER}" medco-unlynx \
         server generateTaggingSecrets --file "/medco-configuration/group.toml" --nodeIndex "${NODE_IDX}" --secrets "${SECRETS}"
 fi
 echo "### secrets generated"
