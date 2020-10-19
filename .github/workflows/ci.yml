@@ -58,14 +58,14 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build Docker images
-        run: make docker_images_build_dev
+        run: make -C deployments/dev-local-3nodes build
 
       - name: Get test data
         run: make download_test_data
 
       - name: Start deployment and wait for it to be ready
         run: |
-          docker-compose -f deployments/dev-local-3nodes/docker-compose.yml up -d
+          make -C deployments/dev-local-3nodes up
           bash test/wait_for_startup.sh $MEDCO_DB_NUMBER $MEDCO_DB_HOST $MEDCO_DB_PORT $MEDCO_DB_USER $MEDCO_DB_PASSWORD $MEDCO_DB_NAME
 
       - name: Load data in deployment

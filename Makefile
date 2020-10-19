@@ -1,10 +1,5 @@
-MEDCO_VERSION := $(shell git describe --tags --always --dirty)
-
-# build commands
-.PHONY: docker_images_build_dev
-docker_images_build_dev:
-	cd "deployments/dev-local-3nodes"; \
-	docker-compose -f docker-compose.yml -f docker-compose.tools.yml build
+MEDCO_VERSION := $(shell git describe --tags --always)
+GB_VERSION := v1.0.0
 
 # test commands
 .PHONY: test test_go_fmt test_go_lint test_codecov_unit test_codecov_e2e
@@ -46,7 +41,7 @@ test_codecov_e2e:
 	./test/coveralls.sh "" "./connector/wrappers/i2b2 ./connector/wrappers/unlynx ./connector/server/handlers"
 
 # utility commands
-.PHONY:	test_unlynx_loop swagger swagger-gen download_test_data load_test_data version
+.PHONY:	test_unlynx_loop swagger swagger-gen download_test_data medco_version gb_version
 test_unlynx_loop:
 	for i in $$( seq 100 ); \
 		do echo "******* Run $$i"; echo; \
@@ -83,10 +78,8 @@ download_test_data:
 	./test/data/download.sh genomic_small
 	./test/data/download.sh i2b2
 
-load_test_data:
-	docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-loader-srv0 v0 --ont_clinical /data/genomic/tcga_cbio/8_clinical_data.csv --sen /data/genomic/sensitive.txt --ont_genomic /data/genomic/tcga_cbio/8_mutation_data.csv --clinical /data/genomic/tcga_cbio/8_clinical_data.csv --genomic /data/genomic/tcga_cbio/8_mutation_data.csv --output /data/
-	docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-loader-srv1 v0 --ont_clinical /data/genomic/tcga_cbio/8_clinical_data.csv --sen /data/genomic/sensitive.txt --ont_genomic /data/genomic/tcga_cbio/8_mutation_data.csv --clinical /data/genomic/tcga_cbio/8_clinical_data.csv --genomic /data/genomic/tcga_cbio/8_mutation_data.csv --output /data/
-	docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-loader-srv2 v0 --ont_clinical /data/genomic/tcga_cbio/8_clinical_data.csv --sen /data/genomic/sensitive.txt --ont_genomic /data/genomic/tcga_cbio/8_mutation_data.csv --clinical /data/genomic/tcga_cbio/8_clinical_data.csv --genomic /data/genomic/tcga_cbio/8_mutation_data.csv --output /data/
-
-version:
+medco_version:
 	@echo $(MEDCO_VERSION)
+
+gb_version:
+	@echo $(GB_VERSION)

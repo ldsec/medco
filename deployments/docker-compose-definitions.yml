@@ -1,7 +1,7 @@
 version: '2.4'
 services:
   i2b2:
-    image: medco/i2b2:${I2B2_VERSION:-v1.0.0-MedCo}
+    image: ghcr.io/ldsec/i2b2-medco:${MEDCO_VERSION:?}
     build:
       context: ../build/package/i2b2
     environment:
@@ -17,7 +17,7 @@ services:
       - AXIS2_LOGLEVEL=INFO
 
   medco-unlynx:
-    image: medco/medco:${MEDCO_VERSION:-v1.0.0}
+    image: ghcr.io/ldsec/medco:${MEDCO_VERSION:?}
     build:
       context: ../
       dockerfile: build/package/medco/Dockerfile
@@ -32,7 +32,7 @@ services:
       - ./dev-local-3nodes/configuration:/medco-configuration
 
   nginx:
-    image: medco/nginx:${NGINX_VERSION:-v1.0.0-MedCo}
+    image: ghcr.io/ldsec/nginx-medco:${MEDCO_VERSION:?}
     build:
       context: ../build/package/nginx
     environment:
@@ -52,7 +52,7 @@ services:
     - ../build/package/postgresql/initdb-data:/docker-entrypoint-initdb.d
 
   pg-admin:
-    image: medco/pgadmin4:${PGADMIN_VERSION:-v1.0.0-MedCo}
+    image: ghcr.io/ldsec/pgadmin-medco:${MEDCO_VERSION:?}
     build:
       context: ../build/package/pgadmin
     environment:
@@ -60,7 +60,7 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=admin
 
   keycloak:
-    image: medco/keycloak:${KEYCLOAK_VERSION:-v1.0.0-MedCo}
+    image: ghcr.io/ldsec/keycloak-medco:${MEDCO_VERSION:?}
     build:
       context: ../build/package/keycloak
     environment:
@@ -74,7 +74,7 @@ services:
       - DB_PASSWORD=keycloak
 
   glowing-bear-medco:
-    image: medco/glowing-bear-medco:${GLOWING_BEAR_MEDCO_VERSION:-v1.0.0}
+    image: ghcr.io/ldsec/glowing-bear-medco:${GLOWING_BEAR_MEDCO_VERSION:?}
     environment:
       - GB_MEDCO_NODE_URL=http://localhost/local-3nodes/medco-0
       - GB_KEYCLOAK_URL=http://localhost/auth
@@ -83,7 +83,7 @@ services:
       - GB_FOOTER_TEXT=
 
   medco-connector:
-    image: medco/medco:${MEDCO_VERSION:-v1.0.0}
+    image: ghcr.io/ldsec/medco:${MEDCO_VERSION:?}
     build:
       context: ../
       dockerfile: build/package/medco/Dockerfile
@@ -123,7 +123,7 @@ services:
       - ./dev-local-3nodes/configuration:/medco-configuration
 
   medco-cli-client:
-    image: medco/medco:${MEDCO_VERSION:-v1.0.0}
+    image: ghcr.io/ldsec/medco:${MEDCO_VERSION:?}
     build:
       context: ../
       dockerfile: build/package/medco/Dockerfile
@@ -146,7 +146,7 @@ services:
     network_mode: host
 
   medco-loader:
-    image: medco/medco:${MEDCO_VERSION:-v1.0.0}
+    image: ghcr.io/ldsec/medco:${MEDCO_VERSION:?}
     build:
       context: ../
       dockerfile: build/package/medco/Dockerfile
