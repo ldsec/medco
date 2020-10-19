@@ -4,12 +4,13 @@ import (
 	"os"
 	"strings"
 
-	querytoolsclient "github.com/ldsec/medco/connector/client/querytools"
-	survivalclient "github.com/ldsec/medco/connector/client/survivalanalysis"
-
-	medcoclient "github.com/ldsec/medco/connector/client/explore"
+	"github.com/ldsec/medco"
+	medcoclient "github.com/ldsec/medco/connector/client"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
+
+	querytoolsclient "github.com/ldsec/medco/connector/client/querytools"
+	survivalclient "github.com/ldsec/medco/connector/client/survivalanalysis"
 )
 
 func main() {
@@ -17,7 +18,7 @@ func main() {
 	cliApp := cli.NewApp()
 	cliApp.Name = "medco-cli-client"
 	cliApp.Usage = "Command-line query tool for MedCo."
-	cliApp.Version = "1.0.0" // todo: dynamically get version from build process
+	cliApp.Version = medco.Version
 
 	// from env / config: whatever is in the config of GB : debug,
 	// cli: whatever is user input

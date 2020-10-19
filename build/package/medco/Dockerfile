@@ -15,7 +15,7 @@ RUN cd /go/pkg/mod/go.dedis.ch/onet && \
         's/conn.SetReadDeadline(time.Now().Add(5 \* time.Minute))/conn.SetReadDeadline(time.Now().Add(5 \* time.Hour))/'
 
 # compile and install all binaries
-RUN CGO_ENABLED=0 go install -v ./cmd/...
+RUN CGO_ENABLED=0 go install -v -ldflags "-X github.com/ldsec/medco.Version=$(make medco_version)" ./...
 
 # -------------------------------------------
 FROM golang:1.14-alpine as release
