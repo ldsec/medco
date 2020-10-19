@@ -4,7 +4,7 @@ on:
     branches:
       - 'dev'
     tags:
-      - 'v*.*.*'
+      - '*'
   pull_request:
 
 jobs:
@@ -37,7 +37,7 @@ jobs:
       - name: Get MedCo version
         id: get_version
         run: |
-          VERSION=$(make version)
+          VERSION=$(make medco_version)
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/}
           fi
