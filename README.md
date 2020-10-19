@@ -53,7 +53,7 @@ docker-compose -f docker-compose.yml -f docker-compose.tools.yml pull
 ```
 
 ### How to load data
-A detailed up-to-date guide on how to use the *medco-loader* is available 
+A detailed up-to-date guide on how to use the *medco loader* is available 
 [here](https://ldsec.gitbook.io/medco-documentation/system-administrators/data-loading).
 
 ### How to use the medco-cli-client
@@ -62,5 +62,5 @@ MedCo provides a client command-line interface to interact with the *connector* 
 To learn how to use it, check the [CLI documentation](https://ldsec.gitbook.io/medco-documentation/system-administrators/cli).
 
 ## License
-*medco-deployment* is licensed under a End User Software License Agreement ('EULA') for non-commercial use.
+*medco* is licensed under a End User Software License Agreement ('EULA') for non-commercial use.
 If you need more information, please contact us.
