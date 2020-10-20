@@ -1,6 +1,5 @@
-[![Build Status](https://travis-ci.org/ldsec/medco.svg?branch=master)](https://travis-ci.org/ldsec/medco) 
 [![Go Report Card](https://goreportcard.com/badge/github.com/ldsec/medco)](https://goreportcard.com/report/github.com/ldsec/medco) 
-[![Coverage Status](https://coveralls.io/repos/github/ldsec/medco/badge.svg?branch=master)](https://coveralls.io/github/ldsec/medco?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/ldsec/medco/badge.svg?branch=dev)](https://coveralls.io/github/ldsec/medco?branch=dev)
 
 # MedCo
 You can find more information about the MedCo project [here](https://medco.epfl.ch/).
@@ -41,7 +40,7 @@ Run the following commands to build the MedCo docker images from source.
 ```shell
 git clone https://github.com/ldsec/medco.git
 cd medco/deployments/dev-local-3nodes
-docker-compose -f docker-compose.yml -f docker-compose.tools.yml build
+make build
 ```
 
 ### Downloading docker images
@@ -49,7 +48,7 @@ Run the following commands to download the MedCo docker images.
 ```shell
 git clone https://github.com/ldsec/medco.git
 cd medco/deployments/test-local-3nodes
-docker-compose -f docker-compose.yml -f docker-compose.tools.yml pull
+make pull
 ```
 
 ### How to load data
