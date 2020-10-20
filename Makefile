@@ -1,5 +1,5 @@
 MEDCO_VERSION := $(shell git describe --tags --always)
-GB_VERSION := v1.0.0
+GB_VERSION := e675e66
 
 # test commands
 .PHONY: test test_go_fmt test_go_lint test_codecov_unit test_codecov_e2e
