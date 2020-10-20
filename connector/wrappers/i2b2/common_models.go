@@ -3,7 +3,6 @@ package i2b2
 import (
 	"encoding/xml"
 	"errors"
-	"github.com/ldsec/medco"
 	"github.com/ldsec/medco/connector/util/server"
 	"strconv"
 	"time"
@@ -23,7 +22,7 @@ func NewRequest() Request {
 			I2b2VersionCompatible:                  "0.3",
 			Hl7VersionCompatible:                   "2.4",
 			SendingApplicationApplicationName:      "MedCo Connector",
-			SendingApplicationApplicationVersion:   medco.Version,
+			SendingApplicationApplicationVersion:   "0.2",
 			SendingFacilityFacilityName:            "MedCo",
 			ReceivingApplicationApplicationName:    "i2b2 cell",
 			ReceivingApplicationApplicationVersion: "1.7",
