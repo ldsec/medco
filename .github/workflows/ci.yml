@@ -68,11 +68,14 @@ jobs:
           docker-compose -f deployments/dev-local-3nodes/docker-compose.yml up -d
           bash test/wait_for_startup.sh $MEDCO_DB_NUMBER $MEDCO_DB_HOST $MEDCO_DB_PORT $MEDCO_DB_USER $MEDCO_DB_PASSWORD $MEDCO_DB_NAME
 
+      - name: Run unit tests depending on deployment without a loading performed
+        run: make test_codecov_e2e_preloading
+
       - name: Load data in deployment
         run: make load_test_data
 
-      - name: Run unit tests depending on deployment
-        run: make test_codecov_e2e
+      - name: Run unit tests depending on deployment with loadings performed
+        run: make test_codecov_e2e_postloading
 
       - name: Run e2e queries
         run: bash test/test_cli.sh $MEDCO_USER_USERNAME $MEDCO_USER_PASSWORD

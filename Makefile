@@ -42,8 +42,11 @@ test_go_unit:
 test_codecov_unit:
 	./test/coveralls.sh "./connector/wrappers/i2b2 ./connector/wrappers/unlynx ./connector/server/handlers ./connector/server/survivalanalysis ./connector/server/querytools"
 
-test_codecov_e2e:
-	./test/coveralls.sh "" "./connector/wrappers/i2b2 ./connector/wrappers/unlynx ./connector/server/handlers ./connector/server/survivalanalysis ./connector/server/querytools"
+test_codecov_e2e_preloading:
+	./test/coveralls.sh "./connector/wrappers/i2b2 ./connector/wrappers/unlynx ./connector/server/handlers" "./connector/server/survivalanalysis ./connector/server/querytools"
+
+test_codecov_e2e_postloading:
+	./test/coveralls.sh "./connector/server/survivalanalysis ./connector/server/querytools" "./connector/wrappers/i2b2 ./connector/wrappers/unlynx ./connector/server/handlers"
 
 # utility commands
 .PHONY:	test_unlynx_loop swagger swagger-gen download_test_data load_test_data version
