@@ -46,8 +46,8 @@ hugoGeneSymbolGetVariantsResult2="-7039476204566471680-7039476580443220992"
 hugoGeneSymbolGetVariantsResult3="-7039476780159200256"
 
 test1 () {
-  docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /results/result.csv $1 $2
-  result="$(cat deployments/result.csv | tr -d '\r\n\t ')"
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /results/result.csv $1 $2
+  result="$(cat ../result.csv | tr -d '\r\n\t ')"
   if [ "${result}" != "${3}" ];
   then
   echo "$1 $2: test failed"
@@ -57,8 +57,8 @@ test1 () {
 }
 
 test2 () {
- docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /results/result.csv $1 $2
-  result="$(awk -F "\"*,\"*" '{print $2}' deployments/result.csv)"
+ docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /results/result.csv $1 $2
+  result="$(awk -F "\"*,\"*" '{print $2}' ../result.csv)"
   if [ "${result}" != "${3}" ];
   then
   echo "$1 $2: test failed"
@@ -68,7 +68,7 @@ test2 () {
 }
 
 test3 () {
-  result="$(docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run -e LOG_LEVEL=1 -e CONN_TIMEOUT=10m medco-cli-client --user $USERNAME --password $PASSWORD $1 $2 | tr -d '\r\n\t ')"
+  result="$(docker-compose -f docker-compose.tools.yml run -e LOG_LEVEL=1 -e CONN_TIMEOUT=10m medco-cli-client --user $USERNAME --password $PASSWORD $1 $2 | tr -d '\r\n\t ')"
   if [ "${result}" != "${3}" ];
   then
   echo "$1 $2: test failed"
@@ -77,6 +77,7 @@ test3 () {
   fi
 }
 
+pushd deployments/dev-local-3nodes/
 echo "Testing concept-children..."
 
 test1 "concept-children" "${searchConceptChildren1}" "${resultSearchConceptChildren1}"
@@ -114,4 +115,5 @@ test3 "ga-get-variant --z "homozygous\|unknown" hugo_gene_symbol" "${hugoGeneSym
 test3 "ga-get-variant --z "heterozygous\|homozygous\|unknown" hugo_gene_symbol" "${hugoGeneSymbolGetVariantsValue}" "${hugoGeneSymbolGetVariantsResult1}"
 
 echo "CLI test successful!"
+popd
 exit 0
