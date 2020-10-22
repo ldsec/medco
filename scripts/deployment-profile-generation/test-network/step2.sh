@@ -14,7 +14,7 @@ SECRETS="${3-}"
 # convenience variables
 PROFILE_NAME="test-network-${NETWORK_NAME}-node${NODE_IDX}"
 SCRIPT_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-MEDCO_DOCKER="ghcr.io/ldsec/medco:$(make --no-print-directory -C ../../../ version)"
+MEDCO_DOCKER="ghcr.io/ldsec/medco:$(make --no-print-directory -C ../../../ medco_version)"
 COMPOSE_FOLDER="${SCRIPT_FOLDER}/../../../deployments/${PROFILE_NAME}"
 CONF_FOLDER="${COMPOSE_FOLDER}/configuration"
 if [[ ! -d ${CONF_FOLDER} ]] || [[ ! -d ${COMPOSE_FOLDER} ]] || [[ -f ${CONF_FOLDER}/group.toml ]]; then
