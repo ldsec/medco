@@ -7,7 +7,7 @@ add-apt-repository ppa:git-core/ppa -y
 curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash
 apt-get -y install git-lfs
 
-apt-get -y install git apt-transport-https curl software-properties-common screen nano
+apt-get -y install git apt-transport-https curl software-properties-common screen nano build-essential
 
 apt-get remove docker docker-engine docker.io
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
@@ -29,7 +29,7 @@ docker run hello-world
 curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose
 mkdir /opt/medco
-git clone https://github.com/ldsec/medco-deployment.git /opt/medco/medco-deployment
+git clone https://github.com/ldsec/medco.git /opt/medco/medco
 
 mkdir /disk
 mount /dev/sdb /disk
