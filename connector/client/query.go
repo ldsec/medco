@@ -3,17 +3,18 @@ package medcoclient
 import (
 	"crypto/tls"
 	"errors"
+	"net/http"
+	"net/url"
+	"time"
+
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/ldsec/medco/connector/restapi/client"
 	"github.com/ldsec/medco/connector/restapi/client/medco_network"
 	"github.com/ldsec/medco/connector/restapi/client/medco_node"
 	"github.com/ldsec/medco/connector/restapi/models"
-	"github.com/ldsec/medco/connector/util/client"
+	utilclient "github.com/ldsec/medco/connector/util/client"
 	"github.com/ldsec/medco/connector/wrappers/unlynx"
 	"github.com/sirupsen/logrus"
-	"net/http"
-	"net/url"
-	"time"
 )
 
 // ExploreQuery is a MedCo client explore query
@@ -195,10 +196,14 @@ func (clientQuery *ExploreQuery) generateModel() (queryModel *models.ExploreQuer
 		}
 
 		for _, encItem := range panel {
+			encrypted := new(bool)
+			*encrypted = true
+			queryTerm := new(string)
+			*queryTerm = encItem
 			panelModel.Items = append(panelModel.Items, &models.ExploreQueryPanelsItems0ItemsItems0{
-				Encrypted: &true,
+				Encrypted: encrypted,
 				Operator:  "exists",
-				QueryTerm: &encItem,
+				QueryTerm: queryTerm,
 				Value:     "",
 			})
 
