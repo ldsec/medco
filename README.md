@@ -21,19 +21,19 @@ It follows the Golang standard project layout.
     - *medco-unlynx*: Unlynx server
 - *connector*: implementation of the REST API server
 - *deployments*: docker-compose files, parameters and configuration for different deployment profiles
-    - *[dev-local-3nodes](https://ldsec.gitbook.io/medco-documentation/system-administrator-guide/deployment/local-development-deployment)*: profile that deploys 3 MedCo nodes on a single machine for development purposes
-    - *[test-local-3nodes](https://ldsec.gitbook.io/medco-documentation/system-administrator-guide/deployment/local-test-deployment)*: profile that deploys 3 MedCo nodes on a single machine for test purposes
+    - *[dev-local-3nodes](https://ldsec.gitbook.io/medco-documentation/developers/local-development-deployment)*: profile that deploys 3 MedCo nodes on a single machine for development purposes
+    - *[test-local-3nodes](https://ldsec.gitbook.io/medco-documentation/system-administrators/deployment/local-test-deployment)*: profile that deploys 3 MedCo nodes on a single machine for test purposes
 - *loader*: implementation of the ETL tool
 - *scripts*: various utility scripts
     - *profile-generation-scripts*: scripts to generate various deployment profiles files
-        - *test-network*: scripts to generate the deployment profiles files for the [Network Test Deployment](https://ldsec.gitbook.io/medco-documentation/system-administrator-guide/deployment/network-test-deployment) profile
+        - *test-network*: scripts to generate the deployment profiles files for the [Network Test Deployment](https://ldsec.gitbook.io/medco-documentation/system-administrators/deployment/network-test-deployment) profile
 - *test*: testing scripts
     - *test/data*: script to download the test datasets
 - *unlynx*: implementation of the unlynx wrapper
 
 ## Getting started
 A description of the available deployment profiles, along with a detailed guide on how to use them, is available 
-[here](https://ldsec.gitbook.io/medco-documentation/system-administrator-guide/deployment).
+[here](https://ldsec.gitbook.io/medco-documentation/system-administrators/deployment).
 
 ### Building docker images
 Run the following commands to build the MedCo docker images from source.
