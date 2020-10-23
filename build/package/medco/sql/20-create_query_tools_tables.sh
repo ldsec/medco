@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+# create the schema
+psql $PSQL_PARAMS -d "$MC_DB_NAME" <<-EOSQL
+CREATE SCHEMA query_tools;
+EOSQL
 
 #create the enum type
 psql $PSQL_PARAMS -d "$MC_DB_NAME" <<-EOSQL

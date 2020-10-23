@@ -20,23 +20,15 @@ if [[ "$1" = "medco-connector-server" ]]; then
   # initialize database if it does not exist (credentials must be valid and have create database right)
   DB_CHECK=$(psql ${PSQL_PARAMS} -d postgres -X -A -t -c "select count(*) from pg_database where datname = '${MC_DB_NAME}';")
   if [[ "$DB_CHECK" -ne "1" ]]; then
-  echo "Initialising medco_connector database"
-      psql $PSQL_PARAMS -d postgres <<-EOSQL
+    echo "Initialising medco_connector database"
+    psql $PSQL_PARAMS -d postgres <<-EOSQL
           CREATE DATABASE ${MC_DB_NAME};
 EOSQL
-  psql $PSQL_PARAMS -d "$MC_DB_NAME" <<-EOSQL
-          CREATE SCHEMA genomic_annotations;
-          CREATE SCHEMA query_tools;
-EOSQL
 
-# create tables for query tools for storing results from MedCo Explore queries
-echo "create query tools tables"
-bash /usr/local/bin/querytools/create_query_tools_tables.sh
-
-# load e2e test data for survival analysis
-echo "loading test data"
-bash /usr/local/bin/querytools/load_test_cohort.sh
-
+    # run loading scripts
+    for f in "$MC_SQL_DIR"/*.sh; do
+        bash "$f"
+    done
   fi
 
   EXEC="${EXEC} --write-timeout=${SERVER_HTTP_WRITE_TIMEOUT_SECONDS}s"

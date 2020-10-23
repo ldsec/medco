@@ -5,23 +5,26 @@ package handlers
 import (
 	"testing"
 
+	"sort"
+	"testing"
+
 	"github.com/ldsec/medco/connector/restapi/server/operations/genomic_annotations"
 	utilserver "github.com/ldsec/medco/connector/util/server"
 	"github.com/sirupsen/logrus"
 )
 
-var variantNameGetValuesValue = "5238"
-var variantNameGetValuesResult = []string{"16:75238144:C>C", "6:52380882:G>G"}
-var proteinChangeGetValuesValue = "g32"
-var proteinChangeGetValuesResult = []string{"G325R", "G32E"}
-var proteinChangeGetValuesValue2 = "7cfs*"
-var proteinChangeGetValuesResult2 = []string{"S137Cfs*28"}
-var hugoGeneSymbolGetValuesValue = "tr5"
-var hugoGeneSymbolGetValuesResult = []string{"HTR5A"}
+var variantNameGetValuesValue = "78"
+var variantNameGetValuesResult = []string{"6:35786830:GGGACC>TAATAC", "7:78098298:TCTTTA>AACGGA", "8:57873164:GCTGTG>GGCT"}
+var proteinChangeGetValuesValue = "y"
+var proteinChangeGetValuesResult = []string{"N232Y", "H277Y", "Y1062H"}
+var proteinChangeGetValuesValue2 = "l61sfs*"
+var proteinChangeGetValuesResult2 = []string{"L61Sfs*54"}
+var hugoGeneSymbolGetValuesValue = "nav"
+var hugoGeneSymbolGetValuesResult = []string{"NAV3"}
 
-var variantNameGetVariantsResult = []string{"-4530899676219565056"}
-var proteinChangeGetVariantsResult = []string{"-2429151887266669568"}
-var hugoGeneSymbolGetVariantsResult = []string{"-7039476204566471680", "-7039476580443220992", "-7039476780159200256"}
+var variantNameGetVariantsResult = []string{"-7455563962931223533"}
+var proteinChangeGetVariantsResult = []string{"-2823470849823937376"}
+var hugoGeneSymbolGetVariantsResult = []string{"-7121901993980174104", "-4898572880864589696", "-6271408487767448598"}
 
 func init() {
 	utilserver.SetForTesting()
@@ -154,8 +157,15 @@ func areEqual(slice1, slice2 []string) bool {
 		return false
 	}
 
-	for i, element := range slice1 {
-		if element != slice2[i] {
+	slice1C := make([]string, len(slice1))
+	slice2C := make([]string, len(slice2))
+	copy(slice1C, slice1)
+	copy(slice2C, slice2)
+	sort.Strings(slice1C)
+	sort.Strings(slice2C)
+
+	for i, element := range slice1C {
+		if element != slice2C[i] {
 			return false
 		}
 	}
