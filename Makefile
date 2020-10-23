@@ -32,13 +32,10 @@ test_go_lint:
 	}
 
 test_go_unit:
-	go test -v -race -short -p=1 ./...
+	go test -v -race -short --tags=unit_test -p=1 ./...
 
-test_codecov_unit:
-	./test/coveralls.sh "./connector/wrappers/i2b2 ./connector/wrappers/unlynx ./connector/server/handlers"
-
-test_codecov_e2e:
-	./test/coveralls.sh "" "./connector/wrappers/i2b2 ./connector/wrappers/unlynx ./connector/server/handlers"
+test_go_integration:
+	go test -v -race -short --tags=integration_test -p=1 ./...
 
 # utility commands
 .PHONY:	test_unlynx_loop swagger swagger-gen download_test_data medco_version gb_version
