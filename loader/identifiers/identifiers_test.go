@@ -1,3 +1,5 @@
+// +build unit_test
+
 package identifiers_test
 
 import (

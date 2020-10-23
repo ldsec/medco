@@ -27,17 +27,7 @@ jobs:
         run: make download_test_data
 
       - name: Run go test
-        run: make test_codecov_unit
-
-      - name: Install goveralls
-        env:
-          GO111MODULE: off
-        run: go get github.com/mattn/goveralls
-
-      - name: Send coverage
-        env:
-          COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: goveralls -coverprofile=profile.cov -service=github
+        run: make test_go_unit
 
   e2e-tests:
     name: End-to-end tests
@@ -68,17 +58,14 @@ jobs:
           make -C deployments/dev-local-3nodes up
           bash test/wait_for_startup.sh $MEDCO_DB_NUMBER $MEDCO_DB_HOST $MEDCO_DB_PORT $MEDCO_DB_USER $MEDCO_DB_PASSWORD $MEDCO_DB_NAME
 
-      - name: Run unit tests depending on deployment without a loading performed
-        run: make test_codecov_e2e_preloading
+      - name: Run integration tests (depending on deployment)
+        run: make test_go_integration
 
       - name: Run e2e queries before loading
         run: bash test/test_cli_preloading.sh $MEDCO_USER_USERNAME $MEDCO_USER_PASSWORD
-        
+
       - name: Load data in deployment
         run: make -C deployments/dev-local-3nodes load_test_data
-
-      - name: Run unit tests depending on deployment with loadings performed
-        run: make test_codecov_e2e_postloading
 
       - name: Run e2e queries after loading
         run: bash test/test_cli_postloading.sh $MEDCO_USER_USERNAME $MEDCO_USER_PASSWORD

@@ -1,3 +1,5 @@
+// +build unit_test
+
 package loaderi2b2_test
 
 import (
