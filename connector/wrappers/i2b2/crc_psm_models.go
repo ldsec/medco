@@ -3,13 +3,14 @@ package i2b2
 import (
 	"encoding/xml"
 	"errors"
+	"github.com/ldsec/medco/connector/restapi/models"
 	"github.com/ldsec/medco/connector/util/server"
 	"strconv"
 	"strings"
 )
 
 // NewCrcPsmReqFromQueryDef returns a new request object for i2b2 psm request
-func NewCrcPsmReqFromQueryDef(queryName string, panelsItemKeys [][]string, panelsIsNot []bool, resultOutputs []ResultOutputName) Request {
+func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []models.ExploreQueryPanelsItems0, resultOutputs []ResultOutputName) Request {
 
 	// PSM header
 	psmHeader := PsmHeader{
@@ -36,13 +37,14 @@ func NewCrcPsmReqFromQueryDef(queryName string, panelsItemKeys [][]string, panel
 	}
 
 	// embed query in request
-	for p, panelItemKeys := range panelsItemKeys {
+	for p, queryPanel := range queryPanels {
+
 		invert := "0"
-		if panelsIsNot[p] {
+		if *queryPanel.Not {
 			invert = "1"
 		}
 
-		panel := Panel{
+		i2b2Panel := Panel{
 			PanelNumber:          strconv.Itoa(p + 1),
 			PanelAccuracyScale:   "100",
 			Invert:               invert,
@@ -50,14 +52,20 @@ func NewCrcPsmReqFromQueryDef(queryName string, panelsItemKeys [][]string, panel
 			TotalItemOccurrences: "1",
 		}
 
-		for _, itemKey := range panelItemKeys {
-			item := Item{
-				ItemKey: itemKey,
+		for _, queryItem := range queryPanel.Items {
+			i2b2Item := Item{
+				ItemKey: *queryItem.QueryTerm,
 			}
-			panel.Items = append(panel.Items, item)
+			if queryItem.Modifier != nil {
+				i2b2Item.ConstrainByModifier = &ConstrainByModifier{
+					AppliedPath: queryItem.Modifier.AppliedPath,
+					ModifierKey: queryItem.Modifier.ModifierKey,
+				}
+			}
+			i2b2Panel.Items = append(i2b2Panel.Items, i2b2Item)
 		}
 
-		psmRequest.Panels = append(psmRequest.Panels, panel)
+		psmRequest.Panels = append(psmRequest.Panels, i2b2Panel)
 	}
 
 	// embed result outputs
@@ -127,13 +135,20 @@ type Panel struct {
 
 // Item is an i2b2 XML item
 type Item struct {
-	Hlevel        string `xml:"hlevel"`
-	ItemName      string `xml:"item_name"`
-	ItemKey       string `xml:"item_key"`
-	Tooltip       string `xml:"tooltip"`
-	Class         string `xml:"class"`
-	ItemIcon      string `xml:"item_icon"`
-	ItemIsSynonym string `xml:"item_is_synonym"`
+	Hlevel              string               `xml:"hlevel"`
+	ItemName            string               `xml:"item_name"`
+	ItemKey             string               `xml:"item_key"`
+	Tooltip             string               `xml:"tooltip"`
+	Class               string               `xml:"class"`
+	ConstrainByModifier *ConstrainByModifier `xml:"constrain_by_modifier,omitempty"`
+	ItemIcon            string               `xml:"item_icon"`
+	ItemIsSynonym       string               `xml:"item_is_synonym"`
+}
+
+// ConstrainByModifier is an i2b2 XML constrain_by_modifier element
+type ConstrainByModifier struct {
+	AppliedPath string `xml:"applied_path"`
+	ModifierKey string `xml:"modifier_key"`
 }
 
 // ResultOutput is an i2b2 XML requested result type

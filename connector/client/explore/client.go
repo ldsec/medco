@@ -16,6 +16,7 @@ import (
 )
 
 // ExecuteClientQuery executes and displays the result of the MedCo client query
+// endpoint on the server: /node/explore/query
 func ExecuteClientQuery(token, username, password, queryType, queryString, resultOutputFilePath string, disableTLSCheck bool) (err error) {
 
 	// get token
@@ -131,7 +132,8 @@ func printResultsCSV(nodesResult map[int]*ExploreQueryResult, CSVFileURL string)
 	return
 }
 
-// ExecuteClientSearchConcept executes and displays the result of the MedCo sconcept search
+// ExecuteClientSearchConcept executes and displays the result of the MedCo concept search
+// endpoint on the server: /node/explore/search/concept
 func ExecuteClientSearchConcept(token, username, password, conceptPath, resultOutputFilePath string, disableTLSCheck bool) (err error) {
 
 	// get token
@@ -171,6 +173,7 @@ func ExecuteClientSearchConcept(token, username, password, conceptPath, resultOu
 }
 
 // ExecuteClientSearchModifier executes and displays the result of the MedCo modifier search
+// endpoint on the server: /node/explore/search/modifier
 func ExecuteClientSearchModifier(token, username, password, modifierPath, appliedPath, appliedConcept, resultOutputFilePath string, disableTLSCheck bool) (err error) {
 
 	// get token
@@ -210,6 +213,7 @@ func ExecuteClientSearchModifier(token, username, password, modifierPath, applie
 }
 
 // ExecuteClientGenomicAnnotationsGetValues displays the genomic annotations values matching the "annotation" parameter
+// endpoint on the server: /genomic-annotations/{annotation}
 func ExecuteClientGenomicAnnotationsGetValues(token, username, password, annotation, value string, limit int64, disableTLSCheck bool) (err error) {
 
 	// get token
@@ -238,6 +242,7 @@ func ExecuteClientGenomicAnnotationsGetValues(token, username, password, annotat
 }
 
 // ExecuteClientGenomicAnnotationsGetVariants displays the variant ids corresponding to the annotation and value parameters
+// endpoint on the server: /genomic-annotations/{annotation}/{value}
 func ExecuteClientGenomicAnnotationsGetVariants(token, username, password, annotation, value string, zygosity string, encrypted bool, disableTLSCheck bool) (err error) {
 
 	// get token

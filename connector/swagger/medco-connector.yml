@@ -262,7 +262,7 @@ paths:
           type: "string"
           pattern: '^\w+$'
         - $ref: '#/parameters/cohortsRequest'
-       
+
       responses:
         200:
           description: "Updated cohort"
@@ -290,7 +290,7 @@ paths:
           type: "string"
           pattern: '^\w+$'
         - $ref: '#/parameters/cohortsRequest'
-       
+
       responses:
         200:
           description: "Updated cohort"
@@ -454,7 +454,7 @@ responses:
       properties:
         message:
           type: "string"
-  
+
   notFoundResponse:
     description: "Not found."
     schema:
@@ -470,7 +470,7 @@ responses:
       properties:
         message:
           type: "string"
-  
+
   badRequestResponse:
     description: "Bad user input in request."
     schema:
@@ -538,7 +538,7 @@ responses:
           $ref: "#/definitions/exploreQuery"
         result:
           $ref: "#/definitions/exploreQueryResultElement"
-  
+
   getCohortsResponse:
     description: "Queried cohorts"
     schema:
@@ -695,8 +695,14 @@ definitions:
               type: "string"
               maxLength: 0
             modifier:
-              type: "string"
-              pattern: '^([\w=-]+)$|^((\/[^\/]+)+\/?)$'
+              type: "object"
+                properties:
+                  appliedPath:
+                    type: "string"
+                    pattern: '^((\/[^\/]+)+\/?)$'
+                  modifierKey:
+                    type: "string"
+                    pattern: '^(\/(\/[^\/]+)+\/?)$'
             encrypted:
               type: "boolean"
 
@@ -731,7 +737,7 @@ definitions:
         type: "integer"
       timers:
         $ref: "#/definitions/timers"
-        
+
 
   restApiAuthorization:
     type: "string"
@@ -759,7 +765,7 @@ definitions:
             type: "array"
             items:
               $ref: "#/definitions/exploreQueryType"
-  
+
   timers:
     type: "array"
     items:

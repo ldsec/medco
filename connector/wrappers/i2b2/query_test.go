@@ -4,9 +4,7 @@ package i2b2
 
 import (
 	"testing"
-
 	"github.com/stretchr/testify/assert"
-
 	"github.com/ldsec/medco/connector/restapi/models"
 	utilserver "github.com/ldsec/medco/connector/util/server"
 )
@@ -61,11 +59,81 @@ func TestGetOntologyModifierChildren(t *testing.T) {
 
 func TestExecutePsmQuery(t *testing.T) {
 
+	encrypted := true
+	queryTerm := `\\SENSITIVE_TAGGED\medco\tagged\fa15afdd3ce192fffde16d4ed10690b206d7cc95bfce778797cc9a05c312a35d\`
+	item := &models.ExploreQueryPanelsItems0ItemsItems0{
+		Encrypted: &encrypted,
+		QueryTerm: &queryTerm,
+	}
+
+	not := false
 	patientCount, patientSetID, err := ExecutePsmQuery(
 		"testQuery",
-		[][]string{{`\\SENSITIVE_TAGGED\medco\tagged\8d3533369426ae172271e98cef8be2bbfe9919087c776083b1ea1de803fc87aa\`}},
-		[]bool{false},
-	)
+		[]models.ExploreQueryPanelsItems0{
+			{Items: []*models.ExploreQueryPanelsItems0ItemsItems0{
+				item,
+			},
+				Not: &not,
+			}})
+
+	if err != nil {
+		t.Fail()
+	}
+	t.Log("count:"+patientCount, "set ID:"+patientSetID)
+}
+
+func TestExecutePsmQueryWithModifiers(t *testing.T) {
+
+	encrypted := false
+	queryTerm := `\\E2ETEST\e2etest\1\`
+	modifier := models.ExploreQueryPanelsItems0ItemsItems0Modifier{
+		AppliedPath: `\e2etest\1\`,
+		ModifierKey: `\\E2ETEST\modifiers\1\`,
+	}
+
+	item := &models.ExploreQueryPanelsItems0ItemsItems0{
+		Encrypted: &encrypted,
+		QueryTerm: &queryTerm,
+		Modifier:  &modifier,
+	}
+
+	not := false
+	patientCount, patientSetID, err := ExecutePsmQuery(
+		"testQuery",
+		[]models.ExploreQueryPanelsItems0{
+			{Items: []*models.ExploreQueryPanelsItems0ItemsItems0{
+				item,
+			},
+				Not: &not,
+			}})
+
+	if err != nil {
+		t.Fail()
+	}
+	t.Log("count:"+patientCount, "set ID:"+patientSetID)
+
+	// testing with modifier folder -------
+	queryTerm = `\\E2ETEST\e2etest\3\`
+	modifier = models.ExploreQueryPanelsItems0ItemsItems0Modifier{
+		AppliedPath: `\e2etest\%`,
+		ModifierKey: `\\E2ETEST\modifiers\`,
+	}
+
+	item = &models.ExploreQueryPanelsItems0ItemsItems0{
+		Encrypted: &encrypted,
+		QueryTerm: &queryTerm,
+		Modifier:  &modifier,
+	}
+
+	patientCount, patientSetID, err = ExecutePsmQuery(
+		"testQuery",
+		[]models.ExploreQueryPanelsItems0{
+			{Items: []*models.ExploreQueryPanelsItems0ItemsItems0{
+				item,
+			},
+				Not: &not,
+			}})
+
 	if err != nil {
 		t.Fail()
 	}
