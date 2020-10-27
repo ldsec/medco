@@ -1,4 +1,4 @@
-package medcoclient
+package exploreclient
 
 import (
 	"crypto/tls"
@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/url"
 	"time"
+
+	medcoclient "github.com/ldsec/medco/connector/client"
 
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/ldsec/medco/connector/restapi/client"
@@ -48,7 +50,7 @@ func NewExploreQuery(authToken string, queryType models.ExploreQueryType, encPan
 	}
 
 	// retrieve network information
-	getMetadataResp, err := utilclient.MetaData(authToken, disableTLSCheck)
+	getMetadataResp, err := medcoclient.MetaData(authToken, disableTLSCheck)
 	if err != nil {
 		logrus.Error(err)
 		return

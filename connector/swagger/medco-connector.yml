@@ -232,43 +232,83 @@ paths:
       responses:
         200:
           $ref: '#/responses/getCohortsResponse'
-        404:
-          description: "User not found"
         default:
           $ref: '#/responses/errorResponse'
+      security:
+        - medco-jwt: ["medco-explore"]
+
+  /node/explore/cohorts/{name}:
     post:
       tags:
         - "medco-node"
-      summary: "Add a new cohort or update an existing one"
+      summary: "Add a new cohort"
       operationId: "postCohorts"
       parameters:
+        - in: "path"
+          name: "name"
+          description: "Name of the cohort to update"
+          required: true
+          type: "string"
+          pattern: '^\w+$'
         - $ref: '#/parameters/cohortsRequest'
        
       responses:
         200:
           description: "Updated cohort"
-        500:
-          description: "DB has been updated since last importation. Try GET /node/explore/cohorts to fetch the most recent entries"
+        409:
+          description: "The cohort already exists. Try PUT /node/explore/cohorts to update and existing cohort."
         default:
           $ref: '#/responses/errorResponse'
+      security:
+        - medco-jwt: ["medco-explore"]
+
+    put:
+      tags:
+        - "medco-node"
+      summary: "Update a cohort"
+      operationId: "putCohorts"
+      parameters:
+        - in: "path"
+          name: "name"
+          description: "Name of the cohort to update"
+          required: true
+          type: "string"
+          pattern: '^\w+$'
+        - $ref: '#/parameters/cohortsRequest'
+       
+      responses:
+        200:
+          description: "Updated cohort"
+        404:
+          description: "The cohort does not exist. Try POST /node/explore/cohorts to create a new cohort."
+        409:
+          description: "DB has been updated since last importation. Try GET /node/explore/cohorts to fetch the most recent updates."
+        default:
+          $ref: '#/responses/errorResponse'
+      security:
+        - medco-jwt: ["medco-explore"]
+
     delete:
       tags:
         - "medco-node"
       summary: "Delete a cohort if it exists"
       operationId: "deleteCohorts"
       parameters:
-        - in: "body"
+        - in: "path"
           description: "Name of the cohort to delete"
           required: true
-          name: "body"
-          schema: 
-            type: "string"
-            pattern: '^\w+$'
+          name: "name"
+          type: "string"
+          pattern: '^\w+$'
       responses:
         200:
           description: "Deleted cohort"
+        404:
+          description: "The cohort does not exist."
         default:
           $ref: '#/responses/errorResponse'
+      security:
+        - medco-jwt: ["medco-explore"]
 
 
 securityDefinitions:
@@ -311,14 +351,11 @@ parameters:
   cohortsRequest:
     in: "body"
     description: "Cohort that has been updated or created"
-    name: "body"
+    name: "cohortRequest"
     required: true
     schema:
       type: "object"
       properties:
-        cohortName:
-          type: "string"
-          pattern: '^\w+$'
         patientSetID:
           type: "integer"
         creationDate:

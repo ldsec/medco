@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	utilcommon "github.com/ldsec/medco/connector/util/common"
+	"github.com/ldsec/medco/connector/util"
 	utilserver "github.com/ldsec/medco/connector/util/server"
 
 	"github.com/sirupsen/logrus"
@@ -18,7 +18,11 @@ func GetPatientList(userID string, cohortName string) (patientNums []int64, err 
 	err = row.Scan(patientNumsString)
 	var pNum int64
 	logrus.Tracef("Got response %s", *patientNumsString)
-	for _, pID := range strings.Split(strings.Trim(*patientNumsString, "{}"), ",") {
+	patientListString := strings.Trim(*patientNumsString, "{}")
+	if patientListString == "" {
+		return
+	}
+	for _, pID := range strings.Split(patientListString, ",") {
 
 		pNum, err = strconv.ParseInt(pID, 10, 64)
 		if err != nil {
@@ -31,7 +35,7 @@ func GetPatientList(userID string, cohortName string) (patientNums []int64, err 
 }
 
 // GetSavedCohorts runs a SQL query on db and returns the list of saved cohorts for given queryID and userID
-func GetSavedCohorts(userID string) ([]utilcommon.Cohort, error) {
+func GetSavedCohorts(userID string) ([]util.Cohort, error) {
 	rows, err := utilserver.DBConnection.Query(getCohorts, userID)
 	if err != nil {
 		return nil, err
@@ -43,7 +47,7 @@ func GetSavedCohorts(userID string) ([]utilcommon.Cohort, error) {
 	var createDate time.Time
 	var updateDateString string
 	var updateDate time.Time
-	var cohorts = make([]utilcommon.Cohort, 0)
+	var cohorts = make([]util.Cohort, 0)
 	for rows.Next() {
 		err = rows.Scan(&id, &qid, &name, &createDateString, &updateDateString)
 		if err != nil {
@@ -57,7 +61,7 @@ func GetSavedCohorts(userID string) ([]utilcommon.Cohort, error) {
 		if err != nil {
 			return nil, err
 		}
-		cohorts = append(cohorts, utilcommon.Cohort{
+		cohorts = append(cohorts, util.Cohort{
 			CohortID:     id,
 			QueryID:      qid,
 			CohortName:   name,
@@ -104,6 +108,21 @@ func InsertCohort(userID string, queryID int, cohortName string, createDate, upd
 	return cohortID, err
 }
 
+// UpdateCohort runs a SQL query to either insert a new cohort or update an existing one
+func UpdateCohort(cohortName, userID string, queryID int, updateDate time.Time) (int, error) {
+	row := utilserver.DBConnection.QueryRow(updateCohort, cohortName, userID, queryID, updateDate)
+	res := new(string)
+	err := row.Scan(res)
+	if err != nil {
+		return -1, err
+	}
+	cohortID, err := strconv.Atoi(*res)
+	if err != nil {
+		return -1, err
+	}
+	return cohortID, err
+}
+
 // DoesCohortExist check whether a cohort exists for provided user ID and a cohort name.
 func DoesCohortExist(userID, cohortName string) (bool, error) {
 	row := utilserver.DBConnection.QueryRow(doesCohortExist, userID, cohortName)
@@ -125,14 +144,14 @@ func RemoveCohort(userID, cohortName string) error {
 const insertCohort string = `
 INSERT INTO query_tools.saved_cohorts(user_id,query_id,cohort_name,create_date,update_date)
 VALUES ($1,$2,$3,$4,$5)
-ON CONFLICT (user_id,cohort_name) DO UPDATE SET query_id = $2, update_date=$5
 RETURNING cohort_id
 `
 
 const updateCohort string = `
 UPDATE query_tools.saved_cohorts
 SET query_id=$3, update_date= $4
-WHERE cohort_id = $1 AND user_id = $2
+WHERE cohort_name = $1 AND user_id = $2
+RETURNING cohort_id
 `
 
 const getCohorts string = `

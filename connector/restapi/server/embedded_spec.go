@@ -227,6 +227,13 @@ func init() {
     },
     "/node/explore/cohorts": {
       "get": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
+        ],
         "tags": [
           "medco-node"
         ],
@@ -236,21 +243,35 @@ func init() {
           "200": {
             "$ref": "#/responses/getCohortsResponse"
           },
-          "404": {
-            "description": "User not found"
-          },
           "default": {
             "$ref": "#/responses/errorResponse"
           }
         }
-      },
-      "post": {
+      }
+    },
+    "/node/explore/cohorts/{name}": {
+      "put": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
+        ],
         "tags": [
           "medco-node"
         ],
-        "summary": "Add a new cohort or update an existing one",
-        "operationId": "postCohorts",
+        "summary": "Update a cohort",
+        "operationId": "putCohorts",
         "parameters": [
+          {
+            "pattern": "^\\w+$",
+            "type": "string",
+            "description": "Name of the cohort to update",
+            "name": "name",
+            "in": "path",
+            "required": true
+          },
           {
             "$ref": "#/parameters/cohortsRequest"
           }
@@ -259,8 +280,49 @@ func init() {
           "200": {
             "description": "Updated cohort"
           },
-          "500": {
-            "description": "DB has been updated since last importation. Try GET /node/explore/cohorts to fetch the most recent entries"
+          "404": {
+            "description": "The cohort does not exist. Try POST /node/explore/cohorts to create a new cohort."
+          },
+          "409": {
+            "description": "DB has been updated since last importation. Try GET /node/explore/cohorts to fetch the most recent updates."
+          },
+          "default": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
+        ],
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Add a new cohort",
+        "operationId": "postCohorts",
+        "parameters": [
+          {
+            "pattern": "^\\w+$",
+            "type": "string",
+            "description": "Name of the cohort to update",
+            "name": "name",
+            "in": "path",
+            "required": true
+          },
+          {
+            "$ref": "#/parameters/cohortsRequest"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated cohort"
+          },
+          "409": {
+            "description": "The cohort already exists. Try PUT /node/explore/cohorts to update and existing cohort."
           },
           "default": {
             "$ref": "#/responses/errorResponse"
@@ -268,6 +330,13 @@ func init() {
         }
       },
       "delete": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
+        ],
         "tags": [
           "medco-node"
         ],
@@ -275,19 +344,20 @@ func init() {
         "operationId": "deleteCohorts",
         "parameters": [
           {
+            "pattern": "^\\w+$",
+            "type": "string",
             "description": "Name of the cohort to delete",
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "pattern": "^\\w+$"
-            }
+            "name": "name",
+            "in": "path",
+            "required": true
           }
         ],
         "responses": {
           "200": {
             "description": "Deleted cohort"
+          },
+          "404": {
+            "description": "The cohort does not exist."
           },
           "default": {
             "$ref": "#/responses/errorResponse"
@@ -687,16 +757,12 @@ func init() {
   "parameters": {
     "cohortsRequest": {
       "description": "Cohort that has been updated or created",
-      "name": "body",
+      "name": "cohortRequest",
       "in": "body",
       "required": true,
       "schema": {
         "type": "object",
         "properties": {
-          "cohortName": {
-            "type": "string",
-            "pattern": "^\\w+$"
-          },
           "creationDate": {
             "type": "string"
           },
@@ -1349,6 +1415,13 @@ func init() {
     },
     "/node/explore/cohorts": {
       "get": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
+        ],
         "tags": [
           "medco-node"
         ],
@@ -1364,9 +1437,6 @@ func init() {
               }
             }
           },
-          "404": {
-            "description": "User not found"
-          },
           "default": {
             "description": "Error response.",
             "schema": {
@@ -1379,26 +1449,39 @@ func init() {
             }
           }
         }
-      },
-      "post": {
+      }
+    },
+    "/node/explore/cohorts/{name}": {
+      "put": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
+        ],
         "tags": [
           "medco-node"
         ],
-        "summary": "Add a new cohort or update an existing one",
-        "operationId": "postCohorts",
+        "summary": "Update a cohort",
+        "operationId": "putCohorts",
         "parameters": [
           {
+            "pattern": "^\\w+$",
+            "type": "string",
+            "description": "Name of the cohort to update",
+            "name": "name",
+            "in": "path",
+            "required": true
+          },
+          {
             "description": "Cohort that has been updated or created",
-            "name": "body",
+            "name": "cohortRequest",
             "in": "body",
             "required": true,
             "schema": {
               "type": "object",
               "properties": {
-                "cohortName": {
-                  "type": "string",
-                  "pattern": "^\\w+$"
-                },
                 "creationDate": {
                   "type": "string"
                 },
@@ -1416,8 +1499,74 @@ func init() {
           "200": {
             "description": "Updated cohort"
           },
-          "500": {
-            "description": "DB has been updated since last importation. Try GET /node/explore/cohorts to fetch the most recent entries"
+          "404": {
+            "description": "The cohort does not exist. Try POST /node/explore/cohorts to create a new cohort."
+          },
+          "409": {
+            "description": "DB has been updated since last importation. Try GET /node/explore/cohorts to fetch the most recent updates."
+          },
+          "default": {
+            "description": "Error response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
+        ],
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Add a new cohort",
+        "operationId": "postCohorts",
+        "parameters": [
+          {
+            "pattern": "^\\w+$",
+            "type": "string",
+            "description": "Name of the cohort to update",
+            "name": "name",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Cohort that has been updated or created",
+            "name": "cohortRequest",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "creationDate": {
+                  "type": "string"
+                },
+                "patientSetID": {
+                  "type": "integer"
+                },
+                "updateDate": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated cohort"
+          },
+          "409": {
+            "description": "The cohort already exists. Try PUT /node/explore/cohorts to update and existing cohort."
           },
           "default": {
             "description": "Error response.",
@@ -1433,6 +1582,13 @@ func init() {
         }
       },
       "delete": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
+        ],
         "tags": [
           "medco-node"
         ],
@@ -1440,19 +1596,20 @@ func init() {
         "operationId": "deleteCohorts",
         "parameters": [
           {
+            "pattern": "^\\w+$",
+            "type": "string",
             "description": "Name of the cohort to delete",
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "pattern": "^\\w+$"
-            }
+            "name": "name",
+            "in": "path",
+            "required": true
           }
         ],
         "responses": {
           "200": {
             "description": "Deleted cohort"
+          },
+          "404": {
+            "description": "The cohort does not exist."
           },
           "default": {
             "description": "Error response.",
@@ -2120,16 +2277,12 @@ func init() {
   "parameters": {
     "cohortsRequest": {
       "description": "Cohort that has been updated or created",
-      "name": "body",
+      "name": "cohortRequest",
       "in": "body",
       "required": true,
       "schema": {
         "type": "object",
         "properties": {
-          "cohortName": {
-            "type": "string",
-            "pattern": "^\\w+$"
-          },
           "creationDate": {
             "type": "string"
           },

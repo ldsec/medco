@@ -36,8 +36,8 @@ func SubGroupExplore(queryName string, subGroupIndex int, panelsItemKeys [][]str
 
 }
 
-// Intersect returns the intersection of two sets of int64
-func Intersect(x []int64, y []int64) []int64 {
+// intersect returns the intersection of two sets of int64
+func intersect(x []int64, y []int64) []int64 {
 	set := make(map[int64]struct{})
 	for _, elm := range x {
 		set[elm] = struct{}{}

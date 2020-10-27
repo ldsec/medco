@@ -7,11 +7,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ldsec/medco/connector/util"
+
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
 	querytoolsserver "github.com/ldsec/medco/connector/server/querytools"
-	utilcommon "github.com/ldsec/medco/connector/util/common"
 	utilserver "github.com/ldsec/medco/connector/util/server"
 	"github.com/ldsec/medco/connector/wrappers/i2b2"
 	"github.com/ldsec/medco/connector/wrappers/unlynx"
@@ -34,7 +35,7 @@ type Query struct {
 	EndConcept          string
 	EndModifier         string
 	Result              *struct {
-		Timers    utilcommon.Timers
+		Timers    util.Timers
 		EncEvents EventGroups
 	}
 }
@@ -64,7 +65,7 @@ func NewQuery(UserID,
 		EndConcept:          EndConcept,
 		EndModifier:         EndModifier,
 		Result: &struct {
-			Timers    utilcommon.Timers
+			Timers    util.Timers
 			EncEvents EventGroups
 		}{}}
 	res.Result.Timers = make(map[string]time.Duration)
@@ -144,7 +145,7 @@ func (q *Query) Execute() error {
 	waitGroup.Add(len(definitions))
 	channels := make([]chan struct {
 		*EventGroup
-		utilcommon.Timers
+		util.Timers
 	}, len(definitions))
 	errChan := make(chan error, len(definitions))
 	signal := make(chan struct{})
@@ -152,11 +153,11 @@ func (q *Query) Execute() error {
 	for i, definition := range definitions {
 		channels[i] = make(chan struct {
 			*EventGroup
-			utilcommon.Timers
+			util.Timers
 		}, 1)
 		go func(i int, definition *survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) {
 			defer waitGroup.Done()
-			timers := utilcommon.NewTimers()
+			timers := util.NewTimers()
 
 			newEventGroup := &EventGroup{GroupID: definition.CohortName}
 			panels := make([][]string, 0)
@@ -179,7 +180,7 @@ func (q *Query) Execute() error {
 			timer = time.Now()
 			initialCount, patientList, err := SubGroupExplore(q.QueryName, i, panels, not)
 			timers.AddTimers(fmt.Sprintf("medco-connector-i2b2-query-group%d", i), timer, nil)
-			patientList = Intersect(cohort, patientList)
+			patientList = intersect(cohort, patientList)
 			patientLists = append(patientLists, patientList)
 			initialCounts = append(initialCounts, initialCount)
 			logrus.Debug("Initial Counts", initialCounts)
@@ -266,7 +267,7 @@ func (q *Query) Execute() error {
 			timers.AddTimers(fmt.Sprintf("medco-connector-local-encryption%d", i), timer, nil)
 			channels[i] <- struct {
 				*EventGroup
-				utilcommon.Timers
+				util.Timers
 			}{newEventGroup, timers}
 		}(i, definition)
 
@@ -294,7 +295,7 @@ func (q *Query) Execute() error {
 		logrus.Tracef("eventGroup %v", group)
 	}
 	timer = time.Now()
-	var aksTimers utilcommon.Timers
+	var aksTimers util.Timers
 	q.Result.EncEvents, aksTimers, err = AKSgroups(q.QueryName+"_AGG_AND_KEYSWITCH", eventGroups, q.UserPublicKey)
 	q.Result.Timers.AddTimers("medco-connector-aggregate-and-key-switch", timer, aksTimers)
 	return err
@@ -354,7 +355,7 @@ func (q *Query) Validate() error {
 // expansion takes a slice of SQLTimepoints and add encryption of zeros for events of interest and censoring events for each missing relative time from 0 to timeLimit.
 // Relative times greater than timeLimit are discarded.
 // Note that the time limit unit for this function is day.
-func expansion(timePoints utilcommon.TimePoints, timeLimitDay int, granularity string) (utilcommon.TimePoints, error) {
+func expansion(timePoints util.TimePoints, timeLimitDay int, granularity string) (util.TimePoints, error) {
 	var timeLimit int
 	if granFunction, isIn := granularityFunctions[granularity]; isIn {
 		timeLimit = granFunction(timeLimitDay)
@@ -362,7 +363,7 @@ func expansion(timePoints utilcommon.TimePoints, timeLimitDay int, granularity s
 		return nil, fmt.Errorf("granularity %s is not implemented", granularity)
 	}
 
-	res := make(utilcommon.TimePoints, timeLimit)
+	res := make(util.TimePoints, timeLimit)
 	availableTimePoints := make(map[int]struct {
 		EventsOfInterest int64
 		CensoringEvents  int64
@@ -373,12 +374,12 @@ func expansion(timePoints utilcommon.TimePoints, timeLimitDay int, granularity s
 	}
 	for i := 0; i < timeLimit; i++ {
 		if events, ok := availableTimePoints[i]; ok {
-			res[i] = utilcommon.TimePoint{
+			res[i] = util.TimePoint{
 				Time:   i,
 				Events: events,
 			}
 		} else {
-			res[i] = utilcommon.TimePoint{
+			res[i] = util.TimePoint{
 				Time: i,
 				Events: struct {
 					EventsOfInterest int64

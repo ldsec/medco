@@ -9,11 +9,9 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
-	"github.com/go-openapi/validate"
 )
 
 // PostCohortsReader is a Reader for the PostCohorts structure.
@@ -30,8 +28,8 @@ func (o *PostCohortsReader) ReadResponse(response runtime.ClientResponse, consum
 			return nil, err
 		}
 		return result, nil
-	case 500:
-		result := NewPostCohortsInternalServerError()
+	case 409:
+		result := NewPostCohortsConflict()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -61,7 +59,7 @@ type PostCohortsOK struct {
 }
 
 func (o *PostCohortsOK) Error() string {
-	return fmt.Sprintf("[POST /node/explore/cohorts][%d] postCohortsOK ", 200)
+	return fmt.Sprintf("[POST /node/explore/cohorts/{name}][%d] postCohortsOK ", 200)
 }
 
 func (o *PostCohortsOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -69,23 +67,23 @@ func (o *PostCohortsOK) readResponse(response runtime.ClientResponse, consumer r
 	return nil
 }
 
-// NewPostCohortsInternalServerError creates a PostCohortsInternalServerError with default headers values
-func NewPostCohortsInternalServerError() *PostCohortsInternalServerError {
-	return &PostCohortsInternalServerError{}
+// NewPostCohortsConflict creates a PostCohortsConflict with default headers values
+func NewPostCohortsConflict() *PostCohortsConflict {
+	return &PostCohortsConflict{}
 }
 
-/*PostCohortsInternalServerError handles this case with default header values.
+/*PostCohortsConflict handles this case with default header values.
 
-DB has been updated since last importation. Try GET /node/explore/cohorts to fetch the most recent entries
+The cohort already exists. Try PUT /node/explore/cohorts to update and existing cohort.
 */
-type PostCohortsInternalServerError struct {
+type PostCohortsConflict struct {
 }
 
-func (o *PostCohortsInternalServerError) Error() string {
-	return fmt.Sprintf("[POST /node/explore/cohorts][%d] postCohortsInternalServerError ", 500)
+func (o *PostCohortsConflict) Error() string {
+	return fmt.Sprintf("[POST /node/explore/cohorts/{name}][%d] postCohortsConflict ", 409)
 }
 
-func (o *PostCohortsInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *PostCohortsConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	return nil
 }
@@ -113,7 +111,7 @@ func (o *PostCohortsDefault) Code() int {
 }
 
 func (o *PostCohortsDefault) Error() string {
-	return fmt.Sprintf("[POST /node/explore/cohorts][%d] postCohorts default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[POST /node/explore/cohorts/{name}][%d] postCohorts default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *PostCohortsDefault) GetPayload() *PostCohortsDefaultBody {
@@ -137,10 +135,6 @@ swagger:model PostCohortsBody
 */
 type PostCohortsBody struct {
 
-	// cohort name
-	// Pattern: ^\w+$
-	CohortName string `json:"cohortName,omitempty"`
-
 	// creation date
 	CreationDate string `json:"creationDate,omitempty"`
 
@@ -153,28 +147,6 @@ type PostCohortsBody struct {
 
 // Validate validates this post cohorts body
 func (o *PostCohortsBody) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := o.validateCohortName(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (o *PostCohortsBody) validateCohortName(formats strfmt.Registry) error {
-
-	if swag.IsZero(o.CohortName) { // not required
-		return nil
-	}
-
-	if err := validate.Pattern("body"+"."+"cohortName", "body", string(o.CohortName), `^\w+$`); err != nil {
-		return err
-	}
-
 	return nil
 }
 

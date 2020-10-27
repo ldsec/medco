@@ -35,28 +35,28 @@ func (o *PostCohortsOK) WriteResponse(rw http.ResponseWriter, producer runtime.P
 	rw.WriteHeader(200)
 }
 
-// PostCohortsInternalServerErrorCode is the HTTP code returned for type PostCohortsInternalServerError
-const PostCohortsInternalServerErrorCode int = 500
+// PostCohortsConflictCode is the HTTP code returned for type PostCohortsConflict
+const PostCohortsConflictCode int = 409
 
-/*PostCohortsInternalServerError DB has been updated since last importation. Try GET /node/explore/cohorts to fetch the most recent entries
+/*PostCohortsConflict The cohort already exists. Try PUT /node/explore/cohorts to update and existing cohort.
 
-swagger:response postCohortsInternalServerError
+swagger:response postCohortsConflict
 */
-type PostCohortsInternalServerError struct {
+type PostCohortsConflict struct {
 }
 
-// NewPostCohortsInternalServerError creates PostCohortsInternalServerError with default headers values
-func NewPostCohortsInternalServerError() *PostCohortsInternalServerError {
+// NewPostCohortsConflict creates PostCohortsConflict with default headers values
+func NewPostCohortsConflict() *PostCohortsConflict {
 
-	return &PostCohortsInternalServerError{}
+	return &PostCohortsConflict{}
 }
 
 // WriteResponse to the client
-func (o *PostCohortsInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *PostCohortsConflict) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
 
-	rw.WriteHeader(500)
+	rw.WriteHeader(409)
 }
 
 /*PostCohortsDefault Error response.

@@ -85,6 +85,9 @@ func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
 	api.MedcoNodePostCohortsHandler = medco_node.PostCohortsHandlerFunc(handlers.MedCoNodePostCohortsHandler)
 
 	// /node/explore/cohorts
+	api.MedcoNodePutCohortsHandler = medco_node.PutCohortsHandlerFunc(handlers.MedCoNodePutCohortsHandler)
+
+	// /node/explore/cohorts
 	api.MedcoNodeDeleteCohortsHandler = medco_node.DeleteCohortsHandlerFunc(handlers.MedCoNodeDeleteCohortsHandler)
 
 	// /node/analysis/survival/query

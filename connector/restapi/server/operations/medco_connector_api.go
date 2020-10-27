@@ -78,6 +78,9 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 		MedcoNodePostCohortsHandler: medco_node.PostCohortsHandlerFunc(func(params medco_node.PostCohortsParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_node.PostCohorts has not yet been implemented")
 		}),
+		MedcoNodePutCohortsHandler: medco_node.PutCohortsHandlerFunc(func(params medco_node.PutCohortsParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation medco_node.PutCohorts has not yet been implemented")
+		}),
 		SurvivalAnalysisSurvivalAnalysisHandler: survival_analysis.SurvivalAnalysisHandlerFunc(func(params survival_analysis.SurvivalAnalysisParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation survival_analysis.SurvivalAnalysis has not yet been implemented")
 		}),
@@ -148,6 +151,8 @@ type MedcoConnectorAPI struct {
 	GenomicAnnotationsGetVariantsHandler genomic_annotations.GetVariantsHandler
 	// MedcoNodePostCohortsHandler sets the operation handler for the post cohorts operation
 	MedcoNodePostCohortsHandler medco_node.PostCohortsHandler
+	// MedcoNodePutCohortsHandler sets the operation handler for the put cohorts operation
+	MedcoNodePutCohortsHandler medco_node.PutCohortsHandler
 	// SurvivalAnalysisSurvivalAnalysisHandler sets the operation handler for the survival analysis operation
 	SurvivalAnalysisSurvivalAnalysisHandler survival_analysis.SurvivalAnalysisHandler
 	// ServeError is called when an error is received, there is a default handler
@@ -260,6 +265,9 @@ func (o *MedcoConnectorAPI) Validate() error {
 	if o.MedcoNodePostCohortsHandler == nil {
 		unregistered = append(unregistered, "medco_node.PostCohortsHandler")
 	}
+	if o.MedcoNodePutCohortsHandler == nil {
+		unregistered = append(unregistered, "medco_node.PutCohortsHandler")
+	}
 	if o.SurvivalAnalysisSurvivalAnalysisHandler == nil {
 		unregistered = append(unregistered, "survival_analysis.SurvivalAnalysisHandler")
 	}
@@ -364,7 +372,7 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
-	o.handlers["DELETE"]["/node/explore/cohorts"] = medco_node.NewDeleteCohorts(o.context, o.MedcoNodeDeleteCohortsHandler)
+	o.handlers["DELETE"]["/node/explore/cohorts/{name}"] = medco_node.NewDeleteCohorts(o.context, o.MedcoNodeDeleteCohortsHandler)
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
@@ -400,7 +408,11 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/node/explore/cohorts"] = medco_node.NewPostCohorts(o.context, o.MedcoNodePostCohortsHandler)
+	o.handlers["POST"]["/node/explore/cohorts/{name}"] = medco_node.NewPostCohorts(o.context, o.MedcoNodePostCohortsHandler)
+	if o.handlers["PUT"] == nil {
+		o.handlers["PUT"] = make(map[string]http.Handler)
+	}
+	o.handlers["PUT"]["/node/explore/cohorts/{name}"] = medco_node.NewPutCohorts(o.context, o.MedcoNodePutCohortsHandler)
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}

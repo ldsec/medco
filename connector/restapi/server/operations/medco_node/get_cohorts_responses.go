@@ -58,30 +58,6 @@ func (o *GetCohortsOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pr
 	}
 }
 
-// GetCohortsNotFoundCode is the HTTP code returned for type GetCohortsNotFound
-const GetCohortsNotFoundCode int = 404
-
-/*GetCohortsNotFound User not found
-
-swagger:response getCohortsNotFound
-*/
-type GetCohortsNotFound struct {
-}
-
-// NewGetCohortsNotFound creates GetCohortsNotFound with default headers values
-func NewGetCohortsNotFound() *GetCohortsNotFound {
-
-	return &GetCohortsNotFound{}
-}
-
-// WriteResponse to the client
-func (o *GetCohortsNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
-
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
-	rw.WriteHeader(404)
-}
-
 /*GetCohortsDefault Error response.
 
 swagger:response getCohortsDefault

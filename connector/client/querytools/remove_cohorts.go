@@ -8,6 +8,8 @@ import (
 	"net/url"
 	"time"
 
+	medcoclient "github.com/ldsec/medco/connector/client"
+
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/ldsec/medco/connector/restapi/client"
 	"github.com/ldsec/medco/connector/restapi/client/medco_node"
@@ -32,7 +34,7 @@ func NewRemoveCohorts(token string, cohortName string, disableTLSCheck bool) (re
 		cohortName: cohortName,
 	}
 
-	getMetadataResp, err := utilclient.MetaData(token, disableTLSCheck)
+	getMetadataResp, err := medcoclient.MetaData(token, disableTLSCheck)
 	if err != nil {
 		logrus.Error(err)
 		return
@@ -64,35 +66,39 @@ func (removeCohorts *RemoveCohorts) Execute() (err error) {
 	nOfNodes := len(removeCohorts.httpMedCoClients)
 	errChan := make(chan error)
 	resultChan := make(chan *medco_node.DeleteCohortsOK, nOfNodes)
+	logrus.Infof("There are %d nodes", nOfNodes)
 
 	for idx := 0; idx < nOfNodes; idx++ {
 
 		go func(idx int) {
+			logrus.Infof("Submitting to node %d", idx)
 			res, Error := removeCohorts.submitToNode(idx)
 			if Error != nil {
 				logrus.Errorf("Query tool execution error : %s", Error)
 				errChan <- Error
 			} else {
-				logrus.Debugf("Node %d successfully removed cohort", idx)
+				logrus.Infof("Node %d successfully removed cohort", idx)
 				resultChan <- res
 			}
 		}(idx)
 	}
 
-	timeout := time.After(time.Duration(timeOutInSeconds) * time.Second)
+	timeout := time.After(time.Duration(utilclient.QueryToolsTimeoutSeconds) * time.Second)
 	for idx := 0; idx < nOfNodes; idx++ {
 		select {
 		case err = <-errChan:
 			return
 		case <-timeout:
-			err = fmt.Errorf("Timeout %d seconds elapsed", timeOutInSeconds)
+			err = fmt.Errorf("Timeout %d seconds elapsed", utilclient.QueryToolsTimeoutSeconds)
 			logrus.Error(err)
 			return
 		case <-resultChan:
-			logrus.Infof("Node %d succesfully deleted cohort", idx)
+			logrus.Infof("Node %d successfully deleted cohort", idx)
 		}
 
 	}
+
+	logrus.Info("Operation completed")
 
 	return
 
@@ -102,7 +108,7 @@ func (removeCohorts *RemoveCohorts) submitToNode(nodeIdx int) (*medco_node.Delet
 
 	params := medco_node.NewDeleteCohortsParamsWithTimeout(time.Duration(utilclient.QueryTimeoutSeconds) * time.Second)
 
-	params.Body = removeCohorts.cohortName
+	params.Name = removeCohorts.cohortName
 
 	response, err := removeCohorts.httpMedCoClients[nodeIdx].MedcoNode.DeleteCohorts(params, httptransport.BearerToken(removeCohorts.authToken))
 	if err != nil {

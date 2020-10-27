@@ -2,7 +2,7 @@ package survivalclient
 
 import (
 	"github.com/ldsec/medco/connector/restapi/client/survival_analysis"
-	utilcommon "github.com/ldsec/medco/connector/util/common"
+	"github.com/ldsec/medco/connector/util"
 	"github.com/ldsec/medco/connector/wrappers/unlynx"
 )
 
@@ -30,7 +30,7 @@ func (ciphers EncryptedResults) Decrypt(privateKey string) (ClearResults, error)
 		if err != nil {
 			return nil, err
 		}
-		res[i].TimePoints = make(utilcommon.TimePoints, len(cipher.TimePoints))
+		res[i].TimePoints = make(util.TimePoints, len(cipher.TimePoints))
 		for j, events := range cipher.TimePoints {
 			res[i].TimePoints[j].Time = events.Time
 			res[i].TimePoints[j].Events.EventsOfInterest, err = unlynx.Decrypt(events.EncryptedEvents.EventsOfInterest, privateKey)

@@ -8,20 +8,21 @@ import (
 	"net/url"
 	"time"
 
+	medcoclient "github.com/ldsec/medco/connector/client"
+	utilclient "github.com/ldsec/medco/connector/util/client"
+
+	"github.com/ldsec/medco/connector/util"
+
 	"github.com/ldsec/medco/connector/restapi/client/survival_analysis"
 
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 	"github.com/ldsec/medco/connector/restapi/client"
-	utilclient "github.com/ldsec/medco/connector/util/client"
-	utilcommon "github.com/ldsec/medco/connector/util/common"
 	"github.com/ldsec/medco/connector/wrappers/unlynx"
 	"github.com/sirupsen/logrus"
 )
 
-const timeOutInSeconds int64 = 3000
-
-//SurvivalAnalysis represent a survival analysis requeset
+//SurvivalAnalysis represents a survival analysis requeset
 type SurvivalAnalysis struct {
 	// httpMedCoClient is the HTTP client for the MedCo connector
 	httpMedCoClients []*client.MedcoCli
@@ -46,7 +47,7 @@ type SurvivalAnalysis struct {
 
 	formats strfmt.Registry
 
-	timers map[string]time.Duration
+	timers util.Timers
 }
 
 // NewSurvivalAnalysis constructor for survival analysis request
@@ -66,7 +67,7 @@ func NewSurvivalAnalysis(token string, cohortName string, subGroupDefinitions []
 		timers:              make(map[string]time.Duration),
 	}
 
-	getMetadataResp, err := utilclient.MetaData(token, disableTLSCheck)
+	getMetadataResp, err := medcoclient.MetaData(token, disableTLSCheck)
 	if err != nil {
 		logrus.Error(err)
 		return
@@ -111,17 +112,19 @@ type nodeResult struct {
 }
 
 //Execute makes a call to API for survival analysis,
-func (clientSurvivalAnalysis *SurvivalAnalysis) Execute() (results []EncryptedResults, nodeTimers []utilcommon.Timers, err error) {
+func (clientSurvivalAnalysis *SurvivalAnalysis) Execute() (results []EncryptedResults, nodeTimers []util.Timers, err error) {
 
 	var nOfNodes = len(clientSurvivalAnalysis.httpMedCoClients)
 	errChan := make(chan error)
 	resultChan := make(chan nodeResult, nOfNodes)
 	results = make([]EncryptedResults, nOfNodes)
-	nodeTimers = make([]utilcommon.Timers, nOfNodes)
+	nodeTimers = make([]util.Timers, nOfNodes)
+	logrus.Infof("There are %d nodes", nOfNodes)
 
 	for idx := 0; idx < nOfNodes; idx++ {
 
 		go func(idx int) {
+			logrus.Infof("Submitting to node %d", idx)
 			res, Error := clientSurvivalAnalysis.submitToNode(idx)
 			if Error != nil {
 				logrus.Errorf("Survival analysis exection error : %s", Error)
@@ -132,18 +135,19 @@ func (clientSurvivalAnalysis *SurvivalAnalysis) Execute() (results []EncryptedRe
 			}
 		}(idx)
 	}
-	timeout := time.After(time.Duration(timeOutInSeconds) * time.Second)
+	timeout := time.After(time.Duration(utilclient.SurvivalAnalysisTimeoutSeconds) * time.Second)
 	for idx := 0; idx < nOfNodes; idx++ {
 		select {
 		case err = <-errChan:
 			return
 		case <-timeout:
-			err = fmt.Errorf("Timeout %d seconds elapsed", timeOutInSeconds)
+			err = fmt.Errorf("Timeout %d seconds elapsed", utilclient.SurvivalAnalysisTimeoutSeconds)
 			logrus.Error(err)
 			return
 		case nodeRes := <-resultChan:
+			logrus.Infof("Node %d successfully fetched survvial analysis data", idx)
 			results[nodeRes.NodeIndex] = encryptedResultsFromAPIResponse(nodeRes.Body.Results)
-			nodeTimers[nodeRes.NodeIndex] = utilcommon.APIModelToTimers(nodeRes.Body.Timers)
+			nodeTimers[nodeRes.NodeIndex] = util.NewTimersFromAPIModel(nodeRes.Body.Timers)
 		}
 	}
 

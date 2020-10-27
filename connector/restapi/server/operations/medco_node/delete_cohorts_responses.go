@@ -35,6 +35,30 @@ func (o *DeleteCohortsOK) WriteResponse(rw http.ResponseWriter, producer runtime
 	rw.WriteHeader(200)
 }
 
+// DeleteCohortsNotFoundCode is the HTTP code returned for type DeleteCohortsNotFound
+const DeleteCohortsNotFoundCode int = 404
+
+/*DeleteCohortsNotFound The cohort does not exist.
+
+swagger:response deleteCohortsNotFound
+*/
+type DeleteCohortsNotFound struct {
+}
+
+// NewDeleteCohortsNotFound creates DeleteCohortsNotFound with default headers values
+func NewDeleteCohortsNotFound() *DeleteCohortsNotFound {
+
+	return &DeleteCohortsNotFound{}
+}
+
+// WriteResponse to the client
+func (o *DeleteCohortsNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
+
+	rw.WriteHeader(404)
+}
+
 /*DeleteCohortsDefault Error response.
 
 swagger:response deleteCohortsDefault

@@ -44,10 +44,12 @@ func ExecuteGetCohorts(token, username, password string, disableTLSCheck bool, r
 		logrus.Error(err)
 		return err
 	}
+	logrus.Debug("Writing headers")
 	resultCSV.Write([]string{"node_index", "cohort_name", "cohort_id", "query_id", "creation_date", "update_date"})
 
 	for nodeIndex, nodeResult := range cohorts {
 		for _, cohortInfo := range nodeResult {
+			logrus.Debugf("Writing result %d", nodeIndex)
 			err = resultCSV.Write([]string{
 				strconv.Itoa(nodeIndex),
 				cohortInfo.CohortName,
@@ -64,6 +66,7 @@ func ExecuteGetCohorts(token, username, password string, disableTLSCheck bool, r
 		}
 	}
 
+	logrus.Debug("Flushing result file")
 	err = resultCSV.Flush()
 	if err != nil {
 		err = fmt.Errorf("cohorts request flushing result file: %s", err.Error())
@@ -71,9 +74,10 @@ func ExecuteGetCohorts(token, username, password string, disableTLSCheck bool, r
 		return err
 	}
 
+	logrus.Debug("Closing result file")
 	err = resultCSV.Close()
 	if err != nil {
-		err = fmt.Errorf("cohorts request flushing closing file: %s", err.Error())
+		err = fmt.Errorf("cohorts request closing file: %s", err.Error())
 		logrus.Error(err)
 		return err
 	}
@@ -114,6 +118,47 @@ func ExecutePostCohorts(token, username, password, cohortName, patientSetIDsStri
 	}
 
 	err = postCohorts.Execute()
+	if err != nil {
+		err = fmt.Errorf("cohorts request execution: %s", err.Error())
+		logrus.Error(err)
+		return err
+	}
+	return nil
+}
+
+// ExecutePutCohorts executes a put cohorts query
+func ExecutePutCohorts(token, username, password, cohortName, patientSetIDsString string, disableTLSCheck bool) error {
+
+	accessToken, err := utilclient.RetrieveOrGetNewAccessToken(token, username, password, disableTLSCheck)
+	if err != nil {
+		err = fmt.Errorf("while retrieving access token: %s", err.Error())
+		logrus.Error(err)
+		return err
+	}
+	logrus.Debug("access token received")
+	logrus.Tracef("token %s", accessToken)
+
+	logrus.Debug("creating post cohorts request")
+	logrus.Tracef("patient set IDs %v , cohort name %s", patientSetIDsString, cohortName)
+
+	patientSetIDs := make([]int, 0)
+	for _, setID := range strings.Split(patientSetIDsString, ",") {
+		id, err := strconv.Atoi(strings.TrimSpace(setID))
+		if err != nil {
+			err = fmt.Errorf("while parsing int from string %s in parameters: %s", setID, err.Error())
+			logrus.Error(err)
+			return err
+		}
+		patientSetIDs = append(patientSetIDs, id)
+	}
+	putCohorts, err := NewPutCohorts(accessToken, patientSetIDs, cohortName, disableTLSCheck)
+	if err != nil {
+		err = fmt.Errorf("while crafting new put cohorts request: %s", err.Error())
+		logrus.Error(err)
+		return err
+	}
+
+	err = putCohorts.Execute()
 	if err != nil {
 		err = fmt.Errorf("cohorts request execution: %s", err.Error())
 		logrus.Error(err)

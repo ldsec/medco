@@ -1,4 +1,4 @@
-package medcoclient
+package exploreclient
 
 import (
 	"time"

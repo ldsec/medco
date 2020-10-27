@@ -1,4 +1,4 @@
-package utilclient
+package medcoclient
 
 import (
 	"bufio"

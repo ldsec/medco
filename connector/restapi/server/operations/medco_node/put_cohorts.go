@@ -15,40 +15,40 @@ import (
 	"github.com/ldsec/medco/connector/restapi/models"
 )
 
-// PostCohortsHandlerFunc turns a function with the right signature into a post cohorts handler
-type PostCohortsHandlerFunc func(PostCohortsParams, *models.User) middleware.Responder
+// PutCohortsHandlerFunc turns a function with the right signature into a put cohorts handler
+type PutCohortsHandlerFunc func(PutCohortsParams, *models.User) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn PostCohortsHandlerFunc) Handle(params PostCohortsParams, principal *models.User) middleware.Responder {
+func (fn PutCohortsHandlerFunc) Handle(params PutCohortsParams, principal *models.User) middleware.Responder {
 	return fn(params, principal)
 }
 
-// PostCohortsHandler interface for that can handle valid post cohorts params
-type PostCohortsHandler interface {
-	Handle(PostCohortsParams, *models.User) middleware.Responder
+// PutCohortsHandler interface for that can handle valid put cohorts params
+type PutCohortsHandler interface {
+	Handle(PutCohortsParams, *models.User) middleware.Responder
 }
 
-// NewPostCohorts creates a new http.Handler for the post cohorts operation
-func NewPostCohorts(ctx *middleware.Context, handler PostCohortsHandler) *PostCohorts {
-	return &PostCohorts{Context: ctx, Handler: handler}
+// NewPutCohorts creates a new http.Handler for the put cohorts operation
+func NewPutCohorts(ctx *middleware.Context, handler PutCohortsHandler) *PutCohorts {
+	return &PutCohorts{Context: ctx, Handler: handler}
 }
 
-/*PostCohorts swagger:route POST /node/explore/cohorts/{name} medco-node postCohorts
+/*PutCohorts swagger:route PUT /node/explore/cohorts/{name} medco-node putCohorts
 
-Add a new cohort
+Update a cohort
 
 */
-type PostCohorts struct {
+type PutCohorts struct {
 	Context *middleware.Context
-	Handler PostCohortsHandler
+	Handler PutCohortsHandler
 }
 
-func (o *PostCohorts) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+func (o *PutCohorts) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	route, rCtx, _ := o.Context.RouteInfo(r)
 	if rCtx != nil {
 		r = rCtx
 	}
-	var Params = NewPostCohortsParams()
+	var Params = NewPutCohortsParams()
 
 	uprinc, aCtx, err := o.Context.Authorize(r, route)
 	if err != nil {
@@ -74,10 +74,10 @@ func (o *PostCohorts) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 }
 
-// PostCohortsBody post cohorts body
+// PutCohortsBody put cohorts body
 //
-// swagger:model PostCohortsBody
-type PostCohortsBody struct {
+// swagger:model PutCohortsBody
+type PutCohortsBody struct {
 
 	// creation date
 	CreationDate string `json:"creationDate,omitempty"`
@@ -89,13 +89,13 @@ type PostCohortsBody struct {
 	UpdateDate string `json:"updateDate,omitempty"`
 }
 
-// Validate validates this post cohorts body
-func (o *PostCohortsBody) Validate(formats strfmt.Registry) error {
+// Validate validates this put cohorts body
+func (o *PutCohortsBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (o *PostCohortsBody) MarshalBinary() ([]byte, error) {
+func (o *PutCohortsBody) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -103,8 +103,8 @@ func (o *PostCohortsBody) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *PostCohortsBody) UnmarshalBinary(b []byte) error {
-	var res PostCohortsBody
+func (o *PutCohortsBody) UnmarshalBinary(b []byte) error {
+	var res PutCohortsBody
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -112,22 +112,22 @@ func (o *PostCohortsBody) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-// PostCohortsDefaultBody post cohorts default body
+// PutCohortsDefaultBody put cohorts default body
 //
-// swagger:model PostCohortsDefaultBody
-type PostCohortsDefaultBody struct {
+// swagger:model PutCohortsDefaultBody
+type PutCohortsDefaultBody struct {
 
 	// message
 	Message string `json:"message,omitempty"`
 }
 
-// Validate validates this post cohorts default body
-func (o *PostCohortsDefaultBody) Validate(formats strfmt.Registry) error {
+// Validate validates this put cohorts default body
+func (o *PutCohortsDefaultBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (o *PostCohortsDefaultBody) MarshalBinary() ([]byte, error) {
+func (o *PutCohortsDefaultBody) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -135,8 +135,8 @@ func (o *PostCohortsDefaultBody) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *PostCohortsDefaultBody) UnmarshalBinary(b []byte) error {
-	var res PostCohortsDefaultBody
+func (o *PutCohortsDefaultBody) UnmarshalBinary(b []byte) error {
+	var res PutCohortsDefaultBody
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

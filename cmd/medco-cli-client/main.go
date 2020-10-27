@@ -139,6 +139,21 @@ func main() {
 	}
 
 	//--- query tools command flags
+	putCohortFlag := []cli.Flag{
+		// cli.IntSlice produces wrong results
+		cli.StringFlag{
+			Name:     "patientSetIDs, p",
+			Usage:    "List of patient set IDs, there must be one per node",
+			Required: true,
+		},
+		cli.StringFlag{
+			Name:     "cohortName, c",
+			Usage:    "Name of the existing cohort",
+			Required: true,
+		},
+	}
+
+	//--- query tools command flags
 	removeCohortFlag := []cli.Flag{
 		// cli.IntSlice produces wrong results
 		cli.StringFlag{
@@ -179,7 +194,7 @@ func main() {
 					c.Args().Get(0),
 					c.Args().Get(1),
 					c.Args().Get(2),
-					c.GlobalString(("outputFile")),
+					c.GlobalString("outputFile"),
 					c.GlobalBool("disableTLSCheck"))
 			},
 		},
@@ -243,6 +258,7 @@ func main() {
 				)
 			},
 		},
+
 		{
 			Name:        "survival-analysis",
 			Aliases:     []string{"srva"},
@@ -272,8 +288,8 @@ func main() {
 		},
 
 		{
-			Name:        "get-query-tools",
-			Aliases:     []string{"getqt"},
+			Name:        "get-saved-cohorts",
+			Aliases:     []string{"getsc"},
 			Usage:       "get cohorts",
 			Description: "Gets the list of cohorts.",
 			Action: func(c *cli.Context) error {
@@ -282,18 +298,18 @@ func main() {
 					c.GlobalString("user"),
 					c.GlobalString("password"),
 					c.GlobalBool("disableTLSCheck"),
-					"",
+					c.GlobalString("outputFile"),
 				)
 			},
 		},
 
 		{
-			Name:        "post-query-tools",
-			Aliases:     []string{"postqt"},
-			Usage:       "Update a cohort or create a new one.",
+			Name:        "add-saved-cohorts",
+			Aliases:     []string{"addsc"},
+			Usage:       "Create a new cohort.",
 			Flags:       postCohortFlag,
 			ArgsUsage:   "-c cohortName -p patientSetIDs",
-			Description: "Updates a cohort or creates a new cohorts with given name. The patient set IDs corresponds to explore query result IDs.",
+			Description: "Creates a new cohort with given name. The patient set IDs correspond to explore query result IDs.",
 			Action: func(c *cli.Context) error {
 				return querytoolsclient.ExecutePostCohorts(
 					c.GlobalString("token"),
@@ -307,8 +323,27 @@ func main() {
 		},
 
 		{
-			Name:        "remove-query-tools",
-			Aliases:     []string{"rmqt"},
+			Name:        "update-saved-cohorts",
+			Aliases:     []string{"upsc"},
+			Usage:       "Updates an existing cohort.",
+			Flags:       putCohortFlag,
+			ArgsUsage:   "-c cohortName -p patientSetIDs",
+			Description: "Updates a new cohort with given name. The patient set IDs correspond to explore query result IDs.",
+			Action: func(c *cli.Context) error {
+				return querytoolsclient.ExecutePutCohorts(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.String("cohortName"),
+					c.String("patientSetIDs"),
+					c.GlobalBool("disableTLSCheck"),
+				)
+			},
+		},
+
+		{
+			Name:        "remove-saved-cohorts",
+			Aliases:     []string{"rmsc"},
 			Usage:       "Remove a cohort.",
 			Flags:       removeCohortFlag,
 			ArgsUsage:   "-c cohortName",

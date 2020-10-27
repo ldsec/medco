@@ -1,4 +1,4 @@
-package utilcommon
+package util
 
 import (
 	"sort"

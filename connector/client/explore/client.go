@@ -1,18 +1,17 @@
-package medcoclient
+package exploreclient
 
 import (
-	"bufio"
-	"errors"
 	"fmt"
 	"os"
 	"sort"
 	"strconv"
-	"strings"
 	"time"
+
+	medcoclient "github.com/ldsec/medco/connector/client"
+	"github.com/ldsec/medco/connector/wrappers/unlynx"
 
 	"github.com/ldsec/medco/connector/restapi/models"
 	utilclient "github.com/ldsec/medco/connector/util/client"
-	"github.com/ldsec/medco/loader/identifiers"
 	"github.com/sirupsen/logrus"
 )
 
@@ -31,13 +30,13 @@ func ExecuteClientQuery(token, username, password, queryType, queryString, resul
 	}
 
 	// parse query string
-	panelsItemKeys, panelsIsNot, err := utilclient.ParseQueryString(queryString)
+	panelsItemKeys, panelsIsNot, err := medcoclient.ParseQueryString(queryString)
 	if err != nil {
 		return
 	}
 
 	// encrypt item key
-	encPanelsItemKeys, err := utilclient.EncryptPanelItemKeys(panelsItemKeys)
+	encPanelsItemKeys, err := unlynx.EncryptMatrix(panelsItemKeys)
 	if err != nil {
 		return
 	}
@@ -236,58 +235,6 @@ func ExecuteClientGenomicAnnotationsGetValues(token, username, password, annotat
 
 	return
 
-}
-
-// todo: might fail if alleles of queries are too big, what to do? ignore or fail?
-// loadQueryFile load and parse a query file (either simple integer or genomic) into integers
-func loadQueryFile(queryFilePath string) (queryTerms []int64, err error) {
-	logrus.Debug("Client query: loading file ", queryFilePath)
-
-	queryFile, err := os.Open(queryFilePath)
-	if err != nil {
-		logrus.Error("error opening query file: ", err)
-		return
-	}
-
-	fileScanner := bufio.NewScanner(queryFile)
-	for fileScanner.Scan() {
-		queryTermFields := strings.Split(fileScanner.Text(), ",")
-		var queryTerm int64
-
-		if len(queryTermFields) == 1 {
-
-			// simple integer identifier
-			queryTerm, err = strconv.ParseInt(queryTermFields[0], 10, 64)
-			if err != nil {
-				logrus.Error("error parsing query term: ", err)
-				return
-			}
-
-		} else if len(queryTermFields) == 4 {
-
-			// genomic identifier, generate the variant ID
-			startPos, err := strconv.ParseInt(queryTermFields[1], 10, 64)
-			if err != nil {
-				logrus.Error("error parsing start position: ", err)
-				return nil, err
-			}
-
-			queryTerm, err = identifiers.GetVariantID(queryTermFields[0], startPos, queryTermFields[2], queryTermFields[3])
-			if err != nil {
-				logrus.Error("error generating genomic query term: ", err)
-				return nil, err
-			}
-
-		} else {
-			err = errors.New("dataset with " + fmt.Sprint(len(queryTermFields)) + " fields is not supported")
-			logrus.Error(err)
-			return
-		}
-
-		queryTerms = append(queryTerms, queryTerm)
-	}
-
-	return
 }
 
 // ExecuteClientGenomicAnnotationsGetVariants displays the variant ids corresponding to the annotation and value parameters

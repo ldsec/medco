@@ -60,11 +60,11 @@ for the delete cohorts operation typically these are written to a http.Request
 */
 type DeleteCohortsParams struct {
 
-	/*Body
+	/*Name
 	  Name of the cohort to delete
 
 	*/
-	Body string
+	Name string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -104,15 +104,15 @@ func (o *DeleteCohortsParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithBody adds the body to the delete cohorts params
-func (o *DeleteCohortsParams) WithBody(body string) *DeleteCohortsParams {
-	o.SetBody(body)
+// WithName adds the name to the delete cohorts params
+func (o *DeleteCohortsParams) WithName(name string) *DeleteCohortsParams {
+	o.SetName(name)
 	return o
 }
 
-// SetBody adds the body to the delete cohorts params
-func (o *DeleteCohortsParams) SetBody(body string) {
-	o.Body = body
+// SetName adds the name to the delete cohorts params
+func (o *DeleteCohortsParams) SetName(name string) {
+	o.Name = name
 }
 
 // WriteToRequest writes these params to a swagger request
@@ -123,7 +123,8 @@ func (o *DeleteCohortsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt
 	}
 	var res []error
 
-	if err := r.SetBodyParam(o.Body); err != nil {
+	// path param name
+	if err := r.SetPathParam("name", o.Name); err != nil {
 		return err
 	}
 

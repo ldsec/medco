@@ -61,14 +61,18 @@ func TestGetDate(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestInsertCohortAndRemoveCohort(t *testing.T) {
+func TestInsertCohortAndUpdateCohortAndRemoveCohort(t *testing.T) {
 	utilserver.TestDBConnection(t)
 
 	now := time.Now()
+	_, err := UpdateCohort("testCohort2", "test", -1, now)
+	assert.Error(t, err)
+
 	cohortID, err := InsertCohort("test", -1, "testCohort2", now, now)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.NoError(t, err)
+
+	_, err = InsertCohort("test", -1, "testCohort2", now, now)
+	assert.Error(t, err)
 
 	cohorts, err := GetSavedCohorts("test")
 	assert.NoError(t, err)
@@ -84,7 +88,25 @@ func TestInsertCohortAndRemoveCohort(t *testing.T) {
 		}
 	}
 
-	assert.Equal(t, found, true)
+	assert.Equal(t, true, found)
+	now2 := time.Now()
+	cohortID, err = UpdateCohort("testCohort2", "test", -1, now2)
+	assert.NoError(t, err)
+
+	found = false
+	for _, cohort := range cohorts {
+		if cohort.CohortID == cohortID {
+			found = true
+			assert.Equal(t, cohortID, cohort.CohortID)
+			assert.Equal(t, "testCohort2", cohort.CohortName)
+			assert.Equal(t, now2.Format(time.Stamp), cohort.UpdateDate.Format(time.Stamp))
+			break
+		}
+	}
+	assert.Equal(t, true, found)
+
+	cohortID, err = UpdateCohort("testCohort2", "test", -1, now2)
+	assert.NoError(t, err)
 
 	err = RemoveCohort("test", "testCohort2")
 	assert.NoError(t, err)

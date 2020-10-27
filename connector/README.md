@@ -14,7 +14,6 @@ It communicates with the [*unlynx wrapper*](../unlynx) to execute the distribute
 - *util*: utility code (configuration, security, etc.)
     - *client*: client-related utility code
     - *server*: server-related utility code
-    - *common*: utility code common to client and server
 - *wrappers*: client library wrappers for external service (i2b2, unlynx, etc.)
 
 ## Swagger

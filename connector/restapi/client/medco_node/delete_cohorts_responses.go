@@ -28,6 +28,12 @@ func (o *DeleteCohortsReader) ReadResponse(response runtime.ClientResponse, cons
 			return nil, err
 		}
 		return result, nil
+	case 404:
+		result := NewDeleteCohortsNotFound()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
 	default:
 		result := NewDeleteCohortsDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -53,10 +59,31 @@ type DeleteCohortsOK struct {
 }
 
 func (o *DeleteCohortsOK) Error() string {
-	return fmt.Sprintf("[DELETE /node/explore/cohorts][%d] deleteCohortsOK ", 200)
+	return fmt.Sprintf("[DELETE /node/explore/cohorts/{name}][%d] deleteCohortsOK ", 200)
 }
 
 func (o *DeleteCohortsOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	return nil
+}
+
+// NewDeleteCohortsNotFound creates a DeleteCohortsNotFound with default headers values
+func NewDeleteCohortsNotFound() *DeleteCohortsNotFound {
+	return &DeleteCohortsNotFound{}
+}
+
+/*DeleteCohortsNotFound handles this case with default header values.
+
+The cohort does not exist.
+*/
+type DeleteCohortsNotFound struct {
+}
+
+func (o *DeleteCohortsNotFound) Error() string {
+	return fmt.Sprintf("[DELETE /node/explore/cohorts/{name}][%d] deleteCohortsNotFound ", 404)
+}
+
+func (o *DeleteCohortsNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	return nil
 }
@@ -84,7 +111,7 @@ func (o *DeleteCohortsDefault) Code() int {
 }
 
 func (o *DeleteCohortsDefault) Error() string {
-	return fmt.Sprintf("[DELETE /node/explore/cohorts][%d] deleteCohorts default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[DELETE /node/explore/cohorts/{name}][%d] deleteCohorts default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *DeleteCohortsDefault) GetPayload() *DeleteCohortsDefaultBody {

@@ -33,7 +33,7 @@ func NewDeleteCohorts(ctx *middleware.Context, handler DeleteCohortsHandler) *De
 	return &DeleteCohorts{Context: ctx, Handler: handler}
 }
 
-/*DeleteCohorts swagger:route DELETE /node/explore/cohorts medco-node deleteCohorts
+/*DeleteCohorts swagger:route DELETE /node/explore/cohorts/{name} medco-node deleteCohorts
 
 Delete a cohort if it exists
 

@@ -1,8 +1,10 @@
 package querytoolsclient
 
 import (
+	medcoclient "github.com/ldsec/medco/connector/client"
 	"github.com/ldsec/medco/connector/restapi/client"
 	"github.com/ldsec/medco/connector/restapi/client/medco_node"
+	"github.com/ldsec/medco/connector/util"
 
 	"crypto/tls"
 	"errors"
@@ -12,7 +14,6 @@ import (
 	"time"
 
 	utilclient "github.com/ldsec/medco/connector/util/client"
-	utilcommon "github.com/ldsec/medco/connector/util/common"
 
 	httptransport "github.com/go-openapi/runtime/client"
 
@@ -27,15 +28,13 @@ type GetCohorts struct {
 	authToken string
 }
 
-const timeOutInSeconds = 30
-
 // NewGetCohorts creates a new get cohorts query
 func NewGetCohorts(token string, disableTLSCheck bool) (getCohorts *GetCohorts, err error) {
 	getCohorts = &GetCohorts{
 		authToken: token,
 	}
 
-	getMetadataResp, err := utilclient.MetaData(token, disableTLSCheck)
+	getMetadataResp, err := medcoclient.MetaData(token, disableTLSCheck)
 	if err != nil {
 		logrus.Error(err)
 		return
@@ -68,33 +67,35 @@ type nodeResult = struct {
 }
 
 // Execute executes the get cohorts query
-func (getCohorts *GetCohorts) Execute() (results [][]utilcommon.Cohort, err error) {
+func (getCohorts *GetCohorts) Execute() (results [][]util.Cohort, err error) {
 	nOfNodes := len(getCohorts.httpMedCoClients)
 	errChan := make(chan error)
 	resultChan := make(chan nodeResult, nOfNodes)
-	results = make([][]utilcommon.Cohort, nOfNodes)
+	results = make([][]util.Cohort, nOfNodes)
+	logrus.Infof("There are %d nodes", nOfNodes)
 
 	for idx := 0; idx < nOfNodes; idx++ {
 
 		go func(idx int) {
+			logrus.Infof("Submitting to node %d", idx)
 			res, Error := getCohorts.submitToNode(idx)
 			if Error != nil {
 				logrus.Errorf("Get cohort execution error : %s", Error)
 				errChan <- Error
 			} else {
-				logrus.Debugf("Node %d got cohorts %+v", idx, res)
+				logrus.Infof("Node %d got cohorts %+v", idx, res)
 				resultChan <- nodeResult{cohorts: res, nodeIndex: idx}
 			}
 		}(idx)
 	}
 
-	timeout := time.After(time.Duration(timeOutInSeconds) * time.Second)
+	timeout := time.After(time.Duration(utilclient.QueryToolsTimeoutSeconds) * time.Second)
 	for idx := 0; idx < nOfNodes; idx++ {
 		select {
 		case err = <-errChan:
 			return
 		case <-timeout:
-			err = fmt.Errorf("Timeout %d seconds elapsed", timeOutInSeconds)
+			err = fmt.Errorf("Timeout %d seconds elapsed", utilclient.QueryToolsTimeoutSeconds)
 			logrus.Error(err)
 			return
 		case nodeRes := <-resultChan:
@@ -107,11 +108,12 @@ func (getCohorts *GetCohorts) Execute() (results [][]utilcommon.Cohort, err erro
 
 		}
 	}
+	logrus.Info("Operation completed")
 	return
 }
 
 func (getCohorts *GetCohorts) submitToNode(nodeIdx int) ([]*medco_node.GetCohortsOKBodyItems0, error) {
-	//TODO timeout
+
 	params := medco_node.NewGetCohortsParamsWithTimeout(time.Duration(utilclient.QueryTimeoutSeconds) * time.Second)
 	response, err := getCohorts.httpMedCoClients[nodeIdx].MedcoNode.GetCohorts(params, httptransport.BearerToken(getCohorts.authToken))
 	if err != nil {
@@ -121,9 +123,8 @@ func (getCohorts *GetCohorts) submitToNode(nodeIdx int) ([]*medco_node.GetCohort
 
 }
 
-//TODO int64
-func convertCohort(apiRes []*medco_node.GetCohortsOKBodyItems0) (res []utilcommon.Cohort, err error) {
-	res = make([]utilcommon.Cohort, len(apiRes))
+func convertCohort(apiRes []*medco_node.GetCohortsOKBodyItems0) (res []util.Cohort, err error) {
+	res = make([]util.Cohort, len(apiRes))
 	for i, apiCohort := range apiRes {
 		res[i].CohortID = int(apiCohort.CohortID)
 		res[i].CohortName = apiCohort.CohortName

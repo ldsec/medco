@@ -12,8 +12,8 @@ import (
 	"strings"
 )
 
-// PostCohortsURL generates an URL for the post cohorts operation
-type PostCohortsURL struct {
+// PutCohortsURL generates an URL for the put cohorts operation
+type PutCohortsURL struct {
 	Name string
 
 	_basePath string
@@ -24,7 +24,7 @@ type PostCohortsURL struct {
 // WithBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *PostCohortsURL) WithBasePath(bp string) *PostCohortsURL {
+func (o *PutCohortsURL) WithBasePath(bp string) *PutCohortsURL {
 	o.SetBasePath(bp)
 	return o
 }
@@ -32,12 +32,12 @@ func (o *PostCohortsURL) WithBasePath(bp string) *PostCohortsURL {
 // SetBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *PostCohortsURL) SetBasePath(bp string) {
+func (o *PutCohortsURL) SetBasePath(bp string) {
 	o._basePath = bp
 }
 
 // Build a url path and query string
-func (o *PostCohortsURL) Build() (*url.URL, error) {
+func (o *PutCohortsURL) Build() (*url.URL, error) {
 	var _result url.URL
 
 	var _path = "/node/explore/cohorts/{name}"
@@ -46,7 +46,7 @@ func (o *PostCohortsURL) Build() (*url.URL, error) {
 	if name != "" {
 		_path = strings.Replace(_path, "{name}", name, -1)
 	} else {
-		return nil, errors.New("name is required on PostCohortsURL")
+		return nil, errors.New("name is required on PutCohortsURL")
 	}
 
 	_basePath := o._basePath
@@ -59,7 +59,7 @@ func (o *PostCohortsURL) Build() (*url.URL, error) {
 }
 
 // Must is a helper function to panic when the url builder returns an error
-func (o *PostCohortsURL) Must(u *url.URL, err error) *url.URL {
+func (o *PutCohortsURL) Must(u *url.URL, err error) *url.URL {
 	if err != nil {
 		panic(err)
 	}
@@ -70,17 +70,17 @@ func (o *PostCohortsURL) Must(u *url.URL, err error) *url.URL {
 }
 
 // String returns the string representation of the path with query string
-func (o *PostCohortsURL) String() string {
+func (o *PutCohortsURL) String() string {
 	return o.Must(o.Build()).String()
 }
 
 // BuildFull builds a full url with scheme, host, path and query string
-func (o *PostCohortsURL) BuildFull(scheme, host string) (*url.URL, error) {
+func (o *PutCohortsURL) BuildFull(scheme, host string) (*url.URL, error) {
 	if scheme == "" {
-		return nil, errors.New("scheme is required for a full url on PostCohortsURL")
+		return nil, errors.New("scheme is required for a full url on PutCohortsURL")
 	}
 	if host == "" {
-		return nil, errors.New("host is required for a full url on PostCohortsURL")
+		return nil, errors.New("host is required for a full url on PutCohortsURL")
 	}
 
 	base, err := o.Build()
@@ -94,6 +94,6 @@ func (o *PostCohortsURL) BuildFull(scheme, host string) (*url.URL, error) {
 }
 
 // StringFull returns the string representation of a complete url
-func (o *PostCohortsURL) StringFull(scheme, host string) string {
+func (o *PutCohortsURL) StringFull(scheme, host string) string {
 	return o.Must(o.BuildFull(scheme, host)).String()
 }

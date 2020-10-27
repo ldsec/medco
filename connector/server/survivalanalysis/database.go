@@ -4,14 +4,14 @@ import (
 	"strconv"
 	"strings"
 
-	utilcommon "github.com/ldsec/medco/connector/util/common"
+	"github.com/ldsec/medco/connector/util"
 	utilserver "github.com/ldsec/medco/connector/util/server"
 
 	"github.com/sirupsen/logrus"
 )
 
 // buildTimePoints execute a SQL query that returns event counts per time point, for given input patient set, start and end  concept codes and modifiers
-func buildTimePoints(patientList []int64, startConceptCode string, startConceptModifier string, endConceptCode string, endConceptModifier string, timeLimit int) (timePoints utilcommon.TimePoints, err error) {
+func buildTimePoints(patientList []int64, startConceptCode string, startConceptModifier string, endConceptCode string, endConceptModifier string, timeLimit int) (timePoints util.TimePoints, err error) {
 	logrus.Debug("SQL query : " + sql6)
 	pList := make([]string, len(patientList))
 	for i, pNum := range patientList {
@@ -26,7 +26,7 @@ func buildTimePoints(patientList []int64, startConceptCode string, startConceptM
 	eventsString := new(string)
 	censoringString := new(string)
 	for rows.Next() {
-		sqlTimePoint := utilcommon.TimePoint{}
+		sqlTimePoint := util.TimePoint{}
 		scanErr := rows.Scan(timePointString, eventsString, censoringString)
 		if scanErr != nil {
 			err = scanErr

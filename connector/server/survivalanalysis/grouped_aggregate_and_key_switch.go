@@ -10,7 +10,7 @@ import (
 )
 
 // AKSgroups takes an EventGroups instance and flattens its content.
-// Resulting slice is sent with the target pulbic key to Unlynx for and Aggregate-And-Keyswitch protocol.
+// Resulting slice is sent with the target public key to Unlynx for and Aggregate-And-Keyswitch protocol.
 // The slice output by the protocol is itself restructered in an EventGroups instance.
 func AKSgroups(queryID string, eventGroups EventGroups, targetPubKey string) (aksEventGroups EventGroups, time map[string]time.Duration, err error) {
 

@@ -3,6 +3,9 @@ package i2b2
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
+	"github.com/ldsec/medco/connector/restapi/models"
 	utilserver "github.com/ldsec/medco/connector/util/server"
 )
 
@@ -75,4 +78,31 @@ func TestGetPatientSet(t *testing.T) {
 	}
 	t.Log(patientIDs)
 	t.Log(patientDummyFlags)
+}
+
+func TestGetOntologyTermInfo(t *testing.T) {
+
+	results, err := GetOntologyTermInfo("/E2ETEST/e2etest/")
+	assert.NoError(t, err)
+	assert.NotEmpty(t, results)
+	res := results[0]
+	assert.Equal(t, termInfo1.Code, res.Code)
+	assert.Equal(t, termInfo1.DisplayName, res.DisplayName)
+	assert.Equal(t, *termInfo1.Leaf, *res.Leaf)
+	assert.Equal(t, termInfo1.Name, res.Name)
+	assert.Equal(t, termInfo1.Path, res.Path)
+	assert.Equal(t, termInfo1.Type, res.Type)
+	assert.NotNil(t, res.MedcoEncryption)
+
+}
+
+var falseBool bool = false
+
+var termInfo1 = &models.ExploreSearchResultElement{
+	Code:        "",
+	DisplayName: "End-To-End Test",
+	Leaf:        &falseBool,
+	Name:        "End-To-End Test",
+	Path:        "/E2ETEST/e2etest/",
+	Type:        "concept_container",
 }

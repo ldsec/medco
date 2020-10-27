@@ -17,8 +17,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// PostCohorts is a MedCo client query to update saved cohorts
-type PostCohorts struct {
+// PutCohorts is a MedCo client query to update saved cohorts
+type PutCohorts struct {
 	// httpMedCoClients are the HTTP clients for the MedCo connectors
 	httpMedCoClients []*client.MedcoCli
 	// authToken is the OIDC authentication JWT
@@ -28,9 +28,9 @@ type PostCohorts struct {
 	cohortName   string
 }
 
-// NewPostCohorts creates a new post cohorts query
-func NewPostCohorts(token string, patientSetID []int, cohortName string, disableTLSCheck bool) (postCohorts *PostCohorts, err error) {
-	postCohorts = &PostCohorts{
+// NewPutCohorts creates a new post cohorts query
+func NewPutCohorts(token string, patientSetID []int, cohortName string, disableTLSCheck bool) (putCohorts *PutCohorts, err error) {
+	putCohorts = &PutCohorts{
 		authToken:    token,
 		cohortName:   cohortName,
 		patientSetID: patientSetID,
@@ -48,9 +48,9 @@ func NewPostCohorts(token string, patientSetID []int, cohortName string, disable
 		logrus.Error(err)
 		return
 	}
-	postCohorts.httpMedCoClients = make([]*client.MedcoCli, nofNodes)
+	putCohorts.httpMedCoClients = make([]*client.MedcoCli, nofNodes)
 	for _, node := range getMetadataResp.Payload.Nodes {
-		if postCohorts.httpMedCoClients[*node.Index] != nil {
+		if putCohorts.httpMedCoClients[*node.Index] != nil {
 			err = errors.New("duplicated node index in network metadata")
 			logrus.Error(err)
 			return
@@ -64,28 +64,28 @@ func NewPostCohorts(token string, patientSetID []int, cohortName string, disable
 
 		nodeTransport := httptransport.New(nodeURL.Host, nodeURL.Path, []string{nodeURL.Scheme})
 		nodeTransport.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: disableTLSCheck}
-		postCohorts.httpMedCoClients[*node.Index] = client.New(nodeTransport, nil)
+		putCohorts.httpMedCoClients[*node.Index] = client.New(nodeTransport, nil)
 	}
 	return
 }
 
 // Execute executes the post cohorts query
-func (postCohorts *PostCohorts) Execute() (err error) {
-	nOfNodes := len(postCohorts.httpMedCoClients)
+func (PutCohorts *PutCohorts) Execute() (err error) {
+	nOfNodes := len(PutCohorts.httpMedCoClients)
 	errChan := make(chan error)
-	resultChan := make(chan *medco_node.PostCohortsOK, nOfNodes)
+	resultChan := make(chan *medco_node.PutCohortsOK, nOfNodes)
 	logrus.Infof("There are %d nodes", nOfNodes)
 
 	for idx := 0; idx < nOfNodes; idx++ {
 
 		go func(idx int) {
 			logrus.Infof("Submitting to node %d", idx)
-			res, Error := postCohorts.submitToNode(idx)
+			res, Error := PutCohorts.submitToNode(idx)
 			if Error != nil {
 				logrus.Errorf("Query tool execution error : %s", Error)
 				errChan <- Error
 			} else {
-				logrus.Infof("Node %d successfully posted cohort", idx)
+				logrus.Infof("Node %d successfully put cohort", idx)
 
 				resultChan <- res
 			}
@@ -102,28 +102,29 @@ func (postCohorts *PostCohorts) Execute() (err error) {
 			logrus.Error(err)
 			return
 		case <-resultChan:
-			logrus.Infof("Node %d succesfully updated cohort", idx)
+			logrus.Infof("Node %d successfully updated cohort", idx)
 		}
 
 	}
+
 	logrus.Info("Operation completed")
 
 	return
 }
 
-func (postCohorts *PostCohorts) submitToNode(nodeIdx int) (*medco_node.PostCohortsOK, error) {
+func (PutCohorts *PutCohorts) submitToNode(nodeIdx int) (*medco_node.PutCohortsOK, error) {
 	creationDate := time.Now()
 	updateDate := time.Now()
-	params := medco_node.NewPostCohortsParamsWithTimeout(time.Duration(utilclient.QueryTimeoutSeconds) * time.Second)
-	body := medco_node.PostCohortsBody{
+	params := medco_node.NewPutCohortsParamsWithTimeout(time.Duration(utilclient.QueryTimeoutSeconds) * time.Second)
+	body := medco_node.PutCohortsBody{
 		CreationDate: creationDate.Format(time.RFC3339),
 		UpdateDate:   updateDate.Format(time.RFC3339),
-		PatientSetID: int64(postCohorts.patientSetID[nodeIdx]),
+		PatientSetID: int64(PutCohorts.patientSetID[nodeIdx]),
 	}
 	params.SetCohortRequest(body)
-	params.SetName(postCohorts.cohortName)
+	params.SetName(PutCohorts.cohortName)
 
-	response, err := postCohorts.httpMedCoClients[nodeIdx].MedcoNode.PostCohorts(params, httptransport.BearerToken(postCohorts.authToken))
+	response, err := PutCohorts.httpMedCoClients[nodeIdx].MedcoNode.PutCohorts(params, httptransport.BearerToken(PutCohorts.authToken))
 	if err != nil {
 		return nil, err
 	}

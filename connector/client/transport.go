@@ -1,4 +1,4 @@
-package utilclient
+package medcoclient
 
 import (
 	"crypto/tls"
@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/url"
 	"time"
+
+	utilclient "github.com/ldsec/medco/connector/util/client"
 
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/ldsec/medco/connector/restapi/client"
@@ -16,7 +18,7 @@ import (
 
 // MetaData creates a request get metadata and returns the response
 func MetaData(token string, disableTLSCheck bool) (*medco_network.GetMetadataOK, error) {
-	parsedURL, err := url.Parse(MedCoConnectorURL)
+	parsedURL, err := url.Parse(utilclient.MedCoConnectorURL)
 
 	if err != nil {
 		err = fmt.Errorf("cannot parse MedCo connector URL: %s", err.Error())

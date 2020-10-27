@@ -9,11 +9,16 @@ import (
 	"errors"
 	"net/url"
 	golangswaggerpaths "path"
+	"strings"
 )
 
 // DeleteCohortsURL generates an URL for the delete cohorts operation
 type DeleteCohortsURL struct {
+	Name string
+
 	_basePath string
+	// avoid unkeyed usage
+	_ struct{}
 }
 
 // WithBasePath sets the base path for this url builder, only required when it's different from the
@@ -35,7 +40,14 @@ func (o *DeleteCohortsURL) SetBasePath(bp string) {
 func (o *DeleteCohortsURL) Build() (*url.URL, error) {
 	var _result url.URL
 
-	var _path = "/node/explore/cohorts"
+	var _path = "/node/explore/cohorts/{name}"
+
+	name := o.Name
+	if name != "" {
+		_path = strings.Replace(_path, "{name}", name, -1)
+	} else {
+		return nil, errors.New("name is required on DeleteCohortsURL")
+	}
 
 	_basePath := o._basePath
 	if _basePath == "" {

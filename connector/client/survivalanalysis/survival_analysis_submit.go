@@ -1,8 +1,6 @@
 package survivalclient
 
 import (
-	"context"
-	"net/http"
 	"strings"
 	"time"
 
@@ -39,12 +37,4 @@ func (clientSurvivalAnalysis *SurvivalAnalysis) submitToNode(nodeIdx int) (resul
 	results = response.GetPayload()
 
 	return
-}
-
-// GetSurvivalAnalysisParameter holds the information for interaction with the REST API
-type GetSurvivalAnalysisParameter struct {
-	Command    *SurvivalAnalysis
-	timeout    time.Duration
-	Context    context.Context
-	HTTPClient *http.Client
 }

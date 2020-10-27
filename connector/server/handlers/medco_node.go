@@ -137,7 +137,8 @@ func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *m
 // MedCoNodePostCohortsHandler handles POST /medco/node/explore/cohorts  API endpoint
 func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal *models.User) middleware.Responder {
 
-	cohort := params.Body
+	cohort := params.CohortRequest
+	cohortName := params.Name
 
 	hasID, err := querytoolsserver.CheckQueryID(principal.ID, int(cohort.PatientSetID))
 	if err != nil {
@@ -148,7 +149,7 @@ func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal 
 	logrus.Trace("has ID", hasID)
 
 	if !hasID {
-		return medco_node.NewPostCohortsDefault(400).WithPayload(&medco_node.PostCohortsDefaultBody{
+		return medco_node.NewPostCohortsDefault(404).WithPayload(&medco_node.PostCohortsDefaultBody{
 			Message: fmt.Sprintf("User does not have a stored query result with ID: %d", cohort.PatientSetID),
 		})
 	}
@@ -172,27 +173,67 @@ func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal 
 		})
 	}
 	for _, existingCohort := range cohorts {
-		if existingCohort.CohortName == cohort.CohortName {
-			if existingCohort.UpdateDate.After(updateDate) {
-				return medco_node.NewPostCohortsDefault(400).WithPayload(&medco_node.PostCohortsDefaultBody{
-					Message: fmt.Sprintf(
-						"Cohort %s  has a more recent date in DB %s, provided %s",
-						cohort.CohortName,
-						cohort.UpdateDate,
-						existingCohort.UpdateDate.Format(time.RFC3339)),
-				})
-			}
-			break
+		if existingCohort.CohortName == cohortName {
+			return medco_node.NewPostCohortsConflict()
 		}
 	}
-	querytoolsserver.InsertCohort(principal.ID, int(cohort.PatientSetID), cohort.CohortName, creationDate, updateDate)
+	querytoolsserver.InsertCohort(principal.ID, int(cohort.PatientSetID), cohortName, creationDate, updateDate)
 
 	return medco_node.NewPostCohortsOK()
 }
 
+// MedCoNodePutCohortsHandler handles PUT /medco/node/explore/cohorts  API endpoint
+func MedCoNodePutCohortsHandler(params medco_node.PutCohortsParams, principal *models.User) middleware.Responder {
+
+	cohort := params.CohortRequest
+	cohortName := params.Name
+
+	hasID, err := querytoolsserver.CheckQueryID(principal.ID, int(cohort.PatientSetID))
+	if err != nil {
+		return medco_node.NewPutCohortsDefault(500).WithPayload(&medco_node.PutCohortsDefaultBody{
+			Message: fmt.Sprintf("During execution of CheckQueryID"),
+		})
+	}
+	logrus.Trace("has ID", hasID)
+
+	if !hasID {
+		return medco_node.NewPutCohortsNotFound()
+	}
+
+	updateDate, err := time.Parse(time.RFC3339, cohort.UpdateDate)
+	if err != nil {
+		return medco_node.NewPutCohortsDefault(400).WithPayload(&medco_node.PutCohortsDefaultBody{
+			Message: fmt.Sprintf("String %s is not a date with RF3339 layout", cohort.UpdateDate),
+		})
+	}
+	cohorts, err := querytoolsserver.GetSavedCohorts(principal.ID)
+	if err != nil {
+		return medco_node.NewPutCohortsDefault(500).WithPayload(&medco_node.PutCohortsDefaultBody{
+			Message: "Get cohort execution error: " + err.Error(),
+		})
+	}
+	found := false
+	for _, existingCohort := range cohorts {
+		if existingCohort.CohortName == cohortName {
+			if existingCohort.UpdateDate.After(updateDate) {
+				return medco_node.NewPutCohortsConflict()
+			}
+			found = true
+			break
+		}
+	}
+	if !found {
+		return medco_node.NewPutCohortsNotFound()
+	}
+
+	querytoolsserver.UpdateCohort(cohortName, principal.ID, int(cohort.PatientSetID), updateDate)
+
+	return medco_node.NewPutCohortsOK()
+}
+
 // MedCoNodeDeleteCohortsHandler handles DELETE /medco/node/explore/cohorts  API endpoint
 func MedCoNodeDeleteCohortsHandler(params medco_node.DeleteCohortsParams, principal *models.User) middleware.Responder {
-	cohortName := params.Body
+	cohortName := params.Name
 	user := principal.ID
 
 	// check if cohort exists
@@ -204,9 +245,7 @@ func MedCoNodeDeleteCohortsHandler(params medco_node.DeleteCohortsParams, princi
 	}
 	logrus.Trace("hasCohort", hasCohort)
 	if !hasCohort {
-		return medco_node.NewDeleteCohortsDefault(400).WithPayload(&medco_node.DeleteCohortsDefaultBody{
-			Message: "Cohort does not exist",
-		})
+		return medco_node.NewDeleteCohortsNotFound()
 	}
 
 	// delete the cohorts

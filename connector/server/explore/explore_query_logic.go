@@ -9,7 +9,7 @@ import (
 	querytoolsserver "github.com/ldsec/medco/connector/server/querytools"
 
 	"github.com/ldsec/medco/connector/restapi/models"
-	utilcommon "github.com/ldsec/medco/connector/util/common"
+	"github.com/ldsec/medco/connector/util"
 	"github.com/ldsec/medco/connector/wrappers/i2b2"
 	"github.com/ldsec/medco/connector/wrappers/unlynx"
 	"github.com/pkg/errors"
@@ -27,7 +27,7 @@ type ExploreQuery struct {
 	Result   struct {
 		EncCount       string
 		EncPatientList []string
-		Timers         utilcommon.Timers
+		Timers         util.Timers
 		PatientSetID   int
 	}
 }
@@ -39,7 +39,7 @@ func NewExploreQuery(queryName string, query *models.ExploreQuery, userName stri
 		Query:    query,
 		UserName: userName,
 	}
-	new.Result.Timers = utilcommon.NewTimers()
+	new.Result.Timers = util.NewTimers()
 	return new, new.isValid()
 }
 

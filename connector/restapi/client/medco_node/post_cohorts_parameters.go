@@ -60,11 +60,16 @@ for the post cohorts operation typically these are written to a http.Request
 */
 type PostCohortsParams struct {
 
-	/*Body
+	/*CohortRequest
 	  Cohort that has been updated or created
 
 	*/
-	Body PostCohortsBody
+	CohortRequest PostCohortsBody
+	/*Name
+	  Name of the cohort to update
+
+	*/
+	Name string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -104,15 +109,26 @@ func (o *PostCohortsParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithBody adds the body to the post cohorts params
-func (o *PostCohortsParams) WithBody(body PostCohortsBody) *PostCohortsParams {
-	o.SetBody(body)
+// WithCohortRequest adds the cohortRequest to the post cohorts params
+func (o *PostCohortsParams) WithCohortRequest(cohortRequest PostCohortsBody) *PostCohortsParams {
+	o.SetCohortRequest(cohortRequest)
 	return o
 }
 
-// SetBody adds the body to the post cohorts params
-func (o *PostCohortsParams) SetBody(body PostCohortsBody) {
-	o.Body = body
+// SetCohortRequest adds the cohortRequest to the post cohorts params
+func (o *PostCohortsParams) SetCohortRequest(cohortRequest PostCohortsBody) {
+	o.CohortRequest = cohortRequest
+}
+
+// WithName adds the name to the post cohorts params
+func (o *PostCohortsParams) WithName(name string) *PostCohortsParams {
+	o.SetName(name)
+	return o
+}
+
+// SetName adds the name to the post cohorts params
+func (o *PostCohortsParams) SetName(name string) {
+	o.Name = name
 }
 
 // WriteToRequest writes these params to a swagger request
@@ -123,7 +139,12 @@ func (o *PostCohortsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 	}
 	var res []error
 
-	if err := r.SetBodyParam(o.Body); err != nil {
+	if err := r.SetBodyParam(o.CohortRequest); err != nil {
+		return err
+	}
+
+	// path param name
+	if err := r.SetPathParam("name", o.Name); err != nil {
 		return err
 	}
 

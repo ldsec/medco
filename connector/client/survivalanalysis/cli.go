@@ -7,21 +7,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ldsec/medco/connector/util"
+
 	"github.com/ldsec/medco/connector/restapi/client/survival_analysis"
 	"github.com/ldsec/medco/connector/restapi/models"
 	utilclient "github.com/ldsec/medco/connector/util/client"
-	utilcommon "github.com/ldsec/medco/connector/util/common"
 	"github.com/sirupsen/logrus"
 )
-
-// time out in seconds for  access token read parameter file, seconds
-const accessToketimeout time.Duration = 300
-
-// time out in seconds for survival analysis result, seconds
-const resultTimeout time.Duration = 900
-
-// print ticking while waiting for the results, seconds
-const tick time.Duration = 5
 
 // ClientResultElement holds the information for the CLI whole susrvival analysis loop
 type ClientResultElement struct {
@@ -33,18 +25,14 @@ type ClientResultElement struct {
 // ExecuteClientSurvival creates a survival analysis form parameters given in parameter file, and makes a call to the API to executes this query
 func ExecuteClientSurvival(token, parameterFileURL, username, password string, disableTLSCheck bool, resultFile string, timerFile string, limit int, cohortName string, granularity, startConcept, startModifier, endConcept, endModifier string) (err error) {
 
-	//initialize onjects and channels
-	clientTimers := utilcommon.NewTimers()
+	//initialize objects and channels
+	clientTimers := util.NewTimers()
 	var accessToken string
 	var parameters *Parameters
 	tokenChan := make(chan string, 1)
 	parametersChan := make(chan *Parameters, 1)
 	errChan := make(chan error)
 	signal := make(chan struct{})
-	resultChan := make(chan struct {
-		Results []EncryptedResults
-		Timers  []utilcommon.Timers
-	})
 	wait := &sync.WaitGroup{}
 	wait.Add(2)
 	go func() {
@@ -53,7 +41,7 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 	}()
 
 	// --- get token
-	logrus.Debug("requesting access token")
+	logrus.Info("requesting access token")
 	go func() {
 		defer wait.Done()
 		accessToken, err := utilclient.RetrieveOrGetNewAccessToken(token, username, password, disableTLSCheck)
@@ -62,7 +50,7 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 			return
 		}
 		tokenChan <- accessToken
-		logrus.Debug("access token received")
+		logrus.Info("access token received")
 		logrus.Tracef("token %s", accessToken)
 		return
 
@@ -70,7 +58,7 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 
 	// --- get parameters
 	if parameterFileURL != "" {
-		logrus.Debugf("reading parameters")
+		logrus.Info("reading parameters")
 		go func() {
 			defer wait.Done()
 			parameters, err := NewParametersFromFile(parameterFileURL)
@@ -79,7 +67,7 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 				return
 			}
 			parametersChan <- parameters
-			logrus.Debug("parameters read")
+			logrus.Info("parameters read")
 			logrus.Tracef("parameters %+v", parameters)
 			return
 		}()
@@ -91,8 +79,8 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 	case err = <-errChan:
 		logrus.Error(err)
 		return
-	case <-time.After(accessToketimeout * time.Second):
-		err = fmt.Errorf("timeout %d seconds", accessToketimeout)
+	case <-time.After(time.Duration(utilclient.TokenTimeoutSeconds) * time.Second):
+		err = fmt.Errorf("timeout %d seconds", utilclient.TokenTimeoutSeconds)
 		logrus.Error(err)
 		return
 
@@ -117,7 +105,114 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 
 	// --- convert panels
 	timer := time.Now()
-	logrus.Debug("converting panels")
+	logrus.Info("converting panels")
+	panels := convertPanel(parameters)
+	logrus.Info("panels converted")
+	logrus.Tracef("panels: %+v", panels)
+
+	// --- execute query
+	timer = time.Now()
+	logrus.Info("executing query")
+	results, timers, userPrivateKey, err := executeQuery(accessToken, panels, parameters, disableTLSCheck)
+	if err != nil {
+		err = fmt.Errorf("while executing survival analysis results: %s", err.Error())
+		logrus.Error(err)
+		return
+	}
+	clientTimers.AddTimers("medco-connector-survival-query-remote-execution", timer, nil)
+	logrus.Info("query executed")
+	logrus.Tracef("encrypted results: %+v", results)
+	logrus.Tracef("timers: %v", timers)
+
+	// --- decrypt result
+	timer = time.Now()
+	logrus.Info("decrypting results")
+	clearResults := make([]ClearResults, len(results))
+	for idx, encryptedResults := range results {
+		clearResults[idx], err = encryptedResults.Decrypt(userPrivateKey)
+		if err != nil {
+			err = fmt.Errorf("while decrypting survival analysis results: %s", err.Error())
+			logrus.Error(err)
+			return
+		}
+	}
+	clientTimers.AddTimers("medco-connector-decryptions", timer, nil)
+	logrus.Info("results decrypted")
+	logrus.Tracef("clear results: %+v", clearResults)
+
+	// --- printing results
+	printResults(clearResults, timers, clientTimers, parameters.TimeResolution, resultFile, timerFile)
+
+	logrus.Info("Operation completed")
+	return
+
+}
+
+func executeQuery(accessToken string, panels []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0, parameters *Parameters, disableTLSCheck bool) (results []EncryptedResults, timers []util.Timers, userPrivateKey string, err error) {
+	errChan := make(chan error)
+	resultChan := make(chan struct {
+		Results []EncryptedResults
+		Timers  []util.Timers
+	})
+	query, err := NewSurvivalAnalysis(
+		accessToken,
+		parameters.CohortName,
+		panels,
+		parameters.TimeLimit,
+		parameters.TimeResolution,
+		parameters.StartConceptPath,
+		parameters.StartConceptModifier,
+		parameters.EndConceptPath,
+		parameters.EndConceptModifier,
+		disableTLSCheck,
+	)
+	userPrivateKey = query.userPrivateKey
+	if err != nil {
+		return
+	}
+
+	resTimeout := time.After(time.Duration(utilclient.SurvivalAnalysisTimeoutSeconds) * time.Second)
+	resultTicks := time.Tick(time.Duration(utilclient.WaitTickSeconds) * time.Second)
+	go func() {
+		results, timers, err := query.Execute()
+		if err != nil {
+			logrus.Error(err)
+			errChan <- err
+			return
+		}
+		resultChan <- struct {
+			Results []EncryptedResults
+			Timers  []util.Timers
+		}{Results: results, Timers: timers}
+		return
+
+	}()
+
+	tickTime := 0
+resLoop:
+	for {
+		select {
+		case <-resTimeout:
+			err = fmt.Errorf("Timeout %d", utilclient.SurvivalAnalysisTimeoutSeconds)
+			return
+		case err = <-errChan:
+			logrus.Error(err)
+			return
+		case res := <-resultChan:
+			results = res.Results
+			timers = res.Timers
+			break resLoop
+		case <-resultTicks:
+			tickTime += int(utilclient.WaitTickSeconds)
+			logrus.Infof("waiting for response (%d seconds)", tickTime)
+		}
+	}
+
+	return
+
+}
+
+func convertPanel(parameters *Parameters) []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0 {
 	panels := make([]*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0, len(parameters.Cohorts))
 	for i, selection := range parameters.Cohorts {
 		newSelection := &survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0{}
@@ -135,7 +230,7 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 				*itemString = item
 				newItems[k] = &models.PanelItemsItems0{
 					Encrypted: encrypted,
-					Operator:  "exists",
+					Operator:  models.PanelItemsItems0OperatorExists,
 					QueryTerm: itemString,
 				}
 			}
@@ -145,89 +240,11 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 		newSelection.Panels = newPanels
 		panels[i] = newSelection
 	}
-	clientTimers.AddTimers("medco-connector-panel-conversion", timer, nil)
-	logrus.Debug("panels converted")
-	logrus.Tracef("panels: %+v", panels)
+	return panels
+}
 
-	// --- execute query
-	timer = time.Now()
-	logrus.Debug("executing query")
-	query, err := NewSurvivalAnalysis(
-		accessToken,
-		parameters.CohortName,
-		panels,
-		parameters.TimeLimit,
-		parameters.TimeResolution,
-		parameters.StartConceptPath,
-		parameters.StartConceptModifier,
-		parameters.EndConceptPath,
-		parameters.EndConceptModifier,
-		disableTLSCheck,
-	)
-	if err != nil {
-		return
-	}
-
-	resTimeout := time.After(resultTimeout * time.Second)
-	resultTicks := time.Tick(tick * time.Second)
-	go func() {
-		results, timers, err := query.Execute()
-		if err != nil {
-			logrus.Error(err)
-			errChan <- err
-			return
-		}
-		resultChan <- struct {
-			Results []EncryptedResults
-			Timers  []utilcommon.Timers
-		}{Results: results, Timers: timers}
-		return
-
-	}()
-	var results []EncryptedResults
-	var timers []utilcommon.Timers
-
-	tickTime := 0
-resLoop:
-	for {
-		select {
-		case <-resTimeout:
-			err = fmt.Errorf("Timeout %d", resultTimeout)
-		case err = <-errChan:
-			logrus.Error(err)
-			return
-		case res := <-resultChan:
-			results = res.Results
-			timers = res.Timers
-			break resLoop
-		case <-resultTicks:
-			tickTime += int(tick)
-			logrus.Debugf("waiting for response (%d seconds)", tickTime)
-		}
-	}
-	clientTimers.AddTimers("medco-connector-survival-query-remote-execution", timer, nil)
-	logrus.Debug("query executed")
-	logrus.Tracef("encrypted results: %+v", results)
-	logrus.Tracef("timers: %v", timers)
-
-	// --- decrypt result
-	timer = time.Now()
-	logrus.Debug("decrypting results")
-	clearResults := make([]ClearResults, len(results))
-	for idx, encryptedResults := range results {
-		clearResults[idx], err = encryptedResults.Decrypt(query.userPrivateKey)
-		if err != nil {
-			err = fmt.Errorf("while decrypting survival analysis results: %s", err.Error())
-			logrus.Error(err)
-			return
-		}
-	}
-	clientTimers.AddTimers("medco-connector-decryptions", timer, nil)
-	logrus.Debug("results decrypted")
-	logrus.Tracef("clear results: %+v", clearResults)
-
-	// --- printing results
-	logrus.Debug("printing results")
+func printResults(clearResults []ClearResults, timers []util.Timers, clientTimers util.Timers, timeResolution, resultFile, timerFile string) (err error) {
+	logrus.Info("printing results")
 	csv, err := utilclient.NewCSV(resultFile)
 	if err != nil {
 		err = fmt.Errorf("while creating CSV file handler: %s", err)
@@ -248,7 +265,7 @@ resLoop:
 			var group = clearResults[nodeIdx][groupIdx]
 			for _, timePoint := range group.TimePoints {
 				csv.Write([]string{
-					parameters.TimeResolution,
+					timeResolution,
 					strconv.Itoa(nodeIdx),
 					strconv.Itoa(groupIdx),
 					strconv.FormatInt(group.InitialCount, 10),
@@ -279,10 +296,10 @@ resLoop:
 		logrus.Error(err)
 		return
 	}
-	logrus.Debug("results printed")
+	logrus.Info("results printed")
 
 	// print timers
-	logrus.Debug("dumping timers")
+	logrus.Info("dumping timers")
 	dumpCSV, err := utilclient.NewCSV(timerFile)
 	if err != nil {
 		err = fmt.Errorf("while creating CSV file handler: %s", err)
@@ -297,7 +314,7 @@ resLoop:
 	}
 	// each remote time profilings
 	for nodeIdx, nodeTimers := range timers {
-		sortedTimers := utilclient.SortTimers(nodeTimers)
+		sortedTimers := nodeTimers.SortTimers()
 		for _, duration := range sortedTimers {
 			dumpCSV.Write([]string{
 				strconv.Itoa(nodeIdx),
@@ -313,7 +330,7 @@ resLoop:
 
 	}
 	// and local
-	localSortedTimers := utilclient.SortTimers(clientTimers)
+	localSortedTimers := clientTimers.SortTimers()
 	for _, duration := range localSortedTimers {
 		dumpCSV.Write([]string{
 			"client",
@@ -333,6 +350,7 @@ resLoop:
 		logrus.Error(err)
 		return
 	}
+	logrus.Info()
 	err = dumpCSV.Close()
 	if err != nil {
 		err = fmt.Errorf("while closing timer file: %s", err)
@@ -340,8 +358,7 @@ resLoop:
 		return
 	}
 
-	logrus.Debug("timers dumped")
-
+	logrus.Info("timers dumped")
 	return
 
 }

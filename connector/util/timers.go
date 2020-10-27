@@ -1,6 +1,8 @@
-package utilcommon
+package util
 
 import (
+	"sort"
+	"strconv"
 	"time"
 
 	"github.com/ldsec/medco/connector/restapi/models"
@@ -24,7 +26,7 @@ func (timers Timers) AddTimers(timerName string, since time.Time, additionalTime
 		}
 		timers[timerName] = time.Since(since)
 	} else {
-		logrus.Warn("ignoring timer with emtpy label string")
+		logrus.Warn("ignoring timer with empty label string")
 	}
 
 	if additionalTimers != nil {
@@ -48,8 +50,23 @@ func (timers Timers) TimersToAPIModel() models.Timers {
 	return res
 }
 
-// APIModelToTimers converts the API model for timers into a Timers instance. Execution times are converted from nilliseconds to nanoseconds
-func APIModelToTimers(APITimers models.Timers) Timers {
+// SortTimers takes a Timers instance, whichi is a Golang map, and output a sorted 2D string array . This is useful for deterministic output as Golang maps are not deterministic. Stored times are converted from nanoseconds to milliseconds.
+func (timers Timers) SortTimers() [][]string {
+	names := make([]string, 0, len(timers))
+	res := make([][]string, len(timers))
+	for name := range timers {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+
+	for i, name := range names {
+		res[i] = append([]string{name}, strconv.FormatInt(timers[name].Milliseconds(), 10))
+	}
+	return res
+}
+
+// NewTimersFromAPIModel converts the API model for timers into a Timers instance. Execution times are converted from nilliseconds to nanoseconds
+func NewTimersFromAPIModel(APITimers models.Timers) Timers {
 	res := NewTimers()
 	for _, timer := range APITimers {
 		res[timer.Name] = time.Duration(*timer.Milliseconds) * time.Millisecond

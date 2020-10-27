@@ -1,16 +1,17 @@
-package medcoclient
+package exploreclient
 
 import (
 	"crypto/tls"
+	"net/http"
+	"net/url"
+	"time"
+
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/ldsec/medco/connector/restapi/client"
 	"github.com/ldsec/medco/connector/restapi/client/medco_node"
 	"github.com/ldsec/medco/connector/restapi/models"
 	utilclient "github.com/ldsec/medco/connector/util/client"
 	"github.com/sirupsen/logrus"
-	"net/http"
-	"net/url"
-	"time"
 )
 
 // ExploreSearchConcept is a MedCo client explore concept search
