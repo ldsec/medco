@@ -6,10 +6,10 @@ PASSWORD=${2:-test}
 
 # test1 / note: expected without any \n, \r, \t, nor space
 searchConceptChildren1="/"
-resultSearchConceptChildren1="PATHTYPE/I2B2/I2B2/concept_container/CLINICAL_NON_SENSITIVE/medco/clinical/nonsensitive/concept_container/CLINICAL_SENSITIVE/medco/clinical/sensitive/concept_container/GENOMIC/medco/genomic/concept_container/SPHN/SPHNv2020.1/concept_container"
+resultSearchConceptChildren1="PATHAPPLIED_PATHTYPE/I2B2/I2B2/@concept_container/CLINICAL_NON_SENSITIVE/medco/clinical/nonsensitive/@concept_container/CLINICAL_SENSITIVE/medco/clinical/sensitive/@concept_container/GENOMIC/medco/genomic/@concept_container/SPHN/SPHNv2020.1/@concept_container"
 
 searchConceptChildren2="/E2ETEST/e2etest/"
-resultSearchConceptChildren2="PATHTYPE/E2ETEST/e2etest/1/concept/E2ETEST/e2etest/2/concept/E2ETEST/e2etest/3/concept/E2ETEST/modifiers/modifier_folder"
+resultSearchConceptChildren2="PATHAPPLIED_PATHTYPE/E2ETEST/e2etest/1/@concept/E2ETEST/e2etest/2/@concept/E2ETEST/e2etest/3/@concept/E2ETEST/modifiers//e2etest/%modifier_folder"
 
 searchModifierChildren="/E2ETEST/modifiers/ /e2etest/% /E2ETEST/e2etest/1/"
 resultSearchModifierChildren="PATHTYPE/E2ETEST/modifiers/1/modifier"

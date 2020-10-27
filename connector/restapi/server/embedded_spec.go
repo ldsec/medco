@@ -483,6 +483,9 @@ func init() {
         "leaf"
       ],
       "properties": {
+        "appliedPath": {
+          "type": "string"
+        },
         "code": {
           "type": "string"
         },
@@ -1441,6 +1444,9 @@ func init() {
         "leaf"
       ],
       "properties": {
+        "appliedPath": {
+          "type": "string"
+        },
         "code": {
           "type": "string"
         },

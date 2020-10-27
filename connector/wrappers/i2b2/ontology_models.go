@@ -141,7 +141,10 @@ type Concept struct {
 }
 
 // Modifier is an i2b2 XML modifier
-type Modifier Concept
+type Modifier struct {
+	Concept
+	AppliedPath string `xml:"applied_path"`
+}
 
 // OntRespModifiersMessageBody is the message_body of the i2b2 get_modifiers response message
 type OntRespModifiersMessageBody struct {

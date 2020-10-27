@@ -2,11 +2,12 @@ package i2b2
 
 import (
 	"errors"
-	"github.com/ldsec/medco/connector/restapi/models"
-	"github.com/ldsec/medco/connector/util/server"
-	"github.com/sirupsen/logrus"
 	"strconv"
 	"strings"
+
+	"github.com/ldsec/medco/connector/restapi/models"
+	utilserver "github.com/ldsec/medco/connector/util/server"
+	"github.com/sirupsen/logrus"
 )
 
 // GetOntologyChildren makes request to browse the i2b2 ontology
@@ -146,8 +147,9 @@ func parseI2b2Concept(concept Concept) (result *models.ExploreSearchResultElemen
 			Encrypted:   &false,
 			ChildrenIds: []int64{},
 		},
-		Metadata: nil,
-		Path:     convertPathFromI2b2Format(concept.Key),
+		Metadata:    nil,
+		Path:        convertPathFromI2b2Format(concept.Key),
+		AppliedPath: "@",
 		//Type: models.SearchResultElementTypeConcept,
 		//Leaf: false,
 	}
@@ -241,7 +243,12 @@ func parseI2b2Concept(concept Concept) (result *models.ExploreSearchResultElemen
 
 func parseI2b2Modifier(modifier Modifier) (result *models.ExploreSearchResultElement, err error) {
 
-	return parseI2b2Concept(Concept(modifier))
+	result, err = parseI2b2Concept(modifier.Concept)
+	if err != nil {
+		return
+	}
+	result.AppliedPath = convertPathFromI2b2Format(modifier.AppliedPath)
+	return
 
 }
 
