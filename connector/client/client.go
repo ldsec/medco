@@ -5,17 +5,18 @@ import (
 	"encoding/csv"
 	"errors"
 	"fmt"
-	"github.com/ldsec/medco/connector/restapi/models"
-	utilclient "github.com/ldsec/medco/connector/util/client"
-	"github.com/ldsec/medco/connector/wrappers/unlynx"
-	"github.com/ldsec/medco/loader/identifiers"
-	"github.com/sirupsen/logrus"
 	"io"
 	"os"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/ldsec/medco/connector/restapi/models"
+	utilclient "github.com/ldsec/medco/connector/util/client"
+	"github.com/ldsec/medco/connector/wrappers/unlynx"
+	"github.com/ldsec/medco/loader/identifiers"
+	"github.com/sirupsen/logrus"
 )
 
 // ExecuteClientQuery executes and displays the result of the MedCo client query
@@ -295,9 +296,9 @@ func ExecuteClientSearchConcept(token, username, password, conceptPath, resultOu
 		return
 	}
 
-	output := "PATH" + "\t" + "TYPE" + "\n"
+	output := "PATH" + "\t" + "APPLIED_PATH" + "\t" + "TYPE" + "\n"
 	for _, child := range result.Payload.Results {
-		output += child.Path + "\t" + child.Type + "\n"
+		output += child.Path + "\t" + child.AppliedPath + "\t" + child.Type + "\n"
 	}
 
 	if resultOutputFilePath == "" {
