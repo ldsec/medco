@@ -76,16 +76,11 @@ func main() {
 		//	Usage: "YAML parameter file URL",
 		//	Value: "",
 		//},
-		//cli.StringFlag{
-		//	Name:  "resultFile, r",
-		//	Usage: "Output file for the result CSV. Printed to stdout if omitted.",
-		//	Value: "",
-		//},
-		//cli.StringFlag{
-		//	Name:  "dumpFile, d",
-		//	Usage: "Output file for the timers CSV. Printed to stdout if omitted.",
-		//	Value: "",
-		//},
+		cli.StringFlag{
+			Name:  "dumpFile, d",
+			Usage: "Output file for the timers CSV. Printed to stdout if omitted.",
+			Value: "",
+		},
 		cli.IntFlag{
 			Name:     "limit, l",
 			Usage:    "Max limit of survival analysis. Unit depends on chosen granularity, default: day",
@@ -273,8 +268,8 @@ func main() {
 					c.GlobalString("user"),
 					c.GlobalString("password"),
 					c.GlobalBool("disableTLSCheck"),
-					"",
-					"",
+					c.GlobalString("outputFile"),
+					c.String("dumpFile"),
 					c.Int("limit"),
 					c.String("cohortName"),
 					c.String("granularity"),

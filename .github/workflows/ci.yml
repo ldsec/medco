@@ -71,11 +71,14 @@ jobs:
       - name: Run unit tests depending on deployment without a loading performed
         run: make test_codecov_e2e_preloading
 
+      - name: Run e2e queries before loading
+        run: bash test/test_cli_preloading.sh $MEDCO_USER_USERNAME $MEDCO_USER_PASSWORD
+        
       - name: Load data in deployment
         run: make load_test_data
 
       - name: Run unit tests depending on deployment with loadings performed
         run: make test_codecov_e2e_postloading
 
-      - name: Run e2e queries
-        run: bash test/test_cli.sh $MEDCO_USER_USERNAME $MEDCO_USER_PASSWORD
+      - name: Run e2e queries after loading
+        run: bash test/test_cli_postloading.sh $MEDCO_USER_USERNAME $MEDCO_USER_PASSWORD
