@@ -105,3 +105,35 @@ func (o *DeleteCohortsDefaultBody) UnmarshalBinary(b []byte) error {
 	*o = res
 	return nil
 }
+
+// DeleteCohortsNotFoundBody delete cohorts not found body
+//
+// swagger:model DeleteCohortsNotFoundBody
+type DeleteCohortsNotFoundBody struct {
+
+	// message
+	Message string `json:"message,omitempty"`
+}
+
+// Validate validates this delete cohorts not found body
+func (o *DeleteCohortsNotFoundBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *DeleteCohortsNotFoundBody) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *DeleteCohortsNotFoundBody) UnmarshalBinary(b []byte) error {
+	var res DeleteCohortsNotFoundBody
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}

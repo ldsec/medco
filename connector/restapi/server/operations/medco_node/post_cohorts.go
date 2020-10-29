@@ -8,9 +8,11 @@ package medco_node
 import (
 	"net/http"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 
 	"github.com/ldsec/medco/connector/restapi/models"
 )
@@ -74,23 +76,102 @@ func (o *PostCohorts) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 }
 
+// PostCohortsBadRequestBody post cohorts bad request body
+//
+// swagger:model PostCohortsBadRequestBody
+type PostCohortsBadRequestBody struct {
+
+	// message
+	Message string `json:"message,omitempty"`
+}
+
+// Validate validates this post cohorts bad request body
+func (o *PostCohortsBadRequestBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *PostCohortsBadRequestBody) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *PostCohortsBadRequestBody) UnmarshalBinary(b []byte) error {
+	var res PostCohortsBadRequestBody
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
 // PostCohortsBody post cohorts body
 //
 // swagger:model PostCohortsBody
 type PostCohortsBody struct {
 
 	// creation date
-	CreationDate string `json:"creationDate,omitempty"`
+	// Required: true
+	CreationDate *string `json:"creationDate"`
 
 	// patient set ID
-	PatientSetID int64 `json:"patientSetID,omitempty"`
+	// Required: true
+	PatientSetID *int64 `json:"patientSetID"`
 
 	// update date
-	UpdateDate string `json:"updateDate,omitempty"`
+	// Required: true
+	UpdateDate *string `json:"updateDate"`
 }
 
 // Validate validates this post cohorts body
 func (o *PostCohortsBody) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateCreationDate(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validatePatientSetID(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateUpdateDate(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *PostCohortsBody) validateCreationDate(formats strfmt.Registry) error {
+
+	if err := validate.Required("cohortRequest"+"."+"creationDate", "body", o.CreationDate); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *PostCohortsBody) validatePatientSetID(formats strfmt.Registry) error {
+
+	if err := validate.Required("cohortRequest"+"."+"patientSetID", "body", o.PatientSetID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *PostCohortsBody) validateUpdateDate(formats strfmt.Registry) error {
+
+	if err := validate.Required("cohortRequest"+"."+"updateDate", "body", o.UpdateDate); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -105,6 +186,38 @@ func (o *PostCohortsBody) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (o *PostCohortsBody) UnmarshalBinary(b []byte) error {
 	var res PostCohortsBody
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+// PostCohortsConflictBody post cohorts conflict body
+//
+// swagger:model PostCohortsConflictBody
+type PostCohortsConflictBody struct {
+
+	// message
+	Message string `json:"message,omitempty"`
+}
+
+// Validate validates this post cohorts conflict body
+func (o *PostCohortsConflictBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *PostCohortsConflictBody) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *PostCohortsConflictBody) UnmarshalBinary(b []byte) error {
+	var res PostCohortsConflictBody
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -137,6 +250,38 @@ func (o *PostCohortsDefaultBody) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (o *PostCohortsDefaultBody) UnmarshalBinary(b []byte) error {
 	var res PostCohortsDefaultBody
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+// PostCohortsNotFoundBody post cohorts not found body
+//
+// swagger:model PostCohortsNotFoundBody
+type PostCohortsNotFoundBody struct {
+
+	// message
+	Message string `json:"message,omitempty"`
+}
+
+// Validate validates this post cohorts not found body
+func (o *PostCohortsNotFoundBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *PostCohortsNotFoundBody) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *PostCohortsNotFoundBody) UnmarshalBinary(b []byte) error {
+	var res PostCohortsNotFoundBody
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

@@ -80,66 +80,17 @@ func (q *Query) Execute() error {
 	initialCounts := make([]int64, 0)
 	eventGroups := make(EventGroups, 0)
 	timeLimitInDays := q.TimeLimit * granularityValues[q.TimeGranularity]
-
-	// --- cohort patient list
-
 	timer := time.Now()
-	cohort, err := querytoolsserver.GetPatientList(q.UserID, q.CohortName)
-	q.Result.Timers.AddTimers("medco-connector-get-patient-list", timer, nil)
-	logrus.Debug("got patients")
 
-	if err != nil {
-		logrus.Error("error while getting patient list")
-		return err
-	}
+	startConceptCode, endConceptCode, cohort, timers, err := prepareArguments(q.UserID, q.CohortName, q.StartConcept, q.EndConcept)
 
-	// --- get concept and modifier codes from the ontology
-	err = utilserver.I2B2DBConnection.Ping()
-
-	if err != nil {
-		logrus.Error("Unable to connect clear project database, ", err)
-		return err
-	}
-	startConceptCode, err := getCode(q.StartConcept)
-	if err != nil {
-		logrus.Error("Error while retrieving concept code, ", err)
-		return err
-	}
-	endConceptCode, err := getCode(q.EndConcept)
-	if err != nil {
-		logrus.Error("Error while retrieving concept code, ", err)
-		return err
-	}
+	q.Result.Timers.AddTimers("", timer, timers)
 
 	// --- build sub groups
 
 	definitions := q.SubGroupDefinitions
 	if q.SubGroupDefinitions == nil || len(q.SubGroupDefinitions) == 0 {
-		newItems := make([]*models.PanelItemsItems0, 1)
-		encrypted := new(bool)
-		not := new(bool)
-		*encrypted = false
-		*not = false
-		term := new(string)
-		*term = q.StartConcept
-		newItems[0] = &models.PanelItemsItems0{
-			Encrypted: encrypted,
-			Operator:  "equals",
-			QueryTerm: term,
-		}
-		newPanels := make([]*models.Panel, 1)
-		newPanels[0] = &models.Panel{
-			Items: newItems,
-			Not:   not,
-		}
-
-		definitions = []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0{
-			{
-				CohortName: "Full cohort",
-				Panels:     newPanels,
-			},
-		}
-
+		definitions = fullCohort(q.StartConcept)
 	}
 	waitGroup := &sync.WaitGroup{}
 	waitGroup.Add(len(definitions))
@@ -178,20 +129,26 @@ func (q *Query) Execute() error {
 			}
 
 			timer = time.Now()
+			logrus.Infof("I2B2 explore for subgroup %d", i)
+			logrus.Tracef("panels %+v", panels)
 			initialCount, patientList, err := SubGroupExplore(q.QueryName, i, panels, not)
+			if err != nil {
+				err = fmt.Errorf("during subgroup explore procedure: %s", err.Error())
+				errChan <- err
+				return
+			}
+			logrus.Infof("successful I2B2 explore query %d", i)
 			timers.AddTimers(fmt.Sprintf("medco-connector-i2b2-query-group%d", i), timer, nil)
 			patientList = intersect(cohort, patientList)
 			patientLists = append(patientLists, patientList)
 			initialCounts = append(initialCounts, initialCount)
 			logrus.Debug("Initial Counts", initialCounts)
-			if err != nil {
-				errChan <- err
-				return
-			}
+
 			timer = time.Now()
 			initialCountEncrypt, err := unlynx.EncryptWithCothorityKey(initialCount)
 			timers.AddTimers(fmt.Sprintf("medco-connector-encrypt-init-count-group%d", i), timer, nil)
 			if err != nil {
+				err = fmt.Errorf("while encrypting initial count: %s", err.Error())
 				errChan <- err
 				return
 			}
@@ -210,60 +167,16 @@ func (q *Query) Execute() error {
 			)
 			timers.AddTimers(fmt.Sprintf("medco-connector-build-timepoints%d", i), timer, nil)
 			if err != nil {
-				logrus.Error("error while getting building time points", timer)
+				err = fmt.Errorf("error while getting building time points: %s", err.Error())
 				errChan <- err
 				return
 			}
 			logrus.Debugf("got %d time points", len(sqlTimePoints))
 			logrus.Tracef("%+v", sqlTimePoints)
+			processGroupResultTimers := processGroupResult(errChan, newEventGroup, sqlTimePoints, timeLimitInDays, q.TimeGranularity, i)
+			q.Result.Timers.AddTimers("", timer, processGroupResultTimers)
 
-			// --- change time resolution
-			timer = time.Now()
-			sqlTimePoints, err = granularity(sqlTimePoints, q.TimeGranularity)
-			if err != nil {
-				logrus.Error("Error while changing granularity")
-				errChan <- err
-				return
-			}
-			timers.AddTimers(fmt.Sprintf("medco-connector-change-timepoints-to-new-resolution%d", i), timer, nil)
-			logrus.Debugf("changed resolution for %s,  got %d timepoints", q.TimeGranularity, len(sqlTimePoints))
-			logrus.Tracef("time points with resolution %s %+v", q.TimeGranularity, sqlTimePoints)
-
-			// --- expand
-			timer = time.Now()
-			sqlTimePoints, err = expansion(sqlTimePoints, timeLimitInDays, q.TimeGranularity)
-			if err != nil {
-				logrus.Error("Error while expanding")
-				errChan <- err
-				return
-			}
-			timers.AddTimers(fmt.Sprintf("medco-connector-expansion%d", i), timer, nil)
-			logrus.Debugf("expanded to %d timepoints", len(sqlTimePoints))
-			logrus.Tracef("expanded time points %v", sqlTimePoints)
-
-			//locally encrypt
-			timer = time.Now()
-			for _, sqlTimePoint := range sqlTimePoints {
-
-				localEventEncryption, err := unlynx.EncryptWithCothorityKey(sqlTimePoint.Events.EventsOfInterest)
-				if err != nil {
-					errChan <- err
-					return
-				}
-				localCensoringEncryption, err := unlynx.EncryptWithCothorityKey(sqlTimePoint.Events.CensoringEvents)
-				if err != nil {
-					errChan <- err
-				}
-
-				newEventGroup.TimePointResults = append(newEventGroup.TimePointResults, &TimePointResult{
-					TimePoint: sqlTimePoint.Time,
-					Result: Result{
-						EventValueAgg:     localEventEncryption,
-						CensoringValueAgg: localCensoringEncryption,
-					}})
-
-			}
-			logrus.Tracef("Eventt groups %v", newEventGroup)
+			logrus.Tracef("Event groups %v", newEventGroup)
 			timers.AddTimers(fmt.Sprintf("medco-connector-local-encryption%d", i), timer, nil)
 			channels[i] <- struct {
 				*EventGroup
@@ -298,6 +211,9 @@ func (q *Query) Execute() error {
 	var aksTimers util.Timers
 	q.Result.EncEvents, aksTimers, err = AKSgroups(q.QueryName+"_AGG_AND_KEYSWITCH", eventGroups, q.UserPublicKey)
 	q.Result.Timers.AddTimers("medco-connector-aggregate-and-key-switch", timer, aksTimers)
+	if err != nil {
+		err = fmt.Errorf("during aggregation and keyswitch: %s", err.Error())
+	}
 	return err
 }
 
@@ -350,6 +266,43 @@ func (q *Query) Validate() error {
 	}
 	return nil
 
+}
+
+// prepareArguments retrieves concept codes and patients that will be used as the arguments of direct SQL call
+func prepareArguments(userID, cohortName, startConcept, endConcept string) (startConceptCode, endConceptCode string, cohort []int64, timers util.Timers, err error) {
+	timers = make(map[string]time.Duration)
+	// --- cohort patient list
+	timer := time.Now()
+	logrus.Info("get patients")
+	cohort, err = querytoolsserver.GetPatientList(userID, cohortName)
+
+	if err != nil {
+		logrus.Error("error while getting patient list")
+		return
+	}
+
+	timers.AddTimers("medco-connector-get-patient-list", timer, nil)
+	logrus.Info("got patients")
+
+	// --- get concept and modifier codes from the ontology
+	logrus.Info("get concept and modifier codes")
+	err = utilserver.I2B2DBConnection.Ping()
+	if err != nil {
+		err = fmt.Errorf("while connecting to clear project database: %s", err.Error())
+		return
+	}
+	startConceptCode, err = getCode(startConcept)
+	if err != nil {
+		err = fmt.Errorf("while retrieving start concept code: %s", err.Error())
+		return
+	}
+	endConceptCode, err = getCode(endConcept)
+	if err != nil {
+		err = fmt.Errorf("while retrieving end concept code: %s", err.Error())
+		return
+	}
+	logrus.Info("got concept and modifier codes")
+	return
 }
 
 // expansion takes a slice of SQLTimepoints and add encryption of zeros for events of interest and censoring events for each missing relative time from 0 to timeLimit.
@@ -411,4 +364,75 @@ func getCode(path string) (string, error) {
 
 	return res[0].Code, nil
 
+}
+
+// processGroupResult change resolution, expand and encrypt group result
+func processGroupResult(errChan chan error, newEventGroup *EventGroup, sqlTimePoints util.TimePoints, timeLimitInDays int, timeGranularity string, index int) (timers util.Timers) {
+	timers = make(map[string]time.Duration)
+	// --- expand
+	timer := time.Now()
+	sqlTimePoints, err := expansion(sqlTimePoints, timeLimitInDays, timeGranularity)
+	if err != nil {
+		err = fmt.Errorf("while expanding: %s", err.Error())
+		errChan <- err
+		return
+	}
+	timers.AddTimers(fmt.Sprintf("medco-connector-expansion %d", index), timer, nil)
+	logrus.Debugf("expanded to %d timepoints", len(sqlTimePoints))
+	logrus.Tracef("expanded time points %v", sqlTimePoints)
+
+	// --- locally encrypt
+	timer = time.Now()
+	for _, sqlTimePoint := range sqlTimePoints {
+
+		localEventEncryption, err := unlynx.EncryptWithCothorityKey(sqlTimePoint.Events.EventsOfInterest)
+		if err != nil {
+			err = fmt.Errorf("while encrypting event count: %s", err.Error())
+			errChan <- err
+			return
+		}
+		localCensoringEncryption, err := unlynx.EncryptWithCothorityKey(sqlTimePoint.Events.CensoringEvents)
+		if err != nil {
+			err = fmt.Errorf("while encrypting censoring count: %s", err.Error())
+			errChan <- err
+		}
+
+		newEventGroup.TimePointResults = append(newEventGroup.TimePointResults, &TimePointResult{
+			TimePoint: sqlTimePoint.Time,
+			Result: Result{
+				EventValueAgg:     localEventEncryption,
+				CensoringValueAgg: localCensoringEncryption,
+			}})
+
+	}
+	return timers
+
+}
+
+// fullCohort is called to build an explore definition when no subgroups are provided
+func fullCohort(startConcept string) []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0 {
+	newItems := make([]*models.PanelItemsItems0, 1)
+	encrypted := new(bool)
+	not := new(bool)
+	*encrypted = false
+	*not = false
+	term := new(string)
+	*term = startConcept
+	newItems[0] = &models.PanelItemsItems0{
+		Encrypted: encrypted,
+		Operator:  "equals",
+		QueryTerm: term,
+	}
+	newPanels := make([]*models.Panel, 1)
+	newPanels[0] = &models.Panel{
+		Items: newItems,
+		Not:   not,
+	}
+
+	return []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0{
+		{
+			CohortName: "Full cohort",
+			Panels:     newPanels,
+		},
+	}
 }

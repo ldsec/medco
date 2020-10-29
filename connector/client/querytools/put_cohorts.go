@@ -70,8 +70,8 @@ func NewPutCohorts(token string, patientSetID []int, cohortName string, disableT
 }
 
 // Execute executes the post cohorts query
-func (PutCohorts *PutCohorts) Execute() (err error) {
-	nOfNodes := len(PutCohorts.httpMedCoClients)
+func (putCohorts *PutCohorts) Execute() (err error) {
+	nOfNodes := len(putCohorts.httpMedCoClients)
 	errChan := make(chan error)
 	resultChan := make(chan *medco_node.PutCohortsOK, nOfNodes)
 	logrus.Infof("There are %d nodes", nOfNodes)
@@ -80,7 +80,7 @@ func (PutCohorts *PutCohorts) Execute() (err error) {
 
 		go func(idx int) {
 			logrus.Infof("Submitting to node %d", idx)
-			res, Error := PutCohorts.submitToNode(idx)
+			res, Error := putCohorts.submitToNode(idx)
 			if Error != nil {
 				logrus.Errorf("Query tool execution error : %s", Error)
 				errChan <- Error
@@ -112,19 +112,24 @@ func (PutCohorts *PutCohorts) Execute() (err error) {
 	return
 }
 
-func (PutCohorts *PutCohorts) submitToNode(nodeIdx int) (*medco_node.PutCohortsOK, error) {
+func (putCohorts *PutCohorts) submitToNode(nodeIdx int) (*medco_node.PutCohortsOK, error) {
 	creationDate := time.Now()
 	updateDate := time.Now()
 	params := medco_node.NewPutCohortsParamsWithTimeout(time.Duration(utilclient.QueryTimeoutSeconds) * time.Second)
 	body := medco_node.PutCohortsBody{
-		CreationDate: creationDate.Format(time.RFC3339),
-		UpdateDate:   updateDate.Format(time.RFC3339),
-		PatientSetID: int64(PutCohorts.patientSetID[nodeIdx]),
+		CreationDate: new(string),
+		UpdateDate:   new(string),
+		PatientSetID: new(int64),
 	}
-	params.SetCohortRequest(body)
-	params.SetName(PutCohorts.cohortName)
 
-	response, err := PutCohorts.httpMedCoClients[nodeIdx].MedcoNode.PutCohorts(params, httptransport.BearerToken(PutCohorts.authToken))
+	*body.CreationDate = creationDate.Format(time.RFC3339)
+	*body.UpdateDate = updateDate.Format(time.RFC3339)
+	*body.PatientSetID = int64(putCohorts.patientSetID[nodeIdx])
+
+	params.SetCohortRequest(body)
+	params.SetName(putCohorts.cohortName)
+
+	response, err := putCohorts.httpMedCoClients[nodeIdx].MedcoNode.PutCohorts(params, httptransport.BearerToken(putCohorts.authToken))
 	if err != nil {
 		return nil, err
 	}

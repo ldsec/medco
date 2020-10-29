@@ -1,6 +1,7 @@
 package survivalserver
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -12,16 +13,20 @@ import (
 
 // buildTimePoints execute a SQL query that returns event counts per time point, for given input patient set, start and end  concept codes and modifiers
 func buildTimePoints(patientList []int64, startConceptCode string, startConceptModifier string, endConceptCode string, endConceptModifier string, timeLimit int) (timePoints util.TimePoints, err error) {
-	logrus.Debug("SQL query : " + sql6)
+
 	pList := make([]string, len(patientList))
 	for i, pNum := range patientList {
 		pList[i] = strconv.FormatInt(pNum, 10)
 	}
 	patients := "{" + strings.Join(pList, ",") + "}"
+	logrus.Debugf("selecting start concept code %s, start concept modifier %s, patients list %s, end concept code %s, end concept modifier %s, time limit %d")
+	logrus.Debugf("SQL: %s", sql6)
 	rows, err := utilserver.I2B2DBConnection.Query(sql6, startConceptCode, startConceptModifier, patients, endConceptCode, endConceptModifier, timeLimit)
 	if err != nil {
+		err = fmt.Errorf("while execution SQL query: %s", err.Error())
 		return
 	}
+	logrus.Debug("successfully selected")
 	timePointString := new(string)
 	eventsString := new(string)
 	censoringString := new(string)
@@ -30,23 +35,25 @@ func buildTimePoints(patientList []int64, startConceptCode string, startConceptM
 		scanErr := rows.Scan(timePointString, eventsString, censoringString)
 		if scanErr != nil {
 			err = scanErr
+			err = fmt.Errorf("while scanning SQL record: %s", err.Error())
 			return
 		}
 		sqlTimePoint.Events.EventsOfInterest, err = strconv.ParseInt(*eventsString, 10, 64)
 		if err != nil {
-
+			err = fmt.Errorf("while scanning parsing integer string (number of events) \"%s\": %s", *eventsString, err.Error())
 			return
 		}
 		sqlTimePoint.Events.CensoringEvents, err = strconv.ParseInt(*censoringString, 10, 64)
 		if err != nil {
-
+			err = fmt.Errorf("while scanning parsing integer string (number of censoring) \"%s\": %s", *censoringString, err.Error())
 			return
 		}
 		sqlTimePoint.Time, err = strconv.Atoi(*timePointString)
 		if err != nil {
-
+			err = fmt.Errorf("while scanning parsing integer string (relative time) \"%s\": %s", *timePointString, err.Error())
 			return
 		}
+		logrus.Tracef("new time point: %+v", sqlTimePoint)
 		timePoints = append(timePoints, sqlTimePoint)
 	}
 	return

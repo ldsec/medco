@@ -50,6 +50,7 @@ func GetSavedCohorts(userID string) ([]util.Cohort, error) {
 	logrus.Debugf("SQL: %s", getCohorts)
 	rows, err := utilserver.DBConnection.Query(getCohorts, userID)
 	if err != nil {
+		err = fmt.Errorf("while executing SQL: %s", err.Error())
 		return nil, err
 	}
 	logrus.Debug("successfully selected")
@@ -105,6 +106,7 @@ func GetDate(userID string, cohortID int) (time.Time, error) {
 	timeString := new(string)
 	err := row.Scan(timeString)
 	if err != nil {
+		err = fmt.Errorf("while scanning SQL record: %s", err.Error())
 		return time.Now(), err
 	}
 	logrus.Debug("successfully selected")
@@ -123,11 +125,13 @@ func InsertCohort(userID string, queryID int, cohortName string, createDate, upd
 	res := new(string)
 	err := row.Scan(res)
 	if err != nil {
+		err = fmt.Errorf("while scanning SQL record: %s", err.Error())
 		return -1, err
 	}
 	logrus.Debug("successfully inserted")
 	cohortID, err := strconv.Atoi(*res)
 	if err != nil {
+		err = fmt.Errorf("while parsing integer string \"%s\": %s", *res, err.Error())
 		return -1, err
 	}
 	return cohortID, err
@@ -141,11 +145,13 @@ func UpdateCohort(cohortName, userID string, queryID int, updateDate time.Time) 
 	res := new(string)
 	err := row.Scan(res)
 	if err != nil {
+		err = fmt.Errorf("while scanning SQL record: %s", err.Error())
 		return -1, err
 	}
 	logrus.Debug("successfully updated")
 	cohortID, err := strconv.Atoi(*res)
 	if err != nil {
+		err = fmt.Errorf("while parsing integer string \"%s\": %s", *res, err.Error())
 		return -1, err
 	}
 	return cohortID, err
@@ -159,6 +165,7 @@ func DoesCohortExist(userID, cohortName string) (bool, error) {
 	res := new(string)
 	err := row.Scan(res)
 	if err != nil {
+		err = fmt.Errorf("while scanning SQL record: %s", err.Error())
 		return false, err
 	}
 	logrus.Debug("successfully selected")
@@ -168,10 +175,15 @@ func DoesCohortExist(userID, cohortName string) (bool, error) {
 
 // RemoveCohort deletes cohort
 func RemoveCohort(userID, cohortName string) error {
-	logrus.Debugf("deleting user ID %s, cohort name %s")
+	logrus.Debugf("deleting user ID %s, cohort name %s", userID, cohortName)
 	logrus.Debugf("SQL: %s", removeCohort)
 	_, err := utilserver.DBConnection.Exec(removeCohort, userID, cohortName)
-	return err
+	if err != nil {
+		err = fmt.Errorf("while executing SQL: %s", err.Error())
+		return err
+	}
+	logrus.Debug("successfully deleted")
+	return nil
 }
 
 const insertCohort string = `

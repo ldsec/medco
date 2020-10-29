@@ -45,11 +45,6 @@ hugoGeneSymbolGetVariantsResult1="-7039476204566471680-7039476580443220992-70394
 hugoGeneSymbolGetVariantsResult2="-7039476204566471680-7039476580443220992"
 hugoGeneSymbolGetVariantsResult3="-7039476780159200256"
 
-# test4 
-getSavedCohortHeaders="node_index,cohort_name,cohort_id,query_id,creation_date,update_date"
-getSavedCohort1="$(printf -- "node_index cohort_name cohort_id query_id\n0 testCohort -1 -1\n1 testCohort -1 -1\n2 testCohort -1 -1")"
-getSavedCohort2="$(printf -- "node_index cohort_name query_id\n0 testCohort -1\n0 testCohort2 -1\n1 testCohort -1\n1 testCohort2 -1\n2 testCohort -1\n2 testCohort2 -1")"
-
 
 test1 () {
   docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /results/result.csv $1 $2
@@ -81,57 +76,6 @@ test3 () {
   echo "result: ${result}" && echo "expected result: ${3}"
   exit 1
   fi
-}
-
-test4 () {
-  docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /results/result.csv get-saved-cohorts
-  result="$(awk -F',' 'NR==1{print $0}' deployments/result.csv)"
-  if [ "${result}" != "${getSavedCohortHeaders}" ];
-  then
-  echo "get-saved-cohorts headers: test failed"
-  echo "result: ${result}" && echo "expected result: ${getSavedCohortHeaders}"
-  exit 1
-  fi
-
-  result="$(awk -F',' '{print $1,$2,$3,$4}' deployments/result.csv)"
-  if [ "${result}" != "${getSavedCohort1}" ];
-  then
-  echo "get-saved-cohorts content before update: test failed"
-  echo "result: ${result}" && echo "expected result: ${getSavedCohort1}"
-  exit 1
-  fi
-
-  docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD add-saved-cohorts -c testCohort2 -p $(echo -1,-1,-1)
-  docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /results/result.csv get-saved-cohorts
-  result="$(awk -F',' '{print $1,$2,$4}' deployments/result.csv)"
-  if [ "${result}" != "${getSavedCohort2}" ];
-  then
-  echo "get-saved-cohorts content after added new cohort: test failed"
-  echo "result: ${result}" && echo "expected result: ${getSavedCohort2}"
-  exit 1
-  fi
-
-
-  docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD update-saved-cohorts -c testCohort2 -p $(echo -1,-1,-1)
-  docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /results/result.csv get-saved-cohorts
-  result="$(awk -F',' '{print $1,$2,$4}' deployments/result.csv)"
-  if [ "${result}" != "${getSavedCohort2}" ];
-  then
-  echo "get-saved-cohorts content after update: test failed"
-  echo "result: ${result}" && echo "expected result: ${getSavedCohort2}"
-  exit 1
-  fi
-
-  docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD remove-saved-cohorts -c testCohort2
-  docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /results/result.csv get-saved-cohorts
-  result="$(awk -F',' '{print $1,$2,$3,$4}' deployments/result.csv)"
-  if [ "${result}" != "${getSavedCohort1}" ];
-  then
-  echo "get-saved-cohorts content after update: test failed"
-  echo "result: ${result}" && echo "expected result: ${getSavedCohort1}"
-  exit 1
-  fi
-
 }
 
 echo "Testing concept-children..."
@@ -170,5 +114,5 @@ test3 "ga-get-variant --z "heterozygous\|unknown" hugo_gene_symbol" "${hugoGeneS
 test3 "ga-get-variant --z "homozygous\|unknown" hugo_gene_symbol" "${hugoGeneSymbolGetVariantsValue}" "${hugoGeneSymbolGetVariantsResult3}"
 test3 "ga-get-variant --z "heterozygous\|homozygous\|unknown" hugo_gene_symbol" "${hugoGeneSymbolGetVariantsValue}" "${hugoGeneSymbolGetVariantsResult1}"
 
-echo "CLI test successful!"
+echo "CLI test 2/2 successful!"
 exit 0

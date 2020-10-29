@@ -218,6 +218,10 @@ paths:
       responses:
         200:
           $ref: "#/responses/survivalAnalysisResponse"
+        400:
+          $ref : "#/responses/badRequestResponse"
+        404:
+          $ref : "#/responses/notFoundResponse"
         default:
           $ref: '#/responses/errorResponse'
       security:
@@ -255,8 +259,12 @@ paths:
       responses:
         200:
           description: "Updated cohort"
+        400:
+          $ref : "#/responses/badRequestResponse"
+        404:
+          $ref : "#/responses/notFoundResponse"
         409:
-          description: "The cohort already exists. Try PUT /node/explore/cohorts to update and existing cohort."
+          $ref : "#/responses/conflictResponse"
         default:
           $ref: '#/responses/errorResponse'
       security:
@@ -279,10 +287,12 @@ paths:
       responses:
         200:
           description: "Updated cohort"
+        400:
+          $ref : "#/responses/badRequestResponse"
         404:
-          description: "The cohort does not exist. Try POST /node/explore/cohorts to create a new cohort."
+          $ref : "#/responses/notFoundResponse"
         409:
-          description: "DB has been updated since last importation. Try GET /node/explore/cohorts to fetch the most recent updates."
+          $ref : "#/responses/conflictResponse"
         default:
           $ref: '#/responses/errorResponse'
       security:
@@ -304,7 +314,7 @@ paths:
         200:
           description: "Deleted cohort"
         404:
-          description: "The cohort does not exist."
+          $ref : '#/responses/notFoundResponse'
         default:
           $ref: '#/responses/errorResponse'
       security:
@@ -362,6 +372,10 @@ parameters:
           type: "string"
         updateDate:
           type: "string"
+      required:
+        - patientSetID
+        - creationDate
+        - updateDate
 
   survivalAnalysisRequest:
     in: "body"
@@ -373,6 +387,7 @@ parameters:
       properties:
         ID:
           type: "string"
+          pattern: '^[\w:-]+$'
         userPublicKey:
           type: "string"
           pattern: '^[\w=-]+$'
@@ -386,6 +401,7 @@ parameters:
             properties:
               cohortName:
                 type: "string"
+                pattern: '^\w+$'
               panels:
                 type: "array"
                 items:
@@ -393,6 +409,7 @@ parameters:
           maxItems: 4
         timeLimit:
           type: "integer"
+          minimum: 1
         timeGranularity:
           type: "string"
           enum:
@@ -402,16 +419,52 @@ parameters:
             - year
         startConcept:
           type: "string"
+          pattern: '^\/$|^((\/[^\/]+)+\/?)$'
         startModifier:
           type: "string"
         endConcept:
           type: "string"
+          pattern: '^\/$|^((\/[^\/]+)+\/?)$'
         endModifier:
           type: "string"
+      required:
+        - ID
+        - userPublicKey
+        - cohortName
+        - timeLimit
+        - timeGranularity
+        - startConcept
+        - startModifier
+        - endConcept
+        - endModifier
 
 responses:
   errorResponse:
     description: "Error response."
+    schema:
+      type: "object"
+      properties:
+        message:
+          type: "string"
+  
+  notFoundResponse:
+    description: "Not found."
+    schema:
+      type: "object"
+      properties:
+        message:
+          type: "string"
+
+  conflictResponse:
+    description: "Conflict with resource's state."
+    schema:
+      type: "object"
+      properties:
+        message:
+          type: "string"
+  
+  badRequestResponse:
+    description: "Bad user input in request."
     schema:
       type: "object"
       properties:

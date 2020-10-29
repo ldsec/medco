@@ -219,6 +219,12 @@ func init() {
           "200": {
             "$ref": "#/responses/survivalAnalysisResponse"
           },
+          "400": {
+            "$ref": "#/responses/badRequestResponse"
+          },
+          "404": {
+            "$ref": "#/responses/notFoundResponse"
+          },
           "default": {
             "$ref": "#/responses/errorResponse"
           }
@@ -280,11 +286,14 @@ func init() {
           "200": {
             "description": "Updated cohort"
           },
+          "400": {
+            "$ref": "#/responses/badRequestResponse"
+          },
           "404": {
-            "description": "The cohort does not exist. Try POST /node/explore/cohorts to create a new cohort."
+            "$ref": "#/responses/notFoundResponse"
           },
           "409": {
-            "description": "DB has been updated since last importation. Try GET /node/explore/cohorts to fetch the most recent updates."
+            "$ref": "#/responses/conflictResponse"
           },
           "default": {
             "$ref": "#/responses/errorResponse"
@@ -321,8 +330,14 @@ func init() {
           "200": {
             "description": "Updated cohort"
           },
+          "400": {
+            "$ref": "#/responses/badRequestResponse"
+          },
+          "404": {
+            "$ref": "#/responses/notFoundResponse"
+          },
           "409": {
-            "description": "The cohort already exists. Try PUT /node/explore/cohorts to update and existing cohort."
+            "$ref": "#/responses/conflictResponse"
           },
           "default": {
             "$ref": "#/responses/errorResponse"
@@ -357,7 +372,7 @@ func init() {
             "description": "Deleted cohort"
           },
           "404": {
-            "description": "The cohort does not exist."
+            "$ref": "#/responses/notFoundResponse"
           },
           "default": {
             "$ref": "#/responses/errorResponse"
@@ -762,6 +777,11 @@ func init() {
       "required": true,
       "schema": {
         "type": "object",
+        "required": [
+          "patientSetID",
+          "creationDate",
+          "updateDate"
+        ],
         "properties": {
           "creationDate": {
             "type": "string"
@@ -818,22 +838,36 @@ func init() {
       "required": true,
       "schema": {
         "type": "object",
+        "required": [
+          "ID",
+          "userPublicKey",
+          "cohortName",
+          "timeLimit",
+          "timeGranularity",
+          "startConcept",
+          "startModifier",
+          "endConcept",
+          "endModifier"
+        ],
         "properties": {
           "ID": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^[\\w:-]+$"
           },
           "cohortName": {
             "type": "string",
             "pattern": "^\\w+$"
           },
           "endConcept": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
           },
           "endModifier": {
             "type": "string"
           },
           "startConcept": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
           },
           "startModifier": {
             "type": "string"
@@ -845,7 +879,8 @@ func init() {
               "type": "object",
               "properties": {
                 "cohortName": {
-                  "type": "string"
+                  "type": "string",
+                  "pattern": "^\\w+$"
                 },
                 "panels": {
                   "type": "array",
@@ -866,7 +901,8 @@ func init() {
             ]
           },
           "timeLimit": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": 1
           },
           "userPublicKey": {
             "type": "string",
@@ -877,6 +913,28 @@ func init() {
     }
   },
   "responses": {
+    "badRequestResponse": {
+      "description": "Bad user input in request.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "conflictResponse": {
+      "description": "Conflict with resource's state.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "errorResponse": {
       "description": "Error response.",
       "schema": {
@@ -998,6 +1056,17 @@ func init() {
           },
           "public-key": {
             "description": "Aggregated public key of the collective authority.",
+            "type": "string"
+          }
+        }
+      }
+    },
+    "notFoundResponse": {
+      "description": "Not found.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "message": {
             "type": "string"
           }
         }
@@ -1334,22 +1403,36 @@ func init() {
             "required": true,
             "schema": {
               "type": "object",
+              "required": [
+                "ID",
+                "userPublicKey",
+                "cohortName",
+                "timeLimit",
+                "timeGranularity",
+                "startConcept",
+                "startModifier",
+                "endConcept",
+                "endModifier"
+              ],
               "properties": {
                 "ID": {
-                  "type": "string"
+                  "type": "string",
+                  "pattern": "^[\\w:-]+$"
                 },
                 "cohortName": {
                   "type": "string",
                   "pattern": "^\\w+$"
                 },
                 "endConcept": {
-                  "type": "string"
+                  "type": "string",
+                  "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
                 },
                 "endModifier": {
                   "type": "string"
                 },
                 "startConcept": {
-                  "type": "string"
+                  "type": "string",
+                  "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
                 },
                 "startModifier": {
                   "type": "string"
@@ -1371,7 +1454,8 @@ func init() {
                   ]
                 },
                 "timeLimit": {
-                  "type": "integer"
+                  "type": "integer",
+                  "minimum": 1
                 },
                 "userPublicKey": {
                   "type": "string",
@@ -1395,6 +1479,28 @@ func init() {
                 },
                 "timers": {
                   "$ref": "#/definitions/timers"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad user input in request.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
                 }
               }
             }
@@ -1481,6 +1587,11 @@ func init() {
             "required": true,
             "schema": {
               "type": "object",
+              "required": [
+                "patientSetID",
+                "creationDate",
+                "updateDate"
+              ],
               "properties": {
                 "creationDate": {
                   "type": "string"
@@ -1499,11 +1610,38 @@ func init() {
           "200": {
             "description": "Updated cohort"
           },
+          "400": {
+            "description": "Bad user input in request.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
           "404": {
-            "description": "The cohort does not exist. Try POST /node/explore/cohorts to create a new cohort."
+            "description": "Not found.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "409": {
-            "description": "DB has been updated since last importation. Try GET /node/explore/cohorts to fetch the most recent updates."
+            "description": "Conflict with resource's state.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "default": {
             "description": "Error response.",
@@ -1547,6 +1685,11 @@ func init() {
             "required": true,
             "schema": {
               "type": "object",
+              "required": [
+                "patientSetID",
+                "creationDate",
+                "updateDate"
+              ],
               "properties": {
                 "creationDate": {
                   "type": "string"
@@ -1565,8 +1708,38 @@ func init() {
           "200": {
             "description": "Updated cohort"
           },
+          "400": {
+            "description": "Bad user input in request.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
           "409": {
-            "description": "The cohort already exists. Try PUT /node/explore/cohorts to update and existing cohort."
+            "description": "Conflict with resource's state.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "default": {
             "description": "Error response.",
@@ -1609,7 +1782,15 @@ func init() {
             "description": "Deleted cohort"
           },
           "404": {
-            "description": "The cohort does not exist."
+            "description": "Not found.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "default": {
             "description": "Error response.",
@@ -2014,7 +2195,8 @@ func init() {
       "type": "object",
       "properties": {
         "cohortName": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^\\w+$"
         },
         "panels": {
           "type": "array",
@@ -2282,6 +2464,11 @@ func init() {
       "required": true,
       "schema": {
         "type": "object",
+        "required": [
+          "patientSetID",
+          "creationDate",
+          "updateDate"
+        ],
         "properties": {
           "creationDate": {
             "type": "string"
@@ -2338,22 +2525,36 @@ func init() {
       "required": true,
       "schema": {
         "type": "object",
+        "required": [
+          "ID",
+          "userPublicKey",
+          "cohortName",
+          "timeLimit",
+          "timeGranularity",
+          "startConcept",
+          "startModifier",
+          "endConcept",
+          "endModifier"
+        ],
         "properties": {
           "ID": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^[\\w:-]+$"
           },
           "cohortName": {
             "type": "string",
             "pattern": "^\\w+$"
           },
           "endConcept": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
           },
           "endModifier": {
             "type": "string"
           },
           "startConcept": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
           },
           "startModifier": {
             "type": "string"
@@ -2365,7 +2566,8 @@ func init() {
               "type": "object",
               "properties": {
                 "cohortName": {
-                  "type": "string"
+                  "type": "string",
+                  "pattern": "^\\w+$"
                 },
                 "panels": {
                   "type": "array",
@@ -2386,7 +2588,8 @@ func init() {
             ]
           },
           "timeLimit": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": 1
           },
           "userPublicKey": {
             "type": "string",
@@ -2397,6 +2600,28 @@ func init() {
     }
   },
   "responses": {
+    "badRequestResponse": {
+      "description": "Bad user input in request.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "conflictResponse": {
+      "description": "Conflict with resource's state.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "errorResponse": {
       "description": "Error response.",
       "schema": {
@@ -2518,6 +2743,17 @@ func init() {
           },
           "public-key": {
             "description": "Aggregated public key of the collective authority.",
+            "type": "string"
+          }
+        }
+      }
+    },
+    "notFoundResponse": {
+      "description": "Not found.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "message": {
             "type": "string"
           }
         }

@@ -16,17 +16,28 @@ func (clientSurvivalAnalysis *SurvivalAnalysis) submitToNode(nodeIdx int) (resul
 	params := survival_analysis.NewSurvivalAnalysisParamsWithTimeout(time.Duration(utilclient.SurvivalAnalysisTimeoutSeconds) * time.Second)
 
 	body := survival_analysis.SurvivalAnalysisBody{
-		ID:                  clientSurvivalAnalysis.id,
-		UserPublicKey:       clientSurvivalAnalysis.userPublicKey,
-		CohortName:          clientSurvivalAnalysis.cohortName,
+		ID:                  new(string),
+		UserPublicKey:       new(string),
+		CohortName:          new(string),
 		SubGroupDefinitions: clientSurvivalAnalysis.subGroupDefinitions,
-		StartConcept:        clientSurvivalAnalysis.startConceptPath,
-		StartModifier:       clientSurvivalAnalysis.startModifierCode,
-		EndConcept:          clientSurvivalAnalysis.endConceptPath,
-		EndModifier:         clientSurvivalAnalysis.endModifierCode,
-		TimeGranularity:     strings.ToLower(clientSurvivalAnalysis.granularity),
-		TimeLimit:           int64(clientSurvivalAnalysis.limit),
+		StartConcept:        new(string),
+		StartModifier:       new(string),
+		EndConcept:          new(string),
+		EndModifier:         new(string),
+		TimeGranularity:     new(string),
+		TimeLimit:           new(int64),
 	}
+
+	*body.ID = clientSurvivalAnalysis.id
+	*body.UserPublicKey = clientSurvivalAnalysis.userPublicKey
+	*body.CohortName = clientSurvivalAnalysis.cohortName
+	*body.StartConcept = clientSurvivalAnalysis.startConceptPath
+	*body.StartModifier = clientSurvivalAnalysis.startModifierCode
+	*body.EndConcept = clientSurvivalAnalysis.endConceptPath
+	*body.EndModifier = clientSurvivalAnalysis.endModifierCode
+	*body.TimeGranularity = strings.ToLower(clientSurvivalAnalysis.granularity)
+	*body.TimeLimit = int64(clientSurvivalAnalysis.limit)
+
 	params.SetBody(body)
 	response, err := clientSurvivalAnalysis.httpMedCoClients[nodeIdx].SurvivalAnalysis.SurvivalAnalysis(params, httptransport.BearerToken(clientSurvivalAnalysis.authToken))
 

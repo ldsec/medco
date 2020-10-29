@@ -35,14 +35,63 @@ func (o *PutCohortsOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pr
 	rw.WriteHeader(200)
 }
 
+// PutCohortsBadRequestCode is the HTTP code returned for type PutCohortsBadRequest
+const PutCohortsBadRequestCode int = 400
+
+/*PutCohortsBadRequest Bad user input in request.
+
+swagger:response putCohortsBadRequest
+*/
+type PutCohortsBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *PutCohortsBadRequestBody `json:"body,omitempty"`
+}
+
+// NewPutCohortsBadRequest creates PutCohortsBadRequest with default headers values
+func NewPutCohortsBadRequest() *PutCohortsBadRequest {
+
+	return &PutCohortsBadRequest{}
+}
+
+// WithPayload adds the payload to the put cohorts bad request response
+func (o *PutCohortsBadRequest) WithPayload(payload *PutCohortsBadRequestBody) *PutCohortsBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the put cohorts bad request response
+func (o *PutCohortsBadRequest) SetPayload(payload *PutCohortsBadRequestBody) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *PutCohortsBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(400)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // PutCohortsNotFoundCode is the HTTP code returned for type PutCohortsNotFound
 const PutCohortsNotFoundCode int = 404
 
-/*PutCohortsNotFound The cohort does not exist. Try POST /node/explore/cohorts to create a new cohort.
+/*PutCohortsNotFound Not found.
 
 swagger:response putCohortsNotFound
 */
 type PutCohortsNotFound struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *PutCohortsNotFoundBody `json:"body,omitempty"`
 }
 
 // NewPutCohortsNotFound creates PutCohortsNotFound with default headers values
@@ -51,22 +100,42 @@ func NewPutCohortsNotFound() *PutCohortsNotFound {
 	return &PutCohortsNotFound{}
 }
 
+// WithPayload adds the payload to the put cohorts not found response
+func (o *PutCohortsNotFound) WithPayload(payload *PutCohortsNotFoundBody) *PutCohortsNotFound {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the put cohorts not found response
+func (o *PutCohortsNotFound) SetPayload(payload *PutCohortsNotFoundBody) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *PutCohortsNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(404)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
 }
 
 // PutCohortsConflictCode is the HTTP code returned for type PutCohortsConflict
 const PutCohortsConflictCode int = 409
 
-/*PutCohortsConflict DB has been updated since last importation. Try GET /node/explore/cohorts to fetch the most recent updates.
+/*PutCohortsConflict Conflict with resource's state.
 
 swagger:response putCohortsConflict
 */
 type PutCohortsConflict struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *PutCohortsConflictBody `json:"body,omitempty"`
 }
 
 // NewPutCohortsConflict creates PutCohortsConflict with default headers values
@@ -75,12 +144,27 @@ func NewPutCohortsConflict() *PutCohortsConflict {
 	return &PutCohortsConflict{}
 }
 
+// WithPayload adds the payload to the put cohorts conflict response
+func (o *PutCohortsConflict) WithPayload(payload *PutCohortsConflictBody) *PutCohortsConflict {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the put cohorts conflict response
+func (o *PutCohortsConflict) SetPayload(payload *PutCohortsConflictBody) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *PutCohortsConflict) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(409)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
 }
 
 /*PutCohortsDefault Error response.

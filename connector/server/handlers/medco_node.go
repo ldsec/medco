@@ -140,7 +140,7 @@ func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal 
 	cohort := params.CohortRequest
 	cohortName := params.Name
 
-	hasID, err := querytoolsserver.CheckQueryID(principal.ID, int(cohort.PatientSetID))
+	hasID, err := querytoolsserver.CheckQueryID(principal.ID, int(*cohort.PatientSetID))
 	if err != nil {
 		return medco_node.NewPostCohortsDefault(500).WithPayload(&medco_node.PostCohortsDefaultBody{
 			Message: fmt.Sprintf("During execution of CheckQueryID"),
@@ -149,21 +149,22 @@ func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal 
 	logrus.Trace("has ID", hasID)
 
 	if !hasID {
-		return medco_node.NewPostCohortsDefault(404).WithPayload(&medco_node.PostCohortsDefaultBody{
-			Message: fmt.Sprintf("User does not have a stored query result with ID: %d", cohort.PatientSetID),
+
+		return medco_node.NewPostCohortsNotFound().WithPayload(&medco_node.PostCohortsNotFoundBody{
+			Message: fmt.Sprintf("User does not have a stored query result with ID: %d", *cohort.PatientSetID),
 		})
 	}
 
-	creationDate, err := time.Parse(time.RFC3339, cohort.CreationDate)
+	creationDate, err := time.Parse(time.RFC3339, *cohort.CreationDate)
 	if err != nil {
-		return medco_node.NewPostCohortsDefault(400).WithPayload(&medco_node.PostCohortsDefaultBody{
-			Message: fmt.Sprintf("String %s is not a date with RF3339 layout", cohort.CreationDate),
+		return medco_node.NewPostCohortsBadRequest().WithPayload(&medco_node.PostCohortsBadRequestBody{
+			Message: fmt.Sprintf("String %s is not a date with RFC3339 layout", *cohort.CreationDate),
 		})
 	}
-	updateDate, err := time.Parse(time.RFC3339, cohort.UpdateDate)
+	updateDate, err := time.Parse(time.RFC3339, *cohort.UpdateDate)
 	if err != nil {
-		return medco_node.NewPostCohortsDefault(400).WithPayload(&medco_node.PostCohortsDefaultBody{
-			Message: fmt.Sprintf("String %s is not a date with RF3339 layout", cohort.UpdateDate),
+		return medco_node.NewPostCohortsBadRequest().WithPayload(&medco_node.PostCohortsBadRequestBody{
+			Message: fmt.Sprintf("String %s is not a date with RFC3339 layout", *cohort.UpdateDate),
 		})
 	}
 	cohorts, err := querytoolsserver.GetSavedCohorts(principal.ID)
@@ -174,10 +175,12 @@ func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal 
 	}
 	for _, existingCohort := range cohorts {
 		if existingCohort.CohortName == cohortName {
-			return medco_node.NewPostCohortsConflict()
+			return medco_node.NewPostCohortsConflict().WithPayload(&medco_node.PostCohortsConflictBody{
+				Message: "Cohort %s already exists. Try update-saved-cohorts instead of add-saved-cohorts",
+			})
 		}
 	}
-	querytoolsserver.InsertCohort(principal.ID, int(cohort.PatientSetID), cohortName, creationDate, updateDate)
+	querytoolsserver.InsertCohort(principal.ID, int(*cohort.PatientSetID), cohortName, creationDate, updateDate)
 
 	return medco_node.NewPostCohortsOK()
 }
@@ -188,22 +191,24 @@ func MedCoNodePutCohortsHandler(params medco_node.PutCohortsParams, principal *m
 	cohort := params.CohortRequest
 	cohortName := params.Name
 
-	hasID, err := querytoolsserver.CheckQueryID(principal.ID, int(cohort.PatientSetID))
+	hasID, err := querytoolsserver.CheckQueryID(principal.ID, int(*cohort.PatientSetID))
 	if err != nil {
 		return medco_node.NewPutCohortsDefault(500).WithPayload(&medco_node.PutCohortsDefaultBody{
-			Message: fmt.Sprintf("During execution of CheckQueryID"),
+			Message: fmt.Sprintf("User does not have a stored query result with ID: %d", *cohort.PatientSetID),
 		})
 	}
 	logrus.Trace("has ID", hasID)
 
 	if !hasID {
-		return medco_node.NewPutCohortsNotFound()
+		return medco_node.NewPutCohortsNotFound().WithPayload(&medco_node.PutCohortsNotFoundBody{
+			Message: fmt.Sprintf("There is no result instance with id %d", int(*cohort.PatientSetID)),
+		})
 	}
 
-	updateDate, err := time.Parse(time.RFC3339, cohort.UpdateDate)
+	updateDate, err := time.Parse(time.RFC3339, *cohort.UpdateDate)
 	if err != nil {
-		return medco_node.NewPutCohortsDefault(400).WithPayload(&medco_node.PutCohortsDefaultBody{
-			Message: fmt.Sprintf("String %s is not a date with RF3339 layout", cohort.UpdateDate),
+		return medco_node.NewPutCohortsBadRequest().WithPayload(&medco_node.PutCohortsBadRequestBody{
+			Message: fmt.Sprintf("String %s is not a date with RF3339 layout", *cohort.UpdateDate),
 		})
 	}
 	cohorts, err := querytoolsserver.GetSavedCohorts(principal.ID)
@@ -216,7 +221,12 @@ func MedCoNodePutCohortsHandler(params medco_node.PutCohortsParams, principal *m
 	for _, existingCohort := range cohorts {
 		if existingCohort.CohortName == cohortName {
 			if existingCohort.UpdateDate.After(updateDate) {
-				return medco_node.NewPutCohortsConflict()
+				return medco_node.NewPutCohortsConflict().WithPayload(&medco_node.PutCohortsConflictBody{
+					Message: fmt.Sprintf("The cohort update date is more recent in server DB than the date provided by client. Server: %s, client: %s.",
+						existingCohort.UpdateDate.Format(time.RFC3339),
+						updateDate.Format(time.RFC3339),
+					),
+				})
 			}
 			found = true
 			break
@@ -226,7 +236,7 @@ func MedCoNodePutCohortsHandler(params medco_node.PutCohortsParams, principal *m
 		return medco_node.NewPutCohortsNotFound()
 	}
 
-	querytoolsserver.UpdateCohort(cohortName, principal.ID, int(cohort.PatientSetID), updateDate)
+	querytoolsserver.UpdateCohort(cohortName, principal.ID, int(*cohort.PatientSetID), updateDate)
 
 	return medco_node.NewPutCohortsOK()
 }
@@ -245,7 +255,9 @@ func MedCoNodeDeleteCohortsHandler(params medco_node.DeleteCohortsParams, princi
 	}
 	logrus.Trace("hasCohort", hasCohort)
 	if !hasCohort {
-		return medco_node.NewDeleteCohortsNotFound()
+		return medco_node.NewDeleteCohortsNotFound().WithPayload(&medco_node.DeleteCohortsNotFoundBody{
+			Message: fmt.Sprintf("Cohort %s not found", cohortName),
+		})
 	}
 
 	// delete the cohorts

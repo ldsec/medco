@@ -19,11 +19,13 @@ func InsertExploreResultInstance(userID, queryName, queryDefinition string) (int
 	res := new(string)
 	err := row.Scan(res)
 	if err != nil {
+		err = fmt.Errorf("while scanning SQL record: %s", err.Error())
 		return 0, err
 	}
 	logrus.Debug("successfully inserted")
 	queryID, err := strconv.Atoi(*res)
 	if err != nil {
+		err = fmt.Errorf("while parsing integer string \"%s\": %s", *res, err.Error())
 		return 0, err
 	}
 	return queryID, nil
@@ -62,12 +64,14 @@ func UpdateExploreResultInstance(queryID int, clearResultSetSize int, clearResul
 		res, err = utilserver.DBConnection.Exec(updateExploreResultInstanceBoth, queryID, clearResultSetSize, setDefinition, *i2b2EncryptedPatientSetID, *i2b2NonEncryptedPatientSetID)
 	}
 	if err != nil {
+		err = fmt.Errorf("while executing SQL: %s", err.Error())
 		return err
 	}
 	logrus.Debug("successfully updated")
 	logrus.Tracef("sql execution result %+v", res)
 	affected, err := res.RowsAffected()
 	if err != nil {
+		err = fmt.Errorf("while checking SQL row affected: %s", err.Error())
 		return err
 	}
 	if affected == 0 {
@@ -84,14 +88,20 @@ func UpdateExploreResultInstance(queryID int, clearResultSetSize int, clearResul
 func UpdateErrorExploreResultInstance(queryID int) error {
 	logrus.Debugf("updating error for query instance: %d", queryID)
 	res, err := utilserver.DBConnection.Exec(updateErrorExploreQueryInstance, queryID)
+	if err != nil {
+		err = fmt.Errorf("while executing SQL: %s", err.Error())
+		return err
+	}
 	logrus.Debug("successfully updated")
 	logrus.Tracef("sql execution result %+v", res)
 	affected, err := res.RowsAffected()
 	if err != nil {
+		err = fmt.Errorf("while checking SQL row affected: %s", err.Error())
 		return err
 	}
 	if affected == 0 {
 		err = fmt.Errorf("nothing updated")
+		return err
 	}
 	return err
 }
@@ -104,11 +114,13 @@ func CheckQueryID(userID string, queryID int) (bool, error) {
 	res := new(string)
 	err := row.Scan(res)
 	if err != nil {
+		err = fmt.Errorf("while scanning SQL record: %s", err.Error())
 		return false, err
 	}
 	logrus.Debug("successfully selected")
 	count, err := strconv.Atoi(*res)
 	if err != nil {
+		err = fmt.Errorf("while parsing integer string \"%s\": %s", *res, err.Error())
 		return false, err
 	}
 	return (count > 0), err

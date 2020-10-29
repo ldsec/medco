@@ -116,10 +116,15 @@ func (postCohorts *PostCohorts) submitToNode(nodeIdx int) (*medco_node.PostCohor
 	updateDate := time.Now()
 	params := medco_node.NewPostCohortsParamsWithTimeout(time.Duration(utilclient.QueryTimeoutSeconds) * time.Second)
 	body := medco_node.PostCohortsBody{
-		CreationDate: creationDate.Format(time.RFC3339),
-		UpdateDate:   updateDate.Format(time.RFC3339),
-		PatientSetID: int64(postCohorts.patientSetID[nodeIdx]),
+		CreationDate: new(string),
+		UpdateDate:   new(string),
+		PatientSetID: new(int64),
 	}
+
+	*body.CreationDate = creationDate.Format(time.RFC3339)
+	*body.UpdateDate = updateDate.Format(time.RFC3339)
+	*body.PatientSetID = int64(postCohorts.patientSetID[nodeIdx])
+
 	params.SetCohortRequest(body)
 	params.SetName(postCohorts.cohortName)
 

@@ -55,6 +55,94 @@ func (o *SurvivalAnalysisOK) WriteResponse(rw http.ResponseWriter, producer runt
 	}
 }
 
+// SurvivalAnalysisBadRequestCode is the HTTP code returned for type SurvivalAnalysisBadRequest
+const SurvivalAnalysisBadRequestCode int = 400
+
+/*SurvivalAnalysisBadRequest Bad user input in request.
+
+swagger:response survivalAnalysisBadRequest
+*/
+type SurvivalAnalysisBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *SurvivalAnalysisBadRequestBody `json:"body,omitempty"`
+}
+
+// NewSurvivalAnalysisBadRequest creates SurvivalAnalysisBadRequest with default headers values
+func NewSurvivalAnalysisBadRequest() *SurvivalAnalysisBadRequest {
+
+	return &SurvivalAnalysisBadRequest{}
+}
+
+// WithPayload adds the payload to the survival analysis bad request response
+func (o *SurvivalAnalysisBadRequest) WithPayload(payload *SurvivalAnalysisBadRequestBody) *SurvivalAnalysisBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the survival analysis bad request response
+func (o *SurvivalAnalysisBadRequest) SetPayload(payload *SurvivalAnalysisBadRequestBody) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *SurvivalAnalysisBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(400)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// SurvivalAnalysisNotFoundCode is the HTTP code returned for type SurvivalAnalysisNotFound
+const SurvivalAnalysisNotFoundCode int = 404
+
+/*SurvivalAnalysisNotFound Not found.
+
+swagger:response survivalAnalysisNotFound
+*/
+type SurvivalAnalysisNotFound struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *SurvivalAnalysisNotFoundBody `json:"body,omitempty"`
+}
+
+// NewSurvivalAnalysisNotFound creates SurvivalAnalysisNotFound with default headers values
+func NewSurvivalAnalysisNotFound() *SurvivalAnalysisNotFound {
+
+	return &SurvivalAnalysisNotFound{}
+}
+
+// WithPayload adds the payload to the survival analysis not found response
+func (o *SurvivalAnalysisNotFound) WithPayload(payload *SurvivalAnalysisNotFoundBody) *SurvivalAnalysisNotFound {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the survival analysis not found response
+func (o *SurvivalAnalysisNotFound) SetPayload(payload *SurvivalAnalysisNotFoundBody) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *SurvivalAnalysisNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(404)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 /*SurvivalAnalysisDefault Error response.
 
 swagger:response survivalAnalysisDefault

@@ -9,9 +9,11 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // PutCohortsReader is a Reader for the PutCohorts structure.
@@ -28,6 +30,12 @@ func (o *PutCohortsReader) ReadResponse(response runtime.ClientResponse, consume
 			return nil, err
 		}
 		return result, nil
+	case 400:
+		result := NewPutCohortsBadRequest()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
 	case 404:
 		result := NewPutCohortsNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -73,6 +81,39 @@ func (o *PutCohortsOK) readResponse(response runtime.ClientResponse, consumer ru
 	return nil
 }
 
+// NewPutCohortsBadRequest creates a PutCohortsBadRequest with default headers values
+func NewPutCohortsBadRequest() *PutCohortsBadRequest {
+	return &PutCohortsBadRequest{}
+}
+
+/*PutCohortsBadRequest handles this case with default header values.
+
+Bad user input in request.
+*/
+type PutCohortsBadRequest struct {
+	Payload *PutCohortsBadRequestBody
+}
+
+func (o *PutCohortsBadRequest) Error() string {
+	return fmt.Sprintf("[PUT /node/explore/cohorts/{name}][%d] putCohortsBadRequest  %+v", 400, o.Payload)
+}
+
+func (o *PutCohortsBadRequest) GetPayload() *PutCohortsBadRequestBody {
+	return o.Payload
+}
+
+func (o *PutCohortsBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(PutCohortsBadRequestBody)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewPutCohortsNotFound creates a PutCohortsNotFound with default headers values
 func NewPutCohortsNotFound() *PutCohortsNotFound {
 	return &PutCohortsNotFound{}
@@ -80,16 +121,28 @@ func NewPutCohortsNotFound() *PutCohortsNotFound {
 
 /*PutCohortsNotFound handles this case with default header values.
 
-The cohort does not exist. Try POST /node/explore/cohorts to create a new cohort.
+Not found.
 */
 type PutCohortsNotFound struct {
+	Payload *PutCohortsNotFoundBody
 }
 
 func (o *PutCohortsNotFound) Error() string {
-	return fmt.Sprintf("[PUT /node/explore/cohorts/{name}][%d] putCohortsNotFound ", 404)
+	return fmt.Sprintf("[PUT /node/explore/cohorts/{name}][%d] putCohortsNotFound  %+v", 404, o.Payload)
+}
+
+func (o *PutCohortsNotFound) GetPayload() *PutCohortsNotFoundBody {
+	return o.Payload
 }
 
 func (o *PutCohortsNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(PutCohortsNotFoundBody)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
 
 	return nil
 }
@@ -101,16 +154,28 @@ func NewPutCohortsConflict() *PutCohortsConflict {
 
 /*PutCohortsConflict handles this case with default header values.
 
-DB has been updated since last importation. Try GET /node/explore/cohorts to fetch the most recent updates.
+Conflict with resource's state.
 */
 type PutCohortsConflict struct {
+	Payload *PutCohortsConflictBody
 }
 
 func (o *PutCohortsConflict) Error() string {
-	return fmt.Sprintf("[PUT /node/explore/cohorts/{name}][%d] putCohortsConflict ", 409)
+	return fmt.Sprintf("[PUT /node/explore/cohorts/{name}][%d] putCohortsConflict  %+v", 409, o.Payload)
+}
+
+func (o *PutCohortsConflict) GetPayload() *PutCohortsConflictBody {
+	return o.Payload
 }
 
 func (o *PutCohortsConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(PutCohortsConflictBody)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
 
 	return nil
 }
@@ -157,23 +222,102 @@ func (o *PutCohortsDefault) readResponse(response runtime.ClientResponse, consum
 	return nil
 }
 
+/*PutCohortsBadRequestBody put cohorts bad request body
+swagger:model PutCohortsBadRequestBody
+*/
+type PutCohortsBadRequestBody struct {
+
+	// message
+	Message string `json:"message,omitempty"`
+}
+
+// Validate validates this put cohorts bad request body
+func (o *PutCohortsBadRequestBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *PutCohortsBadRequestBody) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *PutCohortsBadRequestBody) UnmarshalBinary(b []byte) error {
+	var res PutCohortsBadRequestBody
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
 /*PutCohortsBody put cohorts body
 swagger:model PutCohortsBody
 */
 type PutCohortsBody struct {
 
 	// creation date
-	CreationDate string `json:"creationDate,omitempty"`
+	// Required: true
+	CreationDate *string `json:"creationDate"`
 
 	// patient set ID
-	PatientSetID int64 `json:"patientSetID,omitempty"`
+	// Required: true
+	PatientSetID *int64 `json:"patientSetID"`
 
 	// update date
-	UpdateDate string `json:"updateDate,omitempty"`
+	// Required: true
+	UpdateDate *string `json:"updateDate"`
 }
 
 // Validate validates this put cohorts body
 func (o *PutCohortsBody) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateCreationDate(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validatePatientSetID(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateUpdateDate(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *PutCohortsBody) validateCreationDate(formats strfmt.Registry) error {
+
+	if err := validate.Required("cohortRequest"+"."+"creationDate", "body", o.CreationDate); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *PutCohortsBody) validatePatientSetID(formats strfmt.Registry) error {
+
+	if err := validate.Required("cohortRequest"+"."+"patientSetID", "body", o.PatientSetID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *PutCohortsBody) validateUpdateDate(formats strfmt.Registry) error {
+
+	if err := validate.Required("cohortRequest"+"."+"updateDate", "body", o.UpdateDate); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -188,6 +332,38 @@ func (o *PutCohortsBody) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (o *PutCohortsBody) UnmarshalBinary(b []byte) error {
 	var res PutCohortsBody
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+/*PutCohortsConflictBody put cohorts conflict body
+swagger:model PutCohortsConflictBody
+*/
+type PutCohortsConflictBody struct {
+
+	// message
+	Message string `json:"message,omitempty"`
+}
+
+// Validate validates this put cohorts conflict body
+func (o *PutCohortsConflictBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *PutCohortsConflictBody) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *PutCohortsConflictBody) UnmarshalBinary(b []byte) error {
+	var res PutCohortsConflictBody
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -220,6 +396,38 @@ func (o *PutCohortsDefaultBody) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (o *PutCohortsDefaultBody) UnmarshalBinary(b []byte) error {
 	var res PutCohortsDefaultBody
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+/*PutCohortsNotFoundBody put cohorts not found body
+swagger:model PutCohortsNotFoundBody
+*/
+type PutCohortsNotFoundBody struct {
+
+	// message
+	Message string `json:"message,omitempty"`
+}
+
+// Validate validates this put cohorts not found body
+func (o *PutCohortsNotFoundBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *PutCohortsNotFoundBody) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *PutCohortsNotFoundBody) UnmarshalBinary(b []byte) error {
+	var res PutCohortsNotFoundBody
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

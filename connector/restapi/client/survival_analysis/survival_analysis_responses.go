@@ -34,6 +34,18 @@ func (o *SurvivalAnalysisReader) ReadResponse(response runtime.ClientResponse, c
 			return nil, err
 		}
 		return result, nil
+	case 400:
+		result := NewSurvivalAnalysisBadRequest()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 404:
+		result := NewSurvivalAnalysisNotFound()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
 	default:
 		result := NewSurvivalAnalysisDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -70,6 +82,72 @@ func (o *SurvivalAnalysisOK) GetPayload() *SurvivalAnalysisOKBody {
 func (o *SurvivalAnalysisOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(SurvivalAnalysisOKBody)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewSurvivalAnalysisBadRequest creates a SurvivalAnalysisBadRequest with default headers values
+func NewSurvivalAnalysisBadRequest() *SurvivalAnalysisBadRequest {
+	return &SurvivalAnalysisBadRequest{}
+}
+
+/*SurvivalAnalysisBadRequest handles this case with default header values.
+
+Bad user input in request.
+*/
+type SurvivalAnalysisBadRequest struct {
+	Payload *SurvivalAnalysisBadRequestBody
+}
+
+func (o *SurvivalAnalysisBadRequest) Error() string {
+	return fmt.Sprintf("[POST /node/analysis/survival/query][%d] survivalAnalysisBadRequest  %+v", 400, o.Payload)
+}
+
+func (o *SurvivalAnalysisBadRequest) GetPayload() *SurvivalAnalysisBadRequestBody {
+	return o.Payload
+}
+
+func (o *SurvivalAnalysisBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(SurvivalAnalysisBadRequestBody)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewSurvivalAnalysisNotFound creates a SurvivalAnalysisNotFound with default headers values
+func NewSurvivalAnalysisNotFound() *SurvivalAnalysisNotFound {
+	return &SurvivalAnalysisNotFound{}
+}
+
+/*SurvivalAnalysisNotFound handles this case with default header values.
+
+Not found.
+*/
+type SurvivalAnalysisNotFound struct {
+	Payload *SurvivalAnalysisNotFoundBody
+}
+
+func (o *SurvivalAnalysisNotFound) Error() string {
+	return fmt.Sprintf("[POST /node/analysis/survival/query][%d] survivalAnalysisNotFound  %+v", 404, o.Payload)
+}
+
+func (o *SurvivalAnalysisNotFound) GetPayload() *SurvivalAnalysisNotFoundBody {
+	return o.Payload
+}
+
+func (o *SurvivalAnalysisNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(SurvivalAnalysisNotFoundBody)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -121,51 +199,116 @@ func (o *SurvivalAnalysisDefault) readResponse(response runtime.ClientResponse, 
 	return nil
 }
 
+/*SurvivalAnalysisBadRequestBody survival analysis bad request body
+swagger:model SurvivalAnalysisBadRequestBody
+*/
+type SurvivalAnalysisBadRequestBody struct {
+
+	// message
+	Message string `json:"message,omitempty"`
+}
+
+// Validate validates this survival analysis bad request body
+func (o *SurvivalAnalysisBadRequestBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *SurvivalAnalysisBadRequestBody) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *SurvivalAnalysisBadRequestBody) UnmarshalBinary(b []byte) error {
+	var res SurvivalAnalysisBadRequestBody
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
 /*SurvivalAnalysisBody survival analysis body
 swagger:model SurvivalAnalysisBody
 */
 type SurvivalAnalysisBody struct {
 
 	// ID
-	ID string `json:"ID,omitempty"`
+	// Required: true
+	// Pattern: ^[\w:-]+$
+	ID *string `json:"ID"`
 
 	// cohort name
+	// Required: true
 	// Pattern: ^\w+$
-	CohortName string `json:"cohortName,omitempty"`
+	CohortName *string `json:"cohortName"`
 
 	// end concept
-	EndConcept string `json:"endConcept,omitempty"`
+	// Required: true
+	// Pattern: ^\/$|^((\/[^\/]+)+\/?)$
+	EndConcept *string `json:"endConcept"`
 
 	// end modifier
-	EndModifier string `json:"endModifier,omitempty"`
+	// Required: true
+	EndModifier *string `json:"endModifier"`
 
 	// start concept
-	StartConcept string `json:"startConcept,omitempty"`
+	// Required: true
+	// Pattern: ^\/$|^((\/[^\/]+)+\/?)$
+	StartConcept *string `json:"startConcept"`
 
 	// start modifier
-	StartModifier string `json:"startModifier,omitempty"`
+	// Required: true
+	StartModifier *string `json:"startModifier"`
 
 	// sub group definitions
 	// Max Items: 4
 	SubGroupDefinitions []*SurvivalAnalysisParamsBodySubGroupDefinitionsItems0 `json:"subGroupDefinitions"`
 
 	// time granularity
+	// Required: true
 	// Enum: [day week month year]
-	TimeGranularity string `json:"timeGranularity,omitempty"`
+	TimeGranularity *string `json:"timeGranularity"`
 
 	// time limit
-	TimeLimit int64 `json:"timeLimit,omitempty"`
+	// Required: true
+	// Minimum: 1
+	TimeLimit *int64 `json:"timeLimit"`
 
 	// user public key
+	// Required: true
 	// Pattern: ^[\w=-]+$
-	UserPublicKey string `json:"userPublicKey,omitempty"`
+	UserPublicKey *string `json:"userPublicKey"`
 }
 
 // Validate validates this survival analysis body
 func (o *SurvivalAnalysisBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := o.validateID(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := o.validateCohortName(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateEndConcept(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateEndModifier(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateStartConcept(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateStartModifier(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -174,6 +317,10 @@ func (o *SurvivalAnalysisBody) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := o.validateTimeGranularity(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateTimeLimit(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -187,13 +334,70 @@ func (o *SurvivalAnalysisBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *SurvivalAnalysisBody) validateCohortName(formats strfmt.Registry) error {
+func (o *SurvivalAnalysisBody) validateID(formats strfmt.Registry) error {
 
-	if swag.IsZero(o.CohortName) { // not required
-		return nil
+	if err := validate.Required("body"+"."+"ID", "body", o.ID); err != nil {
+		return err
 	}
 
-	if err := validate.Pattern("body"+"."+"cohortName", "body", string(o.CohortName), `^\w+$`); err != nil {
+	if err := validate.Pattern("body"+"."+"ID", "body", string(*o.ID), `^[\w:-]+$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *SurvivalAnalysisBody) validateCohortName(formats strfmt.Registry) error {
+
+	if err := validate.Required("body"+"."+"cohortName", "body", o.CohortName); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("body"+"."+"cohortName", "body", string(*o.CohortName), `^\w+$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *SurvivalAnalysisBody) validateEndConcept(formats strfmt.Registry) error {
+
+	if err := validate.Required("body"+"."+"endConcept", "body", o.EndConcept); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("body"+"."+"endConcept", "body", string(*o.EndConcept), `^\/$|^((\/[^\/]+)+\/?)$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *SurvivalAnalysisBody) validateEndModifier(formats strfmt.Registry) error {
+
+	if err := validate.Required("body"+"."+"endModifier", "body", o.EndModifier); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *SurvivalAnalysisBody) validateStartConcept(formats strfmt.Registry) error {
+
+	if err := validate.Required("body"+"."+"startConcept", "body", o.StartConcept); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("body"+"."+"startConcept", "body", string(*o.StartConcept), `^\/$|^((\/[^\/]+)+\/?)$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *SurvivalAnalysisBody) validateStartModifier(formats strfmt.Registry) error {
+
+	if err := validate.Required("body"+"."+"startModifier", "body", o.StartModifier); err != nil {
 		return err
 	}
 
@@ -268,12 +472,25 @@ func (o *SurvivalAnalysisBody) validateTimeGranularityEnum(path, location string
 
 func (o *SurvivalAnalysisBody) validateTimeGranularity(formats strfmt.Registry) error {
 
-	if swag.IsZero(o.TimeGranularity) { // not required
-		return nil
+	if err := validate.Required("body"+"."+"timeGranularity", "body", o.TimeGranularity); err != nil {
+		return err
 	}
 
 	// value enum
-	if err := o.validateTimeGranularityEnum("body"+"."+"timeGranularity", "body", o.TimeGranularity); err != nil {
+	if err := o.validateTimeGranularityEnum("body"+"."+"timeGranularity", "body", *o.TimeGranularity); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *SurvivalAnalysisBody) validateTimeLimit(formats strfmt.Registry) error {
+
+	if err := validate.Required("body"+"."+"timeLimit", "body", o.TimeLimit); err != nil {
+		return err
+	}
+
+	if err := validate.MinimumInt("body"+"."+"timeLimit", "body", int64(*o.TimeLimit), 1, false); err != nil {
 		return err
 	}
 
@@ -282,11 +499,11 @@ func (o *SurvivalAnalysisBody) validateTimeGranularity(formats strfmt.Registry) 
 
 func (o *SurvivalAnalysisBody) validateUserPublicKey(formats strfmt.Registry) error {
 
-	if swag.IsZero(o.UserPublicKey) { // not required
-		return nil
+	if err := validate.Required("body"+"."+"userPublicKey", "body", o.UserPublicKey); err != nil {
+		return err
 	}
 
-	if err := validate.Pattern("body"+"."+"userPublicKey", "body", string(o.UserPublicKey), `^[\w=-]+$`); err != nil {
+	if err := validate.Pattern("body"+"."+"userPublicKey", "body", string(*o.UserPublicKey), `^[\w=-]+$`); err != nil {
 		return err
 	}
 
@@ -336,6 +553,38 @@ func (o *SurvivalAnalysisDefaultBody) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (o *SurvivalAnalysisDefaultBody) UnmarshalBinary(b []byte) error {
 	var res SurvivalAnalysisDefaultBody
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+/*SurvivalAnalysisNotFoundBody survival analysis not found body
+swagger:model SurvivalAnalysisNotFoundBody
+*/
+type SurvivalAnalysisNotFoundBody struct {
+
+	// message
+	Message string `json:"message,omitempty"`
+}
+
+// Validate validates this survival analysis not found body
+func (o *SurvivalAnalysisNotFoundBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *SurvivalAnalysisNotFoundBody) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *SurvivalAnalysisNotFoundBody) UnmarshalBinary(b []byte) error {
+	var res SurvivalAnalysisNotFoundBody
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -607,6 +856,7 @@ swagger:model SurvivalAnalysisParamsBodySubGroupDefinitionsItems0
 type SurvivalAnalysisParamsBodySubGroupDefinitionsItems0 struct {
 
 	// cohort name
+	// Pattern: ^\w+$
 	CohortName string `json:"cohortName,omitempty"`
 
 	// panels
@@ -617,6 +867,10 @@ type SurvivalAnalysisParamsBodySubGroupDefinitionsItems0 struct {
 func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := o.validateCohortName(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := o.validatePanels(formats); err != nil {
 		res = append(res, err)
 	}
@@ -624,6 +878,19 @@ func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) Validate(formats s
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) validateCohortName(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.CohortName) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("cohortName", "body", string(o.CohortName), `^\w+$`); err != nil {
+		return err
+	}
+
 	return nil
 }
 

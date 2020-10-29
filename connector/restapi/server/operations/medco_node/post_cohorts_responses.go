@@ -35,14 +35,107 @@ func (o *PostCohortsOK) WriteResponse(rw http.ResponseWriter, producer runtime.P
 	rw.WriteHeader(200)
 }
 
+// PostCohortsBadRequestCode is the HTTP code returned for type PostCohortsBadRequest
+const PostCohortsBadRequestCode int = 400
+
+/*PostCohortsBadRequest Bad user input in request.
+
+swagger:response postCohortsBadRequest
+*/
+type PostCohortsBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *PostCohortsBadRequestBody `json:"body,omitempty"`
+}
+
+// NewPostCohortsBadRequest creates PostCohortsBadRequest with default headers values
+func NewPostCohortsBadRequest() *PostCohortsBadRequest {
+
+	return &PostCohortsBadRequest{}
+}
+
+// WithPayload adds the payload to the post cohorts bad request response
+func (o *PostCohortsBadRequest) WithPayload(payload *PostCohortsBadRequestBody) *PostCohortsBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the post cohorts bad request response
+func (o *PostCohortsBadRequest) SetPayload(payload *PostCohortsBadRequestBody) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *PostCohortsBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(400)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// PostCohortsNotFoundCode is the HTTP code returned for type PostCohortsNotFound
+const PostCohortsNotFoundCode int = 404
+
+/*PostCohortsNotFound Not found.
+
+swagger:response postCohortsNotFound
+*/
+type PostCohortsNotFound struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *PostCohortsNotFoundBody `json:"body,omitempty"`
+}
+
+// NewPostCohortsNotFound creates PostCohortsNotFound with default headers values
+func NewPostCohortsNotFound() *PostCohortsNotFound {
+
+	return &PostCohortsNotFound{}
+}
+
+// WithPayload adds the payload to the post cohorts not found response
+func (o *PostCohortsNotFound) WithPayload(payload *PostCohortsNotFoundBody) *PostCohortsNotFound {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the post cohorts not found response
+func (o *PostCohortsNotFound) SetPayload(payload *PostCohortsNotFoundBody) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *PostCohortsNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(404)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // PostCohortsConflictCode is the HTTP code returned for type PostCohortsConflict
 const PostCohortsConflictCode int = 409
 
-/*PostCohortsConflict The cohort already exists. Try PUT /node/explore/cohorts to update and existing cohort.
+/*PostCohortsConflict Conflict with resource's state.
 
 swagger:response postCohortsConflict
 */
 type PostCohortsConflict struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *PostCohortsConflictBody `json:"body,omitempty"`
 }
 
 // NewPostCohortsConflict creates PostCohortsConflict with default headers values
@@ -51,12 +144,27 @@ func NewPostCohortsConflict() *PostCohortsConflict {
 	return &PostCohortsConflict{}
 }
 
+// WithPayload adds the payload to the post cohorts conflict response
+func (o *PostCohortsConflict) WithPayload(payload *PostCohortsConflictBody) *PostCohortsConflict {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the post cohorts conflict response
+func (o *PostCohortsConflict) SetPayload(payload *PostCohortsConflictBody) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *PostCohortsConflict) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(409)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
 }
 
 /*PostCohortsDefault Error response.
