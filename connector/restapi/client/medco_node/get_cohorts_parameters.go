@@ -14,13 +14,17 @@ import (
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
 )
 
 // NewGetCohortsParams creates a new GetCohortsParams object
 // with the default values initialized.
 func NewGetCohortsParams() *GetCohortsParams {
-
+	var (
+		limitDefault = int64(10)
+	)
 	return &GetCohortsParams{
+		Limit: &limitDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -29,8 +33,11 @@ func NewGetCohortsParams() *GetCohortsParams {
 // NewGetCohortsParamsWithTimeout creates a new GetCohortsParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewGetCohortsParamsWithTimeout(timeout time.Duration) *GetCohortsParams {
-
+	var (
+		limitDefault = int64(10)
+	)
 	return &GetCohortsParams{
+		Limit: &limitDefault,
 
 		timeout: timeout,
 	}
@@ -39,8 +46,11 @@ func NewGetCohortsParamsWithTimeout(timeout time.Duration) *GetCohortsParams {
 // NewGetCohortsParamsWithContext creates a new GetCohortsParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewGetCohortsParamsWithContext(ctx context.Context) *GetCohortsParams {
-
+	var (
+		limitDefault = int64(10)
+	)
 	return &GetCohortsParams{
+		Limit: &limitDefault,
 
 		Context: ctx,
 	}
@@ -49,8 +59,11 @@ func NewGetCohortsParamsWithContext(ctx context.Context) *GetCohortsParams {
 // NewGetCohortsParamsWithHTTPClient creates a new GetCohortsParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewGetCohortsParamsWithHTTPClient(client *http.Client) *GetCohortsParams {
-
+	var (
+		limitDefault = int64(10)
+	)
 	return &GetCohortsParams{
+		Limit:      &limitDefault,
 		HTTPClient: client,
 	}
 }
@@ -59,6 +72,13 @@ func NewGetCohortsParamsWithHTTPClient(client *http.Client) *GetCohortsParams {
 for the get cohorts operation typically these are written to a http.Request
 */
 type GetCohortsParams struct {
+
+	/*Limit
+	  Limits the number of records retrieved. If the provided value is 0, there is no limit.
+
+	*/
+	Limit *int64
+
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
@@ -97,6 +117,17 @@ func (o *GetCohortsParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithLimit adds the limit to the get cohorts params
+func (o *GetCohortsParams) WithLimit(limit *int64) *GetCohortsParams {
+	o.SetLimit(limit)
+	return o
+}
+
+// SetLimit adds the limit to the get cohorts params
+func (o *GetCohortsParams) SetLimit(limit *int64) {
+	o.Limit = limit
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *GetCohortsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -104,6 +135,22 @@ func (o *GetCohortsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Re
 		return err
 	}
 	var res []error
+
+	if o.Limit != nil {
+
+		// query param limit
+		var qrLimit int64
+		if o.Limit != nil {
+			qrLimit = *o.Limit
+		}
+		qLimit := swag.FormatInt64(qrLimit)
+		if qLimit != "" {
+			if err := r.SetQueryParam("limit", qLimit); err != nil {
+				return err
+			}
+		}
+
+	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

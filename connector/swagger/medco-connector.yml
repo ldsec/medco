@@ -233,6 +233,13 @@ paths:
         - "medco-node"
       summary: "Retrieve cohort names and patient set IDs"
       operationId: "getCohorts"
+      parameters:
+        - in: "query"
+          name: "limit"
+          description: "Limits the number of records retrieved. If the provided value is 0, there is no limit."
+          type: "integer"
+          default: 10
+          minimum: 0
       responses:
         200:
           $ref: '#/responses/getCohortsResponse'
@@ -417,6 +424,7 @@ parameters:
             - week
             - month
             - year
+          default: "day"
         startConcept:
           type: "string"
           pattern: '^\/$|^((\/[^\/]+)+\/?)$'

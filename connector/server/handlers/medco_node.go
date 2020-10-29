@@ -111,7 +111,7 @@ func MedCoNodeExploreQueryHandler(params medco_node.ExploreQueryParams, principa
 // MedCoNodeGetCohortsHandler handles GET /medco/node/explore/cohorts  API endpoint
 func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *models.User) middleware.Responder {
 	userID := principal.ID
-	cohorts, err := querytoolsserver.GetSavedCohorts(userID)
+	cohorts, err := querytoolsserver.GetSavedCohorts(userID, int(*params.Limit))
 	if err != nil {
 		medco_node.NewGetCohortsDefault(500).WithPayload(&medco_node.GetCohortsDefaultBody{
 			Message: "Get cohort execution error: " + err.Error(),
@@ -167,7 +167,7 @@ func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal 
 			Message: fmt.Sprintf("String %s is not a date with RFC3339 layout", *cohort.UpdateDate),
 		})
 	}
-	cohorts, err := querytoolsserver.GetSavedCohorts(principal.ID)
+	cohorts, err := querytoolsserver.GetSavedCohorts(principal.ID, 0)
 	if err != nil {
 		return medco_node.NewPostCohortsDefault(500).WithPayload(&medco_node.PostCohortsDefaultBody{
 			Message: "Get cohort execution error: " + err.Error(),
@@ -211,7 +211,7 @@ func MedCoNodePutCohortsHandler(params medco_node.PutCohortsParams, principal *m
 			Message: fmt.Sprintf("String %s is not a date with RF3339 layout", *cohort.UpdateDate),
 		})
 	}
-	cohorts, err := querytoolsserver.GetSavedCohorts(principal.ID)
+	cohorts, err := querytoolsserver.GetSavedCohorts(principal.ID, 0)
 	if err != nil {
 		return medco_node.NewPutCohortsDefault(500).WithPayload(&medco_node.PutCohortsDefaultBody{
 			Message: "Get cohort execution error: " + err.Error(),

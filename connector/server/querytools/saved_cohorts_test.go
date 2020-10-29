@@ -28,14 +28,14 @@ func TestGetPatientList(t *testing.T) {
 func TestGetSavedCohorts(t *testing.T) {
 	utilserver.TestDBConnection(t)
 
-	cohorts, err := GetSavedCohorts("test")
+	cohorts, err := GetSavedCohorts("test", 0)
 	if err != nil {
 		t.Fatal(err)
 	}
 	assert.Equal(t, true, len(cohorts) > 0)
 	//change user_id
 
-	cohorts, err = GetSavedCohorts("testestest")
+	cohorts, err = GetSavedCohorts("testestest", 0)
 	assert.Equal(t, len(cohorts), 0)
 
 }
@@ -74,7 +74,10 @@ func TestInsertCohortAndUpdateCohortAndRemoveCohort(t *testing.T) {
 	_, err = InsertCohort("test", -1, "testCohort2", now, now)
 	assert.Error(t, err)
 
-	cohorts, err := GetSavedCohorts("test")
+	cohorts, err := GetSavedCohorts("test", 1)
+	assert.NoError(t, err)
+
+	cohorts, err = GetSavedCohorts("test", 0)
 	assert.NoError(t, err)
 
 	found := false

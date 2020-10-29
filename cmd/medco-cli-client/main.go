@@ -119,6 +119,15 @@ func main() {
 	}
 
 	//--- query tools command flags
+	getCohortFlag := []cli.Flag{
+		cli.IntFlag{
+			Name:  "limit, l",
+			Usage: "Limits the number of retrieved cohorts. 0 means no limit.",
+			Value: 10,
+		},
+	}
+
+	//--- query tools command flags
 	postCohortFlag := []cli.Flag{
 		// cli.IntSlice produces wrong results
 		cli.StringFlag{
@@ -286,6 +295,8 @@ func main() {
 			Name:        "get-saved-cohorts",
 			Aliases:     []string{"getsc"},
 			Usage:       "get cohorts",
+			Flags:       getCohortFlag,
+			ArgsUsage:   "[-l limit]",
 			Description: "Gets the list of cohorts.",
 			Action: func(c *cli.Context) error {
 				return querytoolsclient.ExecuteGetCohorts(
@@ -294,6 +305,7 @@ func main() {
 					c.GlobalString("password"),
 					c.GlobalBool("disableTLSCheck"),
 					c.GlobalString("outputFile"),
+					c.Int("limit"),
 				)
 			},
 		},

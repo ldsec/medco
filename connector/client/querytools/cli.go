@@ -12,7 +12,7 @@ import (
 )
 
 // ExecuteGetCohorts executes a get cohorts query and displays its results
-func ExecuteGetCohorts(token, username, password string, disableTLSCheck bool, resultFile string) error {
+func ExecuteGetCohorts(token, username, password string, disableTLSCheck bool, resultFile string, limit int) error {
 	accessToken, err := utilclient.RetrieveOrGetNewAccessToken(token, username, password, disableTLSCheck)
 	if err != nil {
 		err = fmt.Errorf("while retrieving access token: %s", err.Error())

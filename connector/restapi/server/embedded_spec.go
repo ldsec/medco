@@ -245,6 +245,15 @@ func init() {
         ],
         "summary": "Retrieve cohort names and patient set IDs",
         "operationId": "getCohorts",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 10,
+            "description": "Limits the number of records retrieved. If the provided value is 0, there is no limit.",
+            "name": "limit",
+            "in": "query"
+          }
+        ],
         "responses": {
           "200": {
             "$ref": "#/responses/getCohortsResponse"
@@ -893,6 +902,7 @@ func init() {
           },
           "timeGranularity": {
             "type": "string",
+            "default": "day",
             "enum": [
               "day",
               "week",
@@ -1446,6 +1456,7 @@ func init() {
                 },
                 "timeGranularity": {
                   "type": "string",
+                  "default": "day",
                   "enum": [
                     "day",
                     "week",
@@ -1533,6 +1544,16 @@ func init() {
         ],
         "summary": "Retrieve cohort names and patient set IDs",
         "operationId": "getCohorts",
+        "parameters": [
+          {
+            "minimum": 0,
+            "type": "integer",
+            "default": 10,
+            "description": "Limits the number of records retrieved. If the provided value is 0, there is no limit.",
+            "name": "limit",
+            "in": "query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Queried cohorts",
@@ -2580,6 +2601,7 @@ func init() {
           },
           "timeGranularity": {
             "type": "string",
+            "default": "day",
             "enum": [
               "day",
               "week",

@@ -1,6 +1,7 @@
 package querytoolsserver
 
 import (
+	"database/sql"
 	"fmt"
 	"strconv"
 	"strings"
@@ -45,10 +46,21 @@ func GetPatientList(userID string, cohortName string) (patientNums []int64, err 
 }
 
 // GetSavedCohorts runs a SQL query on db and returns the list of saved cohorts for given queryID and userID
-func GetSavedCohorts(userID string) ([]util.Cohort, error) {
-	logrus.Debugf("selecting user ID %s", userID)
-	logrus.Debugf("SQL: %s", getCohorts)
-	rows, err := utilserver.DBConnection.Query(getCohorts, userID)
+func GetSavedCohorts(userID string, limit int) ([]util.Cohort, error) {
+	var rows *sql.Rows
+	var err error
+	if limit > 0 {
+		logrus.Debugf("selecting user ID %s, limit %d", userID, limit)
+		logrus.Debugf("SQL: %s", getCohorts)
+		rows, err = utilserver.DBConnection.Query(getCohorts, userID, limit)
+
+	} else {
+		logrus.Debugf("selecting user ID %s", userID)
+		logrus.Debugf("SQL: %s", getCohortsNoLimit)
+		rows, err = utilserver.DBConnection.Query(getCohortsNoLimit, userID)
+
+	}
+
 	if err != nil {
 		err = fmt.Errorf("while executing SQL: %s", err.Error())
 		return nil, err
@@ -200,6 +212,13 @@ RETURNING cohort_id
 `
 
 const getCohorts string = `
+SELECT cohort_id, query_id, cohort_name, create_date, update_date FROM query_tools.saved_cohorts
+WHERE user_id = $1
+ORDER BY cohort_name
+LIMIT $2
+`
+
+const getCohortsNoLimit string = `
 SELECT cohort_id, query_id, cohort_name, create_date, update_date FROM query_tools.saved_cohorts
 WHERE user_id = $1
 `
