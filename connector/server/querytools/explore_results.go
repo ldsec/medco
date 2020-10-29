@@ -13,12 +13,15 @@ import (
 
 // InsertExploreResultInstance is called when the query is created. A new row is inserted in explore query results table with status 'running'.
 func InsertExploreResultInstance(userID, queryName, queryDefinition string) (int, error) {
+	logrus.Debugf("inserting user ID %s, query name %s, query definition %s", userID, queryName, queryDefinition)
+	logrus.Debugf("SQL: %s", insertExploreResultInstance)
 	row := utilserver.DBConnection.QueryRow(insertExploreResultInstance, userID, queryName, queryDefinition)
 	res := new(string)
 	err := row.Scan(res)
 	if err != nil {
 		return 0, err
 	}
+	logrus.Debug("successfully inserted")
 	queryID, err := strconv.Atoi(*res)
 	if err != nil {
 		return 0, err
@@ -43,16 +46,25 @@ func UpdateExploreResultInstance(queryID int, clearResultSetSize int, clearResul
 		err = fmt.Errorf("I2B2 patient set is undefined for both non encrypted and encrypted projects")
 		return err
 	}
+	logrus.Debugf("updating result instance queryID %d clear result set size %d clear result set %s  encrypted patientSetID %p non encrypted patient set ID %p", queryID, clearResultSetSize, setDefinition, i2b2EncryptedPatientSetID, i2b2NonEncryptedPatientSetID)
 	if i2b2EncryptedPatientSetID == nil {
+		logrus.Debugf("non encrypted patient set adress %p, value %d", i2b2NonEncryptedPatientSetID, *i2b2NonEncryptedPatientSetID)
+		logrus.Debugf("SQL: %s", updateExploreResultInstanceOnlyClear)
 		res, err = utilserver.DBConnection.Exec(updateExploreResultInstanceOnlyClear, queryID, clearResultSetSize, setDefinition, *i2b2NonEncryptedPatientSetID)
 	} else if i2b2NonEncryptedPatientSetID == nil {
-		res, err = utilserver.DBConnection.Exec(updateExploreResultInstanceOnlyClear, queryID, clearResultSetSize, setDefinition, *i2b2EncryptedPatientSetID)
+		logrus.Debugf("encrypted patient set adress %p, value %d", i2b2EncryptedPatientSetID, *i2b2EncryptedPatientSetID)
+		logrus.Debugf("SQL: %s", updateExploreResultInstanceOnlyEncrypted)
+		res, err = utilserver.DBConnection.Exec(updateExploreResultInstanceOnlyEncrypted, queryID, clearResultSetSize, setDefinition, *i2b2EncryptedPatientSetID)
 	} else {
+		logrus.Debugf("non encrypted patient set adress %p, value %d", i2b2NonEncryptedPatientSetID, *i2b2NonEncryptedPatientSetID)
+		logrus.Debugf("encrypted patient set adress %p, value %d", i2b2EncryptedPatientSetID, *i2b2EncryptedPatientSetID)
+		logrus.Debugf("SQL: %s", updateExploreResultInstanceBoth)
 		res, err = utilserver.DBConnection.Exec(updateExploreResultInstanceBoth, queryID, clearResultSetSize, setDefinition, *i2b2EncryptedPatientSetID, *i2b2NonEncryptedPatientSetID)
 	}
 	if err != nil {
 		return err
 	}
+	logrus.Debug("successfully updated")
 	logrus.Tracef("sql execution result %+v", res)
 	affected, err := res.RowsAffected()
 	if err != nil {
@@ -70,7 +82,9 @@ func UpdateExploreResultInstance(queryID int, clearResultSetSize int, clearResul
 // UpdateErrorExploreResultInstance updates the instance corresponding to the given queryID. Its status is changed to 'error'.
 // UpdateErrorExploreResultInstance should be called whenever any I2B2 project throws an error while executing a query.
 func UpdateErrorExploreResultInstance(queryID int) error {
+	logrus.Debugf("updating error for query instance: %d", queryID)
 	res, err := utilserver.DBConnection.Exec(updateErrorExploreQueryInstance, queryID)
+	logrus.Debug("successfully updated")
 	logrus.Tracef("sql execution result %+v", res)
 	affected, err := res.RowsAffected()
 	if err != nil {
@@ -84,12 +98,15 @@ func UpdateErrorExploreResultInstance(queryID int) error {
 
 // CheckQueryID checks whether the user really has a query before inserting a new cohort defined by that query's id
 func CheckQueryID(userID string, queryID int) (bool, error) {
+	logrus.Debugf("selecting  user ID: %s , query ID: %d", userID, queryID)
+	logrus.Debugf("SQL: %s", checkQueryID)
 	row := utilserver.DBConnection.QueryRow(checkQueryID, userID, queryID)
 	res := new(string)
 	err := row.Scan(res)
 	if err != nil {
 		return false, err
 	}
+	logrus.Debug("successfully selected")
 	count, err := strconv.Atoi(*res)
 	if err != nil {
 		return false, err

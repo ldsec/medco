@@ -1,6 +1,7 @@
 package querytoolsserver
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -13,19 +14,28 @@ import (
 
 // GetPatientList runs a SQL query on db and returns the list of patient IDs for given queryID and userID
 func GetPatientList(userID string, cohortName string) (patientNums []int64, err error) {
+	logrus.Debugf("selecting user ID %s, cohort name ID %s", userID, cohortName)
+	logrus.Debugf("SQL: %s", getPatientList)
 	row := utilserver.DBConnection.QueryRow(getPatientList, userID, cohortName)
 	patientNumsString := new(string)
 	err = row.Scan(patientNumsString)
+	if err != nil {
+		err = fmt.Errorf("while scanning SQL record: %s", err.Error())
+		return
+	}
+	logrus.Debug("successfully selected")
 	var pNum int64
 	logrus.Tracef("Got response %s", *patientNumsString)
 	patientListString := strings.Trim(*patientNumsString, "{}")
 	if patientListString == "" {
+		logrus.Debug("empty patient list")
 		return
 	}
 	for _, pID := range strings.Split(patientListString, ",") {
 
 		pNum, err = strconv.ParseInt(pID, 10, 64)
 		if err != nil {
+			err = fmt.Errorf("while parsing patient ID \"%s\": %s", pID, err.Error())
 			return
 		}
 		patientNums = append(patientNums, pNum)
@@ -36,10 +46,13 @@ func GetPatientList(userID string, cohortName string) (patientNums []int64, err 
 
 // GetSavedCohorts runs a SQL query on db and returns the list of saved cohorts for given queryID and userID
 func GetSavedCohorts(userID string) ([]util.Cohort, error) {
+	logrus.Debugf("selecting user ID %s", userID)
+	logrus.Debugf("SQL: %s", getCohorts)
 	rows, err := utilserver.DBConnection.Query(getCohorts, userID)
 	if err != nil {
 		return nil, err
 	}
+	logrus.Debug("successfully selected")
 	var id int
 	var qid int
 	var name string
@@ -51,41 +64,50 @@ func GetSavedCohorts(userID string) ([]util.Cohort, error) {
 	for rows.Next() {
 		err = rows.Scan(&id, &qid, &name, &createDateString, &updateDateString)
 		if err != nil {
+			err = fmt.Errorf("while scanning SQL record: %s", err.Error())
 			return nil, err
 		}
 		createDate, err = time.Parse(time.RFC3339, createDateString)
 		if err != nil {
+			err = fmt.Errorf("while parsing create date string \"%s\": %s", createDateString, err.Error())
 			return nil, err
 		}
 		updateDate, err = time.Parse(time.RFC3339, updateDateString)
 		if err != nil {
+			err = fmt.Errorf("while parsing update date string \"%s\": %s", updateDateString, err.Error())
 			return nil, err
 		}
-		cohorts = append(cohorts, util.Cohort{
+		newCohort := util.Cohort{
 			CohortID:     id,
 			QueryID:      qid,
 			CohortName:   name,
 			CreationDate: createDate,
 			UpdateDate:   updateDate,
-		})
+		}
+		logrus.Tracef("got cohort %+v", newCohort)
+		cohorts = append(cohorts, newCohort)
 	}
 	err = rows.Close()
 	if err != nil {
+		err = fmt.Errorf("while closing SQL record stream: %s", err.Error())
 		return nil, err
 	}
 
-	logrus.Infof("Got %d cohorts", len(cohorts))
+	logrus.Debugf("got %d cohorts", len(cohorts))
 	return cohorts, nil
 }
 
 // GetDate runs a SQL query on db and returns the update date of cohort corresponding to  cohortID
 func GetDate(userID string, cohortID int) (time.Time, error) {
+	logrus.Debugf("selecting user ID %s, cohort ID %d", userID, cohortID)
+	logrus.Debugf("SQL: %s", getDate)
 	row := utilserver.DBConnection.QueryRow(getDate, userID, cohortID)
 	timeString := new(string)
 	err := row.Scan(timeString)
 	if err != nil {
 		return time.Now(), err
 	}
+	logrus.Debug("successfully selected")
 
 	timeParsed, err := time.Parse(time.RFC3339, *timeString)
 
@@ -95,12 +117,15 @@ func GetDate(userID string, cohortID int) (time.Time, error) {
 
 // InsertCohort runs a SQL query to either insert a new cohort or update an existing one
 func InsertCohort(userID string, queryID int, cohortName string, createDate, updateDate time.Time) (int, error) {
+	logrus.Debugf("inserting %s, query ID %d, cohort name %s, create date %s, update date %s", userID, queryID, cohortName, createDate.Format(time.RFC3339), updateDate.Format(time.RFC3339))
+	logrus.Debugf("SQL: %s", insertCohort)
 	row := utilserver.DBConnection.QueryRow(insertCohort, userID, queryID, cohortName, createDate, updateDate)
 	res := new(string)
 	err := row.Scan(res)
 	if err != nil {
 		return -1, err
 	}
+	logrus.Debug("successfully inserted")
 	cohortID, err := strconv.Atoi(*res)
 	if err != nil {
 		return -1, err
@@ -110,12 +135,15 @@ func InsertCohort(userID string, queryID int, cohortName string, createDate, upd
 
 // UpdateCohort runs a SQL query to either insert a new cohort or update an existing one
 func UpdateCohort(cohortName, userID string, queryID int, updateDate time.Time) (int, error) {
+	logrus.Debugf("updating user ID %s, cohort name %s, query ID %d, update time %s", userID, cohortName, queryID, updateDate.Format(time.RFC3339))
+	logrus.Debugf("SQL: %s", updateCohort)
 	row := utilserver.DBConnection.QueryRow(updateCohort, cohortName, userID, queryID, updateDate)
 	res := new(string)
 	err := row.Scan(res)
 	if err != nil {
 		return -1, err
 	}
+	logrus.Debug("successfully updated")
 	cohortID, err := strconv.Atoi(*res)
 	if err != nil {
 		return -1, err
@@ -125,18 +153,23 @@ func UpdateCohort(cohortName, userID string, queryID int, updateDate time.Time) 
 
 // DoesCohortExist check whether a cohort exists for provided user ID and a cohort name.
 func DoesCohortExist(userID, cohortName string) (bool, error) {
+	logrus.Debugf("selecting user ID %s, cohort name %s", userID, cohortName)
+	logrus.Debugf("SQL: %s", doesCohortExist)
 	row := utilserver.DBConnection.QueryRow(doesCohortExist, userID, cohortName)
 	res := new(string)
 	err := row.Scan(res)
 	if err != nil {
 		return false, err
 	}
+	logrus.Debug("successfully selected")
 	cohortNumber, err := strconv.Atoi(*res)
 	return cohortNumber > 0, err
 }
 
 // RemoveCohort deletes cohort
 func RemoveCohort(userID, cohortName string) error {
+	logrus.Debugf("deleting user ID %s, cohort name %s")
+	logrus.Debugf("SQL: %s", removeCohort)
 	_, err := utilserver.DBConnection.Exec(removeCohort, userID, cohortName)
 	return err
 }

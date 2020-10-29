@@ -54,15 +54,24 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 		err = fmt.Errorf("while marshalling query: %s", err.Error())
 		return
 	}
+	logrus.Info("Creating Explore Result instance")
+	timer = time.Now()
 	queryID, err := querytoolsserver.InsertExploreResultInstance(q.UserName, q.ID, string(queryDefinition))
-	logrus.Debugf("Creating Explore Result Instance : %d", queryID)
+	q.Result.Timers.AddTimers("medco-connector-create-result-instance", timer, nil)
+	logrus.Infof("Created Explore Result Instance : %d", queryID)
 	if err != nil {
 		err = fmt.Errorf("while inserting explore result instance: %s", err.Error())
 		return
 	}
 	defer func(e error) {
 		if e != nil {
-			querytoolsserver.UpdateErrorExploreResultInstance(queryID)
+			logrus.Info("Updating Explore Result instance with error status")
+			qtError := querytoolsserver.UpdateErrorExploreResultInstance(queryID)
+			if qtError != nil {
+				e = fmt.Errorf("while inserting a status error in result instance table: %s", qtError.Error())
+			} else {
+				logrus.Info("Updating Explore Result instance with error status")
+			}
 		}
 	}(err)
 
@@ -70,6 +79,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 
 	err = q.isValid()
 	if err != nil {
+		err = fmt.Errorf("while checking validity: %s", err.Error())
 		return
 	}
 
@@ -82,6 +92,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 		taggedQueryTerms = taggedQueryTermsInner
 		if ddtErr != nil {
 			err = ddtErr
+			err = fmt.Errorf("during distributed deterministic tagging (DDT) procedure: %s", err.Error())
 			return
 		}
 		q.Result.Timers.AddTimers("medco-connector-DDT", timer, ddtTimers)
@@ -95,11 +106,13 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	timer = time.Now()
 	panelsItemKeys, panelsIsNot, err := q.getI2b2PsmQueryTerms(taggedQueryTerms)
 	if err != nil {
+		err = fmt.Errorf("while building I2B2 panels: %s", err.Error())
 		return
 	}
 
 	patientCount, patientSetID, err := i2b2.ExecutePsmQuery(q.ID, panelsItemKeys, panelsIsNot)
 	if err != nil {
+		err = fmt.Errorf("during I2B2 PSM query exection: %s", err.Error())
 		return
 	}
 
@@ -110,6 +123,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	timer = time.Now()
 	patientIDs, patientDummyFlags, err := i2b2.GetPatientSet(patientSetID, true)
 	if err != nil {
+		err = fmt.Errorf("during I2B2 patient set query exection: %s", err.Error())
 		return
 	}
 	q.Result.Timers.AddTimers("medco-connector-i2b2-PDO", timer, nil)
@@ -119,6 +133,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	timer = time.Now()
 	aggPatientFlags, err := unlynx.LocallyAggregateValues(patientDummyFlags)
 	if err != nil {
+		err = fmt.Errorf("during local aggregation %s", err.Error())
 		return
 	}
 	q.Result.Timers.AddTimers("medco-connector-local-agg", timer, nil)
@@ -138,6 +153,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 		encCount, ksCountTimers, err = unlynx.KeySwitchValue(q.ID, aggPatientFlags, q.Query.UserPublicKey)
 	}
 	if err != nil {
+		err = fmt.Errorf("during key switch/shuffle operation: %s", err.Error())
 		return
 	}
 	q.Result.Timers.AddTimers("medco-connector-unlynx-key-switch-count", timer, ksCountTimers)
@@ -148,6 +164,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 		timer = time.Now()
 		encCount, err = unlynx.LocallyObfuscateValue(encCount, 5, string(q.Query.UserPublicKey)) // todo: fixed distribution to make dynamic
 		if err != nil {
+			err = fmt.Errorf("during key obfuscation operation: %s", err.Error())
 			return
 		}
 		q.Result.Timers.AddTimers("medco-connector-local-obfuscation", timer, nil)
@@ -167,6 +184,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 			timer = time.Now()
 			maskedPatientIDs, err := q.maskPatientIDs(patientIDs, patientDummyFlags)
 			if err != nil {
+				err = fmt.Errorf("while producing patient masks: %s", err.Error())
 				return err
 			}
 
@@ -177,6 +195,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 			timer = time.Now()
 			ksMaskedPatientIDs, ksPatientListTimers, err := unlynx.KeySwitchValues(q.ID, maskedPatientIDs, string(q.Query.UserPublicKey))
 			if err != nil {
+				err = fmt.Errorf("while key-switching patient masks: %s", err.Error())
 				return err
 			}
 			q.Result.Timers.AddTimers("medco-connector-unlynx-key-switch-patient-list", timer, ksPatientListTimers)
@@ -188,26 +207,13 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 
 		q.Result.PatientSetID = queryID
 	}
-
 	//update medco connector result instance
-	pCount, err := strconv.Atoi(patientCount)
-	if err != nil {
-		return
-	}
-	pIDs := make([]int, len(patientIDs))
-	for i, patientID := range patientIDs {
-		pIDs[i], err = strconv.Atoi(patientID)
-		if err != nil {
-			return
-		}
-	}
-
-	patientSetIDNum, err := strconv.Atoi(patientSetID)
+	timer = time.Now()
+	err = updateResultInstanceTable(queryID, patientCount, patientIDs, patientSetID)
+	q.Result.Timers.AddTimers("medco-connector-update-result-instance", timer, nil)
 	if err != nil {
 		return err
 	}
-
-	querytoolsserver.UpdateExploreResultInstance(queryID, pCount, pIDs, nil, &patientSetIDNum)
 
 	q.Result.Timers.AddTimers("medco-connector-overall", overallTimer, nil)
 	return
@@ -285,5 +291,37 @@ func (q *ExploreQuery) isValid() (err error) {
 		err = errors.New("Query " + q.ID + " is invalid")
 		logrus.Error(err)
 	}
+	return
+}
+
+func updateResultInstanceTable(queryID int, patientCount string, patientIDs []string, patientSetID string) (err error) {
+
+	pCount, err := strconv.Atoi(patientCount)
+	if err != nil {
+		err = fmt.Errorf("while parsing integer from patient count string \"%s\": %s", patientCount, err.Error())
+		return
+	}
+	pIDs := make([]int, len(patientIDs))
+	for i, patientID := range patientIDs {
+		pIDs[i], err = strconv.Atoi(patientID)
+		err = fmt.Errorf("while parsing integer from patient ID string \"%s\": %s", patientID, err.Error())
+		if err != nil {
+			return
+		}
+	}
+
+	patientSetIDNum, err := strconv.Atoi(patientSetID)
+	if err != nil {
+		err = fmt.Errorf("while parsing integer from patient set ID string \"%s\": %s", patientSetID, err.Error())
+		return err
+	}
+
+	logrus.Info("Updating Explore Result instance")
+	querytoolsserver.UpdateExploreResultInstance(queryID, pCount, pIDs, nil, &patientSetIDNum)
+	if err != nil {
+		err = fmt.Errorf("while updating result instance table: %s", err.Error())
+		return
+	}
+	logrus.Info("Updated Explore Result instance")
 	return
 }
