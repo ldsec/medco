@@ -57,12 +57,15 @@ func MedCoNodeExploreSearchModifierHandler(params medco_node.ExploreSearchModifi
 func MedCoNodeExploreQueryHandler(params medco_node.ExploreQueryParams, principal *models.User) middleware.Responder {
 
 	// authorizations of query
-	err := utilserver.AuthorizeExploreQueryType(principal, params.QueryRequest.Query.Type)
+	authorizedQueryType, err := utilserver.FetchAuthorizedExploreQueryType(principal)
 	if err != nil {
 		return medco_node.NewExploreQueryDefault(403).WithPayload(&medco_node.ExploreQueryDefaultBody{
 			Message: "Authorization of query failed: " + err.Error(),
 		})
 	}
+
+	// update query type from user token
+	params.QueryRequest.Query.Type = authorizedQueryType
 
 	// create query
 	query, err := medcoserver.NewExploreQuery(params.QueryRequest.ID, params.QueryRequest.Query)
@@ -73,7 +76,7 @@ func MedCoNodeExploreQueryHandler(params medco_node.ExploreQueryParams, principa
 	}
 
 	// parse query type
-	queryType, err := medcoserver.NewExploreQueryType(params.QueryRequest.Query.Type)
+	queryType, err := medcoserver.NewExploreQueryType(authorizedQueryType)
 	if err != nil {
 		return medco_node.NewExploreQueryDefault(400).WithPayload(&medco_node.ExploreQueryDefaultBody{
 			Message: "Bad query type: " + err.Error(),
