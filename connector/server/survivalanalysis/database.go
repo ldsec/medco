@@ -19,7 +19,7 @@ func buildTimePoints(patientList []int64, startConceptCode string, startConceptM
 		pList[i] = strconv.FormatInt(pNum, 10)
 	}
 	patients := "{" + strings.Join(pList, ",") + "}"
-	logrus.Debugf("selecting start concept code %s, start concept modifier %s, patients list %s, end concept code %s, end concept modifier %s, time limit %d")
+	logrus.Debugf("selecting start concept code %s, start concept modifier %s, patients list %s, end concept code %s, end concept modifier %s, time limit %d", startConceptCode, startConceptModifier, patients, endConceptCode, endConceptModifier, timeLimit)
 	logrus.Debugf("SQL: %s", sql6)
 	rows, err := utilserver.I2B2DBConnection.Query(sql6, startConceptCode, startConceptModifier, patients, endConceptCode, endConceptModifier, timeLimit)
 	if err != nil {
