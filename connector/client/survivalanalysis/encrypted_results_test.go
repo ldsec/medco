@@ -3,7 +3,8 @@ package survivalclient
 import (
 	"testing"
 
-	"github.com/ldsec/medco/connector/util"
+	medcomodels "github.com/ldsec/medco/connector/models"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -50,7 +51,7 @@ var testEncryptedResults = EncryptedResults{
 var testDecryptedResults = ClearResults{
 	{GroupID: "testGroup1",
 		InitialCount: 50,
-		TimePoints: util.TimePoints{
+		TimePoints: medcomodels.TimePoints{
 			{
 				Time: 1,
 				Events: struct {

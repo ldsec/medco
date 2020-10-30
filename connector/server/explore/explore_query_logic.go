@@ -6,10 +6,11 @@ import (
 	"strings"
 	"time"
 
+	medcomodels "github.com/ldsec/medco/connector/models"
+
 	querytoolsserver "github.com/ldsec/medco/connector/server/querytools"
 
-	"github.com/ldsec/medco/connector/restapi/models"
-	"github.com/ldsec/medco/connector/util"
+	models "github.com/ldsec/medco/connector/restapi/models"
 	"github.com/ldsec/medco/connector/wrappers/i2b2"
 	"github.com/ldsec/medco/connector/wrappers/unlynx"
 	"github.com/pkg/errors"
@@ -21,25 +22,25 @@ import (
 
 // ExploreQuery represents an i2b2-MedCo query to be executed
 type ExploreQuery struct {
-	ID       string
-	Query    *models.ExploreQuery
-	UserName string
-	Result   struct {
+	ID     string
+	Query  *models.ExploreQuery
+	User   *models.User
+	Result struct {
 		EncCount       string
 		EncPatientList []string
-		Timers         util.Timers
+		Timers         medcomodels.Timers
 		PatientSetID   int
 	}
 }
 
 // NewExploreQuery creates a new query object and checks its validity
-func NewExploreQuery(queryName string, query *models.ExploreQuery, userName string) (new ExploreQuery, err error) {
+func NewExploreQuery(queryName string, query *models.ExploreQuery, user *models.User) (new ExploreQuery, err error) {
 	new = ExploreQuery{
-		ID:       queryName,
-		Query:    query,
-		UserName: userName,
+		ID:    queryName,
+		Query: query,
+		User:  user,
 	}
-	new.Result.Timers = util.NewTimers()
+	new.Result.Timers = medcomodels.NewTimers()
 	return new, new.isValid()
 }
 
@@ -56,7 +57,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	}
 	logrus.Info("Creating Explore Result instance")
 	timer = time.Now()
-	queryID, err := querytoolsserver.InsertExploreResultInstance(q.UserName, q.ID, string(queryDefinition))
+	queryID, err := querytoolsserver.InsertExploreResultInstance(q.User.ID, q.ID, string(queryDefinition))
 	q.Result.Timers.AddTimers("medco-connector-create-result-instance", timer, nil)
 	logrus.Infof("Created Explore Result Instance : %d", queryID)
 	if err != nil {

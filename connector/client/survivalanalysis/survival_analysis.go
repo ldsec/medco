@@ -8,10 +8,10 @@ import (
 	"net/url"
 	"time"
 
+	medcomodels "github.com/ldsec/medco/connector/models"
+
 	medcoclient "github.com/ldsec/medco/connector/client"
 	utilclient "github.com/ldsec/medco/connector/util/client"
-
-	"github.com/ldsec/medco/connector/util"
 
 	"github.com/ldsec/medco/connector/restapi/client/survival_analysis"
 
@@ -47,7 +47,7 @@ type SurvivalAnalysis struct {
 
 	formats strfmt.Registry
 
-	timers util.Timers
+	timers medcomodels.Timers
 }
 
 // NewSurvivalAnalysis constructor for survival analysis request
@@ -112,13 +112,13 @@ type nodeResult struct {
 }
 
 //Execute makes a call to API for survival analysis,
-func (clientSurvivalAnalysis *SurvivalAnalysis) Execute() (results []EncryptedResults, nodeTimers []util.Timers, err error) {
+func (clientSurvivalAnalysis *SurvivalAnalysis) Execute() (results []EncryptedResults, nodeTimers []medcomodels.Timers, err error) {
 
 	var nOfNodes = len(clientSurvivalAnalysis.httpMedCoClients)
 	errChan := make(chan error)
 	resultChan := make(chan nodeResult, nOfNodes)
 	results = make([]EncryptedResults, nOfNodes)
-	nodeTimers = make([]util.Timers, nOfNodes)
+	nodeTimers = make([]medcomodels.Timers, nOfNodes)
 	logrus.Infof("There are %d nodes", nOfNodes)
 
 	for idx := 0; idx < nOfNodes; idx++ {
@@ -147,7 +147,7 @@ func (clientSurvivalAnalysis *SurvivalAnalysis) Execute() (results []EncryptedRe
 		case nodeRes := <-resultChan:
 			logrus.Infof("Node %d successfully fetched survvial analysis data", idx)
 			results[nodeRes.NodeIndex] = encryptedResultsFromAPIResponse(nodeRes.Body.Results)
-			nodeTimers[nodeRes.NodeIndex] = util.NewTimersFromAPIModel(nodeRes.Body.Timers)
+			nodeTimers[nodeRes.NodeIndex] = medcomodels.NewTimersFromAPIModel(nodeRes.Body.Timers)
 		}
 	}
 

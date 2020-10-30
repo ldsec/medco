@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ldsec/medco/connector/util"
+	medcomodels "github.com/ldsec/medco/connector/models"
 
 	"github.com/ldsec/medco/connector/restapi/client/survival_analysis"
 	"github.com/ldsec/medco/connector/restapi/models"
@@ -26,7 +26,7 @@ type ClientResultElement struct {
 func ExecuteClientSurvival(token, parameterFileURL, username, password string, disableTLSCheck bool, resultFile string, timerFile string, limit int, cohortName string, granularity, startConcept, startModifier, endConcept, endModifier string) (err error) {
 
 	//initialize objects and channels
-	clientTimers := util.NewTimers()
+	clientTimers := medcomodels.NewTimers()
 	var accessToken string
 	var parameters *Parameters
 	tokenChan := make(chan string, 1)
@@ -148,11 +148,11 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 
 }
 
-func executeQuery(accessToken string, panels []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0, parameters *Parameters, disableTLSCheck bool) (results []EncryptedResults, timers []util.Timers, userPrivateKey string, err error) {
+func executeQuery(accessToken string, panels []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0, parameters *Parameters, disableTLSCheck bool) (results []EncryptedResults, timers []medcomodels.Timers, userPrivateKey string, err error) {
 	errChan := make(chan error)
 	resultChan := make(chan struct {
 		Results []EncryptedResults
-		Timers  []util.Timers
+		Timers  []medcomodels.Timers
 	})
 	query, err := NewSurvivalAnalysis(
 		accessToken,
@@ -182,7 +182,7 @@ func executeQuery(accessToken string, panels []*survival_analysis.SurvivalAnalys
 		}
 		resultChan <- struct {
 			Results []EncryptedResults
-			Timers  []util.Timers
+			Timers  []medcomodels.Timers
 		}{Results: results, Timers: timers}
 		return
 
@@ -243,7 +243,7 @@ func convertPanel(parameters *Parameters) []*survival_analysis.SurvivalAnalysisP
 	return panels
 }
 
-func printResults(clearResults []ClearResults, timers []util.Timers, clientTimers util.Timers, timeResolution, resultFile, timerFile string) (err error) {
+func printResults(clearResults []ClearResults, timers []medcomodels.Timers, clientTimers medcomodels.Timers, timeResolution, resultFile, timerFile string) (err error) {
 	logrus.Info("printing results")
 	csv, err := utilclient.NewCSV(resultFile)
 	if err != nil {

@@ -2,9 +2,9 @@ package querytoolsclient
 
 import (
 	medcoclient "github.com/ldsec/medco/connector/client"
+	medcomodels "github.com/ldsec/medco/connector/models"
 	"github.com/ldsec/medco/connector/restapi/client"
 	"github.com/ldsec/medco/connector/restapi/client/medco_node"
-	"github.com/ldsec/medco/connector/util"
 
 	"crypto/tls"
 	"errors"
@@ -67,11 +67,11 @@ type nodeResult = struct {
 }
 
 // Execute executes the get cohorts query
-func (getCohorts *GetCohorts) Execute() (results [][]util.Cohort, err error) {
+func (getCohorts *GetCohorts) Execute() (results [][]medcomodels.Cohort, err error) {
 	nOfNodes := len(getCohorts.httpMedCoClients)
 	errChan := make(chan error)
 	resultChan := make(chan nodeResult, nOfNodes)
-	results = make([][]util.Cohort, nOfNodes)
+	results = make([][]medcomodels.Cohort, nOfNodes)
 	logrus.Infof("There are %d nodes", nOfNodes)
 
 	for idx := 0; idx < nOfNodes; idx++ {
@@ -123,8 +123,8 @@ func (getCohorts *GetCohorts) submitToNode(nodeIdx int) ([]*medco_node.GetCohort
 
 }
 
-func convertCohort(apiRes []*medco_node.GetCohortsOKBodyItems0) (res []util.Cohort, err error) {
-	res = make([]util.Cohort, len(apiRes))
+func convertCohort(apiRes []*medco_node.GetCohortsOKBodyItems0) (res []medcomodels.Cohort, err error) {
+	res = make([]medcomodels.Cohort, len(apiRes))
 	for i, apiCohort := range apiRes {
 		res[i].CohortID = int(apiCohort.CohortID)
 		res[i].CohortName = apiCohort.CohortName

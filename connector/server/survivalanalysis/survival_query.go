@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ldsec/medco/connector/util"
+	medcomodels "github.com/ldsec/medco/connector/models"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -35,7 +35,7 @@ type Query struct {
 	EndConcept          string
 	EndModifier         string
 	Result              *struct {
-		Timers    util.Timers
+		Timers    medcomodels.Timers
 		EncEvents EventGroups
 	}
 }
@@ -65,7 +65,7 @@ func NewQuery(UserID,
 		EndConcept:          EndConcept,
 		EndModifier:         EndModifier,
 		Result: &struct {
-			Timers    util.Timers
+			Timers    medcomodels.Timers
 			EncEvents EventGroups
 		}{}}
 	res.Result.Timers = make(map[string]time.Duration)
@@ -96,7 +96,7 @@ func (q *Query) Execute() error {
 	waitGroup.Add(len(definitions))
 	channels := make([]chan struct {
 		*EventGroup
-		util.Timers
+		medcomodels.Timers
 	}, len(definitions))
 	errChan := make(chan error, len(definitions))
 	signal := make(chan struct{})
@@ -104,11 +104,11 @@ func (q *Query) Execute() error {
 	for i, definition := range definitions {
 		channels[i] = make(chan struct {
 			*EventGroup
-			util.Timers
+			medcomodels.Timers
 		}, 1)
 		go func(i int, definition *survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) {
 			defer waitGroup.Done()
-			timers := util.NewTimers()
+			timers := medcomodels.NewTimers()
 
 			newEventGroup := &EventGroup{GroupID: definition.CohortName}
 			panels := make([][]string, 0)
@@ -182,7 +182,7 @@ func (q *Query) Execute() error {
 			timers.AddTimers(fmt.Sprintf("medco-connector-local-encryption%d", i), timer, nil)
 			channels[i] <- struct {
 				*EventGroup
-				util.Timers
+				medcomodels.Timers
 			}{newEventGroup, timers}
 		}(i, definition)
 
@@ -210,7 +210,7 @@ func (q *Query) Execute() error {
 		logrus.Tracef("eventGroup %v", group)
 	}
 	timer = time.Now()
-	var aksTimers util.Timers
+	var aksTimers medcomodels.Timers
 	q.Result.EncEvents, aksTimers, err = AKSgroups(q.QueryName+"_AGG_AND_KEYSWITCH", eventGroups, q.UserPublicKey)
 	q.Result.Timers.AddTimers("medco-connector-aggregate-and-key-switch", timer, aksTimers)
 	if err != nil {
@@ -271,7 +271,7 @@ func (q *Query) Validate() error {
 }
 
 // prepareArguments retrieves concept codes and patients that will be used as the arguments of direct SQL call
-func prepareArguments(userID, cohortName, startConcept, endConcept string) (startConceptCode, endConceptCode string, cohort []int64, timers util.Timers, err error) {
+func prepareArguments(userID, cohortName, startConcept, endConcept string) (startConceptCode, endConceptCode string, cohort []int64, timers medcomodels.Timers, err error) {
 	timers = make(map[string]time.Duration)
 	// --- cohort patient list
 	timer := time.Now()
@@ -310,7 +310,7 @@ func prepareArguments(userID, cohortName, startConcept, endConcept string) (star
 // expansion takes a slice of SQLTimepoints and add encryption of zeros for events of interest and censoring events for each missing relative time from 0 to timeLimit.
 // Relative times greater than timeLimit are discarded.
 // Note that the time limit unit for this function is day.
-func expansion(timePoints util.TimePoints, timeLimitDay int, granularity string) (util.TimePoints, error) {
+func expansion(timePoints medcomodels.TimePoints, timeLimitDay int, granularity string) (medcomodels.TimePoints, error) {
 	var timeLimit int
 	if granFunction, isIn := granularityFunctions[granularity]; isIn {
 		timeLimit = granFunction(timeLimitDay)
@@ -318,7 +318,7 @@ func expansion(timePoints util.TimePoints, timeLimitDay int, granularity string)
 		return nil, fmt.Errorf("granularity %s is not implemented", granularity)
 	}
 
-	res := make(util.TimePoints, timeLimit)
+	res := make(medcomodels.TimePoints, timeLimit)
 	availableTimePoints := make(map[int]struct {
 		EventsOfInterest int64
 		CensoringEvents  int64
@@ -329,12 +329,12 @@ func expansion(timePoints util.TimePoints, timeLimitDay int, granularity string)
 	}
 	for i := 0; i < timeLimit; i++ {
 		if events, ok := availableTimePoints[i]; ok {
-			res[i] = util.TimePoint{
+			res[i] = medcomodels.TimePoint{
 				Time:   i,
 				Events: events,
 			}
 		} else {
-			res[i] = util.TimePoint{
+			res[i] = medcomodels.TimePoint{
 				Time: i,
 				Events: struct {
 					EventsOfInterest int64
@@ -369,7 +369,7 @@ func getCode(path string) (string, error) {
 }
 
 // processGroupResult change resolution, expand and encrypt group result
-func processGroupResult(errChan chan error, newEventGroup *EventGroup, sqlTimePoints util.TimePoints, timeLimitInDays int, timeGranularity string, index int) (timers util.Timers) {
+func processGroupResult(errChan chan error, newEventGroup *EventGroup, sqlTimePoints medcomodels.TimePoints, timeLimitInDays int, timeGranularity string, index int) (timers medcomodels.Timers) {
 	timers = make(map[string]time.Duration)
 
 	// --- change time resolution

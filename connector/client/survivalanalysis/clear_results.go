@@ -1,7 +1,7 @@
 package survivalclient
 
 import (
-	"github.com/ldsec/medco/connector/util"
+	medcomodels "github.com/ldsec/medco/connector/models"
 )
 
 // ClearResults holds all needed information to perform survival analysis, in clear text.
@@ -10,7 +10,7 @@ import (
 type ClearResults []struct {
 	GroupID      string
 	InitialCount int64
-	TimePoints   util.TimePoints
+	TimePoints   medcomodels.TimePoints
 }
 
 // Len implements Len method for sort.Interface interface

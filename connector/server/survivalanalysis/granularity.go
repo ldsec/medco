@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/ldsec/medco/connector/util"
+	medcomodels "github.com/ldsec/medco/connector/models"
 )
 
 const (
@@ -27,7 +27,7 @@ var granularityFunctions = map[string]func(int) int{
 	"year":  year,
 }
 
-func granularity(points util.TimePoints, granularity string) (util.TimePoints, error) {
+func granularity(points medcomodels.TimePoints, granularity string) (medcomodels.TimePoints, error) {
 	if granFunction, isIn := granularityFunctions[granularity]; isIn {
 		return binTimePoint(points, granFunction), nil
 	}
@@ -51,7 +51,7 @@ func year(val int) int {
 	return ceil(val, dInYear)
 }
 
-func binTimePoint(timePoints util.TimePoints, groupingFunction func(int) int) util.TimePoints {
+func binTimePoint(timePoints medcomodels.TimePoints, groupingFunction func(int) int) medcomodels.TimePoints {
 	bins := make(map[int]struct {
 		EventsOfInterest int64
 		CensoringEvents  int64
@@ -78,9 +78,9 @@ func binTimePoint(timePoints util.TimePoints, groupingFunction func(int) int) ut
 		}
 	}
 
-	newSQLTimePoints := make(util.TimePoints, 0)
+	newSQLTimePoints := make(medcomodels.TimePoints, 0)
 	for time, agg := range bins {
-		newSQLTimePoints = append(newSQLTimePoints, util.TimePoint{
+		newSQLTimePoints = append(newSQLTimePoints, medcomodels.TimePoint{
 			Time: time,
 			Events: struct {
 				EventsOfInterest int64

@@ -11,6 +11,7 @@ import (
 
 const comma rune = ','
 const useCarriageReturnThenLineFeed bool = false
+const filePermission os.FileMode = 777
 
 // ResultCSV holds a file descriptor and abstract create/write/close function
 type ResultCSV struct {
@@ -40,7 +41,7 @@ func NewCSV(filePath string) (*ResultCSV, error) {
 			logrus.Error("error opening file: ", err)
 			return nil, err
 		}
-		err = os.Chmod(filePath, 0777)
+		err = os.Chmod(filePath, filePermission)
 		if err != nil {
 			logrus.Error("error setting permissions on file: ", err)
 			return nil, err

@@ -7,7 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ldsec/medco/connector/util"
+	medcomodels "github.com/ldsec/medco/connector/models"
+
 	utilserver "github.com/ldsec/medco/connector/util/server"
 
 	"github.com/sirupsen/logrus"
@@ -46,7 +47,7 @@ func GetPatientList(userID string, cohortName string) (patientNums []int64, err 
 }
 
 // GetSavedCohorts runs a SQL query on db and returns the list of saved cohorts for given queryID and userID
-func GetSavedCohorts(userID string, limit int) ([]util.Cohort, error) {
+func GetSavedCohorts(userID string, limit int) ([]medcomodels.Cohort, error) {
 	var rows *sql.Rows
 	var err error
 	if limit > 0 {
@@ -73,7 +74,7 @@ func GetSavedCohorts(userID string, limit int) ([]util.Cohort, error) {
 	var createDate time.Time
 	var updateDateString string
 	var updateDate time.Time
-	var cohorts = make([]util.Cohort, 0)
+	var cohorts = make([]medcomodels.Cohort, 0)
 	for rows.Next() {
 		err = rows.Scan(&id, &qid, &name, &createDateString, &updateDateString)
 		if err != nil {
@@ -90,7 +91,7 @@ func GetSavedCohorts(userID string, limit int) ([]util.Cohort, error) {
 			err = fmt.Errorf("while parsing update date string \"%s\": %s", updateDateString, err.Error())
 			return nil, err
 		}
-		newCohort := util.Cohort{
+		newCohort := medcomodels.Cohort{
 			CohortID:     id,
 			QueryID:      qid,
 			CohortName:   name,
