@@ -304,8 +304,8 @@ func updateResultInstanceTable(queryID int, patientCount string, patientIDs []st
 	pIDs := make([]int, len(patientIDs))
 	for i, patientID := range patientIDs {
 		pIDs[i], err = strconv.Atoi(patientID)
-		err = fmt.Errorf("while parsing integer from patient ID string \"%s\": %s", patientID, err.Error())
 		if err != nil {
+			err = fmt.Errorf("while parsing integer from patient ID string \"%s\": %s", patientID, err.Error())
 			return
 		}
 	}
