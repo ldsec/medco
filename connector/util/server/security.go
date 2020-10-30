@@ -10,13 +10,13 @@ import (
 
 // ExploreQueryPermissionLevel assigns a permission level to each ExploreQueryType
 var ExploreQueryPermissionLevel = map[models.ExploreQueryType]int64{
-	models.ExploreQueryTypePatientList: 1,
-	models.ExploreQueryTypeCountPerSite: 2,
-	models.ExploreQueryTypeCountPerSiteObfuscated: 3,
-	models.ExploreQueryTypeCountPerSiteShuffled: 4,
+	models.ExploreQueryTypePatientList:                    1,
+	models.ExploreQueryTypeCountPerSite:                   2,
+	models.ExploreQueryTypeCountPerSiteObfuscated:         3,
+	models.ExploreQueryTypeCountPerSiteShuffled:           4,
 	models.ExploreQueryTypeCountPerSiteShuffledObfuscated: 5,
-	models.ExploreQueryTypeCountGlobal: 6,
-	models.ExploreQueryTypeCountGlobalObfuscated: 7,
+	models.ExploreQueryTypeCountGlobal:                    6,
+	models.ExploreQueryTypeCountGlobalObfuscated:          7,
 }
 
 // AuthenticateUser authenticates user and creates principal with user information, including its authorizations
@@ -154,6 +154,7 @@ func AuthorizeRestAPIEndpoint(user *models.User, requiredAuthorization models.Re
 	return
 }
 
+// FetchAuthorizedExploreQueryType returns the highest permission query type for a given user
 func FetchAuthorizedExploreQueryType(user *models.User) (maxAuthorizedQuery models.ExploreQueryType, err error) {
 	maxPermissionLevel := int64(0)
 	for _, userQueryType := range user.Authorizations.ExploreQuery {
