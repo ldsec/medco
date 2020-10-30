@@ -81,7 +81,7 @@ test2 () {
   exit 1
   fi
   
-  result="$(awk -F',' 'NR==7{print $0}' deployments/result.csv)"
+  result="$(awk -F',' 'NR==1, NR==7 {print $0}' deployments/result.csv)"
   if [ "${result}" != "${2}" ];
   then
   echo "survival analysis $1: test failed"
