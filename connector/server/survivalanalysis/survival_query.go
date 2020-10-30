@@ -173,6 +173,8 @@ func (q *Query) Execute() error {
 			}
 			logrus.Debugf("got %d time points", len(sqlTimePoints))
 			logrus.Tracef("%+v", sqlTimePoints)
+
+			// change time granularity, fill zeros in arrays and encrypt group results
 			processGroupResultTimers := processGroupResult(errChan, newEventGroup, sqlTimePoints, timeLimitInDays, q.TimeGranularity, i)
 			q.Result.Timers.AddTimers("", timer, processGroupResultTimers)
 
@@ -369,9 +371,22 @@ func getCode(path string) (string, error) {
 // processGroupResult change resolution, expand and encrypt group result
 func processGroupResult(errChan chan error, newEventGroup *EventGroup, sqlTimePoints util.TimePoints, timeLimitInDays int, timeGranularity string, index int) (timers util.Timers) {
 	timers = make(map[string]time.Duration)
-	// --- expand
+
+	// --- change time resolution
 	timer := time.Now()
-	sqlTimePoints, err := expansion(sqlTimePoints, timeLimitInDays, timeGranularity)
+	sqlTimePoints, err := granularity(sqlTimePoints, timeGranularity)
+	if err != nil {
+		logrus.Error("Error while changing granularity")
+		errChan <- err
+		return
+	}
+	timers.AddTimers(fmt.Sprintf("medco-connector-change-timepoints-to-new-resolution%d", index), timer, nil)
+	logrus.Debugf("changed resolution for %s,  got %d timepoints", timeGranularity, len(sqlTimePoints))
+	logrus.Tracef("time points with resolution %s %+v", timeGranularity, sqlTimePoints)
+
+	// --- expand
+	timer = time.Now()
+	sqlTimePoints, err = expansion(sqlTimePoints, timeLimitInDays, timeGranularity)
 	if err != nil {
 		err = fmt.Errorf("while expanding: %s", err.Error())
 		errChan <- err
