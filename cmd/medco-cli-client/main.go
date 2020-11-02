@@ -70,12 +70,11 @@ func main() {
 	}
 	//--- survival analysis command flags
 	survivalAnalysisFlag := []cli.Flag{
-		// TODO as CLI is ran in a docker container, some adjustments are needed for I/O files to work
-		//cli.StringFlag{
-		//	Name:  "parameterFile, p",
-		//	Usage: "YAML parameter file URL",
-		//	Value: "",
-		//},
+		cli.StringFlag{
+			Name:  "parameterFile, p",
+			Usage: "YAML parameter file URL",
+			Value: "",
+		},
 		cli.StringFlag{
 			Name:  "dumpFile, d",
 			Usage: "Output file for the timers CSV. Printed to stdout if omitted.",
@@ -268,12 +267,12 @@ func main() {
 			Aliases:     []string{"srva"},
 			Usage:       "Run a survival analysis",
 			Flags:       survivalAnalysisFlag,
-			ArgsUsage:   "-l limit [-g granularity] -c cohortName -s startConcept [-x startModifier] -e endConcept [-y endModifier]",
+			ArgsUsage:   "-l limit [-p parameterFile] [-g granularity] -c cohortName -s startConcept [-x startModifier] -e endConcept [-y endModifier]",
 			Description: "Returns the points of the survival curve",
 			Action: func(c *cli.Context) error {
 				return survivalclient.ExecuteClientSurvival(
 					c.GlobalString("token"),
-					"",
+					c.String("parameterFile"),
 					c.GlobalString("user"),
 					c.GlobalString("password"),
 					c.GlobalBool("disableTLSCheck"),

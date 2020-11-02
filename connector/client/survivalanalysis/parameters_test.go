@@ -38,13 +38,15 @@ var parameters = &Parameters{
 	StartConceptModifier: "anyStartMCode",
 	EndConceptPath:       "/any/end/path/",
 	EndConceptModifier:   "anyEndMCode",
-	Cohorts: []*struct {
-		Panels []*struct {
+	SubGroups: []*struct {
+		GroupName string "yaml:\"group_name\""
+		Panels    []*struct {
 			Not   bool     "yaml:\"not\""
 			Paths []string "yaml:\"paths\""
 		} "yaml:\"panels\""
 	}{
 		{
+			GroupName: "AAA",
 			Panels: []*struct {
 				Not   bool     "yaml:\"not\""
 				Paths []string "yaml:\"paths\""
@@ -60,6 +62,7 @@ var parameters = &Parameters{
 			},
 		},
 		{
+			GroupName: "BBB",
 			Panels: []*struct {
 				Not   bool     "yaml:\"not\""
 				Paths []string "yaml:\"paths\""

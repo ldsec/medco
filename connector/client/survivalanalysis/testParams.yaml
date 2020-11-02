@@ -5,16 +5,18 @@ start_concept_path: "/any/start/path/"
 start_concept_modifier: "anyStartMCode"
 end_concept_path: "/any/end/path/"
 end_concept_modifier: "anyEndMCode"
-cohorts:
-    - panels:
-        - not: false
-          paths:
-            - "/path/1/"
-            - "/path/2/"
-        - not : true
-          paths:
-            - "/path/3/"
-    - panels:
-        - not: false
-          paths:
-            - "/path/4/"
+sub_groups:
+  - group_name: "AAA"
+    panels:
+      - not: false
+        paths:
+          - "/path/1/"
+          - "/path/2/"
+      - not : true
+        paths:
+          - "/path/3/"
+  - group_name: "BBB"
+    panels:
+      - not: false
+        paths:
+          - "/path/4/"

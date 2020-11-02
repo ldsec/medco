@@ -213,10 +213,10 @@ resLoop:
 }
 
 func convertPanel(parameters *Parameters) []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0 {
-	panels := make([]*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0, len(parameters.Cohorts))
-	for i, selection := range parameters.Cohorts {
+	panels := make([]*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0, len(parameters.SubGroups))
+	for i, selection := range parameters.SubGroups {
 		newSelection := &survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0{}
-		newSelection.CohortName = fmt.Sprintf("SUB_GROUP_%d", i)
+		newSelection.CohortName = fmt.Sprintf(selection.GroupName)
 		newPanels := make([]*models.Panel, len(selection.Panels))
 		for j, panel := range selection.Panels {
 			newPanel := &models.Panel{}
