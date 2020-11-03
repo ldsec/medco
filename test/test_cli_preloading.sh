@@ -96,7 +96,7 @@ test2 () {
 test3 () {
   cp test/survival_test_parameters.yaml deployments/parameters/survival_test_parameters.yaml
 
-  docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run -v "$(PWD)/deployments/parameters/":/parameters/  medco-cli-client --user $USERNAME --password $PASSWORD -o /results/result.csv srva -d /results/timers.csv -p /parameters/survival_test_parameters.yaml
+  docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run -v "${PWD}/deployments/parameters/":/parameters/  medco-cli-client --user $USERNAME --password $PASSWORD -o /results/result.csv srva -d /results/timers.csv -p /parameters/survival_test_parameters.yaml
 
   result="$(awk -F',' 'NR==1, NR==7 {print $0}' deployments/result.csv)"
   if [ "${result}" != "${1}" ];
