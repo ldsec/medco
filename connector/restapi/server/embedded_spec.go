@@ -887,7 +887,7 @@ func init() {
             "items": {
               "type": "object",
               "properties": {
-                "cohortName": {
+                "groupName": {
                   "type": "string",
                   "pattern": "^\\w+$"
                 },
@@ -2215,7 +2215,7 @@ func init() {
     "SubGroupDefinitionsItems0": {
       "type": "object",
       "properties": {
-        "cohortName": {
+        "groupName": {
           "type": "string",
           "pattern": "^\\w+$"
         },
@@ -2586,7 +2586,7 @@ func init() {
             "items": {
               "type": "object",
               "properties": {
-                "cohortName": {
+                "groupName": {
                   "type": "string",
                   "pattern": "^\\w+$"
                 },

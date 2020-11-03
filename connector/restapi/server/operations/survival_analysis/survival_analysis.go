@@ -734,9 +734,9 @@ func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0Events) UnmarshalB
 // swagger:model SurvivalAnalysisParamsBodySubGroupDefinitionsItems0
 type SurvivalAnalysisParamsBodySubGroupDefinitionsItems0 struct {
 
-	// cohort name
+	// group name
 	// Pattern: ^\w+$
-	CohortName string `json:"cohortName,omitempty"`
+	GroupName string `json:"groupName,omitempty"`
 
 	// panels
 	Panels []*models.Panel `json:"panels"`
@@ -746,7 +746,7 @@ type SurvivalAnalysisParamsBodySubGroupDefinitionsItems0 struct {
 func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := o.validateCohortName(formats); err != nil {
+	if err := o.validateGroupName(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -760,13 +760,13 @@ func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) Validate(formats s
 	return nil
 }
 
-func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) validateCohortName(formats strfmt.Registry) error {
+func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) validateGroupName(formats strfmt.Registry) error {
 
-	if swag.IsZero(o.CohortName) { // not required
+	if swag.IsZero(o.GroupName) { // not required
 		return nil
 	}
 
-	if err := validate.Pattern("cohortName", "body", string(o.CohortName), `^\w+$`); err != nil {
+	if err := validate.Pattern("groupName", "body", string(o.GroupName), `^\w+$`); err != nil {
 		return err
 	}
 

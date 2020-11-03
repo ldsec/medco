@@ -406,7 +406,7 @@ parameters:
           items:
             type: "object"
             properties:
-              cohortName:
+              groupName:
                 type: "string"
                 pattern: '^\w+$'
               panels:

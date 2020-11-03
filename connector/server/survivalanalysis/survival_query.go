@@ -110,7 +110,7 @@ func (q *Query) Execute() error {
 			defer waitGroup.Done()
 			timers := medcomodels.NewTimers()
 
-			newEventGroup := &EventGroup{GroupID: definition.CohortName}
+			newEventGroup := &EventGroup{GroupID: definition.GroupName}
 			panels := make([][]string, 0)
 			not := make([]bool, 0)
 			panels = append(panels, []string{q.StartConcept})
@@ -446,8 +446,8 @@ func fullCohort(startConcept string) []*survival_analysis.SurvivalAnalysisParams
 
 	return []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0{
 		{
-			CohortName: "Full cohort",
-			Panels:     newPanels,
+			GroupName: "Full cohort",
+			Panels:    newPanels,
 		},
 	}
 }

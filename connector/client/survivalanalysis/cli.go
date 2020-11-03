@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -24,6 +25,12 @@ type ClientResultElement struct {
 
 // ExecuteClientSurvival creates a survival analysis form parameters given in parameter file, and makes a call to the API to executes this query
 func ExecuteClientSurvival(token, parameterFileURL, username, password string, disableTLSCheck bool, resultFile string, timerFile string, limit int, cohortName string, granularity, startConcept, startModifier, endConcept, endModifier string) (err error) {
+
+	err = inputValidation(parameterFileURL, limit, cohortName, startConcept, endConcept)
+	if err != nil {
+		logrus.Error(err)
+		return
+	}
 
 	//initialize objects and channels
 	clientTimers := medcomodels.NewTimers()
@@ -108,7 +115,9 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 	logrus.Info("converting panels")
 	panels := convertPanel(parameters)
 	logrus.Info("panels converted")
-	logrus.Tracef("panels: %+v", panels)
+	for _, panel := range panels {
+		logrus.Trace(modelPanelsToString(panel))
+	}
 
 	// --- execute query
 	timer = time.Now()
@@ -216,7 +225,7 @@ func convertPanel(parameters *Parameters) []*survival_analysis.SurvivalAnalysisP
 	panels := make([]*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0, len(parameters.SubGroups))
 	for i, selection := range parameters.SubGroups {
 		newSelection := &survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0{}
-		newSelection.CohortName = fmt.Sprintf(selection.GroupName)
+		newSelection.GroupName = fmt.Sprintf(selection.GroupName)
 		newPanels := make([]*models.Panel, len(selection.Panels))
 		for j, panel := range selection.Panels {
 			newPanel := &models.Panel{}
@@ -267,7 +276,7 @@ func printResults(clearResults []ClearResults, timers []medcomodels.Timers, clie
 				csv.Write([]string{
 					timeResolution,
 					strconv.Itoa(nodeIdx),
-					strconv.Itoa(groupIdx),
+					group.GroupID,
 					strconv.FormatInt(group.InitialCount, 10),
 					strconv.Itoa(timePoint.Time),
 					strconv.FormatInt(timePoint.Events.EventsOfInterest, 10),
@@ -361,4 +370,42 @@ func printResults(clearResults []ClearResults, timers []medcomodels.Timers, clie
 	logrus.Info("timers dumped")
 	return
 
+}
+
+func inputValidation(parameterFileURL string, limit int, cohortName, startConcept, endConcept string) error {
+	if parameterFileURL == "" {
+		if limit == 0 {
+			return fmt.Errorf("Limit -l is not set")
+		}
+		if cohortName == "" {
+			return fmt.Errorf("Cohort name -c is not set")
+		}
+		if startConcept == "" {
+			return fmt.Errorf("Start concept path -s is not set")
+		}
+		if endConcept == "" {
+			return fmt.Errorf("End concept path -e is not set")
+		}
+	}
+	return nil
+}
+
+func modelPanelsToString(subGroup *survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) string {
+
+	panelStrings := make([]string, 0, len(subGroup.Panels))
+	for _, panel := range subGroup.Panels {
+		itemStrings := make([]string, 0, len(panel.Items))
+		for _, item := range panel.Items {
+			itemStrings = append(itemStrings, fmt.Sprintf("{Encrypted:%t Modifier:%s Operator:%s QueryTerm:%s Value:%s}",
+				*item.Encrypted,
+				item.Modifier,
+				item.Operator,
+				*item.QueryTerm,
+				item.Value))
+		}
+		itemArray := "[" + strings.Join(itemStrings, " ") + "]"
+		panelStrings = append(panelStrings, fmt.Sprintf("{Items:%s Not:%t}", itemArray, *panel.Not))
+	}
+	panelArray := "[" + strings.Join(panelStrings, " ") + "]"
+	return fmt.Sprintf("{GroupName:%s Panels:%s", subGroup.GroupName, panelArray)
 }

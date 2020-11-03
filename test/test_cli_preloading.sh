@@ -12,12 +12,14 @@ getSavedCohort2="$(printf -- "node_index cohort_name query_id\n0 testCohort -1\n
 
 # test2
 timerHeaders="node_index,timer_description,duration_milliseconds"
-survivalDays="$(printf -- "time_granularity,node_index,group_id,initial_count,time_point,event_of_interest_count,censoring_event_count\nday,0,0,684,0,0,0\nday,0,0,684,1,0,0\nday,0,0,684,2,0,0\nday,0,0,684,3,0,0\nday,0,0,684,4,0,0\nday,0,0,684,5,3,0")"
-survivalWeeks="$(printf -- "time_granularity,node_index,group_id,initial_count,time_point,event_of_interest_count,censoring_event_count\nweek,0,0,684,0,0,0\nweek,0,0,684,1,3,0\nweek,0,0,684,2,18,0\nweek,0,0,684,3,3,0\nweek,0,0,684,4,3,0\nweek,0,0,684,5,6,0")"
-survivalMonths="$(printf -- "time_granularity,node_index,group_id,initial_count,time_point,event_of_interest_count,censoring_event_count\nmonth,0,0,684,0,0,0\nmonth,0,0,684,1,30,0\nmonth,0,0,684,2,21,0\nmonth,0,0,684,3,30,0\nmonth,0,0,684,4,30,6\nmonth,0,0,684,5,30,0")"
-survivalYears="$(printf -- "time_granularity,node_index,group_id,initial_count,time_point,event_of_interest_count,censoring_event_count\nyear,0,0,684,0,0,0\nyear,0,0,684,1,363,126\nyear,0,0,684,2,114,42\nyear,0,0,684,3,18,21\nyear,0,0,684,4,0,0\nyear,0,0,684,5,0,0")"
+survivalDays="$(printf -- "time_granularity,node_index,group_id,initial_count,time_point,event_of_interest_count,censoring_event_count\nday,0,Full cohort,684,0,0,0\nday,0,Full cohort,684,1,0,0\nday,0,Full cohort,684,2,0,0\nday,0,Full cohort,684,3,0,0\nday,0,Full cohort,684,4,0,0\nday,0,Full cohort,684,5,3,0")"
+survivalWeeks="$(printf -- "time_granularity,node_index,group_id,initial_count,time_point,event_of_interest_count,censoring_event_count\nweek,0,Full cohort,684,0,0,0\nweek,0,Full cohort,684,1,3,0\nweek,0,Full cohort,684,2,18,0\nweek,0,Full cohort,684,3,3,0\nweek,0,Full cohort,684,4,3,0\nweek,0,Full cohort,684,5,6,0")"
+survivalMonths="$(printf -- "time_granularity,node_index,group_id,initial_count,time_point,event_of_interest_count,censoring_event_count\nmonth,0,Full cohort,684,0,0,0\nmonth,0,Full cohort,684,1,30,0\nmonth,0,Full cohort,684,2,21,0\nmonth,0,Full cohort,684,3,30,0\nmonth,0,Full cohort,684,4,30,6\nmonth,0,Full cohort,684,5,30,0")"
+survivalYears="$(printf -- "time_granularity,node_index,group_id,initial_count,time_point,event_of_interest_count,censoring_event_count\nyear,0,Full cohort,684,0,0,0\nyear,0,Full cohort,684,1,363,126\nyear,0,Full cohort,684,2,114,42\nyear,0,Full cohort,684,3,18,21\nyear,0,Full cohort,684,4,0,0\nyear,0,Full cohort,684,5,0,0")"
 
-
+# test3
+survivalSubGroup1="$(printf -- "time_granularity,node_index,group_id,initial_count,time_point,event_of_interest_count,censoring_event_count\nweek,0,Female,414,0,0,0\nweek,0,Female,414,1,0,0\nweek,0,Female,414,2,18,0\nweek,0,Female,414,3,3,0\nweek,0,Female,414,4,3,0\nweek,0,Female,414,5,6,0")"
+survivalSubGroup2="$(printf -- "week,0,Male,270,0,0,0\nweek,0,Male,270,1,3,0\nweek,0,Male,270,2,0,0\nweek,0,Male,270,3,0,0\nweek,0,Male,270,4,0,0\nweek,0,Male,270,5,0,0")"
 
 test1 () {
   docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /results/result.csv get-saved-cohorts
@@ -71,7 +73,7 @@ test1 () {
 }
 
 test2 () {
-  docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD -o /results/result.csv srva  srva -c testCohort -l 6 -g ${1}  -s /SPHN/SPHNv2020.1/FophDiagnosis/ -e /SPHN/SPHNv2020.1/DeathStatus/ -y 126:1 -d /results/timers.csv
+  docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD -o /results/result.csv srva  -c testCohort -l 6 -g ${1}  -s /SPHN/SPHNv2020.1/FophDiagnosis/ -e /SPHN/SPHNv2020.1/DeathStatus/ -y 126:1 -d /results/timers.csv
   
   result="$(awk -F',' 'NR==1{print $0}' deployments/timers.csv)"
   if [ "${result}" != "${timerHeaders}" ];
@@ -91,6 +93,30 @@ test2 () {
 
 }
 
+test3 () {
+  cp test/survival_test_parameters.yaml deployments/parameters/survival_test_parameters.yaml
+
+  docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run -v "$(PWD)/deployments/parameters/":/parameters/  medco-cli-client --user $USERNAME --password $PASSWORD -o /results/result.csv srva -d /results/timers.csv -p /parameters/survival_test_parameters
+
+  result="$(awk -F',' 'NR==1, NR==7 {print $0}' deployments/result.csv)"
+  if [ "${result}" != "${1}" ];
+  then
+  echo "survival analysis sub group 1: test failed"
+  echo "result: ${result}" && echo "expected result: ${1}"
+  exit 1
+  fi
+
+  result="$(awk -F',' 'NR==8, NR==13 {print $0}' deployments/result.csv)"
+  if [ "${result}" != "${2}" ];
+  then
+  echo "survival analysis sub group 2: test failed"
+  echo "result: ${result}" && echo "expected result: ${2}"
+  exit 1
+  fi
+
+  rm deployments/parameters/survival_test_parameters.yaml
+}
+
 echo "Testing saved-cohorts features..."
 
 test1
@@ -99,6 +125,8 @@ test2 "day" "${survivalDays}"
 test2 "week" "${survivalWeeks}"
 test2 "month" "${survivalMonths}"
 test2 "year" "${survivalYears}"
+
+test3 "${survivalSubGroup1}" "${survivalSubGroup2}"
 
 echo "CLI test 1/2 successful!"
 exit 0

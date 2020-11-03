@@ -81,9 +81,8 @@ func main() {
 			Value: "",
 		},
 		cli.IntFlag{
-			Name:     "limit, l",
-			Usage:    "Max limit of survival analysis. Unit depends on chosen granularity, default: day",
-			Required: true,
+			Name:  "limit, l",
+			Usage: "Max limit of survival analysis. Unit depends on chosen granularity, default: day",
 		},
 		cli.StringFlag{
 			Name:  "granularity, g",
@@ -92,23 +91,21 @@ func main() {
 		},
 		// this is supposed to be a required argument, but we need -1 for testing, and -1 is not possible to pass as an argument here
 		cli.StringFlag{
-			Name:     "cohortName, c",
-			Usage:    "Cohort identifier",
-			Required: true,
+			Name:  "cohortName, c",
+			Usage: "Cohort identifier",
 		},
 		cli.StringFlag{
-			Name:     "startConcept, s",
-			Usage:    "Survival start concept",
-			Required: true},
+			Name:  "startConcept, s",
+			Usage: "Survival start concept",
+		},
 		cli.StringFlag{
 			Name:  "startModifier, x",
 			Usage: "Survival start modifier",
 			Value: "@",
 		},
 		cli.StringFlag{
-			Name:     "endConcept, e",
-			Usage:    "Survival end concept",
-			Required: true,
+			Name:  "endConcept, e",
+			Usage: "Survival end concept",
 		},
 		cli.StringFlag{
 			Name:  "endModifier, y",
@@ -263,12 +260,15 @@ func main() {
 		},
 
 		{
-			Name:        "survival-analysis",
-			Aliases:     []string{"srva"},
-			Usage:       "Run a survival analysis",
-			Flags:       survivalAnalysisFlag,
-			ArgsUsage:   "-l limit [-p parameterFile] [-g granularity] -c cohortName -s startConcept [-x startModifier] -e endConcept [-y endModifier]",
-			Description: "Returns the points of the survival curve",
+			Name:      "survival-analysis",
+			Aliases:   []string{"srva"},
+			Usage:     "Run a survival analysis",
+			Flags:     survivalAnalysisFlag,
+			ArgsUsage: "[-p parameterFile |  [-g granularity] -c cohortName -s startConcept [-x startModifier] -e endConcept [-y endModifier]]",
+			Description: "Returns the points of the survival curve with the provided parameters." +
+				"Instead of using command line arguments, paramters can also be written in parameter file." +
+				"If both parameter file URL and command line argument set are used," +
+				"definitions are overridden by the parameter file.",
 			Action: func(c *cli.Context) error {
 				return survivalclient.ExecuteClientSurvival(
 					c.GlobalString("token"),
