@@ -111,27 +111,23 @@ func (q *Query) Execute() error {
 			timers := medcomodels.NewTimers()
 
 			newEventGroup := &EventGroup{GroupID: definition.GroupName}
-			panels := make([][]string, 0)
-			not := make([]bool, 0)
-			panels = append(panels, []string{q.StartConcept})
-			not = append(not, false)
-			for _, panel := range definition.Panels {
-				terms := make([]string, 0)
 
-				negation := *panel.Not
-
-				for _, term := range panel.Items {
-					terms = append(terms, *term.QueryTerm)
-				}
-
-				panels = append(panels, terms)
-				not = append(not, negation)
+			not := false
+			item := &models.PanelItemsItems0{
+				QueryTerm: &q.StartConcept,
 			}
+			newPanel := &models.Panel{
+				Items: []*models.PanelItemsItems0{
+					item,
+				},
+				Not: &not,
+			}
+			panels := append(definition.Panels, newPanel)
 
 			timer = time.Now()
 			logrus.Infof("I2B2 explore for subgroup %d", i)
 			logrus.Tracef("panels %+v", panels)
-			initialCount, patientList, err := SubGroupExplore(q.QueryName, i, panels, not)
+			initialCount, patientList, err := SubGroupExplore(q.QueryName, i, panels)
 			if err != nil {
 				err = fmt.Errorf("during subgroup explore procedure: %s", err.Error())
 				errChan <- err

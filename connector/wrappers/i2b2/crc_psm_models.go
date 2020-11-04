@@ -10,7 +10,7 @@ import (
 )
 
 // NewCrcPsmReqFromQueryDef returns a new request object for i2b2 psm request
-func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []models.ExploreQueryPanelsItems0, resultOutputs []ResultOutputName) Request {
+func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, resultOutputs []ResultOutputName) Request {
 
 	// PSM header
 	psmHeader := PsmHeader{
@@ -54,12 +54,12 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []models.ExploreQuer
 
 		for _, queryItem := range queryPanel.Items {
 			i2b2Item := Item{
-				ItemKey: *queryItem.QueryTerm,
+				ItemKey: convertPathToI2b2Format(*queryItem.QueryTerm),
 			}
 			if queryItem.Modifier != nil {
 				i2b2Item.ConstrainByModifier = &ConstrainByModifier{
-					AppliedPath: queryItem.Modifier.AppliedPath,
-					ModifierKey: queryItem.Modifier.ModifierKey,
+					AppliedPath: strings.ReplaceAll(queryItem.Modifier.AppliedPath, "/", `\`),
+					ModifierKey: convertPathToI2b2Format(queryItem.Modifier.ModifierKey),
 				}
 			}
 			i2b2Panel.Items = append(i2b2Panel.Items, i2b2Item)

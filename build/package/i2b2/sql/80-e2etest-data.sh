@@ -224,7 +224,7 @@ psql $PSQL_PARAMS -d "$I2B2_DB_NAME" <<-EOSQL
             ('1', '1', 'ENC_ID:1', 'e2etest', 'NOW()', 'ENC_ID:5', '1', 'NOW()', '1'),
             ('2', '2', 'TAG_ID:11', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1'),
             ('2', '2', 'TAG_ID:12', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1'),
-            ('2', '2', 'ENC_ID:1', 'e2etest', 'NOW()', 'ENC_ID:5', '1', 'NOW()', '1'),
+            ('2', '2', 'ENC_ID:1', 'e2etest', 'NOW()', 'ENC_ID:4', '1', 'NOW()', '1'),
             ('2', '2', 'ENC_ID:2', 'e2etest', 'NOW()', 'ENC_ID:6', '1', 'NOW()', '1'),
             ('3', '3', 'TAG_ID:12', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1'),
             ('3', '3', 'TAG_ID:13', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1'),

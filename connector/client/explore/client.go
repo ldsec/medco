@@ -2,17 +2,15 @@ package exploreclient
 
 import (
 	"fmt"
+	medcoclient "github.com/ldsec/medco/connector/client"
+	"github.com/ldsec/medco/connector/restapi/models"
+	utilclient "github.com/ldsec/medco/connector/util/client"
+	"github.com/ldsec/medco/connector/wrappers/unlynx"
+	"github.com/sirupsen/logrus"
 	"os"
 	"sort"
 	"strconv"
 	"time"
-
-	medcoclient "github.com/ldsec/medco/connector/client"
-	"github.com/ldsec/medco/connector/wrappers/unlynx"
-
-	"github.com/ldsec/medco/connector/restapi/models"
-	utilclient "github.com/ldsec/medco/connector/util/client"
-	"github.com/sirupsen/logrus"
 )
 
 // ExecuteClientQuery executes and displays the result of the MedCo client query
@@ -21,6 +19,9 @@ func ExecuteClientQuery(token, username, password, queryType, queryString, resul
 
 	// get token
 	accessToken, err := utilclient.RetrieveOrGetNewAccessToken(token, username, password, disableTLSCheck)
+	if err != nil {
+		return err
+	}
 
 	// parse query type
 	queryTypeParsed := models.ExploreQueryType(queryType)
@@ -31,19 +32,30 @@ func ExecuteClientQuery(token, username, password, queryType, queryString, resul
 	}
 
 	// parse query string
-	panelsItemKeys, panelsIsNot, err := medcoclient.ParseQueryString(queryString)
+	panels, err := medcoclient.ParseQueryString(queryString)
 	if err != nil {
 		return
 	}
 
-	// encrypt item key
-	encPanelsItemKeys, err := unlynx.EncryptMatrix(panelsItemKeys)
-	if err != nil {
-		return
+	// encrypt item keys
+	for _, panel := range panels {
+		for _, item := range panel.Items {
+			if *item.Encrypted {
+				queryTermInt, err := strconv.ParseInt(*item.QueryTerm, 10, 64)
+				if err != nil {
+					return err
+				}
+				encrypted, err := unlynx.EncryptWithCothorityKey(queryTermInt)
+				if err != nil {
+					return err
+				}
+				item.QueryTerm = &encrypted
+			}
+		}
 	}
 
 	// execute query
-	clientQuery, err := NewExploreQuery(accessToken, queryTypeParsed, encPanelsItemKeys, panelsIsNot, disableTLSCheck)
+	clientQuery, err := NewExploreQuery(accessToken, queryTypeParsed, panels, disableTLSCheck)
 	if err != nil {
 		return
 	}

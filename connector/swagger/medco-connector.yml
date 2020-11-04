@@ -685,7 +685,7 @@ definitions:
           properties:
             queryTerm:
               type: "string"
-              pattern: '^([\w=-]+)$|^((\/[^\/]+)+\/?)$'
+              pattern: '^([\w=-]+)$|^((\/[^\/]+)+\/)$'
             operator:
               type: "string"
               enum:
@@ -696,13 +696,13 @@ definitions:
               maxLength: 0
             modifier:
               type: "object"
-                properties:
-                  appliedPath:
-                    type: "string"
-                    pattern: '^((\/[^\/]+)+\/?)$'
-                  modifierKey:
-                    type: "string"
-                    pattern: '^(\/(\/[^\/]+)+\/?)$'
+              properties:
+                appliedPath:
+                  type: "string"
+                  pattern: '^((\/[^\/]+)+\/%?)$'
+                modifierKey:
+                  type: "string"
+                  pattern: '^((\/[^\/]+)+\/)$'
             encrypted:
               type: "boolean"
 

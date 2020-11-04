@@ -146,7 +146,7 @@ services:
       - OIDC_REQ_TOKEN_CLIENT_ID=medco
     volumes:
       - ./dev-local-3nodes/configuration:/medco-configuration
-      - ./:/results
+      - ./:/data
     network_mode: host
 
   medco-loader:

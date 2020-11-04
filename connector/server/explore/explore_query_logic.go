@@ -3,7 +3,6 @@ package medcoserver
 import (
 	"fmt"
 	"strconv"
-	"strings"
 	"time"
 
 	medcomodels "github.com/ldsec/medco/connector/models"
@@ -15,8 +14,6 @@ import (
 	"github.com/ldsec/medco/connector/wrappers/unlynx"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"strconv"
-	"time"
 )
 
 // todo: log query (with associated status)
@@ -87,22 +84,16 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	}
 
 	// tag query terms
-	encQueryTerms := q.getEncQueryTerms()
-	var taggedQueryTerms map[string]string
-	if len(encQueryTerms) > 0 {
+	taggedQueryTerms := make(map[string]string)
+	if encQueryTerms := q.getEncQueryTerms(); len(encQueryTerms) > 0 {
+		var ddtTimers map[string]time.Duration
 		timer = time.Now()
-		taggedQueryTermsInner, ddtTimers, ddtErr := unlynx.DDTagValues(q.ID, encQueryTerms)
-		taggedQueryTerms = taggedQueryTermsInner
-		if ddtErr != nil {
-			err = ddtErr
-			err = fmt.Errorf("during distributed deterministic tagging (DDT) procedure: %s", err.Error())
+		taggedQueryTerms, ddtTimers, err = unlynx.DDTagValues(q.ID, encQueryTerms)
+		if err != nil {
 			return
 		}
 		q.Result.Timers.AddTimers("medco-connector-DDT", timer, ddtTimers)
 		logrus.Info(q.ID, ": tagged ", len(taggedQueryTerms), " elements with unlynx")
-	} else {
-		taggedQueryTerms = make(map[string]string, 0)
-		logrus.Info(q.ID, ": tagged 0 elements with unlynx")
 	}
 
 	// i2b2 PSM query with tagged items
@@ -261,24 +252,24 @@ func (q *ExploreQuery) getEncQueryTerms() (encQueryTerms []string) {
 	return
 }
 
-func (q *ExploreQuery) getI2b2PsmQueryTerms(taggedQueryTerms map[string]string) (panels []models.ExploreQueryPanelsItems0, err error) {
+func (q *ExploreQuery) getI2b2PsmQueryTerms(taggedQueryTerms map[string]string) (panels []*models.Panel, err error) {
 
 	for _, panel := range q.Query.Panels {
 
-		var newPanel models.ExploreQueryPanelsItems0
+		var newPanel models.Panel
 
 		not := *panel.Not
 		newPanel.Not = &not
 
 		for _, item := range panel.Items {
 
-			var newItem models.ExploreQueryPanelsItems0ItemsItems0
+			var newItem models.PanelItemsItems0
 			var itemKey string
 
 			if *item.Encrypted {
 
 				if tag, ok := taggedQueryTerms[*item.QueryTerm]; ok {
-					itemKey = `\\SENSITIVE_TAGGED\medco\tagged\` + tag + `\`
+					itemKey = `/SENSITIVE_TAGGED/medco/tagged/` + tag + `\`
 				} else {
 					err = errors.New("query error: encrypted term does not have corresponding tag")
 					logrus.Error(err)
@@ -298,7 +289,7 @@ func (q *ExploreQuery) getI2b2PsmQueryTerms(taggedQueryTerms map[string]string) 
 			newPanel.Items = append(newPanel.Items, &newItem)
 		}
 
-		panels = append(panels, newPanel)
+		panels = append(panels, &newPanel)
 
 	}
 

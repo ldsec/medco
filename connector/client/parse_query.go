@@ -3,6 +3,8 @@ package medcoclient
 import (
 	"bufio"
 	"errors"
+	"fmt"
+	"github.com/ldsec/medco/connector/restapi/models"
 	"os"
 	"strconv"
 	"strings"
@@ -12,28 +14,32 @@ import (
 )
 
 // ParseQueryString parses the query string given as input
-func ParseQueryString(queryString string) (panelsItemKeys [][]int64, panelsIsNot []bool, err error) {
+func ParseQueryString(queryString string) (panels []*models.Panel, err error) {
 	logrus.Info("Client query is: ", queryString)
 
-	panelsItemKeys = make([][]int64, 0)
-	panelsIsNot = make([]bool, 0)
+	panels = make([]*models.Panel, 0)
 
 	for _, queryPanel := range strings.Split(queryString, " AND ") {
 
+		var newPanel models.Panel
+		var not bool
+
 		// parse panel negation
 		if strings.HasPrefix(queryPanel, "NOT ") {
-			panelsIsNot = append(panelsIsNot, true)
+			not = true
 			queryPanel = queryPanel[4:]
 		} else {
-			panelsIsNot = append(panelsIsNot, false)
+			not = false
 		}
+		newPanel.Not = &not
 
 		// parse query items
-		itemKeys := make([]int64, 0)
 		for _, queryItem := range strings.Split(queryPanel, " OR ") {
-			// 3 cases: simple integer, integer to be repeated, query file
 
-			// case 1: integer to be repeated
+			// queryItem can contain two fields separeted by "^"
+			// the first field is in the format parsed by parseQueryItem,
+			// the second field contains the number of times the first field must be OR-ed with itself
+			// e.g. enc::5^3 --> enc::5 OR enc::5 OR enc::5
 			if strings.Contains(queryItem, "^") {
 				logrus.Debug("Client query integer repeated item: ", queryItem)
 
@@ -44,57 +50,110 @@ func ParseQueryString(queryString string) (panelsItemKeys [][]int64, panelsIsNot
 					return
 				}
 
-				queryInt, queryIntErr := strconv.ParseInt(elements[0], 10, 64)
-				if queryIntErr != nil {
-					logrus.Error("could not parse query integer: ", queryIntErr)
-					return nil, nil, queryIntErr
+				items, err := parseQueryItem(elements[0])
+				if err != nil {
+					return nil, err
 				}
 
-				intMultiplier, intMultiplierErr := strconv.ParseInt(elements[1], 10, 64)
-				if intMultiplierErr != nil {
-					logrus.Error("could not parse query integer multiplier: ", intMultiplierErr)
-					return nil, nil, intMultiplierErr
+				multiplier, err := strconv.ParseInt(elements[1], 10, 64)
+				if err != nil {
+					logrus.Error("invalid multiplier ", elements[1])
+					return nil, err
 				}
 
-				for i := 0; i < int(intMultiplier); i++ {
-					itemKeys = append(itemKeys, queryInt)
+				for i := 0; i < int(multiplier); i++ {
+					newPanel.Items = append(newPanel.Items, items...)
 				}
 
 			} else {
-				queryItem = strings.TrimSpace(queryItem)
-				parsedInt, parsedErr := strconv.ParseInt(queryItem, 10, 64)
-				if parsedErr != nil {
-					logrus.Debugf("Caught exception from strconv %s: ", parsedErr.Error())
+
+				items, err := parseQueryItem(queryItem)
+				if err != nil {
+					return nil, err
 				}
 
-				// case 2: simple integer
-				if parsedErr == nil {
-					logrus.Debug("Client query integer item: ", queryItem)
-
-					// if a parsable integer: use as is
-					itemKeys = append(itemKeys, parsedInt)
-
-					// case 3: query file
-				} else {
-					logrus.Debug("Client query file item: ", queryItem)
-
-					// else assume it is a file
-					itemKeysFromFile, err := loadQueryFile(queryItem)
-					if err != nil {
-						return nil, nil, err
-					}
-					itemKeys = append(itemKeys, itemKeysFromFile...)
-				}
+				newPanel.Items = append(newPanel.Items, items...)
 			}
 		}
-		panelsItemKeys = append(panelsItemKeys, itemKeys)
+		panels = append(panels, &newPanel)
 	}
 	return
 }
 
-// todo: might fail if alleles of queries are too big, what to do? ignore or fail?
-// loadQueryFile load and parse a query file (either simple integer or genomic) into integers
-func loadQueryFile(queryFilePath string) (queryTerms []int64, err error) {
+// parseQueryItem parses a string into an item
+// queryItem is composed of two fields, the type field and the content field, separated by "::"
+// possible values of the type field are: "enc", "clr", "file"
+// when the type field is equal to "enc", the content field contains the concept ID
+// when the type field is equal to "clr", the content field contains the concept path
+// and, possibly, the modifier field, which in turn contains the modifier key and applied path fields, separated by ":"
+// when the type field is equal to "file", the content field contains the path of the file containing the items
+func parseQueryItem(queryItem string) (items []*models.PanelItemsItems0, err error) {
+
+	queryItemFields := strings.Split(queryItem, "::")
+	if len(queryItemFields) < 2 {
+		return nil, fmt.Errorf("invalid query item format: %s", queryItem)
+	}
+
+	switch queryItemFields[0] {
+	case "enc":
+		if len(queryItemFields) != 2 {
+			return nil, fmt.Errorf("invalid enc query item format: %v", queryItemFields)
+		}
+
+		_, err = strconv.ParseInt(queryItemFields[1], 10, 64)
+		if err != nil {
+			logrus.Error("invalid ID ", queryItemFields[1])
+			return nil, err
+		}
+
+		item := new(models.PanelItemsItems0)
+		encrypted := true
+
+		item.Encrypted = &encrypted
+		item.QueryTerm = &queryItemFields[1]
+		items = append(items, item)
+	case "clr":
+		if len(queryItemFields) > 3 {
+			return nil, fmt.Errorf("invalid clr query item format: %v", queryItemFields)
+		}
+		item := new(models.PanelItemsItems0)
+		encrypted := false
+
+		item.Encrypted = &encrypted
+		item.QueryTerm = &queryItemFields[1]
+
+		if len(queryItemFields) == 3 {
+			modifierFields := strings.Split(queryItemFields[2], ":")
+			if len(modifierFields) != 2 {
+				return nil, fmt.Errorf("invalid modifier term format: %v", modifierFields)
+			}
+
+			modifier := &models.PanelItemsItems0Modifier{
+				AppliedPath: modifierFields[1],
+				ModifierKey: modifierFields[0],
+			}
+
+			item.Modifier = modifier
+		}
+		items = append(items, item)
+	case "file":
+		if len(queryItemFields) != 2 {
+			return nil, fmt.Errorf("invalid file query item format: %v", queryItemFields)
+		}
+		items, err = loadQueryFile(queryItemFields[1])
+	default:
+		return nil, fmt.Errorf("invalid query item type: %s", queryItemFields[0])
+	}
+
+	return
+}
+
+// TODO: might fail if alleles of queries are too big, what to do? ignore or fail?
+// loadQueryFile load and parse a query file (containing either regular or genomic IDs) into query items
+// A regular ID is an ID in the format parsable by parseQueryItem, a genomic ID is a sequence of 4 comma separated values
+// Each query item (i.e. regular or genomic ID) must occupy a line in the file.
+// As expected, all query items in a file are part of the same panel, and therefore OR-ed
+func loadQueryFile(queryFilePath string) (queryItems []*models.PanelItemsItems0, err error) {
 	logrus.Debug("Client query: loading file ", queryFilePath)
 
 	queryFile, err := os.Open(queryFilePath)
@@ -106,39 +165,41 @@ func loadQueryFile(queryFilePath string) (queryTerms []int64, err error) {
 	fileScanner := bufio.NewScanner(queryFile)
 	for fileScanner.Scan() {
 		queryTermFields := strings.Split(fileScanner.Text(), ",")
-		var queryTerm int64
+		var queryItem []*models.PanelItemsItems0
 
-		if len(queryTermFields) == 1 {
+		if len(queryTermFields) == 1 { // regular ID
 
-			// simple integer identifier
-			queryTerm, err = strconv.ParseInt(queryTermFields[0], 10, 64)
+			queryItem, err = parseQueryItem(queryTermFields[0])
 			if err != nil {
-				logrus.Error("error parsing query term: ", err)
-				return
+				return nil, err
 			}
 
-		} else if len(queryTermFields) == 4 {
+		} else if len(queryTermFields) == 4 { // genomic ID, generate the variant ID
 
-			// genomic identifier, generate the variant ID
 			startPos, err := strconv.ParseInt(queryTermFields[1], 10, 64)
 			if err != nil {
 				logrus.Error("error parsing start position: ", err)
 				return nil, err
 			}
 
-			queryTerm, err = identifiers.GetVariantID(queryTermFields[0], startPos, queryTermFields[2], queryTermFields[3])
+			variantID, err := identifiers.GetVariantID(queryTermFields[0], startPos, queryTermFields[2], queryTermFields[3])
 			if err != nil {
 				logrus.Error("error generating genomic query term: ", err)
 				return nil, err
 			}
 
+			queryItem, err = parseQueryItem("enc::" + strconv.FormatInt(variantID, 64))
+			if err != nil {
+				return nil, err
+			}
+
 		} else {
-			err = errors.New("dataset with " + strconv.Itoa(len(queryTermFields)) + " fields is not supported")
+			err = errors.New("dataset with " + fmt.Sprint(len(queryTermFields)) + " fields is not supported")
 			logrus.Error(err)
 			return
 		}
 
-		queryTerms = append(queryTerms, queryTerm)
+		queryItems = append(queryItems, queryItem...)
 	}
 
 	return

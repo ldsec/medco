@@ -9,7 +9,7 @@ import (
 )
 
 // ExecutePsmQuery executes an i2b2 PSM query and returns the corresponding patient set id
-func ExecutePsmQuery(queryName string, panels []models.ExploreQueryPanelsItems0) (patientCount string, patientSetID string, err error) {
+func ExecutePsmQuery(queryName string, panels []*models.Panel) (patientCount string, patientSetID string, err error) {
 
 	// craft and execute request
 	xmlResponse := &Response{
