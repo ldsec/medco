@@ -95,7 +95,7 @@ test2 () {
 
 test3 () {
   docker-compose -f docker-compose.tools.yml run \
-    -v "../../test/survival_test_parameters.yaml":/parameters/survival_test_parameters.yaml \
+    -v "${PWD}/../../test/survival_test_parameters.yaml":/parameters/survival_test_parameters.yaml \
     medco-cli-client --user $USERNAME --password $PASSWORD -o /results/result.csv srva -d /results/timers.csv \
     -p /parameters/survival_test_parameters.yaml
 
