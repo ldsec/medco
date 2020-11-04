@@ -22,7 +22,7 @@ survivalSubGroup1="$(printf -- "time_granularity,node_index,group_id,initial_cou
 survivalSubGroup2="$(printf -- "week,0,Male,270,0,0,0\nweek,0,Male,270,1,3,0\nweek,0,Male,270,2,0,0\nweek,0,Male,270,3,0,0\nweek,0,Male,270,4,0,0\nweek,0,Male,270,5,0,0")"
 
 test1 () {
-  docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /results/result.csv get-saved-cohorts
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /results/result.csv get-saved-cohorts
   result="$(awk -F',' 'NR==1{print $0}' deployments/result.csv)"
   if [ "${result}" != "${getSavedCohortHeaders}" ];
   then
