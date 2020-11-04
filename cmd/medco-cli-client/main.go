@@ -4,12 +4,13 @@ import (
 	"os"
 	"strings"
 
-	querytoolsclient "github.com/ldsec/medco/connector/client/querytools"
-	survivalclient "github.com/ldsec/medco/connector/client/survivalanalysis"
-
-	medcoclient "github.com/ldsec/medco/connector/client/explore"
+	"github.com/ldsec/medco"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
+
+	exploreclient "github.com/ldsec/medco/connector/client/explore"
+	querytoolsclient "github.com/ldsec/medco/connector/client/querytools"
+	survivalclient "github.com/ldsec/medco/connector/client/survivalanalysis"
 )
 
 func main() {
@@ -17,7 +18,7 @@ func main() {
 	cliApp := cli.NewApp()
 	cliApp.Name = "medco-cli-client"
 	cliApp.Usage = "Command-line query tool for MedCo."
-	cliApp.Version = "1.0.0" // todo: dynamically get version from build process
+	cliApp.Version = medco.Version
 
 	// from env / config: whatever is in the config of GB : debug,
 	// cli: whatever is user input
@@ -171,7 +172,7 @@ func main() {
 			Usage:     "Get the children (concepts and modifiers) of a concept",
 			ArgsUsage: "conceptPath",
 			Action: func(c *cli.Context) error {
-				return medcoclient.ExecuteClientSearchConcept(
+				return exploreclient.ExecuteClientSearchConcept(
 					c.GlobalString("token"),
 					c.GlobalString("user"),
 					c.GlobalString("password"),
@@ -187,7 +188,7 @@ func main() {
 			Usage:     "Get the children of a modifier",
 			ArgsUsage: "modifierPath appliedPath appliedConcept",
 			Action: func(c *cli.Context) error {
-				return medcoclient.ExecuteClientSearchModifier(
+				return exploreclient.ExecuteClientSearchModifier(
 					c.GlobalString("token"),
 					c.GlobalString("user"),
 					c.GlobalString("password"),
@@ -206,7 +207,7 @@ func main() {
 			ArgsUsage: "[patient_list|count_per_site|count_per_site_obfuscated|count_per_site_shuffled|" +
 				"count_per_site_shuffled_obfuscated|count_global|count_global_obfuscated] [query string]",
 			Action: func(c *cli.Context) error {
-				return medcoclient.ExecuteClientQuery(
+				return exploreclient.ExecuteClientQuery(
 					c.GlobalString("token"),
 					c.GlobalString("user"),
 					c.GlobalString("password"),
@@ -225,7 +226,7 @@ func main() {
 			Flags:     genomicAnnotationsGetValuesFlag,
 			ArgsUsage: "[-l limit] annotation value",
 			Action: func(c *cli.Context) error {
-				return medcoclient.ExecuteClientGenomicAnnotationsGetValues(
+				return exploreclient.ExecuteClientGenomicAnnotationsGetValues(
 					c.GlobalString("token"),
 					c.GlobalString("user"),
 					c.GlobalString("password"),
@@ -246,7 +247,7 @@ func main() {
 			Description: "zygosity can be either heterozygous, homozygous, unknown or a combination of the three separated by |\n" +
 				"If omitted, the command will execute as if zygosity was equal to \"heterozygous|homozygous|unknown|\"",
 			Action: func(c *cli.Context) error {
-				return medcoclient.ExecuteClientGenomicAnnotationsGetVariants(
+				return exploreclient.ExecuteClientGenomicAnnotationsGetVariants(
 					c.GlobalString("token"),
 					c.GlobalString("user"),
 					c.GlobalString("password"),

@@ -22,8 +22,8 @@ survivalSubGroup1="$(printf -- "time_granularity,node_index,group_id,initial_cou
 survivalSubGroup2="$(printf -- "week,0,Male,270,0,0,0\nweek,0,Male,270,1,3,0\nweek,0,Male,270,2,0,0\nweek,0,Male,270,3,0,0\nweek,0,Male,270,4,0,0\nweek,0,Male,270,5,0,0")"
 
 test1 () {
-  docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /results/result.csv get-saved-cohorts
-  result="$(awk -F',' 'NR==1{print $0}' deployments/result.csv)"
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /results/result.csv get-saved-cohorts
+  result="$(awk -F',' 'NR==1{print $0}' ../result.csv)"
   if [ "${result}" != "${getSavedCohortHeaders}" ];
   then
   echo "get-saved-cohorts headers: test failed"
@@ -31,7 +31,7 @@ test1 () {
   exit 1
   fi
 
-  result="$(awk -F',' '{print $1,$2,$3,$4}' deployments/result.csv)"
+  result="$(awk -F',' '{print $1,$2,$3,$4}' ../result.csv)"
   if [ "${result}" != "${getSavedCohort1}" ];
   then
   echo "get-saved-cohorts content before update: test failed"
@@ -39,9 +39,9 @@ test1 () {
   exit 1
   fi
 
-  docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD add-saved-cohorts -c testCohort2 -p $(echo -1,-1,-1)
-  docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /results/result.csv get-saved-cohorts
-  result="$(awk -F',' '{print $1,$2,$4}' deployments/result.csv)"
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD add-saved-cohorts -c testCohort2 -p $(echo -1,-1,-1)
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /results/result.csv get-saved-cohorts
+  result="$(awk -F',' '{print $1,$2,$4}' ../result.csv)"
   if [ "${result}" != "${getSavedCohort2}" ];
   then
   echo "get-saved-cohorts content after added new cohort: test failed"
@@ -50,9 +50,9 @@ test1 () {
   fi
 
 
-  docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD update-saved-cohorts -c testCohort2 -p $(echo -1,-1,-1)
-  docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /results/result.csv get-saved-cohorts
-  result="$(awk -F',' '{print $1,$2,$4}' deployments/result.csv)"
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD update-saved-cohorts -c testCohort2 -p $(echo -1,-1,-1)
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /results/result.csv get-saved-cohorts
+  result="$(awk -F',' '{print $1,$2,$4}' ../result.csv)"
   if [ "${result}" != "${getSavedCohort2}" ];
   then
   echo "get-saved-cohorts content after update: test failed"
@@ -60,9 +60,9 @@ test1 () {
   exit 1
   fi
 
-  docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD remove-saved-cohorts -c testCohort2
-  docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /results/result.csv get-saved-cohorts
-  result="$(awk -F',' '{print $1,$2,$3,$4}' deployments/result.csv)"
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD remove-saved-cohorts -c testCohort2
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /results/result.csv get-saved-cohorts
+  result="$(awk -F',' '{print $1,$2,$3,$4}' ../result.csv)"
   if [ "${result}" != "${getSavedCohort1}" ];
   then
   echo "get-saved-cohorts content after update: test failed"
@@ -73,9 +73,9 @@ test1 () {
 }
 
 test2 () {
-  docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD -o /results/result.csv srva  -c testCohort -l 6 -g ${1}  -s /SPHN/SPHNv2020.1/FophDiagnosis/ -e /SPHN/SPHNv2020.1/DeathStatus/ -y 126:1 -d /results/timers.csv
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD -o /results/result.csv srva  -c testCohort -l 6 -g ${1}  -s /SPHN/SPHNv2020.1/FophDiagnosis/ -e /SPHN/SPHNv2020.1/DeathStatus/ -y 126:1 -d /results/timers.csv
   
-  result="$(awk -F',' 'NR==1{print $0}' deployments/timers.csv)"
+  result="$(awk -F',' 'NR==1{print $0}' ../timers.csv)"
   if [ "${result}" != "${timerHeaders}" ];
   then
   echo "timer headers $1: test failed"
@@ -83,7 +83,7 @@ test2 () {
   exit 1
   fi
   
-  result="$(awk -F',' 'NR==1, NR==7 {print $0}' deployments/result.csv)"
+  result="$(awk -F',' 'NR==1, NR==7 {print $0}' ../result.csv)"
   if [ "${result}" != "${2}" ];
   then
   echo "survival analysis $1: test failed"
@@ -94,11 +94,12 @@ test2 () {
 }
 
 test3 () {
-  cp test/survival_test_parameters.yaml deployments/parameters/survival_test_parameters.yaml
+  docker-compose -f docker-compose.tools.yml run \
+    -v "${PWD}/../../test/survival_test_parameters.yaml":/parameters/survival_test_parameters.yaml \
+    medco-cli-client --user $USERNAME --password $PASSWORD -o /results/result.csv srva -d /results/timers.csv \
+    -p /parameters/survival_test_parameters.yaml
 
-  docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run -v "${PWD}/deployments/parameters/":/parameters/  medco-cli-client --user $USERNAME --password $PASSWORD -o /results/result.csv srva -d /results/timers.csv -p /parameters/survival_test_parameters.yaml
-
-  result="$(awk -F',' 'NR==1, NR==7 {print $0}' deployments/result.csv)"
+  result="$(awk -F',' 'NR==1, NR==7 {print $0}' ../result.csv)"
   if [ "${result}" != "${1}" ];
   then
   echo "survival analysis sub group 1: test failed"
@@ -106,17 +107,16 @@ test3 () {
   exit 1
   fi
 
-  result="$(awk -F',' 'NR==8, NR==13 {print $0}' deployments/result.csv)"
+  result="$(awk -F',' 'NR==8, NR==13 {print $0}' ../result.csv)"
   if [ "${result}" != "${2}" ];
   then
   echo "survival analysis sub group 2: test failed"
   echo "result: ${result}" && echo "expected result: ${2}"
   exit 1
   fi
-
-  rm deployments/parameters/survival_test_parameters.yaml
 }
 
+pushd deployments/dev-local-3nodes/
 echo "Testing saved-cohorts features..."
 
 test1
@@ -129,4 +129,5 @@ test2 "year" "${survivalYears}"
 test3 "${survivalSubGroup1}" "${survivalSubGroup2}"
 
 echo "CLI test 1/2 successful!"
+popd
 exit 0

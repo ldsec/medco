@@ -1,3 +1,5 @@
+// +build unit_test
+
 package servicesmedco_test
 
 import (
@@ -72,6 +74,7 @@ func TestServiceDDT(t *testing.T) {
 	assert.Error(t, err)
 	// no terms to tag
 	_, _, _, err = clients[0].SendSurveyDDTRequestTerms(el, "testDDTSurvey_", nil, proofs, true)
+	assert.Error(t, err)
 
 	wg := libunlynx.StartParallelize(len(clients))
 	var mutex = sync.Mutex{}

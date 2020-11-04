@@ -1,4 +1,5 @@
 FROM golang:1.14 as build
+ARG MEDCO_VERSION=dev
 
 COPY ./ /src
 WORKDIR /src
@@ -15,13 +16,15 @@ RUN cd /go/pkg/mod/go.dedis.ch/onet && \
         's/conn.SetReadDeadline(time.Now().Add(5 \* time.Minute))/conn.SetReadDeadline(time.Now().Add(5 \* time.Hour))/'
 
 # compile and install all binaries
-RUN CGO_ENABLED=0 go install -v ./cmd/...
+RUN CGO_ENABLED=0 go install -v -ldflags "-X github.com/ldsec/medco.Version=${MEDCO_VERSION}" ./...
 
 # -------------------------------------------
 FROM golang:1.14-alpine as release
 
+ENV MC_SQL_DIR=/medco-connector-sql
+
 COPY build/package/medco/docker-entrypoint.sh /usr/local/bin/
-COPY scripts/querytools /usr/local/bin/querytools
+COPY build/package/medco/sql $MC_SQL_DIR
 RUN apk update && apk add bash postgresql && rm -rf /var/cache/apk/* && \
     chmod a+x /usr/local/bin/docker-entrypoint.sh
 COPY --from=build /go/bin /go/bin
