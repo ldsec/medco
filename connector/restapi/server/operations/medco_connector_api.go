@@ -23,6 +23,7 @@ import (
 	"github.com/ldsec/medco/connector/restapi/server/operations/genomic_annotations"
 	"github.com/ldsec/medco/connector/restapi/server/operations/medco_network"
 	"github.com/ldsec/medco/connector/restapi/server/operations/medco_node"
+	"github.com/ldsec/medco/connector/restapi/server/operations/survival_analysis"
 )
 
 // NewMedcoConnectorAPI creates a new MedcoConnector instance
@@ -47,6 +48,9 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 
 		JSONProducer: runtime.JSONProducer(),
 
+		MedcoNodeDeleteCohortsHandler: medco_node.DeleteCohortsHandlerFunc(func(params medco_node.DeleteCohortsParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation medco_node.DeleteCohorts has not yet been implemented")
+		}),
 		MedcoNodeExploreQueryHandler: medco_node.ExploreQueryHandlerFunc(func(params medco_node.ExploreQueryParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_node.ExploreQuery has not yet been implemented")
 		}),
@@ -55,6 +59,9 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 		}),
 		MedcoNodeExploreSearchModifierHandler: medco_node.ExploreSearchModifierHandlerFunc(func(params medco_node.ExploreSearchModifierParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_node.ExploreSearchModifier has not yet been implemented")
+		}),
+		MedcoNodeGetCohortsHandler: medco_node.GetCohortsHandlerFunc(func(params medco_node.GetCohortsParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation medco_node.GetCohorts has not yet been implemented")
 		}),
 		MedcoNodeGetExploreQueryHandler: medco_node.GetExploreQueryHandlerFunc(func(params medco_node.GetExploreQueryParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_node.GetExploreQuery has not yet been implemented")
@@ -67,6 +74,15 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 		}),
 		GenomicAnnotationsGetVariantsHandler: genomic_annotations.GetVariantsHandlerFunc(func(params genomic_annotations.GetVariantsParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation genomic_annotations.GetVariants has not yet been implemented")
+		}),
+		MedcoNodePostCohortsHandler: medco_node.PostCohortsHandlerFunc(func(params medco_node.PostCohortsParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation medco_node.PostCohorts has not yet been implemented")
+		}),
+		MedcoNodePutCohortsHandler: medco_node.PutCohortsHandlerFunc(func(params medco_node.PutCohortsParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation medco_node.PutCohorts has not yet been implemented")
+		}),
+		SurvivalAnalysisSurvivalAnalysisHandler: survival_analysis.SurvivalAnalysisHandlerFunc(func(params survival_analysis.SurvivalAnalysisParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation survival_analysis.SurvivalAnalysis has not yet been implemented")
 		}),
 
 		MedcoJwtAuth: func(token string, scopes []string) (*models.User, error) {
@@ -115,12 +131,16 @@ type MedcoConnectorAPI struct {
 	// APIAuthorizer provides access control (ACL/RBAC/ABAC) by providing access to the request and authenticated principal
 	APIAuthorizer runtime.Authorizer
 
+	// MedcoNodeDeleteCohortsHandler sets the operation handler for the delete cohorts operation
+	MedcoNodeDeleteCohortsHandler medco_node.DeleteCohortsHandler
 	// MedcoNodeExploreQueryHandler sets the operation handler for the explore query operation
 	MedcoNodeExploreQueryHandler medco_node.ExploreQueryHandler
 	// MedcoNodeExploreSearchConceptHandler sets the operation handler for the explore search concept operation
 	MedcoNodeExploreSearchConceptHandler medco_node.ExploreSearchConceptHandler
 	// MedcoNodeExploreSearchModifierHandler sets the operation handler for the explore search modifier operation
 	MedcoNodeExploreSearchModifierHandler medco_node.ExploreSearchModifierHandler
+	// MedcoNodeGetCohortsHandler sets the operation handler for the get cohorts operation
+	MedcoNodeGetCohortsHandler medco_node.GetCohortsHandler
 	// MedcoNodeGetExploreQueryHandler sets the operation handler for the get explore query operation
 	MedcoNodeGetExploreQueryHandler medco_node.GetExploreQueryHandler
 	// MedcoNetworkGetMetadataHandler sets the operation handler for the get metadata operation
@@ -129,6 +149,12 @@ type MedcoConnectorAPI struct {
 	GenomicAnnotationsGetValuesHandler genomic_annotations.GetValuesHandler
 	// GenomicAnnotationsGetVariantsHandler sets the operation handler for the get variants operation
 	GenomicAnnotationsGetVariantsHandler genomic_annotations.GetVariantsHandler
+	// MedcoNodePostCohortsHandler sets the operation handler for the post cohorts operation
+	MedcoNodePostCohortsHandler medco_node.PostCohortsHandler
+	// MedcoNodePutCohortsHandler sets the operation handler for the put cohorts operation
+	MedcoNodePutCohortsHandler medco_node.PutCohortsHandler
+	// SurvivalAnalysisSurvivalAnalysisHandler sets the operation handler for the survival analysis operation
+	SurvivalAnalysisSurvivalAnalysisHandler survival_analysis.SurvivalAnalysisHandler
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
 	ServeError func(http.ResponseWriter, *http.Request, error)
@@ -209,6 +235,9 @@ func (o *MedcoConnectorAPI) Validate() error {
 		unregistered = append(unregistered, "MedcoJwtAuth")
 	}
 
+	if o.MedcoNodeDeleteCohortsHandler == nil {
+		unregistered = append(unregistered, "medco_node.DeleteCohortsHandler")
+	}
 	if o.MedcoNodeExploreQueryHandler == nil {
 		unregistered = append(unregistered, "medco_node.ExploreQueryHandler")
 	}
@@ -217,6 +246,9 @@ func (o *MedcoConnectorAPI) Validate() error {
 	}
 	if o.MedcoNodeExploreSearchModifierHandler == nil {
 		unregistered = append(unregistered, "medco_node.ExploreSearchModifierHandler")
+	}
+	if o.MedcoNodeGetCohortsHandler == nil {
+		unregistered = append(unregistered, "medco_node.GetCohortsHandler")
 	}
 	if o.MedcoNodeGetExploreQueryHandler == nil {
 		unregistered = append(unregistered, "medco_node.GetExploreQueryHandler")
@@ -229,6 +261,15 @@ func (o *MedcoConnectorAPI) Validate() error {
 	}
 	if o.GenomicAnnotationsGetVariantsHandler == nil {
 		unregistered = append(unregistered, "genomic_annotations.GetVariantsHandler")
+	}
+	if o.MedcoNodePostCohortsHandler == nil {
+		unregistered = append(unregistered, "medco_node.PostCohortsHandler")
+	}
+	if o.MedcoNodePutCohortsHandler == nil {
+		unregistered = append(unregistered, "medco_node.PutCohortsHandler")
+	}
+	if o.SurvivalAnalysisSurvivalAnalysisHandler == nil {
+		unregistered = append(unregistered, "survival_analysis.SurvivalAnalysisHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -328,6 +369,10 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 		o.handlers = make(map[string]map[string]http.Handler)
 	}
 
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/node/explore/cohorts/{name}"] = medco_node.NewDeleteCohorts(o.context, o.MedcoNodeDeleteCohortsHandler)
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
@@ -340,6 +385,10 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/node/explore/search/modifier"] = medco_node.NewExploreSearchModifier(o.context, o.MedcoNodeExploreSearchModifierHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/node/explore/cohorts"] = medco_node.NewGetCohorts(o.context, o.MedcoNodeGetCohortsHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
@@ -356,6 +405,18 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/genomic-annotations/{annotation}/{value}"] = genomic_annotations.NewGetVariants(o.context, o.GenomicAnnotationsGetVariantsHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/node/explore/cohorts/{name}"] = medco_node.NewPostCohorts(o.context, o.MedcoNodePostCohortsHandler)
+	if o.handlers["PUT"] == nil {
+		o.handlers["PUT"] = make(map[string]http.Handler)
+	}
+	o.handlers["PUT"]["/node/explore/cohorts/{name}"] = medco_node.NewPutCohorts(o.context, o.MedcoNodePutCohortsHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/node/analysis/survival/query"] = survival_analysis.NewSurvivalAnalysis(o.context, o.SurvivalAnalysisSurvivalAnalysisHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP

@@ -1,19 +1,32 @@
 package utilclient
 
 import (
-	"github.com/sirupsen/logrus"
 	"os"
 	"strconv"
+
+	"github.com/sirupsen/logrus"
 )
 
-// SearchTimeoutSeconds is the timeout for the client query in seconds (default to 3 minutes)
+// SearchTimeoutSeconds is the timeout for the client search in seconds (default to 3 minutes)
 var SearchTimeoutSeconds int64
 
 // QueryTimeoutSeconds is the timeout for the client query in seconds (default to 3 minutes)
 var QueryTimeoutSeconds int64
 
-// GenomicAnnotationsQueryTimeoutSeconds is the timeout for the client query in seconds (default to 10 seconds)
+// GenomicAnnotationsQueryTimeoutSeconds is the timeout for the client genomic annotations in seconds (default to 10 seconds)
 var GenomicAnnotationsQueryTimeoutSeconds int64
+
+// QueryToolsTimeoutSeconds is the timeout for the client query tools in seconds (default to 10 seconds)
+var QueryToolsTimeoutSeconds int64
+
+// SurvivalAnalysisTimeoutSeconds is the timeout for the client survival analysis in seconds (default to 5 minutes)
+var SurvivalAnalysisTimeoutSeconds int64
+
+// TokenTimeoutSeconds is the timeout for the client access token request (default to 10 seconds)
+var TokenTimeoutSeconds int64
+
+// WaitTickSeconds is the period in seconds to use to log anything when waiting on server result (default to 5 seconds)
+var WaitTickSeconds int64
 
 // MedCoConnectorURL is the URL of the MedCo connector this client is attached to
 var MedCoConnectorURL string
@@ -28,9 +41,9 @@ func init() {
 	var err error
 
 	SearchTimeoutSeconds, err = strconv.ParseInt(os.Getenv("CLIENT_SEARCH_TIMEOUT_SECONDS"), 10, 64)
-	if err != nil || QueryTimeoutSeconds < 0 {
+	if err != nil || SearchTimeoutSeconds < 0 {
 		logrus.Warn("invalid client search timeout")
-		QueryTimeoutSeconds = 10
+		SearchTimeoutSeconds = 10
 	}
 
 	QueryTimeoutSeconds, err = strconv.ParseInt(os.Getenv("CLIENT_QUERY_TIMEOUT_SECONDS"), 10, 64)
@@ -39,10 +52,34 @@ func init() {
 		QueryTimeoutSeconds = 3 * 60
 	}
 
+	QueryToolsTimeoutSeconds, err = strconv.ParseInt(os.Getenv("QUERY_TOOLS_TIMEOUT_SECONDS"), 10, 64)
+	if err != nil || QueryToolsTimeoutSeconds < 0 {
+		logrus.Warn("invalid client query tools timeout")
+		QueryToolsTimeoutSeconds = 10
+	}
+
+	SurvivalAnalysisTimeoutSeconds, err = strconv.ParseInt(os.Getenv("SURVIVAL_ANALYSIS_TIMEOUT_SECONDS"), 10, 64)
+	if err != nil || SurvivalAnalysisTimeoutSeconds < 0 {
+		logrus.Warn("invalid client survival analysis timeout")
+		SurvivalAnalysisTimeoutSeconds = 5 * 60
+	}
+
 	GenomicAnnotationsQueryTimeoutSeconds, err = strconv.ParseInt(os.Getenv("CLIENT_GENOMIC_ANNOTATIONS_QUERY_TIMEOUT_SECONDS"), 10, 64)
 	if err != nil || GenomicAnnotationsQueryTimeoutSeconds < 0 {
 		logrus.Warn("invalid client genomic annotations query timeout")
 		GenomicAnnotationsQueryTimeoutSeconds = 10
+	}
+
+	TokenTimeoutSeconds, err = strconv.ParseInt(os.Getenv("TOKEN_TIMEOUT_SECONDS"), 10, 64)
+	if err != nil || TokenTimeoutSeconds < 0 {
+		logrus.Warn("invalid client token timeout")
+		TokenTimeoutSeconds = 10
+	}
+
+	WaitTickSeconds, err = strconv.ParseInt(os.Getenv("WAIT_TICK_SECONDS"), 10, 64)
+	if err != nil || WaitTickSeconds < 0 {
+		logrus.Warn("invalid client genomic wait tick period")
+		WaitTickSeconds = 5
 	}
 
 	MedCoConnectorURL = os.Getenv("MEDCO_CONNECTOR_URL")

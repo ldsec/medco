@@ -1,0 +1,18 @@
+time_resolution: "week"
+time_limit: 6
+cohort_name: "testCohort"
+start_concept_path: "/SPHN/SPHNv2020.1/FophDiagnosis/"
+start_concept_modifier: "@"
+end_concept_path: "/SPHN/SPHNv2020.1/DeathStatus/"
+end_concept_modifier: "126:1"
+sub_groups:
+  - group_name: "Female"
+    panels:
+      - not: false
+        paths:
+          - "/I2B2/I2B2/Demographics/Gender/Female/"
+  - group_name: "Male"
+    panels:
+      - not: false
+        paths:
+          - "/I2B2/I2B2/Demographics/Gender/Male/"

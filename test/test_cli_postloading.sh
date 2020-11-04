@@ -45,6 +45,7 @@ hugoGeneSymbolGetVariantsResult1="-7039476204566471680-7039476580443220992-70394
 hugoGeneSymbolGetVariantsResult2="-7039476204566471680-7039476580443220992"
 hugoGeneSymbolGetVariantsResult3="-7039476780159200256"
 
+
 test1 () {
   docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /results/result.csv $1 $2
   result="$(cat deployments/result.csv | tr -d '\r\n\t ')"
@@ -113,5 +114,5 @@ test3 "ga-get-variant --z "heterozygous\|unknown" hugo_gene_symbol" "${hugoGeneS
 test3 "ga-get-variant --z "homozygous\|unknown" hugo_gene_symbol" "${hugoGeneSymbolGetVariantsValue}" "${hugoGeneSymbolGetVariantsResult3}"
 test3 "ga-get-variant --z "heterozygous\|homozygous\|unknown" hugo_gene_symbol" "${hugoGeneSymbolGetVariantsValue}" "${hugoGeneSymbolGetVariantsResult1}"
 
-echo "CLI test successful!"
+echo "CLI test 2/2 successful!"
 exit 0
