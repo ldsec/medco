@@ -3,8 +3,6 @@
 package handlers
 
 import (
-	"testing"
-
 	"sort"
 	"testing"
 
