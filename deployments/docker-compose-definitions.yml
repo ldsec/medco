@@ -136,6 +136,10 @@ services:
       - MEDCO_NODE_IDX=0
       - CLIENT_SEARCH_TIMEOUT_SECONDS=10
       - CLIENT_QUERY_TIMEOUT_SECONDS=660
+      - QUERY_TOOLS_TIMEOUT_SECONDS=10
+      - SURVIVAL_ANALYSIS_TIMEOUT_SECONDS=300
+      - TOKEN_TIMEOUT_SECONDS=10
+      - WAIT_TICK_SECONDS=5
       - CLIENT_GENOMIC_ANNOTATIONS_QUERY_TIMEOUT_SECONDS=10
       - MEDCO_CONNECTOR_URL=http://localhost/local-3nodes/medco-0
       - OIDC_REQ_TOKEN_URL=http://localhost/auth/realms/master/protocol/openid-connect/token
