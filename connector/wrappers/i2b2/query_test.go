@@ -3,6 +3,7 @@
 package i2b2
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/ldsec/medco/connector/restapi/models"
@@ -11,6 +12,20 @@ import (
 )
 
 func init() {
+	utilserver.SetForTesting()
+	utilserver.DBHost = "localhost"
+	utilserver.DBPort = 5432
+	utilserver.DBName = "medcoconnectorsrv0"
+	utilserver.DBLoginUser = "medcoconnector"
+	utilserver.DBLoginPassword = "medcoconnector"
+
+	utilserver.I2B2DBHost = "localhost"
+	utilserver.I2B2DBPort = 5432
+	utilserver.I2B2DBName = "i2b2medcosrv0"
+	utilserver.I2B2DBLoginUser = "i2b2"
+	utilserver.I2B2DBLoginPassword = "i2b2"
+
+	//that was there before
 	utilserver.I2b2HiveURL = "http://localhost:8090/i2b2/services"
 	utilserver.I2b2LoginDomain = "i2b2medcosrv0"
 	utilserver.I2b2LoginProject = "MedCo"
@@ -37,19 +52,33 @@ func TestGetOntologyConceptChildren(t *testing.T) {
 	if err != nil {
 		t.Fail()
 	}
+
+	t.Log("Length of found results array ", len(results))
+	fmt.Println("Found length of results ", len(results))
+	for _, r := range results {
+		t.Log("Found result ", r.DisplayName)
+		fmt.Println("Found result: ", r.DisplayName)
+	}
+	//TODO add a test to verify that there are 3 children concepts to e2etest
 	t.Log(*results[0].MedcoEncryption)
 }
 
 func TestGetOntologyModifiers(t *testing.T) {
+	//In order to prepare the queries to the sql database done inside GetOntologyModifiers we need to call the "test database" functions
+	utilserver.TestDBConnection(t)
+	utilserver.TestI2B2DBConnection(t)
 
 	results, err := GetOntologyModifiers("/E2ETEST/e2etest/1/")
 	if err != nil {
+		t.Log(err)
 		t.Fail()
 	}
 	t.Log(*results[0].MedcoEncryption)
 }
 
 func TestGetOntologyModifierChildren(t *testing.T) {
+	utilserver.TestDBConnection(t)
+	utilserver.TestI2B2DBConnection(t)
 
 	results, err := GetOntologyModifierChildren("/E2ETEST/modifiers/", "/e2etest/%", "/E2ETEST/e2etest/1/")
 	if err != nil {

@@ -38,6 +38,9 @@ type ExploreSearchModifier struct {
 	// Required: true
 	// Pattern: ^\/$|^((\/[^\/]+)+\/)$
 	Path *string `json:"path"`
+
+	// subject count query info
+	SubjectCountQueryInfo *ExploreSearchCountParams `json:"subjectCountQueryInfo,omitempty"`
 }
 
 // Validate validates this explore search modifier
@@ -57,6 +60,10 @@ func (m *ExploreSearchModifier) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validatePath(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateSubjectCountQueryInfo(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -143,6 +150,24 @@ func (m *ExploreSearchModifier) validatePath(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("path", "body", string(*m.Path), `^\/$|^((\/[^\/]+)+\/)$`); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *ExploreSearchModifier) validateSubjectCountQueryInfo(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.SubjectCountQueryInfo) { // not required
+		return nil
+	}
+
+	if m.SubjectCountQueryInfo != nil {
+		if err := m.SubjectCountQueryInfo.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("subjectCountQueryInfo")
+			}
+			return err
+		}
 	}
 
 	return nil

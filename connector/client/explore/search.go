@@ -43,62 +43,77 @@ type ExploreSearchModifier struct {
 }
 
 // NewExploreSearchConcept creates a new MedCo client explore concept search
-func NewExploreSearchConcept(authToken, conceptPath, operation string, disableTLSCheck bool) (scc *ExploreSearchConcept, err error) {
+func NewExploreSearchConcept(authToken, conceptPath, operation string, disableTLSCheck bool) (scs []*ExploreSearchConcept, err error) {
 
-	scc = &ExploreSearchConcept{
-		authToken:   authToken,
-		conceptPath: conceptPath,
-		operation:   operation,
-	}
+	scs = []*ExploreSearchConcept{}
 
 	// retrieve network information
-	parsedURL, err := url.Parse(utilclient.MedCoConnectorURL)
-	if err != nil {
-		logrus.Error("cannot parse MedCo connector URL: ", err)
-		return
+	for _, nodeURL := range utilclient.MedCoNodesURLs {
+		sc := &ExploreSearchConcept{
+			authToken:   authToken,
+			conceptPath: conceptPath,
+			operation:   operation,
+		}
+		var parsedURL *url.URL
+		parsedURL, err = url.Parse(nodeURL)
+		if err != nil {
+			logrus.Error("cannot parse MedCo connector URL: ", err)
+			return
+		}
+		transport := httptransport.New(parsedURL.Host, parsedURL.Path, []string{parsedURL.Scheme})
+		transport.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: disableTLSCheck}
+
+		// parse network information
+		sc.httpMedCoClient = client.New(transport, nil)
+
+		scs = append(scs, sc)
 	}
-
-	transport := httptransport.New(parsedURL.Host, parsedURL.Path, []string{parsedURL.Scheme})
-	transport.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: disableTLSCheck}
-
-	// parse network information
-	scc.httpMedCoClient = client.New(transport, nil)
 
 	return
 }
 
 // NewExploreSearchModifier creates a new MedCo client explore modifier search
-func NewExploreSearchModifier(authToken, modifierPath, appliedPath, appliedConcept, operation string, disableTLSCheck bool) (smc *ExploreSearchModifier, err error) {
+func NewExploreSearchModifier(authToken, modifierPath, appliedPath, appliedConcept string, operation string, disableTLSCheck bool) (sms []*ExploreSearchModifier, err error) {
 
-	smc = &ExploreSearchModifier{
-		authToken:      authToken,
-		modifierPath:   modifierPath,
-		appliedPath:    appliedPath,
-		appliedConcept: appliedConcept,
-		operation:      operation,
+	sms = []*ExploreSearchModifier{}
+
+	for _, nodeURL := range utilclient.MedCoNodesURLs {
+		sm := &ExploreSearchModifier{
+			authToken:      authToken,
+			modifierPath:   modifierPath,
+			appliedPath:    appliedPath,
+			appliedConcept: appliedConcept,
+			operation:      operation,
+		}
+		// retrieve network information
+		parsedURL, err := url.Parse(nodeURL)
+		if err != nil {
+			logrus.Error("cannot parse MedCo connector URL: ", err)
+			return nil, err
+		}
+
+		transport := httptransport.New(parsedURL.Host, parsedURL.Path, []string{parsedURL.Scheme})
+		transport.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: disableTLSCheck}
+
+		// parse network information
+		sm.httpMedCoClient = client.New(transport, nil)
+
+		sms = append(sms, sm)
 	}
-
-	// retrieve network information
-	parsedURL, err := url.Parse(utilclient.MedCoConnectorURL)
-	if err != nil {
-		logrus.Error("cannot parse MedCo connector URL: ", err)
-		return
-	}
-
-	transport := httptransport.New(parsedURL.Host, parsedURL.Path, []string{parsedURL.Scheme})
-	transport.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: disableTLSCheck}
-
-	// parse network information
-	smc.httpMedCoClient = client.New(transport, nil)
 
 	return
 }
 
 // Execute executes the MedCo client concept search
-func (exploreSearchConcept *ExploreSearchConcept) Execute() (*medco_node.ExploreSearchConceptOK, error) {
+func (exploreSearchConcept *ExploreSearchConcept) Execute(queryID string, pubKey string) (*medco_node.ExploreSearchConceptOK, error) {
 
 	params := medco_node.NewExploreSearchConceptParamsWithTimeout(time.Duration(utilclient.SearchTimeoutSeconds) * time.Second)
+
 	params.SearchConceptRequest = &models.ExploreSearchConcept{Path: &exploreSearchConcept.conceptPath, Operation: &exploreSearchConcept.operation}
+
+	if queryID != "" && pubKey != "" {
+		params.SearchConceptRequest.SubjectCountQueryInfo = &models.ExploreSearchCountParams{QueryID: &queryID, UserPublicKey: &pubKey}
+	}
 
 	response, err := exploreSearchConcept.httpMedCoClient.MedcoNode.ExploreSearchConcept(params, httptransport.BearerToken(exploreSearchConcept.authToken))
 
@@ -112,7 +127,7 @@ func (exploreSearchConcept *ExploreSearchConcept) Execute() (*medco_node.Explore
 }
 
 // Execute executes the MedCo client modifier search
-func (exploreSearchModifier *ExploreSearchModifier) Execute() (*medco_node.ExploreSearchModifierOK, error) {
+func (exploreSearchModifier *ExploreSearchModifier) Execute(queryID string, pubKey string) (*medco_node.ExploreSearchModifierOK, error) {
 
 	params := medco_node.NewExploreSearchModifierParamsWithTimeout(time.Duration(utilclient.SearchTimeoutSeconds) * time.Second)
 	params.SearchModifierRequest = &models.ExploreSearchModifier{
@@ -120,6 +135,10 @@ func (exploreSearchModifier *ExploreSearchModifier) Execute() (*medco_node.Explo
 		AppliedPath:    &exploreSearchModifier.appliedPath,
 		AppliedConcept: &exploreSearchModifier.appliedConcept,
 		Operation:      &exploreSearchModifier.operation,
+	}
+
+	if queryID != "" && pubKey != "" {
+		params.SearchModifierRequest.SubjectCountQueryInfo = &models.ExploreSearchCountParams{QueryID: &queryID, UserPublicKey: &pubKey}
 	}
 
 	response, err := exploreSearchModifier.httpMedCoClient.MedcoNode.ExploreSearchModifier(params, httptransport.BearerToken(exploreSearchModifier.authToken))

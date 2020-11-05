@@ -3,6 +3,7 @@ package utilserver
 import (
 	"database/sql"
 	"fmt"
+
 	// Registering postgres driver
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"

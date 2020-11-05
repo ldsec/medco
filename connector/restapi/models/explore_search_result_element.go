@@ -44,6 +44,15 @@ type ExploreSearchResultElement struct {
 	// path
 	Path string `json:"path,omitempty"`
 
+	// subject count
+	SubjectCount string `json:"subjectCount,omitempty"`
+
+	// subject count encrypted
+	SubjectCountEncrypted string `json:"subjectCountEncrypted,omitempty"`
+
+	// timers
+	Timers Timers `json:"timers,omitempty"`
+
 	// type
 	// Enum: [concept concept_container concept_folder modifier modifier_container modifier_folder genomic_annotation]
 	Type string `json:"type,omitempty"`
@@ -62,6 +71,10 @@ func (m *ExploreSearchResultElement) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateMetadata(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateTimers(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -115,6 +128,22 @@ func (m *ExploreSearchResultElement) validateMetadata(formats strfmt.Registry) e
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *ExploreSearchResultElement) validateTimers(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Timers) { // not required
+		return nil
+	}
+
+	if err := m.Timers.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("timers")
+		}
+		return err
 	}
 
 	return nil

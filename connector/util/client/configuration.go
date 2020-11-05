@@ -3,6 +3,7 @@ package utilclient
 import (
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 )
@@ -30,6 +31,9 @@ var WaitTickSeconds int64
 
 // MedCoConnectorURL is the URL of the MedCo connector this client is attached to
 var MedCoConnectorURL string
+
+// MedCoNodesURLs is a list of the urls of the different medco nodes in the network
+var MedCoNodesURLs []string
 
 // OidcReqTokenURL is the URL from which the JWT is retrieved
 var OidcReqTokenURL string
@@ -83,6 +87,8 @@ func init() {
 	}
 
 	MedCoConnectorURL = os.Getenv("MEDCO_CONNECTOR_URL")
+
+	MedCoNodesURLs = strings.Split(os.Getenv("MEDCO_NODES_URL"), ",")
 
 	OidcReqTokenURL = os.Getenv("OIDC_REQ_TOKEN_URL")
 

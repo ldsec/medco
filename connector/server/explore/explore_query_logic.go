@@ -43,6 +43,66 @@ func NewExploreQuery(queryName string, query *models.ExploreQuery, user *models.
 	return new, new.isValid()
 }
 
+//PrepareAggregationValue Encrypts the subject count field of the SearchElement with the cothority key.
+func PrepareAggregationValue(subjectCountQueryInfo *models.ExploreSearchCountParams,
+	searchElement *models.ExploreSearchResultElement) (aggPatientFlags string, err error) {
+
+	if subjectCountQueryInfo == nil {
+		logrus.Debug("empty subject count query info")
+		return
+	}
+	userPublicKey := *subjectCountQueryInfo.UserPublicKey
+	baseQueryID := *subjectCountQueryInfo.QueryID
+
+	logrus.Debug("subject count is not empty ", searchElement.SubjectCount, " ", userPublicKey, " ", baseQueryID)
+	subjectCountInt, err := strconv.Atoi(searchElement.SubjectCount)
+	if err != nil {
+		logrus.Error("Cannot convert subject count to integer", err)
+		return
+	}
+
+	count64 := int64(subjectCountInt)
+
+	return unlynx.EncryptWithCothorityKey(count64)
+}
+
+//ExecuteTotalnumsAggregation executes an aggregate and key switch with other nodes of @param encryptedTotalnums
+func ExecuteTotalnumsAggregation(queryID string, encryptedTotalnums []string, userPublicKey string, queryType ExploreQueryType, timers medcomodels.Timers) (encAggCount []string, err error) {
+	var timer = time.Now()
+	var ksCountTimers map[string]time.Duration
+
+	if !queryType.Obfuscated {
+		logrus.Info(queryID, ": global aggregate requested")
+		encAggCount, ksCountTimers, err = unlynx.AggregateAndKeySwitchValues(queryID, encryptedTotalnums, userPublicKey)
+	}
+	if err != nil {
+		err = fmt.Errorf("during key switch/shuffle operation: %s", err.Error())
+		return
+	}
+	timers.AddTimers("medco-connector-unlynx-key-switch-count", timer, ksCountTimers)
+
+	logrus.Info(queryID, ": processed count")
+	return
+}
+
+//ExecuteTotalnumAggregation executes the appropriate collective count aggregation procedure according to the @param queryType parameter passed.
+func ExecuteTotalnumAggregation(queryID string, aggPatientFlags string, userPublicKey string, queryType ExploreQueryType, timers medcomodels.Timers) (encCount string, err error) {
+	var timer = time.Now()
+	var ksCountTimers map[string]time.Duration
+	if !queryType.Obfuscated {
+		logrus.Info(queryID, ": global aggregate requested")
+		encCount, ksCountTimers, err = unlynx.AggregateAndKeySwitchValue(queryID, aggPatientFlags, userPublicKey)
+	}
+	if err != nil {
+		err = fmt.Errorf("during key switch/shuffle operation: %s", err.Error())
+		return
+	}
+	timers.AddTimers("medco-connector-unlynx-key-switch-count", timer, ksCountTimers)
+
+	logrus.Info(queryID, ": processed count")
+	return
+}
+
 // Execute implements the I2b2 MedCo query logic
 func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	overallTimer := time.Now()
@@ -126,6 +186,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	// aggregate patient dummy flags
 	timer = time.Now()
 	aggPatientFlags, err := unlynx.LocallyAggregateValues(patientDummyFlags)
+
 	if err != nil {
 		err = fmt.Errorf("during local aggregation %s", err.Error())
 		return
@@ -136,6 +197,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	timer = time.Now()
 	var encCount string
 	var ksCountTimers map[string]time.Duration
+	logrus.Debug("THE EXECUTED QUERY TYPE ", queryType)
 	if queryType.CountType == Global {
 		logrus.Info(q.ID, ": global aggregate requested")
 		encCount, ksCountTimers, err = unlynx.AggregateAndKeySwitchValue(q.ID, aggPatientFlags, q.Query.UserPublicKey)
@@ -165,6 +227,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	}
 
 	logrus.Info(q.ID, ": processed count")
+
 	q.Result.EncCount = encCount
 
 	// optionally prepare the patient list

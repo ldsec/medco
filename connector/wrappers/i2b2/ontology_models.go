@@ -178,6 +178,7 @@ type Concept struct {
 	Level            string              `xml:"level"`
 	Key              string              `xml:"key"`
 	Name             string              `xml:"name"`
+	Fullname         string              `xml:"fullname"`
 	SynonymCd        string              `xml:"synonym_cd"`
 	Visualattributes string              `xml:"visualattributes"`
 	Totalnum         string              `xml:"totalnum"`

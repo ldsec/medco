@@ -6,22 +6,24 @@ PASSWORD=${2:-test}
 
 
 # test1
+#If one of the tables doesn't appear in the result. Be sure it is present in the database. And if it is, be sure
+#that the c_visualattribute column, related to that table, inside the table_access table is set to 'CA' and not 'CH' which hides the table when fetching the children of "/"
 searchConceptChildren1="/"
 resultSearchConceptChildren1="PATH  TYPE
-                              /E2ETEST/e2etest/concept_container
-                              /I2B2/I2B2/ concept_container
-                              /SPHN/SPHNv2020.1/  concept_container"
+                              /E2ETEST/e2etest/ concept_container 0
+                              /I2B2/I2B2/ concept_container 0
+                              /SPHN/SPHNv2020.1/  concept_container 0"
 
 searchConceptChildren2="/E2ETEST/e2etest/"
 resultSearchConceptChildren2="PATH  TYPE
-                              /E2ETEST/e2etest/1/ concept
-                              /E2ETEST/e2etest/2/ concept
-                              /E2ETEST/e2etest/3/ concept
-                              /E2ETEST/modifiers/ modifier_folder"
+                              /E2ETEST/e2etest/1/ concept 12
+                              /E2ETEST/e2etest/2/ concept 12
+                              /E2ETEST/e2etest/3/ concept 12
+                              /E2ETEST/modifiers/ modifier_folder 12"
 
 searchModifierChildren="/E2ETEST/modifiers/ /e2etest/% /E2ETEST/e2etest/1/"
 resultSearchModifierChildren="PATH  TYPE
-                              /E2ETEST/modifiers/1/ modifier"
+                              /E2ETEST/modifiers/1/ modifier 6"
 
 searchConceptInfo="/E2ETEST/e2etest/1/"
 resultSearchConceptInfo="  <ExploreSearchResultElement>
@@ -50,6 +52,8 @@ resultSearchConceptInfo="  <ExploreSearchResultElement>
       </Metadata>
       <Name>E2E Concept 1</Name>
       <Path>/E2ETEST/e2etest/1/</Path>
+      <SubjectCount></SubjectCount>
+      <SubjectCountEncrypted></SubjectCountEncrypted>
       <Type>concept</Type>
   </ExploreSearchResultElement>"
 
@@ -80,6 +84,8 @@ resultSearchModifierInfo="<ExploreSearchResultElement>
       </Metadata>
       <Name>E2E Modifier 1</Name>
       <Path>/E2ETEST/modifiers/1/</Path>
+      <SubjectCount></SubjectCount>
+      <SubjectCountEncrypted></SubjectCountEncrypted>
       <Type>modifier</Type>
   </ExploreSearchResultElement>"
 
@@ -159,16 +165,21 @@ patientList="$(printf -- "Node idx 0\n1137,1138,1139,1140,1141,1142,1143,1144,11
 1336,1337,1338,1339,1340,1341,1342,1343,1344,1345,1346,1347,1348,1349,1350,1351,1352,1353,1354,1355,1356,1357,1358,1359,1360,1361,1362,1363,1364")"
 expectedError="is not authorized to query patient lists"
 
+#test whether each line from expected result is contained within the result.csv file
 test1 () {
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv $1 $2
+
   result="$(cat ../result.csv | tr -d '\r\n\t ')"
   expectedResult="$(echo "${3}" | tr -d '\r\n\t ')"
   if [ "${result}" != "${expectedResult}" ];
   then
-  echo "$1 $2: test failed"
-  echo "result: ${result}" && echo "expected result: ${expectedResult}"
-  exit 1
+    echo "$1 $2: test failed"
+    echo "result: ${result}" && echo "expected result: ${expectedResult}"
+    exit 1
   fi
+
+
+
 }
 
 test2 () {
@@ -250,7 +261,7 @@ test5 () {
    -e clr::/SPHN/SPHNv2020.1/DeathStatus/:/SPHN/DeathStatus-status/death/:/SPHNv2020.1/DeathStatus/ \
    -z earliest \
    -d /data/timers.csv
-  
+
   result="$(awk -F',' 'NR==1{print $0}' ../timers.csv)"
   if [ "${result}" != "${timerHeaders}" ];
   then
@@ -258,7 +269,7 @@ test5 () {
   echo "result: ${result}" && echo "expected result: ${timerHeaders}"
   exit 1
   fi
-  
+
   result="$(awk -F',' 'NR==1, NR==7 {print $0}' ../result.csv)"
   if [ "${result}" != "${2}" ];
   then
@@ -352,28 +363,28 @@ test8() {
   exit 1
   fi
 
-  rm ../dumped_logs_to_remove.txt  
+  rm ../dumped_logs_to_remove.txt
 }
 
 pushd deployments/dev-local-3nodes/
-echo "Testing concept-children..."
+printf "\nTesting concept-children...\n"
 
 test1 "concept-children" "${searchConceptChildren1}" "${resultSearchConceptChildren1}"
 test1 "concept-children" "${searchConceptChildren2}" "${resultSearchConceptChildren2}"
 
-echo "Testing modifier-children..."
+printf "\nTesting modifier-children...\n"
 
 test1 "modifier-children" "${searchModifierChildren}" "${resultSearchModifierChildren}"
 
-echo "Testing concept-info..."
+printf "\nTesting concept-info...\n"
 
 test1 "concept-info" "${searchConceptInfo}" "${resultSearchConceptInfo}"
 
-echo "Testing modifier-info..."
+printf "\nTesting modifier-info...\n"
 
 test1 "modifier-info" "${searchModifierInfo}" "${resultSearchModifierInfo}"
 
-echo "Testing query with test user..."
+printf "\nTesting query with test user...\n"
 
 test2 "query " "${query1}" "${resultQuery1}"
 test2 "query " "${query2}" "${resultQuery2}"
@@ -428,7 +439,7 @@ test7 "samevisit" "samevisit" "any" "samevisit" "${timingResultNonZeroExpected}"
 
 echo "Testing cohorts-patient-list"
 
-test8 
+test8
 
 echo "CLI test 1/2 successful!"
 popd

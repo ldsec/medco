@@ -65,6 +65,9 @@ jobs:
       - name: Run e2e queries before loading
         run: bash test/test_cli_preloading.sh $MEDCO_USER_USERNAME $MEDCO_USER_PASSWORD
 
+      - name: Run test on postgres sql totalnum update script
+        run: bash test/updateTotalnumTest.sh
+
       - name: Load data in deployment
         run: make -C deployments/dev-local-3nodes load_test_data
 

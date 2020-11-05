@@ -698,6 +698,18 @@ responses:
           $ref: "#/definitions/timers"
 
 definitions:
+  exploreSearchCountParams:
+    type: "object"
+    required:
+      - userPublicKey
+      - queryID
+    properties:
+      userPublicKey:
+        type: "string"
+        pattern: '^[\w=-]+$'  
+      queryID:
+        type: "string"
+        pattern: '^[\w:-]+$'
   exploreSearchConcept:
     type: "object"
     required:
@@ -712,6 +724,8 @@ definitions:
         enum:
           - info
           - children
+      subjectCountQueryInfo:
+        $ref: "#/definitions/exploreSearchCountParams"
 
   exploreSearchModifier:
     type: "object"
@@ -735,11 +749,15 @@ definitions:
         enum:
           - info
           - children
+      subjectCountQueryInfo:
+        $ref: "#/definitions/exploreSearchCountParams"
 
   exploreSearchResultElement:
     type: "object"
     required: [leaf]
     properties:
+      timers:
+        $ref: "#/definitions/timers"
       path:
         type: "string"
       appliedPath:
@@ -749,6 +767,10 @@ definitions:
       displayName:
         type: "string"
       code:
+        type: "string"
+      subjectCount:
+        type: "string"
+      subjectCountEncrypted:
         type: "string"
       type:
         type: "string"
