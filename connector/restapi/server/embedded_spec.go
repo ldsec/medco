@@ -632,6 +632,26 @@ func init() {
         "path": {
           "type": "string",
           "pattern": "^\\/$|^((\\/[^\\/]+)+\\/)$"
+        },
+        "subjectCountQueryInfo": {
+          "$ref": "#/definitions/exploreSearchCountParams"
+        }
+      }
+    },
+    "exploreSearchCountParams": {
+      "type": "object",
+      "required": [
+        "userPublicKey",
+        "queryID"
+      ],
+      "properties": {
+        "queryID": {
+          "type": "string",
+          "pattern": "^[\\w:-]+$"
+        },
+        "userPublicKey": {
+          "type": "string",
+          "pattern": "^[\\w=-]+$"
         }
       }
     },
@@ -662,6 +682,9 @@ func init() {
         "path": {
           "type": "string",
           "pattern": "^\\/$|^((\\/[^\\/]+)+\\/)$"
+        },
+        "subjectCountQueryInfo": {
+          "$ref": "#/definitions/exploreSearchCountParams"
         }
       }
     },
@@ -714,6 +737,15 @@ func init() {
         },
         "path": {
           "type": "string"
+        },
+        "subjectCount": {
+          "type": "string"
+        },
+        "subjectCountEncrypted": {
+          "type": "string"
+        },
+        "timers": {
+          "$ref": "#/definitions/timers"
         },
         "type": {
           "type": "string",
@@ -2667,6 +2699,26 @@ func init() {
         "path": {
           "type": "string",
           "pattern": "^\\/$|^((\\/[^\\/]+)+\\/)$"
+        },
+        "subjectCountQueryInfo": {
+          "$ref": "#/definitions/exploreSearchCountParams"
+        }
+      }
+    },
+    "exploreSearchCountParams": {
+      "type": "object",
+      "required": [
+        "userPublicKey",
+        "queryID"
+      ],
+      "properties": {
+        "queryID": {
+          "type": "string",
+          "pattern": "^[\\w:-]+$"
+        },
+        "userPublicKey": {
+          "type": "string",
+          "pattern": "^[\\w=-]+$"
         }
       }
     },
@@ -2697,6 +2749,9 @@ func init() {
         "path": {
           "type": "string",
           "pattern": "^\\/$|^((\\/[^\\/]+)+\\/)$"
+        },
+        "subjectCountQueryInfo": {
+          "$ref": "#/definitions/exploreSearchCountParams"
         }
       }
     },
@@ -2749,6 +2804,15 @@ func init() {
         },
         "path": {
           "type": "string"
+        },
+        "subjectCount": {
+          "type": "string"
+        },
+        "subjectCountEncrypted": {
+          "type": "string"
+        },
+        "timers": {
+          "$ref": "#/definitions/timers"
         },
         "type": {
           "type": "string",

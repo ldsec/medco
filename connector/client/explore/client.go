@@ -7,6 +7,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"sync"
 	"time"
 
 	medcoclient "github.com/ldsec/medco/connector/client"
@@ -139,30 +141,75 @@ func printResultsCSV(nodesResult map[int]*ExploreQueryResult, CSVFileURL string)
 	return
 }
 
-// ExecuteClientSearchConceptChildren executes and displays the result of the MedCo concept children search
-// endpoint on the server: /node/explore/search/concept
-func ExecuteClientSearchConceptChildren(token, username, password, conceptPath, resultOutputFilePath string, disableTLSCheck bool) (err error) {
+func decryptSubjectCount(payloadResults []*models.ExploreSearchResultElement, wg *sync.WaitGroup, resultMutex *sync.Mutex, privKey string, nodesResults *[][]*models.ExploreSearchResultElement) (err error) {
 
-	// get token
-	accessToken, err := utilclient.RetrieveOrGetNewAccessToken(token, username, password, disableTLSCheck)
-	if err != nil {
-		return err
+	//deciphering each element encrypted subject count
+	for _, elem := range payloadResults {
+		if elem.SubjectCountEncrypted == "" {
+			continue
+		}
+		countInt, err := unlynx.Decrypt(elem.SubjectCountEncrypted, privKey)
+		if err != nil {
+			return err
+		}
+		elem.SubjectCount = strconv.FormatInt(countInt, 10)
 	}
 
-	// execute search
-	clientSearchConceptChildren, err := NewExploreSearchConcept(accessToken, conceptPath, models.ExploreSearchConceptOperationChildren, disableTLSCheck)
-	if err != nil {
-		return err
-	}
+	//first decipher subject count if it is present
+	resultMutex.Lock()
+	*nodesResults = append(*nodesResults, payloadResults)
+	resultMutex.Unlock()
 
-	result, err := clientSearchConceptChildren.Execute()
+	wg.Done()
+
+	return
+}
+
+//TODO comment
+func executeAndDecryptRequest(executeSearchRequest func() ([]*models.ExploreSearchResultElement, error), wg *sync.WaitGroup, resultMutex *sync.Mutex, pubKey string, privKey string, nodesResults *[][]*models.ExploreSearchResultElement) (err error) {
+	results, err := executeSearchRequest()
+
+	if err != nil {
+		logrus.Error("Error during request execution ", err)
+		return
+	}
+	err = decryptSubjectCount(results, wg, resultMutex, privKey, nodesResults)
+	return
+}
+
+//TODO comment
+func executeConceptRequest(clientRequest *ExploreSearchConcept, queryID string, pubKey string) (results []*models.ExploreSearchResultElement, err error) {
+	result, err := clientRequest.Execute(queryID, pubKey)
 	if err != nil {
 		return
 	}
 
+	results = result.Payload.Results
+	return
+}
+
+//TODO comment
+func executeModifierRequest(clientRequest *ExploreSearchModifier, queryID string, pubKey string) (results []*models.ExploreSearchResultElement, err error) {
+
+	result, err := clientRequest.Execute(queryID, pubKey)
+	if err != nil {
+		return
+	}
+
+	results = result.Payload.Results
+	return
+}
+
+func getQueryID() string {
+	d := time.Now()
+	return fmt.Sprintf("Medco_Subject_Count_Query_%d%d%d%d%d%d%d", d.Year(), d.Month(), d.Day(), d.Hour(), d.Minute(), d.Second(), d.Nanosecond())
+}
+
+//TODO comment
+func printSearchResult(results []*models.ExploreSearchResultElement, resultOutputFilePath string) {
 	output := "PATH" + "\t" + "TYPE" + "\n"
-	for _, child := range result.Payload.Results {
-		output += child.Path + "\t" + child.Type + "\n"
+	for _, child := range results {
+		output += child.Path + "\t" + child.Type + "\t" + child.SubjectCount + "\n"
 	}
 
 	if resultOutputFilePath == "" {
@@ -175,6 +222,54 @@ func ExecuteClientSearchConceptChildren(token, username, password, conceptPath, 
 		outputFile.WriteString(output)
 		outputFile.Close()
 	}
+}
+
+// ExecuteClientSearchConceptChildren executes and displays the result of the MedCo concept search
+// endpoint on the server: /node/explore/search/concept
+func ExecuteClientSearchConceptChildren(token, username, password, conceptPath, resultOutputFilePath string, disableTLSCheck bool) (err error) {
+
+	// get token
+	accessToken, err := utilclient.RetrieveOrGetNewAccessToken(token, username, password, disableTLSCheck)
+	if err != nil {
+		return err
+	}
+
+	// execute search
+
+	clientSearchConceptRequests, err := NewExploreSearchConcept(accessToken, conceptPath, models.ExploreSearchConceptOperationChildren, disableTLSCheck)
+	if err != nil {
+		return err
+	}
+
+	var nodesResults [][]*models.ExploreSearchResultElement
+
+	var resultMutex sync.Mutex
+	wg := new(sync.WaitGroup)
+	pubKey, privKey, err := unlynx.GenerateKeyPair()
+	queryID := getQueryID()
+	//each entry contains a node's search result.
+
+	wg.Add(len(clientSearchConceptRequests))
+	for _, searchRequest := range clientSearchConceptRequests {
+
+		go func(request *ExploreSearchConcept) {
+			var executeRequest = func() ([]*models.ExploreSearchResultElement, error) {
+				return executeConceptRequest(request, queryID, pubKey)
+			}
+			executeAndDecryptRequest(executeRequest, wg, &resultMutex, pubKey, privKey, &nodesResults)
+		}(searchRequest)
+
+	}
+
+	//waiting for all requests to all medco nodes to complete
+	wg.Wait()
+	if len(clientSearchConceptRequests) != len(nodesResults) {
+		err = fmt.Errorf("Did not get a result from all medco nodes")
+		logrus.Debug(err)
+		return
+	}
+	//use only one of the medco node result list.
+	printSearchResult(nodesResults[0], resultOutputFilePath)
 
 	return
 }
@@ -190,31 +285,41 @@ func ExecuteClientSearchModifierChildren(token, username, password, modifierPath
 	}
 
 	// execute search
-	clientSearchModifierChildren, err := NewExploreSearchModifier(accessToken, modifierPath, appliedPath, appliedConcept, models.ExploreSearchModifierOperationChildren, disableTLSCheck)
+	clientSearchModifierRequests, err := NewExploreSearchModifier(accessToken, modifierPath, appliedPath, appliedConcept, models.ExploreSearchModifierOperationChildren, disableTLSCheck)
 	if err != nil {
 		return err
 	}
 
-	result, err := clientSearchModifierChildren.Execute()
-	if err != nil {
+	var nodesResults [][]*models.ExploreSearchResultElement
+
+	var resultMutex sync.Mutex
+	wg := new(sync.WaitGroup)
+	pubKey, privKey, err := unlynx.GenerateKeyPair()
+	queryID := getQueryID()
+	//each entry contains a node's search result.
+
+	wg.Add(len(clientSearchModifierRequests))
+	for _, searchRequest := range clientSearchModifierRequests {
+
+		go func(request *ExploreSearchModifier) {
+			var executeMethod = func() ([]*models.ExploreSearchResultElement, error) {
+				return executeModifierRequest(request, queryID, pubKey)
+			}
+			executeAndDecryptRequest(executeMethod, wg, &resultMutex, pubKey, privKey, &nodesResults)
+		}(searchRequest)
+
+	}
+
+	//waiting for all requests to all medco nodes to complete
+	wg.Wait()
+
+	if len(clientSearchModifierRequests) != len(nodesResults) {
+		err = fmt.Errorf("Did not get a result from all medco nodes")
+		logrus.Debug(err)
 		return
 	}
-
-	output := "PATH" + "\t" + "TYPE" + "\n"
-	for _, child := range result.Payload.Results {
-		output += child.Path + "\t" + child.Type + "\n"
-	}
-
-	if resultOutputFilePath == "" {
-		fmt.Println(output)
-	} else {
-		outputFile, err := os.Create(resultOutputFilePath)
-		if err != nil {
-			logrus.Error("error opening file: ", err)
-		}
-		outputFile.WriteString(output)
-		outputFile.Close()
-	}
+	//use only one of the medco node result list.
+	printSearchResult(nodesResults[0], resultOutputFilePath)
 
 	return
 }
@@ -230,12 +335,12 @@ func ExecuteClientSearchConceptInfo(token, username, password, conceptPath, resu
 	}
 
 	// execute search
-	clientSearchConceptInfo, err := NewExploreSearchConcept(accessToken, conceptPath, models.ExploreSearchConceptOperationInfo, disableTLSCheck)
+	clientSearchConceptInfoRequests, err := NewExploreSearchConcept(accessToken, conceptPath, models.ExploreSearchConceptOperationInfo, disableTLSCheck)
 	if err != nil {
 		return err
 	}
 
-	result, err := clientSearchConceptInfo.Execute()
+	result, err := clientSearchConceptInfoRequests[0].Execute("", "")
 	if err != nil {
 		return
 	}
@@ -274,12 +379,12 @@ func ExecuteClientSearchModifierInfo(token, username, password, modifierPath, ap
 	}
 
 	// execute search
-	clientSearchModifierInfo, err := NewExploreSearchModifier(accessToken, modifierPath, appliedPath, "/", models.ExploreSearchModifierOperationInfo, disableTLSCheck)
+	clientSearchModifierInfoRequests, err := NewExploreSearchModifier(accessToken, modifierPath, appliedPath, "/", models.ExploreSearchModifierOperationInfo, disableTLSCheck)
 	if err != nil {
 		return err
 	}
 
-	result, err := clientSearchModifierInfo.Execute()
+	result, err := clientSearchModifierInfoRequests[0].Execute("", "")
 	if err != nil {
 		return
 	}

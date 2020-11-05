@@ -1,12 +1,15 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
+	"sort"
 	"time"
 
 	querytoolsserver "github.com/ldsec/medco/connector/server/querytools"
 
 	"github.com/go-openapi/runtime/middleware"
+	medcomodels "github.com/ldsec/medco/connector/models"
 	"github.com/ldsec/medco/connector/restapi/models"
 	"github.com/ldsec/medco/connector/restapi/server/operations/medco_node"
 	medcoserver "github.com/ldsec/medco/connector/server/explore"
@@ -14,6 +17,132 @@ import (
 	"github.com/ldsec/medco/connector/wrappers/i2b2"
 	"github.com/sirupsen/logrus"
 )
+
+func aggregateGroupedSearchResultSubjectCounts(subjectCountQueryInfo *models.ExploreSearchCountParams,
+	searchResult []*models.ExploreSearchResultElement, principal *models.User) (err error) {
+
+	defer func() {
+		if searchResult == nil {
+			return
+		}
+		//cleanup of the cleartext subject count
+		for _, searchElement := range searchResult {
+			if searchElement == nil {
+				continue
+			}
+			searchElement.SubjectCount = ""
+		}
+	}()
+
+	if len(searchResult) == 0 {
+		logrus.Warn("Empty search result passed to aggregateGroupedSearchResultSubjectCounts")
+		return
+	}
+
+	beforePreparation := time.Now()
+	timers := medcomodels.NewTimers()
+	if subjectCountQueryInfo == nil || subjectCountQueryInfo.QueryID == nil || subjectCountQueryInfo.UserPublicKey == nil ||
+		*subjectCountQueryInfo.QueryID == "" || *subjectCountQueryInfo.UserPublicKey == "" {
+		logrus.Debug("empty subject count query info")
+		return
+	}
+
+	authorizedQueryType, err := utilserver.FetchAuthorizedExploreQueryType(principal)
+	logrus.Debug("Authorized query type user ", authorizedQueryType)
+
+	if err != nil {
+		logrus.Error(err)
+		err = errors.New("Impossible to seek the authorized query type")
+		return
+	}
+
+	queryType, err := medcoserver.NewExploreQueryType(authorizedQueryType)
+	if err != nil {
+		err = errors.New("impossible to create new explore query type")
+		logrus.Error(err)
+		return
+	}
+
+	logrus.Debug("new explore query type ", queryType)
+	//otherwise we have to deal with the global count case and perform homomorphic aggregation per concept.
+
+	//Sorting search result based on Path. This is important in order to add subject counts corresponding to the same concepts accross medco nodes.
+	sort.Slice(searchResult, func(i, j int) bool {
+		return searchResult[i].Path < searchResult[j].Path
+	})
+
+	timers.AddTimers("query-preparation", beforePreparation, nil)
+	beforeCothorityEncryption := time.Now()
+
+	//the idea is to compute the aggregated totalnum only for search elements with a defined totalnum in i2b2
+	var encryptedTotalnums []string = []string{}
+	var keptSearchElements []*models.ExploreSearchResultElement = []*models.ExploreSearchResultElement{}
+
+	var debugString string = ""
+	for _, searchElement := range searchResult {
+		if searchElement.SubjectCount == "" {
+			logrus.Debug("Empty subject count for ", searchElement.Name)
+			continue
+		}
+
+		debugString += searchElement.SubjectCount + " " + searchElement.DisplayName + " "
+
+		var encryptedTotalnum string
+		encryptedTotalnum, err = medcoserver.PrepareAggregationValue(subjectCountQueryInfo, searchElement)
+		if err != nil {
+			logrus.Error("Error while preparing totalnum for aggregation ", err)
+			return
+		}
+
+		keptSearchElements = append(keptSearchElements, searchElement)
+		encryptedTotalnums = append(encryptedTotalnums, encryptedTotalnum)
+	}
+
+	if len(encryptedTotalnums) == 0 {
+		logrus.Warn("no subject count to aggregate")
+		return
+	}
+
+	if len(searchResult) != len(encryptedTotalnums) {
+		logrus.Warn("The search result is not of the same length than the encrypted totalnums %d != %d", len(searchResult), len(encryptedTotalnums))
+	}
+
+	logrus.Debug("Encrypted all concepts ", debugString, " about to launch aggregation with query id ", *subjectCountQueryInfo.QueryID)
+
+	timers.AddTimers("cothority-key-encryption-totalnums", beforeCothorityEncryption, nil)
+
+	logrus.Debug("length of encrypted totalnums of size ", len(encryptedTotalnums))
+	aggregatedCounts, err := medcoserver.ExecuteTotalnumsAggregation(*subjectCountQueryInfo.QueryID, encryptedTotalnums, *subjectCountQueryInfo.UserPublicKey, queryType, timers)
+
+	if err != nil {
+		logrus.Error("Error during aggregation of totalnums ", err)
+		return
+	}
+
+	if len(aggregatedCounts) != len(encryptedTotalnums) {
+		err = fmt.Errorf("Number of aggregated counts (%d) and number of encrypted totalnums results (%d) do not match", len(aggregatedCounts), len(encryptedTotalnums))
+		return
+	}
+
+	for i, searchElement := range keptSearchElements {
+		searchElement.SubjectCountEncrypted = aggregatedCounts[i]
+	}
+
+	if len(searchResult) > 0 {
+		//putting the timers for the whole operation in the first search result element.
+		searchResult[0].Timers = timers.TimersToAPIModel()
+	}
+
+	logrus.Debug("Done doing totalnum's aggregation ")
+
+	return
+}
+
+func create500ErrorConcept(err error) *medco_node.ExploreSearchConceptDefault {
+	return medco_node.NewExploreSearchConceptDefault(500).WithPayload(&medco_node.ExploreSearchConceptDefaultBody{
+		Message: err.Error(),
+	})
+}
 
 // MedCoNodeExploreSearchConceptHandler handles the /medco/node/explore/search/concept API endpoint
 func MedCoNodeExploreSearchConceptHandler(params medco_node.ExploreSearchConceptParams, principal *models.User) middleware.Responder {
@@ -24,9 +153,12 @@ func MedCoNodeExploreSearchConceptHandler(params medco_node.ExploreSearchConcept
 
 		searchResult1, err := i2b2.GetOntologyConceptChildren(*params.SearchConceptRequest.Path)
 		if err != nil {
-			return medco_node.NewExploreSearchConceptDefault(500).WithPayload(&medco_node.ExploreSearchConceptDefaultBody{
-				Message: err.Error(),
-			})
+			return create500ErrorConcept(err)
+		}
+
+		err = aggregateGroupedSearchResultSubjectCounts(params.SearchConceptRequest.SubjectCountQueryInfo, searchResult1, principal)
+		if err != nil {
+			return create500ErrorConcept(err)
 		}
 
 		var searchResult2 []*models.ExploreSearchResultElement
@@ -34,10 +166,13 @@ func MedCoNodeExploreSearchConceptHandler(params medco_node.ExploreSearchConcept
 		if *params.SearchConceptRequest.Path != "/" {
 			searchResult2, err = i2b2.GetOntologyModifiers(*params.SearchConceptRequest.Path)
 			if err != nil {
-				return medco_node.NewExploreSearchConceptDefault(500).WithPayload(&medco_node.ExploreSearchConceptDefaultBody{
-					Message: err.Error(),
-				})
+				return create500ErrorConcept(err)
 			}
+		}
+		err = aggregateGroupedSearchResultSubjectCounts(params.SearchConceptRequest.SubjectCountQueryInfo, searchResult2, principal)
+
+		if err != nil {
+			return create500ErrorConcept(err)
 		}
 
 		searchResult = append(searchResult1, searchResult2...)
@@ -46,18 +181,31 @@ func MedCoNodeExploreSearchConceptHandler(params medco_node.ExploreSearchConcept
 
 		var err error
 		searchResult, err = i2b2.GetOntologyConceptInfo(*params.SearchConceptRequest.Path)
+
 		if err != nil {
-			return medco_node.NewExploreSearchConceptDefault(500).WithPayload(&medco_node.ExploreSearchConceptDefaultBody{
-				Message: err.Error(),
-			})
+			return create500ErrorConcept(err)
+		}
+
+		err = aggregateGroupedSearchResultSubjectCounts(params.SearchConceptRequest.SubjectCountQueryInfo, searchResult, principal)
+
+		if err != nil {
+			return create500ErrorConcept(err)
 		}
 	}
+
+	//waiting for all subject counts request done in aggregateSearchResultSubjectCounts to complete. Those subject counts aggragation requests fill searchResult1 and searchResult2
 
 	return medco_node.NewExploreSearchConceptOK().WithPayload(&medco_node.ExploreSearchConceptOKBody{
 		Search:  params.SearchConceptRequest,
 		Results: searchResult,
 	})
 
+}
+
+func create500ErrorModifier(err error) *medco_node.ExploreSearchModifierDefault {
+	return medco_node.NewExploreSearchModifierDefault(500).WithPayload(&medco_node.ExploreSearchModifierDefaultBody{
+		Message: err.Error(),
+	})
 }
 
 // MedCoNodeExploreSearchModifierHandler handles the /medco/node/explore/search/modifier API endpoint
@@ -68,18 +216,22 @@ func MedCoNodeExploreSearchModifierHandler(params medco_node.ExploreSearchModifi
 
 	if *params.SearchModifierRequest.Operation == models.ExploreSearchModifierOperationChildren {
 		searchResult, err = i2b2.GetOntologyModifierChildren(*params.SearchModifierRequest.Path, *params.SearchModifierRequest.AppliedPath, *params.SearchModifierRequest.AppliedConcept)
+		for _, element := range searchResult {
+			logrus.Debug("Modifier search element ", element.DisplayName, " ", element.SubjectCount)
+		}
 		if err != nil {
-			return medco_node.NewExploreSearchModifierDefault(500).WithPayload(&medco_node.ExploreSearchModifierDefaultBody{
-				Message: err.Error(),
-			})
+			return create500ErrorModifier(err)
 		}
 	} else if *params.SearchModifierRequest.Operation == models.ExploreSearchModifierOperationInfo {
 		searchResult, err = i2b2.GetOntologyModifierInfo(*params.SearchModifierRequest.Path, *params.SearchModifierRequest.AppliedPath)
 		if err != nil {
-			return medco_node.NewExploreSearchModifierDefault(500).WithPayload(&medco_node.ExploreSearchModifierDefaultBody{
-				Message: err.Error(),
-			})
+			return create500ErrorModifier(err)
 		}
+	}
+
+	err = aggregateGroupedSearchResultSubjectCounts(params.SearchModifierRequest.SubjectCountQueryInfo, searchResult, principal)
+	if err != nil {
+		return create500ErrorModifier(err)
 	}
 
 	return medco_node.NewExploreSearchModifierOK().WithPayload(&medco_node.ExploreSearchModifierOKBody{

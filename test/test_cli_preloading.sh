@@ -6,17 +6,19 @@ PASSWORD=${2:-test}
 
 
 # test1
+#If one of the tables doesn't appear in the result. Be sure it is present in the database. And if it is, be sure 
+#that the c_visualattribute column, related to that table, inside the table_access table is set to 'CA' and not 'CH' which hides the table when fetching the children of "/"
 searchConceptChildren1="/"
 resultSearchConceptChildren1="PATH  TYPE
-                              /E2ETEST/e2etest/concept_container
+                              /E2ETEST/e2etest/ concept_container
                               /I2B2/I2B2/ concept_container
                               /SPHN/SPHNv2020.1/  concept_container"
 
 searchConceptChildren2="/E2ETEST/e2etest/"
 resultSearchConceptChildren2="PATH  TYPE
-                              /E2ETEST/e2etest/1/ concept
-                              /E2ETEST/e2etest/2/ concept
-                              /E2ETEST/e2etest/3/ concept
+                              /E2ETEST/e2etest/1/ concept 30
+                              /E2ETEST/e2etest/2/ concept 60
+                              /E2ETEST/e2etest/3/ concept 90
                               /E2ETEST/modifiers/ modifier_folder"
 
 searchModifierChildren="/E2ETEST/modifiers/ /e2etest/% /E2ETEST/e2etest/1/"
@@ -136,16 +138,26 @@ timingResultNonZeroExpected="$(printf -- "count\n165\n165\n165")"
 timingResultZeroExpected="$(printf -- "count\n0\n0\n0")"
 
 
+#test whether each line from expected result is contained within the result.csv file
 test1 () {
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv $1 $2
-  result="$(cat ../result.csv | tr -d '\r\n\t ')"
-  expectedResult="$(echo "${3}" | tr -d '\r\n\t ')"
-  if [ "${result}" != "${expectedResult}" ];
-  then
-  echo "$1 $2: test failed"
-  echo "result: ${result}" && echo "expected result: ${expectedResult}"
-  exit 1
-  fi
+  pwd
+  result="$(cat ../result.csv | sed 's/\t/ /g' | tr -s ' ' )"
+  expectedResult="${3}"
+
+ 
+  while IFS= read -r expectedLine; do
+    # awk command allows to remove trailing and leading spaces c.f. https://unix.stackexchange.com/questions/102008/how-do-i-trim-leading-and-trailing-whitespace-from-each-line-of-some-output
+    #the tr -s ' ' command allows to change spaces that repeat into a single space
+    trimmedExpectedLine="$(echo "$expectedLine" | tr -s ' ' | awk '{$1=$1;print}')" 
+    if ! echo "${result}" | grep "$trimmedExpectedLine" --quiet --fixed-strings; then
+      echo "$1 $2: test failed"
+      echo "This expected line is not within the result -->${trimmedExpectedLine}<-- "
+      echo "Observed result: ${result}"  
+      exit 1
+    fi
+  done <<< "$expectedResult"
+ 
 }
 
 test2 () {
@@ -280,24 +292,24 @@ test7() {
 }
 
 pushd deployments/dev-local-3nodes/
-echo "Testing concept-children..."
+printf "\nTesting concept-children...\n"
 
 test1 "concept-children" "${searchConceptChildren1}" "${resultSearchConceptChildren1}"
 test1 "concept-children" "${searchConceptChildren2}" "${resultSearchConceptChildren2}"
 
-echo "Testing modifier-children..."
+printf "\nTesting modifier-children...\n"
 
 test1 "modifier-children" "${searchModifierChildren}" "${resultSearchModifierChildren}"
 
-echo "Testing concept-info..."
+printf "\nTesting concept-info...\n"
 
 test1 "concept-info" "${searchConceptInfo}" "${resultSearchConceptInfo}"
 
-echo "Testing modifier-info..."
+printf "\nTesting modifier-info...\n"
 
 test1 "modifier-info" "${searchModifierInfo}" "${resultSearchModifierInfo}"
 
-echo "Testing query with test user..."
+printf "\nTesting query with test user...\n"
 
 test2 "query " "${query1}" "${resultQuery1}"
 test2 "query " "${query2}" "${resultQuery2}"

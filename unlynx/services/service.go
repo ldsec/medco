@@ -3,21 +3,23 @@ package servicesmedco
 import (
 	"encoding/base64"
 	"fmt"
+	"os"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/BurntSushi/toml"
-	"github.com/fanliao/go-concurrentMap"
+	concurrent "github.com/fanliao/go-concurrentMap"
 	"github.com/ldsec/medco/unlynx/protocols"
-	"github.com/ldsec/unlynx/lib"
-	"github.com/ldsec/unlynx/protocols"
+	libunlynx "github.com/ldsec/unlynx/lib"
+	protocolsunlynx "github.com/ldsec/unlynx/protocols"
+	"github.com/sirupsen/logrus"
 	"go.dedis.ch/kyber/v3"
 	"go.dedis.ch/kyber/v3/util/random"
 	"go.dedis.ch/onet/v3"
 	"go.dedis.ch/onet/v3/log"
 	"go.dedis.ch/onet/v3/network"
 	"golang.org/x/xerrors"
-	"os"
-	"strings"
-	"sync"
-	"time"
 )
 
 func init() {
@@ -429,6 +431,7 @@ func (s *Service) HandleSurveyAggRequest(sar *SurveyAggRequest) (network.Message
 		return nil, xerrors.Errorf("%+v", err)
 	}
 
+	logrus.Debug("result from handle aggregate ", keySwitchingResult, " ", surveyAgg)
 	return &Result{Result: keySwitchingResult, TR: surveyAgg.TR}, nil
 }
 
