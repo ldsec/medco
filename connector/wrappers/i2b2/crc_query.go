@@ -2,14 +2,14 @@ package i2b2
 
 import (
 	"errors"
-
-	utilserver "github.com/ldsec/medco/connector/util/server"
+	"github.com/ldsec/medco/connector/restapi/models"
+	"github.com/ldsec/medco/connector/util/server"
 	"github.com/ldsec/medco/connector/wrappers/unlynx"
 	"github.com/sirupsen/logrus"
 )
 
 // ExecutePsmQuery executes an i2b2 PSM query and returns the corresponding patient set id
-func ExecutePsmQuery(queryName string, panelsItemKeys [][]string, panelsIsNot []bool) (patientCount string, patientSetID string, err error) {
+func ExecutePsmQuery(queryName string, panels []*models.Panel) (patientCount string, patientSetID string, err error) {
 
 	// craft and execute request
 	xmlResponse := &Response{
@@ -20,8 +20,7 @@ func ExecutePsmQuery(queryName string, panelsItemKeys [][]string, panelsIsNot []
 		utilserver.I2b2HiveURL+"/QueryToolService/request",
 		NewCrcPsmReqFromQueryDef(
 			queryName,
-			panelsItemKeys,
-			panelsIsNot,
+			panels,
 			[]ResultOutputName{Patientset, PatientCountXML},
 		),
 		xmlResponse,

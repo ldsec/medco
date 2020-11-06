@@ -2,24 +2,26 @@ package exploreclient
 
 import (
 	"fmt"
+	medcoclient "github.com/ldsec/medco/connector/client"
+	"github.com/ldsec/medco/connector/restapi/models"
+	utilclient "github.com/ldsec/medco/connector/util/client"
+	"github.com/ldsec/medco/connector/wrappers/unlynx"
+	"github.com/sirupsen/logrus"
 	"os"
 	"sort"
 	"strconv"
 	"time"
-
-	medcoclient "github.com/ldsec/medco/connector/client"
-	"github.com/ldsec/medco/connector/wrappers/unlynx"
-
-	"github.com/ldsec/medco/connector/restapi/models"
-	utilclient "github.com/ldsec/medco/connector/util/client"
-	"github.com/sirupsen/logrus"
 )
 
 // ExecuteClientQuery executes and displays the result of the MedCo client query
+// endpoint on the server: /node/explore/query
 func ExecuteClientQuery(token, username, password, queryType, queryString, resultOutputFilePath string, disableTLSCheck bool) (err error) {
 
 	// get token
 	accessToken, err := utilclient.RetrieveOrGetNewAccessToken(token, username, password, disableTLSCheck)
+	if err != nil {
+		return err
+	}
 
 	// parse query type
 	queryTypeParsed := models.ExploreQueryType(queryType)
@@ -30,19 +32,30 @@ func ExecuteClientQuery(token, username, password, queryType, queryString, resul
 	}
 
 	// parse query string
-	panelsItemKeys, panelsIsNot, err := medcoclient.ParseQueryString(queryString)
+	panels, err := medcoclient.ParseQueryString(queryString)
 	if err != nil {
 		return
 	}
 
-	// encrypt item key
-	encPanelsItemKeys, err := unlynx.EncryptMatrix(panelsItemKeys)
-	if err != nil {
-		return
+	// encrypt item keys
+	for _, panel := range panels {
+		for _, item := range panel.Items {
+			if *item.Encrypted {
+				queryTermInt, err := strconv.ParseInt(*item.QueryTerm, 10, 64)
+				if err != nil {
+					return err
+				}
+				encrypted, err := unlynx.EncryptWithCothorityKey(queryTermInt)
+				if err != nil {
+					return err
+				}
+				item.QueryTerm = &encrypted
+			}
+		}
 	}
 
 	// execute query
-	clientQuery, err := NewExploreQuery(accessToken, queryTypeParsed, encPanelsItemKeys, panelsIsNot, disableTLSCheck)
+	clientQuery, err := NewExploreQuery(accessToken, queryTypeParsed, panels, disableTLSCheck)
 	if err != nil {
 		return
 	}
@@ -131,7 +144,8 @@ func printResultsCSV(nodesResult map[int]*ExploreQueryResult, CSVFileURL string)
 	return
 }
 
-// ExecuteClientSearchConcept executes and displays the result of the MedCo sconcept search
+// ExecuteClientSearchConcept executes and displays the result of the MedCo concept search
+// endpoint on the server: /node/explore/search/concept
 func ExecuteClientSearchConcept(token, username, password, conceptPath, resultOutputFilePath string, disableTLSCheck bool) (err error) {
 
 	// get token
@@ -171,6 +185,7 @@ func ExecuteClientSearchConcept(token, username, password, conceptPath, resultOu
 }
 
 // ExecuteClientSearchModifier executes and displays the result of the MedCo modifier search
+// endpoint on the server: /node/explore/search/modifier
 func ExecuteClientSearchModifier(token, username, password, modifierPath, appliedPath, appliedConcept, resultOutputFilePath string, disableTLSCheck bool) (err error) {
 
 	// get token
@@ -210,6 +225,7 @@ func ExecuteClientSearchModifier(token, username, password, modifierPath, applie
 }
 
 // ExecuteClientGenomicAnnotationsGetValues displays the genomic annotations values matching the "annotation" parameter
+// endpoint on the server: /genomic-annotations/{annotation}
 func ExecuteClientGenomicAnnotationsGetValues(token, username, password, annotation, value string, limit int64, disableTLSCheck bool) (err error) {
 
 	// get token
@@ -238,6 +254,7 @@ func ExecuteClientGenomicAnnotationsGetValues(token, username, password, annotat
 }
 
 // ExecuteClientGenomicAnnotationsGetVariants displays the variant ids corresponding to the annotation and value parameters
+// endpoint on the server: /genomic-annotations/{annotation}/{value}
 func ExecuteClientGenomicAnnotationsGetVariants(token, username, password, annotation, value string, zygosity string, encrypted bool, disableTLSCheck bool) (err error) {
 
 	// get token

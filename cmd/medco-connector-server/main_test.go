@@ -112,7 +112,7 @@ func eqValid() exploreQueryRequest {
 
 func TestExploreQuery(t *testing.T) {
 	tests := []teqTests{{true, eqValid()}}
-	for i := 0; i < 9; i++ {
+	for i := 0; i < 10; i++ {
 		tests = append(tests, teqTests{false, eqValid()})
 	}
 	tests[1].query.ID = "123@"
@@ -124,11 +124,11 @@ func TestExploreQuery(t *testing.T) {
 	tests[7].query.Query.Panels[0].Items[0].QueryTerm = "abc/def"
 	tests[8].query.Query.Panels[0].Items[0].QueryTerm = "abc/def/"
 	tests[9].query.Query.Panels[0].Items[0].QueryTerm = "/abc/def//"
-	for i := 0; i < 3; i++ {
+	tests[10].query.Query.Panels[0].Items[0].QueryTerm = "/abc/def"
+	for i := 0; i < 2; i++ {
 		tests = append(tests, teqTests{true, eqValid()})
 	}
-	tests[10].query.Query.Panels[0].Items[0].QueryTerm = "word=-word"
-	tests[11].query.Query.Panels[0].Items[0].QueryTerm = "/abc/def"
+	tests[11].query.Query.Panels[0].Items[0].QueryTerm = "word=-word"
 	tests[12].query.Query.Panels[0].Items[0].QueryTerm = "/abc123@/def123@/"
 
 	for _, test := range tests {

@@ -696,8 +696,17 @@ func init() {
                 "type": "boolean"
               },
               "modifier": {
-                "type": "string",
-                "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/?)$"
+                "type": "object",
+                "properties": {
+                  "appliedPath": {
+                    "type": "string",
+                    "pattern": "^((\\/[^\\/]+)+\\/%?)$"
+                  },
+                  "modifierKey": {
+                    "type": "string",
+                    "pattern": "^((\\/[^\\/]+)+\\/)$"
+                  }
+                }
               },
               "operator": {
                 "type": "string",
@@ -708,7 +717,7 @@ func init() {
               },
               "queryTerm": {
                 "type": "string",
-                "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/?)$"
+                "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/)$"
               },
               "value": {
                 "type": "string"
@@ -2145,8 +2154,17 @@ func init() {
           "type": "boolean"
         },
         "modifier": {
-          "type": "string",
-          "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/?)$"
+          "type": "object",
+          "properties": {
+            "appliedPath": {
+              "type": "string",
+              "pattern": "^((\\/[^\\/]+)+\\/%?)$"
+            },
+            "modifierKey": {
+              "type": "string",
+              "pattern": "^((\\/[^\\/]+)+\\/)$"
+            }
+          }
         },
         "operator": {
           "type": "string",
@@ -2157,11 +2175,24 @@ func init() {
         },
         "queryTerm": {
           "type": "string",
-          "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/?)$"
+          "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/)$"
         },
         "value": {
           "type": "string",
           "maxLength": 0
+        }
+      }
+    },
+    "PanelItemsItems0Modifier": {
+      "type": "object",
+      "properties": {
+        "appliedPath": {
+          "type": "string",
+          "pattern": "^((\\/[^\\/]+)+\\/%?)$"
+        },
+        "modifierKey": {
+          "type": "string",
+          "pattern": "^((\\/[^\\/]+)+\\/)$"
         }
       }
     },

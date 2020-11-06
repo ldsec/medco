@@ -108,8 +108,7 @@ type PanelItemsItems0 struct {
 	Encrypted *bool `json:"encrypted"`
 
 	// modifier
-	// Pattern: ^([\w=-]+)$|^((\/[^\/]+)+\/?)$
-	Modifier string `json:"modifier,omitempty"`
+	Modifier *PanelItemsItems0Modifier `json:"modifier,omitempty"`
 
 	// operator
 	// Enum: [exists equals]
@@ -117,7 +116,7 @@ type PanelItemsItems0 struct {
 
 	// query term
 	// Required: true
-	// Pattern: ^([\w=-]+)$|^((\/[^\/]+)+\/?)$
+	// Pattern: ^([\w=-]+)$|^((\/[^\/]+)+\/)$
 	QueryTerm *string `json:"queryTerm"`
 
 	// value
@@ -170,8 +169,13 @@ func (m *PanelItemsItems0) validateModifier(formats strfmt.Registry) error {
 		return nil
 	}
 
-	if err := validate.Pattern("modifier", "body", string(m.Modifier), `^([\w=-]+)$|^((\/[^\/]+)+\/?)$`); err != nil {
-		return err
+	if m.Modifier != nil {
+		if err := m.Modifier.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("modifier")
+			}
+			return err
+		}
 	}
 
 	return nil
@@ -226,7 +230,7 @@ func (m *PanelItemsItems0) validateQueryTerm(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.Pattern("queryTerm", "body", string(*m.QueryTerm), `^([\w=-]+)$|^((\/[^\/]+)+\/?)$`); err != nil {
+	if err := validate.Pattern("queryTerm", "body", string(*m.QueryTerm), `^([\w=-]+)$|^((\/[^\/]+)+\/)$`); err != nil {
 		return err
 	}
 
@@ -257,6 +261,82 @@ func (m *PanelItemsItems0) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (m *PanelItemsItems0) UnmarshalBinary(b []byte) error {
 	var res PanelItemsItems0
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
+// PanelItemsItems0Modifier panel items items0 modifier
+//
+// swagger:model PanelItemsItems0Modifier
+type PanelItemsItems0Modifier struct {
+
+	// applied path
+	// Pattern: ^((\/[^\/]+)+\/%?)$
+	AppliedPath string `json:"appliedPath,omitempty"`
+
+	// modifier key
+	// Pattern: ^((\/[^\/]+)+\/)$
+	ModifierKey string `json:"modifierKey,omitempty"`
+}
+
+// Validate validates this panel items items0 modifier
+func (m *PanelItemsItems0Modifier) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateAppliedPath(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateModifierKey(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *PanelItemsItems0Modifier) validateAppliedPath(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.AppliedPath) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("modifier"+"."+"appliedPath", "body", string(m.AppliedPath), `^((\/[^\/]+)+\/%?)$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *PanelItemsItems0Modifier) validateModifierKey(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ModifierKey) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("modifier"+"."+"modifierKey", "body", string(m.ModifierKey), `^((\/[^\/]+)+\/)$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *PanelItemsItems0Modifier) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *PanelItemsItems0Modifier) UnmarshalBinary(b []byte) error {
+	var res PanelItemsItems0Modifier
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

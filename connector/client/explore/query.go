@@ -7,9 +7,8 @@ import (
 	"net/url"
 	"time"
 
-	medcoclient "github.com/ldsec/medco/connector/client"
-
 	httptransport "github.com/go-openapi/runtime/client"
+	medcoclient "github.com/ldsec/medco/connector/client"
 	"github.com/ldsec/medco/connector/restapi/client"
 	"github.com/ldsec/medco/connector/restapi/client/medco_node"
 	"github.com/ldsec/medco/connector/restapi/models"
@@ -33,20 +32,17 @@ type ExploreQuery struct {
 
 	// queryType is the type of explore query requested
 	queryType models.ExploreQueryType
-	// encPanelsItemKeys is part of the query: contains the encrypted item keys organized by panel
-	encPanelsItemKeys [][]string
-	// panelsIsNot is part of the query: indicates which panels are negated
-	panelsIsNot []bool
+	// panels contains the panels of the query
+	panels []*models.Panel
 }
 
 // NewExploreQuery creates a new MedCo client query
-func NewExploreQuery(authToken string, queryType models.ExploreQueryType, encPanelsItemKeys [][]string, panelsIsNot []bool, disableTLSCheck bool) (q *ExploreQuery, err error) {
+func NewExploreQuery(authToken string, queryType models.ExploreQueryType, panels []*models.Panel, disableTLSCheck bool) (q *ExploreQuery, err error) {
 
 	q = &ExploreQuery{
-		authToken:         authToken,
-		queryType:         queryType,
-		encPanelsItemKeys: encPanelsItemKeys,
-		panelsIsNot:       panelsIsNot,
+		authToken: authToken,
+		queryType: queryType,
+		panels:    panels,
 	}
 
 	// retrieve network information
@@ -176,33 +172,13 @@ func (clientQuery *ExploreQuery) generateModel() (queryModel *models.ExploreQuer
 	queryModel = &models.ExploreQuery{
 		Type:          clientQuery.queryType,
 		UserPublicKey: clientQuery.userPublicKey,
-		Panels:        []*models.Panel{},
+		Panels:        clientQuery.panels,
 	}
 
-	// query terms
-	true := true
-	for panelIdx, panel := range clientQuery.encPanelsItemKeys {
-
-		panelModel := &models.Panel{
-			Items: []*models.PanelItemsItems0{},
-			Not:   &clientQuery.panelsIsNot[panelIdx],
+	for _, panel := range clientQuery.panels {
+		for _, item := range panel.Items {
+			item.Operator = "exists"
 		}
-
-		for _, encItem := range panel {
-			encrypted := new(bool)
-			*encrypted = true
-			queryTerm := new(string)
-			*queryTerm = encItem
-			panelModel.Items = append(panelModel.Items, &models.PanelItemsItems0{
-				Encrypted: encrypted,
-				Operator:  "exists",
-				QueryTerm: queryTerm,
-				Value:     "",
-			})
-
-		}
-
-		queryModel.Panels = append(queryModel.Panels, panelModel)
 	}
 
 	return

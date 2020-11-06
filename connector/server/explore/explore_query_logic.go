@@ -3,14 +3,13 @@ package medcoserver
 import (
 	"fmt"
 	"strconv"
-	"strings"
 	"time"
 
 	medcomodels "github.com/ldsec/medco/connector/models"
 
 	querytoolsserver "github.com/ldsec/medco/connector/server/querytools"
 
-	models "github.com/ldsec/medco/connector/restapi/models"
+	"github.com/ldsec/medco/connector/restapi/models"
 	"github.com/ldsec/medco/connector/wrappers/i2b2"
 	"github.com/ldsec/medco/connector/wrappers/unlynx"
 	"github.com/pkg/errors"
@@ -85,33 +84,27 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	}
 
 	// tag query terms
-	encQueryTerms := q.getEncQueryTerms()
-	var taggedQueryTerms map[string]string
-	if len(encQueryTerms) > 0 {
+	taggedQueryTerms := make(map[string]string)
+	if encQueryTerms := q.getEncQueryTerms(); len(encQueryTerms) > 0 {
+		var ddtTimers map[string]time.Duration
 		timer = time.Now()
-		taggedQueryTermsInner, ddtTimers, ddtErr := unlynx.DDTagValues(q.ID, encQueryTerms)
-		taggedQueryTerms = taggedQueryTermsInner
-		if ddtErr != nil {
-			err = ddtErr
-			err = fmt.Errorf("during distributed deterministic tagging (DDT) procedure: %s", err.Error())
+		taggedQueryTerms, ddtTimers, err = unlynx.DDTagValues(q.ID, encQueryTerms)
+		if err != nil {
 			return
 		}
 		q.Result.Timers.AddTimers("medco-connector-DDT", timer, ddtTimers)
 		logrus.Info(q.ID, ": tagged ", len(taggedQueryTerms), " elements with unlynx")
-	} else {
-		taggedQueryTerms = make(map[string]string, 0)
-		logrus.Info(q.ID, ": tagged 0 elements with unlynx")
 	}
 
 	// i2b2 PSM query with tagged items
 	timer = time.Now()
-	panelsItemKeys, panelsIsNot, err := q.getI2b2PsmQueryTerms(taggedQueryTerms)
+	panels, err := q.getI2b2PsmQueryTerms(taggedQueryTerms)
 	if err != nil {
 		err = fmt.Errorf("while building I2B2 panels: %s", err.Error())
 		return
 	}
 
-	patientCount, patientSetID, err := i2b2.ExecutePsmQuery(q.ID, panelsItemKeys, panelsIsNot)
+	patientCount, patientSetID, err := i2b2.ExecutePsmQuery(q.ID, panels)
 	if err != nil {
 		err = fmt.Errorf("during I2B2 PSM query exection: %s", err.Error())
 		return
@@ -259,17 +252,24 @@ func (q *ExploreQuery) getEncQueryTerms() (encQueryTerms []string) {
 	return
 }
 
-func (q *ExploreQuery) getI2b2PsmQueryTerms(taggedQueryTerms map[string]string) (panelsItemKeys [][]string, panelsIsNot []bool, err error) {
-	for panelIdx, panel := range q.Query.Panels {
-		panelsIsNot = append(panelsIsNot, *panel.Not)
+func (q *ExploreQuery) getI2b2PsmQueryTerms(taggedQueryTerms map[string]string) (panels []*models.Panel, err error) {
 
-		panelsItemKeys = append(panelsItemKeys, []string{})
+	for _, panel := range q.Query.Panels {
+
+		var newPanel models.Panel
+
+		not := *panel.Not
+		newPanel.Not = &not
+
 		for _, item := range panel.Items {
+
+			var newItem models.PanelItemsItems0
 			var itemKey string
+
 			if *item.Encrypted {
 
 				if tag, ok := taggedQueryTerms[*item.QueryTerm]; ok {
-					itemKey = `\\SENSITIVE_TAGGED\medco\tagged\` + tag + `\`
+					itemKey = `/SENSITIVE_TAGGED/medco/tagged/` + tag + `\`
 				} else {
 					err = errors.New("query error: encrypted term does not have corresponding tag")
 					logrus.Error(err)
@@ -277,12 +277,22 @@ func (q *ExploreQuery) getI2b2PsmQueryTerms(taggedQueryTerms map[string]string) 
 				}
 
 			} else {
-				itemKey = `\` + strings.ReplaceAll(*item.QueryTerm, "/", `\`)
-
+				itemKey = *item.QueryTerm
+				if item.Modifier != nil {
+					modifierCpy := *item.Modifier
+					newItem.Modifier = &modifierCpy
+				}
 			}
-			panelsItemKeys[panelIdx] = append(panelsItemKeys[panelIdx], itemKey)
+
+			newItem.QueryTerm = &itemKey
+
+			newPanel.Items = append(newPanel.Items, &newItem)
 		}
+
+		panels = append(panels, &newPanel)
+
 	}
+
 	return
 }
 
