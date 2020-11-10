@@ -4,10 +4,11 @@ package server
 
 import (
 	"crypto/tls"
-	"github.com/ldsec/medco/connector/server/handlers"
-	"github.com/ldsec/medco/connector/util/server"
-	"github.com/sirupsen/logrus"
 	"net/http"
+
+	"github.com/ldsec/medco/connector/server/handlers"
+	utilserver "github.com/ldsec/medco/connector/util/server"
+	"github.com/sirupsen/logrus"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
@@ -17,6 +18,7 @@ import (
 	"github.com/ldsec/medco/connector/restapi/server/operations/genomic_annotations"
 	"github.com/ldsec/medco/connector/restapi/server/operations/medco_network"
 	"github.com/ldsec/medco/connector/restapi/server/operations/medco_node"
+	"github.com/ldsec/medco/connector/restapi/server/operations/survival_analysis"
 
 	"github.com/ldsec/medco/connector/restapi/models"
 )
@@ -75,6 +77,21 @@ func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
 
 	// /genomic-annotations/{annotation}/{value}
 	api.GenomicAnnotationsGetVariantsHandler = genomic_annotations.GetVariantsHandlerFunc(handlers.MedCoGenomicAnnotationsGetVariantsHandler)
+
+	// /node/explore/cohorts
+	api.MedcoNodeGetCohortsHandler = medco_node.GetCohortsHandlerFunc(handlers.MedCoNodeGetCohortsHandler)
+
+	// /node/explore/cohorts
+	api.MedcoNodePostCohortsHandler = medco_node.PostCohortsHandlerFunc(handlers.MedCoNodePostCohortsHandler)
+
+	// /node/explore/cohorts
+	api.MedcoNodePutCohortsHandler = medco_node.PutCohortsHandlerFunc(handlers.MedCoNodePutCohortsHandler)
+
+	// /node/explore/cohorts
+	api.MedcoNodeDeleteCohortsHandler = medco_node.DeleteCohortsHandlerFunc(handlers.MedCoNodeDeleteCohortsHandler)
+
+	// /node/analysis/survival/query
+	api.SurvivalAnalysisSurvivalAnalysisHandler = survival_analysis.SurvivalAnalysisHandlerFunc(handlers.MedCoSurvivalAnalysisHandler)
 
 	api.ServerShutdown = func() {}
 

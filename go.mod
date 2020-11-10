@@ -32,6 +32,7 @@ require (
 	golang.org/x/net v0.0.0-20200923182212-328152dc79b1
 	golang.org/x/sys v0.0.0-20200923182605-d9f96fdee20d // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
+	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
 )
 
 go 1.14

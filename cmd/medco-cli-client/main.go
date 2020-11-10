@@ -1,12 +1,16 @@
 package main
 
 import (
-	"github.com/ldsec/medco"
-	medcoclient "github.com/ldsec/medco/connector/client"
-	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
 	"os"
 	"strings"
+
+	"github.com/ldsec/medco"
+	"github.com/sirupsen/logrus"
+	"github.com/urfave/cli"
+
+	exploreclient "github.com/ldsec/medco/connector/client/explore"
+	querytoolsclient "github.com/ldsec/medco/connector/client/querytools"
+	survivalclient "github.com/ldsec/medco/connector/client/survivalanalysis"
 )
 
 func main() {
@@ -65,6 +69,100 @@ func main() {
 			Usage: "Return encrypted variant id",
 		},
 	}
+	//--- survival analysis command flags
+	survivalAnalysisFlag := []cli.Flag{
+		cli.StringFlag{
+			Name:  "parameterFile, p",
+			Usage: "YAML parameter file URL",
+			Value: "",
+		},
+		cli.StringFlag{
+			Name:  "dumpFile, d",
+			Usage: "Output file for the timers CSV. Printed to stdout if omitted.",
+			Value: "",
+		},
+		cli.IntFlag{
+			Name:  "limit, l",
+			Usage: "Max limit of survival analysis. Unit depends on chosen granularity, default: day",
+		},
+		cli.StringFlag{
+			Name:  "granularity, g",
+			Usage: "Time resolution, one of [day, week, month, year]",
+			Value: "day",
+		},
+		// this is supposed to be a required argument, but we need -1 for testing, and -1 is not possible to pass as an argument here
+		cli.StringFlag{
+			Name:  "cohortName, c",
+			Usage: "Cohort identifier",
+		},
+		cli.StringFlag{
+			Name:  "startConcept, s",
+			Usage: "Survival start concept",
+		},
+		cli.StringFlag{
+			Name:  "startModifier, x",
+			Usage: "Survival start modifier",
+			Value: "@",
+		},
+		cli.StringFlag{
+			Name:  "endConcept, e",
+			Usage: "Survival end concept",
+		},
+		cli.StringFlag{
+			Name:  "endModifier, y",
+			Usage: "Survival end modifier",
+			Value: "@",
+		},
+	}
+
+	//--- query tools command flags
+	getCohortFlag := []cli.Flag{
+		cli.IntFlag{
+			Name:  "limit, l",
+			Usage: "Limits the number of retrieved cohorts. 0 means no limit.",
+			Value: 10,
+		},
+	}
+
+	//--- query tools command flags
+	postCohortFlag := []cli.Flag{
+		// cli.IntSlice produces wrong results
+		cli.StringFlag{
+			Name:     "patientSetIDs, p",
+			Usage:    "List of patient set IDs, there must be one per node",
+			Required: true,
+		},
+		cli.StringFlag{
+			Name:     "cohortName, c",
+			Usage:    "Name of the new cohort",
+			Required: true,
+		},
+	}
+
+	//--- query tools command flags
+	putCohortFlag := []cli.Flag{
+		// cli.IntSlice produces wrong results
+		cli.StringFlag{
+			Name:     "patientSetIDs, p",
+			Usage:    "List of patient set IDs, there must be one per node",
+			Required: true,
+		},
+		cli.StringFlag{
+			Name:     "cohortName, c",
+			Usage:    "Name of the existing cohort",
+			Required: true,
+		},
+	}
+
+	//--- query tools command flags
+	removeCohortFlag := []cli.Flag{
+		// cli.IntSlice produces wrong results
+		cli.StringFlag{
+			Name:     "cohortName, c",
+			Usage:    "Name of the new cohort",
+			Required: true,
+		},
+	}
 
 	// --- app commands
 	cliApp.Commands = []cli.Command{
@@ -74,7 +172,7 @@ func main() {
 			Usage:     "Get the children (concepts and modifiers) of a concept",
 			ArgsUsage: "conceptPath",
 			Action: func(c *cli.Context) error {
-				return medcoclient.ExecuteClientSearchConcept(
+				return exploreclient.ExecuteClientSearchConcept(
 					c.GlobalString("token"),
 					c.GlobalString("user"),
 					c.GlobalString("password"),
@@ -90,14 +188,14 @@ func main() {
 			Usage:     "Get the children of a modifier",
 			ArgsUsage: "modifierPath appliedPath appliedConcept",
 			Action: func(c *cli.Context) error {
-				return medcoclient.ExecuteClientSearchModifier(
+				return exploreclient.ExecuteClientSearchModifier(
 					c.GlobalString("token"),
 					c.GlobalString("user"),
 					c.GlobalString("password"),
 					c.Args().Get(0),
 					c.Args().Get(1),
 					c.Args().Get(2),
-					c.GlobalString(("outputFile")),
+					c.GlobalString("outputFile"),
 					c.GlobalBool("disableTLSCheck"))
 			},
 		},
@@ -109,7 +207,7 @@ func main() {
 			ArgsUsage: "[patient_list|count_per_site|count_per_site_obfuscated|count_per_site_shuffled|" +
 				"count_per_site_shuffled_obfuscated|count_global|count_global_obfuscated] [query string]",
 			Action: func(c *cli.Context) error {
-				return medcoclient.ExecuteClientQuery(
+				return exploreclient.ExecuteClientQuery(
 					c.GlobalString("token"),
 					c.GlobalString("user"),
 					c.GlobalString("password"),
@@ -128,7 +226,7 @@ func main() {
 			Flags:     genomicAnnotationsGetValuesFlag,
 			ArgsUsage: "[-l limit] annotation value",
 			Action: func(c *cli.Context) error {
-				return medcoclient.ExecuteClientGenomicAnnotationsGetValues(
+				return exploreclient.ExecuteClientGenomicAnnotationsGetValues(
 					c.GlobalString("token"),
 					c.GlobalString("user"),
 					c.GlobalString("password"),
@@ -149,7 +247,7 @@ func main() {
 			Description: "zygosity can be either heterozygous, homozygous, unknown or a combination of the three separated by |\n" +
 				"If omitted, the command will execute as if zygosity was equal to \"heterozygous|homozygous|unknown|\"",
 			Action: func(c *cli.Context) error {
-				return medcoclient.ExecuteClientGenomicAnnotationsGetVariants(
+				return exploreclient.ExecuteClientGenomicAnnotationsGetVariants(
 					c.GlobalString("token"),
 					c.GlobalString("user"),
 					c.GlobalString("password"),
@@ -157,6 +255,112 @@ func main() {
 					c.Args().Get(1),
 					c.String("zygosity"),
 					c.Bool("encrypted"),
+					c.GlobalBool("disableTLSCheck"),
+				)
+			},
+		},
+
+		{
+			Name:      "survival-analysis",
+			Aliases:   []string{"srva"},
+			Usage:     "Run a survival analysis",
+			Flags:     survivalAnalysisFlag,
+			ArgsUsage: "[-p parameterFile |  [-g granularity] -c cohortName -s startConcept [-x startModifier] -e endConcept [-y endModifier]]",
+			Description: "Returns the points of the survival curve with the provided parameters." +
+				"Instead of using command line arguments, paramters can also be written in parameter file." +
+				"If both parameter file URL and command line argument set are used," +
+				"definitions are overridden by the parameter file.",
+			Action: func(c *cli.Context) error {
+				return survivalclient.ExecuteClientSurvival(
+					c.GlobalString("token"),
+					c.String("parameterFile"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.GlobalBool("disableTLSCheck"),
+					c.GlobalString("outputFile"),
+					c.String("dumpFile"),
+					c.Int("limit"),
+					c.String("cohortName"),
+					c.String("granularity"),
+					c.String("startConcept"),
+					c.String("startModifier"),
+					c.String("endConcept"),
+					c.String("endModifier"),
+				)
+
+			},
+		},
+
+		{
+			Name:        "get-saved-cohorts",
+			Aliases:     []string{"getsc"},
+			Usage:       "get cohorts",
+			Flags:       getCohortFlag,
+			ArgsUsage:   "[-l limit]",
+			Description: "Gets the list of cohorts.",
+			Action: func(c *cli.Context) error {
+				return querytoolsclient.ExecuteGetCohorts(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.GlobalBool("disableTLSCheck"),
+					c.GlobalString("outputFile"),
+					c.Int("limit"),
+				)
+			},
+		},
+
+		{
+			Name:        "add-saved-cohorts",
+			Aliases:     []string{"addsc"},
+			Usage:       "Create a new cohort.",
+			Flags:       postCohortFlag,
+			ArgsUsage:   "-c cohortName -p patientSetIDs",
+			Description: "Creates a new cohort with given name. The patient set IDs correspond to explore query result IDs.",
+			Action: func(c *cli.Context) error {
+				return querytoolsclient.ExecutePostCohorts(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.String("cohortName"),
+					c.String("patientSetIDs"),
+					c.GlobalBool("disableTLSCheck"),
+				)
+			},
+		},
+
+		{
+			Name:        "update-saved-cohorts",
+			Aliases:     []string{"upsc"},
+			Usage:       "Updates an existing cohort.",
+			Flags:       putCohortFlag,
+			ArgsUsage:   "-c cohortName -p patientSetIDs",
+			Description: "Updates a new cohort with given name. The patient set IDs correspond to explore query result IDs.",
+			Action: func(c *cli.Context) error {
+				return querytoolsclient.ExecutePutCohorts(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.String("cohortName"),
+					c.String("patientSetIDs"),
+					c.GlobalBool("disableTLSCheck"),
+				)
+			},
+		},
+
+		{
+			Name:        "remove-saved-cohorts",
+			Aliases:     []string{"rmsc"},
+			Usage:       "Remove a cohort.",
+			Flags:       removeCohortFlag,
+			ArgsUsage:   "-c cohortName",
+			Description: "Removes a cohort for a given name. If the user does not have a cohort with this name in DB, an error is sent.",
+			Action: func(c *cli.Context) error {
+				return querytoolsclient.ExecuteRemoveCohorts(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.String("cohortName"),
 					c.GlobalBool("disableTLSCheck"),
 				)
 			},
