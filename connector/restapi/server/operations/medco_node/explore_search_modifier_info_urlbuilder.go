@@ -11,15 +11,15 @@ import (
 	golangswaggerpaths "path"
 )
 
-// ExploreSearchConceptURL generates an URL for the explore search concept operation
-type ExploreSearchConceptURL struct {
+// ExploreSearchModifierInfoURL generates an URL for the explore search modifier info operation
+type ExploreSearchModifierInfoURL struct {
 	_basePath string
 }
 
 // WithBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *ExploreSearchConceptURL) WithBasePath(bp string) *ExploreSearchConceptURL {
+func (o *ExploreSearchModifierInfoURL) WithBasePath(bp string) *ExploreSearchModifierInfoURL {
 	o.SetBasePath(bp)
 	return o
 }
@@ -27,15 +27,15 @@ func (o *ExploreSearchConceptURL) WithBasePath(bp string) *ExploreSearchConceptU
 // SetBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *ExploreSearchConceptURL) SetBasePath(bp string) {
+func (o *ExploreSearchModifierInfoURL) SetBasePath(bp string) {
 	o._basePath = bp
 }
 
 // Build a url path and query string
-func (o *ExploreSearchConceptURL) Build() (*url.URL, error) {
+func (o *ExploreSearchModifierInfoURL) Build() (*url.URL, error) {
 	var _result url.URL
 
-	var _path = "/node/explore/search/concept"
+	var _path = "/node/explore/search/modifier-info"
 
 	_basePath := o._basePath
 	if _basePath == "" {
@@ -47,7 +47,7 @@ func (o *ExploreSearchConceptURL) Build() (*url.URL, error) {
 }
 
 // Must is a helper function to panic when the url builder returns an error
-func (o *ExploreSearchConceptURL) Must(u *url.URL, err error) *url.URL {
+func (o *ExploreSearchModifierInfoURL) Must(u *url.URL, err error) *url.URL {
 	if err != nil {
 		panic(err)
 	}
@@ -58,17 +58,17 @@ func (o *ExploreSearchConceptURL) Must(u *url.URL, err error) *url.URL {
 }
 
 // String returns the string representation of the path with query string
-func (o *ExploreSearchConceptURL) String() string {
+func (o *ExploreSearchModifierInfoURL) String() string {
 	return o.Must(o.Build()).String()
 }
 
 // BuildFull builds a full url with scheme, host, path and query string
-func (o *ExploreSearchConceptURL) BuildFull(scheme, host string) (*url.URL, error) {
+func (o *ExploreSearchModifierInfoURL) BuildFull(scheme, host string) (*url.URL, error) {
 	if scheme == "" {
-		return nil, errors.New("scheme is required for a full url on ExploreSearchConceptURL")
+		return nil, errors.New("scheme is required for a full url on ExploreSearchModifierInfoURL")
 	}
 	if host == "" {
-		return nil, errors.New("host is required for a full url on ExploreSearchConceptURL")
+		return nil, errors.New("host is required for a full url on ExploreSearchModifierInfoURL")
 	}
 
 	base, err := o.Build()
@@ -82,6 +82,6 @@ func (o *ExploreSearchConceptURL) BuildFull(scheme, host string) (*url.URL, erro
 }
 
 // StringFull returns the string representation of a complete url
-func (o *ExploreSearchConceptURL) StringFull(scheme, host string) string {
+func (o *ExploreSearchModifierInfoURL) StringFull(scheme, host string) string {
 	return o.Must(o.BuildFull(scheme, host)).String()
 }

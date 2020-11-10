@@ -40,7 +40,7 @@ func TestNetwork(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func TestExploreSearchConcept(t *testing.T) {
+func TestExploreSearchConceptChildren(t *testing.T) {
 	for _, test := range []struct {
 		ok      bool
 		reqPath string
@@ -48,16 +48,16 @@ func TestExploreSearchConcept(t *testing.T) {
 		{false, ""},
 		{true, "/"},
 		{false, ""},
-		{true, "/abc/def"},
+		{false, "/abc/def"},
 		{true, "/abc/def/"},
-		{true, "/abc/def/asdasdas"},
+		{false, "/abc/def/asdasdas"},
 		{false, "abc/def/"},
 		{false, "//def/"},
 		{false, "///"},
 	} {
 		body := fmt.Sprintf(`{"path":"%s"}`,
 			test.reqPath)
-		ctx, req := getContextRequest(t, "POST", "/node/explore/search/concept",
+		ctx, req := getContextRequest(t, "POST", "/node/explore/search/concept-children",
 			body)
 
 		ri, rCtx, ok := ctx.RouteInfo(req)
@@ -65,7 +65,7 @@ func TestExploreSearchConcept(t *testing.T) {
 		req = rCtx
 
 		log.Lvlf2("checking for %t with body: %s", test.ok, body)
-		err := ctx.BindValidRequest(req, ri, &medco_node.ExploreSearchConceptParams{})
+		err := ctx.BindValidRequest(req, ri, &medco_node.ExploreSearchConceptChildrenParams{})
 		require.Equal(t, test.ok, err == nil, "wrong result for %+v: %s",
 			test, err)
 	}
@@ -88,8 +88,6 @@ type panel struct {
 
 type item struct {
 	QueryTerm string `json:"queryTerm"`
-	Operator  string `json:"operator"`
-	Value     string `json:"value"`
 	Encrypted bool   `json:"encrypted"`
 }
 
@@ -103,7 +101,7 @@ func eqValid() exploreQueryRequest {
 		"id", exploreQuery{
 			"userPub", []panel{
 				{false, []item{
-					{"queryTerm", "exists", "", false},
+					{"queryTerm", false},
 				}},
 			},
 		}}
@@ -111,23 +109,21 @@ func eqValid() exploreQueryRequest {
 
 func TestExploreQuery(t *testing.T) {
 	tests := []teqTests{{true, eqValid()}}
-	for i := 0; i < 9; i++ {
+	for i := 0; i < 7; i++ {
 		tests = append(tests, teqTests{false, eqValid()})
 	}
 	tests[1].query.ID = "123@"
 	tests[2].query.Query.UserPub = "123@"
-	tests[3].query.Query.Panels[0].Items[0].Value = "something"
-	tests[4].query.Query.Panels[0].Items[0].Operator = "non-enum"
-	tests[5].query.Query.Panels[0].Items[0].QueryTerm = "word@"
-	tests[6].query.Query.Panels[0].Items[0].QueryTerm = "abc/def"
-	tests[7].query.Query.Panels[0].Items[0].QueryTerm = "abc/def/"
-	tests[8].query.Query.Panels[0].Items[0].QueryTerm = "/abc/def//"
-	tests[9].query.Query.Panels[0].Items[0].QueryTerm = "/abc/def"
+	tests[3].query.Query.Panels[0].Items[0].QueryTerm = "word@"
+	tests[4].query.Query.Panels[0].Items[0].QueryTerm = "abc/def"
+	tests[5].query.Query.Panels[0].Items[0].QueryTerm = "abc/def/"
+	tests[6].query.Query.Panels[0].Items[0].QueryTerm = "/abc/def//"
+	tests[7].query.Query.Panels[0].Items[0].QueryTerm = "/abc/def"
 	for i := 0; i < 2; i++ {
 		tests = append(tests, teqTests{true, eqValid()})
 	}
-	tests[10].query.Query.Panels[0].Items[0].QueryTerm = "word=-word"
-	tests[11].query.Query.Panels[0].Items[0].QueryTerm = "/abc123@/def123@/"
+	tests[8].query.Query.Panels[0].Items[0].QueryTerm = "word=-word"
+	tests[9].query.Query.Panels[0].Items[0].QueryTerm = "/abc123@/def123@/"
 
 	for _, test := range tests {
 		body, err := json.Marshal(test.query)
@@ -268,17 +264,17 @@ func TestAuthorizations(t *testing.T) {
 		{true, "", "/network", models.RestAPIAuthorizationMedcoNetwork},
 		{false, "", "/network", models.RestAPIAuthorizationMedcoExplore},
 		{false, "", "/network", models.RestAPIAuthorizationMedcoGenomicAnnotations},
-		{false, "POST", "/node/explore/search/concept",
+		{false, "POST", "/node/explore/search/concept-children",
 			models.RestAPIAuthorizationMedcoNetwork},
-		{true, "POST", "/node/explore/search/concept",
+		{true, "POST", "/node/explore/search/concept-children",
 			models.RestAPIAuthorizationMedcoExplore},
-		{false, "POST", "/node/explore/search/concept",
+		{false, "POST", "/node/explore/search/concept-children",
 			models.RestAPIAuthorizationMedcoGenomicAnnotations},
-		{false, "POST", "/node/explore/search/modifier",
+		{false, "POST", "/node/explore/search/modifier-children",
 			models.RestAPIAuthorizationMedcoNetwork},
-		{true, "POST", "/node/explore/search/modifier",
+		{true, "POST", "/node/explore/search/modifier-children",
 			models.RestAPIAuthorizationMedcoExplore},
-		{false, "POST", "/node/explore/search/modifier",
+		{false, "POST", "/node/explore/search/modifier-children",
 			models.RestAPIAuthorizationMedcoGenomicAnnotations},
 		{false, "", "/genomic-annotations/abc",
 			models.RestAPIAuthorizationMedcoNetwork},

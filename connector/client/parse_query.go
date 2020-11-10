@@ -108,29 +108,49 @@ func parseQueryItem(queryItem string) (items []*models.PanelItemsItems0, err err
 
 		item := new(models.PanelItemsItems0)
 		encrypted := true
-
 		item.Encrypted = &encrypted
 		item.QueryTerm = &queryItemFields[1]
+
 		items = append(items, item)
 	case "clr":
 		if len(queryItemFields) > 3 {
 			return nil, fmt.Errorf("invalid clr query item format: %v", queryItemFields)
 		}
+
+		conceptFieldFields := strings.Split(queryItemFields[1], ":")
+
 		item := new(models.PanelItemsItems0)
 		encrypted := false
 
 		item.Encrypted = &encrypted
-		item.QueryTerm = &queryItemFields[1]
+		item.QueryTerm = &conceptFieldFields[0]
+
+		if len(conceptFieldFields) == 3 {
+			constrainByValue := &models.ConstrainByValue{
+				Operator: &conceptFieldFields[1],
+				Value:    &conceptFieldFields[2],
+			}
+			item.ConstrainByValue = constrainByValue
+		} else if len(conceptFieldFields) == 2 || len(conceptFieldFields) > 3 {
+			return nil, fmt.Errorf("invalid concept field format: %v", conceptFieldFields)
+		}
 
 		if len(queryItemFields) == 3 {
 			modifierFields := strings.Split(queryItemFields[2], ":")
-			if len(modifierFields) != 2 {
+			if len(modifierFields) != 2 && len(modifierFields) != 4 {
 				return nil, fmt.Errorf("invalid modifier term format: %v", modifierFields)
 			}
 
 			modifier := &models.PanelItemsItems0Modifier{
-				AppliedPath: modifierFields[1],
-				ModifierKey: modifierFields[0],
+				AppliedPath: &modifierFields[1],
+				ModifierKey: &modifierFields[0],
+			}
+
+			if len(modifierFields) == 4 {
+				modifier.ConstrainByValue = &models.ConstrainByValue{
+					Operator: &modifierFields[2],
+					Value:    &modifierFields[3],
+				}
 			}
 
 			item.Modifier = modifier

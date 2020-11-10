@@ -58,11 +58,17 @@ func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
 	// /medco/network
 	api.MedcoNetworkGetMetadataHandler = medco_network.GetMetadataHandlerFunc(handlers.MedCoNetworkGetMetadataHandler)
 
-	// /medco/node/explore/search/concept
-	api.MedcoNodeExploreSearchConceptHandler = medco_node.ExploreSearchConceptHandlerFunc(handlers.MedCoNodeExploreSearchConceptHandler)
+	// /medco/node/explore/search/concept-children
+	api.MedcoNodeExploreSearchConceptChildrenHandler = medco_node.ExploreSearchConceptChildrenHandlerFunc(handlers.MedCoNodeExploreSearchConceptChildrenHandler)
 
-	// /medco/node/explore/search/modifier
-	api.MedcoNodeExploreSearchModifierHandler = medco_node.ExploreSearchModifierHandlerFunc(handlers.MedCoNodeExploreSearchModifierHandler)
+	// /medco/node/explore/search/modifier-children
+	api.MedcoNodeExploreSearchModifierChildrenHandler = medco_node.ExploreSearchModifierChildrenHandlerFunc(handlers.MedCoNodeExploreSearchModifierChildrenHandler)
+
+	// /medco/node/explore/search/concept-info
+	api.MedcoNodeExploreSearchConceptInfoHandler = medco_node.ExploreSearchConceptInfoHandlerFunc(handlers.MedCoNodeExploreSearchConceptInfoHandler)
+
+	// /medco/node/explore/search/modifier-info
+	api.MedcoNodeExploreSearchModifierInfoHandler = medco_node.ExploreSearchModifierInfoHandlerFunc(handlers.MedCoNodeExploreSearchModifierInfoHandler)
 
 	// /medco/node/explore/query
 	api.MedcoNodeExploreQueryHandler = medco_node.ExploreQueryHandlerFunc(handlers.MedCoNodeExploreQueryHandler)

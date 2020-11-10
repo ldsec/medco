@@ -23,6 +23,64 @@ searchModifierChildren="/E2ETEST/modifiers/ /e2etest/% /E2ETEST/e2etest/1/"
 resultSearchModifierChildren="PATH  TYPE
                               /E2ETEST/modifiers/1/ modifier"
 
+searchConceptInfo="/E2ETEST/e2etest/1/"
+resultSearchConceptInfo="  <ExploreSearchResultElement>
+      <Code>ENC_ID:1</Code>
+      <DisplayName>E2E Concept 1</DisplayName>
+      <Leaf>true</Leaf>
+      <MedcoEncryption>
+          <Encrypted>true</Encrypted>
+          <ID>1</ID>
+      </MedcoEncryption>
+      <Metadata>
+          <ValueMetadata>
+              <ChildrenEncryptIDs></ChildrenEncryptIDs>
+              <CreationDateTime></CreationDateTime>
+              <DataType></DataType>
+              <EncryptedType></EncryptedType>
+              <EnumValues></EnumValues>
+              <Flagstouse></Flagstouse>
+              <NodeEncryptID></NodeEncryptID>
+              <Oktousevalues></Oktousevalues>
+              <TestID></TestID>
+              <TestName></TestName>
+              <Version></Version>
+          </ValueMetadata>
+      </Metadata>
+      <Name>E2E Concept 1</Name>
+      <Path>/E2ETEST/e2etest/1/</Path>
+      <Type>concept</Type>
+  </ExploreSearchResultElement>"
+
+searchModifierInfo="/E2ETEST/modifiers/1/ /e2etest/1/"
+resultSearchModifierInfo="<ExploreSearchResultElement>
+      <Code>ENC_ID:5</Code>
+      <DisplayName>E2E Modifier 1</DisplayName>
+      <Leaf>true</Leaf>
+      <MedcoEncryption>
+          <Encrypted>true</Encrypted>
+          <ID>5</ID>
+      </MedcoEncryption>
+      <Metadata>
+          <ValueMetadata>
+              <ChildrenEncryptIDs></ChildrenEncryptIDs>
+              <CreationDateTime></CreationDateTime>
+              <DataType></DataType>
+              <EncryptedType></EncryptedType>
+              <EnumValues></EnumValues>
+              <Flagstouse></Flagstouse>
+              <NodeEncryptID></NodeEncryptID>
+              <Oktousevalues></Oktousevalues>
+              <TestID></TestID>
+              <TestName></TestName>
+              <Version></Version>
+          </ValueMetadata>
+      </Metadata>
+      <Name>E2E Modifier 1</Name>
+      <Path>/E2ETEST/modifiers/1/</Path>
+      <Type>modifier</Type>
+  </ExploreSearchResultElement>"
+
 # test 2
 query1="enc::1 OR enc::2 AND enc::3"
 resultQuery1="$(printf -- "count\n1\n1\n1")"
@@ -195,6 +253,14 @@ test1 "concept-children" "${searchConceptChildren2}" "${resultSearchConceptChild
 echo "Testing modifier-children..."
 
 test1 "modifier-children" "${searchModifierChildren}" "${resultSearchModifierChildren}"
+
+echo "Testing concept-info..."
+
+test1 "concept-info" "${searchConceptInfo}" "${resultSearchConceptInfo}"
+
+echo "Testing modifier-info..."
+
+test1 "modifier-info" "${searchModifierInfo}" "${resultSearchModifierInfo}"
 
 echo "Testing query..."
 USERNAME="${1:-test}_explore_patient_list"

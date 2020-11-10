@@ -45,33 +45,65 @@ paths:
       security:
         - medco-jwt: ["medco-network"]
 
-  /node/explore/search/concept:
+  /node/explore/search/concept-children:
     post:
       tags:
         - "medco-node"
-      summary: "Returns the children (concepts and modifiers) of a concept"
-      operationId: "exploreSearchConcept"
+      summary: "Returns the concept children (both concepts and modifiers)"
+      operationId: "exploreSearchConceptChildren"
       parameters:
-        - $ref: "#/parameters/exploreSearchConceptRequest"
+        - $ref: "#/parameters/exploreSearchConceptChildrenRequest"
       responses:
         200:
-          $ref: "#/responses/exploreSearchConceptResponse"
+          $ref: "#/responses/exploreSearchConceptChildrenResponse"
         default:
           $ref: "#/responses/errorResponse"
       security:
         - medco-jwt: [ "medco-explore" ]
 
-  /node/explore/search/modifier:
+  /node/explore/search/modifier-children:
     post:
       tags:
         - "medco-node"
-      summary: "Returns the children of a modifier"
-      operationId: "exploreSearchModifier"
+      summary: "Returns the modifier children"
+      operationId: "exploreSearchModifierChildren"
       parameters:
-        - $ref: "#/parameters/exploreSearchModifierRequest"
+        - $ref: "#/parameters/exploreSearchModifierChildrenRequest"
       responses:
         200:
-          $ref: "#/responses/exploreSearchModifierResponse"
+          $ref: "#/responses/exploreSearchModifierChildrenResponse"
+        default:
+          $ref: "#/responses/errorResponse"
+      security:
+        - medco-jwt: [ "medco-explore" ]
+
+  /node/explore/search/concept-info:
+    post:
+      tags:
+        - "medco-node"
+      summary: "Returns the concept info"
+      operationId: "exploreSearchConceptInfo"
+      parameters:
+        - $ref: "#/parameters/exploreSearchConceptInfoRequest"
+      responses:
+        200:
+          $ref: "#/responses/exploreSearchConceptInfoResponse"
+        default:
+          $ref: "#/responses/errorResponse"
+      security:
+        - medco-jwt: [ "medco-explore" ]
+
+  /node/explore/search/modifier-info:
+    post:
+      tags:
+        - "medco-node"
+      summary: "Returns the modifier info"
+      operationId: "exploreSearchModifierInfo"
+      parameters:
+        - $ref: "#/parameters/exploreSearchModifierInfoRequest"
+      responses:
+        200:
+          $ref: "#/responses/exploreSearchModifierInfoResponse"
         default:
           $ref: "#/responses/errorResponse"
       security:
@@ -336,21 +368,37 @@ securityDefinitions:
     description: "MedCo JWT token."
 
 parameters:
-  exploreSearchConceptRequest:
+  exploreSearchConceptChildrenRequest:
     in: "body"
-    name: "searchConceptRequest"
-    description: "MedCo-Explore ontology search concept request."
+    name: "searchConceptChildrenRequest"
+    description: "MedCo-Explore ontology search concept children request."
     required: true
     schema:
-      $ref: "#/definitions/exploreSearchConcept"
+      $ref: "#/definitions/exploreSearchConceptChildren"
 
-  exploreSearchModifierRequest:
+  exploreSearchModifierChildrenRequest:
     in: "body"
-    name: "searchModifierRequest"
-    description: "MedCo-Explore ontology search modifier request."
+    name: "searchModifierChildrenRequest"
+    description: "MedCo-Explore ontology search modifier children request."
     required: true
     schema:
-      $ref: "#/definitions/exploreSearchModifier"
+      $ref: "#/definitions/exploreSearchModifierChildren"
+
+  exploreSearchConceptInfoRequest:
+    in: "body"
+    name: "searchConceptInfoRequest"
+    description: "MedCo-Explore ontology search concept info request."
+    required: true
+    schema:
+      $ref: "#/definitions/exploreSearchConceptInfo"
+
+  exploreSearchModifierInfoRequest:
+    in: "body"
+    name: "searchModifierInfoRequest"
+    description: "MedCo-Explore ontology search modifier info request."
+    required: true
+    schema:
+      $ref: "#/definitions/exploreSearchModifierInfo"
 
   exploreQueryRequest:
     in: "body"
@@ -365,6 +413,7 @@ parameters:
           pattern: '^[\w:-]+$'
         query:
           $ref: "#/definitions/exploreQuery"
+
   cohortsRequest:
     in: "body"
     description: "Cohort that has been updated or created"
@@ -503,25 +552,49 @@ responses:
         nodeIndex:
           type: "integer"
 
-  exploreSearchConceptResponse:
-    description: "MedCo-Explore search concept query response."
+  exploreSearchConceptChildrenResponse:
+    description: "MedCo-Explore search concept children query response."
     schema:
       type: "object"
       properties:
         search:
-          $ref: "#/definitions/exploreSearchConcept"
+          $ref: "#/definitions/exploreSearchConceptChildren"
         results:
           type: "array"
           items:
             $ref: "#/definitions/exploreSearchResultElement"
 
-  exploreSearchModifierResponse:
-    description: "MedCo-Explore search modifier query response."
+  exploreSearchModifierChildrenResponse:
+    description: "MedCo-Explore search modifier children query response."
     schema:
       type: "object"
       properties:
         search:
-          $ref: "#/definitions/exploreSearchModifier"
+          $ref: "#/definitions/exploreSearchModifierChildren"
+        results:
+          type: "array"
+          items:
+            $ref: "#/definitions/exploreSearchResultElement"
+
+  exploreSearchConceptInfoResponse:
+    description: "MedCo-Explore search concept info query response."
+    schema:
+      type: "object"
+      properties:
+        search:
+          $ref: "#/definitions/exploreSearchConceptInfo"
+        results:
+          type: "array"
+          items:
+            $ref: "#/definitions/exploreSearchResultElement"
+
+  exploreSearchModifierInfoResponse:
+    description: "MedCo-Explore search modifier info query response."
+    schema:
+      type: "object"
+      properties:
+        search:
+          $ref: "#/definitions/exploreSearchModifierInfo"
         results:
           type: "array"
           items:
@@ -589,16 +662,16 @@ responses:
           $ref: "#/definitions/timers"
 
 definitions:
-  exploreSearchConcept:
+  exploreSearchConceptChildren:
     type: "object"
     required:
       - path
     properties:
       path:
         type: "string"
-        pattern: '^\/$|^((\/[^\/]+)+\/?)$'
+        pattern: '^\/$|^((\/[^\/]+)+\/)$'
 
-  exploreSearchModifier:
+  exploreSearchModifierChildren:
     type: "object"
     required:
       - path
@@ -607,13 +680,35 @@ definitions:
     properties:
       path:
         type: "string"
-        pattern: '^\/$|^((\/[^\/]+)+\/?)$'
+        pattern: '^\/$|^((\/[^\/]+)+\/)$'
       appliedPath:
         type: "string"
-        pattern: '^\/$|^((\/[^\/]+)+\/?)$'
+        pattern: '^\/$|^((\/[^\/]+)+\/%?)$'
       appliedConcept:
         type: "string"
-        pattern: '^\/$|^((\/[^\/]+)+\/?)$'
+        pattern: '^\/$|^((\/[^\/]+)+\/)$'
+
+  exploreSearchConceptInfo:
+    type: "object"
+    required:
+      - path
+    properties:
+      path:
+        type: "string"
+        pattern: '^\/$|^((\/[^\/]+)+\/)$'
+
+  exploreSearchModifierInfo:
+    type: "object"
+    required:
+      - path
+      - appliedPath
+    properties:
+      path:
+        type: "string"
+        pattern: '^\/$|^((\/[^\/]+)+\/)$'
+      appliedPath:
+        type: "string"
+        pattern: '^\/$|^((\/[^\/]+)+\/%?)$'
 
   exploreSearchResultElement:
     type: "object"
@@ -656,7 +751,61 @@ definitions:
               type: "integer"
               format: "int64"
       metadata:
-        type: "object"
+        $ref: "#/definitions/metadataxml"
+
+  metadataxml:
+    type: "object"
+    properties:
+      ValueMetadata:
+        type: object
+        properties:
+          Version:
+            type: "string"
+          CreationDateTime:
+            type: "string"
+          TestID:
+            type: "string"
+          TestName:
+            type: "string"
+          DataType:
+            type: "string"
+          Flagstouse:
+            type: "string"
+          Oktousevalues:
+            type: "string"
+          EnumValues:
+            type: "string"
+          UnitValues:
+            $ref: "#/definitions/UnitValues"
+          EncryptedType:
+            type: "string"
+          NodeEncryptID:
+            type: "string"
+          ChildrenEncryptIDs:
+            type: "string"
+
+  UnitValues:
+    type: object
+    properties:
+      NormalUnits:
+        type: "string"
+      EqualUnits:
+        type: "array"
+        items:
+          type: "string"
+      ExcludingUnits:
+        type: "array"
+        items:
+          type: "string"
+      ConvertingUnits:
+        type: "array"
+        items:
+         type: "object"
+         properties:
+           Units:
+             type: "string"
+           MultiplyingFactor:
+             type: "string"
 
   exploreQuery:
     description: "MedCo-Explore query"
@@ -688,16 +837,11 @@ definitions:
             queryTerm:
               type: "string"
               pattern: '^([\w=-]+)$|^((\/[^\/]+)+\/)$'
-            operator:
-              type: "string"
-              enum:
-                - exists
-                - equals
-            value:
-              type: "string"
-              maxLength: 0
+            constrainByValue:
+              $ref: "#/definitions/constrainByValue"
             modifier:
               type: "object"
+              required: [appliedPath, modifierKey]
               properties:
                 appliedPath:
                   type: "string"
@@ -705,10 +849,40 @@ definitions:
                 modifierKey:
                   type: "string"
                   pattern: '^((\/[^\/]+)+\/)$'
+                constrainByValue:
+                  $ref: "#/definitions/constrainByValue"
             encrypted:
               type: "boolean"
       panelTiming:
         $ref: "#/definitions/timing"
+
+  constrainByValue:
+    type: "object"
+    required: [operator, value]
+    properties:
+      operator:
+        type: "string"
+        enum:
+          - EQ
+          - NE
+          - GT
+          - GE
+          - LT
+          - LE
+          - IN
+          - BETWEEN
+        description: >
+          EQ: equals
+          NE: not equals
+          GT: greater than
+          GE: greater than or equal
+          LT: less than
+          LE: less than or equal
+          IN: contained in
+          BETWEEN: between
+      value:
+        type: "string"
+
 
   exploreQueryType:
     type: "string"

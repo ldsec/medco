@@ -12,29 +12,29 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// ExploreSearchModifier explore search modifier
+// ExploreSearchModifierChildren explore search modifier children
 //
-// swagger:model exploreSearchModifier
-type ExploreSearchModifier struct {
+// swagger:model exploreSearchModifierChildren
+type ExploreSearchModifierChildren struct {
 
 	// applied concept
 	// Required: true
-	// Pattern: ^\/$|^((\/[^\/]+)+\/?)$
+	// Pattern: ^\/$|^((\/[^\/]+)+\/)$
 	AppliedConcept *string `json:"appliedConcept"`
 
 	// applied path
 	// Required: true
-	// Pattern: ^\/$|^((\/[^\/]+)+\/?)$
+	// Pattern: ^\/$|^((\/[^\/]+)+\/%?)$
 	AppliedPath *string `json:"appliedPath"`
 
 	// path
 	// Required: true
-	// Pattern: ^\/$|^((\/[^\/]+)+\/?)$
+	// Pattern: ^\/$|^((\/[^\/]+)+\/)$
 	Path *string `json:"path"`
 }
 
-// Validate validates this explore search modifier
-func (m *ExploreSearchModifier) Validate(formats strfmt.Registry) error {
+// Validate validates this explore search modifier children
+func (m *ExploreSearchModifierChildren) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAppliedConcept(formats); err != nil {
@@ -55,39 +55,39 @@ func (m *ExploreSearchModifier) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *ExploreSearchModifier) validateAppliedConcept(formats strfmt.Registry) error {
+func (m *ExploreSearchModifierChildren) validateAppliedConcept(formats strfmt.Registry) error {
 
 	if err := validate.Required("appliedConcept", "body", m.AppliedConcept); err != nil {
 		return err
 	}
 
-	if err := validate.Pattern("appliedConcept", "body", string(*m.AppliedConcept), `^\/$|^((\/[^\/]+)+\/?)$`); err != nil {
+	if err := validate.Pattern("appliedConcept", "body", string(*m.AppliedConcept), `^\/$|^((\/[^\/]+)+\/)$`); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (m *ExploreSearchModifier) validateAppliedPath(formats strfmt.Registry) error {
+func (m *ExploreSearchModifierChildren) validateAppliedPath(formats strfmt.Registry) error {
 
 	if err := validate.Required("appliedPath", "body", m.AppliedPath); err != nil {
 		return err
 	}
 
-	if err := validate.Pattern("appliedPath", "body", string(*m.AppliedPath), `^\/$|^((\/[^\/]+)+\/?)$`); err != nil {
+	if err := validate.Pattern("appliedPath", "body", string(*m.AppliedPath), `^\/$|^((\/[^\/]+)+\/%?)$`); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (m *ExploreSearchModifier) validatePath(formats strfmt.Registry) error {
+func (m *ExploreSearchModifierChildren) validatePath(formats strfmt.Registry) error {
 
 	if err := validate.Required("path", "body", m.Path); err != nil {
 		return err
 	}
 
-	if err := validate.Pattern("path", "body", string(*m.Path), `^\/$|^((\/[^\/]+)+\/?)$`); err != nil {
+	if err := validate.Pattern("path", "body", string(*m.Path), `^\/$|^((\/[^\/]+)+\/)$`); err != nil {
 		return err
 	}
 
@@ -95,7 +95,7 @@ func (m *ExploreSearchModifier) validatePath(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (m *ExploreSearchModifier) MarshalBinary() ([]byte, error) {
+func (m *ExploreSearchModifierChildren) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -103,8 +103,8 @@ func (m *ExploreSearchModifier) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *ExploreSearchModifier) UnmarshalBinary(b []byte) error {
-	var res ExploreSearchModifier
+func (m *ExploreSearchModifierChildren) UnmarshalBinary(b []byte) error {
+	var res ExploreSearchModifierChildren
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

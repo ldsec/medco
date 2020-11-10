@@ -12,19 +12,19 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// ExploreSearchConcept explore search concept
+// ExploreSearchConceptChildren explore search concept children
 //
-// swagger:model exploreSearchConcept
-type ExploreSearchConcept struct {
+// swagger:model exploreSearchConceptChildren
+type ExploreSearchConceptChildren struct {
 
 	// path
 	// Required: true
-	// Pattern: ^\/$|^((\/[^\/]+)+\/?)$
+	// Pattern: ^\/$|^((\/[^\/]+)+\/)$
 	Path *string `json:"path"`
 }
 
-// Validate validates this explore search concept
-func (m *ExploreSearchConcept) Validate(formats strfmt.Registry) error {
+// Validate validates this explore search concept children
+func (m *ExploreSearchConceptChildren) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validatePath(formats); err != nil {
@@ -37,13 +37,13 @@ func (m *ExploreSearchConcept) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *ExploreSearchConcept) validatePath(formats strfmt.Registry) error {
+func (m *ExploreSearchConceptChildren) validatePath(formats strfmt.Registry) error {
 
 	if err := validate.Required("path", "body", m.Path); err != nil {
 		return err
 	}
 
-	if err := validate.Pattern("path", "body", string(*m.Path), `^\/$|^((\/[^\/]+)+\/?)$`); err != nil {
+	if err := validate.Pattern("path", "body", string(*m.Path), `^\/$|^((\/[^\/]+)+\/)$`); err != nil {
 		return err
 	}
 
@@ -51,7 +51,7 @@ func (m *ExploreSearchConcept) validatePath(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (m *ExploreSearchConcept) MarshalBinary() ([]byte, error) {
+func (m *ExploreSearchConceptChildren) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -59,8 +59,8 @@ func (m *ExploreSearchConcept) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *ExploreSearchConcept) UnmarshalBinary(b []byte) error {
-	var res ExploreSearchConcept
+func (m *ExploreSearchConceptChildren) UnmarshalBinary(b []byte) error {
+	var res ExploreSearchConceptChildren
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

@@ -16,46 +16,46 @@ import (
 	"github.com/ldsec/medco/connector/restapi/models"
 )
 
-// NewExploreSearchModifierParams creates a new ExploreSearchModifierParams object
+// NewExploreSearchModifierChildrenParams creates a new ExploreSearchModifierChildrenParams object
 // no default values defined in spec.
-func NewExploreSearchModifierParams() ExploreSearchModifierParams {
+func NewExploreSearchModifierChildrenParams() ExploreSearchModifierChildrenParams {
 
-	return ExploreSearchModifierParams{}
+	return ExploreSearchModifierChildrenParams{}
 }
 
-// ExploreSearchModifierParams contains all the bound params for the explore search modifier operation
+// ExploreSearchModifierChildrenParams contains all the bound params for the explore search modifier children operation
 // typically these are obtained from a http.Request
 //
-// swagger:parameters exploreSearchModifier
-type ExploreSearchModifierParams struct {
+// swagger:parameters exploreSearchModifierChildren
+type ExploreSearchModifierChildrenParams struct {
 
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
 
-	/*MedCo-Explore ontology search modifier request.
+	/*MedCo-Explore ontology search modifier children request.
 	  Required: true
 	  In: body
 	*/
-	SearchModifierRequest *models.ExploreSearchModifier
+	SearchModifierChildrenRequest *models.ExploreSearchModifierChildren
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
 // for simple values it will use straight method calls.
 //
-// To ensure default values, the struct must have been initialized with NewExploreSearchModifierParams() beforehand.
-func (o *ExploreSearchModifierParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
+// To ensure default values, the struct must have been initialized with NewExploreSearchModifierChildrenParams() beforehand.
+func (o *ExploreSearchModifierChildrenParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
 
 	o.HTTPRequest = r
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body models.ExploreSearchModifier
+		var body models.ExploreSearchModifierChildren
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
-				res = append(res, errors.Required("searchModifierRequest", "body", ""))
+				res = append(res, errors.Required("searchModifierChildrenRequest", "body", ""))
 			} else {
-				res = append(res, errors.NewParseError("searchModifierRequest", "body", "", err))
+				res = append(res, errors.NewParseError("searchModifierChildrenRequest", "body", "", err))
 			}
 		} else {
 			// validate body object
@@ -64,11 +64,11 @@ func (o *ExploreSearchModifierParams) BindRequest(r *http.Request, route *middle
 			}
 
 			if len(res) == 0 {
-				o.SearchModifierRequest = &body
+				o.SearchModifierChildrenRequest = &body
 			}
 		}
 	} else {
-		res = append(res, errors.Required("searchModifierRequest", "body", ""))
+		res = append(res, errors.Required("searchModifierChildrenRequest", "body", ""))
 	}
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
