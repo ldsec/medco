@@ -211,7 +211,6 @@ func main() {
 					c.GlobalString("token"),
 					c.GlobalString("user"),
 					c.GlobalString("password"),
-					c.Args().First(),
 					strings.Join(c.Args().Tail(), " "),
 					c.GlobalString("outputFile"),
 					c.GlobalBool("disableTLSCheck"),

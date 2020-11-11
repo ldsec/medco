@@ -37,11 +37,10 @@ type ExploreQuery struct {
 }
 
 // NewExploreQuery creates a new MedCo client query
-func NewExploreQuery(authToken string, queryType models.ExploreQueryType, panels []*models.Panel, disableTLSCheck bool) (q *ExploreQuery, err error) {
+func NewExploreQuery(authToken string, panels []*models.Panel, disableTLSCheck bool) (q *ExploreQuery, err error) {
 
 	q = &ExploreQuery{
 		authToken: authToken,
-		queryType: queryType,
 		panels:    panels,
 	}
 

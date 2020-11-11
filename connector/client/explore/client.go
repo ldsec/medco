@@ -3,7 +3,6 @@ package exploreclient
 import (
 	"fmt"
 	medcoclient "github.com/ldsec/medco/connector/client"
-	"github.com/ldsec/medco/connector/restapi/models"
 	utilclient "github.com/ldsec/medco/connector/util/client"
 	"github.com/ldsec/medco/connector/wrappers/unlynx"
 	"github.com/sirupsen/logrus"
@@ -15,20 +14,12 @@ import (
 
 // ExecuteClientQuery executes and displays the result of the MedCo client query
 // endpoint on the server: /node/explore/query
-func ExecuteClientQuery(token, username, password, queryType, queryString, resultOutputFilePath string, disableTLSCheck bool) (err error) {
+func ExecuteClientQuery(token, username, password, queryString, resultOutputFilePath string, disableTLSCheck bool) (err error) {
 
 	// get token
 	accessToken, err := utilclient.RetrieveOrGetNewAccessToken(token, username, password, disableTLSCheck)
 	if err != nil {
 		return err
-	}
-
-	// parse query type
-	queryTypeParsed := models.ExploreQueryType(queryType)
-	err = queryTypeParsed.Validate(nil)
-	if err != nil {
-		logrus.Error("invalid query type")
-		return
 	}
 
 	// parse query string
@@ -55,7 +46,7 @@ func ExecuteClientQuery(token, username, password, queryType, queryString, resul
 	}
 
 	// execute query
-	clientQuery, err := NewExploreQuery(accessToken, queryTypeParsed, panels, disableTLSCheck)
+	clientQuery, err := NewExploreQuery(accessToken, panels, disableTLSCheck)
 	if err != nil {
 		return
 	}
