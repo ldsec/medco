@@ -81,7 +81,7 @@ func ParseQueryString(queryString string) (panels []*models.Panel, err error) {
 }
 
 // parseQueryItem parses a string into an item
-// queryItem is composed of two fields, the type field and the content field, separated by "::"
+// queryItem is composed of one field, the content field, separated by "::"
 // possible values of the type field are: "enc", "clr", "file"
 // when the type field is equal to "enc", the content field contains the concept ID
 // when the type field is equal to "clr", the content field contains the concept path

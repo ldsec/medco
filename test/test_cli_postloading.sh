@@ -64,14 +64,16 @@ test2 () {
 
 pushd deployments/dev-local-3nodes/
 echo "Testing query with genomic data..."
+USERNAME="${USERNAME}_explore_patient_list"
 
-test1 "query patient_list" "${query1}" "${resultQuery1}"
-test1 "query patient_list" "${query2}" "${resultQuery2}"
-test1 "query patient_list" "${query3}" "${resultQuery3}"
-test1 "query patient_list" "${query4}" "${resultQuery4}"
-test1 "query patient_list" "${query5}" "${resultQuery5}"
+test1 "query " "${query1}" "${resultQuery1}"
+test1 "query " "${query2}" "${resultQuery2}"
+test1 "query " "${query3}" "${resultQuery3}"
+test1 "query " "${query4}" "${resultQuery4}"
+test1 "query " "${query5}" "${resultQuery5}"
 
 echo "Testing ga-get-values..."
+USERNAME=${1:-test}
 
 test2 "ga-get-values variant_name" "${variantNameGetValuesValue}" "${variantNameGetValuesResult}"
 test2 "ga-get-values protein_change" "${proteinChangeGetValuesValue}" "${proteinChangeGetValuesResult}"

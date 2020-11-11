@@ -186,14 +186,16 @@ echo "Testing modifier-children..."
 test1 "modifier-children" "${searchModifierChildren}" "${resultSearchModifierChildren}"
 
 echo "Testing query..."
+USERNAME="${USERNAME}_explore_patient_list"
 
-test2 "query patient_list" "${query1}" "${resultQuery1}"
-test2 "query patient_list" "${query2}" "${resultQuery2}"
-test2 "query patient_list" "${query3}" "${resultQuery3}"
-test2 "query patient_list" "${query4}" "${resultQuery4}"
-test2 "query patient_list" "${query5}" "${resultQuery5}"
+test2 "query " "${query1}" "${resultQuery1}"
+test2 "query " "${query2}" "${resultQuery2}"
+test2 "query " "${query3}" "${resultQuery3}"
+test2 "query " "${query4}" "${resultQuery4}"
+test2 "query " "${query5}" "${resultQuery5}"
 
 echo "Testing saved-cohorts features..."
+USERNAME=${1:-test}
 
 test3
 

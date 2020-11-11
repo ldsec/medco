@@ -159,6 +159,7 @@ func AuthorizeRestAPIEndpoint(user *models.User, requiredAuthorization models.Re
 // FetchAuthorizedExploreQueryType returns the highest permission query type for a given user
 func FetchAuthorizedExploreQueryType(user *models.User) (maxAuthorizedQuery models.ExploreQueryType, err error) {
 	maxPermissionLevel := int64(0)
+
 	for _, userQueryType := range user.Authorizations.ExploreQuery {
 		if ExploreQueryPermissionLevel[userQueryType] > maxPermissionLevel {
 			maxPermissionLevel = ExploreQueryPermissionLevel[userQueryType]
@@ -166,12 +167,11 @@ func FetchAuthorizedExploreQueryType(user *models.User) (maxAuthorizedQuery mode
 		}
 	}
 
-	if maxAuthorizedQuery == "" && maxPermissionLevel > 0 {
+	if maxAuthorizedQuery != "" && maxPermissionLevel > 0 {
 		logrus.Info("user is authorized to execute the query type " + maxAuthorizedQuery)
 		return maxAuthorizedQuery, nil
 	}
 
 	err = errors.New("user is not authorized to execute the query")
-	logrus.Warn(err)
 	return
 }
