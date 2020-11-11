@@ -30,8 +30,6 @@ type ExploreQuery struct {
 	// userPrivateKey is the user private key
 	userPrivateKey string
 
-	// queryType is the type of explore query requested
-	queryType models.ExploreQueryType
 	// panels contains the panels of the query
 	panels []*models.Panel
 }
@@ -169,7 +167,6 @@ func (clientQuery *ExploreQuery) generateModel() (queryModel *models.ExploreQuer
 
 	// query model
 	queryModel = &models.ExploreQuery{
-		Type:          clientQuery.queryType,
 		UserPublicKey: clientQuery.userPublicKey,
 		Panels:        clientQuery.panels,
 	}

@@ -69,9 +69,6 @@ func MedCoNodeExploreQueryHandler(params medco_node.ExploreQueryParams, principa
 		})
 	}
 
-	// update query type from user token
-	params.QueryRequest.Query.Type = authorizedQueryType
-
 	// create query
 	query, err := medcoserver.NewExploreQuery(params.QueryRequest.ID, params.QueryRequest.Query, principal)
 	if err != nil {
