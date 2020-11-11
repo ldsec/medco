@@ -77,7 +77,6 @@ type exploreQueryRequest struct {
 }
 
 type exploreQuery struct {
-	Type    string  `json:"type"`
 	UserPub string  `json:"userPublicKey"`
 	Panels  []panel `json:"panels"`
 }
@@ -102,7 +101,7 @@ type teqTests struct {
 func eqValid() exploreQueryRequest {
 	return exploreQueryRequest{
 		"id", exploreQuery{
-			"patient_list", "userPub", []panel{
+			"userPub", []panel{
 				{false, []item{
 					{"queryTerm", "exists", "", false},
 				}},
@@ -112,24 +111,23 @@ func eqValid() exploreQueryRequest {
 
 func TestExploreQuery(t *testing.T) {
 	tests := []teqTests{{true, eqValid()}}
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 9; i++ {
 		tests = append(tests, teqTests{false, eqValid()})
 	}
 	tests[1].query.ID = "123@"
 	tests[2].query.Query.UserPub = "123@"
-	tests[3].query.Query.Type = "non-enum"
-	tests[4].query.Query.Panels[0].Items[0].Value = "something"
-	tests[5].query.Query.Panels[0].Items[0].Operator = "non-enum"
-	tests[6].query.Query.Panels[0].Items[0].QueryTerm = "word@"
-	tests[7].query.Query.Panels[0].Items[0].QueryTerm = "abc/def"
-	tests[8].query.Query.Panels[0].Items[0].QueryTerm = "abc/def/"
-	tests[9].query.Query.Panels[0].Items[0].QueryTerm = "/abc/def//"
-	tests[10].query.Query.Panels[0].Items[0].QueryTerm = "/abc/def"
+	tests[3].query.Query.Panels[0].Items[0].Value = "something"
+	tests[4].query.Query.Panels[0].Items[0].Operator = "non-enum"
+	tests[5].query.Query.Panels[0].Items[0].QueryTerm = "word@"
+	tests[6].query.Query.Panels[0].Items[0].QueryTerm = "abc/def"
+	tests[7].query.Query.Panels[0].Items[0].QueryTerm = "abc/def/"
+	tests[8].query.Query.Panels[0].Items[0].QueryTerm = "/abc/def//"
+	tests[9].query.Query.Panels[0].Items[0].QueryTerm = "/abc/def"
 	for i := 0; i < 2; i++ {
 		tests = append(tests, teqTests{true, eqValid()})
 	}
-	tests[11].query.Query.Panels[0].Items[0].QueryTerm = "word=-word"
-	tests[12].query.Query.Panels[0].Items[0].QueryTerm = "/abc123@/def123@/"
+	tests[10].query.Query.Panels[0].Items[0].QueryTerm = "word=-word"
+	tests[11].query.Query.Panels[0].Items[0].QueryTerm = "/abc123@/def123@/"
 
 	for _, test := range tests {
 		body, err := json.Marshal(test.query)
