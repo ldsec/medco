@@ -7,7 +7,7 @@ PASSWORD=${2:-test}
 # test1
 query1="enc::1 AND enc::2"
 resultQuery1a="$(printf -- "count\n8\n8\n8")"
-resultQuery1b="$(printf -- "count\n16\n16\n16")"
+resultQuery1b="$(printf -- "count\n24\n24\n24")"
 query2="enc::6 OR enc::16 AND enc::8"
 resultQuery2="$(printf -- "count\n5\n5\n5")"
 query3="enc::5 AND enc::10 AND enc::15"
