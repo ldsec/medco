@@ -39,7 +39,8 @@ resultQuery4="$(printf -- "count\n1\n1\n1")"
 echo "enc::1
 enc::2" > deployments/query_file.txt
 query5="enc::3 AND file::/data/query_file.txt"
-resultQuery5="$(printf -- "count\n1\n1\n1")"
+resultQuery5a="$(printf -- "count\n1\n1\n1")"
+resultQuery5b="$(printf -- "count\n3\n3\n3")"
 
 # test3
 getSavedCohortHeaders="node_index,cohort_name,cohort_id,query_id,creation_date,update_date"
@@ -81,6 +82,16 @@ test2 () {
 }
 
 test3 () {
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv $1 $2
+  result="$(awk -F "\"*,\"*" '{print $2}' ../result.csv)"
+  if [ "${result}" == "${3}" ];
+  then
+  echo "$1 $2: WARNING - result is the same"
+  echo "result: ${result}" && echo "expected result: ${3}"
+  fi
+}
+
+test4 () {
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv get-saved-cohorts
   result="$(awk -F',' 'NR==1{print $0}' ../result.csv)"
   if [ "${result}" != "${getSavedCohortHeaders}" ];
@@ -131,7 +142,7 @@ test3 () {
 
 }
 
-test4 () {
+test5 () {
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD -o /data/result.csv srva  -c testCohort -l 6 -g ${1}  -s /SPHN/SPHNv2020.1/FophDiagnosis/ -e /SPHN/SPHNv2020.1/DeathStatus/ -y 126:1 -d /data/timers.csv
   
   result="$(awk -F',' 'NR==1{print $0}' ../timers.csv)"
@@ -152,7 +163,7 @@ test4 () {
 
 }
 
-test5 () {
+test6 () {
   docker-compose -f docker-compose.tools.yml run \
     -v "${PWD}/../../test/survival_test_parameters.yaml":/parameters/survival_test_parameters.yaml \
     medco-cli-client --user $USERNAME --password $PASSWORD -o /data/result.csv srva -d /data/timers.csv \
@@ -186,23 +197,31 @@ echo "Testing modifier-children..."
 test1 "modifier-children" "${searchModifierChildren}" "${resultSearchModifierChildren}"
 
 echo "Testing query..."
+USERNAME="${1:-test}_explore_patient_list"
 
-test2 "query patient_list" "${query1}" "${resultQuery1}"
-test2 "query patient_list" "${query2}" "${resultQuery2}"
-test2 "query patient_list" "${query3}" "${resultQuery3}"
-test2 "query patient_list" "${query4}" "${resultQuery4}"
-test2 "query patient_list" "${query5}" "${resultQuery5}"
+test2 "query " "${query1}" "${resultQuery1}"
+test2 "query " "${query2}" "${resultQuery2}"
+test2 "query " "${query3}" "${resultQuery3}"
+test2 "query " "${query4}" "${resultQuery4}"
+test2 "query " "${query5}" "${resultQuery5a}"
+
+USERNAME="${1:-test}_explore_count_global"
+test2 "query " "${query5}" "${resultQuery5b}"
+
+USERNAME="${1:-test}_explore_count_global_obfuscated"
+test3 "query " "${query5}" "${resultQuery5b}"
 
 echo "Testing saved-cohorts features..."
+USERNAME=${1:-test}
 
-test3
+test4
 
-test4 "day" "${survivalDays}"
-test4 "week" "${survivalWeeks}"
-test4 "month" "${survivalMonths}"
-test4 "year" "${survivalYears}"
+test5 "day" "${survivalDays}"
+test5 "week" "${survivalWeeks}"
+test5 "month" "${survivalMonths}"
+test5 "year" "${survivalYears}"
 
-test5 "${survivalSubGroup1}" "${survivalSubGroup2}"
+test6 "${survivalSubGroup1}" "${survivalSubGroup2}"
 
 echo "CLI test 1/2 successful!"
 popd

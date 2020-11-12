@@ -30,18 +30,15 @@ type ExploreQuery struct {
 	// userPrivateKey is the user private key
 	userPrivateKey string
 
-	// queryType is the type of explore query requested
-	queryType models.ExploreQueryType
 	// panels contains the panels of the query
 	panels []*models.Panel
 }
 
 // NewExploreQuery creates a new MedCo client query
-func NewExploreQuery(authToken string, queryType models.ExploreQueryType, panels []*models.Panel, disableTLSCheck bool) (q *ExploreQuery, err error) {
+func NewExploreQuery(authToken string, panels []*models.Panel, disableTLSCheck bool) (q *ExploreQuery, err error) {
 
 	q = &ExploreQuery{
 		authToken: authToken,
-		queryType: queryType,
 		panels:    panels,
 	}
 
@@ -170,7 +167,6 @@ func (clientQuery *ExploreQuery) generateModel() (queryModel *models.ExploreQuer
 
 	// query model
 	queryModel = &models.ExploreQuery{
-		Type:          clientQuery.queryType,
 		UserPublicKey: clientQuery.userPublicKey,
 		Panels:        clientQuery.panels,
 	}

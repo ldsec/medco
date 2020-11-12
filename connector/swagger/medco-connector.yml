@@ -659,8 +659,6 @@ definitions:
   exploreQuery:
     description: "MedCo-Explore query"
     properties:
-      type:
-        $ref: "#/definitions/exploreQueryType"
       userPublicKey:
         type: "string"
         pattern: '^[\w=-]+$'

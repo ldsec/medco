@@ -22,9 +22,6 @@ type ExploreQuery struct {
 	// i2b2 panels (linked by an AND)
 	Panels []*Panel `json:"panels"`
 
-	// type
-	Type ExploreQueryType `json:"type,omitempty"`
-
 	// user public key
 	// Pattern: ^[\w=-]+$
 	UserPublicKey string `json:"userPublicKey,omitempty"`
@@ -35,10 +32,6 @@ func (m *ExploreQuery) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validatePanels(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateType(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -72,22 +65,6 @@ func (m *ExploreQuery) validatePanels(formats strfmt.Registry) error {
 			}
 		}
 
-	}
-
-	return nil
-}
-
-func (m *ExploreQuery) validateType(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Type) { // not required
-		return nil
-	}
-
-	if err := m.Type.Validate(formats); err != nil {
-		if ve, ok := err.(*errors.Validation); ok {
-			return ve.ValidateName("type")
-		}
-		return err
 	}
 
 	return nil

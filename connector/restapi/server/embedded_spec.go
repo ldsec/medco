@@ -531,9 +531,6 @@ func init() {
             "$ref": "#/definitions/panel"
           }
         },
-        "type": {
-          "$ref": "#/definitions/exploreQueryType"
-        },
         "userPublicKey": {
           "type": "string",
           "pattern": "^[\\w=-]+$"
@@ -2299,9 +2296,6 @@ func init() {
           "items": {
             "$ref": "#/definitions/panel"
           }
-        },
-        "type": {
-          "$ref": "#/definitions/exploreQueryType"
         },
         "userPublicKey": {
           "type": "string",

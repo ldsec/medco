@@ -8,6 +8,17 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// ExploreQueryPermissionLevel assigns a permission level to each ExploreQueryType
+var ExploreQueryPermissionLevel = map[models.ExploreQueryType]int64{
+	models.ExploreQueryTypePatientList:                    1,
+	models.ExploreQueryTypeCountPerSite:                   2,
+	models.ExploreQueryTypeCountPerSiteObfuscated:         3,
+	models.ExploreQueryTypeCountPerSiteShuffled:           4,
+	models.ExploreQueryTypeCountPerSiteShuffledObfuscated: 5,
+	models.ExploreQueryTypeCountGlobal:                    6,
+	models.ExploreQueryTypeCountGlobalObfuscated:          7,
+}
+
 // AuthenticateUser authenticates user and creates principal with user information, including its authorizations
 // returns error if user is not authorized
 func AuthenticateUser(token string) (user *models.User, err error) {
@@ -145,16 +156,22 @@ func AuthorizeRestAPIEndpoint(user *models.User, requiredAuthorization models.Re
 	return
 }
 
-// AuthorizeExploreQueryType authorizes the explore query type requested by the user
-func AuthorizeExploreQueryType(user *models.User, requestedQueryType models.ExploreQueryType) (err error) {
+// FetchAuthorizedExploreQueryType returns the highest permission query type for a given user
+func FetchAuthorizedExploreQueryType(user *models.User) (maxAuthorizedQuery models.ExploreQueryType, err error) {
+	maxPermissionLevel := int64(0)
+
 	for _, userQueryType := range user.Authorizations.ExploreQuery {
-		if userQueryType == requestedQueryType {
-			logrus.Info("user is authorized to execute the query type " + string(requestedQueryType))
-			return nil
+		if ExploreQueryPermissionLevel[userQueryType] > maxPermissionLevel {
+			maxPermissionLevel = ExploreQueryPermissionLevel[userQueryType]
+			maxAuthorizedQuery = userQueryType
 		}
 	}
 
-	err = errors.New("user is not authorized to execute the query type " + string(requestedQueryType))
-	logrus.Warn(err)
+	if maxAuthorizedQuery != "" && maxPermissionLevel > 0 {
+		logrus.Info("user is authorized to execute the query type " + maxAuthorizedQuery)
+		return maxAuthorizedQuery, nil
+	}
+
+	err = errors.New("user is not authorized to execute the query")
 	return
 }

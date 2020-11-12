@@ -6,7 +6,8 @@ PASSWORD=${2:-test}
 
 # test1
 query1="enc::1 AND enc::2"
-resultQuery1="$(printf -- "count\n8\n8\n8")"
+resultQuery1a="$(printf -- "count\n8\n8\n8")"
+resultQuery1b="$(printf -- "count\n24\n24\n24")"
 query2="enc::6 OR enc::16 AND enc::8"
 resultQuery2="$(printf -- "count\n5\n5\n5")"
 query3="enc::5 AND enc::10 AND enc::15"
@@ -52,6 +53,16 @@ test1 () {
 }
 
 test2 () {
+ docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv $1 $2
+  result="$(awk -F "\"*,\"*" '{print $2}' ../result.csv)"
+  if [ "${result}" == "${3}" ];
+  then
+  echo "$1 $2: WARNING - result is the same"
+  echo "result: ${result}" && echo "expected result: ${3}"
+  fi
+}
+
+test3 () {
   result="$(docker-compose -f docker-compose.tools.yml run -e LOG_LEVEL=1 -e CONN_TIMEOUT=10m medco-cli-client --user $USERNAME --password $PASSWORD $1 $2 | tr -d '\r\n\t ')"
   expectedResult="$(echo "${3}" | tr -d '\r\n\t ')"
   if [ "${result}" != "${expectedResult}" ];
@@ -63,32 +74,41 @@ test2 () {
 }
 
 pushd deployments/dev-local-3nodes/
-echo "Testing query with genomic data..."
 
-test1 "query patient_list" "${query1}" "${resultQuery1}"
-test1 "query patient_list" "${query2}" "${resultQuery2}"
-test1 "query patient_list" "${query3}" "${resultQuery3}"
-test1 "query patient_list" "${query4}" "${resultQuery4}"
-test1 "query patient_list" "${query5}" "${resultQuery5}"
+echo "Testing query with genomic data..."
+USERNAME="${1:-test}_explore_patient_list"
+
+test1 "query " "${query1}" "${resultQuery1a}"
+test1 "query " "${query2}" "${resultQuery2}"
+test1 "query " "${query3}" "${resultQuery3}"
+test1 "query " "${query4}" "${resultQuery4}"
+test1 "query " "${query5}" "${resultQuery5}"
+
+USERNAME="${1:-test}_explore_count_global"
+test1 "query " "${query1}" "${resultQuery1b}"
+
+USERNAME="${1:-test}_explore_count_global_obfuscated"
+test2 "query " "${query1}" "${resultQuery1b}"
 
 echo "Testing ga-get-values..."
+USERNAME=${1:-test}
 
-test2 "ga-get-values variant_name" "${variantNameGetValuesValue}" "${variantNameGetValuesResult}"
-test2 "ga-get-values protein_change" "${proteinChangeGetValuesValue}" "${proteinChangeGetValuesResult}"
-test2 "ga-get-values protein_change" "${proteinChangeGetValuesValue2}" "${proteinChangeGetValuesResult2}"
-test2 "ga-get-values hugo_gene_symbol" "${hugoGeneSymbolGetValuesValue}" "${hugoGeneSymbolGetValuesResult}"
+test3 "ga-get-values variant_name" "${variantNameGetValuesValue}" "${variantNameGetValuesResult}"
+test3 "ga-get-values protein_change" "${proteinChangeGetValuesValue}" "${proteinChangeGetValuesResult}"
+test3 "ga-get-values protein_change" "${proteinChangeGetValuesValue2}" "${proteinChangeGetValuesResult2}"
+test3 "ga-get-values hugo_gene_symbol" "${hugoGeneSymbolGetValuesValue}" "${hugoGeneSymbolGetValuesResult}"
 
 echo "Testing ga-get-variant..."
 
-test2 "ga-get-variant variant_name" "${variantNameGetVariantsValue}" "${variantNameGetVariantsResult}"
-test2 "ga-get-variant protein_change" "${proteinChangeGetVariantsValue}" "${proteinChangeGetVariantsResult}"
-test2 "ga-get-variant hugo_gene_symbol" "${hugoGeneSymbolGetVariantsValue}" "${hugoGeneSymbolGetVariantsResult1}"
-test2 "ga-get-variant --z "heterozygous" hugo_gene_symbol" "${hugoGeneSymbolGetVariantsValue}" "${hugoGeneSymbolGetVariantsResult2}"
-test2 "ga-get-variant --z "unknown" hugo_gene_symbol" "${hugoGeneSymbolGetVariantsValue}" "${hugoGeneSymbolGetVariantsResult3}"
-test2 "ga-get-variant --z "heterozygous\|homozygous" hugo_gene_symbol" "${hugoGeneSymbolGetVariantsValue}" "${hugoGeneSymbolGetVariantsResult2}"
-test2 "ga-get-variant --z "heterozygous\|unknown" hugo_gene_symbol" "${hugoGeneSymbolGetVariantsValue}" "${hugoGeneSymbolGetVariantsResult1}"
-test2 "ga-get-variant --z "homozygous\|unknown" hugo_gene_symbol" "${hugoGeneSymbolGetVariantsValue}" "${hugoGeneSymbolGetVariantsResult3}"
-test2 "ga-get-variant --z "heterozygous\|homozygous\|unknown" hugo_gene_symbol" "${hugoGeneSymbolGetVariantsValue}" "${hugoGeneSymbolGetVariantsResult1}"
+test3 "ga-get-variant variant_name" "${variantNameGetVariantsValue}" "${variantNameGetVariantsResult}"
+test3 "ga-get-variant protein_change" "${proteinChangeGetVariantsValue}" "${proteinChangeGetVariantsResult}"
+test3 "ga-get-variant hugo_gene_symbol" "${hugoGeneSymbolGetVariantsValue}" "${hugoGeneSymbolGetVariantsResult1}"
+test3 "ga-get-variant --z "heterozygous" hugo_gene_symbol" "${hugoGeneSymbolGetVariantsValue}" "${hugoGeneSymbolGetVariantsResult2}"
+test3 "ga-get-variant --z "unknown" hugo_gene_symbol" "${hugoGeneSymbolGetVariantsValue}" "${hugoGeneSymbolGetVariantsResult3}"
+test3 "ga-get-variant --z "heterozygous\|homozygous" hugo_gene_symbol" "${hugoGeneSymbolGetVariantsValue}" "${hugoGeneSymbolGetVariantsResult2}"
+test3 "ga-get-variant --z "heterozygous\|unknown" hugo_gene_symbol" "${hugoGeneSymbolGetVariantsValue}" "${hugoGeneSymbolGetVariantsResult1}"
+test3 "ga-get-variant --z "homozygous\|unknown" hugo_gene_symbol" "${hugoGeneSymbolGetVariantsValue}" "${hugoGeneSymbolGetVariantsResult3}"
+test3 "ga-get-variant --z "heterozygous\|homozygous\|unknown" hugo_gene_symbol" "${hugoGeneSymbolGetVariantsValue}" "${hugoGeneSymbolGetVariantsResult1}"
 
 echo "CLI test 2/2 successful!"
 popd
