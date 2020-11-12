@@ -201,9 +201,9 @@ func main() {
 		},
 
 		{
-			Name:    "query",
-			Aliases: []string{"q"},
-			Usage:   "Query the MedCo network",
+			Name:      "query",
+			Aliases:   []string{"q"},
+			Usage:     "Query the MedCo network",
 			ArgsUsage: "[query string]",
 			Action: func(c *cli.Context) error {
 				return exploreclient.ExecuteClientQuery(

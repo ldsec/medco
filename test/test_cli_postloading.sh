@@ -63,6 +63,7 @@ test2 () {
 }
 
 pushd deployments/dev-local-3nodes/
+
 echo "Testing query with genomic data..."
 USERNAME="${USERNAME}_explore_patient_list"
 
