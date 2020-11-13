@@ -613,32 +613,6 @@ func init() {
         }
       }
     },
-    "constrainByValue": {
-      "type": "object",
-      "required": [
-        "operator",
-        "value"
-      ],
-      "properties": {
-        "operator": {
-          "description": "EQ: equals NE: not equals GT: greater than GE: greater than or equal LT: less than LE: less than or equal IN: contained in BETWEEN: between\n",
-          "type": "string",
-          "enum": [
-            "EQ",
-            "NE",
-            "GT",
-            "GE",
-            "LT",
-            "LE",
-            "IN",
-            "BETWEEN"
-          ]
-        },
-        "value": {
-          "type": "string"
-        }
-      }
-    },
     "exploreQuery": {
       "description": "MedCo-Explore query",
       "properties": {
@@ -888,9 +862,6 @@ func init() {
               "queryTerm"
             ],
             "properties": {
-              "constrainByValue": {
-                "$ref": "#/definitions/constrainByValue"
-              },
               "encrypted": {
                 "type": "boolean"
               },
@@ -905,18 +876,32 @@ func init() {
                     "type": "string",
                     "pattern": "^((\\/[^\\/]+)+\\/%?)$"
                   },
-                  "constrainByValue": {
-                    "$ref": "#/definitions/constrainByValue"
-                  },
                   "modifierKey": {
                     "type": "string",
                     "pattern": "^((\\/[^\\/]+)+\\/)$"
                   }
                 }
               },
+              "operator": {
+                "description": "EQ: equals NE: not equals GT: greater than GE: greater than or equal LT: less than LE: less than or equal BETWEEN: between (value syntax: x and y)\n",
+                "type": "string",
+                "enum": [
+                  "EQ",
+                  "NE",
+                  "GT",
+                  "GE",
+                  "LT",
+                  "LE",
+                  "BETWEEN"
+                ]
+              },
               "queryTerm": {
                 "type": "string",
                 "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/)$"
+              },
+              "value": {
+                "type": "string",
+                "pattern": "^[+-]?([0-9]*[.])?[0-9]+"
               }
             }
           }
@@ -2565,9 +2550,6 @@ func init() {
         "queryTerm"
       ],
       "properties": {
-        "constrainByValue": {
-          "$ref": "#/definitions/constrainByValue"
-        },
         "encrypted": {
           "type": "boolean"
         },
@@ -2582,18 +2564,32 @@ func init() {
               "type": "string",
               "pattern": "^((\\/[^\\/]+)+\\/%?)$"
             },
-            "constrainByValue": {
-              "$ref": "#/definitions/constrainByValue"
-            },
             "modifierKey": {
               "type": "string",
               "pattern": "^((\\/[^\\/]+)+\\/)$"
             }
           }
         },
+        "operator": {
+          "description": "EQ: equals NE: not equals GT: greater than GE: greater than or equal LT: less than LE: less than or equal BETWEEN: between (value syntax: x and y)\n",
+          "type": "string",
+          "enum": [
+            "EQ",
+            "NE",
+            "GT",
+            "GE",
+            "LT",
+            "LE",
+            "BETWEEN"
+          ]
+        },
         "queryTerm": {
           "type": "string",
           "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/)$"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^[+-]?([0-9]*[.])?[0-9]+"
         }
       }
     },
@@ -2607,9 +2603,6 @@ func init() {
         "appliedPath": {
           "type": "string",
           "pattern": "^((\\/[^\\/]+)+\\/%?)$"
-        },
-        "constrainByValue": {
-          "$ref": "#/definitions/constrainByValue"
         },
         "modifierKey": {
           "type": "string",
@@ -2745,32 +2738,6 @@ func init() {
           "items": {
             "$ref": "#/definitions/restApiAuthorization"
           }
-        }
-      }
-    },
-    "constrainByValue": {
-      "type": "object",
-      "required": [
-        "operator",
-        "value"
-      ],
-      "properties": {
-        "operator": {
-          "description": "EQ: equals NE: not equals GT: greater than GE: greater than or equal LT: less than LE: less than or equal IN: contained in BETWEEN: between\n",
-          "type": "string",
-          "enum": [
-            "EQ",
-            "NE",
-            "GT",
-            "GE",
-            "LT",
-            "LE",
-            "IN",
-            "BETWEEN"
-          ]
-        },
-        "value": {
-          "type": "string"
         }
       }
     },

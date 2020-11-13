@@ -6,6 +6,7 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"strconv"
 
 	"github.com/go-openapi/errors"
@@ -125,9 +126,6 @@ func (m *Panel) UnmarshalBinary(b []byte) error {
 // swagger:model PanelItemsItems0
 type PanelItemsItems0 struct {
 
-	// constrain by value
-	ConstrainByValue *ConstrainByValue `json:"constrainByValue,omitempty"`
-
 	// encrypted
 	// Required: true
 	Encrypted *bool `json:"encrypted"`
@@ -135,19 +133,24 @@ type PanelItemsItems0 struct {
 	// modifier
 	Modifier *PanelItemsItems0Modifier `json:"modifier,omitempty"`
 
+	// EQ: equals NE: not equals GT: greater than GE: greater than or equal LT: less than LE: less than or equal BETWEEN: between (value syntax: x and y)
+	//
+	// Enum: [EQ NE GT GE LT LE BETWEEN]
+	Operator string `json:"operator,omitempty"`
+
 	// query term
 	// Required: true
 	// Pattern: ^([\w=-]+)$|^((\/[^\/]+)+\/)$
 	QueryTerm *string `json:"queryTerm"`
+
+	// value
+	// Pattern: ^[+-]?([0-9]*[.])?[0-9]+
+	Value string `json:"value,omitempty"`
 }
 
 // Validate validates this panel items items0
 func (m *PanelItemsItems0) Validate(formats strfmt.Registry) error {
 	var res []error
-
-	if err := m.validateConstrainByValue(formats); err != nil {
-		res = append(res, err)
-	}
 
 	if err := m.validateEncrypted(formats); err != nil {
 		res = append(res, err)
@@ -157,31 +160,21 @@ func (m *PanelItemsItems0) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateOperator(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateQueryTerm(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateValue(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *PanelItemsItems0) validateConstrainByValue(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.ConstrainByValue) { // not required
-		return nil
-	}
-
-	if m.ConstrainByValue != nil {
-		if err := m.ConstrainByValue.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("constrainByValue")
-			}
-			return err
-		}
-	}
-
 	return nil
 }
 
@@ -212,6 +205,64 @@ func (m *PanelItemsItems0) validateModifier(formats strfmt.Registry) error {
 	return nil
 }
 
+var panelItemsItems0TypeOperatorPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["EQ","NE","GT","GE","LT","LE","BETWEEN"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		panelItemsItems0TypeOperatorPropEnum = append(panelItemsItems0TypeOperatorPropEnum, v)
+	}
+}
+
+const (
+
+	// PanelItemsItems0OperatorEQ captures enum value "EQ"
+	PanelItemsItems0OperatorEQ string = "EQ"
+
+	// PanelItemsItems0OperatorNE captures enum value "NE"
+	PanelItemsItems0OperatorNE string = "NE"
+
+	// PanelItemsItems0OperatorGT captures enum value "GT"
+	PanelItemsItems0OperatorGT string = "GT"
+
+	// PanelItemsItems0OperatorGE captures enum value "GE"
+	PanelItemsItems0OperatorGE string = "GE"
+
+	// PanelItemsItems0OperatorLT captures enum value "LT"
+	PanelItemsItems0OperatorLT string = "LT"
+
+	// PanelItemsItems0OperatorLE captures enum value "LE"
+	PanelItemsItems0OperatorLE string = "LE"
+
+	// PanelItemsItems0OperatorBETWEEN captures enum value "BETWEEN"
+	PanelItemsItems0OperatorBETWEEN string = "BETWEEN"
+)
+
+// prop value enum
+func (m *PanelItemsItems0) validateOperatorEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, panelItemsItems0TypeOperatorPropEnum, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *PanelItemsItems0) validateOperator(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Operator) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateOperatorEnum("operator", "body", m.Operator); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (m *PanelItemsItems0) validateQueryTerm(formats strfmt.Registry) error {
 
 	if err := validate.Required("queryTerm", "body", m.QueryTerm); err != nil {
@@ -219,6 +270,19 @@ func (m *PanelItemsItems0) validateQueryTerm(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Pattern("queryTerm", "body", string(*m.QueryTerm), `^([\w=-]+)$|^((\/[^\/]+)+\/)$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *PanelItemsItems0) validateValue(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Value) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("value", "body", string(m.Value), `^[+-]?([0-9]*[.])?[0-9]+`); err != nil {
 		return err
 	}
 
@@ -253,9 +317,6 @@ type PanelItemsItems0Modifier struct {
 	// Pattern: ^((\/[^\/]+)+\/%?)$
 	AppliedPath *string `json:"appliedPath"`
 
-	// constrain by value
-	ConstrainByValue *ConstrainByValue `json:"constrainByValue,omitempty"`
-
 	// modifier key
 	// Required: true
 	// Pattern: ^((\/[^\/]+)+\/)$
@@ -267,10 +328,6 @@ func (m *PanelItemsItems0Modifier) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAppliedPath(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateConstrainByValue(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -292,24 +349,6 @@ func (m *PanelItemsItems0Modifier) validateAppliedPath(formats strfmt.Registry) 
 
 	if err := validate.Pattern("modifier"+"."+"appliedPath", "body", string(*m.AppliedPath), `^((\/[^\/]+)+\/%?)$`); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (m *PanelItemsItems0Modifier) validateConstrainByValue(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.ConstrainByValue) { // not required
-		return nil
-	}
-
-	if m.ConstrainByValue != nil {
-		if err := m.ConstrainByValue.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("modifier" + "." + "constrainByValue")
-			}
-			return err
-		}
 	}
 
 	return nil
