@@ -102,6 +102,35 @@ func TestExecutePsmQuery(t *testing.T) {
 	t.Log("count:"+patientCount, "set ID:"+patientSetID)
 }
 
+func TestExecutePsmQueryWithValue(t *testing.T) {
+
+	encrypted := false
+	queryTerm := `/E2ETEST/e2etest/1/`
+
+	item := &models.PanelItemsItems0{
+		Encrypted: &encrypted,
+		QueryTerm: &queryTerm,
+		Operator:  "EQ",
+		Value:     "10",
+	}
+
+	not := false
+	patientCount, patientSetID, err := ExecutePsmQuery(
+		"testQuery",
+		[]*models.Panel{
+			{Items: []*models.PanelItemsItems0{
+				item,
+			},
+				Not: &not,
+			}},
+		models.TimingAny)
+
+	if err != nil {
+		t.Fail()
+	}
+	t.Log("count:"+patientCount, "set ID:"+patientSetID)
+}
+
 func TestExecutePsmQueryWithModifiers(t *testing.T) {
 
 	encrypted := false
@@ -151,6 +180,43 @@ func TestExecutePsmQueryWithModifiers(t *testing.T) {
 	}
 
 	patientCount, patientSetID, err = ExecutePsmQuery(
+		"testQuery",
+		[]*models.Panel{
+			{Items: []*models.PanelItemsItems0{
+				item,
+			},
+				Not: &not,
+			}},
+		models.TimingAny)
+
+	if err != nil {
+		t.Fail()
+	}
+	t.Log("count:"+patientCount, "set ID:"+patientSetID)
+}
+
+func TestExecutePsmQueryWithModifierAndValue(t *testing.T) {
+
+	encrypted := false
+	queryTerm := `/E2ETEST/e2etest/1/`
+
+	appliedPath := `/e2etest/1/`
+	modifierKey := `/E2ETEST/modifiers/1/`
+	modifier := &models.PanelItemsItems0Modifier{
+		AppliedPath: &appliedPath,
+		ModifierKey: &modifierKey,
+	}
+
+	item := &models.PanelItemsItems0{
+		Encrypted: &encrypted,
+		QueryTerm: &queryTerm,
+		Operator:  "EQ",
+		Value:     "15",
+		Modifier:  modifier,
+	}
+
+	not := false
+	patientCount, patientSetID, err := ExecutePsmQuery(
 		"testQuery",
 		[]*models.Panel{
 			{Items: []*models.PanelItemsItems0{

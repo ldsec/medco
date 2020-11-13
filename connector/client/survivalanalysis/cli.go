@@ -395,10 +395,12 @@ func modelPanelsToString(subGroup *survival_analysis.SurvivalAnalysisParamsBodyS
 	for _, panel := range subGroup.Panels {
 		itemStrings := make([]string, 0, len(panel.Items))
 		for _, item := range panel.Items {
-			itemStrings = append(itemStrings, fmt.Sprintf("{Encrypted:%t Modifier:%v QueryTerm:%s}",
+			itemStrings = append(itemStrings, fmt.Sprintf("{Encrypted:%t Modifier:%v Operator:%s QueryTerm:%s Value:%s}",
 				*item.Encrypted,
 				item.Modifier,
-				*item.QueryTerm))
+				item.Operator,
+				*item.QueryTerm,
+				item.Value))
 		}
 		itemArray := "[" + strings.Join(itemStrings, " ") + "]"
 		panelStrings = append(panelStrings, fmt.Sprintf("{Items:%s Not:%t}", itemArray, *panel.Not))

@@ -25,6 +25,7 @@ resultSearchModifierChildren="PATH  TYPE
 
 searchConceptInfo="/E2ETEST/e2etest/1/"
 resultSearchConceptInfo="  <ExploreSearchResultElement>
+      <AppliedPath>@</AppliedPath>
       <Code>ENC_ID:1</Code>
       <DisplayName>E2E Concept 1</DisplayName>
       <Leaf>true</Leaf>
@@ -54,6 +55,7 @@ resultSearchConceptInfo="  <ExploreSearchResultElement>
 
 searchModifierInfo="/E2ETEST/modifiers/1/ /e2etest/1/"
 resultSearchModifierInfo="<ExploreSearchResultElement>
+      <AppliedPath>/e2etest/1/</AppliedPath>
       <Code>ENC_ID:5</Code>
       <DisplayName>E2E Modifier 1</DisplayName>
       <Leaf>true</Leaf>
@@ -89,16 +91,28 @@ query2="clr::/E2ETEST/e2etest/1/ OR enc::2 AND enc::3"
 resultQuery2="$(printf -- "count\n1\n1\n1")"
 
 query3="clr::/E2ETEST/e2etest/1/"
-resultQuery3="$(printf -- "count\n2\n2\n2")"
+resultQuery3="$(printf -- "count\n3\n3\n3")"
 
-query4="clr::/E2ETEST/e2etest/1/::/E2ETEST/modifiers/1/:/e2etest/%"
-resultQuery4="$(printf -- "count\n1\n1\n1")"
+query4="clr::/E2ETEST/e2etest/1/:/E2ETEST/modifiers/1/:/e2etest/%"
+resultQuery4="$(printf -- "count\n2\n2\n2")"
 
 echo "enc::1
 enc::2" > deployments/query_file.txt
 query5="enc::3 AND file::/data/query_file.txt"
 resultQuery5a="$(printf -- "count\n1\n1\n1")"
 resultQuery5b="$(printf -- "count\n3\n3\n3")"
+
+query6="clr::/E2ETEST/e2etest/1/::EQ:10"
+resultQuery6="$(printf -- "count\n1\n1\n1")"
+
+query7="clr::/E2ETEST/e2etest/1/:/E2ETEST/modifiers/1/:/e2etest/1/::EQ:15"
+resultQuery7="$(printf -- "count\n1\n1\n1")"
+
+query8="clr::/E2ETEST/e2etest/1/::BETWEEN:5 and 25"
+resultQuery8="$(printf -- "count\n2\n2\n2")"
+
+query9="enc::1 OR clr::/E2ETEST/e2etest/2/::GE:25 AND clr::/E2ETEST/e2etest/2/:/E2ETEST/modifiers/2/:/e2etest/2/::LT:21"
+resultQuery9="$(printf -- "count\n2\n2\n2")"
 
 # test3
 getSavedCohortHeaders="node_index,cohort_name,cohort_id,query_id,creation_date,update_date"
@@ -270,6 +284,10 @@ test2 "query " "${query2}" "${resultQuery2}"
 test2 "query " "${query3}" "${resultQuery3}"
 test2 "query " "${query4}" "${resultQuery4}"
 test2 "query " "${query5}" "${resultQuery5a}"
+test2 "query " "${query6}" "${resultQuery6}"
+test2 "query " "${query7}" "${resultQuery7}"
+test2 "query " "${query8}" "${resultQuery8}"
+test2 "query " "${query9}" "${resultQuery9}"
 
 USERNAME="${1:-test}_explore_count_global"
 test2 "query " "${query5}" "${resultQuery5b}"

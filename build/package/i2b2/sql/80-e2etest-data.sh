@@ -219,18 +219,30 @@ psql $PSQL_PARAMS -d "$I2B2_DB_NAME" <<-EOSQL
 
     -- i2b2demodata_i2b2.observation_fact
     insert into i2b2demodata_i2b2.observation_fact
-        (encounter_num, patient_num, concept_cd, provider_id, start_date, modifier_cd, instance_num, import_date, upload_id) values
-            ('1', '1', 'TAG_ID:11', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1'),
-            ('1', '1', 'ENC_ID:1', 'e2etest', 'NOW()', 'ENC_ID:5', '1', 'NOW()', '1'),
-            ('2', '2', 'TAG_ID:11', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1'),
-            ('2', '2', 'TAG_ID:12', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1'),
-            ('2', '2', 'ENC_ID:1', 'e2etest', 'NOW()', 'ENC_ID:4', '1', 'NOW()', '1'),
-            ('2', '2', 'ENC_ID:2', 'e2etest', 'NOW()', 'ENC_ID:6', '1', 'NOW()', '1'),
-            ('3', '3', 'TAG_ID:12', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1'),
-            ('3', '3', 'TAG_ID:13', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1'),
-            ('3', '3', 'ENC_ID:3', 'e2etest', 'NOW()', 'ENC_ID:4', '1', 'NOW()', '1'),
-            ('4', '4', 'TAG_ID:11', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1'),
-            ('4', '4', 'TAG_ID:12', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1'),
-            ('4', '4', 'TAG_ID:13', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1'),
-            ('4', '4', 'ENC_ID:3', 'e2etest', 'NOW()', 'ENC_ID:7', '1', 'NOW()', '1');
+        (encounter_num, patient_num, concept_cd, provider_id, start_date, modifier_cd, instance_num, import_date, upload_id, valtype_cd, tval_char, nval_num) values
+            ('1', '1', 'TAG_ID:11', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1', NULL, NULL, NULL),
+            ('1', '1', 'ENC_ID:1', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1', 'N', 'E', '10'),
+            ('1', '1', 'ENC_ID:1', 'e2etest', 'NOW()', 'ENC_ID:5', '1', 'NOW()', '1', 'N', 'E', '10'),
+            ('2', '2', 'TAG_ID:11', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1', NULL, NULL, NULL),
+            ('2', '2', 'TAG_ID:12', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1', NULL, NULL, NULL),
+            ('2', '2', 'ENC_ID:1', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1', 'N', 'E', '20'),
+            ('2', '2', 'ENC_ID:1', 'e2etest', 'NOW()', 'ENC_ID:4', '1', 'NOW()', '1', 'N', 'E', '20'),
+            ('2', '2', 'ENC_ID:2', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1', 'N', 'E', '50'),
+            ('2', '2', 'ENC_ID:2', 'e2etest', 'NOW()', 'ENC_ID:6', '1', 'NOW()', '1', 'N', 'E', '5'),
+            ('3', '3', 'TAG_ID:12', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1', NULL, NULL, NULL),
+            ('3', '3', 'TAG_ID:13', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1', NULL, NULL, NULL),
+            ('3', '3', 'ENC_ID:1', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1', 'N', 'E', '30'),
+            ('3', '3', 'ENC_ID:1', 'e2etest', 'NOW()', 'ENC_ID:4', '1', 'NOW()', '1', 'N', 'E', '15'),
+            ('3', '3', 'ENC_ID:1', 'e2etest', 'NOW()', 'ENC_ID:5', '1', 'NOW()', '1', 'N', 'E', '15'),
+            ('3', '3', 'ENC_ID:2', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1', 'N', 'E', '25'),
+            ('3', '3', 'ENC_ID:2', 'e2etest', 'NOW()', 'ENC_ID:4', '1', 'NOW()', '1', 'N', 'E', '30'),
+            ('3', '3', 'ENC_ID:2', 'e2etest', 'NOW()', 'ENC_ID:6', '1', 'NOW()', '1', 'N', 'E', '15'),
+            ('3', '3', 'ENC_ID:3', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1', 'N', 'E', '77'),
+            ('3', '3', 'ENC_ID:3', 'e2etest', 'NOW()', 'ENC_ID:4', '1', 'NOW()', '1', 'N', 'E', '66'),
+            ('3', '3', 'ENC_ID:3', 'e2etest', 'NOW()', 'ENC_ID:7', '1', 'NOW()', '1', 'N', 'E', '88'),
+            ('4', '4', 'TAG_ID:11', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1', NULL, NULL, NULL),
+            ('4', '4', 'TAG_ID:12', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1', NULL, NULL, NULL),
+            ('4', '4', 'TAG_ID:13', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1', NULL, NULL, NULL),
+            ('4', '4', 'ENC_ID:3', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1', 'N', 'E', '20'),
+            ('4', '4', 'ENC_ID:3', 'e2etest', 'NOW()', 'ENC_ID:7', '1', 'NOW()', '1', 'N', 'E', '10');
 EOSQL

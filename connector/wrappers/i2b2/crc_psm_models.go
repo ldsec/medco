@@ -57,11 +57,11 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, res
 			i2b2Item := Item{
 				ItemKey: convertPathToI2b2Format(*queryItem.QueryTerm),
 			}
-			if queryItem.ConstrainByValue != nil {
+			if queryItem.Operator != "" && queryItem.Modifier == nil {
 				i2b2Item.ConstrainByValue = &ConstrainByValue{
 					ValueType:       "NUMBER",
-					ValueOperator:   *queryItem.ConstrainByValue.Operator,
-					ValueConstraint: *queryItem.ConstrainByValue.Value,
+					ValueOperator:   queryItem.Operator,
+					ValueConstraint: queryItem.Value,
 				}
 			}
 			if queryItem.Modifier != nil {
@@ -69,11 +69,11 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, res
 					AppliedPath: strings.ReplaceAll(*queryItem.Modifier.AppliedPath, "/", `\`),
 					ModifierKey: convertPathToI2b2Format(*queryItem.Modifier.ModifierKey),
 				}
-				if queryItem.Modifier.ConstrainByValue != nil {
+				if queryItem.Operator != "" {
 					i2b2Item.ConstrainByModifier.ConstrainByValue = &ConstrainByValue{
 						ValueType:       "NUMBER",
-						ValueOperator:   *queryItem.ConstrainByValue.Operator,
-						ValueConstraint: *queryItem.ConstrainByValue.Value,
+						ValueOperator:   queryItem.Operator,
+						ValueConstraint: queryItem.Value,
 					}
 				}
 			}
