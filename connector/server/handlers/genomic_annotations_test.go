@@ -1,47 +1,31 @@
+// +build integration_test
+
 package handlers
 
 import (
+	"sort"
+	"testing"
+
 	"github.com/ldsec/medco/connector/restapi/server/operations/genomic_annotations"
 	utilserver "github.com/ldsec/medco/connector/util/server"
 	"github.com/sirupsen/logrus"
-	"testing"
 )
 
-var variantNameGetValuesValue = "5238"
-var variantNameGetValuesResult = []string{"16:75238144:C>C", "6:52380882:G>G"}
-var proteinChangeGetValuesValue = "g32"
-var proteinChangeGetValuesResult = []string{"G325R", "G32E"}
-var proteinChangeGetValuesValue2 = "7cfs*"
-var proteinChangeGetValuesResult2 = []string{"S137Cfs*28"}
-var hugoGeneSymbolGetValuesValue = "tr5"
-var hugoGeneSymbolGetValuesResult = []string{"HTR5A"}
+var variantNameGetValuesValue = "78"
+var variantNameGetValuesResult = []string{"6:35786830:GGGACC>TAATAC", "7:78098298:TCTTTA>AACGGA", "8:57873164:GCTGTG>GGCT"}
+var proteinChangeGetValuesValue = "y"
+var proteinChangeGetValuesResult = []string{"N232Y", "H277Y", "Y1062H"}
+var proteinChangeGetValuesValue2 = "l61sfs*"
+var proteinChangeGetValuesResult2 = []string{"L61Sfs*54"}
+var hugoGeneSymbolGetValuesValue = "nav"
+var hugoGeneSymbolGetValuesResult = []string{"NAV3"}
 
-var variantNameGetVariantsResult = []string{"-4530899676219565056"}
-var proteinChangeGetVariantsResult = []string{"-2429151887266669568"}
-var hugoGeneSymbolGetVariantsResult = []string{"-7039476204566471680", "-7039476580443220992", "-7039476780159200256"}
+var variantNameGetVariantsResult = []string{"-7455563962931223533"}
+var proteinChangeGetVariantsResult = []string{"-2823470849823937376"}
+var hugoGeneSymbolGetVariantsResult = []string{"-7121901993980174104", "-4898572880864589696", "-6271408487767448598"}
 
 func init() {
-	utilserver.DBHost = "localhost"
-	utilserver.DBPort = 5432
-	utilserver.DBName = "medcoconnectorsrv0"
-	utilserver.DBLoginUser = "medcoconnector"
-	utilserver.DBLoginPassword = "medcoconnector"
-	utilserver.SetLogLevel("5")
-}
-
-func TestDBConnection(t *testing.T) {
-
-	var err error
-	utilserver.DBConnection, err = utilserver.InitializeConnectionToDB(utilserver.DBHost, utilserver.DBPort, utilserver.DBName, utilserver.DBLoginUser, utilserver.DBLoginPassword)
-	if err != nil {
-		t.Fail()
-	}
-
-	err = utilserver.DBConnection.Ping()
-	if err != nil {
-		logrus.Error("Impossible to connect to DB " + err.Error())
-		t.Fail()
-	}
+	utilserver.SetForTesting()
 }
 
 // warning: this test needs the dev-local-3nodes medco deployment running locally, loaded with default data
@@ -81,17 +65,17 @@ func TestGenomicAnnotationsGetVariants(t *testing.T) {
 
 }
 
-func testGenomicAnnotationsGetValues(query_type string, query_value string, query_result []string, t *testing.T) {
+func testGenomicAnnotationsGetValues(queryType string, queryValue string, queryResult []string, t *testing.T) {
 
-	TestDBConnection(t)
+	utilserver.TestDBConnection(t)
 
 	var annotations []string
 	var annotation string
 	params := genomic_annotations.NewGetValuesParams()
 	var err error
 
-	params.Annotation = query_type
-	params.Value = query_value
+	params.Annotation = queryType
+	params.Value = queryValue
 
 	query, _ := buildGetValuesQuery(params)
 	rows, err := utilserver.DBConnection.Query(query, params.Annotation, params.Value, *params.Limit)
@@ -111,16 +95,16 @@ func testGenomicAnnotationsGetValues(query_type string, query_value string, quer
 		annotations = append(annotations, annotation)
 	}
 
-	if !areEqual(annotations, query_result) {
-		logrus.Error("Wrong " + query_type + " query result")
+	if !areEqual(annotations, queryResult) {
+		logrus.Error("Wrong " + queryType + " query result")
 		t.Fail()
 	}
 
 }
 
-func testGenomicAnnotationsGetVariants(query_type string, query_value string, zygosity []string, query_result []string, t *testing.T) {
+func testGenomicAnnotationsGetVariants(queryType string, queryValue string, zygosity []string, queryResult []string, t *testing.T) {
 
-	TestDBConnection(t)
+	utilserver.TestDBConnection(t)
 
 	var variants []string
 	var variant string
@@ -128,8 +112,8 @@ func testGenomicAnnotationsGetVariants(query_type string, query_value string, zy
 
 	params := genomic_annotations.NewGetVariantsParams()
 
-	params.Annotation = query_type
-	params.Value = query_value
+	params.Annotation = queryType
+	params.Value = queryValue
 	params.Zygosity = zygosity
 
 	zygosityStr := ""
@@ -158,8 +142,8 @@ func testGenomicAnnotationsGetVariants(query_type string, query_value string, zy
 		variants = append(variants, variant)
 	}
 
-	if !areEqual(variants, query_result) {
-		logrus.Error("Wrong " + query_type + " query result")
+	if !areEqual(variants, queryResult) {
+		logrus.Error("Wrong " + queryType + " query result")
 		t.Fail()
 	}
 
@@ -171,8 +155,15 @@ func areEqual(slice1, slice2 []string) bool {
 		return false
 	}
 
-	for i, element := range slice1 {
-		if element != slice2[i] {
+	slice1C := make([]string, len(slice1))
+	slice2C := make([]string, len(slice2))
+	copy(slice1C, slice1)
+	copy(slice2C, slice2)
+	sort.Strings(slice1C)
+	sort.Strings(slice2C)
+
+	for i, element := range slice1C {
+		if element != slice2C[i] {
 			return false
 		}
 	}

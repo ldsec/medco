@@ -2,6 +2,7 @@ package i2b2
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -9,6 +10,40 @@ import (
 	utilserver "github.com/ldsec/medco/connector/util/server"
 	"github.com/sirupsen/logrus"
 )
+
+// GetOntologyTermInfo makes request to get infromation about a node given its path
+func GetOntologyTermInfo(path string) (results []*models.ExploreSearchResultElement, err error) {
+	path = strings.TrimSpace(path)
+	xmlResponse := &Response{
+		MessageBody: &OntRespConceptsMessageBody{},
+	}
+	if len(path) == 0 {
+		err = fmt.Errorf("empty path")
+		logrus.Error(err)
+		return
+	}
+
+	err = i2b2XMLRequest(
+		utilserver.I2b2HiveURL+"/OntologyService/getTermInfo",
+		NewOntReqGetTermInfoMessageBody(convertPathToI2b2Format(path)),
+		xmlResponse,
+	)
+	if err != nil {
+		return nil, err
+	}
+	i2b2TermInfo := xmlResponse.MessageBody.(*OntRespConceptsMessageBody).Concepts
+	results = make([]*models.ExploreSearchResultElement, 0)
+	for _, concept := range i2b2TermInfo {
+		parsedConcept, err := parseI2b2Concept(concept)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, parsedConcept)
+	}
+
+	return
+
+}
 
 // GetOntologyChildren makes request to browse the i2b2 ontology
 func GetOntologyChildren(path string) (results []*models.ExploreSearchResultElement, err error) {

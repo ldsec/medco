@@ -158,6 +158,10 @@ psql $PSQL_PARAMS -d "$I2B2_DB_NAME" <<-EOSQL
     -- i2b2demodata_i2b2.concept_dimension
     insert into i2b2demodata_i2b2.concept_dimension
         (concept_path, concept_cd, import_date, upload_id) values
+            ('\e2etest\', '', 'NOW()', '1'),
+            ('\e2etest\1\', 'ENC_ID:1', 'NOW()', '1'),
+            ('\e2etest\2\', 'ENC_ID:2', 'NOW()', '1'),
+            ('\e2etest\3\', 'ENC_ID:3', 'NOW()', '1'),
             ('\medco\tagged\8d3533369426ae172271e98cef8be2bbfe9919087c776083b1ea1de803fc87aa\', 'TAG_ID:11', 'NOW()', '1'),
             ('\medco\tagged\c75af24ed416c61b67011eb91aa852f5069c020c4bd8c1e64a07c7fb061d8ace\', 'TAG_ID:12', 'NOW()', '1'),
             ('\medco\tagged\46f75970444851cb64f1b940ef9205a20b65d6fd5bb68a250b0f52f07f6da9a3\', 'TAG_ID:13', 'NOW()', '1'),
@@ -217,11 +221,16 @@ psql $PSQL_PARAMS -d "$I2B2_DB_NAME" <<-EOSQL
     insert into i2b2demodata_i2b2.observation_fact
         (encounter_num, patient_num, concept_cd, provider_id, start_date, modifier_cd, instance_num, import_date, upload_id) values
             ('1', '1', 'TAG_ID:11', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1'),
+            ('1', '1', 'ENC_ID:1', 'e2etest', 'NOW()', 'ENC_ID:5', '1', 'NOW()', '1'),
             ('2', '2', 'TAG_ID:11', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1'),
             ('2', '2', 'TAG_ID:12', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1'),
+            ('2', '2', 'ENC_ID:1', 'e2etest', 'NOW()', 'ENC_ID:4', '1', 'NOW()', '1'),
+            ('2', '2', 'ENC_ID:2', 'e2etest', 'NOW()', 'ENC_ID:6', '1', 'NOW()', '1'),
             ('3', '3', 'TAG_ID:12', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1'),
             ('3', '3', 'TAG_ID:13', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1'),
+            ('3', '3', 'ENC_ID:3', 'e2etest', 'NOW()', 'ENC_ID:4', '1', 'NOW()', '1'),
             ('4', '4', 'TAG_ID:11', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1'),
             ('4', '4', 'TAG_ID:12', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1'),
-            ('4', '4', 'TAG_ID:13', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1');
+            ('4', '4', 'TAG_ID:13', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1'),
+            ('4', '4', 'ENC_ID:3', 'e2etest', 'NOW()', 'ENC_ID:7', '1', 'NOW()', '1');
 EOSQL

@@ -1,0 +1,22 @@
+time_resolution: "day"
+time_limit: 19
+cohort_name: "anyName"
+start_concept_path: "/any/start/path/"
+start_concept_modifier: "anyStartMCode"
+end_concept_path: "/any/end/path/"
+end_concept_modifier: "anyEndMCode"
+sub_groups:
+  - group_name: "AAA"
+    panels:
+      - not: false
+        paths:
+          - "/path/1/"
+          - "/path/2/"
+      - not : true
+        paths:
+          - "/path/3/"
+  - group_name: "BBB"
+    panels:
+      - not: false
+        paths:
+          - "/path/4/"

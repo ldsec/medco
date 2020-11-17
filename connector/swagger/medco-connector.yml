@@ -16,6 +16,8 @@ tags:
     description: "MedCo Node API"
   - name: "genomic-annotations"
     description: "Genomic Annotations Query API"
+  - name : "survival-analysis"
+    description : "Survival analysis API"
 schemes:
   - "http"
 consumes:
@@ -204,6 +206,127 @@ paths:
           $ref: "#/responses/errorResponse"
       security:
         - medco-jwt: ["medco-genomic-annotations"]
+  /node/analysis/survival/query:
+    post :
+      tags:
+        - "survival-analysis"
+      summary: "Send a query to run a survival analysis"
+      operationId: "survivalAnalysis"
+      parameters:
+      - $ref: "#/parameters/survivalAnalysisRequest"
+
+      responses:
+        200:
+          $ref: "#/responses/survivalAnalysisResponse"
+        400:
+          $ref : "#/responses/badRequestResponse"
+        404:
+          $ref : "#/responses/notFoundResponse"
+        default:
+          $ref: '#/responses/errorResponse'
+      security:
+        - medco-jwt: ["medco-survival-analysis"]
+
+  /node/explore/cohorts:
+    get:
+      tags:
+        - "medco-node"
+      summary: "Retrieve cohort names and patient set IDs"
+      operationId: "getCohorts"
+      parameters:
+        - in: "query"
+          name: "limit"
+          description: "Limits the number of records retrieved. If the provided value is 0, there is no limit."
+          type: "integer"
+          default: 10
+          minimum: 0
+      responses:
+        200:
+          $ref: '#/responses/getCohortsResponse'
+        default:
+          $ref: '#/responses/errorResponse'
+      security:
+        - medco-jwt: ["medco-explore"]
+
+  /node/explore/cohorts/{name}:
+    post:
+      tags:
+        - "medco-node"
+      summary: "Add a new cohort"
+      operationId: "postCohorts"
+      parameters:
+        - in: "path"
+          name: "name"
+          description: "Name of the cohort to update"
+          required: true
+          type: "string"
+          pattern: '^\w+$'
+        - $ref: '#/parameters/cohortsRequest'
+
+      responses:
+        200:
+          description: "Updated cohort"
+        400:
+          $ref : "#/responses/badRequestResponse"
+        404:
+          $ref : "#/responses/notFoundResponse"
+        409:
+          $ref : "#/responses/conflictResponse"
+        default:
+          $ref: '#/responses/errorResponse'
+      security:
+        - medco-jwt: ["medco-explore"]
+
+    put:
+      tags:
+        - "medco-node"
+      summary: "Update a cohort"
+      operationId: "putCohorts"
+      parameters:
+        - in: "path"
+          name: "name"
+          description: "Name of the cohort to update"
+          required: true
+          type: "string"
+          pattern: '^\w+$'
+        - $ref: '#/parameters/cohortsRequest'
+
+      responses:
+        200:
+          description: "Updated cohort"
+        400:
+          $ref : "#/responses/badRequestResponse"
+        404:
+          $ref : "#/responses/notFoundResponse"
+        409:
+          $ref : "#/responses/conflictResponse"
+        default:
+          $ref: '#/responses/errorResponse'
+      security:
+        - medco-jwt: ["medco-explore"]
+
+    delete:
+      tags:
+        - "medco-node"
+      summary: "Delete a cohort if it exists"
+      operationId: "deleteCohorts"
+      parameters:
+        - in: "path"
+          description: "Name of the cohort to delete"
+          required: true
+          name: "name"
+          type: "string"
+          pattern: '^\w+$'
+      responses:
+        200:
+          description: "Deleted cohort"
+        404:
+          $ref : '#/responses/notFoundResponse'
+        default:
+          $ref: '#/responses/errorResponse'
+      security:
+        - medco-jwt: ["medco-explore"]
+
 
 securityDefinitions:
   medco-jwt:
@@ -242,10 +365,114 @@ parameters:
           pattern: '^[\w:-]+$'
         query:
           $ref: "#/definitions/exploreQuery"
+  cohortsRequest:
+    in: "body"
+    description: "Cohort that has been updated or created"
+    name: "cohortRequest"
+    required: true
+    schema:
+      type: "object"
+      properties:
+        patientSetID:
+          type: "integer"
+        creationDate:
+          type: "string"
+        updateDate:
+          type: "string"
+      required:
+        - patientSetID
+        - creationDate
+        - updateDate
+
+  survivalAnalysisRequest:
+    in: "body"
+    description: "User public key, patient list and time codes strings for the survival analysis"
+    name: "body"
+    required: true
+    schema:
+      type: "object"
+      properties:
+        ID:
+          type: "string"
+          pattern: '^[\w:-]+$'
+        userPublicKey:
+          type: "string"
+          pattern: '^[\w=-]+$'
+        cohortName:
+          type: "string"
+          pattern: '^\w+$'
+        subGroupDefinitions:
+          type : "array"
+          items:
+            type: "object"
+            properties:
+              groupName:
+                type: "string"
+                pattern: '^\w+$'
+              panels:
+                type: "array"
+                items:
+                  $ref: '#/definitions/panel'
+          maxItems: 4
+        timeLimit:
+          type: "integer"
+          minimum: 1
+        timeGranularity:
+          type: "string"
+          enum:
+            - day
+            - week
+            - month
+            - year
+          default: "day"
+        startConcept:
+          type: "string"
+          pattern: '^\/$|^((\/[^\/]+)+\/?)$'
+        startModifier:
+          type: "string"
+        endConcept:
+          type: "string"
+          pattern: '^\/$|^((\/[^\/]+)+\/?)$'
+        endModifier:
+          type: "string"
+      required:
+        - ID
+        - userPublicKey
+        - cohortName
+        - timeLimit
+        - timeGranularity
+        - startConcept
+        - startModifier
+        - endConcept
+        - endModifier
 
 responses:
   errorResponse:
     description: "Error response."
+    schema:
+      type: "object"
+      properties:
+        message:
+          type: "string"
+
+  notFoundResponse:
+    description: "Not found."
+    schema:
+      type: "object"
+      properties:
+        message:
+          type: "string"
+
+  conflictResponse:
+    description: "Conflict with resource's state."
+    schema:
+      type: "object"
+      properties:
+        message:
+          type: "string"
+
+  badRequestResponse:
+    description: "Bad user input in request."
     schema:
       type: "object"
       properties:
@@ -311,6 +538,55 @@ responses:
           $ref: "#/definitions/exploreQuery"
         result:
           $ref: "#/definitions/exploreQueryResultElement"
+
+  getCohortsResponse:
+    description: "Queried cohorts"
+    schema:
+      type: "array"
+      items:
+        type: "object"
+        properties:
+          cohortId:
+            type: "integer"
+          queryId:
+            type: "integer"
+          cohortName:
+            type: "string"
+          creationDate:
+            type: "string"
+          updateDate:
+            type: "string"
+
+  survivalAnalysisResponse:
+    description: "Queried survival analysis"
+    schema:
+      type: "object"
+      properties:
+        results:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              groupID:
+                type: "string"
+              initialCount:
+                type: "string"
+              groupResults:
+                type : "array"
+                items:
+                  type: "object"
+                  properties:
+                    timepoint:
+                      type: "integer"
+                    events:
+                      type: "object"
+                      properties:
+                        eventofinterest:
+                          type: "string"
+                        censoringevent:
+                          type: "string"
+        timers:
+          $ref: "#/definitions/timers"
 
 definitions:
   exploreSearchConcept:
@@ -385,8 +661,6 @@ definitions:
   exploreQuery:
     description: "MedCo-Explore query"
     properties:
-      type:
-        $ref: "#/definitions/exploreQueryType"
       userPublicKey:
         type: "string"
         pattern: '^[\w=-]+$'
@@ -394,35 +668,43 @@ definitions:
         type: "array"
         description: "i2b2 panels (linked by an AND)"
         items:
+          $ref: "#/definitions/panel"
+  panel:
+    type: "object"
+    required: [not]
+    properties:
+      not:
+        type: "boolean"
+        description: "exclude the i2b2 panel"
+      items:
+        type: "array"
+        description: "i2b2 items (linked by an OR)"
+        items:
           type: "object"
-          required: [not]
+          required: [encrypted, queryTerm]
           properties:
-            not:
+            queryTerm:
+              type: "string"
+              pattern: '^([\w=-]+)$|^((\/[^\/]+)+\/)$'
+            operator:
+              type: "string"
+              enum:
+                - exists
+                - equals
+            value:
+              type: "string"
+              maxLength: 0
+            modifier:
+              type: "object"
+              properties:
+                appliedPath:
+                  type: "string"
+                  pattern: '^((\/[^\/]+)+\/%?)$'
+                modifierKey:
+                  type: "string"
+                  pattern: '^((\/[^\/]+)+\/)$'
+            encrypted:
               type: "boolean"
-              description: "exclude the i2b2 panel"
-            items:
-              type: "array"
-              description: "i2b2 items (linked by an OR)"
-              items:
-                type: "object"
-                required: [encrypted, queryTerm]
-                properties:
-                  queryTerm:
-                    type: "string"
-                    pattern: '^([\w=-]+)$|^((\/[^\/]+)+\/?)$'
-                  operator:
-                    type: "string"
-                    enum:
-                      - exists
-                      - equals
-                  value:
-                    type: "string"
-                    maxLength: 0
-                  modifier:
-                    type: "string"
-                    pattern: '^([\w=-]+)$|^((\/[^\/]+)+\/?)$'
-                  encrypted:
-                    type: "boolean"
 
   exploreQueryType:
     type: "string"
@@ -451,17 +733,11 @@ definitions:
         type: "array"
         items:
           type: "string"
+      patientSetID:
+        type: "integer"
       timers:
-        type: "array"
-        items:
-          type: "object"
-          required: [milliseconds]
-          properties:
-            name:
-              type: "string"
-            milliseconds:
-              type: "integer"
-              format: "int64"
+        $ref: "#/definitions/timers"
+
 
   restApiAuthorization:
     type: "string"
@@ -469,6 +745,7 @@ definitions:
       - medco-network
       - medco-explore
       - medco-genomic-annotations
+      - medco-survival-analysis
 
   user:
     type: "object"
@@ -488,3 +765,15 @@ definitions:
             type: "array"
             items:
               $ref: "#/definitions/exploreQueryType"
+
+  timers:
+    type: "array"
+    items:
+      type: "object"
+      required: [milliseconds]
+      properties:
+        name:
+          type: "string"
+        milliseconds:
+          type: "integer"
+          format: "int64"

@@ -1,7 +1,11 @@
+// +build integration_test
+
 package i2b2
 
 import (
-	"github.com/ldsec/medco/connector/util/server"
+	"github.com/ldsec/medco/connector/restapi/models"
+	utilserver "github.com/ldsec/medco/connector/util/server"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -55,11 +59,81 @@ func TestGetOntologyModifierChildren(t *testing.T) {
 
 func TestExecutePsmQuery(t *testing.T) {
 
+	encrypted := true
+	queryTerm := `/SENSITIVE_TAGGED/medco/tagged/8d3533369426ae172271e98cef8be2bbfe9919087c776083b1ea1de803fc87aa/`
+	item := &models.PanelItemsItems0{
+		Encrypted: &encrypted,
+		QueryTerm: &queryTerm,
+	}
+
+	not := false
 	patientCount, patientSetID, err := ExecutePsmQuery(
 		"testQuery",
-		[][]string{{`\\SENSITIVE_TAGGED\medco\tagged\fa15afdd3ce192fffde16d4ed10690b206d7cc95bfce778797cc9a05c312a35d\`}},
-		[]bool{false},
-	)
+		[]*models.Panel{
+			{Items: []*models.PanelItemsItems0{
+				item,
+			},
+				Not: &not,
+			}})
+
+	if err != nil {
+		t.Fail()
+	}
+	t.Log("count:"+patientCount, "set ID:"+patientSetID)
+}
+
+func TestExecutePsmQueryWithModifiers(t *testing.T) {
+
+	encrypted := false
+	queryTerm := `/E2ETEST/e2etest/1/`
+	modifier := models.PanelItemsItems0Modifier{
+		AppliedPath: `/e2etest/1/`,
+		ModifierKey: `/E2ETEST/modifiers/1/`,
+	}
+
+	item := &models.PanelItemsItems0{
+		Encrypted: &encrypted,
+		QueryTerm: &queryTerm,
+		Modifier:  &modifier,
+	}
+
+	not := false
+	patientCount, patientSetID, err := ExecutePsmQuery(
+		"testQuery",
+		[]*models.Panel{
+			{Items: []*models.PanelItemsItems0{
+				item,
+			},
+				Not: &not,
+			}})
+
+	if err != nil {
+		t.Fail()
+	}
+	t.Log("count:"+patientCount, "set ID:"+patientSetID)
+
+	// testing with modifier folder -------
+	queryTerm = `/E2ETEST/e2etest/3/`
+	modifier = models.PanelItemsItems0Modifier{
+		AppliedPath: `/e2etest/%`,
+		ModifierKey: `/E2ETEST/modifiers/`,
+	}
+
+	item = &models.PanelItemsItems0{
+		Encrypted: &encrypted,
+		QueryTerm: &queryTerm,
+		Modifier:  &modifier,
+	}
+
+	patientCount, patientSetID, err = ExecutePsmQuery(
+		"testQuery",
+		[]*models.Panel{
+			{Items: []*models.PanelItemsItems0{
+				item,
+			},
+				Not: &not,
+			}})
+
 	if err != nil {
 		t.Fail()
 	}
@@ -68,10 +142,37 @@ func TestExecutePsmQuery(t *testing.T) {
 
 func TestGetPatientSet(t *testing.T) {
 
-	patientIDs, patientDummyFlags, err := GetPatientSet("9")
+	patientIDs, patientDummyFlags, err := GetPatientSet("9", false)
 	if err != nil {
 		t.Fail()
 	}
 	t.Log(patientIDs)
 	t.Log(patientDummyFlags)
+}
+
+func TestGetOntologyTermInfo(t *testing.T) {
+
+	results, err := GetOntologyTermInfo("/E2ETEST/e2etest/")
+	assert.NoError(t, err)
+	assert.NotEmpty(t, results)
+	res := results[0]
+	assert.Equal(t, termInfo1.Code, res.Code)
+	assert.Equal(t, termInfo1.DisplayName, res.DisplayName)
+	assert.Equal(t, *termInfo1.Leaf, *res.Leaf)
+	assert.Equal(t, termInfo1.Name, res.Name)
+	assert.Equal(t, termInfo1.Path, res.Path)
+	assert.Equal(t, termInfo1.Type, res.Type)
+	assert.NotNil(t, res.MedcoEncryption)
+
+}
+
+var falseBool bool = false
+
+var termInfo1 = &models.ExploreSearchResultElement{
+	Code:        "",
+	DisplayName: "End-To-End Test",
+	Leaf:        &falseBool,
+	Name:        "End-To-End Test",
+	Path:        "/E2ETEST/e2etest/",
+	Type:        "concept_container",
 }

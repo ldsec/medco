@@ -59,3 +59,16 @@ func RetrieveAccessToken(username string, password string, disableTLSCheck bool)
 	logrus.Debug("OIDC request token: " + parsedResp.AccessToken)
 	return parsedResp.AccessToken, nil
 }
+
+// RetrieveOrGetNewAccessToken requests JWT from OIDC provider if given token is empty
+func RetrieveOrGetNewAccessToken(token string, username string, password string, disableTLSCheck bool) (accessToken string, err error) {
+
+	if len(token) > 0 {
+		accessToken = token
+		return
+	}
+	logrus.Debug("No token provided, requesting token for user ", username, ", disable TLS check: ", disableTLSCheck)
+	accessToken, err = RetrieveAccessToken(username, password, disableTLSCheck)
+	return
+
+}

@@ -4,33 +4,26 @@ set -Eeuo pipefail
 USERNAME=${1:-test}
 PASSWORD=${2:-test}
 
-# test1 / note: expected without any \n, \r, \t, nor space
-searchConceptChildren1="/"
-resultSearchConceptChildren1="PATHAPPLIED_PATHTYPE/I2B2/I2B2/@concept_container/CLINICAL_NON_SENSITIVE/medco/clinical/nonsensitive/@concept_container/CLINICAL_SENSITIVE/medco/clinical/sensitive/@concept_container/GENOMIC/medco/genomic/@concept_container/SPHN/SPHNv2020.1/@concept_container"
-
-searchConceptChildren2="/E2ETEST/e2etest/"
-resultSearchConceptChildren2="PATHAPPLIED_PATHTYPE/E2ETEST/e2etest/1/@concept/E2ETEST/e2etest/2/@concept/E2ETEST/e2etest/3/@concept/E2ETEST/modifiers//e2etest/%modifier_folder"
-
-searchModifierChildren="/E2ETEST/modifiers/ /e2etest/% /E2ETEST/e2etest/1/"
-resultSearchModifierChildren="PATHTYPE/E2ETEST/modifiers/1/modifier"
-
-# test2
-query1="1 AND 2"
-resultQuery1="$(printf -- "count\n8\n8\n8")"
-query2="6 OR 16 AND 8"
+# test1
+query1="enc::1 AND enc::2"
+resultQuery1a="$(printf -- "count\n8\n8\n8")"
+resultQuery1b="$(printf -- "count\n24\n24\n24")"
+query2="enc::6 OR enc::16 AND enc::8"
 resultQuery2="$(printf -- "count\n5\n5\n5")"
-query3="5 AND 10 AND 15"
+query3="enc::5 AND enc::10 AND enc::15"
 resultQuery3="$(printf -- "count\n3\n3\n3")"
-query4="4 OR 11 OR 17"
+query4="enc::4 OR enc::11 OR enc::17"
 resultQuery4="$(printf -- "count\n7\n7\n7")"
-query5="3 OR 6 AND 9 AND 12 OR 15"
+query5="enc::3 OR enc::6 AND enc::9 AND enc::12 OR enc::15"
 resultQuery5="$(printf -- "count\n2\n2\n2")"
 
-# test3 / note: expected without any \n, \r, \t, nor space
+# test2
 variantNameGetValuesValue="5238"
-variantNameGetValuesResult="16:75238144:C>C6:52380882:G>G"
+variantNameGetValuesResult="16:75238144:C>C
+                            6:52380882:G>G"
 proteinChangeGetValuesValue="g32"
-proteinChangeGetValuesResult="G325RG32E"
+proteinChangeGetValuesResult="G325R
+                              G32E"
 proteinChangeGetValuesValue2="7cfs*"
 proteinChangeGetValuesResult2="S137Cfs*28"
 hugoGeneSymbolGetValuesValue="tr5"
@@ -41,13 +34,16 @@ variantNameGetVariantsResult="-4530899676219565056"
 proteinChangeGetVariantsValue="G325R"
 proteinChangeGetVariantsResult="-2429151887266669568"
 hugoGeneSymbolGetVariantsValue="HTR5A"
-hugoGeneSymbolGetVariantsResult1="-7039476204566471680-7039476580443220992-7039476780159200256"
-hugoGeneSymbolGetVariantsResult2="-7039476204566471680-7039476580443220992"
+hugoGeneSymbolGetVariantsResult1="-7039476204566471680
+                                  -7039476580443220992
+                                  -7039476780159200256"
+hugoGeneSymbolGetVariantsResult2="-7039476204566471680
+                                  -7039476580443220992"
 hugoGeneSymbolGetVariantsResult3="-7039476780159200256"
 
 test1 () {
-  docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /results/result.csv $1 $2
-  result="$(cat deployments/result.csv | tr -d '\r\n\t ')"
+ docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv $1 $2
+  result="$(awk -F "\"*,\"*" '{print $2}' ../result.csv)"
   if [ "${result}" != "${3}" ];
   then
   echo "$1 $2: test failed"
@@ -57,19 +53,19 @@ test1 () {
 }
 
 test2 () {
- docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /results/result.csv $1 $2
-  result="$(awk -F "\"*,\"*" '{print $2}' deployments/result.csv)"
-  if [ "${result}" != "${3}" ];
+ docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv $1 $2
+  result="$(awk -F "\"*,\"*" '{print $2}' ../result.csv)"
+  if [ "${result}" == "${3}" ];
   then
-  echo "$1 $2: test failed"
+  echo "$1 $2: WARNING - result is the same"
   echo "result: ${result}" && echo "expected result: ${3}"
-  exit 1
   fi
 }
 
 test3 () {
-  result="$(docker-compose -f deployments/dev-local-3nodes/docker-compose.tools.yml run -e LOG_LEVEL=1 -e CONN_TIMEOUT=10m medco-cli-client --user $USERNAME --password $PASSWORD $1 $2 | tr -d '\r\n\t ')"
-  if [ "${result}" != "${3}" ];
+  result="$(docker-compose -f docker-compose.tools.yml run -e LOG_LEVEL=1 -e CONN_TIMEOUT=10m medco-cli-client --user $USERNAME --password $PASSWORD $1 $2 | tr -d '\r\n\t ')"
+  expectedResult="$(echo "${3}" | tr -d '\r\n\t ')"
+  if [ "${result}" != "${expectedResult}" ];
   then
   echo "$1 $2: test failed"
   echo "result: ${result}" && echo "expected result: ${3}"
@@ -77,24 +73,25 @@ test3 () {
   fi
 }
 
-echo "Testing concept-children..."
+pushd deployments/dev-local-3nodes/
 
-test1 "concept-children" "${searchConceptChildren1}" "${resultSearchConceptChildren1}"
-test1 "concept-children" "${searchConceptChildren2}" "${resultSearchConceptChildren2}"
+echo "Testing query with genomic data..."
+USERNAME="${1:-test}_explore_patient_list"
 
-echo "Testing modifier-children..."
+test1 "query " "${query1}" "${resultQuery1a}"
+test1 "query " "${query2}" "${resultQuery2}"
+test1 "query " "${query3}" "${resultQuery3}"
+test1 "query " "${query4}" "${resultQuery4}"
+test1 "query " "${query5}" "${resultQuery5}"
 
-test1 "modifier-children" "${searchModifierChildren}" "${resultSearchModifierChildren}"
+USERNAME="${1:-test}_explore_count_global"
+test1 "query " "${query1}" "${resultQuery1b}"
 
-echo "Testing query..."
-
-test2 "query patient_list" "${query1}" "${resultQuery1}"
-test2 "query patient_list" "${query2}" "${resultQuery2}"
-test2 "query patient_list" "${query3}" "${resultQuery3}"
-test2 "query patient_list" "${query4}" "${resultQuery4}"
-test2 "query patient_list" "${query5}" "${resultQuery5}"
+USERNAME="${1:-test}_explore_count_global_obfuscated"
+test2 "query " "${query1}" "${resultQuery1b}"
 
 echo "Testing ga-get-values..."
+USERNAME=${1:-test}
 
 test3 "ga-get-values variant_name" "${variantNameGetValuesValue}" "${variantNameGetValuesResult}"
 test3 "ga-get-values protein_change" "${proteinChangeGetValuesValue}" "${proteinChangeGetValuesResult}"
@@ -113,5 +110,6 @@ test3 "ga-get-variant --z "heterozygous\|unknown" hugo_gene_symbol" "${hugoGeneS
 test3 "ga-get-variant --z "homozygous\|unknown" hugo_gene_symbol" "${hugoGeneSymbolGetVariantsValue}" "${hugoGeneSymbolGetVariantsResult3}"
 test3 "ga-get-variant --z "heterozygous\|homozygous\|unknown" hugo_gene_symbol" "${hugoGeneSymbolGetVariantsValue}" "${hugoGeneSymbolGetVariantsResult1}"
 
-echo "CLI test successful!"
+echo "CLI test 2/2 successful!"
+popd
 exit 0

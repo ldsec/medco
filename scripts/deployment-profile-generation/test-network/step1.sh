@@ -20,7 +20,7 @@ PRIV_KEY="${5-}"
 # convenience variables
 PROFILE_NAME="test-network-${NETWORK_NAME}-node${NODE_IDX}"
 SCRIPT_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-MEDCO_UNLYNX_VER="v1.0.0"
+MEDCO_DOCKER="ghcr.io/ldsec/medco:$(make --no-print-directory -C ../../../ medco_version)"
 COMPOSE_FOLDER="${SCRIPT_FOLDER}/../../../deployments/${PROFILE_NAME}"
 CONF_FOLDER="${COMPOSE_FOLDER}/configuration"
 if [[ -d ${COMPOSE_FOLDER} ]]; then
@@ -43,12 +43,12 @@ echo -n "${NODE_DNS_NAME}" > "${CONF_FOLDER}/srv${NODE_IDX}-nodednsname.txt"
 # ===================== unlynx keys =========================
 echo "### Generating unlynx keys"
 if [[ -z ${PUB_KEY} ]]; then
-    docker run -v "$CONF_FOLDER:/medco-configuration" -u "$(id -u):$(id -g)" "medco/medco-unlynx:${MEDCO_UNLYNX_VER}" \
+    docker run -v "$CONF_FOLDER:/medco-configuration" -u "$(id -u):$(id -g)" "${MEDCO_DOCKER}" medco-unlynx \
         server setupNonInteractive --serverBinding "${NODE_DNS_NAME}:2000" --description "${PROFILE_NAME}_medco_unlynx_server" \
         --privateTomlPath "/medco-configuration/srv${NODE_IDX}-private.toml" \
         --publicTomlPath "/medco-configuration/srv${NODE_IDX}-public.toml"
 else
-    docker run -v "$CONF_FOLDER:/medco-configuration" -u "$(id -u):$(id -g)" "medco/medco-unlynx:${MEDCO_UNLYNX_VER}" \
+    docker run -v "$CONF_FOLDER:/medco-configuration" -u "$(id -u):$(id -g)" "${MEDCO_DOCKER}" medco-unlynx \
         server setupNonInteractive --serverBinding "${NODE_DNS_NAME}:2000" --description "${PROFILE_NAME}_medco_unlynx_server" \
         --privateTomlPath "/medco-configuration/srv${NODE_IDX}-private.toml" \
         --publicTomlPath "/medco-configuration/srv${NODE_IDX}-public.toml" \
@@ -97,7 +97,7 @@ echo "### Certificate generated!"
 
 # ===================== compose profile =====================
 echo "### Generating compose profile"
-cp "${SCRIPT_FOLDER}/docker-compose.yml" "${SCRIPT_FOLDER}/docker-compose.tools.yml" "${COMPOSE_FOLDER}/"
+cp "${SCRIPT_FOLDER}/docker-compose.yml" "${SCRIPT_FOLDER}/docker-compose.tools.yml" "${SCRIPT_FOLDER}/Makefile" "${COMPOSE_FOLDER}/"
 cat > "${COMPOSE_FOLDER}/.env" <<EOF
 MEDCO_NODE_DNS_NAME=${NODE_DNS_NAME}
 MEDCO_NODE_IDX=${NODE_IDX}

@@ -4,7 +4,7 @@ on:
     branches:
       - 'dev'
     tags:
-      - 'v*.*.*'
+      - '*'
   pull_request:
 
 jobs:
@@ -37,7 +37,7 @@ jobs:
       - name: Get MedCo version
         id: get_version
         run: |
-          VERSION=$(make version)
+          VERSION=$(make medco_version)
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/}
           fi
@@ -47,6 +47,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           file: ./build/package/medco/Dockerfile
+          build-args: MEDCO_VERSION=${{ steps.get_version.outputs.version }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ghcr.io/ldsec/medco:${{ steps.get_version.outputs.version }}
           cache-from: type=local,src=/tmp/.buildx-cache

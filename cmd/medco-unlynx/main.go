@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/ldsec/medco"
 	"os"
 
 	"github.com/ldsec/unlynx/lib"
@@ -14,9 +15,6 @@ import (
 const (
 	// BinaryName is the name of the binary
 	BinaryName = "medco-unlynx"
-
-	// Version of the binary
-	Version = "1.00"
 
 	// DefaultGroupFile is the name of the default file to lookup for group definition
 	DefaultGroupFile = "group.toml"
@@ -67,7 +65,7 @@ func main() {
 	cliApp := cli.NewApp()
 	cliApp.Name = "medco-unlynx"
 	cliApp.Usage = "Query medical information securely and privately"
-	cliApp.Version = Version
+	cliApp.Version = medco.Version
 
 	binaryFlags := []cli.Flag{
 		cli.IntFlag{

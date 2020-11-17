@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/ldsec/medco"
 	"github.com/urfave/cli"
 	"os"
 
@@ -105,6 +106,7 @@ func main() {
 	cliApp := cli.NewApp()
 	cliApp.Name = "MedCo Loader"
 	cliApp.Usage = "Software tool to manipulate i2b2/medco data"
+	cliApp.Version = medco.Version
 
 	binaryFlags := []cli.Flag{
 		cli.IntFlag{

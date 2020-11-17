@@ -1,3 +1,5 @@
+// +build unit_test
+
 package main
 
 import (
@@ -12,7 +14,7 @@ import (
 	"github.com/go-openapi/runtime/security"
 
 	"github.com/ldsec/medco/connector/restapi/models"
-	"github.com/ldsec/medco/connector/util/server"
+	utilserver "github.com/ldsec/medco/connector/util/server"
 
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/runtime"
@@ -75,7 +77,6 @@ type exploreQueryRequest struct {
 }
 
 type exploreQuery struct {
-	Type    string  `json:"type"`
 	UserPub string  `json:"userPublicKey"`
 	Panels  []panel `json:"panels"`
 }
@@ -100,7 +101,7 @@ type teqTests struct {
 func eqValid() exploreQueryRequest {
 	return exploreQueryRequest{
 		"id", exploreQuery{
-			"patient_list", "userPub", []panel{
+			"userPub", []panel{
 				{false, []item{
 					{"queryTerm", "exists", "", false},
 				}},
@@ -115,19 +116,18 @@ func TestExploreQuery(t *testing.T) {
 	}
 	tests[1].query.ID = "123@"
 	tests[2].query.Query.UserPub = "123@"
-	tests[3].query.Query.Type = "non-enum"
-	tests[4].query.Query.Panels[0].Items[0].Value = "something"
-	tests[5].query.Query.Panels[0].Items[0].Operator = "non-enum"
-	tests[6].query.Query.Panels[0].Items[0].QueryTerm = "word@"
-	tests[7].query.Query.Panels[0].Items[0].QueryTerm = "abc/def"
-	tests[8].query.Query.Panels[0].Items[0].QueryTerm = "abc/def/"
-	tests[9].query.Query.Panels[0].Items[0].QueryTerm = "/abc/def//"
-	for i := 0; i < 3; i++ {
+	tests[3].query.Query.Panels[0].Items[0].Value = "something"
+	tests[4].query.Query.Panels[0].Items[0].Operator = "non-enum"
+	tests[5].query.Query.Panels[0].Items[0].QueryTerm = "word@"
+	tests[6].query.Query.Panels[0].Items[0].QueryTerm = "abc/def"
+	tests[7].query.Query.Panels[0].Items[0].QueryTerm = "abc/def/"
+	tests[8].query.Query.Panels[0].Items[0].QueryTerm = "/abc/def//"
+	tests[9].query.Query.Panels[0].Items[0].QueryTerm = "/abc/def"
+	for i := 0; i < 2; i++ {
 		tests = append(tests, teqTests{true, eqValid()})
 	}
 	tests[10].query.Query.Panels[0].Items[0].QueryTerm = "word=-word"
-	tests[11].query.Query.Panels[0].Items[0].QueryTerm = "/abc/def"
-	tests[12].query.Query.Panels[0].Items[0].QueryTerm = "/abc123@/def123@/"
+	tests[11].query.Query.Panels[0].Items[0].QueryTerm = "/abc123@/def123@/"
 
 	for _, test := range tests {
 		body, err := json.Marshal(test.query)
@@ -222,7 +222,7 @@ func TestGenomicVariants(t *testing.T) {
 }
 
 func TestAuthorizations(t *testing.T) {
-	spec, api := getApi()
+	spec, api := getAPI()
 	api.Init()
 	var authorized bool
 
@@ -293,7 +293,7 @@ func TestAuthorizations(t *testing.T) {
 		{true, "", "/genomic-annotations/abc/123",
 			models.RestAPIAuthorizationMedcoGenomicAnnotations},
 	} {
-		ctx, req := getContextRequestFromApi(t, spec, api,
+		ctx, req := getContextRequestFromAPI(t, spec, api,
 			test.method, test.path, "")
 		req.Header.Set("Authorization", string(test.restAPI))
 		route, ok := ctx.LookupRoute(req)
@@ -306,12 +306,12 @@ func TestAuthorizations(t *testing.T) {
 
 func getContextRequest(t *testing.T,
 	method, p, str string) (*middleware.Context, *http.Request) {
-	spec, api := getApi()
+	spec, api := getAPI()
 	api.Init()
-	return getContextRequestFromApi(t, spec, api, method, p, str)
+	return getContextRequestFromAPI(t, spec, api, method, p, str)
 }
 
-func getContextRequestFromApi(t *testing.T, spec *loads.Document,
+func getContextRequestFromAPI(t *testing.T, spec *loads.Document,
 	api *operations.MedcoConnectorAPI, method, p,
 	str string) (*middleware.Context, *http.Request) {
 	ctx := middleware.NewContext(spec, nil,
@@ -325,7 +325,7 @@ func getContextRequestFromApi(t *testing.T, spec *loads.Document,
 	return ctx, req
 }
 
-func getApi() (*loads.Document, *operations.MedcoConnectorAPI) {
+func getAPI() (*loads.Document, *operations.MedcoConnectorAPI) {
 	swaggerSpec, err := loads.Embedded(server.SwaggerJSON, server.FlatSwaggerJSON)
 	if err != nil {
 		log.Fatal(err)
