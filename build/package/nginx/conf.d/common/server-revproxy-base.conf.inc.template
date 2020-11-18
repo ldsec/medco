@@ -27,17 +27,22 @@ proxy_no_cache $cookie_session;
 proxy_buffers 32 4k;
 
 location /auth {
+    include /etc/nginx/conf.d/common/security-headers.inc;
+    include /etc/nginx/conf.d/common/no-cache-headers.inc;
     set $upstream_host keycloak;
     proxy_pass http://$upstream_host:8080;
 }
 
 location /glowing-bear {
+    include /etc/nginx/conf.d/common/security-headers.inc;
     set $upstream_host glowing-bear-medco;
     proxy_pass http://$upstream_host;
 }
 
 location /medco {
+    include /etc/nginx/conf.d/common/security-headers.inc;
     include /etc/nginx/conf.d/common/cors.inc;
+    include /etc/nginx/conf.d/common/no-cache-headers.inc;
     set $upstream_host medco-connector;
     proxy_pass http://$upstream_host:1999;
 }
