@@ -621,6 +621,8 @@ definitions:
     properties:
       path:
         type: "string"
+      appliedPath:
+        type: "string"
       name:
         type: "string"
       displayName:

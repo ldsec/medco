@@ -19,6 +19,9 @@ import (
 // swagger:model exploreSearchResultElement
 type ExploreSearchResultElement struct {
 
+	// applied path
+	AppliedPath string `json:"appliedPath,omitempty"`
+
 	// code
 	Code string `json:"code,omitempty"`
 
