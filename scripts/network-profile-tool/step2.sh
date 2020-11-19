@@ -8,14 +8,14 @@ if [[ $# -ne 2 && $# -ne 3 ]]; then
     exit 1
 fi
 NETWORK_NAME="$1"
-NODE_IDX="$2"
+NODE_IDX=$(printf "%03d" "$2") # padding to 3 digits
 SECRETS="${3-}"
 
 # convenience variables
-PROFILE_NAME="test-network-${NETWORK_NAME}-node${NODE_IDX}"
+PROFILE_NAME="network-${NETWORK_NAME}-node${NODE_IDX}"
 SCRIPT_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-MEDCO_DOCKER="ghcr.io/ldsec/medco:$(make --no-print-directory -C ../../../ medco_version)"
-COMPOSE_FOLDER="${SCRIPT_FOLDER}/../../../deployments/${PROFILE_NAME}"
+MEDCO_DOCKER="ghcr.io/ldsec/medco:$(make --no-print-directory -C ../../ medco_version)"
+COMPOSE_FOLDER="${SCRIPT_FOLDER}/../../deployments/${PROFILE_NAME}"
 CONF_FOLDER="${COMPOSE_FOLDER}/configuration"
 if [[ ! -d ${CONF_FOLDER} ]] || [[ ! -d ${COMPOSE_FOLDER} ]] || [[ -f ${CONF_FOLDER}/group.toml ]]; then
     echo "The compose or configuration profile folder does not exist, or the step 2 has already been executed. Aborting."
@@ -56,7 +56,6 @@ echo "### secrets generated"
 echo "### Updating compose profile"
 declare -a MEDCO_NODES_URL OIDC_JWKS_URLS OIDC_JWT_ISSUERS OIDC_CLIENT_IDS OIDC_JWT_USER_ID_CLAIMS
 pushd "${CONF_FOLDER}"
-# todo: the ls is doing the sorting OK up to 9 nodes, but not after that (e.g. if 10 is present it will come right after 1)
 ITER_IDX=0
 for nodednsname in srv*-nodednsname.txt; do
   MEDCO_NODES_URL+=("https://$(<"${nodednsname}")/medco")
@@ -69,7 +68,7 @@ for nodednsname in srv*-nodednsname.txt; do
 done
 popd
 
-export IFS=, # todo: this export might affect some commands executed after if they exist
+export IFS=,
 cat >> "${COMPOSE_FOLDER}/.env" <<EOF
 MEDCO_NODES_URL=${MEDCO_NODES_URL[*]}
 OIDC_JWKS_URLS=${OIDC_JWKS_URLS[*]}
