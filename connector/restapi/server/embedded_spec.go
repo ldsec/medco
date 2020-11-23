@@ -531,6 +531,9 @@ func init() {
             "$ref": "#/definitions/panel"
           }
         },
+        "queryTiming": {
+          "$ref": "#/definitions/timing"
+        },
         "userPublicKey": {
           "type": "string",
           "pattern": "^[\\w=-]+$"
@@ -728,6 +731,9 @@ func init() {
         "not": {
           "description": "exclude the i2b2 panel",
           "type": "boolean"
+        },
+        "panelTiming": {
+          "$ref": "#/definitions/timing"
         }
       }
     },
@@ -757,6 +763,15 @@ func init() {
           }
         }
       }
+    },
+    "timing": {
+      "type": "string",
+      "default": "any",
+      "enum": [
+        "any",
+        "samevisit",
+        "sameinstancenum"
+      ]
     },
     "user": {
       "type": "object",
@@ -2300,6 +2315,9 @@ func init() {
             "$ref": "#/definitions/panel"
           }
         },
+        "queryTiming": {
+          "$ref": "#/definitions/timing"
+        },
         "userPublicKey": {
           "type": "string",
           "pattern": "^[\\w=-]+$"
@@ -2461,6 +2479,9 @@ func init() {
         "not": {
           "description": "exclude the i2b2 panel",
           "type": "boolean"
+        },
+        "panelTiming": {
+          "$ref": "#/definitions/timing"
         }
       }
     },
@@ -2478,6 +2499,15 @@ func init() {
       "items": {
         "$ref": "#/definitions/TimersItems0"
       }
+    },
+    "timing": {
+      "type": "string",
+      "default": "any",
+      "enum": [
+        "any",
+        "samevisit",
+        "sameinstancenum"
+      ]
     },
     "user": {
       "type": "object",

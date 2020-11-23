@@ -669,6 +669,8 @@ definitions:
         description: "i2b2 panels (linked by an AND)"
         items:
           $ref: "#/definitions/panel"
+      queryTiming:
+        $ref: "#/definitions/timing"
   panel:
     type: "object"
     required: [not]
@@ -705,6 +707,8 @@ definitions:
                   pattern: '^((\/[^\/]+)+\/)$'
             encrypted:
               type: "boolean"
+      panelTiming:
+        $ref: "#/definitions/timing"
 
   exploreQueryType:
     type: "string"
@@ -765,6 +769,14 @@ definitions:
             type: "array"
             items:
               $ref: "#/definitions/exploreQueryType"
+  
+  timing:
+    type: string
+    enum:
+      - any
+      - samevisit
+      - sameinstancenum
+    default: "any"
 
   timers:
     type: "array"

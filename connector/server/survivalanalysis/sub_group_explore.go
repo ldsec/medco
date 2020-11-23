@@ -1,15 +1,16 @@
 package survivalserver
 
 import (
+	"strconv"
+
 	"github.com/ldsec/medco/connector/restapi/models"
 	"github.com/ldsec/medco/connector/wrappers/i2b2"
-	"strconv"
 )
 
 // SubGroupExplore executes an I2B2 Explore query with panels
 func SubGroupExplore(queryName string, subGroupIndex int, panels []*models.Panel) (int64, []int64, error) {
 
-	patientCount, patientSetID, err := i2b2.ExecutePsmQuery(queryName+"_SUBGROUP_"+strconv.Itoa(subGroupIndex), panels)
+	patientCount, patientSetID, err := i2b2.ExecutePsmQuery(queryName+"_SUBGROUP_"+strconv.Itoa(subGroupIndex), panels, "ANY")
 	if err != nil {
 		return 0, nil, err
 	}
