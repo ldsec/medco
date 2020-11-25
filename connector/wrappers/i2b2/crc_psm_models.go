@@ -3,14 +3,15 @@ package i2b2
 import (
 	"encoding/xml"
 	"errors"
-	"github.com/ldsec/medco/connector/restapi/models"
-	"github.com/ldsec/medco/connector/util/server"
 	"strconv"
 	"strings"
+
+	"github.com/ldsec/medco/connector/restapi/models"
+	utilserver "github.com/ldsec/medco/connector/util/server"
 )
 
 // NewCrcPsmReqFromQueryDef returns a new request object for i2b2 psm request
-func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, resultOutputs []ResultOutputName) Request {
+func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, resultOutputs []ResultOutputName, queryTiming models.Timing) Request {
 
 	// PSM header
 	psmHeader := PsmHeader{
@@ -32,7 +33,7 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, res
 		QueryName:        queryName,
 		QueryID:          queryName,
 		QueryDescription: "Query from MedCo connector (" + queryName + ")",
-		QueryTiming:      "ANY",
+		QueryTiming:      strings.ToUpper(string(queryTiming)),
 		SpecificityScale: "0",
 	}
 
@@ -48,7 +49,7 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, res
 			PanelNumber:          strconv.Itoa(p + 1),
 			PanelAccuracyScale:   "100",
 			Invert:               invert,
-			PanelTiming:          "ANY",
+			PanelTiming:          strings.ToUpper(string(queryPanel.PanelTiming)),
 			TotalItemOccurrences: "1",
 		}
 

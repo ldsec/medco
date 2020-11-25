@@ -22,6 +22,9 @@ type ExploreQuery struct {
 	// i2b2 panels (linked by an AND)
 	Panels []*Panel `json:"panels"`
 
+	// query timing
+	QueryTiming Timing `json:"queryTiming,omitempty"`
+
 	// user public key
 	// Pattern: ^[\w=-]+$
 	UserPublicKey string `json:"userPublicKey,omitempty"`
@@ -32,6 +35,10 @@ func (m *ExploreQuery) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validatePanels(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateQueryTiming(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -65,6 +72,22 @@ func (m *ExploreQuery) validatePanels(formats strfmt.Registry) error {
 			}
 		}
 
+	}
+
+	return nil
+}
+
+func (m *ExploreQuery) validateQueryTiming(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.QueryTiming) { // not required
+		return nil
+	}
+
+	if err := m.QueryTiming.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("queryTiming")
+		}
+		return err
 	}
 
 	return nil

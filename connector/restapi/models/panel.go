@@ -26,6 +26,9 @@ type Panel struct {
 	// exclude the i2b2 panel
 	// Required: true
 	Not *bool `json:"not"`
+
+	// panel timing
+	PanelTiming Timing `json:"panelTiming,omitempty"`
 }
 
 // Validate validates this panel
@@ -37,6 +40,10 @@ func (m *Panel) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateNot(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validatePanelTiming(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -74,6 +81,22 @@ func (m *Panel) validateItems(formats strfmt.Registry) error {
 func (m *Panel) validateNot(formats strfmt.Registry) error {
 
 	if err := validate.Required("not", "body", m.Not); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Panel) validatePanelTiming(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.PanelTiming) { // not required
+		return nil
+	}
+
+	if err := m.PanelTiming.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("panelTiming")
+		}
 		return err
 	}
 

@@ -3,10 +3,11 @@
 package i2b2
 
 import (
+	"testing"
+
 	"github.com/ldsec/medco/connector/restapi/models"
 	utilserver "github.com/ldsec/medco/connector/util/server"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func init() {
@@ -74,7 +75,8 @@ func TestExecutePsmQuery(t *testing.T) {
 				item,
 			},
 				Not: &not,
-			}})
+			}},
+		models.TimingAny)
 
 	if err != nil {
 		t.Fail()
@@ -105,7 +107,8 @@ func TestExecutePsmQueryWithModifiers(t *testing.T) {
 				item,
 			},
 				Not: &not,
-			}})
+			}},
+		models.TimingAny)
 
 	if err != nil {
 		t.Fail()
@@ -132,7 +135,8 @@ func TestExecutePsmQueryWithModifiers(t *testing.T) {
 				item,
 			},
 				Not: &not,
-			}})
+			}},
+		models.TimingAny)
 
 	if err != nil {
 		t.Fail()
