@@ -32,14 +32,17 @@ type ExploreQuery struct {
 
 	// panels contains the panels of the query
 	panels []*models.Panel
+
+	queryTiming models.Timing
 }
 
 // NewExploreQuery creates a new MedCo client query
-func NewExploreQuery(authToken string, panels []*models.Panel, disableTLSCheck bool) (q *ExploreQuery, err error) {
+func NewExploreQuery(authToken string, panels []*models.Panel, timing models.Timing, disableTLSCheck bool) (q *ExploreQuery, err error) {
 
 	q = &ExploreQuery{
-		authToken: authToken,
-		panels:    panels,
+		authToken:   authToken,
+		panels:      panels,
+		queryTiming: timing,
 	}
 
 	// retrieve network information
