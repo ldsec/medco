@@ -17,6 +17,20 @@ func NewOntReqGetTermInfoMessageBody(path string) Request {
 	return NewRequestWithBody(body)
 }
 
+// NewOntReqGetModifierInfoMessageBody returns a new request object for i2b2 get modifier info (information about node).
+// A modifier is indentified by its own path (field self in XML API) and its applied path.
+func NewOntReqGetModifierInfoMessageBody(path string, appliedPath string) Request {
+	body := OntReqGetModifierInfoMessageBody{}
+	body.GetModifierInfo.Hiddens = "false"
+	body.GetModifierInfo.Blob = "true"
+	body.GetModifierInfo.Synonyms = "false"
+	body.GetModifierInfo.Type = "core"
+	body.GetModifierInfo.Self = path
+	body.GetModifierInfo.AppliedPath = appliedPath
+
+	return NewRequestWithBody(body)
+}
+
 // NewOntReqGetCategoriesMessageBody returns a new request object for i2b2 categories (ontology root nodes)
 func NewOntReqGetCategoriesMessageBody() Request {
 	body := OntReqGetCategoriesMessageBody{}
@@ -94,6 +108,19 @@ type OntReqGetTermInfoMessageBody struct {
 		Blob     string `xml:"blob,attr"`
 		Self     string `xml:"self"`
 	} `xml:"ontns:get_term_info"`
+}
+
+// OntReqGetModifierInfoMessageBody is an i2b2 XML message body for ontology modifier info request
+type OntReqGetModifierInfoMessageBody struct {
+	XMLName         xml.Name `xml:"message_body"`
+	GetModifierInfo struct {
+		Hiddens     string `xml:"hiddens,attr"`
+		Synonyms    string `xml:"synonyms,attr"`
+		Type        string `xml:"type,attr"`
+		Blob        string `xml:"blob,attr"`
+		Self        string `xml:"self"`
+		AppliedPath string `xml:"applied_path"`
+	} `xml:"ontns:get_modifier_info"`
 }
 
 // OntReqGetCategoriesMessageBody is an i2b2 XML message body for ontology categories request

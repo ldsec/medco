@@ -45,6 +45,54 @@ func GetOntologyTermInfo(path string) (results []*models.ExploreSearchResultElem
 
 }
 
+// GetOntologyModifierInfo makes request to get infromation about a modifier node given its path and applied path.
+// If the applied path is not found, it returns all modifiers that match whose key matches path
+func GetOntologyModifierInfo(path string, appliedPath string) (results []*models.ExploreSearchResultElement, err error) {
+	path = strings.TrimSpace(path)
+	xmlResponse := &Response{
+		MessageBody: &OntRespModifiersMessageBody{},
+	}
+	if len(path) == 0 {
+		err = fmt.Errorf("empty path")
+		logrus.Error(err)
+		return
+	}
+	if len(appliedPath) == 0 {
+		err = fmt.Errorf("empty applied path")
+		logrus.Error(err)
+		return
+	}
+
+	formattedPath := convertPathToI2b2Format(path)
+	formattedAppliedPath := convertPathToI2b2Format(appliedPath)
+
+	// applied path does not contain table access and thus starts with a single back slash
+	if strings.HasPrefix(formattedAppliedPath, `\\`) {
+		formattedAppliedPath = formattedAppliedPath[1:]
+	}
+
+	err = i2b2XMLRequest(
+		utilserver.I2b2HiveURL+"/OntologyService/getModifierInfo",
+		NewOntReqGetModifierInfoMessageBody(formattedPath, formattedAppliedPath),
+		xmlResponse,
+	)
+	if err != nil {
+		return
+	}
+	i2b2ModifierInfo := xmlResponse.MessageBody.(*OntRespModifiersMessageBody).Modifiers
+	results = make([]*models.ExploreSearchResultElement, 0)
+	for _, modifier := range i2b2ModifierInfo {
+		parsedModifier, err := parseI2b2Modifier(modifier)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, parsedModifier)
+	}
+
+	return
+
+}
+
 // GetOntologyChildren makes request to browse the i2b2 ontology
 func GetOntologyChildren(path string) (results []*models.ExploreSearchResultElement, err error) {
 

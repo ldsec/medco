@@ -155,8 +155,14 @@ func TestGetPatientSet(t *testing.T) {
 }
 
 func TestGetOntologyTermInfo(t *testing.T) {
+	results, err := GetOntologyTermInfo("E2ETEST/wrongFormat/")
+	assert.Error(t, err)
 
-	results, err := GetOntologyTermInfo("/E2ETEST/e2etest/")
+	results, err = GetOntologyTermInfo("/E2ETEST/e2etestthisIsNotAnExistingPathForSure/")
+	assert.NoError(t, err)
+	assert.Empty(t, results)
+
+	results, err = GetOntologyTermInfo("/E2ETEST/e2etest/")
 	assert.NoError(t, err)
 	assert.NotEmpty(t, results)
 	res := results[0]
@@ -170,7 +176,50 @@ func TestGetOntologyTermInfo(t *testing.T) {
 
 }
 
+func TestGetOntologyModifierInfo(t *testing.T) {
+
+	results, err := GetOntologyModifierInfo("/E2ETEST/modifiersNotAnExistingModifier/", "/e2etest/%")
+	assert.NoError(t, err)
+	assert.Empty(t, results)
+
+	results, err = GetOntologyModifierInfo("/E2ETEST/modifiers/", "/e2etest/%")
+	assert.NoError(t, err)
+	assert.NotEmpty(t, results)
+
+	res1 := results[0]
+	assert.Equal(t, modifierInfo1.Code, res1.Code)
+	assert.Equal(t, modifierInfo1.DisplayName, res1.DisplayName)
+	assert.Equal(t, *modifierInfo1.Leaf, *res1.Leaf)
+	assert.Equal(t, modifierInfo1.Name, res1.Name)
+	assert.Equal(t, modifierInfo1.Path, res1.Path)
+	assert.Equal(t, modifierInfo1.AppliedPath, res1.AppliedPath)
+	assert.Equal(t, modifierInfo1.Type, res1.Type)
+	assert.NotNil(t, res1.MedcoEncryption)
+
+	// If the path is found and the applied path has no match, modifiers are returned regardless of the applied path
+	results, err = GetOntologyModifierInfo("/E2ETEST/modifiers/", "/e2etest/1/")
+	assert.NoError(t, err)
+	assert.NotEmpty(t, results)
+	res2 := results[0]
+	assert.Equal(t, res1, res2)
+
+	results, err = GetOntologyModifierInfo("/E2ETEST/modifiers/1/", "/e2etest/2/")
+	assert.NoError(t, err)
+	assert.NotEmpty(t, results)
+	res3 := results[0]
+	assert.Equal(t, modifierInfo2.Code, res3.Code)
+	assert.Equal(t, modifierInfo2.DisplayName, res3.DisplayName)
+	assert.Equal(t, *modifierInfo2.Leaf, *res3.Leaf)
+	assert.Equal(t, modifierInfo2.Name, res3.Name)
+	assert.Equal(t, modifierInfo2.Path, res3.Path)
+	assert.Equal(t, modifierInfo2.AppliedPath, res3.AppliedPath)
+	assert.Equal(t, modifierInfo2.Type, res3.Type)
+	assert.NotNil(t, res3.MedcoEncryption)
+
+}
+
 var falseBool bool = false
+var trueBool bool = true
 
 var termInfo1 = &models.ExploreSearchResultElement{
 	Code:        "",
@@ -179,4 +228,24 @@ var termInfo1 = &models.ExploreSearchResultElement{
 	Name:        "End-To-End Test",
 	Path:        "/E2ETEST/e2etest/",
 	Type:        "concept_container",
+}
+
+var modifierInfo1 = &models.ExploreSearchResultElement{
+	Code:        "ENC_ID:4",
+	DisplayName: "E2E Modifiers test",
+	Leaf:        &falseBool,
+	Name:        "E2E Modifiers test",
+	Path:        "/E2ETEST/modifiers/",
+	AppliedPath: "/e2etest/%",
+	Type:        "modifier_folder",
+}
+
+var modifierInfo2 = &models.ExploreSearchResultElement{
+	Code:        "ENC_ID:5",
+	DisplayName: "E2E Modifier 1",
+	Leaf:        &trueBool,
+	Name:        "E2E Modifier 1",
+	Path:        "/E2ETEST/modifiers/1/",
+	AppliedPath: "/e2etest/1/",
+	Type:        "modifier",
 }
