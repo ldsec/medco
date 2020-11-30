@@ -264,7 +264,7 @@ func ExecuteClientSearchConceptInfo(token, username, password, conceptPath, resu
 }
 
 // ExecuteClientSearchModifierInfo executes and displays the result of the MedCo modifier info search
-// endpoint on the server: /node/explore/search/modifier-children
+// endpoint on the server: /node/explore/search/modifier-info
 func ExecuteClientSearchModifierInfo(token, username, password, modifierPath, appliedPath, resultOutputFilePath string, disableTLSCheck bool) (err error) {
 
 	// get token
