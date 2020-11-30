@@ -3,16 +3,17 @@ package exploreclient
 import (
 	"encoding/xml"
 	"fmt"
-	medcoclient "github.com/ldsec/medco/connector/client"
-	"github.com/ldsec/medco/connector/restapi/models"
-	utilclient "github.com/ldsec/medco/connector/util/client"
-	"github.com/ldsec/medco/connector/wrappers/unlynx"
-	"github.com/sirupsen/logrus"
 	"os"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+
+	medcoclient "github.com/ldsec/medco/connector/client"
+	"github.com/ldsec/medco/connector/restapi/models"
+	utilclient "github.com/ldsec/medco/connector/util/client"
+	"github.com/ldsec/medco/connector/wrappers/unlynx"
+	"github.com/sirupsen/logrus"
 )
 
 // ExecuteClientQuery executes and displays the result of the MedCo client query

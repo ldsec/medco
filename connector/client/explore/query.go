@@ -172,6 +172,7 @@ func (clientQuery *ExploreQuery) generateModel() (queryModel *models.ExploreQuer
 	queryModel = &models.ExploreQuery{
 		UserPublicKey: clientQuery.userPublicKey,
 		Panels:        clientQuery.panels,
+		QueryTiming:   clientQuery.queryTiming,
 	}
 
 	return

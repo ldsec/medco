@@ -254,7 +254,7 @@ func main() {
 					c.GlobalString("user"),
 					c.GlobalString("password"),
 					strings.Join(c.Args(), " "),
-					c.GlobalString("timing"),
+					c.String("timing"),
 					c.GlobalString("outputFile"),
 					c.GlobalBool("disableTLSCheck"),
 				)
