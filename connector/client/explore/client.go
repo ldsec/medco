@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	medcoclient "github.com/ldsec/medco/connector/client"
+	"github.com/ldsec/medco/connector/restapi/models"
 	utilclient "github.com/ldsec/medco/connector/util/client"
 	"github.com/ldsec/medco/connector/wrappers/unlynx"
 	"github.com/sirupsen/logrus"
@@ -137,7 +138,7 @@ func printResultsCSV(nodesResult map[int]*ExploreQueryResult, CSVFileURL string)
 }
 
 // ExecuteClientSearchConceptChildren executes and displays the result of the MedCo concept children search
-// endpoint on the server: /node/explore/search/concept-children
+// endpoint on the server: /node/explore/search/concept
 func ExecuteClientSearchConceptChildren(token, username, password, conceptPath, resultOutputFilePath string, disableTLSCheck bool) (err error) {
 
 	// get token
@@ -147,7 +148,7 @@ func ExecuteClientSearchConceptChildren(token, username, password, conceptPath, 
 	}
 
 	// execute search
-	clientSearchConceptChildren, err := NewExploreSearchConceptChildren(accessToken, conceptPath, disableTLSCheck)
+	clientSearchConceptChildren, err := NewExploreSearchConcept(accessToken, conceptPath, models.ExploreSearchConceptOperationChildren, disableTLSCheck)
 	if err != nil {
 		return err
 	}
@@ -177,7 +178,7 @@ func ExecuteClientSearchConceptChildren(token, username, password, conceptPath, 
 }
 
 // ExecuteClientSearchModifierChildren executes and displays the result of the MedCo modifier children search
-// endpoint on the server: /node/explore/search/modifier-children
+// endpoint on the server: /node/explore/search/modifier
 func ExecuteClientSearchModifierChildren(token, username, password, modifierPath, appliedPath, appliedConcept, resultOutputFilePath string, disableTLSCheck bool) (err error) {
 
 	// get token
@@ -187,7 +188,7 @@ func ExecuteClientSearchModifierChildren(token, username, password, modifierPath
 	}
 
 	// execute search
-	clientSearchModifierChildren, err := NewExploreSearchModifierChildren(accessToken, modifierPath, appliedPath, appliedConcept, disableTLSCheck)
+	clientSearchModifierChildren, err := NewExploreSearchModifier(accessToken, modifierPath, appliedPath, appliedConcept, models.ExploreSearchModifierOperationChildren, disableTLSCheck)
 	if err != nil {
 		return err
 	}
@@ -217,7 +218,7 @@ func ExecuteClientSearchModifierChildren(token, username, password, modifierPath
 }
 
 // ExecuteClientSearchConceptInfo executes and displays the result of the MedCo concept info search
-// endpoint on the server: /node/explore/search/concept-info
+// endpoint on the server: /node/explore/search/concept
 func ExecuteClientSearchConceptInfo(token, username, password, conceptPath, resultOutputFilePath string, disableTLSCheck bool) (err error) {
 
 	// get token
@@ -227,7 +228,7 @@ func ExecuteClientSearchConceptInfo(token, username, password, conceptPath, resu
 	}
 
 	// execute search
-	clientSearchConceptInfo, err := NewExploreSearchConceptInfo(accessToken, conceptPath, disableTLSCheck)
+	clientSearchConceptInfo, err := NewExploreSearchConcept(accessToken, conceptPath, models.ExploreSearchConceptOperationInfo, disableTLSCheck)
 	if err != nil {
 		return err
 	}
@@ -261,7 +262,7 @@ func ExecuteClientSearchConceptInfo(token, username, password, conceptPath, resu
 }
 
 // ExecuteClientSearchModifierInfo executes and displays the result of the MedCo modifier info search
-// endpoint on the server: /node/explore/search/modifier-info
+// endpoint on the server: /node/explore/search/modifier
 func ExecuteClientSearchModifierInfo(token, username, password, modifierPath, appliedPath, resultOutputFilePath string, disableTLSCheck bool) (err error) {
 
 	// get token
@@ -271,7 +272,7 @@ func ExecuteClientSearchModifierInfo(token, username, password, modifierPath, ap
 	}
 
 	// execute search
-	clientSearchModifierInfo, err := NewExploreSearchModifierInfo(accessToken, modifierPath, appliedPath, "", disableTLSCheck)
+	clientSearchModifierInfo, err := NewExploreSearchModifier(accessToken, modifierPath, appliedPath, "/", models.ExploreSearchModifierOperationInfo, disableTLSCheck)
 	if err != nil {
 		return err
 	}

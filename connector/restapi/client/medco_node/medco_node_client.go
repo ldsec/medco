@@ -29,13 +29,9 @@ type ClientService interface {
 
 	ExploreQuery(params *ExploreQueryParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreQueryOK, error)
 
-	ExploreSearchConceptChildren(params *ExploreSearchConceptChildrenParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreSearchConceptChildrenOK, error)
+	ExploreSearchConcept(params *ExploreSearchConceptParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreSearchConceptOK, error)
 
-	ExploreSearchConceptInfo(params *ExploreSearchConceptInfoParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreSearchConceptInfoOK, error)
-
-	ExploreSearchModifierChildren(params *ExploreSearchModifierChildrenParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreSearchModifierChildrenOK, error)
-
-	ExploreSearchModifierInfo(params *ExploreSearchModifierInfoParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreSearchModifierInfoOK, error)
+	ExploreSearchModifier(params *ExploreSearchModifierParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreSearchModifierOK, error)
 
 	GetCohorts(params *GetCohortsParams, authInfo runtime.ClientAuthInfoWriter) (*GetCohortsOK, error)
 
@@ -117,23 +113,23 @@ func (a *Client) ExploreQuery(params *ExploreQueryParams, authInfo runtime.Clien
 }
 
 /*
-  ExploreSearchConceptChildren returns the concept children both concepts and modifiers
+  ExploreSearchConcept returns info about the concept and its both concepts and modifiers children
 */
-func (a *Client) ExploreSearchConceptChildren(params *ExploreSearchConceptChildrenParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreSearchConceptChildrenOK, error) {
+func (a *Client) ExploreSearchConcept(params *ExploreSearchConceptParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreSearchConceptOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewExploreSearchConceptChildrenParams()
+		params = NewExploreSearchConceptParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "exploreSearchConceptChildren",
+		ID:                 "exploreSearchConcept",
 		Method:             "POST",
-		PathPattern:        "/node/explore/search/concept-children",
+		PathPattern:        "/node/explore/search/concept",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &ExploreSearchConceptChildrenReader{formats: a.formats},
+		Reader:             &ExploreSearchConceptReader{formats: a.formats},
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
@@ -141,33 +137,33 @@ func (a *Client) ExploreSearchConceptChildren(params *ExploreSearchConceptChildr
 	if err != nil {
 		return nil, err
 	}
-	success, ok := result.(*ExploreSearchConceptChildrenOK)
+	success, ok := result.(*ExploreSearchConceptOK)
 	if ok {
 		return success, nil
 	}
 	// unexpected success response
-	unexpectedSuccess := result.(*ExploreSearchConceptChildrenDefault)
+	unexpectedSuccess := result.(*ExploreSearchConceptDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
 /*
-  ExploreSearchConceptInfo returns the concept info
+  ExploreSearchModifier returns info about the modifier and its children
 */
-func (a *Client) ExploreSearchConceptInfo(params *ExploreSearchConceptInfoParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreSearchConceptInfoOK, error) {
+func (a *Client) ExploreSearchModifier(params *ExploreSearchModifierParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreSearchModifierOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewExploreSearchConceptInfoParams()
+		params = NewExploreSearchModifierParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "exploreSearchConceptInfo",
+		ID:                 "exploreSearchModifier",
 		Method:             "POST",
-		PathPattern:        "/node/explore/search/concept-info",
+		PathPattern:        "/node/explore/search/modifier",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &ExploreSearchConceptInfoReader{formats: a.formats},
+		Reader:             &ExploreSearchModifierReader{formats: a.formats},
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
@@ -175,80 +171,12 @@ func (a *Client) ExploreSearchConceptInfo(params *ExploreSearchConceptInfoParams
 	if err != nil {
 		return nil, err
 	}
-	success, ok := result.(*ExploreSearchConceptInfoOK)
+	success, ok := result.(*ExploreSearchModifierOK)
 	if ok {
 		return success, nil
 	}
 	// unexpected success response
-	unexpectedSuccess := result.(*ExploreSearchConceptInfoDefault)
-	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
-}
-
-/*
-  ExploreSearchModifierChildren returns the modifier children
-*/
-func (a *Client) ExploreSearchModifierChildren(params *ExploreSearchModifierChildrenParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreSearchModifierChildrenOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewExploreSearchModifierChildrenParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "exploreSearchModifierChildren",
-		Method:             "POST",
-		PathPattern:        "/node/explore/search/modifier-children",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
-		Params:             params,
-		Reader:             &ExploreSearchModifierChildrenReader{formats: a.formats},
-		AuthInfo:           authInfo,
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	success, ok := result.(*ExploreSearchModifierChildrenOK)
-	if ok {
-		return success, nil
-	}
-	// unexpected success response
-	unexpectedSuccess := result.(*ExploreSearchModifierChildrenDefault)
-	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
-}
-
-/*
-  ExploreSearchModifierInfo returns the modifier info
-*/
-func (a *Client) ExploreSearchModifierInfo(params *ExploreSearchModifierInfoParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreSearchModifierInfoOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewExploreSearchModifierInfoParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "exploreSearchModifierInfo",
-		Method:             "POST",
-		PathPattern:        "/node/explore/search/modifier-info",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
-		Params:             params,
-		Reader:             &ExploreSearchModifierInfoReader{formats: a.formats},
-		AuthInfo:           authInfo,
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	success, ok := result.(*ExploreSearchModifierInfoOK)
-	if ok {
-		return success, nil
-	}
-	// unexpected success response
-	unexpectedSuccess := result.(*ExploreSearchModifierInfoDefault)
+	unexpectedSuccess := result.(*ExploreSearchModifierDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 

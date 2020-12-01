@@ -15,77 +15,75 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// MedCoNodeExploreSearchConceptChildrenHandler handles the /medco/node/explore/search/concept-children API endpoint
-func MedCoNodeExploreSearchConceptChildrenHandler(params medco_node.ExploreSearchConceptChildrenParams, principal *models.User) middleware.Responder {
+// MedCoNodeExploreSearchConceptHandler handles the /medco/node/explore/search/concept API endpoint
+func MedCoNodeExploreSearchConceptHandler(params medco_node.ExploreSearchConceptParams, principal *models.User) middleware.Responder {
 
-	searchResult1, err := i2b2.GetOntologyConceptChildren(*params.SearchConceptChildrenRequest.Path)
-	if err != nil {
-		return medco_node.NewExploreSearchConceptChildrenDefault(500).WithPayload(&medco_node.ExploreSearchConceptChildrenDefaultBody{
-			Message: err.Error(),
-		})
-	}
+	var searchResult []*models.ExploreSearchResultElement
 
-	var searchResult2 []*models.ExploreSearchResultElement
+	if *params.SearchConceptRequest.Operation == models.ExploreSearchConceptOperationChildren {
 
-	if *params.SearchConceptChildrenRequest.Path != "/" {
-		searchResult2, err = i2b2.GetOntologyModifiers(*params.SearchConceptChildrenRequest.Path)
+		searchResult1, err := i2b2.GetOntologyConceptChildren(*params.SearchConceptRequest.Path)
 		if err != nil {
-			return medco_node.NewExploreSearchConceptChildrenDefault(500).WithPayload(&medco_node.ExploreSearchConceptChildrenDefaultBody{
+			return medco_node.NewExploreSearchConceptDefault(500).WithPayload(&medco_node.ExploreSearchConceptDefaultBody{
+				Message: err.Error(),
+			})
+		}
+
+		var searchResult2 []*models.ExploreSearchResultElement
+
+		if *params.SearchConceptRequest.Path != "/" {
+			searchResult2, err = i2b2.GetOntologyModifiers(*params.SearchConceptRequest.Path)
+			if err != nil {
+				return medco_node.NewExploreSearchConceptDefault(500).WithPayload(&medco_node.ExploreSearchConceptDefaultBody{
+					Message: err.Error(),
+				})
+			}
+		}
+
+		searchResult = append(searchResult1, searchResult2...)
+
+	} else if *params.SearchConceptRequest.Operation == models.ExploreSearchConceptOperationInfo {
+
+		var err error
+		searchResult, err = i2b2.GetOntologyConceptInfo(*params.SearchConceptRequest.Path)
+		if err != nil {
+			return medco_node.NewExploreSearchConceptDefault(500).WithPayload(&medco_node.ExploreSearchConceptDefaultBody{
 				Message: err.Error(),
 			})
 		}
 	}
 
-	return medco_node.NewExploreSearchConceptChildrenOK().WithPayload(&medco_node.ExploreSearchConceptChildrenOKBody{
-		Search:  params.SearchConceptChildrenRequest,
-		Results: append(searchResult1, searchResult2...),
-	})
-}
-
-// MedCoNodeExploreSearchModifierChildrenHandler handles the /medco/node/explore/search/modifier-children API endpoint
-func MedCoNodeExploreSearchModifierChildrenHandler(params medco_node.ExploreSearchModifierChildrenParams, principal *models.User) middleware.Responder {
-
-	searchResult, err := i2b2.GetOntologyModifierChildren(*params.SearchModifierChildrenRequest.Path, *params.SearchModifierChildrenRequest.AppliedPath, *params.SearchModifierChildrenRequest.AppliedConcept)
-	if err != nil {
-		return medco_node.NewExploreSearchModifierChildrenDefault(500).WithPayload(&medco_node.ExploreSearchModifierChildrenDefaultBody{
-			Message: err.Error(),
-		})
-	}
-
-	return medco_node.NewExploreSearchModifierChildrenOK().WithPayload(&medco_node.ExploreSearchModifierChildrenOKBody{
-		Search:  params.SearchModifierChildrenRequest,
+	return medco_node.NewExploreSearchConceptOK().WithPayload(&medco_node.ExploreSearchConceptOKBody{
+		Search:  params.SearchConceptRequest,
 		Results: searchResult,
 	})
+
 }
 
-// MedCoNodeExploreSearchConceptInfoHandler handles the /medco/node/explore/search/concept-info API endpoint
-func MedCoNodeExploreSearchConceptInfoHandler(params medco_node.ExploreSearchConceptInfoParams, principal *models.User) middleware.Responder {
+// MedCoNodeExploreSearchModifierHandler handles the /medco/node/explore/search/modifier API endpoint
+func MedCoNodeExploreSearchModifierHandler(params medco_node.ExploreSearchModifierParams, principal *models.User) middleware.Responder {
 
-	searchResult, err := i2b2.GetOntologyConceptInfo(*params.SearchConceptInfoRequest.Path)
-	if err != nil {
-		return medco_node.NewExploreSearchConceptInfoDefault(500).WithPayload(&medco_node.ExploreSearchConceptInfoDefaultBody{
-			Message: err.Error(),
-		})
+	var searchResult []*models.ExploreSearchResultElement
+	var err error
+
+	if *params.SearchModifierRequest.Operation == models.ExploreSearchModifierOperationChildren {
+		searchResult, err = i2b2.GetOntologyModifierChildren(*params.SearchModifierRequest.Path, *params.SearchModifierRequest.AppliedPath, *params.SearchModifierRequest.AppliedConcept)
+		if err != nil {
+			return medco_node.NewExploreSearchModifierDefault(500).WithPayload(&medco_node.ExploreSearchModifierDefaultBody{
+				Message: err.Error(),
+			})
+		}
+	} else if *params.SearchModifierRequest.Operation == models.ExploreSearchModifierOperationInfo {
+		searchResult, err = i2b2.GetOntologyModifierInfo(*params.SearchModifierRequest.Path, *params.SearchModifierRequest.AppliedPath)
+		if err != nil {
+			return medco_node.NewExploreSearchModifierDefault(500).WithPayload(&medco_node.ExploreSearchModifierDefaultBody{
+				Message: err.Error(),
+			})
+		}
 	}
 
-	return medco_node.NewExploreSearchConceptInfoOK().WithPayload(&medco_node.ExploreSearchConceptInfoOKBody{
-		Search:  params.SearchConceptInfoRequest,
-		Results: searchResult,
-	})
-}
-
-// MedCoNodeExploreSearchModifierInfoHandler handles the /medco/node/explore/search/modifier-info API endpoint
-func MedCoNodeExploreSearchModifierInfoHandler(params medco_node.ExploreSearchModifierInfoParams, principal *models.User) middleware.Responder {
-
-	searchResult, err := i2b2.GetOntologyModifierInfo(*params.SearchModifierInfoRequest.Path, *params.SearchModifierInfoRequest.AppliedPath)
-	if err != nil {
-		return medco_node.NewExploreSearchModifierInfoDefault(500).WithPayload(&medco_node.ExploreSearchModifierInfoDefaultBody{
-			Message: err.Error(),
-		})
-	}
-
-	return medco_node.NewExploreSearchModifierInfoOK().WithPayload(&medco_node.ExploreSearchModifierInfoOKBody{
-		Search:  params.SearchModifierInfoRequest,
+	return medco_node.NewExploreSearchModifierOK().WithPayload(&medco_node.ExploreSearchModifierOKBody{
+		Search:  params.SearchModifierRequest,
 		Results: searchResult,
 	})
 }
