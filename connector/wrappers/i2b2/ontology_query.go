@@ -2,7 +2,6 @@ package i2b2
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -11,42 +10,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// GetOntologyTermInfo makes request to get infromation about a node given its path
-func GetOntologyTermInfo(path string) (results []*models.ExploreSearchResultElement, err error) {
-	path = strings.TrimSpace(path)
-	xmlResponse := &Response{
-		MessageBody: &OntRespConceptsMessageBody{},
-	}
-	if len(path) == 0 {
-		err = fmt.Errorf("empty path")
-		logrus.Error(err)
-		return
-	}
-
-	err = i2b2XMLRequest(
-		utilserver.I2b2HiveURL+"/OntologyService/getTermInfo",
-		NewOntReqGetTermInfoMessageBody(convertPathToI2b2Format(path)),
-		xmlResponse,
-	)
-	if err != nil {
-		return nil, err
-	}
-	i2b2TermInfo := xmlResponse.MessageBody.(*OntRespConceptsMessageBody).Concepts
-	results = make([]*models.ExploreSearchResultElement, 0)
-	for _, concept := range i2b2TermInfo {
-		parsedConcept, err := parseI2b2Concept(concept)
-		if err != nil {
-			return nil, err
-		}
-		results = append(results, parsedConcept)
-	}
-
-	return
-
-}
-
-// GetOntologyChildren makes request to browse the i2b2 ontology
-func GetOntologyChildren(path string) (results []*models.ExploreSearchResultElement, err error) {
+// GetOntologyConceptChildren makes request to browse the i2b2 ontology
+func GetOntologyConceptChildren(path string) (results []*models.ExploreSearchResultElement, err error) {
 
 	// craft and make request
 	path = strings.TrimSpace(path)
@@ -163,6 +128,74 @@ func GetOntologyModifierChildren(parent, appliedPath, appliedConcept string) (re
 	return
 }
 
+// GetOntologyConceptInfo makes request to get information about a node given its path
+func GetOntologyConceptInfo(path string) (results []*models.ExploreSearchResultElement, err error) {
+
+	// craft and make request
+	path = convertPathToI2b2Format(strings.TrimSpace(path))
+
+	xmlResponse := &Response{
+		MessageBody: &OntRespConceptsMessageBody{},
+	}
+
+	err = i2b2XMLRequest(
+		utilserver.I2b2HiveURL+"/OntologyService/getTermInfo",
+		NewOntReqGetTermInfoMessageBody(path),
+		xmlResponse,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// generate result from response
+	i2b2ConceptsInfo := xmlResponse.MessageBody.(*OntRespConceptsMessageBody).Concepts
+	results = make([]*models.ExploreSearchResultElement, 0)
+	for _, concept := range i2b2ConceptsInfo {
+		parsedConcept, err := parseI2b2Concept(concept)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, parsedConcept)
+	}
+
+	return
+}
+
+// GetOntologyModifierInfo retrieves the info of the modifier identified by path and appliedPath
+func GetOntologyModifierInfo(path, appliedPath string) (results []*models.ExploreSearchResultElement, err error) {
+
+	// craft and make request
+	path = convertPathToI2b2Format(strings.TrimSpace(path))
+	appliedPath = convertPathToI2b2Format(strings.TrimSpace(appliedPath))[1:]
+
+	xmlResponse := &Response{
+		MessageBody: &OntRespModifiersMessageBody{},
+	}
+
+	err = i2b2XMLRequest(
+		utilserver.I2b2HiveURL+"/OntologyService/getModifierInfo",
+		NewOntReqGetModifierInfoMessageBody(path, appliedPath),
+		xmlResponse,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// generate result from response
+	i2b2Modifiers := xmlResponse.MessageBody.(*OntRespModifiersMessageBody).Modifiers
+	results = make([]*models.ExploreSearchResultElement, 0, len(i2b2Modifiers))
+	for _, modifier := range i2b2Modifiers {
+		parsedModifier, err := parseI2b2Modifier(modifier)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, parsedModifier)
+	}
+
+	return
+}
+
 func parseI2b2Concept(concept Concept) (result *models.ExploreSearchResultElement, err error) {
 	// todo: add leaf, ensure type OK
 	//          type:
@@ -182,7 +215,7 @@ func parseI2b2Concept(concept Concept) (result *models.ExploreSearchResultElemen
 			Encrypted:   &false,
 			ChildrenIds: []int64{},
 		},
-		Metadata:    nil,
+		Metadata:    concept.Metadataxml,
 		Path:        convertPathFromI2b2Format(concept.Key),
 		AppliedPath: "@",
 		//Type: models.SearchResultElementTypeConcept,
@@ -235,7 +268,7 @@ func parseI2b2Concept(concept Concept) (result *models.ExploreSearchResultElemen
 		}
 
 		// if concept from loader v1 encrypted (from metadata xml)
-	} else if concept.Metadataxml.ValueMetadata.EncryptedType != "" {
+	} else if concept.Metadataxml != nil && concept.Metadataxml.ValueMetadata.EncryptedType != "" {
 		result.MedcoEncryption.Encrypted = &true
 
 		// node ID

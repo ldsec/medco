@@ -473,7 +473,7 @@ func init() {
         "tags": [
           "medco-node"
         ],
-        "summary": "Returns the children (concepts and modifiers) of a concept",
+        "summary": "Returns info about the concept and its (both concepts and modifiers) children",
         "operationId": "exploreSearchConcept",
         "parameters": [
           {
@@ -502,7 +502,7 @@ func init() {
         "tags": [
           "medco-node"
         ],
-        "summary": "Returns the children of a modifier",
+        "summary": "Returns info about the modifier and its children",
         "operationId": "exploreSearchModifier",
         "parameters": [
           {
@@ -521,6 +521,40 @@ func init() {
     }
   },
   "definitions": {
+    "UnitValues": {
+      "type": "object",
+      "properties": {
+        "ConvertingUnits": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "MultiplyingFactor": {
+                "type": "string"
+              },
+              "Units": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "EqualUnits": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "ExcludingUnits": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "NormalUnits": {
+          "type": "string"
+        }
+      }
+    },
     "exploreQuery": {
       "description": "MedCo-Explore query",
       "properties": {
@@ -584,12 +618,20 @@ func init() {
     "exploreSearchConcept": {
       "type": "object",
       "required": [
-        "path"
+        "path",
+        "operation"
       ],
       "properties": {
+        "operation": {
+          "type": "string",
+          "enum": [
+            "info",
+            "children"
+          ]
+        },
         "path": {
           "type": "string",
-          "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
+          "pattern": "^\\/$|^((\\/[^\\/]+)+\\/)$"
         }
       }
     },
@@ -598,20 +640,28 @@ func init() {
       "required": [
         "path",
         "appliedPath",
-        "appliedConcept"
+        "appliedConcept",
+        "operation"
       ],
       "properties": {
         "appliedConcept": {
           "type": "string",
-          "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
+          "pattern": "^\\/$|^((\\/[^\\/]+)+\\/)$"
         },
         "appliedPath": {
           "type": "string",
-          "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
+          "pattern": "^\\/$|^((\\/[^\\/]+)+\\/%?)$"
+        },
+        "operation": {
+          "type": "string",
+          "enum": [
+            "info",
+            "children"
+          ]
         },
         "path": {
           "type": "string",
-          "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
+          "pattern": "^\\/$|^((\\/[^\\/]+)+\\/)$"
         }
       }
     },
@@ -657,7 +707,7 @@ func init() {
           }
         },
         "metadata": {
-          "type": "object"
+          "$ref": "#/definitions/metadataxml"
         },
         "name": {
           "type": "string"
@@ -676,6 +726,52 @@ func init() {
             "modifier_folder",
             "genomic_annotation"
           ]
+        }
+      }
+    },
+    "metadataxml": {
+      "type": "object",
+      "properties": {
+        "ValueMetadata": {
+          "type": "object",
+          "properties": {
+            "ChildrenEncryptIDs": {
+              "type": "string"
+            },
+            "CreationDateTime": {
+              "type": "string"
+            },
+            "DataType": {
+              "type": "string"
+            },
+            "EncryptedType": {
+              "type": "string"
+            },
+            "EnumValues": {
+              "type": "string"
+            },
+            "Flagstouse": {
+              "type": "string"
+            },
+            "NodeEncryptID": {
+              "type": "string"
+            },
+            "Oktousevalues": {
+              "type": "string"
+            },
+            "TestID": {
+              "type": "string"
+            },
+            "TestName": {
+              "type": "string"
+            },
+            "UnitValues": {
+              "$ref": "#/definitions/UnitValues"
+            },
+            "Version": {
+              "type": "string"
+            }
+          }
         }
       }
     },
@@ -700,6 +796,10 @@ func init() {
               },
               "modifier": {
                 "type": "object",
+                "required": [
+                  "appliedPath",
+                  "modifierKey"
+                ],
                 "properties": {
                   "appliedPath": {
                     "type": "string",
@@ -712,10 +812,16 @@ func init() {
                 }
               },
               "operator": {
+                "description": "EQ: equals NE: not equals GT: greater than GE: greater than or equal LT: less than LE: less than or equal BETWEEN: between (value syntax: x and y)\n",
                 "type": "string",
                 "enum": [
-                  "exists",
-                  "equals"
+                  "EQ",
+                  "NE",
+                  "GT",
+                  "GE",
+                  "LT",
+                  "LE",
+                  "BETWEEN"
                 ]
               },
               "queryTerm": {
@@ -723,7 +829,8 @@ func init() {
                 "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/)$"
               },
               "value": {
-                "type": "string"
+                "type": "string",
+                "pattern": "^[+-]?([0-9]*[.])?[0-9]+"
               }
             }
           }
@@ -1015,7 +1122,7 @@ func init() {
       }
     },
     "exploreSearchModifierResponse": {
-      "description": "MedCo-Explore search modifier query response.",
+      "description": "MedCo-Explore search modifier children query response.",
       "schema": {
         "type": "object",
         "properties": {
@@ -1994,7 +2101,7 @@ func init() {
         "tags": [
           "medco-node"
         ],
-        "summary": "Returns the children (concepts and modifiers) of a concept",
+        "summary": "Returns info about the concept and its (both concepts and modifiers) children",
         "operationId": "exploreSearchConcept",
         "parameters": [
           {
@@ -2051,7 +2158,7 @@ func init() {
         "tags": [
           "medco-node"
         ],
-        "summary": "Returns the children of a modifier",
+        "summary": "Returns info about the modifier and its children",
         "operationId": "exploreSearchModifier",
         "parameters": [
           {
@@ -2066,7 +2173,7 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "MedCo-Explore search modifier query response.",
+            "description": "MedCo-Explore search modifier children query response.",
             "schema": {
               "type": "object",
               "properties": {
@@ -2141,6 +2248,47 @@ func init() {
         }
       }
     },
+    "MetadataxmlValueMetadata": {
+      "type": "object",
+      "properties": {
+        "ChildrenEncryptIDs": {
+          "type": "string"
+        },
+        "CreationDateTime": {
+          "type": "string"
+        },
+        "DataType": {
+          "type": "string"
+        },
+        "EncryptedType": {
+          "type": "string"
+        },
+        "EnumValues": {
+          "type": "string"
+        },
+        "Flagstouse": {
+          "type": "string"
+        },
+        "NodeEncryptID": {
+          "type": "string"
+        },
+        "Oktousevalues": {
+          "type": "string"
+        },
+        "TestID": {
+          "type": "string"
+        },
+        "TestName": {
+          "type": "string"
+        },
+        "UnitValues": {
+          "$ref": "#/definitions/UnitValues"
+        },
+        "Version": {
+          "type": "string"
+        }
+      }
+    },
     "NodesItems0": {
       "type": "object",
       "required": [
@@ -2170,6 +2318,10 @@ func init() {
         },
         "modifier": {
           "type": "object",
+          "required": [
+            "appliedPath",
+            "modifierKey"
+          ],
           "properties": {
             "appliedPath": {
               "type": "string",
@@ -2182,10 +2334,16 @@ func init() {
           }
         },
         "operator": {
+          "description": "EQ: equals NE: not equals GT: greater than GE: greater than or equal LT: less than LE: less than or equal BETWEEN: between (value syntax: x and y)\n",
           "type": "string",
           "enum": [
-            "exists",
-            "equals"
+            "EQ",
+            "NE",
+            "GT",
+            "GE",
+            "LT",
+            "LE",
+            "BETWEEN"
           ]
         },
         "queryTerm": {
@@ -2194,12 +2352,16 @@ func init() {
         },
         "value": {
           "type": "string",
-          "maxLength": 0
+          "pattern": "^[+-]?([0-9]*[.])?[0-9]+"
         }
       }
     },
     "PanelItemsItems0Modifier": {
       "type": "object",
+      "required": [
+        "appliedPath",
+        "modifierKey"
+      ],
       "properties": {
         "appliedPath": {
           "type": "string",
@@ -2288,6 +2450,43 @@ func init() {
         }
       }
     },
+    "UnitValues": {
+      "type": "object",
+      "properties": {
+        "ConvertingUnits": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UnitValuesConvertingUnitsItems0"
+          }
+        },
+        "EqualUnits": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "ExcludingUnits": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "NormalUnits": {
+          "type": "string"
+        }
+      }
+    },
+    "UnitValuesConvertingUnitsItems0": {
+      "type": "object",
+      "properties": {
+        "MultiplyingFactor": {
+          "type": "string"
+        },
+        "Units": {
+          "type": "string"
+        }
+      }
+    },
     "UserAuthorizations": {
       "type": "object",
       "properties": {
@@ -2368,12 +2567,20 @@ func init() {
     "exploreSearchConcept": {
       "type": "object",
       "required": [
-        "path"
+        "path",
+        "operation"
       ],
       "properties": {
+        "operation": {
+          "type": "string",
+          "enum": [
+            "info",
+            "children"
+          ]
+        },
         "path": {
           "type": "string",
-          "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
+          "pattern": "^\\/$|^((\\/[^\\/]+)+\\/)$"
         }
       }
     },
@@ -2382,20 +2589,28 @@ func init() {
       "required": [
         "path",
         "appliedPath",
-        "appliedConcept"
+        "appliedConcept",
+        "operation"
       ],
       "properties": {
         "appliedConcept": {
           "type": "string",
-          "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
+          "pattern": "^\\/$|^((\\/[^\\/]+)+\\/)$"
         },
         "appliedPath": {
           "type": "string",
-          "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
+          "pattern": "^\\/$|^((\\/[^\\/]+)+\\/%?)$"
+        },
+        "operation": {
+          "type": "string",
+          "enum": [
+            "info",
+            "children"
+          ]
         },
         "path": {
           "type": "string",
-          "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
+          "pattern": "^\\/$|^((\\/[^\\/]+)+\\/)$"
         }
       }
     },
@@ -2441,7 +2656,7 @@ func init() {
           }
         },
         "metadata": {
-          "type": "object"
+          "$ref": "#/definitions/metadataxml"
         },
         "name": {
           "type": "string"
@@ -2460,6 +2675,52 @@ func init() {
             "modifier_folder",
             "genomic_annotation"
           ]
+        }
+      }
+    },
+    "metadataxml": {
+      "type": "object",
+      "properties": {
+        "ValueMetadata": {
+          "type": "object",
+          "properties": {
+            "ChildrenEncryptIDs": {
+              "type": "string"
+            },
+            "CreationDateTime": {
+              "type": "string"
+            },
+            "DataType": {
+              "type": "string"
+            },
+            "EncryptedType": {
+              "type": "string"
+            },
+            "EnumValues": {
+              "type": "string"
+            },
+            "Flagstouse": {
+              "type": "string"
+            },
+            "NodeEncryptID": {
+              "type": "string"
+            },
+            "Oktousevalues": {
+              "type": "string"
+            },
+            "TestID": {
+              "type": "string"
+            },
+            "TestName": {
+              "type": "string"
+            },
+            "UnitValues": {
+              "$ref": "#/definitions/UnitValues"
+            },
+            "Version": {
+              "type": "string"
+            }
+          }
         }
       }
     },
@@ -2751,7 +3012,7 @@ func init() {
       }
     },
     "exploreSearchModifierResponse": {
-      "description": "MedCo-Explore search modifier query response.",
+      "description": "MedCo-Explore search modifier children query response.",
       "schema": {
         "type": "object",
         "properties": {

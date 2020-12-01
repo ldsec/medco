@@ -6,6 +6,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
@@ -17,15 +19,24 @@ import (
 // swagger:model exploreSearchConcept
 type ExploreSearchConcept struct {
 
+	// operation
+	// Required: true
+	// Enum: [info children]
+	Operation *string `json:"operation"`
+
 	// path
 	// Required: true
-	// Pattern: ^\/$|^((\/[^\/]+)+\/?)$
+	// Pattern: ^\/$|^((\/[^\/]+)+\/)$
 	Path *string `json:"path"`
 }
 
 // Validate validates this explore search concept
 func (m *ExploreSearchConcept) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateOperation(formats); err != nil {
+		res = append(res, err)
+	}
 
 	if err := m.validatePath(formats); err != nil {
 		res = append(res, err)
@@ -37,13 +48,56 @@ func (m *ExploreSearchConcept) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
+var exploreSearchConceptTypeOperationPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["info","children"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		exploreSearchConceptTypeOperationPropEnum = append(exploreSearchConceptTypeOperationPropEnum, v)
+	}
+}
+
+const (
+
+	// ExploreSearchConceptOperationInfo captures enum value "info"
+	ExploreSearchConceptOperationInfo string = "info"
+
+	// ExploreSearchConceptOperationChildren captures enum value "children"
+	ExploreSearchConceptOperationChildren string = "children"
+)
+
+// prop value enum
+func (m *ExploreSearchConcept) validateOperationEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, exploreSearchConceptTypeOperationPropEnum, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ExploreSearchConcept) validateOperation(formats strfmt.Registry) error {
+
+	if err := validate.Required("operation", "body", m.Operation); err != nil {
+		return err
+	}
+
+	// value enum
+	if err := m.validateOperationEnum("operation", "body", *m.Operation); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (m *ExploreSearchConcept) validatePath(formats strfmt.Registry) error {
 
 	if err := validate.Required("path", "body", m.Path); err != nil {
 		return err
 	}
 
-	if err := validate.Pattern("path", "body", string(*m.Path), `^\/$|^((\/[^\/]+)+\/?)$`); err != nil {
+	if err := validate.Pattern("path", "body", string(*m.Path), `^\/$|^((\/[^\/]+)+\/)$`); err != nil {
 		return err
 	}
 

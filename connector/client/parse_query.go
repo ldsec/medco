@@ -81,16 +81,20 @@ func ParseQueryString(queryString string) (panels []*models.Panel, err error) {
 }
 
 // parseQueryItem parses a string into an item
-// queryItem is composed of one field, the content field, separated by "::"
-// possible values of the type field are: "enc", "clr", "file"
-// when the type field is equal to "enc", the content field contains the concept ID
-// when the type field is equal to "clr", the content field contains the concept path
-// and, possibly, the modifier field, which in turn contains the modifier key and applied path fields, separated by ":"
-// when the type field is equal to "file", the content field contains the path of the file containing the items
+// queryItem is composed of two mandatory fields, the type field and the content field,
+// and an optional field, the constraint field, separated by "::".
+//		type::content[::constraint]
+// Possible values of the type field are: "enc", "clr", "file".
+// 1. When the type field is equal to "enc", the content field contains the concept ID. The constraint field is not present this case.
+// 2. When the type field is equal to "clr", the content field contains the concept field (containing the concept path)
+// 		and, possibly, the modifier field, which in turn contains the modifier key and applied path fields, separated by ":".
+// 		The optional constraint field can be present, containing the operator and value fields separated by ":.
+//		The constraint field applies to the concept or, if the modifier field is present, to the modifier.
+// 3. When the type field is equal to "file", the content field contains the path of the file containing the items. The constraint field is not present in this case.
 func parseQueryItem(queryItem string) (items []*models.PanelItemsItems0, err error) {
 
 	queryItemFields := strings.Split(queryItem, "::")
-	if len(queryItemFields) < 2 {
+	if len(queryItemFields) != 2 && len(queryItemFields) != 3 {
 		return nil, fmt.Errorf("invalid query item format: %s", queryItem)
 	}
 
@@ -108,33 +112,41 @@ func parseQueryItem(queryItem string) (items []*models.PanelItemsItems0, err err
 
 		item := new(models.PanelItemsItems0)
 		encrypted := true
-
 		item.Encrypted = &encrypted
 		item.QueryTerm = &queryItemFields[1]
+
 		items = append(items, item)
 	case "clr":
-		if len(queryItemFields) > 3 {
-			return nil, fmt.Errorf("invalid clr query item format: %v", queryItemFields)
+		contentFieldFields := strings.Split(queryItemFields[1], ":")
+		if len(contentFieldFields) != 1 && len(contentFieldFields) != 3 {
+			return nil, fmt.Errorf("invalid content field format: %v", contentFieldFields)
 		}
+
 		item := new(models.PanelItemsItems0)
 		encrypted := false
 
 		item.Encrypted = &encrypted
-		item.QueryTerm = &queryItemFields[1]
+		item.QueryTerm = &contentFieldFields[0]
 
-		if len(queryItemFields) == 3 {
-			modifierFields := strings.Split(queryItemFields[2], ":")
-			if len(modifierFields) != 2 {
-				return nil, fmt.Errorf("invalid modifier term format: %v", modifierFields)
-			}
-
+		if len(contentFieldFields) == 3 { // there is a modifier field
 			modifier := &models.PanelItemsItems0Modifier{
-				AppliedPath: modifierFields[1],
-				ModifierKey: modifierFields[0],
+				AppliedPath: &contentFieldFields[2],
+				ModifierKey: &contentFieldFields[1],
 			}
 
 			item.Modifier = modifier
 		}
+
+		if len(queryItemFields) == 3 { // there is a constrain field
+			constrainFieldFields := strings.Split(queryItemFields[2], ":")
+			if len(constrainFieldFields) != 2 {
+				return nil, fmt.Errorf("invalid constrain field format: %v", constrainFieldFields)
+			}
+
+			item.Operator = constrainFieldFields[0]
+			item.Value = constrainFieldFields[1]
+		}
+
 		items = append(items, item)
 	case "file":
 		if len(queryItemFields) != 2 {

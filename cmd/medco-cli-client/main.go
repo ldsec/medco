@@ -168,11 +168,11 @@ func main() {
 	cliApp.Commands = []cli.Command{
 		{
 			Name:      "concept-children",
-			Aliases:   []string{"conc"},
-			Usage:     "Get the children (concepts and modifiers) of a concept",
+			Aliases:   []string{"con-c"},
+			Usage:     "Get the concept children (both concepts and modifiers)",
 			ArgsUsage: "conceptPath",
 			Action: func(c *cli.Context) error {
-				return exploreclient.ExecuteClientSearchConcept(
+				return exploreclient.ExecuteClientSearchConceptChildren(
 					c.GlobalString("token"),
 					c.GlobalString("user"),
 					c.GlobalString("password"),
@@ -184,17 +184,50 @@ func main() {
 
 		{
 			Name:      "modifier-children",
-			Aliases:   []string{"modc"},
-			Usage:     "Get the children of a modifier",
+			Aliases:   []string{"mod-c"},
+			Usage:     "Get the modifier children",
 			ArgsUsage: "modifierPath appliedPath appliedConcept",
 			Action: func(c *cli.Context) error {
-				return exploreclient.ExecuteClientSearchModifier(
+				return exploreclient.ExecuteClientSearchModifierChildren(
 					c.GlobalString("token"),
 					c.GlobalString("user"),
 					c.GlobalString("password"),
 					c.Args().Get(0),
 					c.Args().Get(1),
 					c.Args().Get(2),
+					c.GlobalString("outputFile"),
+					c.GlobalBool("disableTLSCheck"))
+			},
+		},
+
+		{
+			Name:      "concept-info",
+			Aliases:   []string{"con-i"},
+			Usage:     "Get the concept info",
+			ArgsUsage: "conceptPath",
+			Action: func(c *cli.Context) error {
+				return exploreclient.ExecuteClientSearchConceptInfo(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.Args().Get(0),
+					c.GlobalString(("outputFile")),
+					c.GlobalBool("disableTLSCheck"))
+			},
+		},
+
+		{
+			Name:      "modifier-info",
+			Aliases:   []string{"mod-i"},
+			Usage:     "Get the modifier info",
+			ArgsUsage: "modifierPath appliedPath",
+			Action: func(c *cli.Context) error {
+				return exploreclient.ExecuteClientSearchModifierInfo(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.Args().Get(0),
+					c.Args().Get(1),
 					c.GlobalString("outputFile"),
 					c.GlobalBool("disableTLSCheck"))
 			},

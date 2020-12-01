@@ -42,21 +42,25 @@ func TestNetwork(t *testing.T) {
 
 func TestExploreSearchConcept(t *testing.T) {
 	for _, test := range []struct {
-		ok      bool
-		reqPath string
+		ok           bool
+		reqPath      string
+		reqOperation string
 	}{
-		{false, ""},
-		{true, "/"},
-		{false, ""},
-		{true, "/abc/def"},
-		{true, "/abc/def/"},
-		{true, "/abc/def/asdasdas"},
-		{false, "abc/def/"},
-		{false, "//def/"},
-		{false, "///"},
+		{false, "", models.ExploreSearchModifierOperationChildren},
+		{true, "/", models.ExploreSearchModifierOperationChildren},
+		{true, "/", models.ExploreSearchModifierOperationInfo},
+		{false, "/", "not_an_operation"},
+		{false, "/abc/def", models.ExploreSearchModifierOperationChildren},
+		{true, "/abc/def/", models.ExploreSearchModifierOperationChildren},
+		{true, "/abc/def/", models.ExploreSearchModifierOperationInfo},
+		{false, "/abc/def/", "not_an_operation"},
+		{false, "/abc/def/asdasdas", models.ExploreSearchModifierOperationChildren},
+		{false, "abc/def/", models.ExploreSearchModifierOperationChildren},
+		{false, "//def/", models.ExploreSearchModifierOperationChildren},
+		{false, "///", models.ExploreSearchModifierOperationChildren},
 	} {
-		body := fmt.Sprintf(`{"path":"%s"}`,
-			test.reqPath)
+		body := fmt.Sprintf(`{"path":"%s", "operation":"%s"}`,
+			test.reqPath, test.reqOperation)
 		ctx, req := getContextRequest(t, "POST", "/node/explore/search/concept",
 			body)
 
@@ -103,7 +107,7 @@ func eqValid() exploreQueryRequest {
 		"id", exploreQuery{
 			"userPub", []panel{
 				{false, []item{
-					{"queryTerm", "exists", "", false},
+					{"queryTerm", "EQ", "10", false},
 				}},
 			},
 		}}

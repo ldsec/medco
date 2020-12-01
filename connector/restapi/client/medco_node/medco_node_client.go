@@ -113,7 +113,7 @@ func (a *Client) ExploreQuery(params *ExploreQueryParams, authInfo runtime.Clien
 }
 
 /*
-  ExploreSearchConcept returns the children concepts and modifiers of a concept
+  ExploreSearchConcept returns info about the concept and its both concepts and modifiers children
 */
 func (a *Client) ExploreSearchConcept(params *ExploreSearchConceptParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreSearchConceptOK, error) {
 	// TODO: Validate the params before sending
@@ -147,7 +147,7 @@ func (a *Client) ExploreSearchConcept(params *ExploreSearchConceptParams, authIn
 }
 
 /*
-  ExploreSearchModifier returns the children of a modifier
+  ExploreSearchModifier returns info about the modifier and its children
 */
 func (a *Client) ExploreSearchModifier(params *ExploreSearchModifierParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreSearchModifierOK, error) {
 	// TODO: Validate the params before sending

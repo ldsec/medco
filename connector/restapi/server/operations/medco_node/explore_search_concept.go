@@ -37,7 +37,7 @@ func NewExploreSearchConcept(ctx *middleware.Context, handler ExploreSearchConce
 
 /*ExploreSearchConcept swagger:route POST /node/explore/search/concept medco-node exploreSearchConcept
 
-Returns the children (concepts and modifiers) of a concept
+Returns info about the concept and its (both concepts and modifiers) children
 
 */
 type ExploreSearchConcept struct {
