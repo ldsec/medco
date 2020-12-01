@@ -69,12 +69,12 @@ func NewQuery(UserID,
 			EncEvents EventGroups
 		}{}}
 	if StartModifier != nil {
-		logrus.Debugf("Provided start modifier with key %s and applied path %s", StartModifier)
+		logrus.Debugf("Provided start modifier with key %s and applied path %s", *StartModifier.ModifierKey, *StartModifier.AppliedPath)
 	} else {
 		logrus.Debug("No start modifier provided")
 	}
 	if EndModifier != nil {
-		logrus.Debugf("Provided end modifier with key %s and applied path %s", StartModifier)
+		logrus.Debugf("Provided end modifier with key %s and applied path %s", *EndModifier.ModifierKey, *EndModifier.AppliedPath)
 	} else {
 		logrus.Debug("No end modifier provided")
 	}

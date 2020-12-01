@@ -34,9 +34,9 @@ type SurvivalAnalysis struct {
 	cohortName string
 
 	startConceptPath    string
-	startModifierCode   string
+	startModifier       *survival_analysis.SurvivalAnalysisParamsBodyStartModifier
 	endConceptPath      string
-	endModifierCode     string
+	endModifier         *survival_analysis.SurvivalAnalysisParamsBodyEndModifier
 	subGroupDefinitions []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0
 
 	limit       int
@@ -51,16 +51,27 @@ type SurvivalAnalysis struct {
 }
 
 // NewSurvivalAnalysis constructor for survival analysis request
-func NewSurvivalAnalysis(token string, cohortName string, subGroupDefinitions []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0, limit int, granularity, startConcept, startModifier, endConcept, endModifier string, disableTLSCheck bool) (q *SurvivalAnalysis, err error) {
+func NewSurvivalAnalysis(
+	token string,
+	cohortName string,
+	subGroupDefinitions []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0,
+	limit int,
+	granularity,
+	startConcept string,
+	startModifier *survival_analysis.SurvivalAnalysisParamsBodyStartModifier,
+	endConcept string,
+	endModifier *survival_analysis.SurvivalAnalysisParamsBodyEndModifier,
+	disableTLSCheck bool,
+) (q *SurvivalAnalysis, err error) {
 	q = &SurvivalAnalysis{
 		authToken:           token,
 		id:                  "MedCo_Survival_Analysis" + time.Now().Format(time.RFC3339),
 		cohortName:          cohortName,
 		subGroupDefinitions: subGroupDefinitions,
 		startConceptPath:    startConcept,
-		startModifierCode:   startModifier,
+		startModifier:       startModifier,
 		endConceptPath:      endConcept,
-		endModifierCode:     endModifier,
+		endModifier:         endModifier,
 		limit:               limit,
 		granularity:         granularity,
 		formats:             strfmt.Default,

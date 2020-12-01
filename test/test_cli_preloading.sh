@@ -143,7 +143,9 @@ test4 () {
 }
 
 test5 () {
-  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD -o /data/result.csv srva  -c testCohort -l 6 -g ${1}  -s /SPHN/SPHNv2020.1/FophDiagnosis/ -e /SPHN/SPHNv2020.1/DeathStatus/ -y 126:1 -d /data/timers.csv
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD -o /data/result.csv srva  -c testCohort -l 6 -g ${1} \
+   -s clr::/SPHN/SPHNv2020.1/FophDiagnosis/ \
+   -e clr::/SPHN/SPHNv2020.1/DeathStatus/:/SPHN/DeathStatus-status/death/:/SPHNv2020.1/DeathStatus/ -d /data/timers.csv
   
   result="$(awk -F',' 'NR==1{print $0}' ../timers.csv)"
   if [ "${result}" != "${timerHeaders}" ];
