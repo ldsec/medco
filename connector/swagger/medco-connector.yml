@@ -429,12 +429,32 @@ parameters:
           type: "string"
           pattern: '^\/$|^((\/[^\/]+)+\/?)$'
         startModifier:
-          type: "string"
+          type: "object"
+          properties:
+            modifierKey:
+              type: "string"
+              pattern: '^((\/[^\/]+)+\/)$'
+            appliedPath:
+              type: "string"
+              pattern: '^((\/[^\/]+)+\/%?)$'
+          required:
+            - modifierKey
+            - appliedPath
         endConcept:
           type: "string"
           pattern: '^\/$|^((\/[^\/]+)+\/?)$'
         endModifier:
-          type: "string"
+          type: "object"
+          properties:
+            modifierKey:
+              type: "string"
+              pattern: '^((\/[^\/]+)+\/)$'
+            appliedPath:
+              type: "string"
+              pattern: '^((\/[^\/]+)+\/%?)$'
+          required:
+            - modifierKey
+            - appliedPath
       required:
         - ID
         - userPublicKey
@@ -442,9 +462,7 @@ parameters:
         - timeLimit
         - timeGranularity
         - startConcept
-        - startModifier
         - endConcept
-        - endModifier
 
 responses:
   errorResponse:

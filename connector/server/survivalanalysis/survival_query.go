@@ -31,9 +31,9 @@ type Query struct {
 	TimeLimit           int
 	TimeGranularity     string
 	StartConcept        string
-	StartModifier       string
+	StartModifier       *survival_analysis.SurvivalAnalysisParamsBodyStartModifier
 	EndConcept          string
-	EndModifier         string
+	EndModifier         *survival_analysis.SurvivalAnalysisParamsBodyEndModifier
 	Result              *struct {
 		Timers    medcomodels.Timers
 		EncEvents EventGroups
@@ -49,9 +49,9 @@ func NewQuery(UserID,
 	TimeLimit int,
 	TimeGranularity string,
 	StartConcept string,
-	StartModifier string,
+	StartModifier *survival_analysis.SurvivalAnalysisParamsBodyStartModifier,
 	EndConcept string,
-	EndModifier string) *Query {
+	EndModifier *survival_analysis.SurvivalAnalysisParamsBodyEndModifier) *Query {
 	res := &Query{
 		UserPublicKey:       UserPublicKey,
 		UserID:              UserID,
@@ -68,6 +68,16 @@ func NewQuery(UserID,
 			Timers    medcomodels.Timers
 			EncEvents EventGroups
 		}{}}
+	if StartModifier != nil {
+		logrus.Debugf("Provided start modifier with key %s and applied path %s", StartModifier)
+	} else {
+		logrus.Debug("No start modifier provided")
+	}
+	if EndModifier != nil {
+		logrus.Debugf("Provided end modifier with key %s and applied path %s", StartModifier)
+	} else {
+		logrus.Debug("No end modifier provided")
+	}
 	res.Result.Timers = make(map[string]time.Duration)
 
 	return res
@@ -82,7 +92,7 @@ func (q *Query) Execute() error {
 	timeLimitInDays := q.TimeLimit * granularityValues[q.TimeGranularity]
 	timer := time.Now()
 
-	startConceptCode, endConceptCode, cohort, timers, err := prepareArguments(q.UserID, q.CohortName, q.StartConcept, q.EndConcept)
+	startConceptCode, startModifierCode, endConceptCode, endModifierCode, cohort, timers, err := prepareArguments(q.UserID, q.CohortName, q.StartConcept, q.StartModifier, q.EndConcept, q.EndModifier)
 
 	q.Result.Timers.AddTimers("", timer, timers)
 
@@ -156,9 +166,9 @@ func (q *Query) Execute() error {
 			sqlTimePoints, err := buildTimePoints(
 				patientList,
 				startConceptCode,
-				q.StartModifier,
+				startModifierCode,
 				endConceptCode,
-				q.EndModifier,
+				endModifierCode,
 				timeLimitInDays,
 			)
 			timers.AddTimers(fmt.Sprintf("medco-connector-build-timepoints%d", i), timer, nil)
@@ -223,10 +233,17 @@ func (q *Query) Validate() error {
 	if q.StartConcept == "" {
 		return fmt.Errorf("emtpy start concept path")
 	}
-	q.StartModifier = strings.TrimSpace(q.StartModifier)
-	if q.StartModifier == "" {
-		logrus.Warn("empty start concept, defaulte to \"@\"")
+	if q.StartModifier != nil {
+		*q.StartModifier.ModifierKey = strings.TrimSpace(*q.StartModifier.ModifierKey)
+		if *q.StartModifier.ModifierKey == "" {
+			logrus.Errorf("empty start modifier key")
+		}
+		*q.StartModifier.AppliedPath = strings.TrimSpace(*q.StartModifier.AppliedPath)
+		if *q.StartModifier.AppliedPath == "" {
+			logrus.Errorf("empty start modifier applied path")
+		}
 	}
+
 	q.QueryName = strings.TrimSpace(q.QueryName)
 	if q.QueryName == "" {
 		return fmt.Errorf("empty query name")
@@ -235,10 +252,17 @@ func (q *Query) Validate() error {
 	if q.EndConcept == "" {
 		return fmt.Errorf("empty end concept path")
 	}
-	q.EndModifier = strings.TrimSpace(q.EndModifier)
-	if q.EndModifier == "" {
-		logrus.Warn("empty end modifier, defaulted to \"@\"")
+	if q.EndModifier != nil {
+		*q.EndModifier.ModifierKey = strings.TrimSpace(*q.EndModifier.ModifierKey)
+		if *q.EndModifier.ModifierKey == "" {
+			logrus.Errorf("empty end modifier key")
+		}
+		*q.EndModifier.AppliedPath = strings.TrimSpace(*q.EndModifier.AppliedPath)
+		if *q.EndModifier.AppliedPath == "" {
+			logrus.Errorf("empty end modifier applied path")
+		}
 	}
+
 	q.UserID = strings.TrimSpace(q.UserID)
 	if q.UserID == "" {
 		return fmt.Errorf("empty user name")
@@ -267,7 +291,20 @@ func (q *Query) Validate() error {
 }
 
 // prepareArguments retrieves concept codes and patients that will be used as the arguments of direct SQL call
-func prepareArguments(userID, cohortName, startConcept, endConcept string) (startConceptCode, endConceptCode string, cohort []int64, timers medcomodels.Timers, err error) {
+func prepareArguments(
+	userID,
+	cohortName, startConcept string,
+	startModifier *survival_analysis.SurvivalAnalysisParamsBodyStartModifier,
+	endConcept string,
+	endModifier *survival_analysis.SurvivalAnalysisParamsBodyEndModifier,
+) (
+	startConceptCode,
+	startModifierCode,
+	endConceptCode,
+	endModifierCode string,
+	cohort []int64, timers medcomodels.Timers,
+	err error,
+) {
 	timers = make(map[string]time.Duration)
 	// --- cohort patient list
 	timer := time.Now()
@@ -294,9 +331,27 @@ func prepareArguments(userID, cohortName, startConcept, endConcept string) (star
 		err = fmt.Errorf("while retrieving start concept code: %s", err.Error())
 		return
 	}
+	if startModifier == nil {
+		startModifierCode = "@"
+	} else {
+		startModifierCode, err = getModifierCode(*startModifier.ModifierKey, *startModifier.AppliedPath)
+	}
+	if err != nil {
+		err = fmt.Errorf("while retrieving start modifier code: %s", err.Error())
+		return
+	}
 	endConceptCode, err = getCode(endConcept)
 	if err != nil {
 		err = fmt.Errorf("while retrieving end concept code: %s", err.Error())
+		return
+	}
+	if endModifier == nil {
+		endModifierCode = "@"
+	} else {
+		endModifierCode, err = getModifierCode(*endModifier.ModifierKey, *endModifier.AppliedPath)
+	}
+	if err != nil {
+		err = fmt.Errorf("while retrieving end modifier code: %s", err.Error())
 		return
 	}
 	logrus.Info("got concept and modifier codes")
@@ -362,6 +417,23 @@ func getCode(path string) (string, error) {
 
 	return res[0].Code, nil
 
+}
+
+// getModifierPath takes the full path of a I2B2 modifier and its applied paht and returns its code
+func getModifierCode(path string, appliedPath string) (string, error) {
+	res, err := i2b2.GetOntologyModifierInfo(path, appliedPath)
+	if err != nil {
+		return "", err
+	}
+	if len(res) != 1 {
+		return "", errors.Errorf("Result length of GetOntologyTermInfo is expected to be 1. Got: %d. "+
+			"Is applied path %s available for modifier key %s ?", len(res), appliedPath, path)
+	}
+	if res[0].Code == "" {
+		return "", errors.New("Code is empty")
+	}
+
+	return res[0].Code, nil
 }
 
 // processGroupResult change resolution, expand and encrypt group result

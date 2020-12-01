@@ -878,9 +878,7 @@ func init() {
           "timeLimit",
           "timeGranularity",
           "startConcept",
-          "startModifier",
-          "endConcept",
-          "endModifier"
+          "endConcept"
         ],
         "properties": {
           "ID": {
@@ -896,14 +894,42 @@ func init() {
             "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
           },
           "endModifier": {
-            "type": "string"
+            "type": "object",
+            "required": [
+              "modifierKey",
+              "appliedPath"
+            ],
+            "properties": {
+              "appliedPath": {
+                "type": "string",
+                "pattern": "^((\\/[^\\/]+)+\\/%?)$"
+              },
+              "modifierKey": {
+                "type": "string",
+                "pattern": "^((\\/[^\\/]+)+\\/)$"
+              }
+            }
           },
           "startConcept": {
             "type": "string",
             "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
           },
           "startModifier": {
-            "type": "string"
+            "type": "object",
+            "required": [
+              "modifierKey",
+              "appliedPath"
+            ],
+            "properties": {
+              "appliedPath": {
+                "type": "string",
+                "pattern": "^((\\/[^\\/]+)+\\/%?)$"
+              },
+              "modifierKey": {
+                "type": "string",
+                "pattern": "^((\\/[^\\/]+)+\\/)$"
+              }
+            }
           },
           "subGroupDefinitions": {
             "type": "array",
@@ -1444,9 +1470,7 @@ func init() {
                 "timeLimit",
                 "timeGranularity",
                 "startConcept",
-                "startModifier",
-                "endConcept",
-                "endModifier"
+                "endConcept"
               ],
               "properties": {
                 "ID": {
@@ -1462,14 +1486,42 @@ func init() {
                   "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
                 },
                 "endModifier": {
-                  "type": "string"
+                  "type": "object",
+                  "required": [
+                    "modifierKey",
+                    "appliedPath"
+                  ],
+                  "properties": {
+                    "appliedPath": {
+                      "type": "string",
+                      "pattern": "^((\\/[^\\/]+)+\\/%?)$"
+                    },
+                    "modifierKey": {
+                      "type": "string",
+                      "pattern": "^((\\/[^\\/]+)+\\/)$"
+                    }
+                  }
                 },
                 "startConcept": {
                   "type": "string",
                   "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
                 },
                 "startModifier": {
-                  "type": "string"
+                  "type": "object",
+                  "required": [
+                    "modifierKey",
+                    "appliedPath"
+                  ],
+                  "properties": {
+                    "appliedPath": {
+                      "type": "string",
+                      "pattern": "^((\\/[^\\/]+)+\\/%?)$"
+                    },
+                    "modifierKey": {
+                      "type": "string",
+                      "pattern": "^((\\/[^\\/]+)+\\/)$"
+                    }
+                  }
                 },
                 "subGroupDefinitions": {
                   "type": "array",
@@ -2273,6 +2325,40 @@ func init() {
         }
       }
     },
+    "SurvivalAnalysisParamsBodyEndModifier": {
+      "type": "object",
+      "required": [
+        "modifierKey",
+        "appliedPath"
+      ],
+      "properties": {
+        "appliedPath": {
+          "type": "string",
+          "pattern": "^((\\/[^\\/]+)+\\/%?)$"
+        },
+        "modifierKey": {
+          "type": "string",
+          "pattern": "^((\\/[^\\/]+)+\\/)$"
+        }
+      }
+    },
+    "SurvivalAnalysisParamsBodyStartModifier": {
+      "type": "object",
+      "required": [
+        "modifierKey",
+        "appliedPath"
+      ],
+      "properties": {
+        "appliedPath": {
+          "type": "string",
+          "pattern": "^((\\/[^\\/]+)+\\/%?)$"
+        },
+        "modifierKey": {
+          "type": "string",
+          "pattern": "^((\\/[^\\/]+)+\\/)$"
+        }
+      }
+    },
     "TimersItems0": {
       "type": "object",
       "required": [
@@ -2614,9 +2700,7 @@ func init() {
           "timeLimit",
           "timeGranularity",
           "startConcept",
-          "startModifier",
-          "endConcept",
-          "endModifier"
+          "endConcept"
         ],
         "properties": {
           "ID": {
@@ -2632,14 +2716,42 @@ func init() {
             "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
           },
           "endModifier": {
-            "type": "string"
+            "type": "object",
+            "required": [
+              "modifierKey",
+              "appliedPath"
+            ],
+            "properties": {
+              "appliedPath": {
+                "type": "string",
+                "pattern": "^((\\/[^\\/]+)+\\/%?)$"
+              },
+              "modifierKey": {
+                "type": "string",
+                "pattern": "^((\\/[^\\/]+)+\\/)$"
+              }
+            }
           },
           "startConcept": {
             "type": "string",
             "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
           },
           "startModifier": {
-            "type": "string"
+            "type": "object",
+            "required": [
+              "modifierKey",
+              "appliedPath"
+            ],
+            "properties": {
+              "appliedPath": {
+                "type": "string",
+                "pattern": "^((\\/[^\\/]+)+\\/%?)$"
+              },
+              "modifierKey": {
+                "type": "string",
+                "pattern": "^((\\/[^\\/]+)+\\/)$"
+              }
+            }
           },
           "subGroupDefinitions": {
             "type": "array",
