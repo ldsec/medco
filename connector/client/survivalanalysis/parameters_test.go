@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const testParamFile string = "testParams.yaml"
+const testParamFile string = "test_params.yaml"
 
 func TestNewParametersFromFile(t *testing.T) {
 	file, err := os.Open(testParamFile)
@@ -110,7 +110,7 @@ var parameters = &Parameters{
 						Modifier *modifier `yaml:"modifier,omitempty"`
 					}{
 						{
-							Path: "/path/3/",
+							Path: "/path/4/",
 						},
 					},
 				},
