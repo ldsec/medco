@@ -33,33 +33,6 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 		return
 	}
 
-	startPanel, err := medcoclient.ParseQueryItem(startItem)
-	if err != nil {
-		logrus.Error("while parsing start item", err)
-		return
-	}
-
-	err = panelValidation(startPanel)
-	if err != nil {
-		logrus.Error("while validating start item", err)
-		return
-	}
-	startConcept := *(startPanel[0].QueryTerm)
-
-	endPanel, err := medcoclient.ParseQueryItem(endItem)
-	if err != nil {
-		logrus.Error("while parsing end item", err)
-		return
-	}
-
-	err = panelValidation(endPanel)
-
-	if err != nil {
-		logrus.Error("while validating start item", err)
-		return
-	}
-	endConcept := *(endPanel[0].QueryTerm)
-
 	//initialize objects and channels
 	clientTimers := medcomodels.NewTimers()
 	var accessToken string
@@ -124,20 +97,46 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 		if parameterFileURL != "" {
 			parameters = <-parametersChan
 		} else {
-			var startModifier *modifier
-			var endModifier *modifier
-
-			if startMod := startPanel[0].Modifier; startMod != nil {
-				startModifier = &modifier{
-					startMod.ModifierKey,
-					startMod.AppliedPath,
-				}
+			var startPanel []*models.PanelItemsItems0
+			var endPanel []*models.PanelItemsItems0
+			startPanel, err = medcoclient.ParseQueryItem(startItem)
+			if err != nil {
+				logrus.Error("while parsing start item: ", err.Error())
+				return
 			}
 
-			if endMod := startPanel[0].Modifier; endMod != nil {
+			err = panelValidation(startPanel)
+			if err != nil {
+				logrus.Error("while validating start item", err)
+				return
+			}
+			startConcept := *(startPanel[0].QueryTerm)
+
+			endPanel, err = medcoclient.ParseQueryItem(endItem)
+			if err != nil {
+				logrus.Error("while parsing end item", err)
+				return
+			}
+
+			err = panelValidation(endPanel)
+
+			if err != nil {
+				logrus.Error("while validating start item", err)
+				return
+			}
+			endConcept := *(endPanel[0].QueryTerm)
+			var startModifier *modifier
+			var endModifier *modifier
+			if startMod := startPanel[0].Modifier; startMod != nil {
+				startModifier = &modifier{
+					ModifierKey: startMod.ModifierKey,
+					AppliedPath: startMod.AppliedPath,
+				}
+			}
+			if endMod := endPanel[0].Modifier; endMod != nil {
 				endModifier = &modifier{
-					endMod.ModifierKey,
-					endMod.AppliedPath,
+					ModifierKey: endMod.ModifierKey,
+					AppliedPath: endMod.AppliedPath,
 				}
 			}
 
@@ -151,7 +150,6 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 				endModifier,
 				nil,
 			}
-
 		}
 	}
 
@@ -212,7 +210,11 @@ func executeQuery(accessToken string, panels []*survival_analysis.SurvivalAnalys
 	var APIendModifier *survival_analysis.SurvivalAnalysisParamsBodyEndModifier
 
 	if startMod := parameters.StartModifier; startMod != nil {
-		APIstartModifier = &survival_analysis.SurvivalAnalysisParamsBodyStartModifier{}
+		logrus.Debug("start modifier provided")
+		APIstartModifier = &survival_analysis.SurvivalAnalysisParamsBodyStartModifier{
+			ModifierKey: new(string),
+			AppliedPath: new(string),
+		}
 		*APIstartModifier.ModifierKey = startMod.ModifierKey
 		*APIstartModifier.AppliedPath = startMod.AppliedPath
 	}
@@ -300,10 +302,18 @@ func convertPanel(parameters *Parameters) []*survival_analysis.SurvivalAnalysisP
 				itemString := new(string)
 				*encrypted = false
 				*itemString = item.Path
+				var modifier *models.PanelItemsItems0Modifier
+				if mod := item.Modifier; mod != nil {
+					modifier = &models.PanelItemsItems0Modifier{
+						ModifierKey: mod.ModifierKey,
+						AppliedPath: mod.AppliedPath,
+					}
+				}
 				newItems[k] = &models.PanelItemsItems0{
 					Encrypted: encrypted,
 					Operator:  models.PanelItemsItems0OperatorExists,
 					QueryTerm: itemString,
+					Modifier:  modifier,
 				}
 			}
 			newPanel.Items = newItems

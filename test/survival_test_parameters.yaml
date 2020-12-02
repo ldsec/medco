@@ -11,9 +11,9 @@ sub_groups:
     panels:
       - not: false
         items:
-          path: "/I2B2/I2B2/Demographics/Gender/Female/"
+          - path: "/I2B2/I2B2/Demographics/Gender/Female/"
   - group_name: "Male"
     panels:
       - not: false
         items:
-          path: "/I2B2/I2B2/Demographics/Gender/Male/"
+          - path: "/I2B2/I2B2/Demographics/Gender/Male/"

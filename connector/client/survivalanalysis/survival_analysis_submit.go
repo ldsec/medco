@@ -21,9 +21,9 @@ func (clientSurvivalAnalysis *SurvivalAnalysis) submitToNode(nodeIdx int) (resul
 		CohortName:          new(string),
 		SubGroupDefinitions: clientSurvivalAnalysis.subGroupDefinitions,
 		StartConcept:        new(string),
-		StartModifier:       nil,
+		StartModifier:       clientSurvivalAnalysis.startModifier,
 		EndConcept:          new(string),
-		EndModifier:         nil,
+		EndModifier:         clientSurvivalAnalysis.endModifier,
 		TimeGranularity:     new(string),
 		TimeLimit:           new(int64),
 	}

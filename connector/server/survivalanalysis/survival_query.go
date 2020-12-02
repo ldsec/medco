@@ -93,7 +93,10 @@ func (q *Query) Execute() error {
 	timer := time.Now()
 
 	startConceptCode, startModifierCode, endConceptCode, endModifierCode, cohort, timers, err := prepareArguments(q.UserID, q.CohortName, q.StartConcept, q.StartModifier, q.EndConcept, q.EndModifier)
-
+	if err != nil {
+		err = fmt.Errorf("while retrieving concept codes and patient indices: %s", err.Error())
+		return err
+	}
 	q.Result.Timers.AddTimers("", timer, timers)
 
 	// --- build sub groups
@@ -403,6 +406,7 @@ func expansion(timePoints medcomodels.TimePoints, timeLimitDay int, granularity 
 
 // getCode takes the full path of a I2B2 concept and returns its code
 func getCode(path string) (string, error) {
+	logrus.Debugf("get code concept path %s", path)
 	res, err := i2b2.GetOntologyTermInfo(path)
 	if err != nil {
 		return "", err
@@ -414,6 +418,7 @@ func getCode(path string) (string, error) {
 	if res[0].Code == "" {
 		return "", errors.New("Code is empty")
 	}
+	logrus.Debugf("got concept code %s", res[0].Code)
 
 	return res[0].Code, nil
 
@@ -421,10 +426,12 @@ func getCode(path string) (string, error) {
 
 // getModifierPath takes the full path of a I2B2 modifier and its applied paht and returns its code
 func getModifierCode(path string, appliedPath string) (string, error) {
+	logrus.Debugf("get modifier code modifier path %s applied path %s", path, appliedPath)
 	res, err := i2b2.GetOntologyModifierInfo(path, appliedPath)
 	if err != nil {
 		return "", err
 	}
+
 	if len(res) != 1 {
 		return "", errors.Errorf("Result length of GetOntologyTermInfo is expected to be 1. Got: %d. "+
 			"Is applied path %s available for modifier key %s ?", len(res), appliedPath, path)
@@ -432,6 +439,10 @@ func getModifierCode(path string, appliedPath string) (string, error) {
 	if res[0].Code == "" {
 		return "", errors.New("Code is empty")
 	}
+	if res[0].AppliedPath != appliedPath {
+		return "", fmt.Errorf("applied paths don't match. Is applied path %s available for modifier key %s ?", appliedPath, path)
+	}
+	logrus.Debugf("got modifier code %s", res[0].Code)
 
 	return res[0].Code, nil
 }
