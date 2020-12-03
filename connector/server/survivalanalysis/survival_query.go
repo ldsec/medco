@@ -407,12 +407,12 @@ func expansion(timePoints medcomodels.TimePoints, timeLimitDay int, granularity 
 // getCode takes the full path of a I2B2 concept and returns its code
 func getCode(path string) (string, error) {
 	logrus.Debugf("get code concept path %s", path)
-	res, err := i2b2.GetOntologyTermInfo(path)
+	res, err := i2b2.GetOntologyConceptInfo(path)
 	if err != nil {
 		return "", err
 	}
 	if len(res) != 1 {
-		return "", errors.Errorf("Result length of GetOntologyTermInfo is expected to be 1. Got: %d", len(res))
+		return "", errors.Errorf("Result length of GetOntologyConceptInfo is expected to be 1. Got: %d", len(res))
 	}
 
 	if res[0].Code == "" {
@@ -514,7 +514,6 @@ func fullCohort(startConcept string) []*survival_analysis.SurvivalAnalysisParams
 	*term = startConcept
 	newItems[0] = &models.PanelItemsItems0{
 		Encrypted: encrypted,
-		Operator:  "equals",
 		QueryTerm: term,
 	}
 	newPanels := make([]*models.Panel, 1)

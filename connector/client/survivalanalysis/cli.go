@@ -129,14 +129,14 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 			var endModifier *modifier
 			if startMod := startPanel[0].Modifier; startMod != nil {
 				startModifier = &modifier{
-					ModifierKey: startMod.ModifierKey,
-					AppliedPath: startMod.AppliedPath,
+					ModifierKey: *startMod.ModifierKey,
+					AppliedPath: *startMod.AppliedPath,
 				}
 			}
 			if endMod := endPanel[0].Modifier; endMod != nil {
 				endModifier = &modifier{
-					ModifierKey: endMod.ModifierKey,
-					AppliedPath: endMod.AppliedPath,
+					ModifierKey: *endMod.ModifierKey,
+					AppliedPath: *endMod.AppliedPath,
 				}
 			}
 
@@ -305,13 +305,15 @@ func convertPanel(parameters *Parameters) []*survival_analysis.SurvivalAnalysisP
 				var modifier *models.PanelItemsItems0Modifier
 				if mod := item.Modifier; mod != nil {
 					modifier = &models.PanelItemsItems0Modifier{
-						ModifierKey: mod.ModifierKey,
-						AppliedPath: mod.AppliedPath,
+						ModifierKey: new(string),
+						AppliedPath: new(string),
 					}
+					*modifier.ModifierKey = mod.ModifierKey
+					*modifier.AppliedPath = mod.AppliedPath
+
 				}
 				newItems[k] = &models.PanelItemsItems0{
 					Encrypted: encrypted,
-					Operator:  models.PanelItemsItems0OperatorExists,
 					QueryTerm: itemString,
 					Modifier:  modifier,
 				}
@@ -487,7 +489,7 @@ func modelPanelsToString(subGroup *survival_analysis.SurvivalAnalysisParamsBodyS
 	for _, panel := range subGroup.Panels {
 		itemStrings := make([]string, 0, len(panel.Items))
 		for _, item := range panel.Items {
-			itemStrings = append(itemStrings, fmt.Sprintf("{Encrypted:%t Modifier:%s Operator:%s QueryTerm:%s Value:%s}",
+			itemStrings = append(itemStrings, fmt.Sprintf("{Encrypted:%t Modifier:%v Operator:%s QueryTerm:%s Value:%s}",
 				*item.Encrypted,
 				item.Modifier,
 				item.Operator,

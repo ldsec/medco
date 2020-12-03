@@ -4,3 +4,4 @@ ENV SCRIPT_NAME="/pgadmin"
 COPY reverseproxyfix.sh /
 RUN chmod +x /reverseproxyfix.sh && \
     /reverseproxyfix.sh
+COPY servers.json /pgadmin4/

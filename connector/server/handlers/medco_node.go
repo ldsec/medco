@@ -18,17 +18,34 @@ import (
 // MedCoNodeExploreSearchConceptHandler handles the /medco/node/explore/search/concept API endpoint
 func MedCoNodeExploreSearchConceptHandler(params medco_node.ExploreSearchConceptParams, principal *models.User) middleware.Responder {
 
-	searchResult1, err := i2b2.GetOntologyChildren(*params.SearchConceptRequest.Path)
-	if err != nil {
-		return medco_node.NewExploreSearchConceptDefault(500).WithPayload(&medco_node.ExploreSearchConceptDefaultBody{
-			Message: err.Error(),
-		})
-	}
+	var searchResult []*models.ExploreSearchResultElement
 
-	var searchResult2 []*models.ExploreSearchResultElement
+	if *params.SearchConceptRequest.Operation == models.ExploreSearchConceptOperationChildren {
 
-	if *params.SearchConceptRequest.Path != "/" {
-		searchResult2, err = i2b2.GetOntologyModifiers(*params.SearchConceptRequest.Path)
+		searchResult1, err := i2b2.GetOntologyConceptChildren(*params.SearchConceptRequest.Path)
+		if err != nil {
+			return medco_node.NewExploreSearchConceptDefault(500).WithPayload(&medco_node.ExploreSearchConceptDefaultBody{
+				Message: err.Error(),
+			})
+		}
+
+		var searchResult2 []*models.ExploreSearchResultElement
+
+		if *params.SearchConceptRequest.Path != "/" {
+			searchResult2, err = i2b2.GetOntologyModifiers(*params.SearchConceptRequest.Path)
+			if err != nil {
+				return medco_node.NewExploreSearchConceptDefault(500).WithPayload(&medco_node.ExploreSearchConceptDefaultBody{
+					Message: err.Error(),
+				})
+			}
+		}
+
+		searchResult = append(searchResult1, searchResult2...)
+
+	} else if *params.SearchConceptRequest.Operation == models.ExploreSearchConceptOperationInfo {
+
+		var err error
+		searchResult, err = i2b2.GetOntologyConceptInfo(*params.SearchConceptRequest.Path)
 		if err != nil {
 			return medco_node.NewExploreSearchConceptDefault(500).WithPayload(&medco_node.ExploreSearchConceptDefaultBody{
 				Message: err.Error(),
@@ -38,18 +55,31 @@ func MedCoNodeExploreSearchConceptHandler(params medco_node.ExploreSearchConcept
 
 	return medco_node.NewExploreSearchConceptOK().WithPayload(&medco_node.ExploreSearchConceptOKBody{
 		Search:  params.SearchConceptRequest,
-		Results: append(searchResult1, searchResult2...),
+		Results: searchResult,
 	})
+
 }
 
 // MedCoNodeExploreSearchModifierHandler handles the /medco/node/explore/search/modifier API endpoint
 func MedCoNodeExploreSearchModifierHandler(params medco_node.ExploreSearchModifierParams, principal *models.User) middleware.Responder {
 
-	searchResult, err := i2b2.GetOntologyModifierChildren(*params.SearchModifierRequest.Path, *params.SearchModifierRequest.AppliedPath, *params.SearchModifierRequest.AppliedConcept)
-	if err != nil {
-		return medco_node.NewExploreSearchModifierDefault(500).WithPayload(&medco_node.ExploreSearchModifierDefaultBody{
-			Message: err.Error(),
-		})
+	var searchResult []*models.ExploreSearchResultElement
+	var err error
+
+	if *params.SearchModifierRequest.Operation == models.ExploreSearchModifierOperationChildren {
+		searchResult, err = i2b2.GetOntologyModifierChildren(*params.SearchModifierRequest.Path, *params.SearchModifierRequest.AppliedPath, *params.SearchModifierRequest.AppliedConcept)
+		if err != nil {
+			return medco_node.NewExploreSearchModifierDefault(500).WithPayload(&medco_node.ExploreSearchModifierDefaultBody{
+				Message: err.Error(),
+			})
+		}
+	} else if *params.SearchModifierRequest.Operation == models.ExploreSearchModifierOperationInfo {
+		searchResult, err = i2b2.GetOntologyModifierInfo(*params.SearchModifierRequest.Path, *params.SearchModifierRequest.AppliedPath)
+		if err != nil {
+			return medco_node.NewExploreSearchModifierDefault(500).WithPayload(&medco_node.ExploreSearchModifierDefaultBody{
+				Message: err.Error(),
+			})
+		}
 	}
 
 	return medco_node.NewExploreSearchModifierOK().WithPayload(&medco_node.ExploreSearchModifierOKBody{

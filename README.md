@@ -25,8 +25,7 @@ It follows the Golang standard project layout.
     - *[test-local-3nodes](https://ldsec.gitbook.io/medco-documentation/system-administrators/deployment/local-test-deployment)*: profile that deploys 3 MedCo nodes on a single machine for test purposes
 - *loader*: implementation of the ETL tool
 - *scripts*: various utility scripts
-    - *profile-generation-scripts*: scripts to generate various deployment profiles files
-        - *test-network*: scripts to generate the deployment profiles files for the [Network Test Deployment](https://ldsec.gitbook.io/medco-documentation/system-administrators/deployment/network-test-deployment) profile
+    - *network-profile-tool*: scripts to generate the deployment profiles files for the [Network Deployment](https://ldsec.gitbook.io/medco-documentation/system-administrators/deployment/network-deployment) profile
 - *test*: testing scripts
     - *test/data*: script to download the test datasets
 - *unlynx*: implementation of the unlynx wrapper

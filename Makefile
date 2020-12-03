@@ -48,6 +48,9 @@ test_unlynx_loop:
 
 swagger-gen: swagger
 	swagger validate ./connector/swagger/medco-connector.yml
+	rm -rf connector/restapi/client/* connector/restapi/models/*
+	find connector/restapi/server/ -mindepth 1 -type f ! -name "configure_medco_connector.go" -delete
+	find connector/restapi/server/ -mindepth 1 -type d -delete
 	swagger generate server \
 		--server-package=connector/restapi/server \
 		--model-package=connector/restapi/models \

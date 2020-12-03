@@ -23,6 +23,8 @@ type ExploreSearchConcept struct {
 	authToken string
 
 	conceptPath string
+
+	operation string
 }
 
 // ExploreSearchModifier is a MedCo client explore modifier search
@@ -36,14 +38,17 @@ type ExploreSearchModifier struct {
 	modifierPath   string
 	appliedPath    string
 	appliedConcept string
+
+	operation string
 }
 
 // NewExploreSearchConcept creates a new MedCo client explore concept search
-func NewExploreSearchConcept(authToken, conceptPath string, disableTLSCheck bool) (sc *ExploreSearchConcept, err error) {
+func NewExploreSearchConcept(authToken, conceptPath, operation string, disableTLSCheck bool) (scc *ExploreSearchConcept, err error) {
 
-	sc = &ExploreSearchConcept{
+	scc = &ExploreSearchConcept{
 		authToken:   authToken,
 		conceptPath: conceptPath,
+		operation:   operation,
 	}
 
 	// retrieve network information
@@ -57,19 +62,20 @@ func NewExploreSearchConcept(authToken, conceptPath string, disableTLSCheck bool
 	transport.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: disableTLSCheck}
 
 	// parse network information
-	sc.httpMedCoClient = client.New(transport, nil)
+	scc.httpMedCoClient = client.New(transport, nil)
 
 	return
 }
 
 // NewExploreSearchModifier creates a new MedCo client explore modifier search
-func NewExploreSearchModifier(authToken, modifierPath, appliedPath, appliedConcept string, disableTLSCheck bool) (sm *ExploreSearchModifier, err error) {
+func NewExploreSearchModifier(authToken, modifierPath, appliedPath, appliedConcept, operation string, disableTLSCheck bool) (smc *ExploreSearchModifier, err error) {
 
-	sm = &ExploreSearchModifier{
+	smc = &ExploreSearchModifier{
 		authToken:      authToken,
 		modifierPath:   modifierPath,
 		appliedPath:    appliedPath,
 		appliedConcept: appliedConcept,
+		operation:      operation,
 	}
 
 	// retrieve network information
@@ -83,7 +89,7 @@ func NewExploreSearchModifier(authToken, modifierPath, appliedPath, appliedConce
 	transport.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: disableTLSCheck}
 
 	// parse network information
-	sm.httpMedCoClient = client.New(transport, nil)
+	smc.httpMedCoClient = client.New(transport, nil)
 
 	return
 }
@@ -92,12 +98,12 @@ func NewExploreSearchModifier(authToken, modifierPath, appliedPath, appliedConce
 func (exploreSearchConcept *ExploreSearchConcept) Execute() (*medco_node.ExploreSearchConceptOK, error) {
 
 	params := medco_node.NewExploreSearchConceptParamsWithTimeout(time.Duration(utilclient.SearchTimeoutSeconds) * time.Second)
-	params.SearchConceptRequest = &models.ExploreSearchConcept{Path: &exploreSearchConcept.conceptPath}
+	params.SearchConceptRequest = &models.ExploreSearchConcept{Path: &exploreSearchConcept.conceptPath, Operation: &exploreSearchConcept.operation}
 
 	response, err := exploreSearchConcept.httpMedCoClient.MedcoNode.ExploreSearchConcept(params, httptransport.BearerToken(exploreSearchConcept.authToken))
 
 	if err != nil {
-		logrus.Error("Explore Search Concept error: ", err)
+		logrus.Error("Explore Search Concept Children error: ", err)
 		return nil, err
 	}
 
@@ -113,12 +119,13 @@ func (exploreSearchModifier *ExploreSearchModifier) Execute() (*medco_node.Explo
 		Path:           &exploreSearchModifier.modifierPath,
 		AppliedPath:    &exploreSearchModifier.appliedPath,
 		AppliedConcept: &exploreSearchModifier.appliedConcept,
+		Operation:      &exploreSearchModifier.operation,
 	}
 
 	response, err := exploreSearchModifier.httpMedCoClient.MedcoNode.ExploreSearchModifier(params, httptransport.BearerToken(exploreSearchModifier.authToken))
 
 	if err != nil {
-		logrus.Error("Explore Search Modifier error: ", err)
+		logrus.Error("Explore Search Modifier Children error: ", err)
 		return nil, err
 	}
 
