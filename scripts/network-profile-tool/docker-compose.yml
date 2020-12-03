@@ -56,6 +56,7 @@ services:
       - "443:443"
     environment:
       - HTTP_SCHEME=https
+      - PROD_CONFIG=true
     volumes:
       - ./configuration/group.toml:/medco-configuration/group.toml
       - ./configuration/certificate.crt:/medco-configuration/certificate.crt
@@ -69,13 +70,6 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?}
     ports:
       - "5432:5432"
-
-  pg-admin:
-    extends:
-      file: ../docker-compose-definitions.yml
-      service: pg-admin
-    environment:
-      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD:?}
 
   keycloak:
     extends:
