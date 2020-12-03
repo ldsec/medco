@@ -98,13 +98,13 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 
 	// i2b2 PSM query with tagged items
 	timer = time.Now()
-	panels, err := q.getI2b2PsmQueryTerms(taggedQueryTerms)
+	err = q.convertI2b2PsmQueryPanels(taggedQueryTerms)
 	if err != nil {
-		err = fmt.Errorf("while building I2B2 panels: %s", err.Error())
+		err = fmt.Errorf("while converting I2B2 panels: %s", err.Error())
 		return
 	}
 
-	patientCount, patientSetID, err := i2b2.ExecutePsmQuery(q.ID, panels)
+	patientCount, patientSetID, err := i2b2.ExecutePsmQuery(q.ID, q.Query.Panels, q.Query.QueryTiming)
 	if err != nil {
 		err = fmt.Errorf("during I2B2 PSM query exection: %s", err.Error())
 		return
@@ -252,45 +252,21 @@ func (q *ExploreQuery) getEncQueryTerms() (encQueryTerms []string) {
 	return
 }
 
-func (q *ExploreQuery) getI2b2PsmQueryTerms(taggedQueryTerms map[string]string) (panels []*models.Panel, err error) {
+func (q *ExploreQuery) convertI2b2PsmQueryPanels(taggedQueryTerms map[string]string) (err error) {
 
 	for _, panel := range q.Query.Panels {
-
-		var newPanel models.Panel
-
-		not := *panel.Not
-		newPanel.Not = &not
-
 		for _, item := range panel.Items {
-
-			var newItem models.PanelItemsItems0
-			var itemKey string
-
 			if *item.Encrypted {
-
 				if tag, ok := taggedQueryTerms[*item.QueryTerm]; ok {
-					itemKey = `/SENSITIVE_TAGGED/medco/tagged/` + tag + `\`
+					itemKey := `/SENSITIVE_TAGGED/medco/tagged/` + tag + `\`
+					item.QueryTerm = &itemKey
 				} else {
 					err = errors.New("query error: encrypted term does not have corresponding tag")
 					logrus.Error(err)
 					return
 				}
-
-			} else {
-				itemKey = *item.QueryTerm
-				if item.Modifier != nil {
-					modifierCpy := *item.Modifier
-					newItem.Modifier = &modifierCpy
-				}
 			}
-
-			newItem.QueryTerm = &itemKey
-
-			newPanel.Items = append(newPanel.Items, &newItem)
 		}
-
-		panels = append(panels, &newPanel)
-
 	}
 
 	return

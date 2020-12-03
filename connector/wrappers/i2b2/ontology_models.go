@@ -2,6 +2,7 @@ package i2b2
 
 import (
 	"encoding/xml"
+	"github.com/ldsec/medco/connector/restapi/models"
 )
 
 // NewOntReqGetTermInfoMessageBody returns a new request object for i2b2 get term info (information about node)
@@ -73,6 +74,21 @@ func NewOntReqGetModifierChildrenMessageBody(parent, appliedPath, appliedConcept
 	return NewRequestWithBody(body)
 }
 
+// NewOntReqGetModifierInfoMessageBody returns a new request object to get the i2b2 modifier info
+func NewOntReqGetModifierInfoMessageBody(path, appliedPath string) Request {
+	body := OntReqGetModifierInfoMessageBody{}
+
+	body.GetModifierInfo.Blob = "true"
+	body.GetModifierInfo.Type = "core"
+	body.GetModifierInfo.Synonyms = "false"
+	body.GetModifierInfo.Hiddens = "false"
+
+	body.GetModifierInfo.Self = path
+	body.GetModifierInfo.AppliedPath = appliedPath
+
+	return NewRequestWithBody(body)
+}
+
 // --- request
 
 type baseMessageBody struct {
@@ -133,6 +149,16 @@ type OntReqGetModifierChildrenMessageBody struct {
 	} `xml:"ontns:get_modifier_children"`
 }
 
+// OntReqGetModifierInfoMessageBody is an i2b2 XML message for ontology modifier info request
+type OntReqGetModifierInfoMessageBody struct {
+	XMLName         xml.Name `xml:"message_body"`
+	GetModifierInfo struct {
+		baseMessageBody
+		Self        string `xml:"self"`
+		AppliedPath string `xml:"applied_path"`
+	} `xml:"ontns:get_modifier_info"`
+}
+
 // --- response
 
 // OntRespConceptsMessageBody is the message_body of the i2b2 get_children response message
@@ -143,46 +169,37 @@ type OntRespConceptsMessageBody struct {
 
 // Concept is an i2b2 XML concept
 type Concept struct {
-	Level            string      `xml:"level"`
-	Key              string      `xml:"key"`
-	Name             string      `xml:"name"`
-	SynonymCd        string      `xml:"synonym_cd"`
-	Visualattributes string      `xml:"visualattributes"`
-	Totalnum         string      `xml:"totalnum"`
-	Basecode         string      `xml:"basecode"`
-	Metadataxml      Metadataxml `xml:"metadataxml"`
-	Facttablecolumn  string      `xml:"facttablecolumn"`
-	Tablename        string      `xml:"tablename"`
-	Columnname       string      `xml:"columnname"`
-	Columndatatype   string      `xml:"columndatatype"`
-	Operator         string      `xml:"operator"`
-	Dimcode          string      `xml:"dimcode"`
-	Comment          string      `xml:"comment"`
-	Tooltip          string      `xml:"tooltip"`
-	UpdateDate       string      `xml:"update_date"`
-	DownloadDate     string      `xml:"download_date"`
-	ImportDate       string      `xml:"import_date"`
-	SourcesystemCd   string      `xml:"sourcesystem_cd"`
-	ValuetypeCd      string      `xml:"valuetype_cd"`
+	Level            string              `xml:"level"`
+	Key              string              `xml:"key"`
+	Name             string              `xml:"name"`
+	SynonymCd        string              `xml:"synonym_cd"`
+	Visualattributes string              `xml:"visualattributes"`
+	Totalnum         string              `xml:"totalnum"`
+	Basecode         string              `xml:"basecode"`
+	Metadataxml      *models.Metadataxml `xml:"metadataxml"`
+	Facttablecolumn  string              `xml:"facttablecolumn"`
+	Tablename        string              `xml:"tablename"`
+	Columnname       string              `xml:"columnname"`
+	Columndatatype   string              `xml:"columndatatype"`
+	Operator         string              `xml:"operator"`
+	Dimcode          string              `xml:"dimcode"`
+	Comment          string              `xml:"comment"`
+	Tooltip          string              `xml:"tooltip"`
+	UpdateDate       string              `xml:"update_date"`
+	DownloadDate     string              `xml:"download_date"`
+	ImportDate       string              `xml:"import_date"`
+	SourcesystemCd   string              `xml:"sourcesystem_cd"`
+	ValuetypeCd      string              `xml:"valuetype_cd"`
 }
 
 // Modifier is an i2b2 XML modifier
-type Modifier Concept
+type Modifier struct {
+	Concept
+	AppliedPath string `xml:"applied_path"`
+}
 
 // OntRespModifiersMessageBody is the message_body of the i2b2 get_modifiers response message
 type OntRespModifiersMessageBody struct {
 	XMLName   xml.Name   `xml:"message_body"`
 	Modifiers []Modifier `xml:"modifiers>modifier"`
-}
-
-// Metadataxml is an i2b2 XML metadata entity
-type Metadataxml struct {
-	XMLName       xml.Name `xml:"metadataxml"`
-	ValueMetadata struct {
-		EncryptedType      string `xml:"EncryptedType"`
-		NodeEncryptID      string `xml:"NodeEncryptID"`
-		ChildrenEncryptIDs string `xml:"ChildrenEncryptIDs"`
-
-		// todo: other elements not unmarshaled, add it to add support for other types
-	} `xml:"ValueMetadata"`
 }

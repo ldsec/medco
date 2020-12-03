@@ -3,14 +3,15 @@ package i2b2
 import (
 	"encoding/xml"
 	"errors"
-	"github.com/ldsec/medco/connector/restapi/models"
-	"github.com/ldsec/medco/connector/util/server"
 	"strconv"
 	"strings"
+
+	"github.com/ldsec/medco/connector/restapi/models"
+	utilserver "github.com/ldsec/medco/connector/util/server"
 )
 
 // NewCrcPsmReqFromQueryDef returns a new request object for i2b2 psm request
-func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, resultOutputs []ResultOutputName) Request {
+func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, resultOutputs []ResultOutputName, queryTiming models.Timing) Request {
 
 	// PSM header
 	psmHeader := PsmHeader{
@@ -32,7 +33,7 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, res
 		QueryName:        queryName,
 		QueryID:          queryName,
 		QueryDescription: "Query from MedCo connector (" + queryName + ")",
-		QueryTiming:      "ANY",
+		QueryTiming:      strings.ToUpper(string(queryTiming)),
 		SpecificityScale: "0",
 	}
 
@@ -48,7 +49,7 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, res
 			PanelNumber:          strconv.Itoa(p + 1),
 			PanelAccuracyScale:   "100",
 			Invert:               invert,
-			PanelTiming:          "ANY",
+			PanelTiming:          strings.ToUpper(string(queryPanel.PanelTiming)),
 			TotalItemOccurrences: "1",
 		}
 
@@ -56,10 +57,24 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, res
 			i2b2Item := Item{
 				ItemKey: convertPathToI2b2Format(*queryItem.QueryTerm),
 			}
+			if queryItem.Operator != "" && queryItem.Modifier == nil {
+				i2b2Item.ConstrainByValue = &ConstrainByValue{
+					ValueType:       "NUMBER",
+					ValueOperator:   queryItem.Operator,
+					ValueConstraint: queryItem.Value,
+				}
+			}
 			if queryItem.Modifier != nil {
 				i2b2Item.ConstrainByModifier = &ConstrainByModifier{
-					AppliedPath: strings.ReplaceAll(queryItem.Modifier.AppliedPath, "/", `\`),
-					ModifierKey: convertPathToI2b2Format(queryItem.Modifier.ModifierKey),
+					AppliedPath: strings.ReplaceAll(*queryItem.Modifier.AppliedPath, "/", `\`),
+					ModifierKey: convertPathToI2b2Format(*queryItem.Modifier.ModifierKey),
+				}
+				if queryItem.Operator != "" {
+					i2b2Item.ConstrainByModifier.ConstrainByValue = &ConstrainByValue{
+						ValueType:       "NUMBER",
+						ValueOperator:   queryItem.Operator,
+						ValueConstraint: queryItem.Value,
+					}
 				}
 			}
 			i2b2Panel.Items = append(i2b2Panel.Items, i2b2Item)
@@ -140,6 +155,7 @@ type Item struct {
 	ItemKey             string               `xml:"item_key"`
 	Tooltip             string               `xml:"tooltip"`
 	Class               string               `xml:"class"`
+	ConstrainByValue    *ConstrainByValue    `xml:"constrain_by_value,omitempty"`
 	ConstrainByModifier *ConstrainByModifier `xml:"constrain_by_modifier,omitempty"`
 	ItemIcon            string               `xml:"item_icon"`
 	ItemIsSynonym       string               `xml:"item_is_synonym"`
@@ -147,8 +163,16 @@ type Item struct {
 
 // ConstrainByModifier is an i2b2 XML constrain_by_modifier element
 type ConstrainByModifier struct {
-	AppliedPath string `xml:"applied_path"`
-	ModifierKey string `xml:"modifier_key"`
+	AppliedPath      string            `xml:"applied_path"`
+	ModifierKey      string            `xml:"modifier_key"`
+	ConstrainByValue *ConstrainByValue `xml:"constrain_by_value"`
+}
+
+// ConstrainByValue is an i2b2 XML constrain_by_value element
+type ConstrainByValue struct {
+	ValueType       string `xml:"value_type"`
+	ValueOperator   string `xml:"value_operator"`
+	ValueConstraint string `xml:"value_constraint"`
 }
 
 // ResultOutput is an i2b2 XML requested result type

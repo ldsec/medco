@@ -239,7 +239,6 @@ func convertPanel(parameters *Parameters) []*survival_analysis.SurvivalAnalysisP
 				*itemString = item
 				newItems[k] = &models.PanelItemsItems0{
 					Encrypted: encrypted,
-					Operator:  models.PanelItemsItems0OperatorExists,
 					QueryTerm: itemString,
 				}
 			}
@@ -396,7 +395,7 @@ func modelPanelsToString(subGroup *survival_analysis.SurvivalAnalysisParamsBodyS
 	for _, panel := range subGroup.Panels {
 		itemStrings := make([]string, 0, len(panel.Items))
 		for _, item := range panel.Items {
-			itemStrings = append(itemStrings, fmt.Sprintf("{Encrypted:%t Modifier:%s Operator:%s QueryTerm:%s Value:%s}",
+			itemStrings = append(itemStrings, fmt.Sprintf("{Encrypted:%t Modifier:%v Operator:%s QueryTerm:%s Value:%s}",
 				*item.Encrypted,
 				item.Modifier,
 				item.Operator,

@@ -49,7 +49,7 @@ paths:
     post:
       tags:
         - "medco-node"
-      summary: "Returns the children (concepts and modifiers) of a concept"
+      summary: "Returns info about the concept and its (both concepts and modifiers) children"
       operationId: "exploreSearchConcept"
       parameters:
         - $ref: "#/parameters/exploreSearchConceptRequest"
@@ -65,7 +65,7 @@ paths:
     post:
       tags:
         - "medco-node"
-      summary: "Returns the children of a modifier"
+      summary: "Returns info about the modifier and its children"
       operationId: "exploreSearchModifier"
       parameters:
         - $ref: "#/parameters/exploreSearchModifierRequest"
@@ -365,6 +365,7 @@ parameters:
           pattern: '^[\w:-]+$'
         query:
           $ref: "#/definitions/exploreQuery"
+
   cohortsRequest:
     in: "body"
     description: "Cohort that has been updated or created"
@@ -516,7 +517,7 @@ responses:
             $ref: "#/definitions/exploreSearchResultElement"
 
   exploreSearchModifierResponse:
-    description: "MedCo-Explore search modifier query response."
+    description: "MedCo-Explore search modifier children query response."
     schema:
       type: "object"
       properties:
@@ -593,10 +594,16 @@ definitions:
     type: "object"
     required:
       - path
+      - operation
     properties:
       path:
         type: "string"
-        pattern: '^\/$|^((\/[^\/]+)+\/?)$'
+        pattern: '^\/$|^((\/[^\/]+)+\/)$'
+      operation:
+        type: "string"
+        enum:
+          - info
+          - children
 
   exploreSearchModifier:
     type: "object"
@@ -604,22 +611,30 @@ definitions:
       - path
       - appliedPath
       - appliedConcept
+      - operation
     properties:
       path:
         type: "string"
-        pattern: '^\/$|^((\/[^\/]+)+\/?)$'
+        pattern: '^\/$|^((\/[^\/]+)+\/)$'
       appliedPath:
         type: "string"
-        pattern: '^\/$|^((\/[^\/]+)+\/?)$'
+        pattern: '^\/$|^((\/[^\/]+)+\/%?)$'
       appliedConcept:
         type: "string"
-        pattern: '^\/$|^((\/[^\/]+)+\/?)$'
+        pattern: '^\/$|^((\/[^\/]+)+\/)$'
+      operation:
+        type: "string"
+        enum:
+          - info
+          - children
 
   exploreSearchResultElement:
     type: "object"
     required: [leaf]
     properties:
       path:
+        type: "string"
+      appliedPath:
         type: "string"
       name:
         type: "string"
@@ -654,7 +669,61 @@ definitions:
               type: "integer"
               format: "int64"
       metadata:
-        type: "object"
+        $ref: "#/definitions/metadataxml"
+
+  metadataxml:
+    type: "object"
+    properties:
+      ValueMetadata:
+        type: object
+        properties:
+          Version:
+            type: "string"
+          CreationDateTime:
+            type: "string"
+          TestID:
+            type: "string"
+          TestName:
+            type: "string"
+          DataType:
+            type: "string"
+          Flagstouse:
+            type: "string"
+          Oktousevalues:
+            type: "string"
+          EnumValues:
+            type: "string"
+          UnitValues:
+            $ref: "#/definitions/UnitValues"
+          EncryptedType:
+            type: "string"
+          NodeEncryptID:
+            type: "string"
+          ChildrenEncryptIDs:
+            type: "string"
+
+  UnitValues:
+    type: object
+    properties:
+      NormalUnits:
+        type: "string"
+      EqualUnits:
+        type: "array"
+        items:
+          type: "string"
+      ExcludingUnits:
+        type: "array"
+        items:
+          type: "string"
+      ConvertingUnits:
+        type: "array"
+        items:
+         type: "object"
+         properties:
+           Units:
+             type: "string"
+           MultiplyingFactor:
+             type: "string"
 
   exploreQuery:
     description: "MedCo-Explore query"
@@ -667,6 +736,8 @@ definitions:
         description: "i2b2 panels (linked by an AND)"
         items:
           $ref: "#/definitions/panel"
+      queryTiming:
+        $ref: "#/definitions/timing"
   panel:
     type: "object"
     required: [not]
@@ -687,13 +758,27 @@ definitions:
             operator:
               type: "string"
               enum:
-                - exists
-                - equals
+                - EQ
+                - NE
+                - GT
+                - GE
+                - LT
+                - LE
+                - BETWEEN
+              description: >
+                EQ: equals
+                NE: not equals
+                GT: greater than
+                GE: greater than or equal
+                LT: less than
+                LE: less than or equal
+                BETWEEN: between (value syntax: x and y)
             value:
               type: "string"
-              maxLength: 0
+              pattern: '^[+-]?([0-9]*[.])?[0-9]+'
             modifier:
               type: "object"
+              required: [appliedPath, modifierKey]
               properties:
                 appliedPath:
                   type: "string"
@@ -703,6 +788,8 @@ definitions:
                   pattern: '^((\/[^\/]+)+\/)$'
             encrypted:
               type: "boolean"
+      panelTiming:
+        $ref: "#/definitions/timing"
 
   exploreQueryType:
     type: "string"
@@ -763,6 +850,14 @@ definitions:
             type: "array"
             items:
               $ref: "#/definitions/exploreQueryType"
+  
+  timing:
+    type: string
+    enum:
+      - any
+      - samevisit
+      - sameinstancenum
+    default: "any"
 
   timers:
     type: "array"

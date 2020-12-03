@@ -26,6 +26,9 @@ type Panel struct {
 	// exclude the i2b2 panel
 	// Required: true
 	Not *bool `json:"not"`
+
+	// panel timing
+	PanelTiming Timing `json:"panelTiming,omitempty"`
 }
 
 // Validate validates this panel
@@ -37,6 +40,10 @@ func (m *Panel) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateNot(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validatePanelTiming(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -80,6 +87,22 @@ func (m *Panel) validateNot(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *Panel) validatePanelTiming(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.PanelTiming) { // not required
+		return nil
+	}
+
+	if err := m.PanelTiming.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("panelTiming")
+		}
+		return err
+	}
+
+	return nil
+}
+
 // MarshalBinary interface implementation
 func (m *Panel) MarshalBinary() ([]byte, error) {
 	if m == nil {
@@ -110,8 +133,9 @@ type PanelItemsItems0 struct {
 	// modifier
 	Modifier *PanelItemsItems0Modifier `json:"modifier,omitempty"`
 
-	// operator
-	// Enum: [exists equals]
+	// EQ: equals NE: not equals GT: greater than GE: greater than or equal LT: less than LE: less than or equal BETWEEN: between (value syntax: x and y)
+	//
+	// Enum: [EQ NE GT GE LT LE BETWEEN]
 	Operator string `json:"operator,omitempty"`
 
 	// query term
@@ -120,7 +144,7 @@ type PanelItemsItems0 struct {
 	QueryTerm *string `json:"queryTerm"`
 
 	// value
-	// Max Length: 0
+	// Pattern: ^[+-]?([0-9]*[.])?[0-9]+
 	Value string `json:"value,omitempty"`
 }
 
@@ -185,7 +209,7 @@ var panelItemsItems0TypeOperatorPropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["exists","equals"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["EQ","NE","GT","GE","LT","LE","BETWEEN"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -195,11 +219,26 @@ func init() {
 
 const (
 
-	// PanelItemsItems0OperatorExists captures enum value "exists"
-	PanelItemsItems0OperatorExists string = "exists"
+	// PanelItemsItems0OperatorEQ captures enum value "EQ"
+	PanelItemsItems0OperatorEQ string = "EQ"
 
-	// PanelItemsItems0OperatorEquals captures enum value "equals"
-	PanelItemsItems0OperatorEquals string = "equals"
+	// PanelItemsItems0OperatorNE captures enum value "NE"
+	PanelItemsItems0OperatorNE string = "NE"
+
+	// PanelItemsItems0OperatorGT captures enum value "GT"
+	PanelItemsItems0OperatorGT string = "GT"
+
+	// PanelItemsItems0OperatorGE captures enum value "GE"
+	PanelItemsItems0OperatorGE string = "GE"
+
+	// PanelItemsItems0OperatorLT captures enum value "LT"
+	PanelItemsItems0OperatorLT string = "LT"
+
+	// PanelItemsItems0OperatorLE captures enum value "LE"
+	PanelItemsItems0OperatorLE string = "LE"
+
+	// PanelItemsItems0OperatorBETWEEN captures enum value "BETWEEN"
+	PanelItemsItems0OperatorBETWEEN string = "BETWEEN"
 )
 
 // prop value enum
@@ -243,7 +282,7 @@ func (m *PanelItemsItems0) validateValue(formats strfmt.Registry) error {
 		return nil
 	}
 
-	if err := validate.MaxLength("value", "body", string(m.Value), 0); err != nil {
+	if err := validate.Pattern("value", "body", string(m.Value), `^[+-]?([0-9]*[.])?[0-9]+`); err != nil {
 		return err
 	}
 
@@ -274,12 +313,14 @@ func (m *PanelItemsItems0) UnmarshalBinary(b []byte) error {
 type PanelItemsItems0Modifier struct {
 
 	// applied path
+	// Required: true
 	// Pattern: ^((\/[^\/]+)+\/%?)$
-	AppliedPath string `json:"appliedPath,omitempty"`
+	AppliedPath *string `json:"appliedPath"`
 
 	// modifier key
+	// Required: true
 	// Pattern: ^((\/[^\/]+)+\/)$
-	ModifierKey string `json:"modifierKey,omitempty"`
+	ModifierKey *string `json:"modifierKey"`
 }
 
 // Validate validates this panel items items0 modifier
@@ -302,11 +343,11 @@ func (m *PanelItemsItems0Modifier) Validate(formats strfmt.Registry) error {
 
 func (m *PanelItemsItems0Modifier) validateAppliedPath(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.AppliedPath) { // not required
-		return nil
+	if err := validate.Required("modifier"+"."+"appliedPath", "body", m.AppliedPath); err != nil {
+		return err
 	}
 
-	if err := validate.Pattern("modifier"+"."+"appliedPath", "body", string(m.AppliedPath), `^((\/[^\/]+)+\/%?)$`); err != nil {
+	if err := validate.Pattern("modifier"+"."+"appliedPath", "body", string(*m.AppliedPath), `^((\/[^\/]+)+\/%?)$`); err != nil {
 		return err
 	}
 
@@ -315,11 +356,11 @@ func (m *PanelItemsItems0Modifier) validateAppliedPath(formats strfmt.Registry) 
 
 func (m *PanelItemsItems0Modifier) validateModifierKey(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.ModifierKey) { // not required
-		return nil
+	if err := validate.Required("modifier"+"."+"modifierKey", "body", m.ModifierKey); err != nil {
+		return err
 	}
 
-	if err := validate.Pattern("modifier"+"."+"modifierKey", "body", string(m.ModifierKey), `^((\/[^\/]+)+\/)$`); err != nil {
+	if err := validate.Pattern("modifier"+"."+"modifierKey", "body", string(*m.ModifierKey), `^((\/[^\/]+)+\/)$`); err != nil {
 		return err
 	}
 

@@ -51,7 +51,7 @@ func NewExploreSearchModifierOK() *ExploreSearchModifierOK {
 
 /*ExploreSearchModifierOK handles this case with default header values.
 
-MedCo-Explore search modifier query response.
+MedCo-Explore search modifier children query response.
 */
 type ExploreSearchModifierOK struct {
 	Payload *ExploreSearchModifierOKBody

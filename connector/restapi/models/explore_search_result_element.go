@@ -19,6 +19,9 @@ import (
 // swagger:model exploreSearchResultElement
 type ExploreSearchResultElement struct {
 
+	// applied path
+	AppliedPath string `json:"appliedPath,omitempty"`
+
 	// code
 	Code string `json:"code,omitempty"`
 
@@ -33,7 +36,7 @@ type ExploreSearchResultElement struct {
 	MedcoEncryption *ExploreSearchResultElementMedcoEncryption `json:"medcoEncryption,omitempty"`
 
 	// metadata
-	Metadata interface{} `json:"metadata,omitempty"`
+	Metadata *Metadataxml `json:"metadata,omitempty"`
 
 	// name
 	Name string `json:"name,omitempty"`
@@ -55,6 +58,10 @@ func (m *ExploreSearchResultElement) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateMedcoEncryption(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateMetadata(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -87,6 +94,24 @@ func (m *ExploreSearchResultElement) validateMedcoEncryption(formats strfmt.Regi
 		if err := m.MedcoEncryption.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("medcoEncryption")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *ExploreSearchResultElement) validateMetadata(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Metadata) { // not required
+		return nil
+	}
+
+	if m.Metadata != nil {
+		if err := m.Metadata.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("metadata")
 			}
 			return err
 		}

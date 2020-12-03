@@ -1,8 +1,10 @@
 package exploreclient
 
 import (
+	"encoding/xml"
 	"fmt"
 	medcoclient "github.com/ldsec/medco/connector/client"
+	"github.com/ldsec/medco/connector/restapi/models"
 	utilclient "github.com/ldsec/medco/connector/util/client"
 	"github.com/ldsec/medco/connector/wrappers/unlynx"
 	"github.com/sirupsen/logrus"
@@ -135,9 +137,9 @@ func printResultsCSV(nodesResult map[int]*ExploreQueryResult, CSVFileURL string)
 	return
 }
 
-// ExecuteClientSearchConcept executes and displays the result of the MedCo concept search
+// ExecuteClientSearchConceptChildren executes and displays the result of the MedCo concept children search
 // endpoint on the server: /node/explore/search/concept
-func ExecuteClientSearchConcept(token, username, password, conceptPath, resultOutputFilePath string, disableTLSCheck bool) (err error) {
+func ExecuteClientSearchConceptChildren(token, username, password, conceptPath, resultOutputFilePath string, disableTLSCheck bool) (err error) {
 
 	// get token
 	accessToken, err := utilclient.RetrieveOrGetNewAccessToken(token, username, password, disableTLSCheck)
@@ -146,12 +148,12 @@ func ExecuteClientSearchConcept(token, username, password, conceptPath, resultOu
 	}
 
 	// execute search
-	clientSearchConcept, err := NewExploreSearchConcept(accessToken, conceptPath, disableTLSCheck)
+	clientSearchConceptChildren, err := NewExploreSearchConcept(accessToken, conceptPath, models.ExploreSearchConceptOperationChildren, disableTLSCheck)
 	if err != nil {
 		return err
 	}
 
-	result, err := clientSearchConcept.Execute()
+	result, err := clientSearchConceptChildren.Execute()
 	if err != nil {
 		return
 	}
@@ -175,9 +177,9 @@ func ExecuteClientSearchConcept(token, username, password, conceptPath, resultOu
 	return
 }
 
-// ExecuteClientSearchModifier executes and displays the result of the MedCo modifier search
+// ExecuteClientSearchModifierChildren executes and displays the result of the MedCo modifier children search
 // endpoint on the server: /node/explore/search/modifier
-func ExecuteClientSearchModifier(token, username, password, modifierPath, appliedPath, appliedConcept, resultOutputFilePath string, disableTLSCheck bool) (err error) {
+func ExecuteClientSearchModifierChildren(token, username, password, modifierPath, appliedPath, appliedConcept, resultOutputFilePath string, disableTLSCheck bool) (err error) {
 
 	// get token
 	accessToken, err := utilclient.RetrieveOrGetNewAccessToken(token, username, password, disableTLSCheck)
@@ -186,12 +188,12 @@ func ExecuteClientSearchModifier(token, username, password, modifierPath, applie
 	}
 
 	// execute search
-	clientSearchConcept, err := NewExploreSearchModifier(accessToken, modifierPath, appliedPath, appliedConcept, disableTLSCheck)
+	clientSearchModifierChildren, err := NewExploreSearchModifier(accessToken, modifierPath, appliedPath, appliedConcept, models.ExploreSearchModifierOperationChildren, disableTLSCheck)
 	if err != nil {
 		return err
 	}
 
-	result, err := clientSearchConcept.Execute()
+	result, err := clientSearchModifierChildren.Execute()
 	if err != nil {
 		return
 	}
@@ -199,6 +201,94 @@ func ExecuteClientSearchModifier(token, username, password, modifierPath, applie
 	output := "PATH" + "\t" + "TYPE" + "\n"
 	for _, child := range result.Payload.Results {
 		output += child.Path + "\t" + child.Type + "\n"
+	}
+
+	if resultOutputFilePath == "" {
+		fmt.Println(output)
+	} else {
+		outputFile, err := os.Create(resultOutputFilePath)
+		if err != nil {
+			logrus.Error("error opening file: ", err)
+		}
+		outputFile.WriteString(output)
+		outputFile.Close()
+	}
+
+	return
+}
+
+// ExecuteClientSearchConceptInfo executes and displays the result of the MedCo concept info search
+// endpoint on the server: /node/explore/search/concept
+func ExecuteClientSearchConceptInfo(token, username, password, conceptPath, resultOutputFilePath string, disableTLSCheck bool) (err error) {
+
+	// get token
+	accessToken, err := utilclient.RetrieveOrGetNewAccessToken(token, username, password, disableTLSCheck)
+	if err != nil {
+		return err
+	}
+
+	// execute search
+	clientSearchConceptInfo, err := NewExploreSearchConcept(accessToken, conceptPath, models.ExploreSearchConceptOperationInfo, disableTLSCheck)
+	if err != nil {
+		return err
+	}
+
+	result, err := clientSearchConceptInfo.Execute()
+	if err != nil {
+		return
+	}
+
+	output := ""
+	for _, concept := range result.Payload.Results {
+		tmp, err := xml.MarshalIndent(concept, "  ", "    ")
+		if err != nil {
+			return err
+		}
+		output += fmt.Sprintln(string(tmp))
+	}
+
+	if resultOutputFilePath == "" {
+		fmt.Println(output)
+	} else {
+		outputFile, err := os.Create(resultOutputFilePath)
+		if err != nil {
+			logrus.Error("error opening file: ", err)
+		}
+		outputFile.WriteString(output)
+		outputFile.Close()
+	}
+
+	return
+}
+
+// ExecuteClientSearchModifierInfo executes and displays the result of the MedCo modifier info search
+// endpoint on the server: /node/explore/search/modifier
+func ExecuteClientSearchModifierInfo(token, username, password, modifierPath, appliedPath, resultOutputFilePath string, disableTLSCheck bool) (err error) {
+
+	// get token
+	accessToken, err := utilclient.RetrieveOrGetNewAccessToken(token, username, password, disableTLSCheck)
+	if err != nil {
+		return err
+	}
+
+	// execute search
+	clientSearchModifierInfo, err := NewExploreSearchModifier(accessToken, modifierPath, appliedPath, "/", models.ExploreSearchModifierOperationInfo, disableTLSCheck)
+	if err != nil {
+		return err
+	}
+
+	result, err := clientSearchModifierInfo.Execute()
+	if err != nil {
+		return
+	}
+
+	output := ""
+	for _, modifier := range result.Payload.Results {
+		tmp, err := xml.MarshalIndent(modifier, "  ", "    ")
+		if err != nil {
+			return err
+		}
+		output += fmt.Sprintln(string(tmp))
 	}
 
 	if resultOutputFilePath == "" {

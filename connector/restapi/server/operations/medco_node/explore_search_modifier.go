@@ -37,7 +37,7 @@ func NewExploreSearchModifier(ctx *middleware.Context, handler ExploreSearchModi
 
 /*ExploreSearchModifier swagger:route POST /node/explore/search/modifier medco-node exploreSearchModifier
 
-Returns the children of a modifier
+Returns info about the modifier and its children
 
 */
 type ExploreSearchModifier struct {

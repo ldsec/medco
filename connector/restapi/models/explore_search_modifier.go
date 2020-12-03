@@ -6,6 +6,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
@@ -19,17 +21,22 @@ type ExploreSearchModifier struct {
 
 	// applied concept
 	// Required: true
-	// Pattern: ^\/$|^((\/[^\/]+)+\/?)$
+	// Pattern: ^\/$|^((\/[^\/]+)+\/)$
 	AppliedConcept *string `json:"appliedConcept"`
 
 	// applied path
 	// Required: true
-	// Pattern: ^\/$|^((\/[^\/]+)+\/?)$
+	// Pattern: ^\/$|^((\/[^\/]+)+\/%?)$
 	AppliedPath *string `json:"appliedPath"`
+
+	// operation
+	// Required: true
+	// Enum: [info children]
+	Operation *string `json:"operation"`
 
 	// path
 	// Required: true
-	// Pattern: ^\/$|^((\/[^\/]+)+\/?)$
+	// Pattern: ^\/$|^((\/[^\/]+)+\/)$
 	Path *string `json:"path"`
 }
 
@@ -42,6 +49,10 @@ func (m *ExploreSearchModifier) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateAppliedPath(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateOperation(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -61,7 +72,7 @@ func (m *ExploreSearchModifier) validateAppliedConcept(formats strfmt.Registry) 
 		return err
 	}
 
-	if err := validate.Pattern("appliedConcept", "body", string(*m.AppliedConcept), `^\/$|^((\/[^\/]+)+\/?)$`); err != nil {
+	if err := validate.Pattern("appliedConcept", "body", string(*m.AppliedConcept), `^\/$|^((\/[^\/]+)+\/)$`); err != nil {
 		return err
 	}
 
@@ -74,7 +85,50 @@ func (m *ExploreSearchModifier) validateAppliedPath(formats strfmt.Registry) err
 		return err
 	}
 
-	if err := validate.Pattern("appliedPath", "body", string(*m.AppliedPath), `^\/$|^((\/[^\/]+)+\/?)$`); err != nil {
+	if err := validate.Pattern("appliedPath", "body", string(*m.AppliedPath), `^\/$|^((\/[^\/]+)+\/%?)$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var exploreSearchModifierTypeOperationPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["info","children"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		exploreSearchModifierTypeOperationPropEnum = append(exploreSearchModifierTypeOperationPropEnum, v)
+	}
+}
+
+const (
+
+	// ExploreSearchModifierOperationInfo captures enum value "info"
+	ExploreSearchModifierOperationInfo string = "info"
+
+	// ExploreSearchModifierOperationChildren captures enum value "children"
+	ExploreSearchModifierOperationChildren string = "children"
+)
+
+// prop value enum
+func (m *ExploreSearchModifier) validateOperationEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, exploreSearchModifierTypeOperationPropEnum, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ExploreSearchModifier) validateOperation(formats strfmt.Registry) error {
+
+	if err := validate.Required("operation", "body", m.Operation); err != nil {
+		return err
+	}
+
+	// value enum
+	if err := m.validateOperationEnum("operation", "body", *m.Operation); err != nil {
 		return err
 	}
 
@@ -87,7 +141,7 @@ func (m *ExploreSearchModifier) validatePath(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.Pattern("path", "body", string(*m.Path), `^\/$|^((\/[^\/]+)+\/?)$`); err != nil {
+	if err := validate.Pattern("path", "body", string(*m.Path), `^\/$|^((\/[^\/]+)+\/)$`); err != nil {
 		return err
 	}
 

@@ -171,11 +171,5 @@ func (clientQuery *ExploreQuery) generateModel() (queryModel *models.ExploreQuer
 		Panels:        clientQuery.panels,
 	}
 
-	for _, panel := range clientQuery.panels {
-		for _, item := range panel.Items {
-			item.Operator = "exists"
-		}
-	}
-
 	return
 }
