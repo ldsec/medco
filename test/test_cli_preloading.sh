@@ -196,7 +196,15 @@ echo "Testing modifier-children..."
 
 test1 "modifier-children" "${searchModifierChildren}" "${resultSearchModifierChildren}"
 
-echo "Testing query..."
+echo "Testing query with test user..."
+
+test2 "query " "${query1}" "${resultQuery1}"
+test2 "query " "${query2}" "${resultQuery2}"
+test2 "query " "${query3}" "${resultQuery3}"
+test2 "query " "${query4}" "${resultQuery4}"
+test2 "query " "${query5}" "${resultQuery5a}"
+
+echo "Testing query with test_explore_patient_list user..."
 USERNAME="${1:-test}_explore_patient_list"
 
 test2 "query " "${query1}" "${resultQuery1}"

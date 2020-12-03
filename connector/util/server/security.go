@@ -10,13 +10,13 @@ import (
 
 // ExploreQueryPermissionLevel assigns a permission level to each ExploreQueryType
 var ExploreQueryPermissionLevel = map[models.ExploreQueryType]int64{
-	models.ExploreQueryTypePatientList:                    1,
-	models.ExploreQueryTypeCountPerSite:                   2,
-	models.ExploreQueryTypeCountPerSiteObfuscated:         3,
-	models.ExploreQueryTypeCountPerSiteShuffled:           4,
-	models.ExploreQueryTypeCountPerSiteShuffledObfuscated: 5,
-	models.ExploreQueryTypeCountGlobal:                    6,
-	models.ExploreQueryTypeCountGlobalObfuscated:          7,
+	models.ExploreQueryTypePatientList:                    70,
+	models.ExploreQueryTypeCountPerSite:                   60,
+	models.ExploreQueryTypeCountPerSiteObfuscated:         50,
+	models.ExploreQueryTypeCountPerSiteShuffled:           40,
+	models.ExploreQueryTypeCountPerSiteShuffledObfuscated: 30,
+	models.ExploreQueryTypeCountGlobal:                    20,
+	models.ExploreQueryTypeCountGlobalObfuscated:          10,
 }
 
 // AuthenticateUser authenticates user and creates principal with user information, including its authorizations
