@@ -40,24 +40,28 @@ func TestNetwork(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func TestExploreSearchConceptChildren(t *testing.T) {
+func TestExploreSearchConcept(t *testing.T) {
 	for _, test := range []struct {
-		ok      bool
-		reqPath string
+		ok           bool
+		reqPath      string
+		reqOperation string
 	}{
-		{false, ""},
-		{true, "/"},
-		{false, ""},
-		{false, "/abc/def"},
-		{true, "/abc/def/"},
-		{false, "/abc/def/asdasdas"},
-		{false, "abc/def/"},
-		{false, "//def/"},
-		{false, "///"},
+		{false, "", models.ExploreSearchModifierOperationChildren},
+		{true, "/", models.ExploreSearchModifierOperationChildren},
+		{true, "/", models.ExploreSearchModifierOperationInfo},
+		{false, "/", "not_an_operation"},
+		{false, "/abc/def", models.ExploreSearchModifierOperationChildren},
+		{true, "/abc/def/", models.ExploreSearchModifierOperationChildren},
+		{true, "/abc/def/", models.ExploreSearchModifierOperationInfo},
+		{false, "/abc/def/", "not_an_operation"},
+		{false, "/abc/def/asdasdas", models.ExploreSearchModifierOperationChildren},
+		{false, "abc/def/", models.ExploreSearchModifierOperationChildren},
+		{false, "//def/", models.ExploreSearchModifierOperationChildren},
+		{false, "///", models.ExploreSearchModifierOperationChildren},
 	} {
-		body := fmt.Sprintf(`{"path":"%s"}`,
-			test.reqPath)
-		ctx, req := getContextRequest(t, "POST", "/node/explore/search/concept-children",
+		body := fmt.Sprintf(`{"path":"%s", "operation":"%s"}`,
+			test.reqPath, test.reqOperation)
+		ctx, req := getContextRequest(t, "POST", "/node/explore/search/concept",
 			body)
 
 		ri, rCtx, ok := ctx.RouteInfo(req)
@@ -65,7 +69,7 @@ func TestExploreSearchConceptChildren(t *testing.T) {
 		req = rCtx
 
 		log.Lvlf2("checking for %t with body: %s", test.ok, body)
-		err := ctx.BindValidRequest(req, ri, &medco_node.ExploreSearchConceptChildrenParams{})
+		err := ctx.BindValidRequest(req, ri, &medco_node.ExploreSearchConceptParams{})
 		require.Equal(t, test.ok, err == nil, "wrong result for %+v: %s",
 			test, err)
 	}
@@ -268,17 +272,17 @@ func TestAuthorizations(t *testing.T) {
 		{true, "", "/network", models.RestAPIAuthorizationMedcoNetwork},
 		{false, "", "/network", models.RestAPIAuthorizationMedcoExplore},
 		{false, "", "/network", models.RestAPIAuthorizationMedcoGenomicAnnotations},
-		{false, "POST", "/node/explore/search/concept-children",
+		{false, "POST", "/node/explore/search/concept",
 			models.RestAPIAuthorizationMedcoNetwork},
-		{true, "POST", "/node/explore/search/concept-children",
+		{true, "POST", "/node/explore/search/concept",
 			models.RestAPIAuthorizationMedcoExplore},
-		{false, "POST", "/node/explore/search/concept-children",
+		{false, "POST", "/node/explore/search/concept",
 			models.RestAPIAuthorizationMedcoGenomicAnnotations},
-		{false, "POST", "/node/explore/search/modifier-children",
+		{false, "POST", "/node/explore/search/modifier",
 			models.RestAPIAuthorizationMedcoNetwork},
-		{true, "POST", "/node/explore/search/modifier-children",
+		{true, "POST", "/node/explore/search/modifier",
 			models.RestAPIAuthorizationMedcoExplore},
-		{false, "POST", "/node/explore/search/modifier-children",
+		{false, "POST", "/node/explore/search/modifier",
 			models.RestAPIAuthorizationMedcoGenomicAnnotations},
 		{false, "", "/genomic-annotations/abc",
 			models.RestAPIAuthorizationMedcoNetwork},

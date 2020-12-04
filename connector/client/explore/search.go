@@ -14,8 +14,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// ExploreSearchConceptChildren is a MedCo client explore concept children search
-type ExploreSearchConceptChildren struct {
+// ExploreSearchConcept is a MedCo client explore concept search
+type ExploreSearchConcept struct {
 
 	// httpMedCoClients is the HTTP client for the MedCo connectors
 	httpMedCoClient *client.MedcoCli
@@ -23,10 +23,12 @@ type ExploreSearchConceptChildren struct {
 	authToken string
 
 	conceptPath string
+
+	operation string
 }
 
-// ExploreSearchModifierChildren is a MedCo client explore modifier children search
-type ExploreSearchModifierChildren struct {
+// ExploreSearchModifier is a MedCo client explore modifier search
+type ExploreSearchModifier struct {
 
 	// httpMedCoClients is the HTTP client for the MedCo connectors
 	httpMedCoClient *client.MedcoCli
@@ -36,20 +38,17 @@ type ExploreSearchModifierChildren struct {
 	modifierPath   string
 	appliedPath    string
 	appliedConcept string
+
+	operation string
 }
 
-// ExploreSearchConceptInfo is a MedCo client explore concept info search
-type ExploreSearchConceptInfo ExploreSearchConceptChildren
+// NewExploreSearchConcept creates a new MedCo client explore concept search
+func NewExploreSearchConcept(authToken, conceptPath, operation string, disableTLSCheck bool) (scc *ExploreSearchConcept, err error) {
 
-// ExploreSearchModifierInfo is a MedCo client explore modifier info search
-type ExploreSearchModifierInfo ExploreSearchModifierChildren
-
-// NewExploreSearchConceptChildren creates a new MedCo client explore concept children search
-func NewExploreSearchConceptChildren(authToken, conceptPath string, disableTLSCheck bool) (scc *ExploreSearchConceptChildren, err error) {
-
-	scc = &ExploreSearchConceptChildren{
+	scc = &ExploreSearchConcept{
 		authToken:   authToken,
 		conceptPath: conceptPath,
+		operation:   operation,
 	}
 
 	// retrieve network information
@@ -68,14 +67,15 @@ func NewExploreSearchConceptChildren(authToken, conceptPath string, disableTLSCh
 	return
 }
 
-// NewExploreSearchModifierChildren creates a new MedCo client explore modifier children search
-func NewExploreSearchModifierChildren(authToken, modifierPath, appliedPath, appliedConcept string, disableTLSCheck bool) (smc *ExploreSearchModifierChildren, err error) {
+// NewExploreSearchModifier creates a new MedCo client explore modifier search
+func NewExploreSearchModifier(authToken, modifierPath, appliedPath, appliedConcept, operation string, disableTLSCheck bool) (smc *ExploreSearchModifier, err error) {
 
-	smc = &ExploreSearchModifierChildren{
+	smc = &ExploreSearchModifier{
 		authToken:      authToken,
 		modifierPath:   modifierPath,
 		appliedPath:    appliedPath,
 		appliedConcept: appliedConcept,
+		operation:      operation,
 	}
 
 	// retrieve network information
@@ -94,31 +94,13 @@ func NewExploreSearchModifierChildren(authToken, modifierPath, appliedPath, appl
 	return
 }
 
-// NewExploreSearchConceptInfo creates a new MedCo client explore concept info search
-func NewExploreSearchConceptInfo(authToken, conceptPath string, disableTLSCheck bool) (sci *ExploreSearchConceptInfo, err error) {
+// Execute executes the MedCo client concept search
+func (exploreSearchConcept *ExploreSearchConcept) Execute() (*medco_node.ExploreSearchConceptOK, error) {
 
-	scc, err := NewExploreSearchConceptChildren(authToken, conceptPath, disableTLSCheck)
-	sci = (*ExploreSearchConceptInfo)(scc)
-	return
+	params := medco_node.NewExploreSearchConceptParamsWithTimeout(time.Duration(utilclient.SearchTimeoutSeconds) * time.Second)
+	params.SearchConceptRequest = &models.ExploreSearchConcept{Path: &exploreSearchConcept.conceptPath, Operation: &exploreSearchConcept.operation}
 
-}
-
-// NewExploreSearchModifierInfo creates a new MedCo client explore modifier info search
-func NewExploreSearchModifierInfo(authToken, modifierPath, appliedPath, appliedConcept string, disableTLSCheck bool) (smi *ExploreSearchModifierInfo, err error) {
-
-	smc, err := NewExploreSearchModifierChildren(authToken, modifierPath, appliedPath, "", disableTLSCheck)
-	smi = (*ExploreSearchModifierInfo)(smc)
-	return
-
-}
-
-// Execute executes the MedCo client concept children search
-func (exploreSearchConceptChildren *ExploreSearchConceptChildren) Execute() (*medco_node.ExploreSearchConceptChildrenOK, error) {
-
-	params := medco_node.NewExploreSearchConceptChildrenParamsWithTimeout(time.Duration(utilclient.SearchTimeoutSeconds) * time.Second)
-	params.SearchConceptChildrenRequest = &models.ExploreSearchConceptChildren{Path: &exploreSearchConceptChildren.conceptPath}
-
-	response, err := exploreSearchConceptChildren.httpMedCoClient.MedcoNode.ExploreSearchConceptChildren(params, httptransport.BearerToken(exploreSearchConceptChildren.authToken))
+	response, err := exploreSearchConcept.httpMedCoClient.MedcoNode.ExploreSearchConcept(params, httptransport.BearerToken(exploreSearchConcept.authToken))
 
 	if err != nil {
 		logrus.Error("Explore Search Concept Children error: ", err)
@@ -129,54 +111,18 @@ func (exploreSearchConceptChildren *ExploreSearchConceptChildren) Execute() (*me
 
 }
 
-// Execute executes the MedCo client modifier children search
-func (exploreSearchModifierChildren *ExploreSearchModifierChildren) Execute() (*medco_node.ExploreSearchModifierChildrenOK, error) {
+// Execute executes the MedCo client modifier search
+func (exploreSearchModifier *ExploreSearchModifier) Execute() (*medco_node.ExploreSearchModifierOK, error) {
 
-	params := medco_node.NewExploreSearchModifierChildrenParamsWithTimeout(time.Duration(utilclient.SearchTimeoutSeconds) * time.Second)
-	params.SearchModifierChildrenRequest = &models.ExploreSearchModifierChildren{
-		Path:           &exploreSearchModifierChildren.modifierPath,
-		AppliedPath:    &exploreSearchModifierChildren.appliedPath,
-		AppliedConcept: &exploreSearchModifierChildren.appliedConcept,
+	params := medco_node.NewExploreSearchModifierParamsWithTimeout(time.Duration(utilclient.SearchTimeoutSeconds) * time.Second)
+	params.SearchModifierRequest = &models.ExploreSearchModifier{
+		Path:           &exploreSearchModifier.modifierPath,
+		AppliedPath:    &exploreSearchModifier.appliedPath,
+		AppliedConcept: &exploreSearchModifier.appliedConcept,
+		Operation:      &exploreSearchModifier.operation,
 	}
 
-	response, err := exploreSearchModifierChildren.httpMedCoClient.MedcoNode.ExploreSearchModifierChildren(params, httptransport.BearerToken(exploreSearchModifierChildren.authToken))
-
-	if err != nil {
-		logrus.Error("Explore Search Modifier Children error: ", err)
-		return nil, err
-	}
-
-	return response, nil
-
-}
-
-// Execute executes the MedCo client concept info search
-func (exploreSearchConceptInfo *ExploreSearchConceptInfo) Execute() (*medco_node.ExploreSearchConceptInfoOK, error) {
-
-	params := medco_node.NewExploreSearchConceptInfoParamsWithTimeout(time.Duration(utilclient.SearchTimeoutSeconds) * time.Second)
-	params.SearchConceptInfoRequest = &models.ExploreSearchConceptInfo{Path: &exploreSearchConceptInfo.conceptPath}
-
-	response, err := exploreSearchConceptInfo.httpMedCoClient.MedcoNode.ExploreSearchConceptInfo(params, httptransport.BearerToken(exploreSearchConceptInfo.authToken))
-
-	if err != nil {
-		logrus.Error("Explore Search Concept Info error: ", err)
-		return nil, err
-	}
-
-	return response, nil
-
-}
-
-// Execute executes the MedCo client modifier info search
-func (exploreSearchModifierInfo *ExploreSearchModifierInfo) Execute() (*medco_node.ExploreSearchModifierInfoOK, error) {
-
-	params := medco_node.NewExploreSearchModifierInfoParamsWithTimeout(time.Duration(utilclient.SearchTimeoutSeconds) * time.Second)
-	params.SearchModifierInfoRequest = &models.ExploreSearchModifierInfo{
-		Path:        &exploreSearchModifierInfo.modifierPath,
-		AppliedPath: &exploreSearchModifierInfo.appliedPath,
-	}
-
-	response, err := exploreSearchModifierInfo.httpMedCoClient.MedcoNode.ExploreSearchModifierInfo(params, httptransport.BearerToken(exploreSearchModifierInfo.authToken))
+	response, err := exploreSearchModifier.httpMedCoClient.MedcoNode.ExploreSearchModifier(params, httptransport.BearerToken(exploreSearchModifier.authToken))
 
 	if err != nil {
 		logrus.Error("Explore Search Modifier Children error: ", err)

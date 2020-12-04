@@ -461,7 +461,7 @@ func init() {
         }
       }
     },
-    "/node/explore/search/concept-children": {
+    "/node/explore/search/concept": {
       "post": {
         "security": [
           {
@@ -473,16 +473,16 @@ func init() {
         "tags": [
           "medco-node"
         ],
-        "summary": "Returns the concept children (both concepts and modifiers)",
-        "operationId": "exploreSearchConceptChildren",
+        "summary": "Returns info about the concept and its (both concepts and modifiers) children",
+        "operationId": "exploreSearchConcept",
         "parameters": [
           {
-            "$ref": "#/parameters/exploreSearchConceptChildrenRequest"
+            "$ref": "#/parameters/exploreSearchConceptRequest"
           }
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/exploreSearchConceptChildrenResponse"
+            "$ref": "#/responses/exploreSearchConceptResponse"
           },
           "default": {
             "$ref": "#/responses/errorResponse"
@@ -490,7 +490,7 @@ func init() {
         }
       }
     },
-    "/node/explore/search/concept-info": {
+    "/node/explore/search/modifier": {
       "post": {
         "security": [
           {
@@ -502,74 +502,16 @@ func init() {
         "tags": [
           "medco-node"
         ],
-        "summary": "Returns the concept info",
-        "operationId": "exploreSearchConceptInfo",
+        "summary": "Returns info about the modifier and its children",
+        "operationId": "exploreSearchModifier",
         "parameters": [
           {
-            "$ref": "#/parameters/exploreSearchConceptInfoRequest"
+            "$ref": "#/parameters/exploreSearchModifierRequest"
           }
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/exploreSearchConceptInfoResponse"
-          },
-          "default": {
-            "$ref": "#/responses/errorResponse"
-          }
-        }
-      }
-    },
-    "/node/explore/search/modifier-children": {
-      "post": {
-        "security": [
-          {
-            "medco-jwt": [
-              "medco-explore"
-            ]
-          }
-        ],
-        "tags": [
-          "medco-node"
-        ],
-        "summary": "Returns the modifier children",
-        "operationId": "exploreSearchModifierChildren",
-        "parameters": [
-          {
-            "$ref": "#/parameters/exploreSearchModifierChildrenRequest"
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/responses/exploreSearchModifierChildrenResponse"
-          },
-          "default": {
-            "$ref": "#/responses/errorResponse"
-          }
-        }
-      }
-    },
-    "/node/explore/search/modifier-info": {
-      "post": {
-        "security": [
-          {
-            "medco-jwt": [
-              "medco-explore"
-            ]
-          }
-        ],
-        "tags": [
-          "medco-node"
-        ],
-        "summary": "Returns the modifier info",
-        "operationId": "exploreSearchModifierInfo",
-        "parameters": [
-          {
-            "$ref": "#/parameters/exploreSearchModifierInfoRequest"
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/responses/exploreSearchModifierInfoResponse"
+            "$ref": "#/responses/exploreSearchModifierResponse"
           },
           "default": {
             "$ref": "#/responses/errorResponse"
@@ -673,36 +615,33 @@ func init() {
         "count_global_obfuscated"
       ]
     },
-    "exploreSearchConceptChildren": {
+    "exploreSearchConcept": {
       "type": "object",
       "required": [
-        "path"
+        "path",
+        "operation"
       ],
       "properties": {
+        "operation": {
+          "type": "string",
+          "enum": [
+            "info",
+            "children"
+          ]
+        },
         "path": {
           "type": "string",
           "pattern": "^\\/$|^((\\/[^\\/]+)+\\/)$"
         }
       }
     },
-    "exploreSearchConceptInfo": {
-      "type": "object",
-      "required": [
-        "path"
-      ],
-      "properties": {
-        "path": {
-          "type": "string",
-          "pattern": "^\\/$|^((\\/[^\\/]+)+\\/)$"
-        }
-      }
-    },
-    "exploreSearchModifierChildren": {
+    "exploreSearchModifier": {
       "type": "object",
       "required": [
         "path",
         "appliedPath",
-        "appliedConcept"
+        "appliedConcept",
+        "operation"
       ],
       "properties": {
         "appliedConcept": {
@@ -713,22 +652,12 @@ func init() {
           "type": "string",
           "pattern": "^\\/$|^((\\/[^\\/]+)+\\/%?)$"
         },
-        "path": {
+        "operation": {
           "type": "string",
-          "pattern": "^\\/$|^((\\/[^\\/]+)+\\/)$"
-        }
-      }
-    },
-    "exploreSearchModifierInfo": {
-      "type": "object",
-      "required": [
-        "path",
-        "appliedPath"
-      ],
-      "properties": {
-        "appliedPath": {
-          "type": "string",
-          "pattern": "^\\/$|^((\\/[^\\/]+)+\\/%?)$"
+          "enum": [
+            "info",
+            "children"
+          ]
         },
         "path": {
           "type": "string",
@@ -1024,40 +953,22 @@ func init() {
         }
       }
     },
-    "exploreSearchConceptChildrenRequest": {
-      "description": "MedCo-Explore ontology search concept children request.",
-      "name": "searchConceptChildrenRequest",
+    "exploreSearchConceptRequest": {
+      "description": "MedCo-Explore ontology search concept request.",
+      "name": "searchConceptRequest",
       "in": "body",
       "required": true,
       "schema": {
-        "$ref": "#/definitions/exploreSearchConceptChildren"
+        "$ref": "#/definitions/exploreSearchConcept"
       }
     },
-    "exploreSearchConceptInfoRequest": {
-      "description": "MedCo-Explore ontology search concept info request.",
-      "name": "searchConceptInfoRequest",
+    "exploreSearchModifierRequest": {
+      "description": "MedCo-Explore ontology search modifier request.",
+      "name": "searchModifierRequest",
       "in": "body",
       "required": true,
       "schema": {
-        "$ref": "#/definitions/exploreSearchConceptInfo"
-      }
-    },
-    "exploreSearchModifierChildrenRequest": {
-      "description": "MedCo-Explore ontology search modifier children request.",
-      "name": "searchModifierChildrenRequest",
-      "in": "body",
-      "required": true,
-      "schema": {
-        "$ref": "#/definitions/exploreSearchModifierChildren"
-      }
-    },
-    "exploreSearchModifierInfoRequest": {
-      "description": "MedCo-Explore ontology search modifier info request.",
-      "name": "searchModifierInfoRequest",
-      "in": "body",
-      "required": true,
-      "schema": {
-        "$ref": "#/definitions/exploreSearchModifierInfo"
+        "$ref": "#/definitions/exploreSearchModifier"
       }
     },
     "survivalAnalysisRequest": {
@@ -1193,8 +1104,8 @@ func init() {
         }
       }
     },
-    "exploreSearchConceptChildrenResponse": {
-      "description": "MedCo-Explore search concept children query response.",
+    "exploreSearchConceptResponse": {
+      "description": "MedCo-Explore search concept query response.",
       "schema": {
         "type": "object",
         "properties": {
@@ -1205,29 +1116,12 @@ func init() {
             }
           },
           "search": {
-            "$ref": "#/definitions/exploreSearchConceptChildren"
+            "$ref": "#/definitions/exploreSearchConcept"
           }
         }
       }
     },
-    "exploreSearchConceptInfoResponse": {
-      "description": "MedCo-Explore search concept info query response.",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "results": {
-            "type": "array",
-            "items": {
-              "$ref": "#/definitions/exploreSearchResultElement"
-            }
-          },
-          "search": {
-            "$ref": "#/definitions/exploreSearchConceptInfo"
-          }
-        }
-      }
-    },
-    "exploreSearchModifierChildrenResponse": {
+    "exploreSearchModifierResponse": {
       "description": "MedCo-Explore search modifier children query response.",
       "schema": {
         "type": "object",
@@ -1239,24 +1133,7 @@ func init() {
             }
           },
           "search": {
-            "$ref": "#/definitions/exploreSearchModifierChildren"
-          }
-        }
-      }
-    },
-    "exploreSearchModifierInfoResponse": {
-      "description": "MedCo-Explore search modifier info query response.",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "results": {
-            "type": "array",
-            "items": {
-              "$ref": "#/definitions/exploreSearchResultElement"
-            }
-          },
-          "search": {
-            "$ref": "#/definitions/exploreSearchModifierInfo"
+            "$ref": "#/definitions/exploreSearchModifier"
           }
         }
       }
@@ -2212,7 +2089,7 @@ func init() {
         }
       }
     },
-    "/node/explore/search/concept-children": {
+    "/node/explore/search/concept": {
       "post": {
         "security": [
           {
@@ -2224,22 +2101,22 @@ func init() {
         "tags": [
           "medco-node"
         ],
-        "summary": "Returns the concept children (both concepts and modifiers)",
-        "operationId": "exploreSearchConceptChildren",
+        "summary": "Returns info about the concept and its (both concepts and modifiers) children",
+        "operationId": "exploreSearchConcept",
         "parameters": [
           {
-            "description": "MedCo-Explore ontology search concept children request.",
-            "name": "searchConceptChildrenRequest",
+            "description": "MedCo-Explore ontology search concept request.",
+            "name": "searchConceptRequest",
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/exploreSearchConceptChildren"
+              "$ref": "#/definitions/exploreSearchConcept"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "MedCo-Explore search concept children query response.",
+            "description": "MedCo-Explore search concept query response.",
             "schema": {
               "type": "object",
               "properties": {
@@ -2250,7 +2127,7 @@ func init() {
                   }
                 },
                 "search": {
-                  "$ref": "#/definitions/exploreSearchConceptChildren"
+                  "$ref": "#/definitions/exploreSearchConcept"
                 }
               }
             }
@@ -2269,7 +2146,7 @@ func init() {
         }
       }
     },
-    "/node/explore/search/concept-info": {
+    "/node/explore/search/modifier": {
       "post": {
         "security": [
           {
@@ -2281,73 +2158,16 @@ func init() {
         "tags": [
           "medco-node"
         ],
-        "summary": "Returns the concept info",
-        "operationId": "exploreSearchConceptInfo",
+        "summary": "Returns info about the modifier and its children",
+        "operationId": "exploreSearchModifier",
         "parameters": [
           {
-            "description": "MedCo-Explore ontology search concept info request.",
-            "name": "searchConceptInfoRequest",
+            "description": "MedCo-Explore ontology search modifier request.",
+            "name": "searchModifierRequest",
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/exploreSearchConceptInfo"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "MedCo-Explore search concept info query response.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "results": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/exploreSearchResultElement"
-                  }
-                },
-                "search": {
-                  "$ref": "#/definitions/exploreSearchConceptInfo"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Error response.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/node/explore/search/modifier-children": {
-      "post": {
-        "security": [
-          {
-            "medco-jwt": [
-              "medco-explore"
-            ]
-          }
-        ],
-        "tags": [
-          "medco-node"
-        ],
-        "summary": "Returns the modifier children",
-        "operationId": "exploreSearchModifierChildren",
-        "parameters": [
-          {
-            "description": "MedCo-Explore ontology search modifier children request.",
-            "name": "searchModifierChildrenRequest",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/exploreSearchModifierChildren"
+              "$ref": "#/definitions/exploreSearchModifier"
             }
           }
         ],
@@ -2364,64 +2184,7 @@ func init() {
                   }
                 },
                 "search": {
-                  "$ref": "#/definitions/exploreSearchModifierChildren"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Error response.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/node/explore/search/modifier-info": {
-      "post": {
-        "security": [
-          {
-            "medco-jwt": [
-              "medco-explore"
-            ]
-          }
-        ],
-        "tags": [
-          "medco-node"
-        ],
-        "summary": "Returns the modifier info",
-        "operationId": "exploreSearchModifierInfo",
-        "parameters": [
-          {
-            "description": "MedCo-Explore ontology search modifier info request.",
-            "name": "searchModifierInfoRequest",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/exploreSearchModifierInfo"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "MedCo-Explore search modifier info query response.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "results": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/exploreSearchResultElement"
-                  }
-                },
-                "search": {
-                  "$ref": "#/definitions/exploreSearchModifierInfo"
+                  "$ref": "#/definitions/exploreSearchModifier"
                 }
               }
             }
@@ -2801,36 +2564,33 @@ func init() {
         "count_global_obfuscated"
       ]
     },
-    "exploreSearchConceptChildren": {
+    "exploreSearchConcept": {
       "type": "object",
       "required": [
-        "path"
+        "path",
+        "operation"
       ],
       "properties": {
+        "operation": {
+          "type": "string",
+          "enum": [
+            "info",
+            "children"
+          ]
+        },
         "path": {
           "type": "string",
           "pattern": "^\\/$|^((\\/[^\\/]+)+\\/)$"
         }
       }
     },
-    "exploreSearchConceptInfo": {
-      "type": "object",
-      "required": [
-        "path"
-      ],
-      "properties": {
-        "path": {
-          "type": "string",
-          "pattern": "^\\/$|^((\\/[^\\/]+)+\\/)$"
-        }
-      }
-    },
-    "exploreSearchModifierChildren": {
+    "exploreSearchModifier": {
       "type": "object",
       "required": [
         "path",
         "appliedPath",
-        "appliedConcept"
+        "appliedConcept",
+        "operation"
       ],
       "properties": {
         "appliedConcept": {
@@ -2841,22 +2601,12 @@ func init() {
           "type": "string",
           "pattern": "^\\/$|^((\\/[^\\/]+)+\\/%?)$"
         },
-        "path": {
+        "operation": {
           "type": "string",
-          "pattern": "^\\/$|^((\\/[^\\/]+)+\\/)$"
-        }
-      }
-    },
-    "exploreSearchModifierInfo": {
-      "type": "object",
-      "required": [
-        "path",
-        "appliedPath"
-      ],
-      "properties": {
-        "appliedPath": {
-          "type": "string",
-          "pattern": "^\\/$|^((\\/[^\\/]+)+\\/%?)$"
+          "enum": [
+            "info",
+            "children"
+          ]
         },
         "path": {
           "type": "string",
@@ -3093,40 +2843,22 @@ func init() {
         }
       }
     },
-    "exploreSearchConceptChildrenRequest": {
-      "description": "MedCo-Explore ontology search concept children request.",
-      "name": "searchConceptChildrenRequest",
+    "exploreSearchConceptRequest": {
+      "description": "MedCo-Explore ontology search concept request.",
+      "name": "searchConceptRequest",
       "in": "body",
       "required": true,
       "schema": {
-        "$ref": "#/definitions/exploreSearchConceptChildren"
+        "$ref": "#/definitions/exploreSearchConcept"
       }
     },
-    "exploreSearchConceptInfoRequest": {
-      "description": "MedCo-Explore ontology search concept info request.",
-      "name": "searchConceptInfoRequest",
+    "exploreSearchModifierRequest": {
+      "description": "MedCo-Explore ontology search modifier request.",
+      "name": "searchModifierRequest",
       "in": "body",
       "required": true,
       "schema": {
-        "$ref": "#/definitions/exploreSearchConceptInfo"
-      }
-    },
-    "exploreSearchModifierChildrenRequest": {
-      "description": "MedCo-Explore ontology search modifier children request.",
-      "name": "searchModifierChildrenRequest",
-      "in": "body",
-      "required": true,
-      "schema": {
-        "$ref": "#/definitions/exploreSearchModifierChildren"
-      }
-    },
-    "exploreSearchModifierInfoRequest": {
-      "description": "MedCo-Explore ontology search modifier info request.",
-      "name": "searchModifierInfoRequest",
-      "in": "body",
-      "required": true,
-      "schema": {
-        "$ref": "#/definitions/exploreSearchModifierInfo"
+        "$ref": "#/definitions/exploreSearchModifier"
       }
     },
     "survivalAnalysisRequest": {
@@ -3262,8 +2994,8 @@ func init() {
         }
       }
     },
-    "exploreSearchConceptChildrenResponse": {
-      "description": "MedCo-Explore search concept children query response.",
+    "exploreSearchConceptResponse": {
+      "description": "MedCo-Explore search concept query response.",
       "schema": {
         "type": "object",
         "properties": {
@@ -3274,29 +3006,12 @@ func init() {
             }
           },
           "search": {
-            "$ref": "#/definitions/exploreSearchConceptChildren"
+            "$ref": "#/definitions/exploreSearchConcept"
           }
         }
       }
     },
-    "exploreSearchConceptInfoResponse": {
-      "description": "MedCo-Explore search concept info query response.",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "results": {
-            "type": "array",
-            "items": {
-              "$ref": "#/definitions/exploreSearchResultElement"
-            }
-          },
-          "search": {
-            "$ref": "#/definitions/exploreSearchConceptInfo"
-          }
-        }
-      }
-    },
-    "exploreSearchModifierChildrenResponse": {
+    "exploreSearchModifierResponse": {
       "description": "MedCo-Explore search modifier children query response.",
       "schema": {
         "type": "object",
@@ -3308,24 +3023,7 @@ func init() {
             }
           },
           "search": {
-            "$ref": "#/definitions/exploreSearchModifierChildren"
-          }
-        }
-      }
-    },
-    "exploreSearchModifierInfoResponse": {
-      "description": "MedCo-Explore search modifier info query response.",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "results": {
-            "type": "array",
-            "items": {
-              "$ref": "#/definitions/exploreSearchResultElement"
-            }
-          },
-          "search": {
-            "$ref": "#/definitions/exploreSearchModifierInfo"
+            "$ref": "#/definitions/exploreSearchModifier"
           }
         }
       }

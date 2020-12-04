@@ -54,17 +54,11 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 		MedcoNodeExploreQueryHandler: medco_node.ExploreQueryHandlerFunc(func(params medco_node.ExploreQueryParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_node.ExploreQuery has not yet been implemented")
 		}),
-		MedcoNodeExploreSearchConceptChildrenHandler: medco_node.ExploreSearchConceptChildrenHandlerFunc(func(params medco_node.ExploreSearchConceptChildrenParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation medco_node.ExploreSearchConceptChildren has not yet been implemented")
+		MedcoNodeExploreSearchConceptHandler: medco_node.ExploreSearchConceptHandlerFunc(func(params medco_node.ExploreSearchConceptParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation medco_node.ExploreSearchConcept has not yet been implemented")
 		}),
-		MedcoNodeExploreSearchConceptInfoHandler: medco_node.ExploreSearchConceptInfoHandlerFunc(func(params medco_node.ExploreSearchConceptInfoParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation medco_node.ExploreSearchConceptInfo has not yet been implemented")
-		}),
-		MedcoNodeExploreSearchModifierChildrenHandler: medco_node.ExploreSearchModifierChildrenHandlerFunc(func(params medco_node.ExploreSearchModifierChildrenParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation medco_node.ExploreSearchModifierChildren has not yet been implemented")
-		}),
-		MedcoNodeExploreSearchModifierInfoHandler: medco_node.ExploreSearchModifierInfoHandlerFunc(func(params medco_node.ExploreSearchModifierInfoParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation medco_node.ExploreSearchModifierInfo has not yet been implemented")
+		MedcoNodeExploreSearchModifierHandler: medco_node.ExploreSearchModifierHandlerFunc(func(params medco_node.ExploreSearchModifierParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation medco_node.ExploreSearchModifier has not yet been implemented")
 		}),
 		MedcoNodeGetCohortsHandler: medco_node.GetCohortsHandlerFunc(func(params medco_node.GetCohortsParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_node.GetCohorts has not yet been implemented")
@@ -141,14 +135,10 @@ type MedcoConnectorAPI struct {
 	MedcoNodeDeleteCohortsHandler medco_node.DeleteCohortsHandler
 	// MedcoNodeExploreQueryHandler sets the operation handler for the explore query operation
 	MedcoNodeExploreQueryHandler medco_node.ExploreQueryHandler
-	// MedcoNodeExploreSearchConceptChildrenHandler sets the operation handler for the explore search concept children operation
-	MedcoNodeExploreSearchConceptChildrenHandler medco_node.ExploreSearchConceptChildrenHandler
-	// MedcoNodeExploreSearchConceptInfoHandler sets the operation handler for the explore search concept info operation
-	MedcoNodeExploreSearchConceptInfoHandler medco_node.ExploreSearchConceptInfoHandler
-	// MedcoNodeExploreSearchModifierChildrenHandler sets the operation handler for the explore search modifier children operation
-	MedcoNodeExploreSearchModifierChildrenHandler medco_node.ExploreSearchModifierChildrenHandler
-	// MedcoNodeExploreSearchModifierInfoHandler sets the operation handler for the explore search modifier info operation
-	MedcoNodeExploreSearchModifierInfoHandler medco_node.ExploreSearchModifierInfoHandler
+	// MedcoNodeExploreSearchConceptHandler sets the operation handler for the explore search concept operation
+	MedcoNodeExploreSearchConceptHandler medco_node.ExploreSearchConceptHandler
+	// MedcoNodeExploreSearchModifierHandler sets the operation handler for the explore search modifier operation
+	MedcoNodeExploreSearchModifierHandler medco_node.ExploreSearchModifierHandler
 	// MedcoNodeGetCohortsHandler sets the operation handler for the get cohorts operation
 	MedcoNodeGetCohortsHandler medco_node.GetCohortsHandler
 	// MedcoNodeGetExploreQueryHandler sets the operation handler for the get explore query operation
@@ -251,17 +241,11 @@ func (o *MedcoConnectorAPI) Validate() error {
 	if o.MedcoNodeExploreQueryHandler == nil {
 		unregistered = append(unregistered, "medco_node.ExploreQueryHandler")
 	}
-	if o.MedcoNodeExploreSearchConceptChildrenHandler == nil {
-		unregistered = append(unregistered, "medco_node.ExploreSearchConceptChildrenHandler")
+	if o.MedcoNodeExploreSearchConceptHandler == nil {
+		unregistered = append(unregistered, "medco_node.ExploreSearchConceptHandler")
 	}
-	if o.MedcoNodeExploreSearchConceptInfoHandler == nil {
-		unregistered = append(unregistered, "medco_node.ExploreSearchConceptInfoHandler")
-	}
-	if o.MedcoNodeExploreSearchModifierChildrenHandler == nil {
-		unregistered = append(unregistered, "medco_node.ExploreSearchModifierChildrenHandler")
-	}
-	if o.MedcoNodeExploreSearchModifierInfoHandler == nil {
-		unregistered = append(unregistered, "medco_node.ExploreSearchModifierInfoHandler")
+	if o.MedcoNodeExploreSearchModifierHandler == nil {
+		unregistered = append(unregistered, "medco_node.ExploreSearchModifierHandler")
 	}
 	if o.MedcoNodeGetCohortsHandler == nil {
 		unregistered = append(unregistered, "medco_node.GetCohortsHandler")
@@ -396,19 +380,11 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/node/explore/search/concept-children"] = medco_node.NewExploreSearchConceptChildren(o.context, o.MedcoNodeExploreSearchConceptChildrenHandler)
+	o.handlers["POST"]["/node/explore/search/concept"] = medco_node.NewExploreSearchConcept(o.context, o.MedcoNodeExploreSearchConceptHandler)
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/node/explore/search/concept-info"] = medco_node.NewExploreSearchConceptInfo(o.context, o.MedcoNodeExploreSearchConceptInfoHandler)
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/node/explore/search/modifier-children"] = medco_node.NewExploreSearchModifierChildren(o.context, o.MedcoNodeExploreSearchModifierChildrenHandler)
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/node/explore/search/modifier-info"] = medco_node.NewExploreSearchModifierInfo(o.context, o.MedcoNodeExploreSearchModifierInfoHandler)
+	o.handlers["POST"]["/node/explore/search/modifier"] = medco_node.NewExploreSearchModifier(o.context, o.MedcoNodeExploreSearchModifierHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}

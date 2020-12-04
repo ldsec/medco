@@ -5,5 +5,4 @@ server {
     include /etc/nginx/conf.d/common/server-default.conf.inc;
     include /etc/nginx/conf.d/common/server-revproxy-base.conf.inc;
     include /etc/nginx/conf.d/common/server-revproxy-dev.conf.inc;
-    include /etc/nginx/conf.d/common/security-headers.inc;
 }

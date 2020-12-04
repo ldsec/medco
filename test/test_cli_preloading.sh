@@ -131,8 +131,8 @@ survivalSubGroup1="$(printf -- "time_granularity,node_index,group_id,initial_cou
 survivalSubGroup2="$(printf -- "week,0,Male,270,0,0,0\nweek,0,Male,270,1,3,0\nweek,0,Male,270,2,0,0\nweek,0,Male,270,3,0,0\nweek,0,Male,270,4,0,0\nweek,0,Male,270,5,0,0")"
 
 # test7
-function timing() { "query clr::/E2ETEST/SPHNv2020.1/DeathStatus/ OR clr::/E2ETEST/SPHNv2020.1/DeathStatus/ ${1} AND clr::/E2ETEST/SPHNv2020.1/DeathStatus/:/E2ETEST/DeathStatus-status/death/:/SPHNv2020.1/DeathStatus/ ${2} AND clr::/E2ETEST/I2B2/Demographics/Gender/Female/ OR clr::/E2ETEST/I2B2/Demographics/Gender/Male/ ${3} -t ${4}"; };
-timingResultNonZeroExpected="$(printf -- "count\n495\n495\n495")"
+function timing() { echo "query clr::/E2ETEST/SPHNv2020.1/DeathStatus/ OR clr::/E2ETEST/SPHNv2020.1/DeathStatus/ ${1} AND clr::/E2ETEST/SPHNv2020.1/DeathStatus/:/E2ETEST/DeathStatus-status/death/:/SPHNv2020.1/DeathStatus/ ${2} AND clr::/E2ETEST/I2B2/Demographics/Gender/Female/ OR clr::/E2ETEST/I2B2/Demographics/Gender/Male/ ${3} -t ${4}"; };
+timingResultNonZeroExpected="$(printf -- "count\n165\n165\n165")"
 timingResultZeroExpected="$(printf -- "count\n0\n0\n0")"
 
 
@@ -295,7 +295,15 @@ echo "Testing modifier-info..."
 
 test1 "modifier-info" "${searchModifierInfo}" "${resultSearchModifierInfo}"
 
-echo "Testing query..."
+echo "Testing query with test user..."
+
+test2 "query " "${query1}" "${resultQuery1}"
+test2 "query " "${query2}" "${resultQuery2}"
+test2 "query " "${query3}" "${resultQuery3}"
+test2 "query " "${query4}" "${resultQuery4}"
+test2 "query " "${query5}" "${resultQuery5a}"
+
+echo "Testing query with test_explore_patient_list user..."
 USERNAME="${1:-test}_explore_patient_list"
 
 test2 "query " "${query1}" "${resultQuery1}"
@@ -319,6 +327,8 @@ USERNAME=${1:-test}
 
 test4
 
+echo "Testing survival analysis features..."
+USERNAME=${1:-test}
 test5 "day" "${survivalDays}"
 test5 "week" "${survivalWeeks}"
 test5 "month" "${survivalMonths}"
@@ -326,8 +336,13 @@ test5 "year" "${survivalYears}"
 
 test6 "${survivalSubGroup1}" "${survivalSubGroup2}"
 
+echo "Testing query with timing settings features..."
+USERNAME=${1:-test}
 test7 "any" "any" "any" "any" "${timingResultNonZeroExpected}"
 test7 "sameinstancenum" "sameinstancenum" "sameinstancenum" "sameinstancenum" "${timingResultZeroExpected}"
+test7 "samevisit" "samevisit" "samevisit" "samevisit" "${timingResultZeroExpected}"
+test7 "sameinstancenum" "sameinstancenum" "any" "sameinstancenum" "${timingResultNonZeroExpected}"
+test7 "samevisit" "samevisit" "any" "samevisit" "${timingResultNonZeroExpected}"
 
 echo "CLI test 1/2 successful!"
 popd

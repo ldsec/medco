@@ -12,16 +12,16 @@ if [[ ! $1 =~ ^[a-zA-Z0-9-]+$ ]]; then
     exit 1
 fi
 NETWORK_NAME="$1"
-NODE_IDX="$2"
+NODE_IDX=$(printf "%03d" "$2") # padding to 3 digits
 NODE_DNS_NAME="$3"
 PUB_KEY="${4-}"
 PRIV_KEY="${5-}"
 
 # convenience variables
-PROFILE_NAME="test-network-${NETWORK_NAME}-node${NODE_IDX}"
+PROFILE_NAME="network-${NETWORK_NAME}-node${NODE_IDX}"
 SCRIPT_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-MEDCO_DOCKER="ghcr.io/ldsec/medco:$(make --no-print-directory -C ../../../ medco_version)"
-COMPOSE_FOLDER="${SCRIPT_FOLDER}/../../../deployments/${PROFILE_NAME}"
+MEDCO_DOCKER="ghcr.io/ldsec/medco:$(make --no-print-directory -C ../../ medco_version)"
+COMPOSE_FOLDER="${SCRIPT_FOLDER}/../../deployments/${PROFILE_NAME}"
 CONF_FOLDER="${COMPOSE_FOLDER}/configuration"
 if [[ -d ${COMPOSE_FOLDER} ]]; then
     echo "The profile folder exists. Aborting."
@@ -104,13 +104,12 @@ MEDCO_NODE_IDX=${NODE_IDX}
 MEDCO_PROFILE_NAME=${PROFILE_NAME}
 MEDCO_NETWORK_NAME=${NETWORK_NAME}
 
-I2B2_WILDFLY_PASSWORD=admin
-I2B2_SERVICE_PASSWORD=pFjy3EjDVwLfT2rB9xkK
-I2B2_USER_PASSWORD=demouser
-POSTGRES_PASSWORD=postgres1
-PGADMIN_PASSWORD=admin
+I2B2_WILDFLY_PASSWORD=replaceme
+I2B2_SERVICE_PASSWORD=replaceme
+I2B2_USER_PASSWORD=replaceme
+POSTGRES_PASSWORD=replaceme
+KEYCLOAK_PASSWORD=replaceme
 
-KEYCLOAK_PASSWORD=keycloak
 KEYCLOAK_REALM=master
 KEYCLOAK_CLIENT_ID=medco
 KEYCLOAK_USER_CLAIM=preferred_username
@@ -124,4 +123,3 @@ echo "### Generating archive to be shared"
 tar czvf "${CONF_FOLDER}/srv${NODE_IDX}-public.tar.gz" -C "${CONF_FOLDER}" \
     "srv${NODE_IDX}-certificate.crt" "srv${NODE_IDX}-public.toml" "srv${NODE_IDX}-nodednsname.txt"
 echo "### DONE! srv${NODE_IDX}-public.tar.gz generated, ready for step 2"
-
