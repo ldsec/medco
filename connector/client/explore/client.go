@@ -3,20 +3,22 @@ package exploreclient
 import (
 	"encoding/xml"
 	"fmt"
+	"os"
+	"sort"
+	"strconv"
+	"strings"
+	"time"
+
 	medcoclient "github.com/ldsec/medco/connector/client"
 	"github.com/ldsec/medco/connector/restapi/models"
 	utilclient "github.com/ldsec/medco/connector/util/client"
 	"github.com/ldsec/medco/connector/wrappers/unlynx"
 	"github.com/sirupsen/logrus"
-	"os"
-	"sort"
-	"strconv"
-	"time"
 )
 
 // ExecuteClientQuery executes and displays the result of the MedCo client query
 // endpoint on the server: /node/explore/query
-func ExecuteClientQuery(token, username, password, queryString, resultOutputFilePath string, disableTLSCheck bool) (err error) {
+func ExecuteClientQuery(token, username, password, queryString, queryTiming, resultOutputFilePath string, disableTLSCheck bool) (err error) {
 
 	// get token
 	accessToken, err := utilclient.RetrieveOrGetNewAccessToken(token, username, password, disableTLSCheck)
@@ -48,7 +50,7 @@ func ExecuteClientQuery(token, username, password, queryString, resultOutputFile
 	}
 
 	// execute query
-	clientQuery, err := NewExploreQuery(accessToken, panels, disableTLSCheck)
+	clientQuery, err := NewExploreQuery(accessToken, panels, models.Timing(strings.ToLower(queryTiming)), disableTLSCheck)
 	if err != nil {
 		return
 	}
