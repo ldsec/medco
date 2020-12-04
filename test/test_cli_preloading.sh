@@ -130,6 +130,12 @@ survivalYears="$(printf -- "time_granularity,node_index,group_id,initial_count,t
 survivalSubGroup1="$(printf -- "time_granularity,node_index,group_id,initial_count,time_point,event_of_interest_count,censoring_event_count\nweek,0,Female,414,0,0,0\nweek,0,Female,414,1,0,0\nweek,0,Female,414,2,18,0\nweek,0,Female,414,3,3,0\nweek,0,Female,414,4,3,0\nweek,0,Female,414,5,6,0")"
 survivalSubGroup2="$(printf -- "week,0,Male,270,0,0,0\nweek,0,Male,270,1,3,0\nweek,0,Male,270,2,0,0\nweek,0,Male,270,3,0,0\nweek,0,Male,270,4,0,0\nweek,0,Male,270,5,0,0")"
 
+# test7
+function timing() { echo "query clr::/E2ETEST/SPHNv2020.1/DeathStatus/ OR clr::/E2ETEST/SPHNv2020.1/DeathStatus/ ${1} AND clr::/E2ETEST/SPHNv2020.1/DeathStatus/:/E2ETEST/DeathStatus-status/death/:/SPHNv2020.1/DeathStatus/ ${2} AND clr::/E2ETEST/I2B2/Demographics/Gender/Female/ OR clr::/E2ETEST/I2B2/Demographics/Gender/Male/ ${3} -t ${4}"; };
+timingResultNonZeroExpected="$(printf -- "count\n165\n165\n165")"
+timingResultZeroExpected="$(printf -- "count\n0\n0\n0")"
+
+
 test1 () {
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv $1 $2
   result="$(cat ../result.csv | tr -d '\r\n\t ')"
@@ -258,6 +264,19 @@ test6 () {
   fi
 }
 
+test7() {
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv \
+  $(timing $1 $2 $3 $4)
+  result="$(awk -F "\"*,\"*" '{print $2}' ../result.csv)"
+  if [ "${result}" != "${5}" ];
+  then
+  echo "query timing ${1} ${2} ${3} ${4}: test failed"
+  echo "result: ${result}" && echo "expected result: ${5}"
+  exit 1
+  fi
+
+}
+
 pushd deployments/dev-local-3nodes/
 echo "Testing concept-children..."
 
@@ -308,12 +327,22 @@ USERNAME=${1:-test}
 
 test4
 
+echo "Testing survival analysis features..."
+USERNAME=${1:-test}
 test5 "day" "${survivalDays}"
 test5 "week" "${survivalWeeks}"
 test5 "month" "${survivalMonths}"
 test5 "year" "${survivalYears}"
 
 test6 "${survivalSubGroup1}" "${survivalSubGroup2}"
+
+echo "Testing query with timing settings features..."
+USERNAME=${1:-test}
+test7 "any" "any" "any" "any" "${timingResultNonZeroExpected}"
+test7 "sameinstancenum" "sameinstancenum" "sameinstancenum" "sameinstancenum" "${timingResultZeroExpected}"
+test7 "samevisit" "samevisit" "samevisit" "samevisit" "${timingResultZeroExpected}"
+test7 "sameinstancenum" "sameinstancenum" "any" "sameinstancenum" "${timingResultNonZeroExpected}"
+test7 "samevisit" "samevisit" "any" "samevisit" "${timingResultNonZeroExpected}"
 
 echo "CLI test 1/2 successful!"
 popd

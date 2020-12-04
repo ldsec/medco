@@ -14,6 +14,12 @@ import (
 )
 
 // ParseQueryString parses the query string given as input
+// A query string is a list of panels concatenated by " AND ".
+// Each panel is a list of query items, in the format parsed by parseQueryItem, concatenated by " OR ".
+// Each query item can be OR-ed n times with itself (and so lengthening the panel's query items list) using the syntax query_item^n.
+// The first element of a panel can be a "NOT". In this case the panel is negated.
+// The last element of a panel can be the panel timing, whose value either "any", "samevisit", or "sameinstancenum".
+// If omitted, the panel timing is defaulted to "any".
 func ParseQueryString(queryString string) (panels []*models.Panel, err error) {
 	logrus.Info("Client query is: ", queryString)
 
@@ -32,6 +38,23 @@ func ParseQueryString(queryString string) (panels []*models.Panel, err error) {
 			not = false
 		}
 		newPanel.Not = &not
+
+		// parse panel timing
+		queryPanelFields := strings.Split(queryPanel, " ")
+		panelTiming := strings.ToLower(queryPanelFields[len(queryPanelFields)-1])
+		switch panelTiming {
+		case string(models.TimingSamevisit):
+			newPanel.PanelTiming = models.TimingSamevisit
+			queryPanel = queryPanel[:len(queryPanel)-len(panelTiming)-1]
+		case string(models.TimingSameinstancenum):
+			newPanel.PanelTiming = models.TimingSameinstancenum
+			queryPanel = queryPanel[:len(queryPanel)-len(panelTiming)-1]
+		case string(models.TimingAny):
+			newPanel.PanelTiming = models.TimingAny
+			queryPanel = queryPanel[:len(queryPanel)-len(panelTiming)-1]
+		default:
+			newPanel.PanelTiming = models.TimingAny
+		}
 
 		// parse query items
 		for _, queryItem := range strings.Split(queryPanel, " OR ") {
