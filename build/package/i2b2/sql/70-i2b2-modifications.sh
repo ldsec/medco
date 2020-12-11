@@ -11,4 +11,11 @@ psql $PSQL_PARAMS -d "$I2B2_DB_NAME" <<-EOSQL
         ('patient_dimension', 'enc_dummy_flag_cd', 'CRC_COLUMN_DESCRIPTOR', 'Encrypted Dummy Flag', NULL, NULL, NULL,
         NULL, 'NOW()', NULL, 1);
 
+
+    -- increase size of modifier_path in the modifier_dimension table
+    ALTER TABLE i2b2demodata_i2b2.modifier_dimension ALTER COLUMN modifier_path TYPE varchar(2000);
+
+    -- increase size of concept_path in the concept_dimension table
+    ALTER TABLE i2b2demodata_i2b2.concept_dimension ALTER COLUMN concept_path TYPE varchar(2000);
+
 EOSQL
