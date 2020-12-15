@@ -127,6 +127,22 @@ func CheckQueryID(userID string, queryID int) (bool, error) {
 
 }
 
+// GetQueryDefinition is called when the query is created. A new row is inserted in explore query results table with status 'running'.
+func GetQueryDefinition(queryID int) (string, error) {
+	logrus.Debugf("query ID %d", queryID)
+	logrus.Debugf("SQL: %s", getQueryDefinition)
+	row := utilserver.DBConnection.QueryRow(getQueryDefinition, queryID)
+	res := new(string)
+	err := row.Scan(res)
+	if err != nil {
+		err = fmt.Errorf("while scanning SQL record: %s", err.Error())
+		return "", err
+	}
+	logrus.Debug("successfully retrieved")
+	return *res, nil
+
+}
+
 const getPatientList string = `
 SELECT clear_result_set FROM query_tools.explore_query_results
 WHERE query_id = (SELECT query_id FROM query_tools.saved_cohorts WHERE user_id = $1 AND cohort_name = $2 AND query_status = 'completed');
@@ -163,4 +179,9 @@ WHERE query_id = $1 AND query_status = 'running'
 const checkQueryID string = `
 SELECT COUNT(query_id) FROM query_tools.explore_query_results
 WHERE user_id = $1 AND query_id = $2
+`
+
+const getQueryDefinition string = `
+SELECT query_definition FROM query_tools.explore_query_results
+WHERE query_id = $1
 `

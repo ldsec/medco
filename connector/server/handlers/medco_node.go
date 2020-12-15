@@ -149,13 +149,33 @@ func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *m
 	}
 	payload := &medco_node.GetCohortsOK{}
 	for _, cohort := range cohorts {
+		queryID := int64(cohort.QueryID)
+		var queryDefinition *medco_node.GetCohortsOKBodyItems0QueryDefinition
+		queryDefinitionString, err := querytoolsserver.GetQueryDefinition(int(queryID))
+		if err != nil {
+			medco_node.NewGetCohortsDefault(500).WithPayload(&medco_node.GetCohortsDefaultBody{
+				Message: "Get cohort execution error: " + err.Error(),
+			})
+		}
+		queryModel := &models.ExploreQuery{}
+		err = queryModel.UnmarshalBinary([]byte(queryDefinitionString))
+		if err != nil {
+			logrus.Warnf("skipping query definition unmarshalling with string %s: %s", queryDefinitionString, err.Error())
+		} else {
+			queryDefinition = &medco_node.GetCohortsOKBodyItems0QueryDefinition{
+				Panels:      queryModel.Panels,
+				QueryTiming: queryModel.QueryTiming,
+			}
+		}
+
 		payload.Payload = append(payload.Payload,
 			&medco_node.GetCohortsOKBodyItems0{
-				CohortName:   cohort.CohortName,
-				CohortID:     int64(cohort.CohortID),
-				QueryID:      int64(cohort.QueryID),
-				CreationDate: cohort.CreationDate.Format(time.RFC3339),
-				UpdateDate:   cohort.UpdateDate.Format(time.RFC3339),
+				CohortName:      cohort.CohortName,
+				CohortID:        int64(cohort.CohortID),
+				QueryID:         queryID,
+				CreationDate:    cohort.CreationDate.Format(time.RFC3339),
+				UpdateDate:      cohort.UpdateDate.Format(time.RFC3339),
+				QueryDefinition: queryDefinition,
 			},
 		)
 	}

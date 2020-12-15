@@ -61,6 +61,13 @@ func TestCheckQueryID(t *testing.T) {
 
 }
 
+func TestGetQueryDefinition(t *testing.T) {
+	utilserver.TestDBConnection(t)
+	res, err := GetQueryDefinition(-1)
+	assert.NoError(t, err)
+	assert.Equal(t, "This field normally contains the selection panels", res)
+}
+
 const exploreResultDeletion = `
 DELETE FROM query_tools.explore_query_results
 WHERE query_id = $1
