@@ -65,10 +65,13 @@ func TestGetQueryDefinition(t *testing.T) {
 	utilserver.TestDBConnection(t)
 	res, err := GetQueryDefinition(-1)
 	assert.NoError(t, err)
-	assert.Equal(t, "This field normally contains the selection panels", res)
+	assert.Equal(t, queryDefinition, res)
+
 }
 
 const exploreResultDeletion = `
 DELETE FROM query_tools.explore_query_results
 WHERE query_id = $1
 `
+
+const queryDefinition = `{"panels":[{"items":[{"encrypted":false,"queryTerm":"/E2ETEST/SPHNv2020.1/DeathStatus/"}],"not":false,"panelTiming":"any"}],"queryTiming":"any"}`
