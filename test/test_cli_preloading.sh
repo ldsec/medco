@@ -245,9 +245,9 @@ test5 () {
 
 test6 () {
   docker-compose -f docker-compose.tools.yml run \
-    -v "${PWD}/../../test/survival_test_parameters.yaml":/parameters/survival_test_parameters.yaml \
+    -v "${PWD}/../../test/survival_e2e_test_parameters.yaml":/parameters/survival_e2e_test_parameters.yaml \
     medco-cli-client --user $USERNAME --password $PASSWORD -o /data/result.csv srva -d /data/timers.csv \
-    -p /parameters/survival_test_parameters.yaml
+    -p /parameters/survival_e2e_test_parameters.yaml
 
   result="$(awk -F',' 'NR==1, NR==7 {print $0}' ../result.csv)"
   if [ "${result}" != "${1}" ];

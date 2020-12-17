@@ -232,62 +232,72 @@ func (q *Query) Execute() error {
 // Heading and trailing spaces are silently trimmed. Granularity string is silently written in lower case.
 // If any other wrong member can be defaulted, a warning message is printed, otherwise an error is returned.
 func (q *Query) Validate() error {
-	q.StartConcept = strings.TrimSpace(q.StartConcept)
-	if q.StartConcept == "" {
-		return fmt.Errorf("emtpy start concept path")
-	}
-	if q.StartModifier != nil {
-		*q.StartModifier.ModifierKey = strings.TrimSpace(*q.StartModifier.ModifierKey)
-		if *q.StartModifier.ModifierKey == "" {
-			logrus.Errorf("empty start modifier key")
-		}
-		*q.StartModifier.AppliedPath = strings.TrimSpace(*q.StartModifier.AppliedPath)
-		if *q.StartModifier.AppliedPath == "" {
-			logrus.Errorf("empty start modifier applied path")
-		}
-	}
 
 	q.QueryName = strings.TrimSpace(q.QueryName)
 	if q.QueryName == "" {
 		return fmt.Errorf("empty query name")
 	}
+
+	q.StartConcept = strings.TrimSpace(q.StartConcept)
+	if q.StartConcept == "" {
+		return fmt.Errorf("emtpy start concept path, queryID: %s", q.QueryName)
+	}
+	if q.StartModifier != nil {
+		*q.StartModifier.ModifierKey = strings.TrimSpace(*q.StartModifier.ModifierKey)
+		if *q.StartModifier.ModifierKey == "" {
+			return fmt.Errorf("empty start modifier key, queryID: %s, start concept: %s", q.QueryName, q.StartConcept)
+		}
+		*q.StartModifier.AppliedPath = strings.TrimSpace(*q.StartModifier.AppliedPath)
+		if *q.StartModifier.AppliedPath == "" {
+			return fmt.Errorf(
+				"empty start modifier applied path, queryID: %s, start concept: %s, start modifier key: %s",
+				q.QueryName, q.StartConcept,
+				*q.StartModifier.ModifierKey,
+			)
+		}
+	}
+
 	q.EndConcept = strings.TrimSpace(q.EndConcept)
 	if q.EndConcept == "" {
-		return fmt.Errorf("empty end concept path")
+		return fmt.Errorf("empty end concept path, queryID: %s", q.QueryName)
 	}
 	if q.EndModifier != nil {
 		*q.EndModifier.ModifierKey = strings.TrimSpace(*q.EndModifier.ModifierKey)
 		if *q.EndModifier.ModifierKey == "" {
-			logrus.Errorf("empty end modifier key")
+			return fmt.Errorf("empty end modifier key, queryID: %s, end concept: %s", q.QueryName, q.EndConcept)
 		}
 		*q.EndModifier.AppliedPath = strings.TrimSpace(*q.EndModifier.AppliedPath)
 		if *q.EndModifier.AppliedPath == "" {
-			logrus.Errorf("empty end modifier applied path")
+			return fmt.Errorf(
+				"empty end modifier applied path, queryID: %s, end concept: %s, end modifier key: %s",
+				q.QueryName, q.EndConcept,
+				*q.EndModifier.ModifierKey,
+			)
 		}
 	}
 
 	q.UserID = strings.TrimSpace(q.UserID)
 	if q.UserID == "" {
-		return fmt.Errorf("empty user name")
+		return fmt.Errorf("empty user name, queryID: %s", q.QueryName)
 	}
 	q.TimeGranularity = strings.ToLower(strings.TrimSpace(q.TimeGranularity))
 	if q.TimeGranularity == "" {
-		return fmt.Errorf("empty granularity")
+		return fmt.Errorf("empty granularityqueryID: %s", q.QueryName)
 	}
 	if _, isIn := granularityFunctions[q.TimeGranularity]; !isIn {
 		granularities := make([]string, 0, len(granularityFunctions))
 		for name := range granularityFunctions {
 			granularities = append(granularities, name)
 		}
-		return fmt.Errorf("granularity %s not implemented, must be one of %v", q.TimeGranularity, granularities)
+		return fmt.Errorf("granularity %s not implemented, must be one of %v; queryID: %s", q.TimeGranularity, granularities, q.QueryName)
 	}
 	q.UserPublicKey = strings.TrimSpace(q.UserPublicKey)
 	if q.UserPublicKey == "" {
-		return fmt.Errorf("empty user public key")
+		return fmt.Errorf("empty user public keyqueryID: %s", q.QueryName)
 	}
 	_, err := base64.URLEncoding.DecodeString(q.UserPublicKey)
 	if err != nil {
-		return fmt.Errorf("user public key is not valid against the alternate RFC4648 base64 for URL: %s", err.Error())
+		return fmt.Errorf("user public key is not valid against the alternate RFC4648 base64 for URL: %s; queryID: %s", err.Error(), q.QueryName)
 	}
 	return nil
 

@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const testParamFile string = "test_params.yaml"
+const testParamFile string = "../../../test/survival_unit_test_parameters.yaml"
 
 func TestNewParametersFromFile(t *testing.T) {
 	file, err := os.Open(testParamFile)
