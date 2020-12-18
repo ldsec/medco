@@ -1,0 +1,29 @@
+time_resolution: "day"
+time_limit: 19
+cohort_name: "anyName"
+start_concept_path: "/any/start/path/"
+start_modifier: 
+  modifier_key : "/any/start/modifier/key/"
+  applied_path: "/any/start/path/%"
+end_concept_path: "/any/end/path/"
+end_modifier:
+  modifier_key : "/any/end/modifier/key/"
+  applied_path: "/any/end/path/%"
+sub_groups:
+  - group_name: "AAA"
+    panels:
+      - not: false
+        items:
+          - path: "/path/1/"
+          - path: "/path/2/"
+            modifier:
+              modifier_key: "/key1/"
+              applied_path: "/appliedpath1/"
+      - not : true
+        items:
+          - path: "/path/3/"
+  - group_name: "BBB"
+    panels:
+      - not: false
+        items:
+          - path: "/path/4/"

@@ -4,10 +4,11 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"github.com/ldsec/medco/connector/restapi/models"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/ldsec/medco/connector/restapi/models"
 
 	"github.com/ldsec/medco/loader/identifiers"
 	"github.com/sirupsen/logrus"
@@ -73,7 +74,7 @@ func ParseQueryString(queryString string) (panels []*models.Panel, err error) {
 					return
 				}
 
-				items, err := parseQueryItem(elements[0])
+				items, err := ParseQueryItem(elements[0])
 				if err != nil {
 					return nil, err
 				}
@@ -90,7 +91,7 @@ func ParseQueryString(queryString string) (panels []*models.Panel, err error) {
 
 			} else {
 
-				items, err := parseQueryItem(queryItem)
+				items, err := ParseQueryItem(queryItem)
 				if err != nil {
 					return nil, err
 				}
@@ -103,7 +104,7 @@ func ParseQueryString(queryString string) (panels []*models.Panel, err error) {
 	return
 }
 
-// parseQueryItem parses a string into an item
+// ParseQueryItem parses a string into an item
 // queryItem is composed of two mandatory fields, the type field and the content field,
 // and an optional field, the constraint field, separated by "::".
 //		type::content[::constraint]
@@ -114,7 +115,7 @@ func ParseQueryString(queryString string) (panels []*models.Panel, err error) {
 // 		The optional constraint field can be present, containing the operator and value fields separated by ":.
 //		The constraint field applies to the concept or, if the modifier field is present, to the modifier.
 // 3. When the type field is equal to "file", the content field contains the path of the file containing the items. The constraint field is not present in this case.
-func parseQueryItem(queryItem string) (items []*models.PanelItemsItems0, err error) {
+func ParseQueryItem(queryItem string) (items []*models.PanelItemsItems0, err error) {
 
 	queryItemFields := strings.Split(queryItem, "::")
 	if len(queryItemFields) != 2 && len(queryItemFields) != 3 {
@@ -204,7 +205,7 @@ func loadQueryFile(queryFilePath string) (queryItems []*models.PanelItemsItems0,
 
 		if len(queryTermFields) == 1 { // regular ID
 
-			queryItem, err = parseQueryItem(queryTermFields[0])
+			queryItem, err = ParseQueryItem(queryTermFields[0])
 			if err != nil {
 				return nil, err
 			}
@@ -223,7 +224,7 @@ func loadQueryFile(queryFilePath string) (queryItems []*models.PanelItemsItems0,
 				return nil, err
 			}
 
-			queryItem, err = parseQueryItem("enc::" + strconv.FormatInt(variantID, 64))
+			queryItem, err = ParseQueryItem("enc::" + strconv.FormatInt(variantID, 64))
 			if err != nil {
 				return nil, err
 			}

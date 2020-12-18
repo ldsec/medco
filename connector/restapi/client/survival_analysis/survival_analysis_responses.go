@@ -252,8 +252,7 @@ type SurvivalAnalysisBody struct {
 	EndConcept *string `json:"endConcept"`
 
 	// end modifier
-	// Required: true
-	EndModifier *string `json:"endModifier"`
+	EndModifier *SurvivalAnalysisParamsBodyEndModifier `json:"endModifier,omitempty"`
 
 	// start concept
 	// Required: true
@@ -261,8 +260,7 @@ type SurvivalAnalysisBody struct {
 	StartConcept *string `json:"startConcept"`
 
 	// start modifier
-	// Required: true
-	StartModifier *string `json:"startModifier"`
+	StartModifier *SurvivalAnalysisParamsBodyStartModifier `json:"startModifier,omitempty"`
 
 	// sub group definitions
 	// Max Items: 4
@@ -375,8 +373,17 @@ func (o *SurvivalAnalysisBody) validateEndConcept(formats strfmt.Registry) error
 
 func (o *SurvivalAnalysisBody) validateEndModifier(formats strfmt.Registry) error {
 
-	if err := validate.Required("body"+"."+"endModifier", "body", o.EndModifier); err != nil {
-		return err
+	if swag.IsZero(o.EndModifier) { // not required
+		return nil
+	}
+
+	if o.EndModifier != nil {
+		if err := o.EndModifier.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("body" + "." + "endModifier")
+			}
+			return err
+		}
 	}
 
 	return nil
@@ -397,8 +404,17 @@ func (o *SurvivalAnalysisBody) validateStartConcept(formats strfmt.Registry) err
 
 func (o *SurvivalAnalysisBody) validateStartModifier(formats strfmt.Registry) error {
 
-	if err := validate.Required("body"+"."+"startModifier", "body", o.StartModifier); err != nil {
-		return err
+	if swag.IsZero(o.StartModifier) { // not required
+		return nil
+	}
+
+	if o.StartModifier != nil {
+		if err := o.StartModifier.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("body" + "." + "startModifier")
+			}
+			return err
+		}
 	}
 
 	return nil
@@ -843,6 +859,162 @@ func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0Events) MarshalBin
 // UnmarshalBinary interface implementation
 func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0Events) UnmarshalBinary(b []byte) error {
 	var res SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0Events
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+/*SurvivalAnalysisParamsBodyEndModifier survival analysis params body end modifier
+swagger:model SurvivalAnalysisParamsBodyEndModifier
+*/
+type SurvivalAnalysisParamsBodyEndModifier struct {
+
+	// applied path
+	// Required: true
+	// Pattern: ^((\/[^\/]+)+\/%?)$
+	AppliedPath *string `json:"appliedPath"`
+
+	// modifier key
+	// Required: true
+	// Pattern: ^((\/[^\/]+)+\/)$
+	ModifierKey *string `json:"modifierKey"`
+}
+
+// Validate validates this survival analysis params body end modifier
+func (o *SurvivalAnalysisParamsBodyEndModifier) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateAppliedPath(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateModifierKey(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *SurvivalAnalysisParamsBodyEndModifier) validateAppliedPath(formats strfmt.Registry) error {
+
+	if err := validate.Required("body"+"."+"endModifier"+"."+"appliedPath", "body", o.AppliedPath); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("body"+"."+"endModifier"+"."+"appliedPath", "body", string(*o.AppliedPath), `^((\/[^\/]+)+\/%?)$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *SurvivalAnalysisParamsBodyEndModifier) validateModifierKey(formats strfmt.Registry) error {
+
+	if err := validate.Required("body"+"."+"endModifier"+"."+"modifierKey", "body", o.ModifierKey); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("body"+"."+"endModifier"+"."+"modifierKey", "body", string(*o.ModifierKey), `^((\/[^\/]+)+\/)$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *SurvivalAnalysisParamsBodyEndModifier) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *SurvivalAnalysisParamsBodyEndModifier) UnmarshalBinary(b []byte) error {
+	var res SurvivalAnalysisParamsBodyEndModifier
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+/*SurvivalAnalysisParamsBodyStartModifier survival analysis params body start modifier
+swagger:model SurvivalAnalysisParamsBodyStartModifier
+*/
+type SurvivalAnalysisParamsBodyStartModifier struct {
+
+	// applied path
+	// Required: true
+	// Pattern: ^((\/[^\/]+)+\/%?)$
+	AppliedPath *string `json:"appliedPath"`
+
+	// modifier key
+	// Required: true
+	// Pattern: ^((\/[^\/]+)+\/)$
+	ModifierKey *string `json:"modifierKey"`
+}
+
+// Validate validates this survival analysis params body start modifier
+func (o *SurvivalAnalysisParamsBodyStartModifier) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateAppliedPath(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateModifierKey(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *SurvivalAnalysisParamsBodyStartModifier) validateAppliedPath(formats strfmt.Registry) error {
+
+	if err := validate.Required("body"+"."+"startModifier"+"."+"appliedPath", "body", o.AppliedPath); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("body"+"."+"startModifier"+"."+"appliedPath", "body", string(*o.AppliedPath), `^((\/[^\/]+)+\/%?)$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *SurvivalAnalysisParamsBodyStartModifier) validateModifierKey(formats strfmt.Registry) error {
+
+	if err := validate.Required("body"+"."+"startModifier"+"."+"modifierKey", "body", o.ModifierKey); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("body"+"."+"startModifier"+"."+"modifierKey", "body", string(*o.ModifierKey), `^((\/[^\/]+)+\/)$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *SurvivalAnalysisParamsBodyStartModifier) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *SurvivalAnalysisParamsBodyStartModifier) UnmarshalBinary(b []byte) error {
+	var res SurvivalAnalysisParamsBodyStartModifier
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

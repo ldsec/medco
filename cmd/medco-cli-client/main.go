@@ -109,18 +109,8 @@ func main() {
 			Usage: "Survival start concept",
 		},
 		cli.StringFlag{
-			Name:  "startModifier, x",
-			Usage: "Survival start modifier",
-			Value: "@",
-		},
-		cli.StringFlag{
 			Name:  "endConcept, e",
 			Usage: "Survival end concept",
-		},
-		cli.StringFlag{
-			Name:  "endModifier, y",
-			Usage: "Survival end modifier",
-			Value: "@",
 		},
 	}
 
@@ -325,9 +315,7 @@ func main() {
 					c.String("cohortName"),
 					c.String("granularity"),
 					c.String("startConcept"),
-					c.String("startModifier"),
 					c.String("endConcept"),
-					c.String("endModifier"),
 				)
 
 			},
