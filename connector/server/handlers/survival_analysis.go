@@ -24,9 +24,9 @@ func MedCoSurvivalAnalysisHandler(param survival_analysis.SurvivalAnalysisParams
 		int(*param.Body.TimeLimit),
 		*param.Body.TimeGranularity,
 		*param.Body.StartConcept,
-		*param.Body.StartModifier,
+		param.Body.StartModifier,
 		*param.Body.EndConcept,
-		*param.Body.EndModifier,
+		param.Body.EndModifier,
 	)
 	logrus.Debug("survivalAnalysis: ", survivalAnalysisQuery)
 	err := survivalAnalysisQuery.Validate()

@@ -11,20 +11,28 @@ import (
 
 // Parameters holds parameters to build a survival query
 type Parameters struct {
-	TimeResolution       string `yaml:"time_resolution"`
-	TimeLimit            int    `yaml:"time_limit"`
-	CohortName           string `yaml:"cohort_name"`
-	StartConceptPath     string `yaml:"start_concept_path"`
-	StartConceptModifier string `yaml:"start_concept_modifier"`
-	EndConceptPath       string `yaml:"end_concept_path"`
-	EndConceptModifier   string `yaml:"end_concept_modifier"`
-	SubGroups            []*struct {
+	TimeResolution   string    `yaml:"time_resolution"`
+	TimeLimit        int       `yaml:"time_limit"`
+	CohortName       string    `yaml:"cohort_name"`
+	StartConceptPath string    `yaml:"start_concept_path"`
+	StartModifier    *modifier `yaml:"start_modifier,omitempty"`
+	EndConceptPath   string    `yaml:"end_concept_path"`
+	EndModifier      *modifier `yaml:"end_modifier,omitempty"`
+	SubGroups        []*struct {
 		GroupName string `yaml:"group_name"`
 		Panels    []*struct {
-			Not   bool     `yaml:"not"`
-			Paths []string `yaml:"paths"`
+			Not   bool `yaml:"not"`
+			Items []*struct {
+				Path     string    `yaml:"path"`
+				Modifier *modifier `yaml:"modifier,omitempty"`
+			} `yaml:"items"`
 		} `yaml:"panels"`
 	} `yaml:"sub_groups,omitempty"`
+}
+
+type modifier struct {
+	ModifierKey string `yaml:"modifier_key"`
+	AppliedPath string `yaml:"applied_path"`
 }
 
 // NewParametersFromFile builds a Parameters instance from YAML file
@@ -64,13 +72,23 @@ func (p *Parameters) String() string {
 	}
 	subGroupArray := "[" + strings.Join(subGroupStrings, " ") + "]"
 
-	return fmt.Sprintf("{TimeResolution:%s TimeLimit:%d CohortName:%s StartConceptPath:%s StartConceptModifier:%s EndConceptPath:%s EndConceptModifier:%s SubGroups:%s}",
+	startModifierString := ""
+	if startMod := p.StartModifier; startMod != nil {
+		startModifierString = fmt.Sprintf("{ModifierKey:%s AppliedPath:%s}", startMod.ModifierKey, startMod.AppliedPath)
+	}
+
+	endModifierString := ""
+	if endMod := p.EndModifier; endMod != nil {
+		endModifierString = fmt.Sprintf("{ModifierKey:%s AppliedPath:%s}", endMod.ModifierKey, endMod.AppliedPath)
+	}
+
+	return fmt.Sprintf("{TimeResolution:%s TimeLimit:%d CohortName:%s StartConceptPath:%s StartModifier:%s EndConceptPath:%s EndModifier:%s SubGroups:%s}",
 		p.TimeResolution,
 		p.TimeLimit,
 		p.CohortName,
 		p.StartConceptPath,
-		p.StartConceptModifier,
+		startModifierString,
 		p.EndConceptPath,
-		p.EndConceptModifier,
+		endModifierString,
 		subGroupArray)
 }

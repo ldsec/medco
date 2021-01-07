@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	medcoclient "github.com/ldsec/medco/connector/client"
 	medcomodels "github.com/ldsec/medco/connector/models"
 
 	"github.com/ldsec/medco/connector/restapi/client/survival_analysis"
@@ -24,9 +25,9 @@ type ClientResultElement struct {
 }
 
 // ExecuteClientSurvival creates a survival analysis form parameters given in parameter file, and makes a call to the API to executes this query
-func ExecuteClientSurvival(token, parameterFileURL, username, password string, disableTLSCheck bool, resultFile string, timerFile string, limit int, cohortName string, granularity, startConcept, startModifier, endConcept, endModifier string) (err error) {
+func ExecuteClientSurvival(token, parameterFileURL, username, password string, disableTLSCheck bool, resultFile string, timerFile string, limit int, cohortName string, granularity, startItem, endItem string) (err error) {
 
-	err = inputValidation(parameterFileURL, limit, cohortName, startConcept, endConcept)
+	err = inputValidation(parameterFileURL, limit, cohortName, startItem, endItem)
 	if err != nil {
 		logrus.Error(err)
 		return
@@ -96,6 +97,49 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 		if parameterFileURL != "" {
 			parameters = <-parametersChan
 		} else {
+			var startPanel []*models.PanelItemsItems0
+			var endPanel []*models.PanelItemsItems0
+			startPanel, err = medcoclient.ParseQueryItem(startItem)
+			if err != nil {
+				logrus.Error("while parsing start item: ", err.Error())
+				return
+			}
+
+			err = panelValidation(startPanel)
+			if err != nil {
+				logrus.Error("while validating start item", err)
+				return
+			}
+			startConcept := *(startPanel[0].QueryTerm)
+
+			endPanel, err = medcoclient.ParseQueryItem(endItem)
+			if err != nil {
+				logrus.Error("while parsing end item", err)
+				return
+			}
+
+			err = panelValidation(endPanel)
+
+			if err != nil {
+				logrus.Error("while validating start item", err)
+				return
+			}
+			endConcept := *(endPanel[0].QueryTerm)
+			var startModifier *modifier
+			var endModifier *modifier
+			if startMod := startPanel[0].Modifier; startMod != nil {
+				startModifier = &modifier{
+					ModifierKey: *startMod.ModifierKey,
+					AppliedPath: *startMod.AppliedPath,
+				}
+			}
+			if endMod := endPanel[0].Modifier; endMod != nil {
+				endModifier = &modifier{
+					ModifierKey: *endMod.ModifierKey,
+					AppliedPath: *endMod.AppliedPath,
+				}
+			}
+
 			parameters = &Parameters{
 				granularity,
 				limit,
@@ -106,7 +150,6 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 				endModifier,
 				nil,
 			}
-
 		}
 	}
 
@@ -163,6 +206,28 @@ func executeQuery(accessToken string, panels []*survival_analysis.SurvivalAnalys
 		Results []EncryptedResults
 		Timers  []medcomodels.Timers
 	})
+	var APIstartModifier *survival_analysis.SurvivalAnalysisParamsBodyStartModifier
+	var APIendModifier *survival_analysis.SurvivalAnalysisParamsBodyEndModifier
+
+	if startMod := parameters.StartModifier; startMod != nil {
+		logrus.Debug("start modifier provided")
+		APIstartModifier = &survival_analysis.SurvivalAnalysisParamsBodyStartModifier{
+			ModifierKey: new(string),
+			AppliedPath: new(string),
+		}
+		*APIstartModifier.ModifierKey = startMod.ModifierKey
+		*APIstartModifier.AppliedPath = startMod.AppliedPath
+	}
+
+	if endMod := parameters.EndModifier; endMod != nil {
+		APIendModifier = &survival_analysis.SurvivalAnalysisParamsBodyEndModifier{
+			ModifierKey: new(string),
+			AppliedPath: new(string),
+		}
+		*APIendModifier.ModifierKey = endMod.ModifierKey
+		*APIendModifier.AppliedPath = endMod.AppliedPath
+	}
+
 	query, err := NewSurvivalAnalysis(
 		accessToken,
 		parameters.CohortName,
@@ -170,9 +235,9 @@ func executeQuery(accessToken string, panels []*survival_analysis.SurvivalAnalys
 		parameters.TimeLimit,
 		parameters.TimeResolution,
 		parameters.StartConceptPath,
-		parameters.StartConceptModifier,
+		APIstartModifier,
 		parameters.EndConceptPath,
-		parameters.EndConceptModifier,
+		APIendModifier,
 		disableTLSCheck,
 	)
 	userPrivateKey = query.userPrivateKey
@@ -231,15 +296,26 @@ func convertPanel(parameters *Parameters) []*survival_analysis.SurvivalAnalysisP
 			newPanel := &models.Panel{}
 			newPanel.Not = new(bool)
 			*newPanel.Not = panel.Not
-			newItems := make([]*models.PanelItemsItems0, len(panel.Paths))
-			for k, item := range panel.Paths {
+			newItems := make([]*models.PanelItemsItems0, len(panel.Items))
+			for k, item := range panel.Items {
 				encrypted := new(bool)
 				itemString := new(string)
 				*encrypted = false
-				*itemString = item
+				*itemString = item.Path
+				var modifier *models.PanelItemsItems0Modifier
+				if mod := item.Modifier; mod != nil {
+					modifier = &models.PanelItemsItems0Modifier{
+						ModifierKey: new(string),
+						AppliedPath: new(string),
+					}
+					*modifier.ModifierKey = mod.ModifierKey
+					*modifier.AppliedPath = mod.AppliedPath
+
+				}
 				newItems[k] = &models.PanelItemsItems0{
 					Encrypted: encrypted,
 					QueryTerm: itemString,
+					Modifier:  modifier,
 				}
 			}
 			newPanel.Items = newItems
@@ -387,6 +463,24 @@ func inputValidation(parameterFileURL string, limit int, cohortName, startConcep
 		}
 	}
 	return nil
+}
+
+func panelValidation(panel []*models.PanelItemsItems0) (err error) {
+	if len(panel) == 0 {
+		err = fmt.Errorf("panels are empty. Was the start item string empry ?")
+		logrus.Error(err)
+		return
+	}
+	if len(panel) > 1 {
+		err = fmt.Errorf("multiple items retrieved from the item string. Was a file provided ? Only clear concept should be used")
+		logrus.Error(err)
+		return
+	}
+	if *(panel[0].Encrypted) {
+		err = fmt.Errorf("encrypted concept found, only clear concept should be used")
+		logrus.Error(err)
+	}
+	return
 }
 
 func modelPanelsToString(subGroup *survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) string {

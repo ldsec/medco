@@ -31,9 +31,9 @@ type Query struct {
 	TimeLimit           int
 	TimeGranularity     string
 	StartConcept        string
-	StartModifier       string
+	StartModifier       *survival_analysis.SurvivalAnalysisParamsBodyStartModifier
 	EndConcept          string
-	EndModifier         string
+	EndModifier         *survival_analysis.SurvivalAnalysisParamsBodyEndModifier
 	Result              *struct {
 		Timers    medcomodels.Timers
 		EncEvents EventGroups
@@ -49,9 +49,9 @@ func NewQuery(UserID,
 	TimeLimit int,
 	TimeGranularity string,
 	StartConcept string,
-	StartModifier string,
+	StartModifier *survival_analysis.SurvivalAnalysisParamsBodyStartModifier,
 	EndConcept string,
-	EndModifier string) *Query {
+	EndModifier *survival_analysis.SurvivalAnalysisParamsBodyEndModifier) *Query {
 	res := &Query{
 		UserPublicKey:       UserPublicKey,
 		UserID:              UserID,
@@ -68,6 +68,16 @@ func NewQuery(UserID,
 			Timers    medcomodels.Timers
 			EncEvents EventGroups
 		}{}}
+	if StartModifier != nil {
+		logrus.Debugf("Provided start modifier with key %s and applied path %s", *StartModifier.ModifierKey, *StartModifier.AppliedPath)
+	} else {
+		logrus.Debug("No start modifier provided")
+	}
+	if EndModifier != nil {
+		logrus.Debugf("Provided end modifier with key %s and applied path %s", *EndModifier.ModifierKey, *EndModifier.AppliedPath)
+	} else {
+		logrus.Debug("No end modifier provided")
+	}
 	res.Result.Timers = make(map[string]time.Duration)
 
 	return res
@@ -82,8 +92,11 @@ func (q *Query) Execute() error {
 	timeLimitInDays := q.TimeLimit * granularityValues[q.TimeGranularity]
 	timer := time.Now()
 
-	startConceptCode, endConceptCode, cohort, timers, err := prepareArguments(q.UserID, q.CohortName, q.StartConcept, q.EndConcept)
-
+	startConceptCode, startModifierCode, endConceptCode, endModifierCode, cohort, timers, err := prepareArguments(q.UserID, q.CohortName, q.StartConcept, q.StartModifier, q.EndConcept, q.EndModifier)
+	if err != nil {
+		err = fmt.Errorf("while retrieving concept codes and patient indices: %s", err.Error())
+		return err
+	}
 	q.Result.Timers.AddTimers("", timer, timers)
 
 	// --- build sub groups
@@ -156,9 +169,9 @@ func (q *Query) Execute() error {
 			sqlTimePoints, err := buildTimePoints(
 				patientList,
 				startConceptCode,
-				q.StartModifier,
+				startModifierCode,
 				endConceptCode,
-				q.EndModifier,
+				endModifierCode,
 				timeLimitInDays,
 			)
 			timers.AddTimers(fmt.Sprintf("medco-connector-build-timepoints%d", i), timer, nil)
@@ -219,55 +232,92 @@ func (q *Query) Execute() error {
 // Heading and trailing spaces are silently trimmed. Granularity string is silently written in lower case.
 // If any other wrong member can be defaulted, a warning message is printed, otherwise an error is returned.
 func (q *Query) Validate() error {
-	q.StartConcept = strings.TrimSpace(q.StartConcept)
-	if q.StartConcept == "" {
-		return fmt.Errorf("emtpy start concept path")
-	}
-	q.StartModifier = strings.TrimSpace(q.StartModifier)
-	if q.StartModifier == "" {
-		logrus.Warn("empty start concept, defaulte to \"@\"")
-	}
+
 	q.QueryName = strings.TrimSpace(q.QueryName)
 	if q.QueryName == "" {
 		return fmt.Errorf("empty query name")
 	}
+
+	q.StartConcept = strings.TrimSpace(q.StartConcept)
+	if q.StartConcept == "" {
+		return fmt.Errorf("emtpy start concept path, queryID: %s", q.QueryName)
+	}
+	if q.StartModifier != nil {
+		*q.StartModifier.ModifierKey = strings.TrimSpace(*q.StartModifier.ModifierKey)
+		if *q.StartModifier.ModifierKey == "" {
+			return fmt.Errorf("empty start modifier key, queryID: %s, start concept: %s", q.QueryName, q.StartConcept)
+		}
+		*q.StartModifier.AppliedPath = strings.TrimSpace(*q.StartModifier.AppliedPath)
+		if *q.StartModifier.AppliedPath == "" {
+			return fmt.Errorf(
+				"empty start modifier applied path, queryID: %s, start concept: %s, start modifier key: %s",
+				q.QueryName, q.StartConcept,
+				*q.StartModifier.ModifierKey,
+			)
+		}
+	}
+
 	q.EndConcept = strings.TrimSpace(q.EndConcept)
 	if q.EndConcept == "" {
-		return fmt.Errorf("empty end concept path")
+		return fmt.Errorf("empty end concept path, queryID: %s", q.QueryName)
 	}
-	q.EndModifier = strings.TrimSpace(q.EndModifier)
-	if q.EndModifier == "" {
-		logrus.Warn("empty end modifier, defaulted to \"@\"")
+	if q.EndModifier != nil {
+		*q.EndModifier.ModifierKey = strings.TrimSpace(*q.EndModifier.ModifierKey)
+		if *q.EndModifier.ModifierKey == "" {
+			return fmt.Errorf("empty end modifier key, queryID: %s, end concept: %s", q.QueryName, q.EndConcept)
+		}
+		*q.EndModifier.AppliedPath = strings.TrimSpace(*q.EndModifier.AppliedPath)
+		if *q.EndModifier.AppliedPath == "" {
+			return fmt.Errorf(
+				"empty end modifier applied path, queryID: %s, end concept: %s, end modifier key: %s",
+				q.QueryName, q.EndConcept,
+				*q.EndModifier.ModifierKey,
+			)
+		}
 	}
+
 	q.UserID = strings.TrimSpace(q.UserID)
 	if q.UserID == "" {
-		return fmt.Errorf("empty user name")
+		return fmt.Errorf("empty user name, queryID: %s", q.QueryName)
 	}
 	q.TimeGranularity = strings.ToLower(strings.TrimSpace(q.TimeGranularity))
 	if q.TimeGranularity == "" {
-		return fmt.Errorf("empty granularity")
+		return fmt.Errorf("empty granularityqueryID: %s", q.QueryName)
 	}
 	if _, isIn := granularityFunctions[q.TimeGranularity]; !isIn {
 		granularities := make([]string, 0, len(granularityFunctions))
 		for name := range granularityFunctions {
 			granularities = append(granularities, name)
 		}
-		return fmt.Errorf("granularity %s not implemented, must be one of %v", q.TimeGranularity, granularities)
+		return fmt.Errorf("granularity %s not implemented, must be one of %v; queryID: %s", q.TimeGranularity, granularities, q.QueryName)
 	}
 	q.UserPublicKey = strings.TrimSpace(q.UserPublicKey)
 	if q.UserPublicKey == "" {
-		return fmt.Errorf("empty user public key")
+		return fmt.Errorf("empty user public keyqueryID: %s", q.QueryName)
 	}
 	_, err := base64.URLEncoding.DecodeString(q.UserPublicKey)
 	if err != nil {
-		return fmt.Errorf("user public key is not valid against the alternate RFC4648 base64 for URL: %s", err.Error())
+		return fmt.Errorf("user public key is not valid against the alternate RFC4648 base64 for URL: %s; queryID: %s", err.Error(), q.QueryName)
 	}
 	return nil
 
 }
 
 // prepareArguments retrieves concept codes and patients that will be used as the arguments of direct SQL call
-func prepareArguments(userID, cohortName, startConcept, endConcept string) (startConceptCode, endConceptCode string, cohort []int64, timers medcomodels.Timers, err error) {
+func prepareArguments(
+	userID,
+	cohortName, startConcept string,
+	startModifier *survival_analysis.SurvivalAnalysisParamsBodyStartModifier,
+	endConcept string,
+	endModifier *survival_analysis.SurvivalAnalysisParamsBodyEndModifier,
+) (
+	startConceptCode,
+	startModifierCode,
+	endConceptCode,
+	endModifierCode string,
+	cohort []int64, timers medcomodels.Timers,
+	err error,
+) {
 	timers = make(map[string]time.Duration)
 	// --- cohort patient list
 	timer := time.Now()
@@ -294,9 +344,27 @@ func prepareArguments(userID, cohortName, startConcept, endConcept string) (star
 		err = fmt.Errorf("while retrieving start concept code: %s", err.Error())
 		return
 	}
+	if startModifier == nil {
+		startModifierCode = "@"
+	} else {
+		startModifierCode, err = getModifierCode(*startModifier.ModifierKey, *startModifier.AppliedPath)
+	}
+	if err != nil {
+		err = fmt.Errorf("while retrieving start modifier code: %s", err.Error())
+		return
+	}
 	endConceptCode, err = getCode(endConcept)
 	if err != nil {
 		err = fmt.Errorf("while retrieving end concept code: %s", err.Error())
+		return
+	}
+	if endModifier == nil {
+		endModifierCode = "@"
+	} else {
+		endModifierCode, err = getModifierCode(*endModifier.ModifierKey, *endModifier.AppliedPath)
+	}
+	if err != nil {
+		err = fmt.Errorf("while retrieving end modifier code: %s", err.Error())
 		return
 	}
 	logrus.Info("got concept and modifier codes")
@@ -348,6 +416,7 @@ func expansion(timePoints medcomodels.TimePoints, timeLimitDay int, granularity 
 
 // getCode takes the full path of a I2B2 concept and returns its code
 func getCode(path string) (string, error) {
+	logrus.Debugf("get code concept path %s", path)
 	res, err := i2b2.GetOntologyConceptInfo(path)
 	if err != nil {
 		return "", err
@@ -359,9 +428,33 @@ func getCode(path string) (string, error) {
 	if res[0].Code == "" {
 		return "", errors.New("Code is empty")
 	}
+	logrus.Debugf("got concept code %s", res[0].Code)
 
 	return res[0].Code, nil
 
+}
+
+// getModifierPath takes the full path of a I2B2 modifier and its applied paht and returns its code
+func getModifierCode(path string, appliedPath string) (string, error) {
+	logrus.Debugf("get modifier code modifier path %s applied path %s", path, appliedPath)
+	res, err := i2b2.GetOntologyModifierInfo(path, appliedPath)
+	if err != nil {
+		return "", err
+	}
+
+	if len(res) != 1 {
+		return "", errors.Errorf("Result length of GetOntologyTermInfo is expected to be 1. Got: %d. "+
+			"Is applied path %s available for modifier key %s ?", len(res), appliedPath, path)
+	}
+	if res[0].Code == "" {
+		return "", errors.New("Code is empty")
+	}
+	if res[0].AppliedPath != appliedPath {
+		return "", fmt.Errorf("applied paths don't match. Is applied path %s available for modifier key %s ?", appliedPath, path)
+	}
+	logrus.Debugf("got modifier code %s", res[0].Code)
+
+	return res[0].Code, nil
 }
 
 // processGroupResult change resolution, expand and encrypt group result
