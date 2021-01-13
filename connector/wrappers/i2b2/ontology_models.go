@@ -77,7 +77,7 @@ func NewOntReqGetModifiersMessageBody(self string) Request {
 func NewOntReqGetModifierChildrenMessageBody(parent, appliedPath, appliedConcept string) Request {
 	body := OntReqGetModifierChildrenMessageBody{}
 
-	body.GetModifierChildren.Blob = "false"
+	body.GetModifierChildren.Blob = "true"
 	body.GetModifierChildren.Type = "limited"
 	body.GetModifierChildren.Max = "200"
 	body.GetModifierChildren.Synonyms = "false"
