@@ -125,7 +125,7 @@ func (postCohorts *PostCohorts) submitToNode(nodeIdx int) (*medco_node.PostCohor
 	*body.UpdateDate = updateDate.Format(time.RFC3339)
 	*body.PatientSetID = int64(postCohorts.patientSetID[nodeIdx])
 
-	params.SetCohortRequest(body)
+	params.SetCohortsRequest(body)
 	params.SetName(postCohorts.cohortName)
 
 	response, err := postCohorts.httpMedCoClients[nodeIdx].MedcoNode.PostCohorts(params, httptransport.BearerToken(postCohorts.authToken))

@@ -127,11 +127,6 @@ func CheckQueryID(userID string, queryID int) (bool, error) {
 
 }
 
-const getPatientList string = `
-SELECT clear_result_set FROM query_tools.explore_query_results
-WHERE query_id = (SELECT query_id FROM query_tools.saved_cohorts WHERE user_id = $1 AND cohort_name = $2 AND query_status = 'completed');
-`
-
 const insertExploreResultInstance string = `
 INSERT INTO query_tools.explore_query_results(user_id,query_name, query_status,query_definition)
 VALUES ($1,$2,'running',$3)

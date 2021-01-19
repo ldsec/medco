@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"time"
 
+	medcoserver "github.com/ldsec/medco/connector/server/explore"
+
 	querytoolsserver "github.com/ldsec/medco/connector/server/querytools"
 
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/ldsec/medco/connector/restapi/models"
 	"github.com/ldsec/medco/connector/restapi/server/operations/medco_node"
-	medcoserver "github.com/ldsec/medco/connector/server/explore"
 	utilserver "github.com/ldsec/medco/connector/util/server"
 	"github.com/ldsec/medco/connector/wrappers/i2b2"
 	"github.com/sirupsen/logrus"
@@ -143,7 +144,7 @@ func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *m
 	userID := principal.ID
 	cohorts, err := querytoolsserver.GetSavedCohorts(userID, int(*params.Limit))
 	if err != nil {
-		medco_node.NewGetCohortsDefault(500).WithPayload(&medco_node.GetCohortsDefaultBody{
+		return medco_node.NewGetCohortsDefault(500).WithPayload(&medco_node.GetCohortsDefaultBody{
 			Message: "Get cohort execution error: " + err.Error(),
 		})
 	}
@@ -164,10 +165,65 @@ func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *m
 
 }
 
+// MedCoNodePostCohortsPatientListHandler handles POST /medco/node/explore/cohorts/patientList  API endpoint
+func MedCoNodePostCohortsPatientListHandler(params medco_node.PostCohortsPatientListParams, principal *models.User) middleware.Responder {
+	body := params.CohortsPatientListRequest
+	authorizedQueryType, err := utilserver.FetchAuthorizedExploreQueryType(principal)
+	if err != nil {
+		return medco_node.NewPostCohortsPatientListForbidden().WithPayload(&medco_node.PostCohortsPatientListForbiddenBody{
+			Message: fmt.Sprintf("User %s is not authorized to use MedCo Explore", principal.ID),
+		})
+	}
+
+	// if the user is authorized to get the patient list in Explore Query, it is the same for getting list from saved cohorts
+	queryType, err := medcoserver.NewExploreQueryType(authorizedQueryType)
+	if err != nil {
+		return medco_node.NewPostCohortsPatientListNotFound().WithPayload(&medco_node.PostCohortsPatientListNotFoundBody{
+			Message: "Bad query type: " + err.Error(),
+		})
+	}
+
+	if !queryType.PatientList {
+		return medco_node.NewPostCohortsPatientListForbidden().WithPayload(&medco_node.PostCohortsPatientListForbiddenBody{
+			Message: fmt.Sprintf("User %s is not authorized to query patient lists", principal.ID),
+		})
+	}
+
+	// check if the cohort exists
+	doesExist, err := querytoolsserver.DoesCohortExist(principal.ID, *body.CohortName)
+	if err != nil {
+		return medco_node.NewPostCohortsPatientListDefault(500).WithPayload(&medco_node.PostCohortsPatientListDefaultBody{
+			Message: "DB error while checking if the cohort exists: " + err.Error(),
+		})
+	}
+	if !doesExist {
+		return medco_node.NewPostCohortsPatientListNotFound().WithPayload(&medco_node.PostCohortsPatientListNotFoundBody{
+			Message: fmt.Sprintf("No cohort named %s found for user %s", *body.CohortName, principal.ID),
+		})
+	}
+
+	// user is authorized and cohort exists
+	cohortsPatientList := querytoolsserver.NewCohortsPatientList(body.ID, *body.UserPublicKey, *body.CohortName, principal)
+
+	err = cohortsPatientList.Execute()
+	if err != nil {
+		return medco_node.NewPostCohortsPatientListDefault(500).WithPayload(&medco_node.PostCohortsPatientListDefaultBody{
+			Message: "During execution of cohorts patient list: " + err.Error(),
+		})
+	}
+
+	payload := &medco_node.PostCohortsPatientListOKBody{
+		Results: cohortsPatientList.Result.EncPatientList,
+		Timers:  cohortsPatientList.Result.Timers.TimersToAPIModel(),
+	}
+	return medco_node.NewPostCohortsPatientListOK().WithPayload(payload)
+
+}
+
 // MedCoNodePostCohortsHandler handles POST /medco/node/explore/cohorts  API endpoint
 func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal *models.User) middleware.Responder {
 
-	cohort := params.CohortRequest
+	cohort := params.CohortsRequest
 	cohortName := params.Name
 
 	hasID, err := querytoolsserver.CheckQueryID(principal.ID, int(*cohort.PatientSetID))
@@ -218,7 +274,7 @@ func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal 
 // MedCoNodePutCohortsHandler handles PUT /medco/node/explore/cohorts  API endpoint
 func MedCoNodePutCohortsHandler(params medco_node.PutCohortsParams, principal *models.User) middleware.Responder {
 
-	cohort := params.CohortRequest
+	cohort := params.CohortsRequest
 	cohortName := params.Name
 
 	hasID, err := querytoolsserver.CheckQueryID(principal.ID, int(*cohort.PatientSetID))

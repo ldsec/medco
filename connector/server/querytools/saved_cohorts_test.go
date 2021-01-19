@@ -15,25 +15,39 @@ func init() {
 }
 
 func TestGetPatientList(t *testing.T) {
+	const expectedPatientNumber = 228
 	utilserver.TestDBConnection(t)
 
 	pList, err := GetPatientList("test", "testCohort")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(pList) != 228 {
-		t.Fatalf("Expected 228 patients, got: %d", len(pList))
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, expectedPatientNumber, len(pList))
 
+	_, err = GetPatientList("thisUserDoesNotExist", "testCohort")
+	assert.Error(t, err)
+	_, err = GetPatientList("test", "thisCohortDoesNotExist")
+	assert.Error(t, err)
+
+}
+
+func TestGetI2b2NonEncryptedSetID(t *testing.T) {
+	const expectedSetID = int64(-1)
+	utilserver.TestDBConnection(t)
+
+	I2b2SetID, err := GetI2b2NonEncryptedSetID("test", "testCohort")
+	assert.NoError(t, err)
+	assert.Equal(t, expectedSetID, I2b2SetID)
+
+	_, err = GetI2b2NonEncryptedSetID("thisUserDoesNotExist", "testCohort")
+	assert.Error(t, err)
+	_, err = GetI2b2NonEncryptedSetID("test", "thisCohortDoesNotExist")
+	assert.Error(t, err)
 }
 
 func TestGetSavedCohorts(t *testing.T) {
 	utilserver.TestDBConnection(t)
 
 	cohorts, err := GetSavedCohorts("test", 0)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.NoError(t, err)
 	assert.Equal(t, true, len(cohorts) > 0)
 	//change user_id
 
@@ -50,9 +64,7 @@ func TestGetDate(t *testing.T) {
 		t.Fatal(err)
 	}
 	expectedDate, err := time.Parse(time.RFC3339, "2020-08-25T13:57:00Z")
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.NoError(t, err)
 	assert.Equal(t, expectedDate, updateDate)
 
 	//change cohort_id

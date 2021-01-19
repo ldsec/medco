@@ -413,6 +413,9 @@ parameters:
     schema:
       type: "object"
       properties:
+        id:
+          type: "string"
+          pattern: '^[\w:-]+$'
         cohortName:
           type: "string"
           pattern: '^\w+$'

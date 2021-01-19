@@ -46,6 +46,28 @@ func GetPatientList(userID string, cohortName string) (patientNums []int64, err 
 	return
 }
 
+// GetI2b2NonEncryptedSetID runs a SQL query on db and returns the list of patient IDs for given queryID and userID
+func GetI2b2NonEncryptedSetID(userID string, cohortName string) (i2b2SetID int64, err error) {
+	logrus.Debugf("selecting user ID %s, cohort name ID %s", userID, cohortName)
+	logrus.Debugf("SQL: %s", getI2b2NonEncryptedSetID)
+	row := utilserver.DBConnection.QueryRow(getI2b2NonEncryptedSetID, userID, cohortName)
+	i2b2SetNumString := new(string)
+	err = row.Scan(i2b2SetNumString)
+	if err != nil {
+		err = fmt.Errorf("while scanning SQL record: %s", err.Error())
+		return
+	}
+	logrus.Debug("successfully selected")
+	logrus.Tracef("Got response %s", *i2b2SetNumString)
+
+	i2b2SetID, err = strconv.ParseInt(*i2b2SetNumString, 10, 64)
+	if err != nil {
+		err = fmt.Errorf("while parsing patient ID \"%s\": %s", *i2b2SetNumString, err.Error())
+		return
+	}
+	return
+}
+
 // GetSavedCohorts runs a SQL query on db and returns the list of saved cohorts for given queryID and userID
 func GetSavedCohorts(userID string, limit int) ([]medcomodels.Cohort, error) {
 	var rows *sql.Rows
@@ -198,6 +220,16 @@ func RemoveCohort(userID, cohortName string) error {
 	logrus.Debug("successfully deleted")
 	return nil
 }
+
+const getPatientList string = `
+SELECT clear_result_set FROM query_tools.explore_query_results
+WHERE query_id = (SELECT query_id FROM query_tools.saved_cohorts WHERE user_id = $1 AND cohort_name = $2 AND query_status = 'completed');
+`
+
+const getI2b2NonEncryptedSetID string = `
+SELECT i2b2_non_encrypted_patient_set_id FROM query_tools.explore_query_results
+WHERE query_id = (SELECT query_id FROM query_tools.saved_cohorts WHERE user_id = $1 AND cohort_name = $2 AND query_status = 'completed');
+`
 
 const insertCohort string = `
 INSERT INTO query_tools.saved_cohorts(user_id,query_id,cohort_name,create_date,update_date)
