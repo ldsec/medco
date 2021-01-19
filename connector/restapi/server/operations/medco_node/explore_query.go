@@ -6,6 +6,7 @@ package medco_node
 // Editing this file might prove futile when you re-run the generate command
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/go-openapi/errors"
@@ -35,7 +36,7 @@ func NewExploreQuery(ctx *middleware.Context, handler ExploreQueryHandler) *Expl
 	return &ExploreQuery{Context: ctx, Handler: handler}
 }
 
-/*ExploreQuery swagger:route POST /node/explore/query medco-node exploreQuery
+/* ExploreQuery swagger:route POST /node/explore/query medco-node exploreQuery
 
 MedCo-Explore query to the node.
 
@@ -51,7 +52,6 @@ func (o *ExploreQuery) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		r = rCtx
 	}
 	var Params = NewExploreQueryParams()
-
 	uprinc, aCtx, err := o.Context.Authorize(r, route)
 	if err != nil {
 		o.Context.Respond(rw, r, route.Produces, route, err)
@@ -71,7 +71,6 @@ func (o *ExploreQuery) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	res := o.Handler.Handle(Params, principal) // actually handle the request
-
 	o.Context.Respond(rw, r, route.Produces, route, res)
 
 }
@@ -108,12 +107,11 @@ func (o *ExploreQueryBody) Validate(formats strfmt.Registry) error {
 }
 
 func (o *ExploreQueryBody) validateID(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.ID) { // not required
 		return nil
 	}
 
-	if err := validate.Pattern("queryRequest"+"."+"id", "body", string(o.ID), `^[\w:-]+$`); err != nil {
+	if err := validate.Pattern("queryRequest"+"."+"id", "body", o.ID, `^[\w:-]+$`); err != nil {
 		return err
 	}
 
@@ -121,13 +119,40 @@ func (o *ExploreQueryBody) validateID(formats strfmt.Registry) error {
 }
 
 func (o *ExploreQueryBody) validateQuery(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Query) { // not required
 		return nil
 	}
 
 	if o.Query != nil {
 		if err := o.Query.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("queryRequest" + "." + "query")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ContextValidate validate this explore query body based on the context it is used
+func (o *ExploreQueryBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.contextValidateQuery(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *ExploreQueryBody) contextValidateQuery(ctx context.Context, formats strfmt.Registry) error {
+
+	if o.Query != nil {
+		if err := o.Query.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("queryRequest" + "." + "query")
 			}
@@ -167,6 +192,11 @@ type ExploreQueryDefaultBody struct {
 
 // Validate validates this explore query default body
 func (o *ExploreQueryDefaultBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this explore query default body based on context it is used
+func (o *ExploreQueryDefaultBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -222,7 +252,6 @@ func (o *ExploreQueryOKBody) Validate(formats strfmt.Registry) error {
 }
 
 func (o *ExploreQueryOKBody) validateQuery(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Query) { // not required
 		return nil
 	}
@@ -240,13 +269,58 @@ func (o *ExploreQueryOKBody) validateQuery(formats strfmt.Registry) error {
 }
 
 func (o *ExploreQueryOKBody) validateResult(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Result) { // not required
 		return nil
 	}
 
 	if o.Result != nil {
 		if err := o.Result.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("exploreQueryOK" + "." + "result")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ContextValidate validate this explore query o k body based on the context it is used
+func (o *ExploreQueryOKBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.contextValidateQuery(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.contextValidateResult(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *ExploreQueryOKBody) contextValidateQuery(ctx context.Context, formats strfmt.Registry) error {
+
+	if o.Query != nil {
+		if err := o.Query.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("exploreQueryOK" + "." + "query")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *ExploreQueryOKBody) contextValidateResult(ctx context.Context, formats strfmt.Registry) error {
+
+	if o.Result != nil {
+		if err := o.Result.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("exploreQueryOK" + "." + "result")
 			}

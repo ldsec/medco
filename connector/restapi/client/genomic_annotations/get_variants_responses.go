@@ -6,6 +6,7 @@ package genomic_annotations
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"fmt"
 	"io"
 
@@ -51,7 +52,7 @@ func NewGetVariantsOK() *GetVariantsOK {
 	return &GetVariantsOK{}
 }
 
-/*GetVariantsOK handles this case with default header values.
+/* GetVariantsOK describes a response with status code 200, with default header values.
 
 Queried variants.
 */
@@ -62,7 +63,6 @@ type GetVariantsOK struct {
 func (o *GetVariantsOK) Error() string {
 	return fmt.Sprintf("[GET /genomic-annotations/{annotation}/{value}][%d] getVariantsOK  %+v", 200, o.Payload)
 }
-
 func (o *GetVariantsOK) GetPayload() []string {
 	return o.Payload
 }
@@ -82,7 +82,7 @@ func NewGetVariantsNotFound() *GetVariantsNotFound {
 	return &GetVariantsNotFound{}
 }
 
-/*GetVariantsNotFound handles this case with default header values.
+/* GetVariantsNotFound describes a response with status code 404, with default header values.
 
 Annotation or annotation value not found.
 */
@@ -105,7 +105,7 @@ func NewGetVariantsDefault(code int) *GetVariantsDefault {
 	}
 }
 
-/*GetVariantsDefault handles this case with default header values.
+/* GetVariantsDefault describes a response with status code -1, with default header values.
 
 Error response.
 */
@@ -123,7 +123,6 @@ func (o *GetVariantsDefault) Code() int {
 func (o *GetVariantsDefault) Error() string {
 	return fmt.Sprintf("[GET /genomic-annotations/{annotation}/{value}][%d] getVariants default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *GetVariantsDefault) GetPayload() *GetVariantsDefaultBody {
 	return o.Payload
 }
@@ -151,6 +150,11 @@ type GetVariantsDefaultBody struct {
 
 // Validate validates this get variants default body
 func (o *GetVariantsDefaultBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this get variants default body based on context it is used
+func (o *GetVariantsDefaultBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

@@ -35,6 +35,8 @@ type ClientService interface {
 
 	GetCohorts(params *GetCohortsParams, authInfo runtime.ClientAuthInfoWriter) (*GetCohortsOK, error)
 
+	GetCohortsPatientList(params *GetCohortsPatientListParams, authInfo runtime.ClientAuthInfoWriter) (*GetCohortsPatientListOK, error)
+
 	GetExploreQuery(params *GetExploreQueryParams, authInfo runtime.ClientAuthInfoWriter) (*GetExploreQueryOK, error)
 
 	PostCohorts(params *PostCohortsParams, authInfo runtime.ClientAuthInfoWriter) (*PostCohortsOK, error)
@@ -211,6 +213,40 @@ func (a *Client) GetCohorts(params *GetCohortsParams, authInfo runtime.ClientAut
 	}
 	// unexpected success response
 	unexpectedSuccess := result.(*GetCohortsDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+  GetCohortsPatientList retrieves the encrypted patient list for a given cohort name
+*/
+func (a *Client) GetCohortsPatientList(params *GetCohortsPatientListParams, authInfo runtime.ClientAuthInfoWriter) (*GetCohortsPatientListOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetCohortsPatientListParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getCohortsPatientList",
+		Method:             "GET",
+		PathPattern:        "/node/explore/cohorts/patientList",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &GetCohortsPatientListReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetCohortsPatientListOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*GetCohortsPatientListDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 

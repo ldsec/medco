@@ -16,64 +16,79 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewPutCohortsParams creates a new PutCohortsParams object
-// with the default values initialized.
+// NewPutCohortsParams creates a new PutCohortsParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewPutCohortsParams() *PutCohortsParams {
-	var ()
 	return &PutCohortsParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewPutCohortsParamsWithTimeout creates a new PutCohortsParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewPutCohortsParamsWithTimeout(timeout time.Duration) *PutCohortsParams {
-	var ()
 	return &PutCohortsParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewPutCohortsParamsWithContext creates a new PutCohortsParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewPutCohortsParamsWithContext(ctx context.Context) *PutCohortsParams {
-	var ()
 	return &PutCohortsParams{
-
 		Context: ctx,
 	}
 }
 
 // NewPutCohortsParamsWithHTTPClient creates a new PutCohortsParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewPutCohortsParamsWithHTTPClient(client *http.Client) *PutCohortsParams {
-	var ()
 	return &PutCohortsParams{
 		HTTPClient: client,
 	}
 }
 
-/*PutCohortsParams contains all the parameters to send to the API endpoint
-for the put cohorts operation typically these are written to a http.Request
+/* PutCohortsParams contains all the parameters to send to the API endpoint
+   for the put cohorts operation.
+
+   Typically these are written to a http.Request.
 */
 type PutCohortsParams struct {
 
-	/*CohortRequest
-	  Cohort that has been updated or created
+	/* CohortRequest.
 
+	   Cohort that has been updated or created
 	*/
 	CohortRequest PutCohortsBody
-	/*Name
-	  Name of the cohort to update
 
+	/* Name.
+
+	   Name of the cohort to update
 	*/
 	Name string
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the put cohorts params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *PutCohortsParams) WithDefaults() *PutCohortsParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the put cohorts params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *PutCohortsParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the put cohorts params
@@ -138,7 +153,6 @@ func (o *PutCohortsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Re
 		return err
 	}
 	var res []error
-
 	if err := r.SetBodyParam(o.CohortRequest); err != nil {
 		return err
 	}

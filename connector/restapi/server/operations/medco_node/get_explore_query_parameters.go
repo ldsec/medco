@@ -14,7 +14,8 @@ import (
 )
 
 // NewGetExploreQueryParams creates a new GetExploreQueryParams object
-// no default values defined in spec.
+//
+// There are no default values defined in the spec.
 func NewGetExploreQueryParams() GetExploreQueryParams {
 
 	return GetExploreQueryParams{}
@@ -49,7 +50,6 @@ func (o *GetExploreQueryParams) BindRequest(r *http.Request, route *middleware.M
 	if err := o.bindQueryID(rQueryID, rhkQueryID, route.Formats); err != nil {
 		res = append(res, err)
 	}
-
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
@@ -65,7 +65,6 @@ func (o *GetExploreQueryParams) bindQueryID(rawData []string, hasKey bool, forma
 
 	// Required: true
 	// Parameter is provided by construction from the route
-
 	o.QueryID = raw
 
 	return nil

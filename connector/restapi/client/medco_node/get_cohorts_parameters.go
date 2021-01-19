@@ -17,71 +17,86 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// NewGetCohortsParams creates a new GetCohortsParams object
-// with the default values initialized.
+// NewGetCohortsParams creates a new GetCohortsParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewGetCohortsParams() *GetCohortsParams {
-	var (
-		limitDefault = int64(10)
-	)
 	return &GetCohortsParams{
-		Limit: &limitDefault,
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetCohortsParamsWithTimeout creates a new GetCohortsParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewGetCohortsParamsWithTimeout(timeout time.Duration) *GetCohortsParams {
-	var (
-		limitDefault = int64(10)
-	)
 	return &GetCohortsParams{
-		Limit: &limitDefault,
-
 		timeout: timeout,
 	}
 }
 
 // NewGetCohortsParamsWithContext creates a new GetCohortsParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewGetCohortsParamsWithContext(ctx context.Context) *GetCohortsParams {
-	var (
-		limitDefault = int64(10)
-	)
 	return &GetCohortsParams{
-		Limit: &limitDefault,
-
 		Context: ctx,
 	}
 }
 
 // NewGetCohortsParamsWithHTTPClient creates a new GetCohortsParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewGetCohortsParamsWithHTTPClient(client *http.Client) *GetCohortsParams {
-	var (
-		limitDefault = int64(10)
-	)
 	return &GetCohortsParams{
-		Limit:      &limitDefault,
 		HTTPClient: client,
 	}
 }
 
-/*GetCohortsParams contains all the parameters to send to the API endpoint
-for the get cohorts operation typically these are written to a http.Request
+/* GetCohortsParams contains all the parameters to send to the API endpoint
+   for the get cohorts operation.
+
+   Typically these are written to a http.Request.
 */
 type GetCohortsParams struct {
 
-	/*Limit
-	  Limits the number of records retrieved. If the provided value is 0, there is no limit.
+	/* Limit.
 
+	   Limits the number of records retrieved. If the provided value is 0, there is no limit.
+
+	   Default: 10
 	*/
 	Limit *int64
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the get cohorts params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetCohortsParams) WithDefaults() *GetCohortsParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the get cohorts params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetCohortsParams) SetDefaults() {
+	var (
+		limitDefault = int64(10)
+	)
+
+	val := GetCohortsParams{
+		Limit: &limitDefault,
+	}
+
+	val.timeout = o.timeout
+	val.Context = o.Context
+	val.HTTPClient = o.HTTPClient
+	*o = val
 }
 
 // WithTimeout adds the timeout to the get cohorts params
@@ -140,16 +155,17 @@ func (o *GetCohortsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Re
 
 		// query param limit
 		var qrLimit int64
+
 		if o.Limit != nil {
 			qrLimit = *o.Limit
 		}
 		qLimit := swag.FormatInt64(qrLimit)
 		if qLimit != "" {
+
 			if err := r.SetQueryParam("limit", qLimit); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if len(res) > 0 {

@@ -6,6 +6,7 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/go-openapi/errors"
@@ -20,17 +21,17 @@ type RestAPIAuthorization string
 
 const (
 
-	// RestAPIAuthorizationMedcoNetwork captures enum value "medco-network"
-	RestAPIAuthorizationMedcoNetwork RestAPIAuthorization = "medco-network"
+	// RestAPIAuthorizationMedcoDashNetwork captures enum value "medco-network"
+	RestAPIAuthorizationMedcoDashNetwork RestAPIAuthorization = "medco-network"
 
-	// RestAPIAuthorizationMedcoExplore captures enum value "medco-explore"
-	RestAPIAuthorizationMedcoExplore RestAPIAuthorization = "medco-explore"
+	// RestAPIAuthorizationMedcoDashExplore captures enum value "medco-explore"
+	RestAPIAuthorizationMedcoDashExplore RestAPIAuthorization = "medco-explore"
 
-	// RestAPIAuthorizationMedcoGenomicAnnotations captures enum value "medco-genomic-annotations"
-	RestAPIAuthorizationMedcoGenomicAnnotations RestAPIAuthorization = "medco-genomic-annotations"
+	// RestAPIAuthorizationMedcoDashGenomicDashAnnotations captures enum value "medco-genomic-annotations"
+	RestAPIAuthorizationMedcoDashGenomicDashAnnotations RestAPIAuthorization = "medco-genomic-annotations"
 
-	// RestAPIAuthorizationMedcoSurvivalAnalysis captures enum value "medco-survival-analysis"
-	RestAPIAuthorizationMedcoSurvivalAnalysis RestAPIAuthorization = "medco-survival-analysis"
+	// RestAPIAuthorizationMedcoDashSurvivalDashAnalysis captures enum value "medco-survival-analysis"
+	RestAPIAuthorizationMedcoDashSurvivalDashAnalysis RestAPIAuthorization = "medco-survival-analysis"
 )
 
 // for schema
@@ -65,5 +66,10 @@ func (m RestAPIAuthorization) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+// ContextValidate validates this rest Api authorization based on context it is used
+func (m RestAPIAuthorization) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }

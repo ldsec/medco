@@ -6,6 +6,7 @@ package medco_node
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"fmt"
 	"io"
 
@@ -45,7 +46,7 @@ func NewGetCohortsOK() *GetCohortsOK {
 	return &GetCohortsOK{}
 }
 
-/*GetCohortsOK handles this case with default header values.
+/* GetCohortsOK describes a response with status code 200, with default header values.
 
 Queried cohorts
 */
@@ -56,7 +57,6 @@ type GetCohortsOK struct {
 func (o *GetCohortsOK) Error() string {
 	return fmt.Sprintf("[GET /node/explore/cohorts][%d] getCohortsOK  %+v", 200, o.Payload)
 }
-
 func (o *GetCohortsOK) GetPayload() []*GetCohortsOKBodyItems0 {
 	return o.Payload
 }
@@ -78,7 +78,7 @@ func NewGetCohortsDefault(code int) *GetCohortsDefault {
 	}
 }
 
-/*GetCohortsDefault handles this case with default header values.
+/* GetCohortsDefault describes a response with status code -1, with default header values.
 
 Error response.
 */
@@ -96,7 +96,6 @@ func (o *GetCohortsDefault) Code() int {
 func (o *GetCohortsDefault) Error() string {
 	return fmt.Sprintf("[GET /node/explore/cohorts][%d] getCohorts default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *GetCohortsDefault) GetPayload() *GetCohortsDefaultBody {
 	return o.Payload
 }
@@ -124,6 +123,11 @@ type GetCohortsDefaultBody struct {
 
 // Validate validates this get cohorts default body
 func (o *GetCohortsDefaultBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this get cohorts default body based on context it is used
+func (o *GetCohortsDefaultBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -168,6 +172,11 @@ type GetCohortsOKBodyItems0 struct {
 
 // Validate validates this get cohorts o k body items0
 func (o *GetCohortsOKBodyItems0) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this get cohorts o k body items0 based on context it is used
+func (o *GetCohortsOKBodyItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

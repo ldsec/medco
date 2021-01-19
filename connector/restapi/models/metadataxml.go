@@ -6,6 +6,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
+
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
@@ -35,13 +37,40 @@ func (m *Metadataxml) Validate(formats strfmt.Registry) error {
 }
 
 func (m *Metadataxml) validateValueMetadata(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.ValueMetadata) { // not required
 		return nil
 	}
 
 	if m.ValueMetadata != nil {
 		if err := m.ValueMetadata.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("ValueMetadata")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ContextValidate validate this metadataxml based on the context it is used
+func (m *Metadataxml) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateValueMetadata(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *Metadataxml) contextValidateValueMetadata(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.ValueMetadata != nil {
+		if err := m.ValueMetadata.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("ValueMetadata")
 			}
@@ -127,13 +156,40 @@ func (m *MetadataxmlValueMetadata) Validate(formats strfmt.Registry) error {
 }
 
 func (m *MetadataxmlValueMetadata) validateUnitValues(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.UnitValues) { // not required
 		return nil
 	}
 
 	if m.UnitValues != nil {
 		if err := m.UnitValues.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("ValueMetadata" + "." + "UnitValues")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ContextValidate validate this metadataxml value metadata based on the context it is used
+func (m *MetadataxmlValueMetadata) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateUnitValues(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *MetadataxmlValueMetadata) contextValidateUnitValues(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.UnitValues != nil {
+		if err := m.UnitValues.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("ValueMetadata" + "." + "UnitValues")
 			}

@@ -6,6 +6,7 @@ package medco_node
 // Editing this file might prove futile when you re-run the generate command
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 
@@ -35,7 +36,7 @@ func NewExploreSearchModifier(ctx *middleware.Context, handler ExploreSearchModi
 	return &ExploreSearchModifier{Context: ctx, Handler: handler}
 }
 
-/*ExploreSearchModifier swagger:route POST /node/explore/search/modifier medco-node exploreSearchModifier
+/* ExploreSearchModifier swagger:route POST /node/explore/search/modifier medco-node exploreSearchModifier
 
 Returns info about the modifier and its children
 
@@ -51,7 +52,6 @@ func (o *ExploreSearchModifier) ServeHTTP(rw http.ResponseWriter, r *http.Reques
 		r = rCtx
 	}
 	var Params = NewExploreSearchModifierParams()
-
 	uprinc, aCtx, err := o.Context.Authorize(r, route)
 	if err != nil {
 		o.Context.Respond(rw, r, route.Produces, route, err)
@@ -71,7 +71,6 @@ func (o *ExploreSearchModifier) ServeHTTP(rw http.ResponseWriter, r *http.Reques
 	}
 
 	res := o.Handler.Handle(Params, principal) // actually handle the request
-
 	o.Context.Respond(rw, r, route.Produces, route, res)
 
 }
@@ -87,6 +86,11 @@ type ExploreSearchModifierDefaultBody struct {
 
 // Validate validates this explore search modifier default body
 func (o *ExploreSearchModifierDefaultBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this explore search modifier default body based on context it is used
+func (o *ExploreSearchModifierDefaultBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -139,7 +143,6 @@ func (o *ExploreSearchModifierOKBody) Validate(formats strfmt.Registry) error {
 }
 
 func (o *ExploreSearchModifierOKBody) validateResults(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Results) { // not required
 		return nil
 	}
@@ -164,13 +167,62 @@ func (o *ExploreSearchModifierOKBody) validateResults(formats strfmt.Registry) e
 }
 
 func (o *ExploreSearchModifierOKBody) validateSearch(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Search) { // not required
 		return nil
 	}
 
 	if o.Search != nil {
 		if err := o.Search.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("exploreSearchModifierOK" + "." + "search")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ContextValidate validate this explore search modifier o k body based on the context it is used
+func (o *ExploreSearchModifierOKBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.contextValidateResults(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.contextValidateSearch(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *ExploreSearchModifierOKBody) contextValidateResults(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(o.Results); i++ {
+
+		if o.Results[i] != nil {
+			if err := o.Results[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("exploreSearchModifierOK" + "." + "results" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (o *ExploreSearchModifierOKBody) contextValidateSearch(ctx context.Context, formats strfmt.Registry) error {
+
+	if o.Search != nil {
+		if err := o.Search.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("exploreSearchModifierOK" + "." + "search")
 			}

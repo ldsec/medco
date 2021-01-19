@@ -264,6 +264,36 @@ func init() {
         }
       }
     },
+    "/node/explore/cohorts/patientList": {
+      "get": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
+        ],
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Retrieve the encrypted patient list for a given cohort name",
+        "operationId": "getCohortsPatientList",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/getCohortsPatientListResponse"
+          },
+          "403": {
+            "$ref": "#/responses/forbiddenResponse"
+          },
+          "404": {
+            "$ref": "#/responses/notFoundResponse"
+          },
+          "default": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      }
+    },
     "/node/explore/cohorts/{name}": {
       "put": {
         "security": [
@@ -1164,6 +1194,34 @@ func init() {
         }
       }
     },
+    "forbiddenResponse": {
+      "description": "Request is valid and user is authenticated, but not authorized to perform this action.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "getCohortsPatientListResponse": {
+      "description": "Queried patient list",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "timers": {
+            "$ref": "#/definitions/timers"
+          }
+        }
+      }
+    },
     "getCohortsResponse": {
       "description": "Queried cohorts",
       "schema": {
@@ -1292,6 +1350,7 @@ func init() {
       "description": "MedCo JWT token.",
       "type": "oauth2",
       "flow": "application",
+      "authorizationUrl": "",
       "tokenUrl": "https://medco-demo.epfl.ch/auth"
     }
   },
@@ -1744,6 +1803,74 @@ func init() {
               "type": "array",
               "items": {
                 "$ref": "#/definitions/GetCohortsOKBodyItems0"
+              }
+            }
+          },
+          "default": {
+            "description": "Error response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/node/explore/cohorts/patientList": {
+      "get": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
+        ],
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Retrieve the encrypted patient list for a given cohort name",
+        "operationId": "getCohortsPatientList",
+        "responses": {
+          "200": {
+            "description": "Queried patient list",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "timers": {
+                  "$ref": "#/definitions/timers"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Request is valid and user is authenticated, but not authorized to perform this action.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
               }
             }
           },
@@ -3140,6 +3267,34 @@ func init() {
         }
       }
     },
+    "forbiddenResponse": {
+      "description": "Request is valid and user is authenticated, but not authorized to perform this action.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "getCohortsPatientListResponse": {
+      "description": "Queried patient list",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "timers": {
+            "$ref": "#/definitions/timers"
+          }
+        }
+      }
+    },
     "getCohortsResponse": {
       "description": "Queried cohorts",
       "schema": {
@@ -3268,6 +3423,7 @@ func init() {
       "description": "MedCo JWT token.",
       "type": "oauth2",
       "flow": "application",
+      "authorizationUrl": "",
       "tokenUrl": "https://medco-demo.epfl.ch/auth"
     }
   },

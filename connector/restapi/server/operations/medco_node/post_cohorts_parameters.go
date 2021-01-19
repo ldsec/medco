@@ -6,6 +6,7 @@ package medco_node
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"io"
 	"net/http"
 
@@ -17,7 +18,8 @@ import (
 )
 
 // NewPostCohortsParams creates a new PostCohortsParams object
-// no default values defined in spec.
+//
+// There are no default values defined in the spec.
 func NewPostCohortsParams() PostCohortsParams {
 
 	return PostCohortsParams{}
@@ -69,6 +71,11 @@ func (o *PostCohortsParams) BindRequest(r *http.Request, route *middleware.Match
 				res = append(res, err)
 			}
 
+			ctx := validate.WithOperationRequest(context.Background())
+			if err := body.ContextValidate(ctx, route.Formats); err != nil {
+				res = append(res, err)
+			}
+
 			if len(res) == 0 {
 				o.CohortRequest = body
 			}
@@ -76,11 +83,11 @@ func (o *PostCohortsParams) BindRequest(r *http.Request, route *middleware.Match
 	} else {
 		res = append(res, errors.Required("cohortRequest", "body", ""))
 	}
+
 	rName, rhkName, _ := route.Params.GetOK("name")
 	if err := o.bindName(rName, rhkName, route.Formats); err != nil {
 		res = append(res, err)
 	}
-
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
@@ -96,7 +103,6 @@ func (o *PostCohortsParams) bindName(rawData []string, hasKey bool, formats strf
 
 	// Required: true
 	// Parameter is provided by construction from the route
-
 	o.Name = raw
 
 	if err := o.validateName(formats); err != nil {

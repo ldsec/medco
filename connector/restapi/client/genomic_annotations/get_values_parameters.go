@@ -17,81 +17,98 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// NewGetValuesParams creates a new GetValuesParams object
-// with the default values initialized.
+// NewGetValuesParams creates a new GetValuesParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewGetValuesParams() *GetValuesParams {
-	var (
-		limitDefault = int64(10)
-	)
 	return &GetValuesParams{
-		Limit: &limitDefault,
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetValuesParamsWithTimeout creates a new GetValuesParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewGetValuesParamsWithTimeout(timeout time.Duration) *GetValuesParams {
-	var (
-		limitDefault = int64(10)
-	)
 	return &GetValuesParams{
-		Limit: &limitDefault,
-
 		timeout: timeout,
 	}
 }
 
 // NewGetValuesParamsWithContext creates a new GetValuesParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewGetValuesParamsWithContext(ctx context.Context) *GetValuesParams {
-	var (
-		limitDefault = int64(10)
-	)
 	return &GetValuesParams{
-		Limit: &limitDefault,
-
 		Context: ctx,
 	}
 }
 
 // NewGetValuesParamsWithHTTPClient creates a new GetValuesParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewGetValuesParamsWithHTTPClient(client *http.Client) *GetValuesParams {
-	var (
-		limitDefault = int64(10)
-	)
 	return &GetValuesParams{
-		Limit:      &limitDefault,
 		HTTPClient: client,
 	}
 }
 
-/*GetValuesParams contains all the parameters to send to the API endpoint
-for the get values operation typically these are written to a http.Request
+/* GetValuesParams contains all the parameters to send to the API endpoint
+   for the get values operation.
+
+   Typically these are written to a http.Request.
 */
 type GetValuesParams struct {
 
-	/*Annotation
-	  Genomic annotation name.
+	/* Annotation.
 
+	   Genomic annotation name.
 	*/
 	Annotation string
-	/*Limit
-	  Limits the number of records retrieved.
 
+	/* Limit.
+
+	   Limits the number of records retrieved.
+
+	   Default: 10
 	*/
 	Limit *int64
-	/*Value
-	  Genomic annotation value.
 
+	/* Value.
+
+	   Genomic annotation value.
 	*/
 	Value string
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the get values params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetValuesParams) WithDefaults() *GetValuesParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the get values params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetValuesParams) SetDefaults() {
+	var (
+		limitDefault = int64(10)
+	)
+
+	val := GetValuesParams{
+		Limit: &limitDefault,
+	}
+
+	val.timeout = o.timeout
+	val.Context = o.Context
+	val.HTTPClient = o.HTTPClient
+	*o = val
 }
 
 // WithTimeout adds the timeout to the get values params
@@ -177,22 +194,24 @@ func (o *GetValuesParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Reg
 
 		// query param limit
 		var qrLimit int64
+
 		if o.Limit != nil {
 			qrLimit = *o.Limit
 		}
 		qLimit := swag.FormatInt64(qrLimit)
 		if qLimit != "" {
+
 			if err := r.SetQueryParam("limit", qLimit); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	// query param value
 	qrValue := o.Value
 	qValue := qrValue
 	if qValue != "" {
+
 		if err := r.SetQueryParam("value", qValue); err != nil {
 			return err
 		}

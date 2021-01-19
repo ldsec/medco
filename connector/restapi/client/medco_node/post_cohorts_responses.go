@@ -6,6 +6,7 @@ package medco_node
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"fmt"
 	"io"
 
@@ -65,7 +66,7 @@ func NewPostCohortsOK() *PostCohortsOK {
 	return &PostCohortsOK{}
 }
 
-/*PostCohortsOK handles this case with default header values.
+/* PostCohortsOK describes a response with status code 200, with default header values.
 
 Updated cohort
 */
@@ -86,7 +87,7 @@ func NewPostCohortsBadRequest() *PostCohortsBadRequest {
 	return &PostCohortsBadRequest{}
 }
 
-/*PostCohortsBadRequest handles this case with default header values.
+/* PostCohortsBadRequest describes a response with status code 400, with default header values.
 
 Bad user input in request.
 */
@@ -97,7 +98,6 @@ type PostCohortsBadRequest struct {
 func (o *PostCohortsBadRequest) Error() string {
 	return fmt.Sprintf("[POST /node/explore/cohorts/{name}][%d] postCohortsBadRequest  %+v", 400, o.Payload)
 }
-
 func (o *PostCohortsBadRequest) GetPayload() *PostCohortsBadRequestBody {
 	return o.Payload
 }
@@ -119,7 +119,7 @@ func NewPostCohortsNotFound() *PostCohortsNotFound {
 	return &PostCohortsNotFound{}
 }
 
-/*PostCohortsNotFound handles this case with default header values.
+/* PostCohortsNotFound describes a response with status code 404, with default header values.
 
 Not found.
 */
@@ -130,7 +130,6 @@ type PostCohortsNotFound struct {
 func (o *PostCohortsNotFound) Error() string {
 	return fmt.Sprintf("[POST /node/explore/cohorts/{name}][%d] postCohortsNotFound  %+v", 404, o.Payload)
 }
-
 func (o *PostCohortsNotFound) GetPayload() *PostCohortsNotFoundBody {
 	return o.Payload
 }
@@ -152,7 +151,7 @@ func NewPostCohortsConflict() *PostCohortsConflict {
 	return &PostCohortsConflict{}
 }
 
-/*PostCohortsConflict handles this case with default header values.
+/* PostCohortsConflict describes a response with status code 409, with default header values.
 
 Conflict with resource's state.
 */
@@ -163,7 +162,6 @@ type PostCohortsConflict struct {
 func (o *PostCohortsConflict) Error() string {
 	return fmt.Sprintf("[POST /node/explore/cohorts/{name}][%d] postCohortsConflict  %+v", 409, o.Payload)
 }
-
 func (o *PostCohortsConflict) GetPayload() *PostCohortsConflictBody {
 	return o.Payload
 }
@@ -187,7 +185,7 @@ func NewPostCohortsDefault(code int) *PostCohortsDefault {
 	}
 }
 
-/*PostCohortsDefault handles this case with default header values.
+/* PostCohortsDefault describes a response with status code -1, with default header values.
 
 Error response.
 */
@@ -205,7 +203,6 @@ func (o *PostCohortsDefault) Code() int {
 func (o *PostCohortsDefault) Error() string {
 	return fmt.Sprintf("[POST /node/explore/cohorts/{name}][%d] postCohorts default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *PostCohortsDefault) GetPayload() *PostCohortsDefaultBody {
 	return o.Payload
 }
@@ -233,6 +230,11 @@ type PostCohortsBadRequestBody struct {
 
 // Validate validates this post cohorts bad request body
 func (o *PostCohortsBadRequestBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this post cohorts bad request body based on context it is used
+func (o *PostCohortsBadRequestBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -321,6 +323,11 @@ func (o *PostCohortsBody) validateUpdateDate(formats strfmt.Registry) error {
 	return nil
 }
 
+// ContextValidate validates this post cohorts body based on context it is used
+func (o *PostCohortsBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
 // MarshalBinary interface implementation
 func (o *PostCohortsBody) MarshalBinary() ([]byte, error) {
 	if o == nil {
@@ -350,6 +357,11 @@ type PostCohortsConflictBody struct {
 
 // Validate validates this post cohorts conflict body
 func (o *PostCohortsConflictBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this post cohorts conflict body based on context it is used
+func (o *PostCohortsConflictBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -385,6 +397,11 @@ func (o *PostCohortsDefaultBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
+// ContextValidate validates this post cohorts default body based on context it is used
+func (o *PostCohortsDefaultBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
 // MarshalBinary interface implementation
 func (o *PostCohortsDefaultBody) MarshalBinary() ([]byte, error) {
 	if o == nil {
@@ -414,6 +431,11 @@ type PostCohortsNotFoundBody struct {
 
 // Validate validates this post cohorts not found body
 func (o *PostCohortsNotFoundBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this post cohorts not found body based on context it is used
+func (o *PostCohortsNotFoundBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

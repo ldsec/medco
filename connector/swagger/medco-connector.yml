@@ -327,6 +327,24 @@ paths:
       security:
         - medco-jwt: ["medco-explore"]
 
+  /node/explore/cohorts/patientList:
+    get:
+      tags:
+        - "medco-node"
+      summary: "Retrieve the encrypted patient list for a given cohort name"
+      operationId: "getCohortsPatientList"
+      responses:
+        200:
+          $ref: '#/responses/getCohortsPatientListResponse'
+        404:
+          $ref: '#/responses/notFoundResponse'
+        403:
+          $ref: '#/responses/forbiddenResponse'
+        default:
+          $ref: '#/responses/errorResponse'
+      security:
+        - medco-jwt: ["medco-explore"]
+
 
 securityDefinitions:
   medco-jwt:
@@ -497,6 +515,14 @@ responses:
       properties:
         message:
           type: "string"
+  
+  forbiddenResponse:
+    description: "Request is valid and user is authenticated, but not authorized to perform this action."
+    schema:
+      type: "object"
+      properties:
+        message:
+          type: "string"
 
   networkMetadataResponse:
     description: "Network metadata (public key and nodes list)."
@@ -575,6 +601,18 @@ responses:
             type: "string"
           updateDate:
             type: "string"
+
+  getCohortsPatientListResponse:
+    description: "Queried patient list"
+    schema:
+      type: "object"
+      properties:
+        results:
+          type: "array"
+          items:
+            type: "string"
+        timers:
+          $ref: "#/definitions/timers"
 
   survivalAnalysisResponse:
     description: "Queried survival analysis"

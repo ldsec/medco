@@ -16,52 +16,66 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewGetMetadataParams creates a new GetMetadataParams object
-// with the default values initialized.
+// NewGetMetadataParams creates a new GetMetadataParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewGetMetadataParams() *GetMetadataParams {
-
 	return &GetMetadataParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetMetadataParamsWithTimeout creates a new GetMetadataParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewGetMetadataParamsWithTimeout(timeout time.Duration) *GetMetadataParams {
-
 	return &GetMetadataParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewGetMetadataParamsWithContext creates a new GetMetadataParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewGetMetadataParamsWithContext(ctx context.Context) *GetMetadataParams {
-
 	return &GetMetadataParams{
-
 		Context: ctx,
 	}
 }
 
 // NewGetMetadataParamsWithHTTPClient creates a new GetMetadataParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewGetMetadataParamsWithHTTPClient(client *http.Client) *GetMetadataParams {
-
 	return &GetMetadataParams{
 		HTTPClient: client,
 	}
 }
 
-/*GetMetadataParams contains all the parameters to send to the API endpoint
-for the get metadata operation typically these are written to a http.Request
+/* GetMetadataParams contains all the parameters to send to the API endpoint
+   for the get metadata operation.
+
+   Typically these are written to a http.Request.
 */
 type GetMetadataParams struct {
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the get metadata params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetMetadataParams) WithDefaults() *GetMetadataParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the get metadata params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetMetadataParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the get metadata params

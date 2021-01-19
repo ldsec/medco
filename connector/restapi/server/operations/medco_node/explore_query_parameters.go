@@ -6,6 +6,7 @@ package medco_node
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"io"
 	"net/http"
 
@@ -14,6 +15,7 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // NewExploreQueryParams creates a new ExploreQueryParams object
@@ -78,6 +80,11 @@ func (o *ExploreQueryParams) BindRequest(r *http.Request, route *middleware.Matc
 				res = append(res, err)
 			}
 
+			ctx := validate.WithOperationRequest(context.Background())
+			if err := body.ContextValidate(ctx, route.Formats); err != nil {
+				res = append(res, err)
+			}
+
 			if len(res) == 0 {
 				o.QueryRequest = body
 			}
@@ -85,11 +92,11 @@ func (o *ExploreQueryParams) BindRequest(r *http.Request, route *middleware.Matc
 	} else {
 		res = append(res, errors.Required("queryRequest", "body", ""))
 	}
+
 	qSync, qhkSync, _ := qs.GetOK("sync")
 	if err := o.bindSync(qSync, qhkSync, route.Formats); err != nil {
 		res = append(res, err)
 	}
-
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
@@ -105,6 +112,7 @@ func (o *ExploreQueryParams) bindSync(rawData []string, hasKey bool, formats str
 
 	// Required: false
 	// AllowEmptyValue: false
+
 	if raw == "" { // empty values pass all other validations
 		// Default values have been previously initialized by NewExploreQueryParams()
 		return nil

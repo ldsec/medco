@@ -6,6 +6,7 @@ package survival_analysis
 // Editing this file might prove futile when you re-run the generate command
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -37,7 +38,7 @@ func NewSurvivalAnalysis(ctx *middleware.Context, handler SurvivalAnalysisHandle
 	return &SurvivalAnalysis{Context: ctx, Handler: handler}
 }
 
-/*SurvivalAnalysis swagger:route POST /node/analysis/survival/query survival-analysis survivalAnalysis
+/* SurvivalAnalysis swagger:route POST /node/analysis/survival/query survival-analysis survivalAnalysis
 
 Send a query to run a survival analysis
 
@@ -53,7 +54,6 @@ func (o *SurvivalAnalysis) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		r = rCtx
 	}
 	var Params = NewSurvivalAnalysisParams()
-
 	uprinc, aCtx, err := o.Context.Authorize(r, route)
 	if err != nil {
 		o.Context.Respond(rw, r, route.Produces, route, err)
@@ -73,7 +73,6 @@ func (o *SurvivalAnalysis) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	res := o.Handler.Handle(Params, principal) // actually handle the request
-
 	o.Context.Respond(rw, r, route.Produces, route, res)
 
 }
@@ -89,6 +88,11 @@ type SurvivalAnalysisBadRequestBody struct {
 
 // Validate validates this survival analysis bad request body
 func (o *SurvivalAnalysisBadRequestBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this survival analysis bad request body based on context it is used
+func (o *SurvivalAnalysisBadRequestBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -217,7 +221,7 @@ func (o *SurvivalAnalysisBody) validateID(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.Pattern("body"+"."+"ID", "body", string(*o.ID), `^[\w:-]+$`); err != nil {
+	if err := validate.Pattern("body"+"."+"ID", "body", *o.ID, `^[\w:-]+$`); err != nil {
 		return err
 	}
 
@@ -230,7 +234,7 @@ func (o *SurvivalAnalysisBody) validateCohortName(formats strfmt.Registry) error
 		return err
 	}
 
-	if err := validate.Pattern("body"+"."+"cohortName", "body", string(*o.CohortName), `^\w+$`); err != nil {
+	if err := validate.Pattern("body"+"."+"cohortName", "body", *o.CohortName, `^\w+$`); err != nil {
 		return err
 	}
 
@@ -243,7 +247,7 @@ func (o *SurvivalAnalysisBody) validateEndConcept(formats strfmt.Registry) error
 		return err
 	}
 
-	if err := validate.Pattern("body"+"."+"endConcept", "body", string(*o.EndConcept), `^\/$|^((\/[^\/]+)+\/?)$`); err != nil {
+	if err := validate.Pattern("body"+"."+"endConcept", "body", *o.EndConcept, `^\/$|^((\/[^\/]+)+\/?)$`); err != nil {
 		return err
 	}
 
@@ -251,7 +255,6 @@ func (o *SurvivalAnalysisBody) validateEndConcept(formats strfmt.Registry) error
 }
 
 func (o *SurvivalAnalysisBody) validateEndModifier(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.EndModifier) { // not required
 		return nil
 	}
@@ -274,7 +277,7 @@ func (o *SurvivalAnalysisBody) validateStartConcept(formats strfmt.Registry) err
 		return err
 	}
 
-	if err := validate.Pattern("body"+"."+"startConcept", "body", string(*o.StartConcept), `^\/$|^((\/[^\/]+)+\/?)$`); err != nil {
+	if err := validate.Pattern("body"+"."+"startConcept", "body", *o.StartConcept, `^\/$|^((\/[^\/]+)+\/?)$`); err != nil {
 		return err
 	}
 
@@ -282,7 +285,6 @@ func (o *SurvivalAnalysisBody) validateStartConcept(formats strfmt.Registry) err
 }
 
 func (o *SurvivalAnalysisBody) validateStartModifier(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.StartModifier) { // not required
 		return nil
 	}
@@ -300,7 +302,6 @@ func (o *SurvivalAnalysisBody) validateStartModifier(formats strfmt.Registry) er
 }
 
 func (o *SurvivalAnalysisBody) validateSubGroupDefinitions(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.SubGroupDefinitions) { // not required
 		return nil
 	}
@@ -385,7 +386,7 @@ func (o *SurvivalAnalysisBody) validateTimeLimit(formats strfmt.Registry) error 
 		return err
 	}
 
-	if err := validate.MinimumInt("body"+"."+"timeLimit", "body", int64(*o.TimeLimit), 1, false); err != nil {
+	if err := validate.MinimumInt("body"+"."+"timeLimit", "body", *o.TimeLimit, 1, false); err != nil {
 		return err
 	}
 
@@ -398,8 +399,76 @@ func (o *SurvivalAnalysisBody) validateUserPublicKey(formats strfmt.Registry) er
 		return err
 	}
 
-	if err := validate.Pattern("body"+"."+"userPublicKey", "body", string(*o.UserPublicKey), `^[\w=-]+$`); err != nil {
+	if err := validate.Pattern("body"+"."+"userPublicKey", "body", *o.UserPublicKey, `^[\w=-]+$`); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// ContextValidate validate this survival analysis body based on the context it is used
+func (o *SurvivalAnalysisBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.contextValidateEndModifier(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.contextValidateStartModifier(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.contextValidateSubGroupDefinitions(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *SurvivalAnalysisBody) contextValidateEndModifier(ctx context.Context, formats strfmt.Registry) error {
+
+	if o.EndModifier != nil {
+		if err := o.EndModifier.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("body" + "." + "endModifier")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *SurvivalAnalysisBody) contextValidateStartModifier(ctx context.Context, formats strfmt.Registry) error {
+
+	if o.StartModifier != nil {
+		if err := o.StartModifier.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("body" + "." + "startModifier")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *SurvivalAnalysisBody) contextValidateSubGroupDefinitions(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(o.SubGroupDefinitions); i++ {
+
+		if o.SubGroupDefinitions[i] != nil {
+			if err := o.SubGroupDefinitions[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("body" + "." + "subGroupDefinitions" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil
@@ -437,6 +506,11 @@ func (o *SurvivalAnalysisDefaultBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
+// ContextValidate validates this survival analysis default body based on context it is used
+func (o *SurvivalAnalysisDefaultBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
 // MarshalBinary interface implementation
 func (o *SurvivalAnalysisDefaultBody) MarshalBinary() ([]byte, error) {
 	if o == nil {
@@ -466,6 +540,11 @@ type SurvivalAnalysisNotFoundBody struct {
 
 // Validate validates this survival analysis not found body
 func (o *SurvivalAnalysisNotFoundBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this survival analysis not found body based on context it is used
+func (o *SurvivalAnalysisNotFoundBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -518,7 +597,6 @@ func (o *SurvivalAnalysisOKBody) Validate(formats strfmt.Registry) error {
 }
 
 func (o *SurvivalAnalysisOKBody) validateResults(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Results) { // not required
 		return nil
 	}
@@ -543,12 +621,59 @@ func (o *SurvivalAnalysisOKBody) validateResults(formats strfmt.Registry) error 
 }
 
 func (o *SurvivalAnalysisOKBody) validateTimers(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Timers) { // not required
 		return nil
 	}
 
 	if err := o.Timers.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("survivalAnalysisOK" + "." + "timers")
+		}
+		return err
+	}
+
+	return nil
+}
+
+// ContextValidate validate this survival analysis o k body based on the context it is used
+func (o *SurvivalAnalysisOKBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.contextValidateResults(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.contextValidateTimers(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *SurvivalAnalysisOKBody) contextValidateResults(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(o.Results); i++ {
+
+		if o.Results[i] != nil {
+			if err := o.Results[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("survivalAnalysisOK" + "." + "results" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (o *SurvivalAnalysisOKBody) contextValidateTimers(ctx context.Context, formats strfmt.Registry) error {
+
+	if err := o.Timers.ContextValidate(ctx, formats); err != nil {
 		if ve, ok := err.(*errors.Validation); ok {
 			return ve.ValidateName("survivalAnalysisOK" + "." + "timers")
 		}
@@ -606,7 +731,6 @@ func (o *SurvivalAnalysisOKBodyResultsItems0) Validate(formats strfmt.Registry) 
 }
 
 func (o *SurvivalAnalysisOKBodyResultsItems0) validateGroupResults(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.GroupResults) { // not required
 		return nil
 	}
@@ -618,6 +742,38 @@ func (o *SurvivalAnalysisOKBodyResultsItems0) validateGroupResults(formats strfm
 
 		if o.GroupResults[i] != nil {
 			if err := o.GroupResults[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("groupResults" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// ContextValidate validate this survival analysis o k body results items0 based on the context it is used
+func (o *SurvivalAnalysisOKBodyResultsItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.contextValidateGroupResults(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *SurvivalAnalysisOKBodyResultsItems0) contextValidateGroupResults(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(o.GroupResults); i++ {
+
+		if o.GroupResults[i] != nil {
+			if err := o.GroupResults[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("groupResults" + "." + strconv.Itoa(i))
 				}
@@ -675,13 +831,40 @@ func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0) Validate(formats
 }
 
 func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0) validateEvents(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Events) { // not required
 		return nil
 	}
 
 	if o.Events != nil {
 		if err := o.Events.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("events")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ContextValidate validate this survival analysis o k body results items0 group results items0 based on the context it is used
+func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.contextValidateEvents(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0) contextValidateEvents(ctx context.Context, formats strfmt.Registry) error {
+
+	if o.Events != nil {
+		if err := o.Events.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("events")
 			}
@@ -724,6 +907,11 @@ type SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0Events struct {
 
 // Validate validates this survival analysis o k body results items0 group results items0 events
 func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0Events) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this survival analysis o k body results items0 group results items0 events based on context it is used
+func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0Events) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -785,7 +973,7 @@ func (o *SurvivalAnalysisParamsBodyEndModifier) validateAppliedPath(formats strf
 		return err
 	}
 
-	if err := validate.Pattern("body"+"."+"endModifier"+"."+"appliedPath", "body", string(*o.AppliedPath), `^((\/[^\/]+)+\/%?)$`); err != nil {
+	if err := validate.Pattern("body"+"."+"endModifier"+"."+"appliedPath", "body", *o.AppliedPath, `^((\/[^\/]+)+\/%?)$`); err != nil {
 		return err
 	}
 
@@ -798,10 +986,15 @@ func (o *SurvivalAnalysisParamsBodyEndModifier) validateModifierKey(formats strf
 		return err
 	}
 
-	if err := validate.Pattern("body"+"."+"endModifier"+"."+"modifierKey", "body", string(*o.ModifierKey), `^((\/[^\/]+)+\/)$`); err != nil {
+	if err := validate.Pattern("body"+"."+"endModifier"+"."+"modifierKey", "body", *o.ModifierKey, `^((\/[^\/]+)+\/)$`); err != nil {
 		return err
 	}
 
+	return nil
+}
+
+// ContextValidate validates this survival analysis params body end modifier based on context it is used
+func (o *SurvivalAnalysisParamsBodyEndModifier) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -863,7 +1056,7 @@ func (o *SurvivalAnalysisParamsBodyStartModifier) validateAppliedPath(formats st
 		return err
 	}
 
-	if err := validate.Pattern("body"+"."+"startModifier"+"."+"appliedPath", "body", string(*o.AppliedPath), `^((\/[^\/]+)+\/%?)$`); err != nil {
+	if err := validate.Pattern("body"+"."+"startModifier"+"."+"appliedPath", "body", *o.AppliedPath, `^((\/[^\/]+)+\/%?)$`); err != nil {
 		return err
 	}
 
@@ -876,10 +1069,15 @@ func (o *SurvivalAnalysisParamsBodyStartModifier) validateModifierKey(formats st
 		return err
 	}
 
-	if err := validate.Pattern("body"+"."+"startModifier"+"."+"modifierKey", "body", string(*o.ModifierKey), `^((\/[^\/]+)+\/)$`); err != nil {
+	if err := validate.Pattern("body"+"."+"startModifier"+"."+"modifierKey", "body", *o.ModifierKey, `^((\/[^\/]+)+\/)$`); err != nil {
 		return err
 	}
 
+	return nil
+}
+
+// ContextValidate validates this survival analysis params body start modifier based on context it is used
+func (o *SurvivalAnalysisParamsBodyStartModifier) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -933,12 +1131,11 @@ func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) Validate(formats s
 }
 
 func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) validateGroupName(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.GroupName) { // not required
 		return nil
 	}
 
-	if err := validate.Pattern("groupName", "body", string(o.GroupName), `^\w+$`); err != nil {
+	if err := validate.Pattern("groupName", "body", o.GroupName, `^\w+$`); err != nil {
 		return err
 	}
 
@@ -946,7 +1143,6 @@ func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) validateGroupName(
 }
 
 func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) validatePanels(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Panels) { // not required
 		return nil
 	}
@@ -958,6 +1154,38 @@ func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) validatePanels(for
 
 		if o.Panels[i] != nil {
 			if err := o.Panels[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("panels" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// ContextValidate validate this survival analysis params body sub group definitions items0 based on the context it is used
+func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.contextValidatePanels(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) contextValidatePanels(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(o.Panels); i++ {
+
+		if o.Panels[i] != nil {
+			if err := o.Panels[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("panels" + "." + strconv.Itoa(i))
 				}

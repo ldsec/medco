@@ -6,6 +6,7 @@ package medco_network
 // Editing this file might prove futile when you re-run the generate command
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 
@@ -36,7 +37,7 @@ func NewGetMetadata(ctx *middleware.Context, handler GetMetadataHandler) *GetMet
 	return &GetMetadata{Context: ctx, Handler: handler}
 }
 
-/*GetMetadata swagger:route GET /network medco-network getMetadata
+/* GetMetadata swagger:route GET /network medco-network getMetadata
 
 Get network metadata.
 
@@ -52,7 +53,6 @@ func (o *GetMetadata) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		r = rCtx
 	}
 	var Params = NewGetMetadataParams()
-
 	uprinc, aCtx, err := o.Context.Authorize(r, route)
 	if err != nil {
 		o.Context.Respond(rw, r, route.Produces, route, err)
@@ -72,7 +72,6 @@ func (o *GetMetadata) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	res := o.Handler.Handle(Params, principal) // actually handle the request
-
 	o.Context.Respond(rw, r, route.Produces, route, res)
 
 }
@@ -88,6 +87,11 @@ type GetMetadataDefaultBody struct {
 
 // Validate validates this get metadata default body
 func (o *GetMetadataDefaultBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this get metadata default body based on context it is used
+func (o *GetMetadataDefaultBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -153,7 +157,6 @@ func (o *GetMetadataOKBody) validateNodeIndex(formats strfmt.Registry) error {
 }
 
 func (o *GetMetadataOKBody) validateNodes(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Nodes) { // not required
 		return nil
 	}
@@ -165,6 +168,38 @@ func (o *GetMetadataOKBody) validateNodes(formats strfmt.Registry) error {
 
 		if o.Nodes[i] != nil {
 			if err := o.Nodes[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("getMetadataOK" + "." + "nodes" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// ContextValidate validate this get metadata o k body based on the context it is used
+func (o *GetMetadataOKBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.contextValidateNodes(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *GetMetadataOKBody) contextValidateNodes(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(o.Nodes); i++ {
+
+		if o.Nodes[i] != nil {
+			if err := o.Nodes[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("getMetadataOK" + "." + "nodes" + "." + strconv.Itoa(i))
 				}
@@ -231,6 +266,11 @@ func (o *GetMetadataOKBodyNodesItems0) validateIndex(formats strfmt.Registry) er
 		return err
 	}
 
+	return nil
+}
+
+// ContextValidate validates this get metadata o k body nodes items0 based on context it is used
+func (o *GetMetadataOKBodyNodesItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

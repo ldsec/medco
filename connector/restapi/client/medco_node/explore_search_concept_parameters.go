@@ -18,59 +18,73 @@ import (
 	"github.com/ldsec/medco/connector/restapi/models"
 )
 
-// NewExploreSearchConceptParams creates a new ExploreSearchConceptParams object
-// with the default values initialized.
+// NewExploreSearchConceptParams creates a new ExploreSearchConceptParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewExploreSearchConceptParams() *ExploreSearchConceptParams {
-	var ()
 	return &ExploreSearchConceptParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewExploreSearchConceptParamsWithTimeout creates a new ExploreSearchConceptParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewExploreSearchConceptParamsWithTimeout(timeout time.Duration) *ExploreSearchConceptParams {
-	var ()
 	return &ExploreSearchConceptParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewExploreSearchConceptParamsWithContext creates a new ExploreSearchConceptParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewExploreSearchConceptParamsWithContext(ctx context.Context) *ExploreSearchConceptParams {
-	var ()
 	return &ExploreSearchConceptParams{
-
 		Context: ctx,
 	}
 }
 
 // NewExploreSearchConceptParamsWithHTTPClient creates a new ExploreSearchConceptParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewExploreSearchConceptParamsWithHTTPClient(client *http.Client) *ExploreSearchConceptParams {
-	var ()
 	return &ExploreSearchConceptParams{
 		HTTPClient: client,
 	}
 }
 
-/*ExploreSearchConceptParams contains all the parameters to send to the API endpoint
-for the explore search concept operation typically these are written to a http.Request
+/* ExploreSearchConceptParams contains all the parameters to send to the API endpoint
+   for the explore search concept operation.
+
+   Typically these are written to a http.Request.
 */
 type ExploreSearchConceptParams struct {
 
-	/*SearchConceptRequest
-	  MedCo-Explore ontology search concept request.
+	/* SearchConceptRequest.
 
+	   MedCo-Explore ontology search concept request.
 	*/
 	SearchConceptRequest *models.ExploreSearchConcept
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the explore search concept params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *ExploreSearchConceptParams) WithDefaults() *ExploreSearchConceptParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the explore search concept params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *ExploreSearchConceptParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the explore search concept params
@@ -124,7 +138,6 @@ func (o *ExploreSearchConceptParams) WriteToRequest(r runtime.ClientRequest, reg
 		return err
 	}
 	var res []error
-
 	if o.SearchConceptRequest != nil {
 		if err := r.SetBodyParam(o.SearchConceptRequest); err != nil {
 			return err

@@ -6,6 +6,7 @@ package medco_node
 // Editing this file might prove futile when you re-run the generate command
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/go-openapi/errors"
@@ -34,7 +35,7 @@ func NewGetExploreQuery(ctx *middleware.Context, handler GetExploreQueryHandler)
 	return &GetExploreQuery{Context: ctx, Handler: handler}
 }
 
-/*GetExploreQuery swagger:route GET /node/explore/query/{queryId} medco-node getExploreQuery
+/* GetExploreQuery swagger:route GET /node/explore/query/{queryId} medco-node getExploreQuery
 
 Get status and result of a MedCo-Explore query.
 
@@ -50,7 +51,6 @@ func (o *GetExploreQuery) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		r = rCtx
 	}
 	var Params = NewGetExploreQueryParams()
-
 	uprinc, aCtx, err := o.Context.Authorize(r, route)
 	if err != nil {
 		o.Context.Respond(rw, r, route.Produces, route, err)
@@ -70,7 +70,6 @@ func (o *GetExploreQuery) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	res := o.Handler.Handle(Params, principal) // actually handle the request
-
 	o.Context.Respond(rw, r, route.Produces, route, res)
 
 }
@@ -86,6 +85,11 @@ type GetExploreQueryDefaultBody struct {
 
 // Validate validates this get explore query default body
 func (o *GetExploreQueryDefaultBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this get explore query default body based on context it is used
+func (o *GetExploreQueryDefaultBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -141,7 +145,6 @@ func (o *GetExploreQueryOKBody) Validate(formats strfmt.Registry) error {
 }
 
 func (o *GetExploreQueryOKBody) validateQuery(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Query) { // not required
 		return nil
 	}
@@ -159,13 +162,58 @@ func (o *GetExploreQueryOKBody) validateQuery(formats strfmt.Registry) error {
 }
 
 func (o *GetExploreQueryOKBody) validateResult(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Result) { // not required
 		return nil
 	}
 
 	if o.Result != nil {
 		if err := o.Result.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("getExploreQueryOK" + "." + "result")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ContextValidate validate this get explore query o k body based on the context it is used
+func (o *GetExploreQueryOKBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.contextValidateQuery(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.contextValidateResult(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *GetExploreQueryOKBody) contextValidateQuery(ctx context.Context, formats strfmt.Registry) error {
+
+	if o.Query != nil {
+		if err := o.Query.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("getExploreQueryOK" + "." + "query")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *GetExploreQueryOKBody) contextValidateResult(ctx context.Context, formats strfmt.Registry) error {
+
+	if o.Result != nil {
+		if err := o.Result.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("getExploreQueryOK" + "." + "result")
 			}

@@ -6,6 +6,7 @@ package medco_node
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"strconv"
@@ -49,7 +50,7 @@ func NewExploreSearchConceptOK() *ExploreSearchConceptOK {
 	return &ExploreSearchConceptOK{}
 }
 
-/*ExploreSearchConceptOK handles this case with default header values.
+/* ExploreSearchConceptOK describes a response with status code 200, with default header values.
 
 MedCo-Explore search concept query response.
 */
@@ -60,7 +61,6 @@ type ExploreSearchConceptOK struct {
 func (o *ExploreSearchConceptOK) Error() string {
 	return fmt.Sprintf("[POST /node/explore/search/concept][%d] exploreSearchConceptOK  %+v", 200, o.Payload)
 }
-
 func (o *ExploreSearchConceptOK) GetPayload() *ExploreSearchConceptOKBody {
 	return o.Payload
 }
@@ -84,7 +84,7 @@ func NewExploreSearchConceptDefault(code int) *ExploreSearchConceptDefault {
 	}
 }
 
-/*ExploreSearchConceptDefault handles this case with default header values.
+/* ExploreSearchConceptDefault describes a response with status code -1, with default header values.
 
 Error response.
 */
@@ -102,7 +102,6 @@ func (o *ExploreSearchConceptDefault) Code() int {
 func (o *ExploreSearchConceptDefault) Error() string {
 	return fmt.Sprintf("[POST /node/explore/search/concept][%d] exploreSearchConcept default  %+v", o._statusCode, o.Payload)
 }
-
 func (o *ExploreSearchConceptDefault) GetPayload() *ExploreSearchConceptDefaultBody {
 	return o.Payload
 }
@@ -130,6 +129,11 @@ type ExploreSearchConceptDefaultBody struct {
 
 // Validate validates this explore search concept default body
 func (o *ExploreSearchConceptDefaultBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this explore search concept default body based on context it is used
+func (o *ExploreSearchConceptDefaultBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -182,7 +186,6 @@ func (o *ExploreSearchConceptOKBody) Validate(formats strfmt.Registry) error {
 }
 
 func (o *ExploreSearchConceptOKBody) validateResults(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Results) { // not required
 		return nil
 	}
@@ -207,13 +210,62 @@ func (o *ExploreSearchConceptOKBody) validateResults(formats strfmt.Registry) er
 }
 
 func (o *ExploreSearchConceptOKBody) validateSearch(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Search) { // not required
 		return nil
 	}
 
 	if o.Search != nil {
 		if err := o.Search.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("exploreSearchConceptOK" + "." + "search")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ContextValidate validate this explore search concept o k body based on the context it is used
+func (o *ExploreSearchConceptOKBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.contextValidateResults(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.contextValidateSearch(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *ExploreSearchConceptOKBody) contextValidateResults(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(o.Results); i++ {
+
+		if o.Results[i] != nil {
+			if err := o.Results[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("exploreSearchConceptOK" + "." + "results" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (o *ExploreSearchConceptOKBody) contextValidateSearch(ctx context.Context, formats strfmt.Registry) error {
+
+	if o.Search != nil {
+		if err := o.Search.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("exploreSearchConceptOK" + "." + "search")
 			}

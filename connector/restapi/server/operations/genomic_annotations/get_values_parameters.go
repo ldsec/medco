@@ -85,7 +85,6 @@ func (o *GetValuesParams) BindRequest(r *http.Request, route *middleware.Matched
 	if err := o.bindValue(qValue, qhkValue, route.Formats); err != nil {
 		res = append(res, err)
 	}
-
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
@@ -101,7 +100,6 @@ func (o *GetValuesParams) bindAnnotation(rawData []string, hasKey bool, formats 
 
 	// Required: true
 	// Parameter is provided by construction from the route
-
 	o.Annotation = raw
 
 	if err := o.validateAnnotation(formats); err != nil {
@@ -130,6 +128,7 @@ func (o *GetValuesParams) bindLimit(rawData []string, hasKey bool, formats strfm
 
 	// Required: false
 	// AllowEmptyValue: false
+
 	if raw == "" { // empty values pass all other validations
 		// Default values have been previously initialized by NewGetValuesParams()
 		return nil
@@ -151,7 +150,7 @@ func (o *GetValuesParams) bindLimit(rawData []string, hasKey bool, formats strfm
 // validateLimit carries on validations for parameter Limit
 func (o *GetValuesParams) validateLimit(formats strfmt.Registry) error {
 
-	if err := validate.MinimumInt("limit", "query", int64(*o.Limit), 0, false); err != nil {
+	if err := validate.MinimumInt("limit", "query", *o.Limit, 0, false); err != nil {
 		return err
 	}
 
@@ -170,10 +169,10 @@ func (o *GetValuesParams) bindValue(rawData []string, hasKey bool, formats strfm
 
 	// Required: true
 	// AllowEmptyValue: false
+
 	if err := validate.RequiredString("value", "query", raw); err != nil {
 		return err
 	}
-
 	o.Value = raw
 
 	if err := o.validateValue(formats); err != nil {
