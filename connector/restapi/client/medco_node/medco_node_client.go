@@ -228,7 +228,7 @@ func (a *Client) GetCohortsPatientList(params *GetCohortsPatientListParams, auth
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getCohortsPatientList",
 		Method:             "GET",
-		PathPattern:        "/node/explore/cohorts/patientList",
+		PathPattern:        "/node/explore/cohorts/patientList/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},

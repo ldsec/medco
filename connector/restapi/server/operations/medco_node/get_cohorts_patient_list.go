@@ -35,7 +35,7 @@ func NewGetCohortsPatientList(ctx *middleware.Context, handler GetCohortsPatient
 	return &GetCohortsPatientList{Context: ctx, Handler: handler}
 }
 
-/* GetCohortsPatientList swagger:route GET /node/explore/cohorts/patientList medco-node getCohortsPatientList
+/* GetCohortsPatientList swagger:route GET /node/explore/cohorts/patientList/{name} medco-node getCohortsPatientList
 
 Retrieve the encrypted patient list for a given cohort name
 

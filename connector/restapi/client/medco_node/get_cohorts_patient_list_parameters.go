@@ -58,6 +58,13 @@ func NewGetCohortsPatientListParamsWithHTTPClient(client *http.Client) *GetCohor
    Typically these are written to a http.Request.
 */
 type GetCohortsPatientListParams struct {
+
+	/* Name.
+
+	   Name of the cohort to update
+	*/
+	Name string
+
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
@@ -111,6 +118,17 @@ func (o *GetCohortsPatientListParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithName adds the name to the get cohorts patient list params
+func (o *GetCohortsPatientListParams) WithName(name string) *GetCohortsPatientListParams {
+	o.SetName(name)
+	return o
+}
+
+// SetName adds the name to the get cohorts patient list params
+func (o *GetCohortsPatientListParams) SetName(name string) {
+	o.Name = name
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *GetCohortsPatientListParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -118,6 +136,11 @@ func (o *GetCohortsPatientListParams) WriteToRequest(r runtime.ClientRequest, re
 		return err
 	}
 	var res []error
+
+	// path param name
+	if err := r.SetPathParam("name", o.Name); err != nil {
+		return err
+	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

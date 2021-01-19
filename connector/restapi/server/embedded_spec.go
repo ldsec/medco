@@ -264,7 +264,7 @@ func init() {
         }
       }
     },
-    "/node/explore/cohorts/patientList": {
+    "/node/explore/cohorts/patientList/{name}": {
       "get": {
         "security": [
           {
@@ -278,6 +278,16 @@ func init() {
         ],
         "summary": "Retrieve the encrypted patient list for a given cohort name",
         "operationId": "getCohortsPatientList",
+        "parameters": [
+          {
+            "pattern": "^\\w+$",
+            "type": "string",
+            "description": "Name of the cohort to update",
+            "name": "name",
+            "in": "path",
+            "required": true
+          }
+        ],
         "responses": {
           "200": {
             "$ref": "#/responses/getCohortsPatientListResponse"
@@ -1820,7 +1830,7 @@ func init() {
         }
       }
     },
-    "/node/explore/cohorts/patientList": {
+    "/node/explore/cohorts/patientList/{name}": {
       "get": {
         "security": [
           {
@@ -1834,6 +1844,16 @@ func init() {
         ],
         "summary": "Retrieve the encrypted patient list for a given cohort name",
         "operationId": "getCohortsPatientList",
+        "parameters": [
+          {
+            "pattern": "^\\w+$",
+            "type": "string",
+            "description": "Name of the cohort to update",
+            "name": "name",
+            "in": "path",
+            "required": true
+          }
+        ],
         "responses": {
           "200": {
             "description": "Queried patient list",

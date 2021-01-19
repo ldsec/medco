@@ -327,12 +327,19 @@ paths:
       security:
         - medco-jwt: ["medco-explore"]
 
-  /node/explore/cohorts/patientList:
+  /node/explore/cohorts/patientList/{name}:
     get:
       tags:
         - "medco-node"
       summary: "Retrieve the encrypted patient list for a given cohort name"
       operationId: "getCohortsPatientList"
+      parameters:
+        - in: "path"
+          name: "name"
+          description: "Name of the cohort to update"
+          required: true
+          type: "string"
+          pattern: '^\w+$'
       responses:
         200:
           $ref: '#/responses/getCohortsPatientListResponse'

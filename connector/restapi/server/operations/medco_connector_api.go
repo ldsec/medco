@@ -403,7 +403,7 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/node/explore/cohorts/patientList"] = medco_node.NewGetCohortsPatientList(o.context, o.MedcoNodeGetCohortsPatientListHandler)
+	o.handlers["GET"]["/node/explore/cohorts/patientList/{name}"] = medco_node.NewGetCohortsPatientList(o.context, o.MedcoNodeGetCohortsPatientListHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
