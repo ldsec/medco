@@ -6,7 +6,6 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"context"
 	"encoding/json"
 
 	"github.com/go-openapi/errors"
@@ -86,6 +85,7 @@ func (m *ExploreSearchResultElement) validateLeaf(formats strfmt.Registry) error
 }
 
 func (m *ExploreSearchResultElement) validateMedcoEncryption(formats strfmt.Registry) error {
+
 	if swag.IsZero(m.MedcoEncryption) { // not required
 		return nil
 	}
@@ -103,6 +103,7 @@ func (m *ExploreSearchResultElement) validateMedcoEncryption(formats strfmt.Regi
 }
 
 func (m *ExploreSearchResultElement) validateMetadata(formats strfmt.Registry) error {
+
 	if swag.IsZero(m.Metadata) { // not required
 		return nil
 	}
@@ -164,6 +165,7 @@ func (m *ExploreSearchResultElement) validateTypeEnum(path, location string, val
 }
 
 func (m *ExploreSearchResultElement) validateType(formats strfmt.Registry) error {
+
 	if swag.IsZero(m.Type) { // not required
 		return nil
 	}
@@ -171,52 +173,6 @@ func (m *ExploreSearchResultElement) validateType(formats strfmt.Registry) error
 	// value enum
 	if err := m.validateTypeEnum("type", "body", m.Type); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-// ContextValidate validate this explore search result element based on the context it is used
-func (m *ExploreSearchResultElement) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.contextValidateMedcoEncryption(ctx, formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.contextValidateMetadata(ctx, formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *ExploreSearchResultElement) contextValidateMedcoEncryption(ctx context.Context, formats strfmt.Registry) error {
-
-	if m.MedcoEncryption != nil {
-		if err := m.MedcoEncryption.ContextValidate(ctx, formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("medcoEncryption")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *ExploreSearchResultElement) contextValidateMetadata(ctx context.Context, formats strfmt.Registry) error {
-
-	if m.Metadata != nil {
-		if err := m.Metadata.ContextValidate(ctx, formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("metadata")
-			}
-			return err
-		}
 	}
 
 	return nil
@@ -290,11 +246,6 @@ func (m *ExploreSearchResultElementMedcoEncryption) validateID(formats strfmt.Re
 		return err
 	}
 
-	return nil
-}
-
-// ContextValidate validates this explore search result element medco encryption based on context it is used
-func (m *ExploreSearchResultElementMedcoEncryption) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

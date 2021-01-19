@@ -6,7 +6,6 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"context"
 	"encoding/json"
 
 	"github.com/go-openapi/errors"
@@ -73,7 +72,7 @@ func (m *ExploreSearchModifier) validateAppliedConcept(formats strfmt.Registry) 
 		return err
 	}
 
-	if err := validate.Pattern("appliedConcept", "body", *m.AppliedConcept, `^\/$|^((\/[^\/]+)+\/)$`); err != nil {
+	if err := validate.Pattern("appliedConcept", "body", string(*m.AppliedConcept), `^\/$|^((\/[^\/]+)+\/)$`); err != nil {
 		return err
 	}
 
@@ -86,7 +85,7 @@ func (m *ExploreSearchModifier) validateAppliedPath(formats strfmt.Registry) err
 		return err
 	}
 
-	if err := validate.Pattern("appliedPath", "body", *m.AppliedPath, `^\/$|^((\/[^\/]+)+\/%?)$`); err != nil {
+	if err := validate.Pattern("appliedPath", "body", string(*m.AppliedPath), `^\/$|^((\/[^\/]+)+\/%?)$`); err != nil {
 		return err
 	}
 
@@ -142,15 +141,10 @@ func (m *ExploreSearchModifier) validatePath(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.Pattern("path", "body", *m.Path, `^\/$|^((\/[^\/]+)+\/)$`); err != nil {
+	if err := validate.Pattern("path", "body", string(*m.Path), `^\/$|^((\/[^\/]+)+\/)$`); err != nil {
 		return err
 	}
 
-	return nil
-}
-
-// ContextValidate validates this explore search modifier based on context it is used
-func (m *ExploreSearchModifier) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

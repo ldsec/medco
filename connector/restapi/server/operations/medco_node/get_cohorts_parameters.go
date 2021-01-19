@@ -63,6 +63,7 @@ func (o *GetCohortsParams) BindRequest(r *http.Request, route *middleware.Matche
 	if err := o.bindLimit(qLimit, qhkLimit, route.Formats); err != nil {
 		res = append(res, err)
 	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
@@ -78,7 +79,6 @@ func (o *GetCohortsParams) bindLimit(rawData []string, hasKey bool, formats strf
 
 	// Required: false
 	// AllowEmptyValue: false
-
 	if raw == "" { // empty values pass all other validations
 		// Default values have been previously initialized by NewGetCohortsParams()
 		return nil
@@ -100,7 +100,7 @@ func (o *GetCohortsParams) bindLimit(rawData []string, hasKey bool, formats strf
 // validateLimit carries on validations for parameter Limit
 func (o *GetCohortsParams) validateLimit(formats strfmt.Registry) error {
 
-	if err := validate.MinimumInt("limit", "query", *o.Limit, 0, false); err != nil {
+	if err := validate.MinimumInt("limit", "query", int64(*o.Limit), 0, false); err != nil {
 		return err
 	}
 

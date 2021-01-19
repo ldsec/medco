@@ -94,6 +94,7 @@ func (o *GetVariantsParams) BindRequest(r *http.Request, route *middleware.Match
 	if err := o.bindZygosity(qZygosity, qhkZygosity, route.Formats); err != nil {
 		res = append(res, err)
 	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
@@ -109,6 +110,7 @@ func (o *GetVariantsParams) bindAnnotation(rawData []string, hasKey bool, format
 
 	// Required: true
 	// Parameter is provided by construction from the route
+
 	o.Annotation = raw
 
 	if err := o.validateAnnotation(formats); err != nil {
@@ -137,7 +139,6 @@ func (o *GetVariantsParams) bindEncrypted(rawData []string, hasKey bool, formats
 
 	// Required: false
 	// AllowEmptyValue: false
-
 	if raw == "" { // empty values pass all other validations
 		// Default values have been previously initialized by NewGetVariantsParams()
 		return nil
@@ -161,6 +162,7 @@ func (o *GetVariantsParams) bindValue(rawData []string, hasKey bool, formats str
 
 	// Required: true
 	// Parameter is provided by construction from the route
+
 	o.Value = raw
 
 	if err := o.validateValue(formats); err != nil {
@@ -184,6 +186,7 @@ func (o *GetVariantsParams) validateValue(formats strfmt.Registry) error {
 //
 // Arrays are parsed according to CollectionFormat: "" (defaults to "csv" when empty).
 func (o *GetVariantsParams) bindZygosity(rawData []string, hasKey bool, formats strfmt.Registry) error {
+
 	var qvZygosity string
 	if len(rawData) > 0 {
 		qvZygosity = rawData[len(rawData)-1]

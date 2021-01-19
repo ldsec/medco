@@ -6,7 +6,6 @@ package medco_node
 // Editing this file might prove futile when you re-run the generate command
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/go-openapi/runtime/middleware"
@@ -34,7 +33,7 @@ func NewDeleteCohorts(ctx *middleware.Context, handler DeleteCohortsHandler) *De
 	return &DeleteCohorts{Context: ctx, Handler: handler}
 }
 
-/* DeleteCohorts swagger:route DELETE /node/explore/cohorts/{name} medco-node deleteCohorts
+/*DeleteCohorts swagger:route DELETE /node/explore/cohorts/{name} medco-node deleteCohorts
 
 Delete a cohort if it exists
 
@@ -50,6 +49,7 @@ func (o *DeleteCohorts) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		r = rCtx
 	}
 	var Params = NewDeleteCohortsParams()
+
 	uprinc, aCtx, err := o.Context.Authorize(r, route)
 	if err != nil {
 		o.Context.Respond(rw, r, route.Produces, route, err)
@@ -69,6 +69,7 @@ func (o *DeleteCohorts) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	res := o.Handler.Handle(Params, principal) // actually handle the request
+
 	o.Context.Respond(rw, r, route.Produces, route, res)
 
 }
@@ -84,11 +85,6 @@ type DeleteCohortsDefaultBody struct {
 
 // Validate validates this delete cohorts default body
 func (o *DeleteCohortsDefaultBody) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// ContextValidate validates this delete cohorts default body based on context it is used
-func (o *DeleteCohortsDefaultBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -121,11 +117,6 @@ type DeleteCohortsNotFoundBody struct {
 
 // Validate validates this delete cohorts not found body
 func (o *DeleteCohortsNotFoundBody) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// ContextValidate validates this delete cohorts not found body based on context it is used
-func (o *DeleteCohortsNotFoundBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

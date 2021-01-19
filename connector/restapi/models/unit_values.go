@@ -6,7 +6,6 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"context"
 	"strconv"
 
 	"github.com/go-openapi/errors"
@@ -47,6 +46,7 @@ func (m *UnitValues) Validate(formats strfmt.Registry) error {
 }
 
 func (m *UnitValues) validateConvertingUnits(formats strfmt.Registry) error {
+
 	if swag.IsZero(m.ConvertingUnits) { // not required
 		return nil
 	}
@@ -58,38 +58,6 @@ func (m *UnitValues) validateConvertingUnits(formats strfmt.Registry) error {
 
 		if m.ConvertingUnits[i] != nil {
 			if err := m.ConvertingUnits[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("ConvertingUnits" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
-	}
-
-	return nil
-}
-
-// ContextValidate validate this unit values based on the context it is used
-func (m *UnitValues) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.contextValidateConvertingUnits(ctx, formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *UnitValues) contextValidateConvertingUnits(ctx context.Context, formats strfmt.Registry) error {
-
-	for i := 0; i < len(m.ConvertingUnits); i++ {
-
-		if m.ConvertingUnits[i] != nil {
-			if err := m.ConvertingUnits[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("ConvertingUnits" + "." + strconv.Itoa(i))
 				}
@@ -134,11 +102,6 @@ type UnitValuesConvertingUnitsItems0 struct {
 
 // Validate validates this unit values converting units items0
 func (m *UnitValuesConvertingUnitsItems0) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// ContextValidate validates this unit values converting units items0 based on context it is used
-func (m *UnitValuesConvertingUnitsItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

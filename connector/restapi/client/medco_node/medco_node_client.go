@@ -35,11 +35,11 @@ type ClientService interface {
 
 	GetCohorts(params *GetCohortsParams, authInfo runtime.ClientAuthInfoWriter) (*GetCohortsOK, error)
 
-	GetCohortsPatientList(params *GetCohortsPatientListParams, authInfo runtime.ClientAuthInfoWriter) (*GetCohortsPatientListOK, error)
-
 	GetExploreQuery(params *GetExploreQueryParams, authInfo runtime.ClientAuthInfoWriter) (*GetExploreQueryOK, error)
 
 	PostCohorts(params *PostCohortsParams, authInfo runtime.ClientAuthInfoWriter) (*PostCohortsOK, error)
+
+	PostCohortsPatientList(params *PostCohortsPatientListParams, authInfo runtime.ClientAuthInfoWriter) (*PostCohortsPatientListOK, error)
 
 	PutCohorts(params *PutCohortsParams, authInfo runtime.ClientAuthInfoWriter) (*PutCohortsOK, error)
 
@@ -217,40 +217,6 @@ func (a *Client) GetCohorts(params *GetCohortsParams, authInfo runtime.ClientAut
 }
 
 /*
-  GetCohortsPatientList retrieves the encrypted patient list for a given cohort name
-*/
-func (a *Client) GetCohortsPatientList(params *GetCohortsPatientListParams, authInfo runtime.ClientAuthInfoWriter) (*GetCohortsPatientListOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetCohortsPatientListParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getCohortsPatientList",
-		Method:             "GET",
-		PathPattern:        "/node/explore/cohorts/patientList/{name}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
-		Params:             params,
-		Reader:             &GetCohortsPatientListReader{formats: a.formats},
-		AuthInfo:           authInfo,
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	success, ok := result.(*GetCohortsPatientListOK)
-	if ok {
-		return success, nil
-	}
-	// unexpected success response
-	unexpectedSuccess := result.(*GetCohortsPatientListDefault)
-	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
-}
-
-/*
   GetExploreQuery gets status and result of a med co explore query
 */
 func (a *Client) GetExploreQuery(params *GetExploreQueryParams, authInfo runtime.ClientAuthInfoWriter) (*GetExploreQueryOK, error) {
@@ -315,6 +281,40 @@ func (a *Client) PostCohorts(params *PostCohortsParams, authInfo runtime.ClientA
 	}
 	// unexpected success response
 	unexpectedSuccess := result.(*PostCohortsDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+  PostCohortsPatientList retrieves the encrypted patient list for a given cohort name
+*/
+func (a *Client) PostCohortsPatientList(params *PostCohortsPatientListParams, authInfo runtime.ClientAuthInfoWriter) (*PostCohortsPatientListOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPostCohortsPatientListParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "postCohortsPatientList",
+		Method:             "POST",
+		PathPattern:        "/node/explore/cohorts/patientList",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &PostCohortsPatientListReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*PostCohortsPatientListOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*PostCohortsPatientListDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 

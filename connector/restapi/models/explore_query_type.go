@@ -6,7 +6,6 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"context"
 	"encoding/json"
 
 	"github.com/go-openapi/errors"
@@ -75,10 +74,5 @@ func (m ExploreQueryType) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-// ContextValidate validates this explore query type based on context it is used
-func (m ExploreQueryType) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }

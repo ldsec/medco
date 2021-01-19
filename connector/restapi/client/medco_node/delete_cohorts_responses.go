@@ -6,7 +6,6 @@ package medco_node
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"context"
 	"fmt"
 	"io"
 
@@ -52,7 +51,7 @@ func NewDeleteCohortsOK() *DeleteCohortsOK {
 	return &DeleteCohortsOK{}
 }
 
-/* DeleteCohortsOK describes a response with status code 200, with default header values.
+/*DeleteCohortsOK handles this case with default header values.
 
 Deleted cohort
 */
@@ -73,7 +72,7 @@ func NewDeleteCohortsNotFound() *DeleteCohortsNotFound {
 	return &DeleteCohortsNotFound{}
 }
 
-/* DeleteCohortsNotFound describes a response with status code 404, with default header values.
+/*DeleteCohortsNotFound handles this case with default header values.
 
 Not found.
 */
@@ -84,6 +83,7 @@ type DeleteCohortsNotFound struct {
 func (o *DeleteCohortsNotFound) Error() string {
 	return fmt.Sprintf("[DELETE /node/explore/cohorts/{name}][%d] deleteCohortsNotFound  %+v", 404, o.Payload)
 }
+
 func (o *DeleteCohortsNotFound) GetPayload() *DeleteCohortsNotFoundBody {
 	return o.Payload
 }
@@ -107,7 +107,7 @@ func NewDeleteCohortsDefault(code int) *DeleteCohortsDefault {
 	}
 }
 
-/* DeleteCohortsDefault describes a response with status code -1, with default header values.
+/*DeleteCohortsDefault handles this case with default header values.
 
 Error response.
 */
@@ -125,6 +125,7 @@ func (o *DeleteCohortsDefault) Code() int {
 func (o *DeleteCohortsDefault) Error() string {
 	return fmt.Sprintf("[DELETE /node/explore/cohorts/{name}][%d] deleteCohorts default  %+v", o._statusCode, o.Payload)
 }
+
 func (o *DeleteCohortsDefault) GetPayload() *DeleteCohortsDefaultBody {
 	return o.Payload
 }
@@ -152,11 +153,6 @@ type DeleteCohortsDefaultBody struct {
 
 // Validate validates this delete cohorts default body
 func (o *DeleteCohortsDefaultBody) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// ContextValidate validates this delete cohorts default body based on context it is used
-func (o *DeleteCohortsDefaultBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -189,11 +185,6 @@ type DeleteCohortsNotFoundBody struct {
 
 // Validate validates this delete cohorts not found body
 func (o *DeleteCohortsNotFoundBody) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// ContextValidate validates this delete cohorts not found body based on context it is used
-func (o *DeleteCohortsNotFoundBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

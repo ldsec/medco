@@ -6,7 +6,6 @@ package medco_node
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"context"
 	"fmt"
 	"io"
 
@@ -55,7 +54,7 @@ func NewGetExploreQueryOK() *GetExploreQueryOK {
 	return &GetExploreQueryOK{}
 }
 
-/* GetExploreQueryOK describes a response with status code 200, with default header values.
+/*GetExploreQueryOK handles this case with default header values.
 
 MedCo-Explore query response.
 */
@@ -66,6 +65,7 @@ type GetExploreQueryOK struct {
 func (o *GetExploreQueryOK) Error() string {
 	return fmt.Sprintf("[GET /node/explore/query/{queryId}][%d] getExploreQueryOK  %+v", 200, o.Payload)
 }
+
 func (o *GetExploreQueryOK) GetPayload() *GetExploreQueryOKBody {
 	return o.Payload
 }
@@ -87,7 +87,7 @@ func NewGetExploreQueryNotFound() *GetExploreQueryNotFound {
 	return &GetExploreQueryNotFound{}
 }
 
-/* GetExploreQueryNotFound describes a response with status code 404, with default header values.
+/*GetExploreQueryNotFound handles this case with default header values.
 
 Query ID not found.
 */
@@ -110,7 +110,7 @@ func NewGetExploreQueryDefault(code int) *GetExploreQueryDefault {
 	}
 }
 
-/* GetExploreQueryDefault describes a response with status code -1, with default header values.
+/*GetExploreQueryDefault handles this case with default header values.
 
 Error response.
 */
@@ -128,6 +128,7 @@ func (o *GetExploreQueryDefault) Code() int {
 func (o *GetExploreQueryDefault) Error() string {
 	return fmt.Sprintf("[GET /node/explore/query/{queryId}][%d] getExploreQuery default  %+v", o._statusCode, o.Payload)
 }
+
 func (o *GetExploreQueryDefault) GetPayload() *GetExploreQueryDefaultBody {
 	return o.Payload
 }
@@ -155,11 +156,6 @@ type GetExploreQueryDefaultBody struct {
 
 // Validate validates this get explore query default body
 func (o *GetExploreQueryDefaultBody) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// ContextValidate validates this get explore query default body based on context it is used
-func (o *GetExploreQueryDefaultBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -215,6 +211,7 @@ func (o *GetExploreQueryOKBody) Validate(formats strfmt.Registry) error {
 }
 
 func (o *GetExploreQueryOKBody) validateQuery(formats strfmt.Registry) error {
+
 	if swag.IsZero(o.Query) { // not required
 		return nil
 	}
@@ -232,58 +229,13 @@ func (o *GetExploreQueryOKBody) validateQuery(formats strfmt.Registry) error {
 }
 
 func (o *GetExploreQueryOKBody) validateResult(formats strfmt.Registry) error {
+
 	if swag.IsZero(o.Result) { // not required
 		return nil
 	}
 
 	if o.Result != nil {
 		if err := o.Result.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("getExploreQueryOK" + "." + "result")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-// ContextValidate validate this get explore query o k body based on the context it is used
-func (o *GetExploreQueryOKBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	var res []error
-
-	if err := o.contextValidateQuery(ctx, formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := o.contextValidateResult(ctx, formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (o *GetExploreQueryOKBody) contextValidateQuery(ctx context.Context, formats strfmt.Registry) error {
-
-	if o.Query != nil {
-		if err := o.Query.ContextValidate(ctx, formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("getExploreQueryOK" + "." + "query")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (o *GetExploreQueryOKBody) contextValidateResult(ctx context.Context, formats strfmt.Registry) error {
-
-	if o.Result != nil {
-		if err := o.Result.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("getExploreQueryOK" + "." + "result")
 			}

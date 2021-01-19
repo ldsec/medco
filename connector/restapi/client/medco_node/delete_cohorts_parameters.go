@@ -16,73 +16,59 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewDeleteCohortsParams creates a new DeleteCohortsParams object,
-// with the default timeout for this client.
-//
-// Default values are not hydrated, since defaults are normally applied by the API server side.
-//
-// To enforce default values in parameter, use SetDefaults or WithDefaults.
+// NewDeleteCohortsParams creates a new DeleteCohortsParams object
+// with the default values initialized.
 func NewDeleteCohortsParams() *DeleteCohortsParams {
+	var ()
 	return &DeleteCohortsParams{
+
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewDeleteCohortsParamsWithTimeout creates a new DeleteCohortsParams object
-// with the ability to set a timeout on a request.
+// with the default values initialized, and the ability to set a timeout on a request
 func NewDeleteCohortsParamsWithTimeout(timeout time.Duration) *DeleteCohortsParams {
+	var ()
 	return &DeleteCohortsParams{
+
 		timeout: timeout,
 	}
 }
 
 // NewDeleteCohortsParamsWithContext creates a new DeleteCohortsParams object
-// with the ability to set a context for a request.
+// with the default values initialized, and the ability to set a context for a request
 func NewDeleteCohortsParamsWithContext(ctx context.Context) *DeleteCohortsParams {
+	var ()
 	return &DeleteCohortsParams{
+
 		Context: ctx,
 	}
 }
 
 // NewDeleteCohortsParamsWithHTTPClient creates a new DeleteCohortsParams object
-// with the ability to set a custom HTTPClient for a request.
+// with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewDeleteCohortsParamsWithHTTPClient(client *http.Client) *DeleteCohortsParams {
+	var ()
 	return &DeleteCohortsParams{
 		HTTPClient: client,
 	}
 }
 
-/* DeleteCohortsParams contains all the parameters to send to the API endpoint
-   for the delete cohorts operation.
-
-   Typically these are written to a http.Request.
+/*DeleteCohortsParams contains all the parameters to send to the API endpoint
+for the delete cohorts operation typically these are written to a http.Request
 */
 type DeleteCohortsParams struct {
 
-	/* Name.
+	/*Name
+	  Name of the cohort to delete
 
-	   Name of the cohort to delete
 	*/
 	Name string
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
-}
-
-// WithDefaults hydrates default values in the delete cohorts params (not the query body).
-//
-// All values with no default are reset to their zero value.
-func (o *DeleteCohortsParams) WithDefaults() *DeleteCohortsParams {
-	o.SetDefaults()
-	return o
-}
-
-// SetDefaults hydrates default values in the delete cohorts params (not the query body).
-//
-// All values with no default are reset to their zero value.
-func (o *DeleteCohortsParams) SetDefaults() {
-	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the delete cohorts params

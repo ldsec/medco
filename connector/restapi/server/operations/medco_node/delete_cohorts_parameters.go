@@ -15,8 +15,7 @@ import (
 )
 
 // NewDeleteCohortsParams creates a new DeleteCohortsParams object
-//
-// There are no default values defined in the spec.
+// no default values defined in spec.
 func NewDeleteCohortsParams() DeleteCohortsParams {
 
 	return DeleteCohortsParams{}
@@ -52,6 +51,7 @@ func (o *DeleteCohortsParams) BindRequest(r *http.Request, route *middleware.Mat
 	if err := o.bindName(rName, rhkName, route.Formats); err != nil {
 		res = append(res, err)
 	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
@@ -67,6 +67,7 @@ func (o *DeleteCohortsParams) bindName(rawData []string, hasKey bool, formats st
 
 	// Required: true
 	// Parameter is provided by construction from the route
+
 	o.Name = raw
 
 	if err := o.validateName(formats); err != nil {

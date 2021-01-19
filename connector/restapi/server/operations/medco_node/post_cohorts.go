@@ -6,7 +6,6 @@ package medco_node
 // Editing this file might prove futile when you re-run the generate command
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/go-openapi/errors"
@@ -36,7 +35,7 @@ func NewPostCohorts(ctx *middleware.Context, handler PostCohortsHandler) *PostCo
 	return &PostCohorts{Context: ctx, Handler: handler}
 }
 
-/* PostCohorts swagger:route POST /node/explore/cohorts/{name} medco-node postCohorts
+/*PostCohorts swagger:route POST /node/explore/cohorts/{name} medco-node postCohorts
 
 Add a new cohort
 
@@ -52,6 +51,7 @@ func (o *PostCohorts) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		r = rCtx
 	}
 	var Params = NewPostCohortsParams()
+
 	uprinc, aCtx, err := o.Context.Authorize(r, route)
 	if err != nil {
 		o.Context.Respond(rw, r, route.Produces, route, err)
@@ -71,6 +71,7 @@ func (o *PostCohorts) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	res := o.Handler.Handle(Params, principal) // actually handle the request
+
 	o.Context.Respond(rw, r, route.Produces, route, res)
 
 }
@@ -86,11 +87,6 @@ type PostCohortsBadRequestBody struct {
 
 // Validate validates this post cohorts bad request body
 func (o *PostCohortsBadRequestBody) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// ContextValidate validates this post cohorts bad request body based on context it is used
-func (o *PostCohortsBadRequestBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -154,7 +150,7 @@ func (o *PostCohortsBody) Validate(formats strfmt.Registry) error {
 
 func (o *PostCohortsBody) validateCreationDate(formats strfmt.Registry) error {
 
-	if err := validate.Required("cohortRequest"+"."+"creationDate", "body", o.CreationDate); err != nil {
+	if err := validate.Required("cohortsRequest"+"."+"creationDate", "body", o.CreationDate); err != nil {
 		return err
 	}
 
@@ -163,7 +159,7 @@ func (o *PostCohortsBody) validateCreationDate(formats strfmt.Registry) error {
 
 func (o *PostCohortsBody) validatePatientSetID(formats strfmt.Registry) error {
 
-	if err := validate.Required("cohortRequest"+"."+"patientSetID", "body", o.PatientSetID); err != nil {
+	if err := validate.Required("cohortsRequest"+"."+"patientSetID", "body", o.PatientSetID); err != nil {
 		return err
 	}
 
@@ -172,15 +168,10 @@ func (o *PostCohortsBody) validatePatientSetID(formats strfmt.Registry) error {
 
 func (o *PostCohortsBody) validateUpdateDate(formats strfmt.Registry) error {
 
-	if err := validate.Required("cohortRequest"+"."+"updateDate", "body", o.UpdateDate); err != nil {
+	if err := validate.Required("cohortsRequest"+"."+"updateDate", "body", o.UpdateDate); err != nil {
 		return err
 	}
 
-	return nil
-}
-
-// ContextValidate validates this post cohorts body based on context it is used
-func (o *PostCohortsBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -216,11 +207,6 @@ func (o *PostCohortsConflictBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-// ContextValidate validates this post cohorts conflict body based on context it is used
-func (o *PostCohortsConflictBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	return nil
-}
-
 // MarshalBinary interface implementation
 func (o *PostCohortsConflictBody) MarshalBinary() ([]byte, error) {
 	if o == nil {
@@ -253,11 +239,6 @@ func (o *PostCohortsDefaultBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-// ContextValidate validates this post cohorts default body based on context it is used
-func (o *PostCohortsDefaultBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	return nil
-}
-
 // MarshalBinary interface implementation
 func (o *PostCohortsDefaultBody) MarshalBinary() ([]byte, error) {
 	if o == nil {
@@ -287,11 +268,6 @@ type PostCohortsNotFoundBody struct {
 
 // Validate validates this post cohorts not found body
 func (o *PostCohortsNotFoundBody) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// ContextValidate validates this post cohorts not found body based on context it is used
-func (o *PostCohortsNotFoundBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

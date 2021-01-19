@@ -17,92 +17,76 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// NewExploreQueryParams creates a new ExploreQueryParams object,
-// with the default timeout for this client.
-//
-// Default values are not hydrated, since defaults are normally applied by the API server side.
-//
-// To enforce default values in parameter, use SetDefaults or WithDefaults.
+// NewExploreQueryParams creates a new ExploreQueryParams object
+// with the default values initialized.
 func NewExploreQueryParams() *ExploreQueryParams {
+	var (
+		syncDefault = bool(true)
+	)
 	return &ExploreQueryParams{
+		Sync: &syncDefault,
+
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewExploreQueryParamsWithTimeout creates a new ExploreQueryParams object
-// with the ability to set a timeout on a request.
+// with the default values initialized, and the ability to set a timeout on a request
 func NewExploreQueryParamsWithTimeout(timeout time.Duration) *ExploreQueryParams {
+	var (
+		syncDefault = bool(true)
+	)
 	return &ExploreQueryParams{
+		Sync: &syncDefault,
+
 		timeout: timeout,
 	}
 }
 
 // NewExploreQueryParamsWithContext creates a new ExploreQueryParams object
-// with the ability to set a context for a request.
+// with the default values initialized, and the ability to set a context for a request
 func NewExploreQueryParamsWithContext(ctx context.Context) *ExploreQueryParams {
+	var (
+		syncDefault = bool(true)
+	)
 	return &ExploreQueryParams{
+		Sync: &syncDefault,
+
 		Context: ctx,
 	}
 }
 
 // NewExploreQueryParamsWithHTTPClient creates a new ExploreQueryParams object
-// with the ability to set a custom HTTPClient for a request.
+// with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewExploreQueryParamsWithHTTPClient(client *http.Client) *ExploreQueryParams {
+	var (
+		syncDefault = bool(true)
+	)
 	return &ExploreQueryParams{
+		Sync:       &syncDefault,
 		HTTPClient: client,
 	}
 }
 
-/* ExploreQueryParams contains all the parameters to send to the API endpoint
-   for the explore query operation.
-
-   Typically these are written to a http.Request.
+/*ExploreQueryParams contains all the parameters to send to the API endpoint
+for the explore query operation typically these are written to a http.Request
 */
 type ExploreQueryParams struct {
 
-	/* QueryRequest.
+	/*QueryRequest
+	  MedCo-Explore query request.
 
-	   MedCo-Explore query request.
 	*/
 	QueryRequest ExploreQueryBody
+	/*Sync
+	  Request synchronous query (defaults to true).
 
-	/* Sync.
-
-	   Request synchronous query (defaults to true).
-
-	   Default: true
 	*/
 	Sync *bool
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
-}
-
-// WithDefaults hydrates default values in the explore query params (not the query body).
-//
-// All values with no default are reset to their zero value.
-func (o *ExploreQueryParams) WithDefaults() *ExploreQueryParams {
-	o.SetDefaults()
-	return o
-}
-
-// SetDefaults hydrates default values in the explore query params (not the query body).
-//
-// All values with no default are reset to their zero value.
-func (o *ExploreQueryParams) SetDefaults() {
-	var (
-		syncDefault = bool(true)
-	)
-
-	val := ExploreQueryParams{
-		Sync: &syncDefault,
-	}
-
-	val.timeout = o.timeout
-	val.Context = o.Context
-	val.HTTPClient = o.HTTPClient
-	*o = val
 }
 
 // WithTimeout adds the timeout to the explore query params
@@ -167,6 +151,7 @@ func (o *ExploreQueryParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 		return err
 	}
 	var res []error
+
 	if err := r.SetBodyParam(o.QueryRequest); err != nil {
 		return err
 	}
@@ -175,17 +160,16 @@ func (o *ExploreQueryParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 
 		// query param sync
 		var qrSync bool
-
 		if o.Sync != nil {
 			qrSync = *o.Sync
 		}
 		qSync := swag.FormatBool(qrSync)
 		if qSync != "" {
-
 			if err := r.SetQueryParam("sync", qSync); err != nil {
 				return err
 			}
 		}
+
 	}
 
 	if len(res) > 0 {

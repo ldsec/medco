@@ -12,50 +12,48 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
-
-	"github.com/ldsec/medco/connector/restapi/models"
 )
 
-// NewExploreSearchConceptParams creates a new ExploreSearchConceptParams object
+// NewPostCohortsPatientListParams creates a new PostCohortsPatientListParams object
 // no default values defined in spec.
-func NewExploreSearchConceptParams() ExploreSearchConceptParams {
+func NewPostCohortsPatientListParams() PostCohortsPatientListParams {
 
-	return ExploreSearchConceptParams{}
+	return PostCohortsPatientListParams{}
 }
 
-// ExploreSearchConceptParams contains all the bound params for the explore search concept operation
+// PostCohortsPatientListParams contains all the bound params for the post cohorts patient list operation
 // typically these are obtained from a http.Request
 //
-// swagger:parameters exploreSearchConcept
-type ExploreSearchConceptParams struct {
+// swagger:parameters postCohortsPatientList
+type PostCohortsPatientListParams struct {
 
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
 
-	/*MedCo-Explore ontology search concept request.
+	/*Cohort patient list request
 	  Required: true
 	  In: body
 	*/
-	SearchConceptRequest *models.ExploreSearchConcept
+	CohortsPatientListRequest PostCohortsPatientListBody
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
 // for simple values it will use straight method calls.
 //
-// To ensure default values, the struct must have been initialized with NewExploreSearchConceptParams() beforehand.
-func (o *ExploreSearchConceptParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
+// To ensure default values, the struct must have been initialized with NewPostCohortsPatientListParams() beforehand.
+func (o *PostCohortsPatientListParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
 
 	o.HTTPRequest = r
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body models.ExploreSearchConcept
+		var body PostCohortsPatientListBody
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
-				res = append(res, errors.Required("searchConceptRequest", "body", ""))
+				res = append(res, errors.Required("cohortsPatientListRequest", "body", ""))
 			} else {
-				res = append(res, errors.NewParseError("searchConceptRequest", "body", "", err))
+				res = append(res, errors.NewParseError("cohortsPatientListRequest", "body", "", err))
 			}
 		} else {
 			// validate body object
@@ -64,11 +62,11 @@ func (o *ExploreSearchConceptParams) BindRequest(r *http.Request, route *middlew
 			}
 
 			if len(res) == 0 {
-				o.SearchConceptRequest = &body
+				o.CohortsPatientListRequest = body
 			}
 		}
 	} else {
-		res = append(res, errors.Required("searchConceptRequest", "body", ""))
+		res = append(res, errors.Required("cohortsPatientListRequest", "body", ""))
 	}
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

@@ -6,7 +6,6 @@ package medco_node
 // Editing this file might prove futile when you re-run the generate command
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/go-openapi/errors"
@@ -36,7 +35,7 @@ func NewPutCohorts(ctx *middleware.Context, handler PutCohortsHandler) *PutCohor
 	return &PutCohorts{Context: ctx, Handler: handler}
 }
 
-/* PutCohorts swagger:route PUT /node/explore/cohorts/{name} medco-node putCohorts
+/*PutCohorts swagger:route PUT /node/explore/cohorts/{name} medco-node putCohorts
 
 Update a cohort
 
@@ -52,6 +51,7 @@ func (o *PutCohorts) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		r = rCtx
 	}
 	var Params = NewPutCohortsParams()
+
 	uprinc, aCtx, err := o.Context.Authorize(r, route)
 	if err != nil {
 		o.Context.Respond(rw, r, route.Produces, route, err)
@@ -71,6 +71,7 @@ func (o *PutCohorts) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	res := o.Handler.Handle(Params, principal) // actually handle the request
+
 	o.Context.Respond(rw, r, route.Produces, route, res)
 
 }
@@ -86,11 +87,6 @@ type PutCohortsBadRequestBody struct {
 
 // Validate validates this put cohorts bad request body
 func (o *PutCohortsBadRequestBody) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// ContextValidate validates this put cohorts bad request body based on context it is used
-func (o *PutCohortsBadRequestBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -154,7 +150,7 @@ func (o *PutCohortsBody) Validate(formats strfmt.Registry) error {
 
 func (o *PutCohortsBody) validateCreationDate(formats strfmt.Registry) error {
 
-	if err := validate.Required("cohortRequest"+"."+"creationDate", "body", o.CreationDate); err != nil {
+	if err := validate.Required("cohortsRequest"+"."+"creationDate", "body", o.CreationDate); err != nil {
 		return err
 	}
 
@@ -163,7 +159,7 @@ func (o *PutCohortsBody) validateCreationDate(formats strfmt.Registry) error {
 
 func (o *PutCohortsBody) validatePatientSetID(formats strfmt.Registry) error {
 
-	if err := validate.Required("cohortRequest"+"."+"patientSetID", "body", o.PatientSetID); err != nil {
+	if err := validate.Required("cohortsRequest"+"."+"patientSetID", "body", o.PatientSetID); err != nil {
 		return err
 	}
 
@@ -172,15 +168,10 @@ func (o *PutCohortsBody) validatePatientSetID(formats strfmt.Registry) error {
 
 func (o *PutCohortsBody) validateUpdateDate(formats strfmt.Registry) error {
 
-	if err := validate.Required("cohortRequest"+"."+"updateDate", "body", o.UpdateDate); err != nil {
+	if err := validate.Required("cohortsRequest"+"."+"updateDate", "body", o.UpdateDate); err != nil {
 		return err
 	}
 
-	return nil
-}
-
-// ContextValidate validates this put cohorts body based on context it is used
-func (o *PutCohortsBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -216,11 +207,6 @@ func (o *PutCohortsConflictBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-// ContextValidate validates this put cohorts conflict body based on context it is used
-func (o *PutCohortsConflictBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	return nil
-}
-
 // MarshalBinary interface implementation
 func (o *PutCohortsConflictBody) MarshalBinary() ([]byte, error) {
 	if o == nil {
@@ -253,11 +239,6 @@ func (o *PutCohortsDefaultBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-// ContextValidate validates this put cohorts default body based on context it is used
-func (o *PutCohortsDefaultBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	return nil
-}
-
 // MarshalBinary interface implementation
 func (o *PutCohortsDefaultBody) MarshalBinary() ([]byte, error) {
 	if o == nil {
@@ -287,11 +268,6 @@ type PutCohortsNotFoundBody struct {
 
 // Validate validates this put cohorts not found body
 func (o *PutCohortsNotFoundBody) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// ContextValidate validates this put cohorts not found body based on context it is used
-func (o *PutCohortsNotFoundBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

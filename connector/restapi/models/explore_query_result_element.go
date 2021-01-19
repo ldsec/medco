@@ -6,7 +6,6 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"context"
 	"encoding/json"
 
 	"github.com/go-openapi/errors"
@@ -91,6 +90,7 @@ func (m *ExploreQueryResultElement) validateStatusEnum(path, location string, va
 }
 
 func (m *ExploreQueryResultElement) validateStatus(formats strfmt.Registry) error {
+
 	if swag.IsZero(m.Status) { // not required
 		return nil
 	}
@@ -104,37 +104,12 @@ func (m *ExploreQueryResultElement) validateStatus(formats strfmt.Registry) erro
 }
 
 func (m *ExploreQueryResultElement) validateTimers(formats strfmt.Registry) error {
+
 	if swag.IsZero(m.Timers) { // not required
 		return nil
 	}
 
 	if err := m.Timers.Validate(formats); err != nil {
-		if ve, ok := err.(*errors.Validation); ok {
-			return ve.ValidateName("timers")
-		}
-		return err
-	}
-
-	return nil
-}
-
-// ContextValidate validate this explore query result element based on the context it is used
-func (m *ExploreQueryResultElement) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.contextValidateTimers(ctx, formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *ExploreQueryResultElement) contextValidateTimers(ctx context.Context, formats strfmt.Registry) error {
-
-	if err := m.Timers.ContextValidate(ctx, formats); err != nil {
 		if ve, ok := err.(*errors.Validation); ok {
 			return ve.ValidateName("timers")
 		}

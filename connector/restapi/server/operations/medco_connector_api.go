@@ -63,9 +63,6 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 		MedcoNodeGetCohortsHandler: medco_node.GetCohortsHandlerFunc(func(params medco_node.GetCohortsParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_node.GetCohorts has not yet been implemented")
 		}),
-		MedcoNodeGetCohortsPatientListHandler: medco_node.GetCohortsPatientListHandlerFunc(func(params medco_node.GetCohortsPatientListParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation medco_node.GetCohortsPatientList has not yet been implemented")
-		}),
 		MedcoNodeGetExploreQueryHandler: medco_node.GetExploreQueryHandlerFunc(func(params medco_node.GetExploreQueryParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_node.GetExploreQuery has not yet been implemented")
 		}),
@@ -80,6 +77,9 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 		}),
 		MedcoNodePostCohortsHandler: medco_node.PostCohortsHandlerFunc(func(params medco_node.PostCohortsParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_node.PostCohorts has not yet been implemented")
+		}),
+		MedcoNodePostCohortsPatientListHandler: medco_node.PostCohortsPatientListHandlerFunc(func(params medco_node.PostCohortsPatientListParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation medco_node.PostCohortsPatientList has not yet been implemented")
 		}),
 		MedcoNodePutCohortsHandler: medco_node.PutCohortsHandlerFunc(func(params medco_node.PutCohortsParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_node.PutCohorts has not yet been implemented")
@@ -112,11 +112,9 @@ type MedcoConnectorAPI struct {
 	// BasicAuthenticator generates a runtime.Authenticator from the supplied basic auth function.
 	// It has a default implementation in the security package, however you can replace it for your particular usage.
 	BasicAuthenticator func(security.UserPassAuthentication) runtime.Authenticator
-
 	// APIKeyAuthenticator generates a runtime.Authenticator from the supplied token auth function.
 	// It has a default implementation in the security package, however you can replace it for your particular usage.
 	APIKeyAuthenticator func(string, string, security.TokenAuthentication) runtime.Authenticator
-
 	// BearerAuthenticator generates a runtime.Authenticator from the supplied bearer token auth function.
 	// It has a default implementation in the security package, however you can replace it for your particular usage.
 	BearerAuthenticator func(string, security.ScopedTokenAuthentication) runtime.Authenticator
@@ -146,8 +144,6 @@ type MedcoConnectorAPI struct {
 	MedcoNodeExploreSearchModifierHandler medco_node.ExploreSearchModifierHandler
 	// MedcoNodeGetCohortsHandler sets the operation handler for the get cohorts operation
 	MedcoNodeGetCohortsHandler medco_node.GetCohortsHandler
-	// MedcoNodeGetCohortsPatientListHandler sets the operation handler for the get cohorts patient list operation
-	MedcoNodeGetCohortsPatientListHandler medco_node.GetCohortsPatientListHandler
 	// MedcoNodeGetExploreQueryHandler sets the operation handler for the get explore query operation
 	MedcoNodeGetExploreQueryHandler medco_node.GetExploreQueryHandler
 	// MedcoNetworkGetMetadataHandler sets the operation handler for the get metadata operation
@@ -158,11 +154,12 @@ type MedcoConnectorAPI struct {
 	GenomicAnnotationsGetVariantsHandler genomic_annotations.GetVariantsHandler
 	// MedcoNodePostCohortsHandler sets the operation handler for the post cohorts operation
 	MedcoNodePostCohortsHandler medco_node.PostCohortsHandler
+	// MedcoNodePostCohortsPatientListHandler sets the operation handler for the post cohorts patient list operation
+	MedcoNodePostCohortsPatientListHandler medco_node.PostCohortsPatientListHandler
 	// MedcoNodePutCohortsHandler sets the operation handler for the put cohorts operation
 	MedcoNodePutCohortsHandler medco_node.PutCohortsHandler
 	// SurvivalAnalysisSurvivalAnalysisHandler sets the operation handler for the survival analysis operation
 	SurvivalAnalysisSurvivalAnalysisHandler survival_analysis.SurvivalAnalysisHandler
-
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
 	ServeError func(http.ResponseWriter, *http.Request, error)
@@ -258,9 +255,6 @@ func (o *MedcoConnectorAPI) Validate() error {
 	if o.MedcoNodeGetCohortsHandler == nil {
 		unregistered = append(unregistered, "medco_node.GetCohortsHandler")
 	}
-	if o.MedcoNodeGetCohortsPatientListHandler == nil {
-		unregistered = append(unregistered, "medco_node.GetCohortsPatientListHandler")
-	}
 	if o.MedcoNodeGetExploreQueryHandler == nil {
 		unregistered = append(unregistered, "medco_node.GetExploreQueryHandler")
 	}
@@ -275,6 +269,9 @@ func (o *MedcoConnectorAPI) Validate() error {
 	}
 	if o.MedcoNodePostCohortsHandler == nil {
 		unregistered = append(unregistered, "medco_node.PostCohortsHandler")
+	}
+	if o.MedcoNodePostCohortsPatientListHandler == nil {
+		unregistered = append(unregistered, "medco_node.PostCohortsPatientListHandler")
 	}
 	if o.MedcoNodePutCohortsHandler == nil {
 		unregistered = append(unregistered, "medco_node.PutCohortsHandler")
@@ -403,10 +400,6 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/node/explore/cohorts/patientList/{name}"] = medco_node.NewGetCohortsPatientList(o.context, o.MedcoNodeGetCohortsPatientListHandler)
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
 	o.handlers["GET"]["/node/explore/query/{queryId}"] = medco_node.NewGetExploreQuery(o.context, o.MedcoNodeGetExploreQueryHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
@@ -424,6 +417,10 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/node/explore/cohorts/{name}"] = medco_node.NewPostCohorts(o.context, o.MedcoNodePostCohortsHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/node/explore/cohorts/patientList"] = medco_node.NewPostCohortsPatientList(o.context, o.MedcoNodePostCohortsPatientListHandler)
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}

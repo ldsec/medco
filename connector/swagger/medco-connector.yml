@@ -327,19 +327,14 @@ paths:
       security:
         - medco-jwt: ["medco-explore"]
 
-  /node/explore/cohorts/patientList/{name}:
-    get:
+  /node/explore/cohorts/patientList:
+    post:
       tags:
         - "medco-node"
       summary: "Retrieve the encrypted patient list for a given cohort name"
-      operationId: "getCohortsPatientList"
+      operationId: "postCohortsPatientList"
       parameters:
-        - in: "path"
-          name: "name"
-          description: "Name of the cohort to update"
-          required: true
-          type: "string"
-          pattern: '^\w+$'
+        - $ref: '#/parameters/cohortsPatientListRequest'
       responses:
         200:
           $ref: '#/responses/getCohortsPatientListResponse'
@@ -393,8 +388,8 @@ parameters:
 
   cohortsRequest:
     in: "body"
-    description: "Cohort that has been updated or created"
-    name: "cohortRequest"
+    description: "Cohort that has been updated or created."
+    name: "cohortsRequest"
     required: true
     schema:
       type: "object"
@@ -409,6 +404,24 @@ parameters:
         - patientSetID
         - creationDate
         - updateDate
+  
+  cohortsPatientListRequest:
+    in: "body"
+    description: "Cohort patient list request"
+    name: "cohortsPatientListRequest"
+    required: true
+    schema:
+      type: "object"
+      properties:
+        cohortName:
+          type: "string"
+          pattern: '^\w+$'
+        userPublicKey:
+          type: "string"
+          pattern: '^[\w=-]+$'
+      required:
+        - cohortName
+        - userPublicKey
 
   survivalAnalysisRequest:
     in: "body"

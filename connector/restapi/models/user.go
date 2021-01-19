@@ -6,7 +6,6 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"context"
 	"strconv"
 
 	"github.com/go-openapi/errors"
@@ -44,40 +43,13 @@ func (m *User) Validate(formats strfmt.Registry) error {
 }
 
 func (m *User) validateAuthorizations(formats strfmt.Registry) error {
+
 	if swag.IsZero(m.Authorizations) { // not required
 		return nil
 	}
 
 	if m.Authorizations != nil {
 		if err := m.Authorizations.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("authorizations")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-// ContextValidate validate this user based on the context it is used
-func (m *User) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.contextValidateAuthorizations(ctx, formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *User) contextValidateAuthorizations(ctx context.Context, formats strfmt.Registry) error {
-
-	if m.Authorizations != nil {
-		if err := m.Authorizations.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("authorizations")
 			}
@@ -137,6 +109,7 @@ func (m *UserAuthorizations) Validate(formats strfmt.Registry) error {
 }
 
 func (m *UserAuthorizations) validateExploreQuery(formats strfmt.Registry) error {
+
 	if swag.IsZero(m.ExploreQuery) { // not required
 		return nil
 	}
@@ -156,6 +129,7 @@ func (m *UserAuthorizations) validateExploreQuery(formats strfmt.Registry) error
 }
 
 func (m *UserAuthorizations) validateRestAPI(formats strfmt.Registry) error {
+
 	if swag.IsZero(m.RestAPI) { // not required
 		return nil
 	}
@@ -163,56 +137,6 @@ func (m *UserAuthorizations) validateRestAPI(formats strfmt.Registry) error {
 	for i := 0; i < len(m.RestAPI); i++ {
 
 		if err := m.RestAPI[i].Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("authorizations" + "." + "restApi" + "." + strconv.Itoa(i))
-			}
-			return err
-		}
-
-	}
-
-	return nil
-}
-
-// ContextValidate validate this user authorizations based on the context it is used
-func (m *UserAuthorizations) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.contextValidateExploreQuery(ctx, formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.contextValidateRestAPI(ctx, formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *UserAuthorizations) contextValidateExploreQuery(ctx context.Context, formats strfmt.Registry) error {
-
-	for i := 0; i < len(m.ExploreQuery); i++ {
-
-		if err := m.ExploreQuery[i].ContextValidate(ctx, formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("authorizations" + "." + "exploreQuery" + "." + strconv.Itoa(i))
-			}
-			return err
-		}
-
-	}
-
-	return nil
-}
-
-func (m *UserAuthorizations) contextValidateRestAPI(ctx context.Context, formats strfmt.Registry) error {
-
-	for i := 0; i < len(m.RestAPI); i++ {
-
-		if err := m.RestAPI[i].ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("authorizations" + "." + "restApi" + "." + strconv.Itoa(i))
 			}

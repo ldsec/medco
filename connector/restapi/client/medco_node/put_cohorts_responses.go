@@ -6,7 +6,6 @@ package medco_node
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"context"
 	"fmt"
 	"io"
 
@@ -66,7 +65,7 @@ func NewPutCohortsOK() *PutCohortsOK {
 	return &PutCohortsOK{}
 }
 
-/* PutCohortsOK describes a response with status code 200, with default header values.
+/*PutCohortsOK handles this case with default header values.
 
 Updated cohort
 */
@@ -87,7 +86,7 @@ func NewPutCohortsBadRequest() *PutCohortsBadRequest {
 	return &PutCohortsBadRequest{}
 }
 
-/* PutCohortsBadRequest describes a response with status code 400, with default header values.
+/*PutCohortsBadRequest handles this case with default header values.
 
 Bad user input in request.
 */
@@ -98,6 +97,7 @@ type PutCohortsBadRequest struct {
 func (o *PutCohortsBadRequest) Error() string {
 	return fmt.Sprintf("[PUT /node/explore/cohorts/{name}][%d] putCohortsBadRequest  %+v", 400, o.Payload)
 }
+
 func (o *PutCohortsBadRequest) GetPayload() *PutCohortsBadRequestBody {
 	return o.Payload
 }
@@ -119,7 +119,7 @@ func NewPutCohortsNotFound() *PutCohortsNotFound {
 	return &PutCohortsNotFound{}
 }
 
-/* PutCohortsNotFound describes a response with status code 404, with default header values.
+/*PutCohortsNotFound handles this case with default header values.
 
 Not found.
 */
@@ -130,6 +130,7 @@ type PutCohortsNotFound struct {
 func (o *PutCohortsNotFound) Error() string {
 	return fmt.Sprintf("[PUT /node/explore/cohorts/{name}][%d] putCohortsNotFound  %+v", 404, o.Payload)
 }
+
 func (o *PutCohortsNotFound) GetPayload() *PutCohortsNotFoundBody {
 	return o.Payload
 }
@@ -151,7 +152,7 @@ func NewPutCohortsConflict() *PutCohortsConflict {
 	return &PutCohortsConflict{}
 }
 
-/* PutCohortsConflict describes a response with status code 409, with default header values.
+/*PutCohortsConflict handles this case with default header values.
 
 Conflict with resource's state.
 */
@@ -162,6 +163,7 @@ type PutCohortsConflict struct {
 func (o *PutCohortsConflict) Error() string {
 	return fmt.Sprintf("[PUT /node/explore/cohorts/{name}][%d] putCohortsConflict  %+v", 409, o.Payload)
 }
+
 func (o *PutCohortsConflict) GetPayload() *PutCohortsConflictBody {
 	return o.Payload
 }
@@ -185,7 +187,7 @@ func NewPutCohortsDefault(code int) *PutCohortsDefault {
 	}
 }
 
-/* PutCohortsDefault describes a response with status code -1, with default header values.
+/*PutCohortsDefault handles this case with default header values.
 
 Error response.
 */
@@ -203,6 +205,7 @@ func (o *PutCohortsDefault) Code() int {
 func (o *PutCohortsDefault) Error() string {
 	return fmt.Sprintf("[PUT /node/explore/cohorts/{name}][%d] putCohorts default  %+v", o._statusCode, o.Payload)
 }
+
 func (o *PutCohortsDefault) GetPayload() *PutCohortsDefaultBody {
 	return o.Payload
 }
@@ -230,11 +233,6 @@ type PutCohortsBadRequestBody struct {
 
 // Validate validates this put cohorts bad request body
 func (o *PutCohortsBadRequestBody) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// ContextValidate validates this put cohorts bad request body based on context it is used
-func (o *PutCohortsBadRequestBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -298,7 +296,7 @@ func (o *PutCohortsBody) Validate(formats strfmt.Registry) error {
 
 func (o *PutCohortsBody) validateCreationDate(formats strfmt.Registry) error {
 
-	if err := validate.Required("cohortRequest"+"."+"creationDate", "body", o.CreationDate); err != nil {
+	if err := validate.Required("cohortsRequest"+"."+"creationDate", "body", o.CreationDate); err != nil {
 		return err
 	}
 
@@ -307,7 +305,7 @@ func (o *PutCohortsBody) validateCreationDate(formats strfmt.Registry) error {
 
 func (o *PutCohortsBody) validatePatientSetID(formats strfmt.Registry) error {
 
-	if err := validate.Required("cohortRequest"+"."+"patientSetID", "body", o.PatientSetID); err != nil {
+	if err := validate.Required("cohortsRequest"+"."+"patientSetID", "body", o.PatientSetID); err != nil {
 		return err
 	}
 
@@ -316,15 +314,10 @@ func (o *PutCohortsBody) validatePatientSetID(formats strfmt.Registry) error {
 
 func (o *PutCohortsBody) validateUpdateDate(formats strfmt.Registry) error {
 
-	if err := validate.Required("cohortRequest"+"."+"updateDate", "body", o.UpdateDate); err != nil {
+	if err := validate.Required("cohortsRequest"+"."+"updateDate", "body", o.UpdateDate); err != nil {
 		return err
 	}
 
-	return nil
-}
-
-// ContextValidate validates this put cohorts body based on context it is used
-func (o *PutCohortsBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -360,11 +353,6 @@ func (o *PutCohortsConflictBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-// ContextValidate validates this put cohorts conflict body based on context it is used
-func (o *PutCohortsConflictBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	return nil
-}
-
 // MarshalBinary interface implementation
 func (o *PutCohortsConflictBody) MarshalBinary() ([]byte, error) {
 	if o == nil {
@@ -397,11 +385,6 @@ func (o *PutCohortsDefaultBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-// ContextValidate validates this put cohorts default body based on context it is used
-func (o *PutCohortsDefaultBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	return nil
-}
-
 // MarshalBinary interface implementation
 func (o *PutCohortsDefaultBody) MarshalBinary() ([]byte, error) {
 	if o == nil {
@@ -431,11 +414,6 @@ type PutCohortsNotFoundBody struct {
 
 // Validate validates this put cohorts not found body
 func (o *PutCohortsNotFoundBody) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// ContextValidate validates this put cohorts not found body based on context it is used
-func (o *PutCohortsNotFoundBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

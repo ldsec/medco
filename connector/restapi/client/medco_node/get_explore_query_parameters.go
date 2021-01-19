@@ -16,73 +16,59 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewGetExploreQueryParams creates a new GetExploreQueryParams object,
-// with the default timeout for this client.
-//
-// Default values are not hydrated, since defaults are normally applied by the API server side.
-//
-// To enforce default values in parameter, use SetDefaults or WithDefaults.
+// NewGetExploreQueryParams creates a new GetExploreQueryParams object
+// with the default values initialized.
 func NewGetExploreQueryParams() *GetExploreQueryParams {
+	var ()
 	return &GetExploreQueryParams{
+
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetExploreQueryParamsWithTimeout creates a new GetExploreQueryParams object
-// with the ability to set a timeout on a request.
+// with the default values initialized, and the ability to set a timeout on a request
 func NewGetExploreQueryParamsWithTimeout(timeout time.Duration) *GetExploreQueryParams {
+	var ()
 	return &GetExploreQueryParams{
+
 		timeout: timeout,
 	}
 }
 
 // NewGetExploreQueryParamsWithContext creates a new GetExploreQueryParams object
-// with the ability to set a context for a request.
+// with the default values initialized, and the ability to set a context for a request
 func NewGetExploreQueryParamsWithContext(ctx context.Context) *GetExploreQueryParams {
+	var ()
 	return &GetExploreQueryParams{
+
 		Context: ctx,
 	}
 }
 
 // NewGetExploreQueryParamsWithHTTPClient creates a new GetExploreQueryParams object
-// with the ability to set a custom HTTPClient for a request.
+// with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewGetExploreQueryParamsWithHTTPClient(client *http.Client) *GetExploreQueryParams {
+	var ()
 	return &GetExploreQueryParams{
 		HTTPClient: client,
 	}
 }
 
-/* GetExploreQueryParams contains all the parameters to send to the API endpoint
-   for the get explore query operation.
-
-   Typically these are written to a http.Request.
+/*GetExploreQueryParams contains all the parameters to send to the API endpoint
+for the get explore query operation typically these are written to a http.Request
 */
 type GetExploreQueryParams struct {
 
-	/* QueryID.
+	/*QueryID
+	  Query ID
 
-	   Query ID
 	*/
 	QueryID string
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
-}
-
-// WithDefaults hydrates default values in the get explore query params (not the query body).
-//
-// All values with no default are reset to their zero value.
-func (o *GetExploreQueryParams) WithDefaults() *GetExploreQueryParams {
-	o.SetDefaults()
-	return o
-}
-
-// SetDefaults hydrates default values in the get explore query params (not the query body).
-//
-// All values with no default are reset to their zero value.
-func (o *GetExploreQueryParams) SetDefaults() {
-	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the get explore query params

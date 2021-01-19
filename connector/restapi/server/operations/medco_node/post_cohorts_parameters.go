@@ -6,7 +6,6 @@ package medco_node
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"context"
 	"io"
 	"net/http"
 
@@ -18,8 +17,7 @@ import (
 )
 
 // NewPostCohortsParams creates a new PostCohortsParams object
-//
-// There are no default values defined in the spec.
+// no default values defined in spec.
 func NewPostCohortsParams() PostCohortsParams {
 
 	return PostCohortsParams{}
@@ -34,11 +32,11 @@ type PostCohortsParams struct {
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
 
-	/*Cohort that has been updated or created
+	/*Cohort that has been updated or created.
 	  Required: true
 	  In: body
 	*/
-	CohortRequest PostCohortsBody
+	CohortsRequest PostCohortsBody
 	/*Name of the cohort to update
 	  Required: true
 	  Pattern: ^\w+$
@@ -61,9 +59,9 @@ func (o *PostCohortsParams) BindRequest(r *http.Request, route *middleware.Match
 		var body PostCohortsBody
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
-				res = append(res, errors.Required("cohortRequest", "body", ""))
+				res = append(res, errors.Required("cohortsRequest", "body", ""))
 			} else {
-				res = append(res, errors.NewParseError("cohortRequest", "body", "", err))
+				res = append(res, errors.NewParseError("cohortsRequest", "body", "", err))
 			}
 		} else {
 			// validate body object
@@ -71,23 +69,18 @@ func (o *PostCohortsParams) BindRequest(r *http.Request, route *middleware.Match
 				res = append(res, err)
 			}
 
-			ctx := validate.WithOperationRequest(context.Background())
-			if err := body.ContextValidate(ctx, route.Formats); err != nil {
-				res = append(res, err)
-			}
-
 			if len(res) == 0 {
-				o.CohortRequest = body
+				o.CohortsRequest = body
 			}
 		}
 	} else {
-		res = append(res, errors.Required("cohortRequest", "body", ""))
+		res = append(res, errors.Required("cohortsRequest", "body", ""))
 	}
-
 	rName, rhkName, _ := route.Params.GetOK("name")
 	if err := o.bindName(rName, rhkName, route.Formats); err != nil {
 		res = append(res, err)
 	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
@@ -103,6 +96,7 @@ func (o *PostCohortsParams) bindName(rawData []string, hasKey bool, formats strf
 
 	// Required: true
 	// Parameter is provided by construction from the route
+
 	o.Name = raw
 
 	if err := o.validateName(formats); err != nil {

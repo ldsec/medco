@@ -6,7 +6,6 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"context"
 	"strconv"
 
 	"github.com/go-openapi/errors"
@@ -24,7 +23,7 @@ type ExploreQuery struct {
 	Panels []*Panel `json:"panels"`
 
 	// query timing
-	QueryTiming *Timing `json:"queryTiming,omitempty"`
+	QueryTiming Timing `json:"queryTiming,omitempty"`
 
 	// user public key
 	// Pattern: ^[\w=-]+$
@@ -54,6 +53,7 @@ func (m *ExploreQuery) Validate(formats strfmt.Registry) error {
 }
 
 func (m *ExploreQuery) validatePanels(formats strfmt.Registry) error {
+
 	if swag.IsZero(m.Panels) { // not required
 		return nil
 	}
@@ -78,79 +78,29 @@ func (m *ExploreQuery) validatePanels(formats strfmt.Registry) error {
 }
 
 func (m *ExploreQuery) validateQueryTiming(formats strfmt.Registry) error {
+
 	if swag.IsZero(m.QueryTiming) { // not required
 		return nil
 	}
 
-	if m.QueryTiming != nil {
-		if err := m.QueryTiming.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("queryTiming")
-			}
-			return err
+	if err := m.QueryTiming.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("queryTiming")
 		}
-	}
-
-	return nil
-}
-
-func (m *ExploreQuery) validateUserPublicKey(formats strfmt.Registry) error {
-	if swag.IsZero(m.UserPublicKey) { // not required
-		return nil
-	}
-
-	if err := validate.Pattern("userPublicKey", "body", m.UserPublicKey, `^[\w=-]+$`); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-// ContextValidate validate this explore query based on the context it is used
-func (m *ExploreQuery) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	var res []error
+func (m *ExploreQuery) validateUserPublicKey(formats strfmt.Registry) error {
 
-	if err := m.contextValidatePanels(ctx, formats); err != nil {
-		res = append(res, err)
+	if swag.IsZero(m.UserPublicKey) { // not required
+		return nil
 	}
 
-	if err := m.contextValidateQueryTiming(ctx, formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *ExploreQuery) contextValidatePanels(ctx context.Context, formats strfmt.Registry) error {
-
-	for i := 0; i < len(m.Panels); i++ {
-
-		if m.Panels[i] != nil {
-			if err := m.Panels[i].ContextValidate(ctx, formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("panels" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
-	}
-
-	return nil
-}
-
-func (m *ExploreQuery) contextValidateQueryTiming(ctx context.Context, formats strfmt.Registry) error {
-
-	if m.QueryTiming != nil {
-		if err := m.QueryTiming.ContextValidate(ctx, formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("queryTiming")
-			}
-			return err
-		}
+	if err := validate.Pattern("userPublicKey", "body", string(m.UserPublicKey), `^[\w=-]+$`); err != nil {
+		return err
 	}
 
 	return nil

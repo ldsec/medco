@@ -6,7 +6,6 @@ package genomic_annotations
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"context"
 	"fmt"
 	"io"
 
@@ -52,7 +51,7 @@ func NewGetValuesOK() *GetValuesOK {
 	return &GetValuesOK{}
 }
 
-/* GetValuesOK describes a response with status code 200, with default header values.
+/*GetValuesOK handles this case with default header values.
 
 Queried annotation values.
 */
@@ -63,6 +62,7 @@ type GetValuesOK struct {
 func (o *GetValuesOK) Error() string {
 	return fmt.Sprintf("[GET /genomic-annotations/{annotation}][%d] getValuesOK  %+v", 200, o.Payload)
 }
+
 func (o *GetValuesOK) GetPayload() []string {
 	return o.Payload
 }
@@ -82,7 +82,7 @@ func NewGetValuesNotFound() *GetValuesNotFound {
 	return &GetValuesNotFound{}
 }
 
-/* GetValuesNotFound describes a response with status code 404, with default header values.
+/*GetValuesNotFound handles this case with default header values.
 
 Annotation not found.
 */
@@ -105,7 +105,7 @@ func NewGetValuesDefault(code int) *GetValuesDefault {
 	}
 }
 
-/* GetValuesDefault describes a response with status code -1, with default header values.
+/*GetValuesDefault handles this case with default header values.
 
 Error response.
 */
@@ -123,6 +123,7 @@ func (o *GetValuesDefault) Code() int {
 func (o *GetValuesDefault) Error() string {
 	return fmt.Sprintf("[GET /genomic-annotations/{annotation}][%d] getValues default  %+v", o._statusCode, o.Payload)
 }
+
 func (o *GetValuesDefault) GetPayload() *GetValuesDefaultBody {
 	return o.Payload
 }
@@ -150,11 +151,6 @@ type GetValuesDefaultBody struct {
 
 // Validate validates this get values default body
 func (o *GetValuesDefaultBody) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// ContextValidate validates this get values default body based on context it is used
-func (o *GetValuesDefaultBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

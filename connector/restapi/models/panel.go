@@ -6,7 +6,6 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"context"
 	"encoding/json"
 	"strconv"
 
@@ -29,7 +28,7 @@ type Panel struct {
 	Not *bool `json:"not"`
 
 	// panel timing
-	PanelTiming *Timing `json:"panelTiming,omitempty"`
+	PanelTiming Timing `json:"panelTiming,omitempty"`
 }
 
 // Validate validates this panel
@@ -55,6 +54,7 @@ func (m *Panel) Validate(formats strfmt.Registry) error {
 }
 
 func (m *Panel) validateItems(formats strfmt.Registry) error {
+
 	if swag.IsZero(m.Items) { // not required
 		return nil
 	}
@@ -88,67 +88,16 @@ func (m *Panel) validateNot(formats strfmt.Registry) error {
 }
 
 func (m *Panel) validatePanelTiming(formats strfmt.Registry) error {
+
 	if swag.IsZero(m.PanelTiming) { // not required
 		return nil
 	}
 
-	if m.PanelTiming != nil {
-		if err := m.PanelTiming.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("panelTiming")
-			}
-			return err
+	if err := m.PanelTiming.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("panelTiming")
 		}
-	}
-
-	return nil
-}
-
-// ContextValidate validate this panel based on the context it is used
-func (m *Panel) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.contextValidateItems(ctx, formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.contextValidatePanelTiming(ctx, formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *Panel) contextValidateItems(ctx context.Context, formats strfmt.Registry) error {
-
-	for i := 0; i < len(m.Items); i++ {
-
-		if m.Items[i] != nil {
-			if err := m.Items[i].ContextValidate(ctx, formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("items" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
-	}
-
-	return nil
-}
-
-func (m *Panel) contextValidatePanelTiming(ctx context.Context, formats strfmt.Registry) error {
-
-	if m.PanelTiming != nil {
-		if err := m.PanelTiming.ContextValidate(ctx, formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("panelTiming")
-			}
-			return err
-		}
+		return err
 	}
 
 	return nil
@@ -239,6 +188,7 @@ func (m *PanelItemsItems0) validateEncrypted(formats strfmt.Registry) error {
 }
 
 func (m *PanelItemsItems0) validateModifier(formats strfmt.Registry) error {
+
 	if swag.IsZero(m.Modifier) { // not required
 		return nil
 	}
@@ -300,6 +250,7 @@ func (m *PanelItemsItems0) validateOperatorEnum(path, location string, value str
 }
 
 func (m *PanelItemsItems0) validateOperator(formats strfmt.Registry) error {
+
 	if swag.IsZero(m.Operator) { // not required
 		return nil
 	}
@@ -318,7 +269,7 @@ func (m *PanelItemsItems0) validateQueryTerm(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.Pattern("queryTerm", "body", *m.QueryTerm, `^([\w=-]+)$|^((\/[^\/]+)+\/)$`); err != nil {
+	if err := validate.Pattern("queryTerm", "body", string(*m.QueryTerm), `^([\w=-]+)$|^((\/[^\/]+)+\/)$`); err != nil {
 		return err
 	}
 
@@ -326,40 +277,13 @@ func (m *PanelItemsItems0) validateQueryTerm(formats strfmt.Registry) error {
 }
 
 func (m *PanelItemsItems0) validateValue(formats strfmt.Registry) error {
+
 	if swag.IsZero(m.Value) { // not required
 		return nil
 	}
 
-	if err := validate.Pattern("value", "body", m.Value, `^[+-]?([0-9]*[.])?[0-9]+`); err != nil {
+	if err := validate.Pattern("value", "body", string(m.Value), `^[+-]?([0-9]*[.])?[0-9]+`); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-// ContextValidate validate this panel items items0 based on the context it is used
-func (m *PanelItemsItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.contextValidateModifier(ctx, formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *PanelItemsItems0) contextValidateModifier(ctx context.Context, formats strfmt.Registry) error {
-
-	if m.Modifier != nil {
-		if err := m.Modifier.ContextValidate(ctx, formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("modifier")
-			}
-			return err
-		}
 	}
 
 	return nil
@@ -423,7 +347,7 @@ func (m *PanelItemsItems0Modifier) validateAppliedPath(formats strfmt.Registry) 
 		return err
 	}
 
-	if err := validate.Pattern("modifier"+"."+"appliedPath", "body", *m.AppliedPath, `^((\/[^\/]+)+\/%?)$`); err != nil {
+	if err := validate.Pattern("modifier"+"."+"appliedPath", "body", string(*m.AppliedPath), `^((\/[^\/]+)+\/%?)$`); err != nil {
 		return err
 	}
 
@@ -436,15 +360,10 @@ func (m *PanelItemsItems0Modifier) validateModifierKey(formats strfmt.Registry) 
 		return err
 	}
 
-	if err := validate.Pattern("modifier"+"."+"modifierKey", "body", *m.ModifierKey, `^((\/[^\/]+)+\/)$`); err != nil {
+	if err := validate.Pattern("modifier"+"."+"modifierKey", "body", string(*m.ModifierKey), `^((\/[^\/]+)+\/)$`); err != nil {
 		return err
 	}
 
-	return nil
-}
-
-// ContextValidate validates this panel items items0 modifier based on context it is used
-func (m *PanelItemsItems0Modifier) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

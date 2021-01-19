@@ -8,8 +8,7 @@ import (
 
 	"github.com/go-openapi/loads"
 	flags "github.com/jessevdk/go-flags"
-
-	swaggerserversrv "github.com/ldsec/medco/connector/restapi/server"
+	"github.com/ldsec/medco/connector/restapi/server"
 	"github.com/ldsec/medco/connector/restapi/server/operations"
 )
 
@@ -18,13 +17,13 @@ import (
 
 func main() {
 
-	swaggerSpec, err := loads.Embedded(swaggerserversrv.SwaggerJSON, swaggerserversrv.FlatSwaggerJSON)
+	swaggerSpec, err := loads.Embedded(server.SwaggerJSON, server.FlatSwaggerJSON)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	api := operations.NewMedcoConnectorAPI(swaggerSpec)
-	server := swaggerserversrv.NewServer(api)
+	server := server.NewServer(api)
 	defer server.Shutdown()
 
 	parser := flags.NewParser(server, flags.Default)

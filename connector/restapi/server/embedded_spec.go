@@ -264,8 +264,8 @@ func init() {
         }
       }
     },
-    "/node/explore/cohorts/patientList/{name}": {
-      "get": {
+    "/node/explore/cohorts/patientList": {
+      "post": {
         "security": [
           {
             "medco-jwt": [
@@ -277,15 +277,10 @@ func init() {
           "medco-node"
         ],
         "summary": "Retrieve the encrypted patient list for a given cohort name",
-        "operationId": "getCohortsPatientList",
+        "operationId": "postCohortsPatientList",
         "parameters": [
           {
-            "pattern": "^\\w+$",
-            "type": "string",
-            "description": "Name of the cohort to update",
-            "name": "name",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/cohortsPatientListRequest"
           }
         ],
         "responses": {
@@ -950,9 +945,36 @@ func init() {
     }
   },
   "parameters": {
+    "cohortsPatientListRequest": {
+      "description": "Cohort patient list request",
+      "name": "cohortsPatientListRequest",
+      "in": "body",
+      "required": true,
+      "schema": {
+        "type": "object",
+        "required": [
+          "cohortName",
+          "userPublicKey"
+        ],
+        "properties": {
+          "cohortName": {
+            "type": "string",
+            "pattern": "^\\w+$"
+          },
+          "id": {
+            "type": "string",
+            "pattern": "^[\\w:-]+$"
+          },
+          "userPublicKey": {
+            "type": "string",
+            "pattern": "^[\\w=-]+$"
+          }
+        }
+      }
+    },
     "cohortsRequest": {
-      "description": "Cohort that has been updated or created",
-      "name": "cohortRequest",
+      "description": "Cohort that has been updated or created.",
+      "name": "cohortsRequest",
       "in": "body",
       "required": true,
       "schema": {
@@ -1360,7 +1382,6 @@ func init() {
       "description": "MedCo JWT token.",
       "type": "oauth2",
       "flow": "application",
-      "authorizationUrl": "",
       "tokenUrl": "https://medco-demo.epfl.ch/auth"
     }
   },
@@ -1830,8 +1851,8 @@ func init() {
         }
       }
     },
-    "/node/explore/cohorts/patientList/{name}": {
-      "get": {
+    "/node/explore/cohorts/patientList": {
+      "post": {
         "security": [
           {
             "medco-jwt": [
@@ -1843,15 +1864,34 @@ func init() {
           "medco-node"
         ],
         "summary": "Retrieve the encrypted patient list for a given cohort name",
-        "operationId": "getCohortsPatientList",
+        "operationId": "postCohortsPatientList",
         "parameters": [
           {
-            "pattern": "^\\w+$",
-            "type": "string",
-            "description": "Name of the cohort to update",
-            "name": "name",
-            "in": "path",
-            "required": true
+            "description": "Cohort patient list request",
+            "name": "cohortsPatientListRequest",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "cohortName",
+                "userPublicKey"
+              ],
+              "properties": {
+                "cohortName": {
+                  "type": "string",
+                  "pattern": "^\\w+$"
+                },
+                "id": {
+                  "type": "string",
+                  "pattern": "^[\\w:-]+$"
+                },
+                "userPublicKey": {
+                  "type": "string",
+                  "pattern": "^[\\w=-]+$"
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -1932,8 +1972,8 @@ func init() {
             "required": true
           },
           {
-            "description": "Cohort that has been updated or created",
-            "name": "cohortRequest",
+            "description": "Cohort that has been updated or created.",
+            "name": "cohortsRequest",
             "in": "body",
             "required": true,
             "schema": {
@@ -2030,8 +2070,8 @@ func init() {
             "required": true
           },
           {
-            "description": "Cohort that has been updated or created",
-            "name": "cohortRequest",
+            "description": "Cohort that has been updated or created.",
+            "name": "cohortsRequest",
             "in": "body",
             "required": true,
             "schema": {
@@ -3033,9 +3073,36 @@ func init() {
     }
   },
   "parameters": {
+    "cohortsPatientListRequest": {
+      "description": "Cohort patient list request",
+      "name": "cohortsPatientListRequest",
+      "in": "body",
+      "required": true,
+      "schema": {
+        "type": "object",
+        "required": [
+          "cohortName",
+          "userPublicKey"
+        ],
+        "properties": {
+          "cohortName": {
+            "type": "string",
+            "pattern": "^\\w+$"
+          },
+          "id": {
+            "type": "string",
+            "pattern": "^[\\w:-]+$"
+          },
+          "userPublicKey": {
+            "type": "string",
+            "pattern": "^[\\w=-]+$"
+          }
+        }
+      }
+    },
     "cohortsRequest": {
-      "description": "Cohort that has been updated or created",
-      "name": "cohortRequest",
+      "description": "Cohort that has been updated or created.",
+      "name": "cohortsRequest",
       "in": "body",
       "required": true,
       "schema": {
@@ -3443,7 +3510,6 @@ func init() {
       "description": "MedCo JWT token.",
       "type": "oauth2",
       "flow": "application",
-      "authorizationUrl": "",
       "tokenUrl": "https://medco-demo.epfl.ch/auth"
     }
   },

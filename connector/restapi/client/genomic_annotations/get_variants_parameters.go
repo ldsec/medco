@@ -17,104 +17,86 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// NewGetVariantsParams creates a new GetVariantsParams object,
-// with the default timeout for this client.
-//
-// Default values are not hydrated, since defaults are normally applied by the API server side.
-//
-// To enforce default values in parameter, use SetDefaults or WithDefaults.
+// NewGetVariantsParams creates a new GetVariantsParams object
+// with the default values initialized.
 func NewGetVariantsParams() *GetVariantsParams {
+	var (
+		encryptedDefault = bool(true)
+	)
 	return &GetVariantsParams{
+		Encrypted: &encryptedDefault,
+
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetVariantsParamsWithTimeout creates a new GetVariantsParams object
-// with the ability to set a timeout on a request.
+// with the default values initialized, and the ability to set a timeout on a request
 func NewGetVariantsParamsWithTimeout(timeout time.Duration) *GetVariantsParams {
+	var (
+		encryptedDefault = bool(true)
+	)
 	return &GetVariantsParams{
+		Encrypted: &encryptedDefault,
+
 		timeout: timeout,
 	}
 }
 
 // NewGetVariantsParamsWithContext creates a new GetVariantsParams object
-// with the ability to set a context for a request.
+// with the default values initialized, and the ability to set a context for a request
 func NewGetVariantsParamsWithContext(ctx context.Context) *GetVariantsParams {
+	var (
+		encryptedDefault = bool(true)
+	)
 	return &GetVariantsParams{
+		Encrypted: &encryptedDefault,
+
 		Context: ctx,
 	}
 }
 
 // NewGetVariantsParamsWithHTTPClient creates a new GetVariantsParams object
-// with the ability to set a custom HTTPClient for a request.
+// with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewGetVariantsParamsWithHTTPClient(client *http.Client) *GetVariantsParams {
+	var (
+		encryptedDefault = bool(true)
+	)
 	return &GetVariantsParams{
+		Encrypted:  &encryptedDefault,
 		HTTPClient: client,
 	}
 }
 
-/* GetVariantsParams contains all the parameters to send to the API endpoint
-   for the get variants operation.
-
-   Typically these are written to a http.Request.
+/*GetVariantsParams contains all the parameters to send to the API endpoint
+for the get variants operation typically these are written to a http.Request
 */
 type GetVariantsParams struct {
 
-	/* Annotation.
+	/*Annotation
+	  Genomic annotation name.
 
-	   Genomic annotation name.
 	*/
 	Annotation string
+	/*Encrypted
+	  Request pre-encrypted variant identifiers (defaults to true).
 
-	/* Encrypted.
-
-	   Request pre-encrypted variant identifiers (defaults to true).
-
-	   Default: true
 	*/
 	Encrypted *bool
+	/*Value
+	  Genomic annotation value.
 
-	/* Value.
-
-	   Genomic annotation value.
 	*/
 	Value string
+	/*Zygosity
+	  Genomic annotation zygosity, if null defaults to all.
 
-	/* Zygosity.
-
-	   Genomic annotation zygosity, if null defaults to all.
 	*/
 	Zygosity []string
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
-}
-
-// WithDefaults hydrates default values in the get variants params (not the query body).
-//
-// All values with no default are reset to their zero value.
-func (o *GetVariantsParams) WithDefaults() *GetVariantsParams {
-	o.SetDefaults()
-	return o
-}
-
-// SetDefaults hydrates default values in the get variants params (not the query body).
-//
-// All values with no default are reset to their zero value.
-func (o *GetVariantsParams) SetDefaults() {
-	var (
-		encryptedDefault = bool(true)
-	)
-
-	val := GetVariantsParams{
-		Encrypted: &encryptedDefault,
-	}
-
-	val.timeout = o.timeout
-	val.Context = o.Context
-	val.HTTPClient = o.HTTPClient
-	*o = val
 }
 
 // WithTimeout adds the timeout to the get variants params
@@ -211,17 +193,16 @@ func (o *GetVariantsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 
 		// query param encrypted
 		var qrEncrypted bool
-
 		if o.Encrypted != nil {
 			qrEncrypted = *o.Encrypted
 		}
 		qEncrypted := swag.FormatBool(qrEncrypted)
 		if qEncrypted != "" {
-
 			if err := r.SetQueryParam("encrypted", qEncrypted); err != nil {
 				return err
 			}
 		}
+
 	}
 
 	// path param value
@@ -229,36 +210,16 @@ func (o *GetVariantsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 		return err
 	}
 
-	if o.Zygosity != nil {
+	valuesZygosity := o.Zygosity
 
-		// binding items for zygosity
-		joinedZygosity := o.bindParamZygosity(reg)
-
-		// query array param zygosity
-		if err := r.SetQueryParam("zygosity", joinedZygosity...); err != nil {
-			return err
-		}
+	joinedZygosity := swag.JoinByFormat(valuesZygosity, "")
+	// query array param zygosity
+	if err := r.SetQueryParam("zygosity", joinedZygosity...); err != nil {
+		return err
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
 	return nil
-}
-
-// bindParamGetVariants binds the parameter zygosity
-func (o *GetVariantsParams) bindParamZygosity(formats strfmt.Registry) []string {
-	zygosityIR := o.Zygosity
-
-	var zygosityIC []string
-	for _, zygosityIIR := range zygosityIR { // explode []string
-
-		zygosityIIV := zygosityIIR // string as string
-		zygosityIC = append(zygosityIC, zygosityIIV)
-	}
-
-	// items.CollectionFormat: ""
-	zygosityIS := swag.JoinByFormat(zygosityIC, "")
-
-	return zygosityIS
 }

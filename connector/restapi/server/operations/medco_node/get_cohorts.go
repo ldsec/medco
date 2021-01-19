@@ -6,7 +6,6 @@ package medco_node
 // Editing this file might prove futile when you re-run the generate command
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/go-openapi/runtime/middleware"
@@ -34,7 +33,7 @@ func NewGetCohorts(ctx *middleware.Context, handler GetCohortsHandler) *GetCohor
 	return &GetCohorts{Context: ctx, Handler: handler}
 }
 
-/* GetCohorts swagger:route GET /node/explore/cohorts medco-node getCohorts
+/*GetCohorts swagger:route GET /node/explore/cohorts medco-node getCohorts
 
 Retrieve cohort names and patient set IDs
 
@@ -50,6 +49,7 @@ func (o *GetCohorts) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		r = rCtx
 	}
 	var Params = NewGetCohortsParams()
+
 	uprinc, aCtx, err := o.Context.Authorize(r, route)
 	if err != nil {
 		o.Context.Respond(rw, r, route.Produces, route, err)
@@ -69,6 +69,7 @@ func (o *GetCohorts) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	res := o.Handler.Handle(Params, principal) // actually handle the request
+
 	o.Context.Respond(rw, r, route.Produces, route, res)
 
 }
@@ -84,11 +85,6 @@ type GetCohortsDefaultBody struct {
 
 // Validate validates this get cohorts default body
 func (o *GetCohortsDefaultBody) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// ContextValidate validates this get cohorts default body based on context it is used
-func (o *GetCohortsDefaultBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -133,11 +129,6 @@ type GetCohortsOKBodyItems0 struct {
 
 // Validate validates this get cohorts o k body items0
 func (o *GetCohortsOKBodyItems0) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// ContextValidate validates this get cohorts o k body items0 based on context it is used
-func (o *GetCohortsOKBodyItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
