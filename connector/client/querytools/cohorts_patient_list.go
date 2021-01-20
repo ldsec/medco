@@ -67,7 +67,7 @@ func NewCohortsPatientList(token, cohortName string, disableTLSCheck bool) (coho
 	}
 	cohortsPatientList.userPublicKey, cohortsPatientList.userPrivateKey, err = unlynx.GenerateKeyPair()
 	if err != nil {
-		logrus.Error("while generating key pair: %s", err.Error())
+		logrus.Errorf("while generating key pair: %s", err.Error())
 		return
 	}
 	return

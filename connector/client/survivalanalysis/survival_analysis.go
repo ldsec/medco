@@ -105,7 +105,7 @@ func NewSurvivalAnalysis(
 
 	q.userPublicKey, q.userPrivateKey, err = unlynx.GenerateKeyPair()
 	if err != nil {
-		logrus.Error("while generating key pair: %s", err.Error())
+		logrus.Errorf("while generating key pair: %s", err.Error())
 		return
 	}
 

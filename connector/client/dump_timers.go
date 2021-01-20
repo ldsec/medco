@@ -9,6 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// DumpTimers writes timers in a file if timerFile string is not empty. Print it in standard output otherwise.
 func DumpTimers(timerFile string, timers []medcomodels.Timers, clientTimers medcomodels.Timers) error {
 	// print timers
 	logrus.Info("dumping timers")
