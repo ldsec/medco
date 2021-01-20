@@ -420,7 +420,7 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/node/explore/cohorts/patientList"] = medco_node.NewPostCohortsPatientList(o.context, o.MedcoNodePostCohortsPatientListHandler)
+	o.handlers["POST"]["/node/explore/cohorts/patient-list"] = medco_node.NewPostCohortsPatientList(o.context, o.MedcoNodePostCohortsPatientListHandler)
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}

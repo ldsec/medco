@@ -61,7 +61,7 @@ func NewGetCohorts(token string, disableTLSCheck bool) (getCohorts *GetCohorts, 
 	return
 }
 
-type nodeResult = struct {
+type getCohortsNodeResult = struct {
 	cohorts   []*medco_node.GetCohortsOKBodyItems0
 	nodeIndex int
 }
@@ -70,7 +70,7 @@ type nodeResult = struct {
 func (getCohorts *GetCohorts) Execute() (results [][]medcomodels.Cohort, err error) {
 	nOfNodes := len(getCohorts.httpMedCoClients)
 	errChan := make(chan error)
-	resultChan := make(chan nodeResult, nOfNodes)
+	resultChan := make(chan getCohortsNodeResult, nOfNodes)
 	results = make([][]medcomodels.Cohort, nOfNodes)
 	logrus.Infof("There are %d nodes", nOfNodes)
 
@@ -84,7 +84,7 @@ func (getCohorts *GetCohorts) Execute() (results [][]medcomodels.Cohort, err err
 				errChan <- Error
 			} else {
 				logrus.Infof("Node %d got cohorts %+v", idx, res)
-				resultChan <- nodeResult{cohorts: res, nodeIndex: idx}
+				resultChan <- getCohortsNodeResult{cohorts: res, nodeIndex: idx}
 			}
 		}(idx)
 	}
@@ -105,7 +105,6 @@ func (getCohorts *GetCohorts) Execute() (results [][]medcomodels.Cohort, err err
 				logrus.Error(err)
 				return
 			}
-
 		}
 	}
 	logrus.Info("Operation completed")

@@ -163,6 +163,20 @@ func main() {
 		},
 	}
 
+	//--- query tools command flags
+	cohortsPatientListFlag := []cli.Flag{
+		cli.StringFlag{
+			Name:     "cohortName, c",
+			Usage:    "Name of the new cohort",
+			Required: true,
+		},
+		cli.StringFlag{
+			Name:     "dumpFile, d",
+			Usage:    "File for dumping ",
+			Required: false,
+		},
+	}
+
 	// --- app commands
 	cliApp.Commands = []cli.Command{
 		{
@@ -391,6 +405,25 @@ func main() {
 					c.GlobalString("user"),
 					c.GlobalString("password"),
 					c.String("cohortName"),
+					c.GlobalBool("disableTLSCheck"),
+				)
+			},
+		},
+		{
+			Name:        "cohorts-patient-list",
+			Aliases:     []string{"cpl"},
+			Usage:       "Request the patients' numbers.",
+			Flags:       cohortsPatientListFlag,
+			ArgsUsage:   "-c cohortName [-d timer dump file]",
+			Description: "Retrieves the numbers of the patients associated to a cohort.",
+			Action: func(c *cli.Context) error {
+				return querytoolsclient.ExecuteCohortsPatientList(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.String("cohortName"),
+					c.GlobalString("outputFile"),
+					c.String("dumpFile"),
 					c.GlobalBool("disableTLSCheck"),
 				)
 			},

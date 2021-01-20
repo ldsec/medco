@@ -35,7 +35,7 @@ func NewPostCohortsPatientList(ctx *middleware.Context, handler PostCohortsPatie
 	return &PostCohortsPatientList{Context: ctx, Handler: handler}
 }
 
-/*PostCohortsPatientList swagger:route POST /node/explore/cohorts/patientList medco-node postCohortsPatientList
+/*PostCohortsPatientList swagger:route POST /node/explore/cohorts/patient-list medco-node postCohortsPatientList
 
 Retrieve the encrypted patient list for a given cohort name
 

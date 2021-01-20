@@ -327,7 +327,7 @@ paths:
       security:
         - medco-jwt: ["medco-explore"]
 
-  /node/explore/cohorts/patientList:
+  /node/explore/cohorts/patient-list:
     post:
       tags:
         - "medco-node"

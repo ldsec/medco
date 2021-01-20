@@ -264,7 +264,7 @@ func init() {
         }
       }
     },
-    "/node/explore/cohorts/patientList": {
+    "/node/explore/cohorts/patient-list": {
       "post": {
         "security": [
           {
@@ -1851,7 +1851,7 @@ func init() {
         }
       }
     },
-    "/node/explore/cohorts/patientList": {
+    "/node/explore/cohorts/patient-list": {
       "post": {
         "security": [
           {

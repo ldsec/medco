@@ -296,7 +296,7 @@ func (a *Client) PostCohortsPatientList(params *PostCohortsPatientListParams, au
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "postCohortsPatientList",
 		Method:             "POST",
-		PathPattern:        "/node/explore/cohorts/patientList",
+		PathPattern:        "/node/explore/cohorts/patient-list",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},

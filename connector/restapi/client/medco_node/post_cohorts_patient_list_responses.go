@@ -70,7 +70,7 @@ type PostCohortsPatientListOK struct {
 }
 
 func (o *PostCohortsPatientListOK) Error() string {
-	return fmt.Sprintf("[POST /node/explore/cohorts/patientList][%d] postCohortsPatientListOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[POST /node/explore/cohorts/patient-list][%d] postCohortsPatientListOK  %+v", 200, o.Payload)
 }
 
 func (o *PostCohortsPatientListOK) GetPayload() *PostCohortsPatientListOKBody {
@@ -103,7 +103,7 @@ type PostCohortsPatientListForbidden struct {
 }
 
 func (o *PostCohortsPatientListForbidden) Error() string {
-	return fmt.Sprintf("[POST /node/explore/cohorts/patientList][%d] postCohortsPatientListForbidden  %+v", 403, o.Payload)
+	return fmt.Sprintf("[POST /node/explore/cohorts/patient-list][%d] postCohortsPatientListForbidden  %+v", 403, o.Payload)
 }
 
 func (o *PostCohortsPatientListForbidden) GetPayload() *PostCohortsPatientListForbiddenBody {
@@ -136,7 +136,7 @@ type PostCohortsPatientListNotFound struct {
 }
 
 func (o *PostCohortsPatientListNotFound) Error() string {
-	return fmt.Sprintf("[POST /node/explore/cohorts/patientList][%d] postCohortsPatientListNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[POST /node/explore/cohorts/patient-list][%d] postCohortsPatientListNotFound  %+v", 404, o.Payload)
 }
 
 func (o *PostCohortsPatientListNotFound) GetPayload() *PostCohortsPatientListNotFoundBody {
@@ -178,7 +178,7 @@ func (o *PostCohortsPatientListDefault) Code() int {
 }
 
 func (o *PostCohortsPatientListDefault) Error() string {
-	return fmt.Sprintf("[POST /node/explore/cohorts/patientList][%d] postCohortsPatientList default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[POST /node/explore/cohorts/patient-list][%d] postCohortsPatientList default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *PostCohortsPatientListDefault) GetPayload() *PostCohortsPatientListDefaultBody {

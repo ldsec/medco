@@ -35,7 +35,7 @@ func (o *PostCohortsPatientListURL) SetBasePath(bp string) {
 func (o *PostCohortsPatientListURL) Build() (*url.URL, error) {
 	var _result url.URL
 
-	var _path = "/node/explore/cohorts/patientList"
+	var _path = "/node/explore/cohorts/patient-list"
 
 	_basePath := o._basePath
 	if _basePath == "" {
