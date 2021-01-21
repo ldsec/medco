@@ -315,7 +315,7 @@ test8() {
   echo "" > ../dumped_logs_to_remove.txt
 
 
-  cohortPatientListWithCredentials "${non_authorized}" "test" > ../dumped_logs_to_remove.txt
+  cohortPatientListWithCredentials "${non_authorized}" "test" > ../dumped_logs_to_remove.txt 2>&1
 
   # result file must be empty
   if [[ $(cat ../result.csv)  != "" ]];
