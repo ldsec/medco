@@ -59,7 +59,7 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, res
 			}
 			if queryItem.Operator != "" && queryItem.Modifier == nil {
 				i2b2Item.ConstrainByValue = &ConstrainByValue{
-					ValueType:       "NUMBER",
+					ValueType:       queryItem.Type,
 					ValueOperator:   queryItem.Operator,
 					ValueConstraint: queryItem.Value,
 				}
@@ -71,7 +71,7 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, res
 				}
 				if queryItem.Operator != "" {
 					i2b2Item.ConstrainByModifier.ConstrainByValue = &ConstrainByValue{
-						ValueType:       "NUMBER",
+						ValueType:       queryItem.Type,
 						ValueOperator:   queryItem.Operator,
 						ValueConstraint: queryItem.Value,
 					}

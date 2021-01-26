@@ -94,6 +94,7 @@ type item struct {
 	QueryTerm string `json:"queryTerm"`
 	Operator  string `json:"operator"`
 	Value     string `json:"value"`
+	Type      string `json:"type"`
 	Encrypted bool   `json:"encrypted"`
 }
 
@@ -107,7 +108,7 @@ func eqValid() exploreQueryRequest {
 		"id", exploreQuery{
 			"userPub", []panel{
 				{false, []item{
-					{"queryTerm", "EQ", "10", false},
+					{"queryTerm", "EQ", "10", "NUMBER", false},
 				}},
 			},
 		}}
@@ -120,7 +121,7 @@ func TestExploreQuery(t *testing.T) {
 	}
 	tests[1].query.ID = "123@"
 	tests[2].query.Query.UserPub = "123@"
-	tests[3].query.Query.Panels[0].Items[0].Value = "something"
+	tests[3].query.Query.Panels[0].Items[0].Type = "non-enum"
 	tests[4].query.Query.Panels[0].Items[0].Operator = "non-enum"
 	tests[5].query.Query.Panels[0].Items[0].QueryTerm = "word@"
 	tests[6].query.Query.Panels[0].Items[0].QueryTerm = "abc/def"

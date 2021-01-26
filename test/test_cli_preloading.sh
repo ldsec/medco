@@ -102,17 +102,29 @@ query5="enc::3 AND file::/data/query_file.txt"
 resultQuery5a="$(printf -- "count\n1\n1\n1")"
 resultQuery5b="$(printf -- "count\n3\n3\n3")"
 
-query6="clr::/E2ETEST/e2etest/1/::EQ:10"
+query6="clr::/E2ETEST/e2etest/1/::EQ:NUMBER:10"
 resultQuery6="$(printf -- "count\n1\n1\n1")"
 
-query7="clr::/E2ETEST/e2etest/1/:/E2ETEST/modifiers/1/:/e2etest/1/::EQ:15"
+query7="clr::/E2ETEST/e2etest/1/:/E2ETEST/modifiers/1/:/e2etest/1/::EQ:NUMBER:15"
 resultQuery7="$(printf -- "count\n1\n1\n1")"
 
-query8="clr::/E2ETEST/e2etest/1/::BETWEEN:5 and 25"
+query8="clr::/E2ETEST/e2etest/1/::BETWEEN:NUMBER:5 and 25"
 resultQuery8="$(printf -- "count\n2\n2\n2")"
 
-query9="enc::1 OR clr::/E2ETEST/e2etest/2/::GE:25 AND clr::/E2ETEST/e2etest/2/:/E2ETEST/modifiers/2/:/e2etest/2/::LT:21"
+query9="enc::1 OR clr::/E2ETEST/e2etest/2/::GE:NUMBER:25 AND clr::/E2ETEST/e2etest/2/:/E2ETEST/modifiers/2/:/e2etest/2/::LT:NUMBER:21"
 resultQuery9="$(printf -- "count\n2\n2\n2")"
+
+query10="clr::/E2ETEST/e2etest/2/:/E2ETEST/modifiers/2text/:/e2etest/2/::IN:TEXT:'abc','de'"
+resultQuery10="$(printf -- "count\n2\n2\n2")"
+
+query11="clr::/E2ETEST/e2etest/3/:/E2ETEST/modifiers/3text/:/e2etest/3/::LIKE[begin]:TEXT:ab"
+resultQuery11="$(printf -- "count\n2\n2\n2")"
+
+query12="clr::/E2ETEST/e2etest/2/:/E2ETEST/modifiers/2text/:/e2etest/2/::LIKE[contains]:TEXT:cd"
+resultQuery12="$(printf -- "count\n1\n1\n1")"
+
+query13="clr::/E2ETEST/e2etest/3/:/E2ETEST/modifiers/3text/:/e2etest/3/::LIKE[end]:TEXT:bc"
+resultQuery13="$(printf -- "count\n0\n0\n0")"
 
 # test4
 getSavedCohortHeaders="node_index,cohort_name,cohort_id,query_id,creation_date,update_date,query_timing,panels"
@@ -307,6 +319,14 @@ test2 "query " "${query2}" "${resultQuery2}"
 test2 "query " "${query3}" "${resultQuery3}"
 test2 "query " "${query4}" "${resultQuery4}"
 test2 "query " "${query5}" "${resultQuery5a}"
+test2 "query " "${query6}" "${resultQuery6}"
+test2 "query " "${query7}" "${resultQuery7}"
+test2 "query " "${query8}" "${resultQuery8}"
+test2 "query " "${query9}" "${resultQuery9}"
+test2 "query " "${query10}" "${resultQuery10}"
+test2 "query " "${query11}" "${resultQuery11}"
+test2 "query " "${query12}" "${resultQuery12}"
+test2 "query " "${query13}" "${resultQuery13}"
 
 echo "Testing query with test_explore_patient_list user..."
 USERNAME="${1:-test}_explore_patient_list"
@@ -316,10 +336,6 @@ test2 "query " "${query2}" "${resultQuery2}"
 test2 "query " "${query3}" "${resultQuery3}"
 test2 "query " "${query4}" "${resultQuery4}"
 test2 "query " "${query5}" "${resultQuery5a}"
-test2 "query " "${query6}" "${resultQuery6}"
-test2 "query " "${query7}" "${resultQuery7}"
-test2 "query " "${query8}" "${resultQuery8}"
-test2 "query " "${query9}" "${resultQuery9}"
 
 USERNAME="${1:-test}_explore_count_global"
 test2 "query " "${query5}" "${resultQuery5b}"
