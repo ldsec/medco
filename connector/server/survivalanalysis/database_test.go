@@ -19,9 +19,16 @@ func init() {
 
 func TestBuildTimePoint(t *testing.T) {
 	utilserver.TestI2B2DBConnection(t)
-	timePoints, err := buildTimePoints(bigList,
-		`A168`,
-		"@", `A125`, "126:1", 2000)
+	timePoints, err := buildTimePoints(
+		bigList,
+		[]string{`A168`},
+		[]string{"@"},
+		true,
+		[]string{`A125`},
+		[]string{"126:1"},
+		true,
+		2000,
+	)
 	if err != nil {
 		t.Error("Test Failed", err)
 	}

@@ -34,9 +34,9 @@ func buildTimePoints(
 	endConcepts := "{" + strings.Join(endConceptCodes, ",") + "}"
 	startModifiers := "{" + strings.Join(startConceptModifiers, ",") + "}"
 	endModifiers := "{" + strings.Join(endConceptModifiers, ",") + "}"
-	description := fmt.Sprintf("selecting start concept code %s, start concept modifier %s, patients list %s, end concept code %s, end concept modifier %s, time limit %d: SQL %6", startConcepts, startModifiers, patients, endConcepts, endModifiers, timeLimit, sql6Instance)
+	description := fmt.Sprintf("selecting start concept code %s, start concept modifier %s, patients list %s, end concept code %s, end concept modifier %s, time limit %d: SQL %s", startConcepts, startModifiers, patients, endConcepts, endModifiers, timeLimit, sql6Instance)
 	logrus.Debugf("running: %s", description)
-	rows, err := utilserver.I2B2DBConnection.Query(sql6Instance, startConcepts, startConceptModifiers, patients, endConcepts, endConceptModifiers, timeLimit)
+	rows, err := utilserver.I2B2DBConnection.Query(sql6Instance, startConcepts, startModifiers, patients, endConcepts, endModifiers, timeLimit)
 	if err != nil {
 		err = fmt.Errorf("while execution SQL query: %s, DB operation: %s", err.Error(), description)
 		return
@@ -97,27 +97,27 @@ $6 max time limit in day
 // prepare those functions in DB
 
 const sql1Earliest string = `
-SELECT patient_num, MIN(start_date) 
+SELECT patient_num, MIN(start_date) AS start_date
 FROM i2b2demodata_i2b2.observation_fact
-WHERE concept_cd IN ($1::string[]) and modifier_cd in ($2::string[]) and patient_num = ANY($3::integer[])
+WHERE concept_cd = ANY ($1::varchar[]) and modifier_cd = ANY ($2::varchar[]) and patient_num = ANY($3::integer[])
 GROUP BY patient_num
 `
 const sql1Latest string = `
-SELECT patient_num, MAX(start_date) 
+SELECT patient_num, MAX(start_date) AS start_date 
 FROM i2b2demodata_i2b2.observation_fact
-WHERE concept_cd IN ($1::string[]) and modifier_cd in ($2::string[]) and patient_num = ANY($3::integer[])
+WHERE concept_cd = ANY ($1::varchar[]) and modifier_cd = ANY ($2::varchar[]) and patient_num = ANY($3::integer[])
 GROUP BY patient_num
 `
 const sql2Earliest string = `
-SELECT patient_num, MIN(end_date)
+SELECT patient_num, MIN(end_date) AS end_date
 FROM i2b2demodata_i2b2.observation_fact
-WHERE concept_cd = $4 and modifier_cd = $5 and patient_num = ANY($3::integer[])
+WHERE concept_cd = ANY ($4::varchar[]) and modifier_cd = ANY  ($5::varchar[]) and patient_num = ANY($3::integer[])
 GROUP BY patient_num
 `
 const sql2Latest string = `
-SELECT patient_num, MAX(end_date)
+SELECT patient_num, MAX(end_date) AS end_date
 FROM i2b2demodata_i2b2.observation_fact
-WHERE concept_cd IN ($4::string[]) and modifier_cd IN ($5::string[]) and patient_num = ANY($3::integer[])
+WHERE concept_cd = ANY ($4::varchar[]) and modifier_cd = ANY ($5::varchar[]) and patient_num = ANY($3::integer[])
 GROUP BY patient_num
 `
 
