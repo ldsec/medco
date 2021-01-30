@@ -63,7 +63,7 @@ func MedCoSurvivalAnalysisHandler(param survival_analysis.SurvivalAnalysisParams
 		logrus.Error(err)
 		return survival_analysis.NewSurvivalAnalysisDefault(500).WithPayload(
 			&survival_analysis.SurvivalAnalysisDefaultBody{
-				Message: "Survival query execution error for: error: %s " + err.Error()})
+				Message: "Survival query execution error:" + err.Error()})
 
 	}
 	results := survivalAnalysisQuery.Result
