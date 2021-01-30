@@ -341,7 +341,7 @@ func prepareArguments(
 		err = fmt.Errorf("while connecting to clear project database: %s", err.Error())
 		return
 	}
-	startConceptCodes, err = getCodes(startConcept)
+	startConceptCodes, err = getConceptCodes(startConcept)
 	if err != nil {
 		err = fmt.Errorf("while retrieving start concept code: %s", err.Error())
 		return
@@ -355,7 +355,7 @@ func prepareArguments(
 		err = fmt.Errorf("while retrieving start modifier code: %s", err.Error())
 		return
 	}
-	endConceptCodes, err = getCodes(endConcept)
+	endConceptCodes, err = getConceptCodes(endConcept)
 	if err != nil {
 		err = fmt.Errorf("while retrieving end concept code: %s", err.Error())
 		return
