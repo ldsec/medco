@@ -142,7 +142,8 @@ func (q *Query) Execute() error {
 			logrus.Tracef("panels %+v", panels)
 			initialCount, patientList, err := SubGroupExplore(q.QueryName, i, panels)
 			if err != nil {
-				err = fmt.Errorf("during subgroup explore procedure: %s", err.Error())
+				logrus.Errorf("during subgroup explore procedure: %s", err.Error())
+				err = fmt.Errorf("during subgroup explore procedure")
 				errChan <- err
 				return
 			}
@@ -151,13 +152,14 @@ func (q *Query) Execute() error {
 			patientList = intersect(cohort, patientList)
 			patientLists = append(patientLists, patientList)
 			initialCounts = append(initialCounts, initialCount)
-			logrus.Debug("Initial Counts", initialCounts)
+			logrus.Debugf("Initial Counts %v", initialCounts)
 
 			timer = time.Now()
 			initialCountEncrypt, err := unlynx.EncryptWithCothorityKey(initialCount)
 			timers.AddTimers(fmt.Sprintf("medco-connector-encrypt-init-count-group%d", i), timer, nil)
 			if err != nil {
-				err = fmt.Errorf("while encrypting initial count: %s", err.Error())
+				logrus.Errorf("while encrypting initial count: %s", err.Error())
+				err = fmt.Errorf("while encrypting initial count")
 				errChan <- err
 				return
 			}
@@ -176,7 +178,10 @@ func (q *Query) Execute() error {
 			)
 			timers.AddTimers(fmt.Sprintf("medco-connector-build-timepoints%d", i), timer, nil)
 			if err != nil {
-				err = fmt.Errorf("error while getting building time points: %s", err.Error())
+
+				// error details dumped in server node console, but survival request does not send them to the client
+				logrus.Errorf("error while getting building time points: %s", err.Error())
+				err = fmt.Errorf("error while getting building time points")
 				errChan <- err
 				return
 			}
@@ -223,7 +228,8 @@ func (q *Query) Execute() error {
 	q.Result.EncEvents, aksTimers, err = AKSgroups(q.QueryName+"_AGG_AND_KEYSWITCH", eventGroups, q.UserPublicKey)
 	q.Result.Timers.AddTimers("medco-connector-aggregate-and-key-switch", timer, aksTimers)
 	if err != nil {
-		err = fmt.Errorf("during aggregation and keyswitch: %s", err.Error())
+		logrus.Errorf("during aggregation and keyswitch: %s", err.Error())
+		err = fmt.Errorf("during aggregation and keyswitch")
 	}
 	return err
 }
