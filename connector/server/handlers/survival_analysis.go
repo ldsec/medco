@@ -59,6 +59,7 @@ func MedCoSurvivalAnalysisHandler(param survival_analysis.SurvivalAnalysisParams
 	err = survivalAnalysisQuery.Execute()
 
 	if err != nil {
+		err = fmt.Errorf("queryID: %s, error: %s", survivalAnalysisQuery.QueryName, err.Error())
 		logrus.Error(err)
 		return survival_analysis.NewSurvivalAnalysisDefault(500).WithPayload(
 			&survival_analysis.SurvivalAnalysisDefaultBody{
