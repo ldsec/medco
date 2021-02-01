@@ -405,7 +405,7 @@ test7 "sameinstancenum" "sameinstancenum" "any" "sameinstancenum" "${timingResul
 test7 "samevisit" "samevisit" "any" "samevisit" "${timingResultNonZeroExpected}"
 
 echo "Testing cohorts-patient-list"
-USERNAME=${1:-test}
+
 test8 
 
 echo "CLI test 1/2 successful!"

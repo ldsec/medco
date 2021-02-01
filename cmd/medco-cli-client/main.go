@@ -172,7 +172,7 @@ func main() {
 		},
 		cli.StringFlag{
 			Name:     "dumpFile, d",
-			Usage:    "File for dumping ",
+			Usage:    "Output file for the timers CSV. Printed to stdout if omitted.",
 			Required: false,
 		},
 	}
@@ -412,10 +412,10 @@ func main() {
 		{
 			Name:        "cohorts-patient-list",
 			Aliases:     []string{"cpl"},
-			Usage:       "Request the patients' numbers.",
+			Usage:       "Retrieve patient list belonging to the cohort",
 			Flags:       cohortsPatientListFlag,
 			ArgsUsage:   "-c cohortName [-d timer dump file]",
-			Description: "Retrieves the numbers of the patients associated to a cohort.",
+			Description: "Retrieve the encrypted patient list for a given cohort name and locally decrypt it.",
 			Action: func(c *cli.Context) error {
 				return querytoolsclient.ExecuteCohortsPatientList(
 					c.GlobalString("token"),
