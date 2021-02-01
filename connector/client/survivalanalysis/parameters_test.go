@@ -39,11 +39,13 @@ var parameters = &Parameters{
 		ModifierKey: "/any/start/modifier/key/",
 		AppliedPath: "/any/start/path/%",
 	},
+	StartsWhen:     "earliest",
 	EndConceptPath: "/any/end/path/",
 	EndModifier: &modifier{
 		ModifierKey: "/any/end/modifier/key/",
 		AppliedPath: "/any/end/path/%",
 	},
+	EndsWhen: "earliest",
 	SubGroups: []*struct {
 		GroupName string "yaml:\"group_name\""
 		Panels    []*struct {

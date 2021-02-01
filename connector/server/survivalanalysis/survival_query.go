@@ -32,8 +32,10 @@ type Query struct {
 	TimeGranularity     string
 	StartConcept        string
 	StartModifier       *survival_analysis.SurvivalAnalysisParamsBodyStartModifier
+	StartsWhen          *string
 	EndConcept          string
 	EndModifier         *survival_analysis.SurvivalAnalysisParamsBodyEndModifier
+	EndsWhen            *string
 	Result              *struct {
 		Timers    medcomodels.Timers
 		EncEvents EventGroups
@@ -50,8 +52,10 @@ func NewQuery(UserID,
 	TimeGranularity string,
 	StartConcept string,
 	StartModifier *survival_analysis.SurvivalAnalysisParamsBodyStartModifier,
+	StartsWhen *string,
 	EndConcept string,
-	EndModifier *survival_analysis.SurvivalAnalysisParamsBodyEndModifier) *Query {
+	EndModifier *survival_analysis.SurvivalAnalysisParamsBodyEndModifier,
+	EndsWhen *string) *Query {
 	res := &Query{
 		UserPublicKey:       UserPublicKey,
 		UserID:              UserID,
@@ -62,8 +66,10 @@ func NewQuery(UserID,
 		TimeGranularity:     TimeGranularity,
 		StartConcept:        StartConcept,
 		StartModifier:       StartModifier,
+		StartsWhen:          StartsWhen,
 		EndConcept:          EndConcept,
 		EndModifier:         EndModifier,
+		EndsWhen:            EndsWhen,
 		Result: &struct {
 			Timers    medcomodels.Timers
 			EncEvents EventGroups
@@ -172,10 +178,10 @@ func (q *Query) Execute() error {
 				patientList,
 				startConceptCodes,
 				startModifierCodes,
-				true,
+				*q.StartsWhen == survival_analysis.SurvivalAnalysisBodyStartsWhenEarliest,
 				endConceptCodes,
 				endModifierCodes,
-				true,
+				*q.EndsWhen == survival_analysis.SurvivalAnalysisBodyEndsWhenEarliest,
 				timeLimitInDays,
 			)
 			timers.AddTimers(fmt.Sprintf("medco-connector-build-timepoints%d", i), timer, nil)

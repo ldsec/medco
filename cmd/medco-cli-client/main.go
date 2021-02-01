@@ -109,8 +109,18 @@ func main() {
 			Usage: "Survival start concept",
 		},
 		cli.StringFlag{
+			Name:  "startsWhen, w",
+			Usage: "Should it take the earliest or latest start event",
+			Value: "earliest",
+		},
+		cli.StringFlag{
 			Name:  "endConcept, e",
 			Usage: "Survival end concept",
+		},
+		cli.StringFlag{
+			Name:  "endsWhen, z",
+			Usage: "Should it take the earliest or latest end event",
+			Value: "earliest",
 		},
 	}
 
@@ -297,7 +307,7 @@ func main() {
 			Aliases:   []string{"srva"},
 			Usage:     "Run a survival analysis",
 			Flags:     survivalAnalysisFlag,
-			ArgsUsage: "[-p parameterFile |  [-g granularity] -c cohortName -s startConcept [-x startModifier] -e endConcept [-y endModifier]]",
+			ArgsUsage: "[-p parameterFile |  [-g granularity] -c cohortName -s startConcept [-x startModifier] -w startsWhen -e endConcept [-y endModifier] -z endsWhen]",
 			Description: "Returns the points of the survival curve with the provided parameters." +
 				"Instead of using command line arguments, paramters can also be written in parameter file." +
 				"If both parameter file URL and command line argument set are used," +
@@ -315,7 +325,9 @@ func main() {
 					c.String("cohortName"),
 					c.String("granularity"),
 					c.String("startConcept"),
+					c.String("startsWhen"),
 					c.String("endConcept"),
+					c.String("endsWhen"),
 				)
 
 			},
