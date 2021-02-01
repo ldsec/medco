@@ -65,6 +65,7 @@ func NewOntReqGetChildrenMessageBody(parent string) Request {
 func NewOntReqGetModifiersMessageBody(self string) Request {
 	body := OntReqGetModifiersMessageBody{}
 
+	body.GetModifiers.Blob = "true"
 	body.GetModifiers.Hiddens = "false"
 	body.GetModifiers.Synonyms = "false"
 
