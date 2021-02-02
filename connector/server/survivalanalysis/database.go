@@ -17,10 +17,10 @@ func buildTimePoints(
 	patientList []int64,
 	startConceptCodes []string,
 	startConceptModifiers []string,
-	startConceptEarliest bool,
+	startEarliest bool,
 	endConceptCodes []string,
 	endConceptModifiers []string,
-	endConceptEarliest bool,
+	endEarliest bool,
 	timeLimit int,
 ) (timePoints medcomodels.TimePoints, err error) {
 
@@ -28,157 +28,108 @@ func buildTimePoints(
 	for i, pNum := range patientList {
 		pList[i] = strconv.FormatInt(pNum, 10)
 	}
-	sql6Instance := sql6(startConceptEarliest, endConceptEarliest)
 	patients := "{" + strings.Join(pList, ",") + "}"
 	startConcepts := "{" + strings.Join(startConceptCodes, ",") + "}"
 	endConcepts := "{" + strings.Join(endConceptCodes, ",") + "}"
 	startModifiers := "{" + strings.Join(startConceptModifiers, ",") + "}"
 	endModifiers := "{" + strings.Join(endConceptModifiers, ",") + "}"
-	description := fmt.Sprintf("selecting start concept code %s, start concept modifier %s, patients list %s, end concept code %s, end concept modifier %s, time limit %d: SQL %s", startConcepts, startModifiers, patients, endConcepts, endModifiers, timeLimit, sql6Instance)
+	description := fmt.Sprintf(
+		"Build time points (patient list :%s, start concept codes: %s, start modifier codes: %s, start earliest: %t,"+
+			" end concept codes: %s, end modifier codes: %s, end earliest: %t, time limit: %d), procedure: %s",
+		patients,
+		startConcepts,
+		startModifiers,
+		startEarliest,
+		endConcepts,
+		endModifiers,
+		endEarliest,
+		timeLimit,
+		"i2b2demodata_i2b2.build_timepoints",
+	)
 	logrus.Debugf("running: %s", description)
-	rows, err := utilserver.I2B2DBConnection.Query(sql6Instance, startConcepts, startModifiers, patients, endConcepts, endModifiers, timeLimit)
+	rows, err := utilserver.I2B2DBConnection.Query(
+		"SELECT i2b2demodata_i2b2.build_timepoints($1, $2, $3, $4, $5, $6, $7, $8)",
+		patients,
+		startConcepts,
+		startModifiers,
+		startEarliest,
+		endConcepts,
+		endModifiers,
+		endEarliest,
+		timeLimit,
+	)
 	if err != nil {
 		err = fmt.Errorf("while execution SQL query: %s, DB operation: %s", err.Error(), description)
 		return
 	}
 	logrus.Debug("successfully selected")
-	timePointString := new(string)
-	eventsString := new(string)
-	censoringString := new(string)
+
+	// initialize the response
+	allTimePoints := make(medcomodels.TimePoints, timeLimit)
+	for i := range allTimePoints {
+		allTimePoints[i].Time = i
+	}
+
+	record := new(string)
+
+	var timePoint int64
+	var counts int64
+	var eventType int
+
 	for rows.Next() {
-		sqlTimePoint := medcomodels.TimePoint{}
-		scanErr := rows.Scan(timePointString, eventsString, censoringString)
+
+		scanErr := rows.Scan(record)
 		if scanErr != nil {
 			err = scanErr
 			err = fmt.Errorf("while scanning SQL record: %s", err.Error())
 			return
 		}
-		sqlTimePoint.Events.EventsOfInterest, err = strconv.ParseInt(*eventsString, 10, 64)
+		logrus.Tracef("Record: %s", *record)
+		cells := strings.Split(strings.Trim(*record, "()"), ",")
+		timePoint, err = strconv.ParseInt(cells[0], 10, 64)
 		if err != nil {
-			err = fmt.Errorf("while scanning parsing integer string (number of events) \"%s\": %s", *eventsString, err.Error())
+			err = fmt.Errorf("while scanning parsing integer string (relative time) \"%s\": %s", cells[0], err.Error())
 			return
 		}
-		sqlTimePoint.Events.CensoringEvents, err = strconv.ParseInt(*censoringString, 10, 64)
+		eventType, err = strconv.Atoi(cells[1])
 		if err != nil {
-			err = fmt.Errorf("while scanning parsing integer string (number of censoring) \"%s\": %s", *censoringString, err.Error())
+			err = fmt.Errorf("while scanning parsing integer string (type of event) \"%s\": %s", cells[2], err.Error())
 			return
 		}
-		sqlTimePoint.Time, err = strconv.Atoi(*timePointString)
+		counts, err = strconv.ParseInt(cells[2], 10, 64)
 		if err != nil {
-			err = fmt.Errorf("while scanning parsing integer string (relative time) \"%s\": %s", *timePointString, err.Error())
+			err = fmt.Errorf("while scanning parsing integer string (number of events) \"%s\": %s", cells[1], err.Error())
 			return
 		}
-		logrus.Tracef("new time point: %+v", sqlTimePoint)
-		timePoints = append(timePoints, sqlTimePoint)
+
+		// 1 is for event of interest, 0 for censoring event
+		if timePoint >= int64(timeLimit) {
+			err = fmt.Errorf("Unexpected time point code %d, must be smaller than time limit %d", timePoint, timeLimit)
+			return
+		}
+		switch eventType {
+		case 0:
+			allTimePoints[timePoint].Events.CensoringEvents = counts
+			break
+		case 1:
+			allTimePoints[timePoint].Events.EventsOfInterest = counts
+			break
+		default:
+			err = fmt.Errorf("Unexpected envent type code %d, must be either 0 (event of interest) or 1 (censoring event)", eventType)
+			return
+		}
 	}
+
+	// filter out empty time point
+
+	timePoints = make(medcomodels.TimePoints, 0)
+	for _, timePoint := range allTimePoints {
+		if (timePoint.Events.CensoringEvents != 0) || (timePoint.Events.EventsOfInterest != 0) {
+			logrus.Tracef("New timepoint added %+v", timePoint)
+			timePoints = append(timePoints, timePoint)
+		}
+	}
+
 	return
 
-}
-
-/*
-
-Recap of arguments:
-
-$1 start event concept code
-
-$2 start event modifier code
-
-$3 list of patient in cohort or sub group
-
-$4 end event concept code
-
-$5 end event modifier code
-
-$6 max time limit in day
-
-*/
-
-// TODO find better names or com
-// prepare those functions in DB
-
-const sql1Earliest string = `
-SELECT patient_num, MIN(start_date) AS start_date
-FROM i2b2demodata_i2b2.observation_fact
-WHERE concept_cd = ANY ($1::varchar[]) and modifier_cd = ANY ($2::varchar[]) and patient_num = ANY($3::integer[])
-GROUP BY patient_num
-`
-const sql1Latest string = `
-SELECT patient_num, MAX(start_date) AS start_date 
-FROM i2b2demodata_i2b2.observation_fact
-WHERE concept_cd = ANY ($1::varchar[]) and modifier_cd = ANY ($2::varchar[]) and patient_num = ANY($3::integer[])
-GROUP BY patient_num
-`
-const sql2Earliest string = `
-SELECT patient_num, MIN(end_date) AS end_date
-FROM i2b2demodata_i2b2.observation_fact
-WHERE concept_cd = ANY ($4::varchar[]) and modifier_cd = ANY  ($5::varchar[]) and patient_num = ANY($3::integer[])
-GROUP BY patient_num
-`
-const sql2Latest string = `
-SELECT patient_num, MAX(end_date) AS end_date
-FROM i2b2demodata_i2b2.observation_fact
-WHERE concept_cd = ANY ($4::varchar[]) and modifier_cd = ANY ($5::varchar[]) and patient_num = ANY($3::integer[])
-GROUP BY patient_num
-`
-
-func sql3(startConceptEarliest, endConceptEarliest bool) string {
-	var sql1, sql2 string
-	if startConceptEarliest {
-		sql1 = sql1Earliest
-	} else {
-		sql1 = sql1Latest
-	}
-
-	if endConceptEarliest {
-		sql2 = sql2Earliest
-	} else {
-		sql2 = sql2Latest
-	}
-
-	return `
-	SELECT DATE_PART('day',end_date::timestamp - start_date::timestamp) AS timepoint, COUNT(*) AS event_count
-	FROM (` + sql1 + `) AS x
-	INNER JOIN  (` + sql2 + `) AS y
-	ON x.patient_num = y.patient_num
-	GROUP BY timepoint
-	`
-}
-
-func sql4(endConceptEarliest bool) string {
-	var sql2 string
-	if endConceptEarliest {
-		sql2 = sql2Earliest
-	} else {
-		sql2 = sql2Latest
-	}
-	return `
-SELECT patient_num, MAX(end_date) AS end_date
-FROM i2b2demodata_i2b2.observation_fact
-WHERE patient_num = ANY($3::integer[]) AND patient_num NOT IN (SELECT patient_num FROM (` + sql2 + `) AS patients_with_events)
-GROUP BY patient_num
-`
-}
-
-func sql5(startConceptEarliest, endConceptEarliest bool) string {
-	var sql1 string
-	if startConceptEarliest {
-		sql1 = sql1Earliest
-	} else {
-		sql1 = sql1Latest
-	}
-	return `
-SELECT * FROM (SELECT DATE_PART('day', end_date::timestamp - start_date::timestamp) AS timepoint, COUNT(*) AS censoring_count
-FROM (` + sql4(endConceptEarliest) + `) AS x
-INNER JOIN  (` + sql1 + `) AS y
-ON (x.patient_num = y.patient_num)
-GROUP BY timepoint) AS z
-WHERE timepoint < $6
-`
-}
-
-func sql6(startConceptEarliest, endConceptEarliest bool) string {
-	return `
-SELECT COALESCE(xx.timepoint,yy.timepoint) AS timepoint , COALESCE(event_count,0) AS event_count, COALESCE(censoring_count,0) AS censoring_count FROM (` + sql3(startConceptEarliest, endConceptEarliest) + `) AS xx  FULL JOIN (` + sql5(startConceptEarliest, endConceptEarliest) + `) AS yy
-ON xx.timepoint = yy.timepoint
-`
 }

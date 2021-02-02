@@ -1,43 +1,77 @@
 
 -- pl/pgsql function that implement the construction of relative times for survival analysis
-CREATE OR REPLACE TYPE timepoint_type AS (count bigint, timepoint bigint, end_type integer);
 
-CREATE FUNCTION build_timepoints(patient_list integer[], start_code varchar, start_modifier_code varchar, end_code varchar, end_modifier_code varchar, time_limit integer) 
-RETURNS ROWS timepoint_type
+CREATE OR REPLACE FUNCTION i2b2demodata_i2b2.build_timepoints(patient_list integer[], start_code varchar[], start_modifier_code varchar[], start_earliest boolean, end_code varchar[], end_modifier_code varchar[], end_earliest boolean, time_limit integer) 
+RETURNS TABLE( timepoint bigint, end_type integer, p_count bigint)
+STABLE
+PARALLEL SAFE
 AS $$
 DECLARE
-
-BEGIN
-
-
-RETURN EXECUTE QUERY format(
-  'SELECT * FROM (SELECT COUNT(patient_num), DATE_PART(%L,end_date::timestamp - start_date::timestamp)::bigint as timepoint, end_type FROM(
-	SELECT z.patient_num, z.start_date, COALESCE(z.end_date,w.end_date) as end_date , COALESCE(z.wagner, w.wagner) as end_type FROM (SELECT x.patient_num, start_date, end_date,wagner FROM(
-	SELECT patient_num, min(start_date) as start_date
+  patients_with_start_concept_earliest text := 'SELECT patient_num, min(start_date) as start_date
 
 	FROM i2b2demodata_i2b2.observation_fact
-	where patient_num = ANY($1::varchar[]) AND concept_cd = ANY($2::varchar[]) and modifier_cd = ANY($3::varchar[])
-	GROUP BY patient_num) as x
-LEFT JOIN (SELECT patient_num, min(start_date) as end_date, 1 as wagner
+	where patient_num = ANY($1::integer[]) AND concept_cd = ANY($2::varchar[]) and modifier_cd = ANY($3::varchar[])
+	GROUP BY patient_num';
+
+  patients_with_start_concept_latest text := 'SELECT patient_num, max(start_date) as start_date
+
+	FROM i2b2demodata_i2b2.observation_fact
+	where patient_num = ANY($1::integer[]) AND concept_cd = ANY($2::varchar[]) and modifier_cd = ANY($3::varchar[])
+	GROUP BY patient_num';
+
+  patients_with_end_concept_earliest  text := 'SELECT patient_num, min(start_date) as end_date, 1 as event_type_cd
 
 	FROM i2b2demodata_i2b2.observation_fact
 	where concept_cd = ANY($4::varchar[]) AND modifier_cd = ANY($5::varchar[])
-	GROUP BY patient_num) as y
-	ON x.patient_num =y.patient_num) as z
-LEFT JOIN (SELECT patient_num, max(coalesce(end_date,start_date)) as end_date, 0 as wagner
+	GROUP BY patient_num';
+
+  patients_with_end_concept_latest  text := 'SELECT patient_num, max(start_date) as end_date, 1 as event_type_cd
+
+	FROM i2b2demodata_i2b2.observation_fact
+	where concept_cd = ANY($4::varchar[]) AND modifier_cd = ANY($5::varchar[])
+	GROUP BY patient_num';
+
+
+  patients_without_end_concept text := 'SELECT patient_num, max(coalesce(end_date,start_date)) as end_date, 0 as event_type_cd
 
 	FROM i2b2demodata_i2b2.observation_fact
 	where concept_cd != ANY($4::varchar[]) AND modifier_cd != ANY($5::varchar[])
-	GROUP BY patient_num) as w
-ON w.patient_num = z.patient_num
+	GROUP BY patient_num';
+
+  qq text := 'SELECT timepoint, end_type, p_count FROM (SELECT COUNT(patient_num) as p_count, DATE_PART(%L,end_date::timestamp - start_date::timestamp)::bigint as timepoint, end_type FROM(
+	SELECT patients_with_start_and_end.patient_num, patients_with_start_and_end.start_date, COALESCE(patients_with_start_and_end.end_date,patients_without_end_concept.end_date) as end_date , COALESCE(patients_with_start_and_end.event_type_cd, patients_without_end_concept.event_type_cd) as end_type FROM (SELECT patient_with_start_concept.patient_num, start_date, end_date,event_type_cd FROM(
+   ';
+
+
+BEGIN
+
+IF 'cubs' = 'cubs' THEN
+    qq := qq || patients_with_start_concept_earliest ;
+  ELSE
+    qq := qq || patients_with_start_concept_latest ;
+END IF ;
+
+qq := qq || ') as patient_with_start_concept LEFT JOIN (';
+
+IF 'cubs' = 'cubs' THEN
+    qq := qq || patients_with_end_concept_earliest;
+  ELSE
+    qq := qq || patients_with_end_concept_latest;
+END IF;
+
+qq := qq || ') as patient_with_end_concept
+	ON patient_with_start_concept.patient_num =patient_with_end_concept.patient_num) as patients_with_start_and_end
+LEFT JOIN (' || patients_without_end_concept || ') as patients_without_end_concept
+ON patients_without_end_concept.patient_num = patients_with_start_and_end.patient_num
 ) as relative_timepoints
 
 GROUP BY timepoint, end_type) as asdf
-where timepoint <$6  and timepoint >=0',
+where timepoint <$6  and timepoint >=0';
+
+RETURN QUERY EXECUTE format(qq,
 'day')
 USING patient_list, start_code, start_modifier_code, end_code, end_modifier_code, time_limit;
 
- 
 
 END;
 $$ LANGUAGE plpgsql

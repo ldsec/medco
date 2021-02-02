@@ -110,7 +110,7 @@ func main() {
 		},
 		cli.StringFlag{
 			Name:  "startsWhen, w",
-			Usage: "Should it take the earliest or latest start event",
+			Usage: "In case of multiple occurences of start concept in observations, specifies if the earliest or the latest is taken",
 			Value: "earliest",
 		},
 		cli.StringFlag{
@@ -119,7 +119,7 @@ func main() {
 		},
 		cli.StringFlag{
 			Name:  "endsWhen, z",
-			Usage: "Should it take the earliest or latest end event",
+			Usage: "In case of multiple occurences of end concept in observations, specifies if the earliest or the latest is taken",
 			Value: "earliest",
 		},
 	}
