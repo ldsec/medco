@@ -785,6 +785,7 @@ definitions:
             operator:
               type: "string"
               enum:
+                # NUMBER operators
                 - EQ
                 - NE
                 - GT
@@ -792,17 +793,34 @@ definitions:
                 - LT
                 - LE
                 - BETWEEN
+                # TEXT operators
+                - IN
+                - LIKE[exact]
+                - LIKE[begin]
+                - LIKE[end]
+                - LIKE[contains]
               description: >
-                EQ: equals
-                NE: not equals
+                # NUMBER operators
+                EQ: equal
+                NE: not equal
                 GT: greater than
                 GE: greater than or equal
                 LT: less than
                 LE: less than or equal
-                BETWEEN: between (value syntax: x and y)
+                BETWEEN: between (value syntax: "x and y")
+                # TEXT operators
+                IN: in (value syntax: "'x','y','z'")
+                LIKE[exact]: equal
+                LIKE[begin]: begins with
+                LIKE[end]: ends with
+                LIKE[contains]: contains
             value:
               type: "string"
-              pattern: '^[+-]?([0-9]*[.])?[0-9]+'
+            type:
+              type: "string"
+              enum:
+                - NUMBER
+                - TEXT
             modifier:
               type: "object"
               required: [appliedPath, modifierKey]
@@ -877,7 +895,7 @@ definitions:
             type: "array"
             items:
               $ref: "#/definitions/exploreQueryType"
-  
+
   timing:
     type: string
     enum:

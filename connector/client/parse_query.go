@@ -109,10 +109,10 @@ func ParseQueryString(queryString string) (panels []*models.Panel, err error) {
 // and an optional field, the constraint field, separated by "::".
 //		type::content[::constraint]
 // Possible values of the type field are: "enc", "clr", "file".
-// 1. When the type field is equal to "enc", the content field contains the concept ID. The constraint field is not present this case.
+// 1. When the type field is equal to "enc", the content field contains the concept ID. The constraint field is not present in this case.
 // 2. When the type field is equal to "clr", the content field contains the concept field (containing the concept path)
 // 		and, possibly, the modifier field, which in turn contains the modifier key and applied path fields, separated by ":".
-// 		The optional constraint field can be present, containing the operator and value fields separated by ":.
+// 		The optional constraint field can be present, containing the operator, type and value fields separated by ":".
 //		The constraint field applies to the concept or, if the modifier field is present, to the modifier.
 // 3. When the type field is equal to "file", the content field contains the path of the file containing the items. The constraint field is not present in this case.
 func ParseQueryItem(queryItem string) (items []*models.PanelItemsItems0, err error) {
@@ -163,12 +163,13 @@ func ParseQueryItem(queryItem string) (items []*models.PanelItemsItems0, err err
 
 		if len(queryItemFields) == 3 { // there is a constrain field
 			constrainFieldFields := strings.Split(queryItemFields[2], ":")
-			if len(constrainFieldFields) != 2 {
+			if len(constrainFieldFields) != 3 {
 				return nil, fmt.Errorf("invalid constrain field format: %v", constrainFieldFields)
 			}
 
 			item.Operator = constrainFieldFields[0]
-			item.Value = constrainFieldFields[1]
+			item.Type = constrainFieldFields[1]
+			item.Value = constrainFieldFields[2]
 		}
 
 		items = append(items, item)
