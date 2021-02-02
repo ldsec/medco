@@ -575,6 +575,15 @@ responses:
             type: "string"
           updateDate:
             type: "string"
+          queryDefinition:
+            type: "object"
+            properties:
+              panels:
+                type: "array"
+                items:
+                  $ref: "#/definitions/panel"
+              queryTiming:
+                $ref: "#/definitions/timing"
 
   survivalAnalysisResponse:
     description: "Queried survival analysis"

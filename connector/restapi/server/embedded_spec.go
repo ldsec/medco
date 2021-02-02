@@ -1180,6 +1180,20 @@ func init() {
             "creationDate": {
               "type": "string"
             },
+            "queryDefinition": {
+              "type": "object",
+              "properties": {
+                "panels": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/panel"
+                  }
+                },
+                "queryTiming": {
+                  "$ref": "#/definitions/timing"
+                }
+              }
+            },
             "queryId": {
               "type": "integer"
             },
@@ -2292,11 +2306,39 @@ func init() {
         "creationDate": {
           "type": "string"
         },
+        "queryDefinition": {
+          "type": "object",
+          "properties": {
+            "panels": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/panel"
+              }
+            },
+            "queryTiming": {
+              "$ref": "#/definitions/timing"
+            }
+          }
+        },
         "queryId": {
           "type": "integer"
         },
         "updateDate": {
           "type": "string"
+        }
+      }
+    },
+    "GetCohortsOKBodyItems0QueryDefinition": {
+      "type": "object",
+      "properties": {
+        "panels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/panel"
+          }
+        },
+        "queryTiming": {
+          "$ref": "#/definitions/timing"
         }
       }
     },
@@ -3155,6 +3197,20 @@ func init() {
             },
             "creationDate": {
               "type": "string"
+            },
+            "queryDefinition": {
+              "type": "object",
+              "properties": {
+                "panels": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/panel"
+                  }
+                },
+                "queryTiming": {
+                  "$ref": "#/definitions/timing"
+                }
+              }
             },
             "queryId": {
               "type": "integer"
