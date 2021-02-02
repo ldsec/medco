@@ -1,59 +1,43 @@
 
 -- pl/pgsql function that implement the construction of relative times for survival analysis
+CREATE OR REPLACE TYPE timepoint_type AS (count bigint, timepoint bigint, end_type integer);
 
-SET search_path TO i2b2demodata_i2b2;
 CREATE FUNCTION build_timepoints(patient_list integer[], start_code varchar, start_modifier_code varchar, end_code varchar, end_modifier_code varchar, time_limit integer) 
-RETURNS TABLE (timepoint integer, event_count integer, censoring_count integer)
+RETURNS ROWS timepoint_type
 AS $$
 DECLARE
 
 BEGIN
-SET search_path TO i2b2demodata_i2b2;
-  
-    -- those query results are used several times, this is why there are TEMP TABLEs
-    CREATE TEMP TABLE start_dates AS (SELECT patient_num,start_date
-                      FROM observation_fact
-                      WHERE concept_cd = start_code AND modifier_cd = start_modifier_code AND patient_num = ANY(patient_list));
-    
-    CREATE TEMP TABLE end_dates AS (SELECT patient_num,end_date
-                      FROM observation_fact
-                      WHERE concept_cd = end_code AND modifier_cd = end_modifier_code AND patient_num = ANY(patient_list));
-    
-    RETURN QUERY
-
-        SELECT COALESCE(xx.timepoint::integer,yy.timepoint::integer) AS timepoint , COALESCE(xx.event_count::integer,0) AS event_count, COALESCE(yy.censoring_count::integer,0) AS censoring_count FROM (
-            
-            --compute relative times for patient having both start and end event
-            SELECT DATE_PART('day',end_date::timestamp - start_date::timestamp) AS timepoint, COUNT(*) AS event_count
-            FROM start_dates
-            INNER JOIN end_dates
-            ON start_dates.patient_num = end_dates.patient_num
-            GROUP BY timepoint
-        ) AS xx  FULL JOIN (
-
-            --compute relative times for patient having both start event, but missing end event
-            SELECT * FROM (SELECT DATE_PART('day', end_date::timestamp - start_date::timestamp) AS timepoint, COUNT(*) AS censoring_count
-                FROM (
-
-                    --the date of censoring event is the most recent date of any events
-                    SELECT patient_num, MAX(end_date) AS end_date
-                    FROM i2b2demodata_i2b2.observation_fact
-                    WHERE patient_num = ANY(patient_list) AND patient_num NOT IN (SELECT patient_num FROM end_dates)
-                    GROUP BY patient_num
-                ) AS x
-                INNER JOIN  start_dates
-                ON x.patient_num = start_dates.patient_num
-                GROUP BY timepoint) AS z
-                
-            --user-defined maximume relative time
-            WHERE z.timepoint < time_limit
-        ) AS yy
-        ON xx.timepoint = yy.timepoint;
-
-    DROP TABLE start_dates;
-    DROP TABLE end_dates;
 
 
+RETURN EXECUTE QUERY format(
+  'SELECT * FROM (SELECT COUNT(patient_num), DATE_PART(%L,end_date::timestamp - start_date::timestamp)::bigint as timepoint, end_type FROM(
+	SELECT z.patient_num, z.start_date, COALESCE(z.end_date,w.end_date) as end_date , COALESCE(z.wagner, w.wagner) as end_type FROM (SELECT x.patient_num, start_date, end_date,wagner FROM(
+	SELECT patient_num, min(start_date) as start_date
+
+	FROM i2b2demodata_i2b2.observation_fact
+	where patient_num = ANY($1::varchar[]) AND concept_cd = ANY($2::varchar[]) and modifier_cd = ANY($3::varchar[])
+	GROUP BY patient_num) as x
+LEFT JOIN (SELECT patient_num, min(start_date) as end_date, 1 as wagner
+
+	FROM i2b2demodata_i2b2.observation_fact
+	where concept_cd = ANY($4::varchar[]) AND modifier_cd = ANY($5::varchar[])
+	GROUP BY patient_num) as y
+	ON x.patient_num =y.patient_num) as z
+LEFT JOIN (SELECT patient_num, max(coalesce(end_date,start_date)) as end_date, 0 as wagner
+
+	FROM i2b2demodata_i2b2.observation_fact
+	where concept_cd != ANY($4::varchar[]) AND modifier_cd != ANY($5::varchar[])
+	GROUP BY patient_num) as w
+ON w.patient_num = z.patient_num
+) as relative_timepoints
+
+GROUP BY timepoint, end_type) as asdf
+where timepoint <$6  and timepoint >=0',
+'day')
+USING patient_list, start_code, start_modifier_code, end_code, end_modifier_code, time_limit;
+
+ 
 
 END;
 $$ LANGUAGE plpgsql

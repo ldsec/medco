@@ -94,8 +94,11 @@ func TestInsertCohortAndUpdateCohortAndRemoveCohort(t *testing.T) {
 	}
 
 	assert.Equal(t, true, found)
+	time.Sleep(10 * time.Second)
 	now2 := time.Now()
 	cohortID, err = UpdateCohort("testCohort2", "test", -1, now2)
+	assert.NoError(t, err)
+	cohorts, err = GetSavedCohorts("test", 0)
 	assert.NoError(t, err)
 
 	found = false
