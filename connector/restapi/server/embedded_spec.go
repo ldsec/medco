@@ -812,7 +812,7 @@ func init() {
                 }
               },
               "operator": {
-                "description": "EQ: equals NE: not equals GT: greater than GE: greater than or equal LT: less than LE: less than or equal BETWEEN: between (value syntax: x and y)\n",
+                "description": "# NUMBER operators EQ: equals NE: not equals GT: greater than GE: greater than or equal LT: less than LE: less than or equal BETWEEN: between (value syntax: \"x and y\")\n# TEXT operators IN: in (value syntax: \"'x','y','z'\") LIKE[exact]: equal LIKE[begin]: begins with LIKE[end]: ends with LIKE[contains]: contains\n",
                 "type": "string",
                 "enum": [
                   "EQ",
@@ -821,16 +821,27 @@ func init() {
                   "GE",
                   "LT",
                   "LE",
-                  "BETWEEN"
+                  "BETWEEN",
+                  "IN",
+                  "LIKE[exact]",
+                  "LIKE[begin]",
+                  "LIKE[end]",
+                  "LIKE[contains]"
                 ]
               },
               "queryTerm": {
                 "type": "string",
                 "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/)$"
               },
-              "value": {
+              "type": {
                 "type": "string",
-                "pattern": "^[+-]?([0-9]*[.])?[0-9]+"
+                "enum": [
+                  "NUMBER",
+                  "TEXT"
+                ]
+              },
+              "value": {
+                "type": "string"
               }
             }
           }
@@ -1195,6 +1206,20 @@ func init() {
             },
             "creationDate": {
               "type": "string"
+            },
+            "queryDefinition": {
+              "type": "object",
+              "properties": {
+                "panels": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/panel"
+                  }
+                },
+                "queryTiming": {
+                  "$ref": "#/definitions/timing"
+                }
+              }
             },
             "queryId": {
               "type": "integer"
@@ -2324,11 +2349,39 @@ func init() {
         "creationDate": {
           "type": "string"
         },
+        "queryDefinition": {
+          "type": "object",
+          "properties": {
+            "panels": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/panel"
+              }
+            },
+            "queryTiming": {
+              "$ref": "#/definitions/timing"
+            }
+          }
+        },
         "queryId": {
           "type": "integer"
         },
         "updateDate": {
           "type": "string"
+        }
+      }
+    },
+    "GetCohortsOKBodyItems0QueryDefinition": {
+      "type": "object",
+      "properties": {
+        "panels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/panel"
+          }
+        },
+        "queryTiming": {
+          "$ref": "#/definitions/timing"
         }
       }
     },
@@ -2418,7 +2471,7 @@ func init() {
           }
         },
         "operator": {
-          "description": "EQ: equals NE: not equals GT: greater than GE: greater than or equal LT: less than LE: less than or equal BETWEEN: between (value syntax: x and y)\n",
+          "description": "# NUMBER operators EQ: equals NE: not equals GT: greater than GE: greater than or equal LT: less than LE: less than or equal BETWEEN: between (value syntax: \"x and y\")\n# TEXT operators IN: in (value syntax: \"'x','y','z'\") LIKE[exact]: equal LIKE[begin]: begins with LIKE[end]: ends with LIKE[contains]: contains\n",
           "type": "string",
           "enum": [
             "EQ",
@@ -2427,16 +2480,27 @@ func init() {
             "GE",
             "LT",
             "LE",
-            "BETWEEN"
+            "BETWEEN",
+            "IN",
+            "LIKE[exact]",
+            "LIKE[begin]",
+            "LIKE[end]",
+            "LIKE[contains]"
           ]
         },
         "queryTerm": {
           "type": "string",
           "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/)$"
         },
-        "value": {
+        "type": {
           "type": "string",
-          "pattern": "^[+-]?([0-9]*[.])?[0-9]+"
+          "enum": [
+            "NUMBER",
+            "TEXT"
+          ]
+        },
+        "value": {
+          "type": "string"
         }
       }
     },
@@ -3203,6 +3267,20 @@ func init() {
             },
             "creationDate": {
               "type": "string"
+            },
+            "queryDefinition": {
+              "type": "object",
+              "properties": {
+                "panels": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/panel"
+                  }
+                },
+                "queryTiming": {
+                  "$ref": "#/definitions/timing"
+                }
+              }
             },
             "queryId": {
               "type": "integer"

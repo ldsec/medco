@@ -131,6 +131,10 @@ func GetOntologyModifierChildren(parent, appliedPath, appliedConcept string) (re
 // GetOntologyConceptInfo makes request to get information about a node given its path
 func GetOntologyConceptInfo(path string) (results []*models.ExploreSearchResultElement, err error) {
 
+	if path == "/" {
+		return
+	}
+
 	// craft and make request
 	path = convertPathToI2b2Format(strings.TrimSpace(path))
 
