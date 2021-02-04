@@ -45,6 +45,9 @@ var I2b2LoginPassword string
 // I2b2WaitTimeSeconds is the i2b2 timeout (seconds)
 var I2b2WaitTimeSeconds int
 
+// I2b2OntMaxElements is the maximum number of elements retrieved from the i2b2 ontology by the connector
+var I2b2OntMaxElements string
+
 // OidcProviders are the OIDC providers this node trusts
 var OidcProviders []*oidcProvider
 
@@ -116,6 +119,7 @@ func init() {
 	I2b2LoginProject = os.Getenv("I2B2_LOGIN_PROJECT")
 	I2b2LoginUser = os.Getenv("I2B2_LOGIN_USER")
 	I2b2LoginPassword = os.Getenv("I2B2_LOGIN_PASSWORD")
+	I2b2OntMaxElements = os.Getenv("I2B2_ONT_MAX_ELEMENTS")
 
 	i2b2to, err := strconv.ParseInt(os.Getenv("I2B2_WAIT_TIME_SECONDS"), 10, 64)
 	if err != nil || i2b2to < 0 {
