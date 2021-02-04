@@ -28,4 +28,5 @@ _testmain.go
 *.gob
 .DS_Store
 .idea/
+.vscode/
 coverage.txt

@@ -1,0 +1,20 @@
+-- pl/pgsql function that removes a cohort identified by its cohort name and the user's ID
+
+CREATE OR REPLACE FUNCTION query_tools.remove_cohort(cohort_name varchar, user_id varchar)
+  RETURNS integer
+  VOLATILE
+  PARALLEL UNSAFE
+  AS $$
+DECLARE
+  cohort_id integer;
+BEGIN
+  EXECUTE 'DELETE FROM query_tools.saved_cohorts
+WHERE user_id = $1 AND cohort_name = $2
+RETURNING cohort_id'
+  USING user_id,
+  cohort_name
+  INTO cohort_id;
+  RETURN cohort_id;
+END;
+$$
+LANGUAGE plpgsql

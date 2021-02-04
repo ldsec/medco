@@ -1,0 +1,29 @@
+-- pl/pgsql function that returns the list of cohorts previously saved by a user
+
+CREATE OR REPLACE FUNCTION query_tools.get_cohort(user_id varchar, number_limit integer)
+  RETURNS TABLE (
+    cohort_id integer,
+    query_id integer,
+    cohort_name varchar,
+    create_date timestamp,
+    update_date timestamp)
+  STABLE
+  PARALLEL SAFE
+  AS $$
+DECLARE
+  query_ text := 'SELECT cohort_id, query_id, cohort_name, create_date, update_date FROM query_tools.saved_cohorts
+WHERE user_id = $1
+ORDER BY update_date DESC, cohort_name';
+BEGIN
+  IF number_limit > 0 THEN
+    query_ := query_ || ' LIMIT $2';
+    RETURN QUERY EXECUTE query_
+    USING user_id,
+    number_limit;
+  ELSE
+    RETURN QUERY EXECUTE query_
+    USING user_id;
+  END IF;
+END;
+$$
+LANGUAGE plpgsql

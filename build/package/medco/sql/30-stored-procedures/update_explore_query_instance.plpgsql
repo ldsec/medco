@@ -1,0 +1,22 @@
+-- pl/pgsql function that updates explore query instance table
+
+CREATE OR REPLACE FUNCTION query_tools.update_explore_query_instance(query_id integer, clear_result_set_size integer, clear_result_set integer[], i2b2_encrypted_patient_set_id integer, i2b2_non_encrypted_patient_set_id integer)
+  RETURNS integer
+  VOLATILE
+  PARALLEL UNSAFE
+  AS $$
+DECLARE
+  query_id_ret integer;
+BEGIN
+  EXECUTE format('UPDATE query_tools.explore_query_results
+SET clear_result_set_size=$2, clear_result_set=$3, query_status=%L , i2b2_encrypted_patient_set_id=$4, i2b2_non_encrypted_patient_set_id=$5
+WHERE query_id = $1 AND status = %L', 'completed', 'running')
+  USING query_id,
+  clear_result_set_size,
+  clear_result_set,
+  i2b2_encrypted_patient_set_id,
+  i2b2_non_encrypted_patient_set_id INTO query_id_ret;
+  RETURN query_id_ret;
+END;
+$$
+LANGUAGE plpgsql

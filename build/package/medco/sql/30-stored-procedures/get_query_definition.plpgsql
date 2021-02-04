@@ -1,0 +1,17 @@
+-- pl/pgsql function that returns the JSON representation of a query definition
+
+CREATE OR REPLACE FUNCTION query_tools.query_definition(query_id integer)
+  RETURNS varchar
+  STABLE
+  PARALLEL SAFE
+  AS $$
+DECLARE
+  querydef varchar;
+BEGIN
+  EXECUTE 'SELECT query_definition FROM query_tools.explore_query_results
+WHERE query_id = $1'
+  USING query_id INTO querydef;
+  RETURN querydef;
+END;
+$$
+LANGUAGE plpgsql

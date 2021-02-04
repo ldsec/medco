@@ -1,0 +1,16 @@
+-- pl/pgsql function that returns the list of patient inside a cohort for a given user
+
+CREATE OR REPLACE FUNCTION query_tools.get_patient_list(user_id varchar, cohort_name varchar)
+  RETURNS SETOF integer
+  STABLE
+  PARALLEL SAFE
+  AS $$
+DECLARE
+BEGIN
+  RETURN QUERY EXECUTE format('SELECT clear_result_set FROM query_tools.explore_query_results
+WHERE query_id = (SELECT query_id FROM query_tools.saved_cohorts WHERE user_id = $1 AND cohort_name = $2 AND query_status = %L);', 'completed')
+  USING user_id,
+  cohort_name;
+END;
+$$
+LANGUAGE plpgsql
