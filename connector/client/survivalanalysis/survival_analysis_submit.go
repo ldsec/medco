@@ -22,8 +22,10 @@ func (clientSurvivalAnalysis *SurvivalAnalysis) submitToNode(nodeIdx int) (resul
 		SubGroupDefinitions: clientSurvivalAnalysis.subGroupDefinitions,
 		StartConcept:        new(string),
 		StartModifier:       clientSurvivalAnalysis.startModifier,
+		StartsWhen:          new(string),
 		EndConcept:          new(string),
 		EndModifier:         clientSurvivalAnalysis.endModifier,
+		EndsWhen:            new(string),
 		TimeGranularity:     new(string),
 		TimeLimit:           new(int64),
 	}
@@ -32,7 +34,9 @@ func (clientSurvivalAnalysis *SurvivalAnalysis) submitToNode(nodeIdx int) (resul
 	*body.UserPublicKey = clientSurvivalAnalysis.userPublicKey
 	*body.CohortName = clientSurvivalAnalysis.cohortName
 	*body.StartConcept = clientSurvivalAnalysis.startConceptPath
+	*body.StartsWhen = clientSurvivalAnalysis.startsWhen
 	*body.EndConcept = clientSurvivalAnalysis.endConceptPath
+	*body.EndsWhen = clientSurvivalAnalysis.endsWhen
 	*body.TimeGranularity = strings.ToLower(clientSurvivalAnalysis.granularity)
 	*body.TimeLimit = int64(clientSurvivalAnalysis.limit)
 
