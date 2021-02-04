@@ -56,6 +56,7 @@ ENV HOST=0.0.0.0 \
     I2B2_LOGIN_USER=e2etest \
     I2B2_LOGIN_PASSWORD=e2etest \
     I2B2_WAIT_TIME_SECONDS=300 \
+    I2B2_ONT_MAX_ELEMENTS=200 \
     UNLYNX_TIMEOUT_SECONDS=300 \
     OIDC_JWKS_URLS=http://keycloak:8080/auth/realms/master/protocol/openid-connect/certs \
     OIDC_JWT_ISSUERS=http://keycloak:8080/auth/realms/master \
