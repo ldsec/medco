@@ -5,10 +5,12 @@ start_concept_path: "/any/start/path/"
 start_modifier: 
   modifier_key : "/any/start/modifier/key/"
   applied_path: "/any/start/path/%"
+starts_when: "earliest"
 end_concept_path: "/any/end/path/"
 end_modifier:
   modifier_key : "/any/end/modifier/key/"
   applied_path: "/any/end/path/%"
+ends_when: "earliest"
 sub_groups:
   - group_name: "AAA"
     panels:

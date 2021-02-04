@@ -1,0 +1,21 @@
+-- pl/pgsql function to return concept codes for a given concept path and its descendants
+
+CREATE OR REPLACE FUNCTION medco_ont.get_concept_codes(ontology character varying,path character varying)
+    RETURNS SETOF character varying
+    LANGUAGE 'plpgsql'
+    STABLE
+    PARALLEL SAFE
+AS $BODY$ 
+BEGIN
+
+    RETURN QUERY EXECUTE format(
+      'SELECT c_basecode
+	      FROM medco_ont.%I
+	      WHERE (c_basecode IS NOT NULL AND c_basecode != %L
+			    AND c_facttablecolumn = %L
+		      AND c_fullname LIKE $1);',
+      ontology, '', 'concept_cd'
+    )
+    USING path;
+  END;
+  $BODY$;

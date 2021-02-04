@@ -996,7 +996,9 @@ func init() {
           "timeLimit",
           "timeGranularity",
           "startConcept",
-          "endConcept"
+          "startsWhen",
+          "endConcept",
+          "endsWhen"
         ],
         "properties": {
           "ID": {
@@ -1028,6 +1030,13 @@ func init() {
               }
             }
           },
+          "endsWhen": {
+            "type": "string",
+            "enum": [
+              "earliest",
+              "latest"
+            ]
+          },
           "startConcept": {
             "type": "string",
             "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
@@ -1048,6 +1057,13 @@ func init() {
                 "pattern": "^((\\/[^\\/]+)+\\/)$"
               }
             }
+          },
+          "startsWhen": {
+            "type": "string",
+            "enum": [
+              "earliest",
+              "latest"
+            ]
           },
           "subGroupDefinitions": {
             "type": "array",
@@ -1602,7 +1618,9 @@ func init() {
                 "timeLimit",
                 "timeGranularity",
                 "startConcept",
-                "endConcept"
+                "startsWhen",
+                "endConcept",
+                "endsWhen"
               ],
               "properties": {
                 "ID": {
@@ -1634,6 +1652,13 @@ func init() {
                     }
                   }
                 },
+                "endsWhen": {
+                  "type": "string",
+                  "enum": [
+                    "earliest",
+                    "latest"
+                  ]
+                },
                 "startConcept": {
                   "type": "string",
                   "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
@@ -1654,6 +1679,13 @@ func init() {
                       "pattern": "^((\\/[^\\/]+)+\\/)$"
                     }
                   }
+                },
+                "startsWhen": {
+                  "type": "string",
+                  "enum": [
+                    "earliest",
+                    "latest"
+                  ]
                 },
                 "subGroupDefinitions": {
                   "type": "array",
@@ -3025,7 +3057,9 @@ func init() {
           "timeLimit",
           "timeGranularity",
           "startConcept",
-          "endConcept"
+          "startsWhen",
+          "endConcept",
+          "endsWhen"
         ],
         "properties": {
           "ID": {
@@ -3057,6 +3091,13 @@ func init() {
               }
             }
           },
+          "endsWhen": {
+            "type": "string",
+            "enum": [
+              "earliest",
+              "latest"
+            ]
+          },
           "startConcept": {
             "type": "string",
             "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
@@ -3077,6 +3118,13 @@ func init() {
                 "pattern": "^((\\/[^\\/]+)+\\/)$"
               }
             }
+          },
+          "startsWhen": {
+            "type": "string",
+            "enum": [
+              "earliest",
+              "latest"
+            ]
           },
           "subGroupDefinitions": {
             "type": "array",
