@@ -32,8 +32,10 @@ type Query struct {
 	TimeGranularity     string
 	StartConcept        string
 	StartModifier       *survival_analysis.SurvivalAnalysisParamsBodyStartModifier
+	StartsWhen          *string
 	EndConcept          string
 	EndModifier         *survival_analysis.SurvivalAnalysisParamsBodyEndModifier
+	EndsWhen            *string
 	Result              *struct {
 		Timers    medcomodels.Timers
 		EncEvents EventGroups
@@ -50,8 +52,10 @@ func NewQuery(UserID,
 	TimeGranularity string,
 	StartConcept string,
 	StartModifier *survival_analysis.SurvivalAnalysisParamsBodyStartModifier,
+	StartsWhen *string,
 	EndConcept string,
-	EndModifier *survival_analysis.SurvivalAnalysisParamsBodyEndModifier) *Query {
+	EndModifier *survival_analysis.SurvivalAnalysisParamsBodyEndModifier,
+	EndsWhen *string) *Query {
 	res := &Query{
 		UserPublicKey:       UserPublicKey,
 		UserID:              UserID,
@@ -62,8 +66,10 @@ func NewQuery(UserID,
 		TimeGranularity:     TimeGranularity,
 		StartConcept:        StartConcept,
 		StartModifier:       StartModifier,
+		StartsWhen:          StartsWhen,
 		EndConcept:          EndConcept,
 		EndModifier:         EndModifier,
+		EndsWhen:            EndsWhen,
 		Result: &struct {
 			Timers    medcomodels.Timers
 			EncEvents EventGroups
@@ -92,7 +98,7 @@ func (q *Query) Execute() error {
 	timeLimitInDays := q.TimeLimit * granularityValues[q.TimeGranularity]
 	timer := time.Now()
 
-	startConceptCode, startModifierCode, endConceptCode, endModifierCode, cohort, timers, err := prepareArguments(q.UserID, q.CohortName, q.StartConcept, q.StartModifier, q.EndConcept, q.EndModifier)
+	startConceptCodes, startModifierCodes, endConceptCodes, endModifierCodes, cohort, timers, err := prepareArguments(q.UserID, q.CohortName, q.StartConcept, q.StartModifier, q.EndConcept, q.EndModifier)
 	if err != nil {
 		err = fmt.Errorf("while retrieving concept codes and patient indices: %s", err.Error())
 		return err
@@ -170,10 +176,12 @@ func (q *Query) Execute() error {
 			//  --- sql query on observation fact table
 			sqlTimePoints, err := buildTimePoints(
 				patientList,
-				startConceptCode,
-				startModifierCode,
-				endConceptCode,
-				endModifierCode,
+				startConceptCodes,
+				startModifierCodes,
+				*q.StartsWhen == survival_analysis.SurvivalAnalysisBodyStartsWhenEarliest,
+				endConceptCodes,
+				endModifierCodes,
+				*q.EndsWhen == survival_analysis.SurvivalAnalysisBodyEndsWhenEarliest,
 				timeLimitInDays,
 			)
 			timers.AddTimers(fmt.Sprintf("medco-connector-build-timepoints%d", i), timer, nil)
@@ -317,10 +325,10 @@ func prepareArguments(
 	endConcept string,
 	endModifier *survival_analysis.SurvivalAnalysisParamsBodyEndModifier,
 ) (
-	startConceptCode,
-	startModifierCode,
-	endConceptCode,
-	endModifierCode string,
+	startConceptCodes,
+	startModifierCodes,
+	endConceptCodes,
+	endModifierCodes []string,
 	cohort []int64, timers medcomodels.Timers,
 	err error,
 ) {
@@ -345,29 +353,29 @@ func prepareArguments(
 		err = fmt.Errorf("while connecting to clear project database: %s", err.Error())
 		return
 	}
-	startConceptCode, err = getCode(startConcept)
+	startConceptCodes, err = getConceptCodes(startConcept)
 	if err != nil {
 		err = fmt.Errorf("while retrieving start concept code: %s", err.Error())
 		return
 	}
 	if startModifier == nil {
-		startModifierCode = "@"
+		startModifierCodes = []string{"@"}
 	} else {
-		startModifierCode, err = getModifierCode(*startModifier.ModifierKey, *startModifier.AppliedPath)
+		startModifierCodes, err = getModifierCodes(*startModifier.ModifierKey, *startModifier.AppliedPath)
 	}
 	if err != nil {
 		err = fmt.Errorf("while retrieving start modifier code: %s", err.Error())
 		return
 	}
-	endConceptCode, err = getCode(endConcept)
+	endConceptCodes, err = getConceptCodes(endConcept)
 	if err != nil {
 		err = fmt.Errorf("while retrieving end concept code: %s", err.Error())
 		return
 	}
 	if endModifier == nil {
-		endModifierCode = "@"
+		endModifierCodes = []string{"@"}
 	} else {
-		endModifierCode, err = getModifierCode(*endModifier.ModifierKey, *endModifier.AppliedPath)
+		endModifierCodes, err = getModifierCodes(*endModifier.ModifierKey, *endModifier.AppliedPath)
 	}
 	if err != nil {
 		err = fmt.Errorf("while retrieving end modifier code: %s", err.Error())

@@ -25,7 +25,7 @@ type ClientResultElement struct {
 }
 
 // ExecuteClientSurvival creates a survival analysis form parameters given in parameter file, and makes a call to the API to executes this query
-func ExecuteClientSurvival(token, parameterFileURL, username, password string, disableTLSCheck bool, resultFile string, timerFile string, limit int, cohortName string, granularity, startItem, endItem string) (err error) {
+func ExecuteClientSurvival(token, parameterFileURL, username, password string, disableTLSCheck bool, resultFile string, timerFile string, limit int, cohortName string, granularity, startItem, startsWhen, endItem, endsWhen string) (err error) {
 
 	err = inputValidation(parameterFileURL, limit, cohortName, startItem, endItem)
 	if err != nil {
@@ -146,8 +146,10 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 				cohortName,
 				startConcept,
 				startModifier,
+				startsWhen,
 				endConcept,
 				endModifier,
+				endsWhen,
 				nil,
 			}
 		}
@@ -228,6 +230,18 @@ func executeQuery(accessToken string, panels []*survival_analysis.SurvivalAnalys
 		*APIendModifier.AppliedPath = endMod.AppliedPath
 	}
 
+	startsWhen, err := parseStartsEndsWhen(parameters.StartsWhen)
+	if err != nil {
+		logrus.Errorf("when parsing startsWhen argument: %s", err.Error())
+		return
+	}
+
+	endsWhen, err := parseStartsEndsWhen(parameters.EndsWhen)
+	if err != nil {
+		logrus.Errorf("when parsing endsWhen argument: %s", err.Error())
+		return
+	}
+
 	query, err := NewSurvivalAnalysis(
 		accessToken,
 		parameters.CohortName,
@@ -236,8 +250,10 @@ func executeQuery(accessToken string, panels []*survival_analysis.SurvivalAnalys
 		parameters.TimeResolution,
 		parameters.StartConceptPath,
 		APIstartModifier,
+		startsWhen,
 		parameters.EndConceptPath,
 		APIendModifier,
+		endsWhen,
 		disableTLSCheck,
 	)
 	userPrivateKey = query.userPrivateKey

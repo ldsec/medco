@@ -12,7 +12,8 @@ require (
 	github.com/go-openapi/strfmt v0.19.5
 	github.com/go-openapi/swag v0.19.9
 	github.com/go-openapi/validate v0.19.11
-	github.com/go-swagger/go-swagger v0.25.0 // indirect
+	github.com/google/go-cmp v0.5.0 // indirect
+	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/ldsec/unlynx v1.4.1
 	github.com/lestrrat-go/jwx v0.9.0
@@ -22,6 +23,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/r0fls/gostats v0.0.0-20180711082619-e793b1fda35c
 	github.com/sirupsen/logrus v1.6.0
+	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/stretchr/testify v1.6.1
 	github.com/urfave/cli v1.22.4
 	go.dedis.ch/kyber/v3 v3.0.12

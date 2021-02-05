@@ -29,20 +29,6 @@ func TestGetPatientList(t *testing.T) {
 
 }
 
-func TestGetI2b2NonEncryptedSetID(t *testing.T) {
-	const expectedSetID = int64(-1)
-	utilserver.TestDBConnection(t)
-
-	I2b2SetID, err := GetI2b2NonEncryptedSetID("test", "testCohort")
-	assert.NoError(t, err)
-	assert.Equal(t, expectedSetID, I2b2SetID)
-
-	_, err = GetI2b2NonEncryptedSetID("thisUserDoesNotExist", "testCohort")
-	assert.Error(t, err)
-	_, err = GetI2b2NonEncryptedSetID("test", "thisCohortDoesNotExist")
-	assert.Error(t, err)
-}
-
 func TestGetSavedCohorts(t *testing.T) {
 	utilserver.TestDBConnection(t)
 
@@ -110,6 +96,8 @@ func TestInsertCohortAndUpdateCohortAndRemoveCohort(t *testing.T) {
 	time.Sleep(10 * time.Second)
 	now2 := time.Now()
 	cohortID, err = UpdateCohort("testCohort2", "test", -1, now2)
+	assert.NoError(t, err)
+	cohorts, err = GetSavedCohorts("test", 0)
 	assert.NoError(t, err)
 
 	cohorts2, err := GetSavedCohorts("test", 0)

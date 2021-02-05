@@ -482,6 +482,11 @@ parameters:
           required:
             - modifierKey
             - appliedPath
+        startsWhen:
+          type: "string"
+          enum:
+            - earliest
+            - latest
         endConcept:
           type: "string"
           pattern: '^\/$|^((\/[^\/]+)+\/?)$'
@@ -497,6 +502,11 @@ parameters:
           required:
             - modifierKey
             - appliedPath
+        endsWhen:
+          type: "string"
+          enum:
+            - earliest
+            - latest
       required:
         - ID
         - userPublicKey
@@ -504,7 +514,9 @@ parameters:
         - timeLimit
         - timeGranularity
         - startConcept
+        - startsWhen
         - endConcept
+        - endsWhen
 
 responses:
   errorResponse:

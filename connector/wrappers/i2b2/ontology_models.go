@@ -2,6 +2,7 @@ package i2b2
 
 import (
 	"encoding/xml"
+	utilserver "github.com/ldsec/medco/connector/util/server"
 
 	"github.com/ldsec/medco/connector/restapi/models"
 )
@@ -12,7 +13,7 @@ func NewOntReqGetTermInfoMessageBody(path string) Request {
 	body.GetTermInfo.Hiddens = "false"
 	body.GetTermInfo.Blob = "true"
 	body.GetTermInfo.Synonyms = "false"
-	body.GetTermInfo.Max = "200"
+	body.GetTermInfo.Max = utilserver.I2b2OntMaxElements
 	body.GetTermInfo.Type = "core"
 	body.GetTermInfo.Self = path
 
@@ -20,7 +21,7 @@ func NewOntReqGetTermInfoMessageBody(path string) Request {
 }
 
 // NewOntReqGetModifierInfoMessageBody returns a new request object for i2b2 get modifier info (information about node).
-// A modifier is indentified by its own path (field self in XML API) and its applied path.
+// A modifier is identified by its own path (field self in XML API) and its applied path.
 func NewOntReqGetModifierInfoMessageBody(path string, appliedPath string) Request {
 	body := OntReqGetModifierInfoMessageBody{}
 
@@ -53,7 +54,7 @@ func NewOntReqGetChildrenMessageBody(parent string) Request {
 	body.GetChildren.Hiddens = "false"
 	body.GetChildren.Blob = "true"
 	body.GetChildren.Synonyms = "false"
-	body.GetChildren.Max = "200"
+	body.GetChildren.Max = utilserver.I2b2OntMaxElements
 	body.GetChildren.Type = "core"
 
 	body.GetChildren.Parent = parent
@@ -80,7 +81,7 @@ func NewOntReqGetModifierChildrenMessageBody(parent, appliedPath, appliedConcept
 
 	body.GetModifierChildren.Blob = "true"
 	body.GetModifierChildren.Type = "limited"
-	body.GetModifierChildren.Max = "200"
+	body.GetModifierChildren.Max = utilserver.I2b2OntMaxElements
 	body.GetModifierChildren.Synonyms = "false"
 	body.GetModifierChildren.Hiddens = "false"
 
