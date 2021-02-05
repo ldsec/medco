@@ -1,0 +1,18 @@
+-- pl/pgsql function that inserts a new cohort
+
+CREATE OR REPLACE FUNCTION query_tools.insert_cohort(user_id varchar, query_id integer, cohort_name varchar, create_date timestamp, update_date timestamp)
+  RETURNS integer
+  VOLATILE
+  PARALLEL UNSAFE
+  AS $$
+DECLARE
+  new_cohort_id integer;
+BEGIN
+  EXECUTE 'INSERT INTO query_tools.saved_cohorts(user_id,query_id,cohort_name,create_date,update_date)
+VALUES ($1,$2,$3,$4,$5)
+RETURNING cohort_id'
+  USING user_id, query_id, cohort_name, create_date, update_date INTO new_cohort_id;
+  RETURN new_cohort_id;
+END;
+$$
+LANGUAGE plpgsql

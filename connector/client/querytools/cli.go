@@ -9,6 +9,7 @@ import (
 
 	medcoclient "github.com/ldsec/medco/connector/client"
 
+	"github.com/ldsec/medco/connector/restapi/models"
 	utilclient "github.com/ldsec/medco/connector/util/client"
 
 	"github.com/sirupsen/logrus"
@@ -48,11 +49,14 @@ func ExecuteGetCohorts(token, username, password string, disableTLSCheck bool, r
 		return err
 	}
 	logrus.Debug("Writing headers")
-	resultCSV.Write([]string{"node_index", "cohort_name", "cohort_id", "query_id", "creation_date", "update_date"})
+	resultCSV.Write([]string{"node_index", "cohort_name", "cohort_id", "query_id", "creation_date", "update_date", "query_timing", "panels"})
 
 	for nodeIndex, nodeResult := range cohorts {
 		for _, cohortInfo := range nodeResult {
 			logrus.Debugf("Writing result %d", nodeIndex)
+			panelJSONs, err := marshal(cohortInfo.QueryDefinition.Panels)
+			// removing the quotes from the marshalling process eases parsing of the produced file
+			panelJSONs = strings.Replace(panelJSONs, `"`, "", -1)
 			err = resultCSV.Write([]string{
 				strconv.Itoa(nodeIndex),
 				cohortInfo.CohortName,
@@ -60,6 +64,8 @@ func ExecuteGetCohorts(token, username, password string, disableTLSCheck bool, r
 				strconv.Itoa(cohortInfo.QueryID),
 				cohortInfo.CreationDate.Format(time.RFC3339),
 				cohortInfo.UpdateDate.Format(time.RFC3339),
+				string(cohortInfo.QueryDefinition.QueryTiming),
+				panelJSONs,
 			})
 			if err != nil {
 				err = fmt.Errorf("cohorts request writing results: %s", err.Error())
@@ -266,5 +272,19 @@ func ExecuteCohortsPatientList(token, username, password, cohortName, resultFile
 	}
 
 	return nil
-
+}
+func marshal(panels []*models.Panel) (res string, err error) {
+	panelStrings := make([]string, 0)
+	var marshalledPanel []byte
+	for _, panel := range panels {
+		if panel != nil {
+			marshalledPanel, err = panel.MarshalBinary()
+			if err != nil {
+				err = fmt.Errorf("while marshalling I2B2 panel: %s", err.Error())
+				return "", err
+			}
+			panelStrings = append(panelStrings, string(marshalledPanel))
+		}
+	}
+	return fmt.Sprintf(`{"panels":[%s]}`, strings.Join(panelStrings, ",")), nil
 }

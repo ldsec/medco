@@ -83,7 +83,11 @@ func (getCohorts *GetCohorts) Execute() (results [][]medcomodels.Cohort, err err
 				logrus.Errorf("Get cohort execution error : %s", Error)
 				errChan <- Error
 			} else {
-				logrus.Infof("Node %d got cohorts %+v", idx, res)
+				cohortsStrings := make([]string, len(res))
+				for i, cohort := range res {
+					cohortsStrings[i] = cohort.CohortName
+				}
+				logrus.Infof("Node %d got cohorts %v", idx, cohortsStrings)
 				resultChan <- getCohortsNodeResult{cohorts: res, nodeIndex: idx}
 			}
 		}(idx)
@@ -136,6 +140,11 @@ func convertCohort(apiRes []*medco_node.GetCohortsOKBodyItems0) (res []medcomode
 			return
 		}
 		res[i].QueryID = int(apiCohort.QueryID)
+		if apiCohort.QueryDefinition != nil {
+			res[i].QueryDefinition.QueryTiming = apiCohort.QueryDefinition.QueryTiming
+			res[i].QueryDefinition.Panels = apiCohort.QueryDefinition.Panels
+		}
+
 	}
 	return
 }

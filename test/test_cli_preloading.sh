@@ -102,31 +102,46 @@ query5="enc::3 AND file::/data/query_file.txt"
 resultQuery5a="$(printf -- "count\n1\n1\n1")"
 resultQuery5b="$(printf -- "count\n3\n3\n3")"
 
-query6="clr::/E2ETEST/e2etest/1/::EQ:10"
+query6="clr::/E2ETEST/e2etest/1/::EQ:NUMBER:10"
 resultQuery6="$(printf -- "count\n1\n1\n1")"
 
-query7="clr::/E2ETEST/e2etest/1/:/E2ETEST/modifiers/1/:/e2etest/1/::EQ:15"
+query7="clr::/E2ETEST/e2etest/1/:/E2ETEST/modifiers/1/:/e2etest/1/::EQ:NUMBER:15"
 resultQuery7="$(printf -- "count\n1\n1\n1")"
 
-query8="clr::/E2ETEST/e2etest/1/::BETWEEN:5 and 25"
+query8="clr::/E2ETEST/e2etest/1/::BETWEEN:NUMBER:5 and 25"
 resultQuery8="$(printf -- "count\n2\n2\n2")"
 
-query9="enc::1 OR clr::/E2ETEST/e2etest/2/::GE:25 AND clr::/E2ETEST/e2etest/2/:/E2ETEST/modifiers/2/:/e2etest/2/::LT:21"
+query9="enc::1 OR clr::/E2ETEST/e2etest/2/::GE:NUMBER:25 AND clr::/E2ETEST/e2etest/2/:/E2ETEST/modifiers/2/:/e2etest/2/::LT:NUMBER:21"
 resultQuery9="$(printf -- "count\n2\n2\n2")"
 
-# test3
-getSavedCohortHeaders="node_index,cohort_name,cohort_id,query_id,creation_date,update_date"
-getSavedCohort1="$(printf -- "node_index cohort_name cohort_id query_id\n0 testCohort -1 -1\n1 testCohort -1 -1\n2 testCohort -1 -1")"
-getSavedCohort2="$(printf -- "node_index cohort_name query_id\n0 testCohort -1\n0 testCohort2 -1\n1 testCohort -1\n1 testCohort2 -1\n2 testCohort -1\n2 testCohort2 -1")"
+query10="clr::/E2ETEST/e2etest/2/:/E2ETEST/modifiers/2text/:/e2etest/2/::IN:TEXT:'abc','de'"
+resultQuery10="$(printf -- "count\n2\n2\n2")"
+
+query11="clr::/E2ETEST/e2etest/3/:/E2ETEST/modifiers/3text/:/e2etest/3/::LIKE[begin]:TEXT:ab"
+resultQuery11="$(printf -- "count\n2\n2\n2")"
+
+query12="clr::/E2ETEST/e2etest/2/:/E2ETEST/modifiers/2text/:/e2etest/2/::LIKE[contains]:TEXT:cd"
+resultQuery12="$(printf -- "count\n1\n1\n1")"
+
+query13="clr::/E2ETEST/e2etest/3/:/E2ETEST/modifiers/3text/:/e2etest/3/::LIKE[end]:TEXT:bc"
+resultQuery13="$(printf -- "count\n0\n0\n0")"
 
 # test4
+getSavedCohortHeaders="node_index,cohort_name,cohort_id,query_id,creation_date,update_date,query_timing,panels"
+getSavedCohort1="$(printf -- "node_index cohort_name cohort_id query_id query_timing panels\n\
+0 testCohort -1 -1 any \"{panels:[{items:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any}]}\"\n\
+1 testCohort -1 -1 any \"{panels:[{items:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any}]}\"\n\
+2 testCohort -1 -1 any \"{panels:[{items:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any}]}\"")"
+getSavedCohort2="$(printf -- "node_index cohort_name query_id\n0 testCohort2 -1\n0 testCohort -1\n1 testCohort2 -1\n1 testCohort -1\n2 testCohort2 -1\n2 testCohort -1")"
+
+# test5
 timerHeaders="node_index,timer_description,duration_milliseconds"
 survivalDays="$(printf -- "time_granularity,node_index,group_id,initial_count,time_point,event_of_interest_count,censoring_event_count\nday,0,Full cohort,684,0,0,0\nday,0,Full cohort,684,1,0,0\nday,0,Full cohort,684,2,0,0\nday,0,Full cohort,684,3,0,0\nday,0,Full cohort,684,4,0,0\nday,0,Full cohort,684,5,3,0")"
 survivalWeeks="$(printf -- "time_granularity,node_index,group_id,initial_count,time_point,event_of_interest_count,censoring_event_count\nweek,0,Full cohort,684,0,0,0\nweek,0,Full cohort,684,1,3,0\nweek,0,Full cohort,684,2,18,0\nweek,0,Full cohort,684,3,3,0\nweek,0,Full cohort,684,4,3,0\nweek,0,Full cohort,684,5,6,0")"
 survivalMonths="$(printf -- "time_granularity,node_index,group_id,initial_count,time_point,event_of_interest_count,censoring_event_count\nmonth,0,Full cohort,684,0,0,0\nmonth,0,Full cohort,684,1,30,0\nmonth,0,Full cohort,684,2,21,0\nmonth,0,Full cohort,684,3,30,0\nmonth,0,Full cohort,684,4,30,6\nmonth,0,Full cohort,684,5,30,0")"
 survivalYears="$(printf -- "time_granularity,node_index,group_id,initial_count,time_point,event_of_interest_count,censoring_event_count\nyear,0,Full cohort,684,0,0,0\nyear,0,Full cohort,684,1,363,126\nyear,0,Full cohort,684,2,114,42\nyear,0,Full cohort,684,3,18,21\nyear,0,Full cohort,684,4,0,0\nyear,0,Full cohort,684,5,0,0")"
 
-# test5
+# test6
 survivalSubGroup1="$(printf -- "time_granularity,node_index,group_id,initial_count,time_point,event_of_interest_count,censoring_event_count\nweek,0,Female,414,0,0,0\nweek,0,Female,414,1,0,0\nweek,0,Female,414,2,18,0\nweek,0,Female,414,3,3,0\nweek,0,Female,414,4,3,0\nweek,0,Female,414,5,6,0")"
 survivalSubGroup2="$(printf -- "week,0,Male,270,0,0,0\nweek,0,Male,270,1,3,0\nweek,0,Male,270,2,0,0\nweek,0,Male,270,3,0,0\nweek,0,Male,270,4,0,0\nweek,0,Male,270,5,0,0")"
 
@@ -187,7 +202,7 @@ test4 () {
   exit 1
   fi
 
-  result="$(awk -F',' '{print $1,$2,$3,$4}' ../result.csv)"
+  result="$(awk -vFPAT='("[^"]+")|([^,]+)' '{print $1,$2,$3,$4,$7,$8}' ../result.csv)"
   if [ "${result}" != "${getSavedCohort1}" ];
   then
   echo "get-saved-cohorts content before update: test failed"
@@ -218,10 +233,10 @@ test4 () {
 
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD remove-saved-cohorts -c testCohort2
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv get-saved-cohorts
-  result="$(awk -F',' '{print $1,$2,$3,$4}' ../result.csv)"
+  result="$(awk -vFPAT='("[^"]+")|([^,]+)' '{print $1,$2,$3,$4,$7,$8}' ../result.csv)"
   if [ "${result}" != "${getSavedCohort1}" ];
   then
-  echo "get-saved-cohorts content after update: test failed"
+  echo "get-saved-cohorts content after removing new cohorts: test failed"
   echo "result: ${result}" && echo "expected result: ${getSavedCohort1}"
   exit 1
   fi
@@ -362,6 +377,14 @@ test2 "query " "${query2}" "${resultQuery2}"
 test2 "query " "${query3}" "${resultQuery3}"
 test2 "query " "${query4}" "${resultQuery4}"
 test2 "query " "${query5}" "${resultQuery5a}"
+test2 "query " "${query6}" "${resultQuery6}"
+test2 "query " "${query7}" "${resultQuery7}"
+test2 "query " "${query8}" "${resultQuery8}"
+test2 "query " "${query9}" "${resultQuery9}"
+test2 "query " "${query10}" "${resultQuery10}"
+test2 "query " "${query11}" "${resultQuery11}"
+test2 "query " "${query12}" "${resultQuery12}"
+test2 "query " "${query13}" "${resultQuery13}"
 
 echo "Testing query with test_explore_patient_list user..."
 USERNAME="${1:-test}_explore_patient_list"
@@ -371,10 +394,6 @@ test2 "query " "${query2}" "${resultQuery2}"
 test2 "query " "${query3}" "${resultQuery3}"
 test2 "query " "${query4}" "${resultQuery4}"
 test2 "query " "${query5}" "${resultQuery5a}"
-test2 "query " "${query6}" "${resultQuery6}"
-test2 "query " "${query7}" "${resultQuery7}"
-test2 "query " "${query8}" "${resultQuery8}"
-test2 "query " "${query9}" "${resultQuery9}"
 
 USERNAME="${1:-test}_explore_count_global"
 test2 "query " "${query5}" "${resultQuery5b}"

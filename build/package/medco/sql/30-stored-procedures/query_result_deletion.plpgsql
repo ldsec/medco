@@ -1,0 +1,17 @@
+
+-- pl/pgsql function to remove a query instance, it should only be called for cleaning tables during tests
+
+CREATE OR REPLACE FUNCTION query_tools.query_result_deletion(query_id integer)
+  RETURNS void
+  VOLATILE
+  PARALLEL UNSAFE
+  AS $$
+DECLARE
+  cohort_id integer;
+BEGIN
+  EXECUTE 'DELETE FROM query_tools.explore_query_results
+WHERE query_id = $1'
+  USING query_id;
+END;
+$$
+LANGUAGE plpgsql
