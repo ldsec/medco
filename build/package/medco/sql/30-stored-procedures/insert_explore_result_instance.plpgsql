@@ -11,7 +11,10 @@ BEGIN
   EXECUTE format('INSERT INTO query_tools.explore_query_results(user_id,query_name, query_status,query_definition)
 VALUES ($1,$2,%L,$3)
 RETURNING query_id', 'running')
-  USING query_id INTO new_query_id;
+  USING user_id,
+  query_name,
+  query_definition
+  INTO new_query_id;
   RETURN new_query_id;
 END;
 $$

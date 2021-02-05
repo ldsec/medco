@@ -1,6 +1,6 @@
 -- pl/pgsql function that returns the list of cohorts previously saved by a user
 
-CREATE OR REPLACE FUNCTION query_tools.get_cohort(user_id varchar, number_limit integer)
+CREATE OR REPLACE FUNCTION query_tools.get_cohorts(user_id varchar, number_limit integer)
   RETURNS TABLE (
     cohort_id integer,
     query_id integer,

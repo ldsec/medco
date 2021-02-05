@@ -1,27 +1,19 @@
-
 -- pl/pgsql function that updates explore query instance table with an error status
 
-CREATE OR REPLACE FUNCTION query_tools.update_error_explore_query_instance(query_id integer)
-
-RETURNS integer
-VOLATILE
-PARALLEL UNSAFE
-AS $$
+CREATE OR REPLACE FUNCTION query_tools.update_error_explore_query_instance (query_id integer)
+  RETURNS integer
+  VOLATILE
+  PARALLEL UNSAFE
+  AS $$
 DECLARE
-
-query_id_ret  integer;
-
+  query_id_ret integer;
 BEGIN
-
-EXECUTE format('UPDATE query_tools.explore_query_results
+  EXECUTE format('UPDATE query_tools.explore_query_results
 SET query_status = %L
 WHERE query_id = $1 AND query_status = %L
-RETURNING query_id',
-'error','running')
-USING query_id INTO query_id_ret;
-
-RETURN query_id_ret;
-
-
+RETURNING query_id', 'error', 'running')
+  USING query_id INTO query_id_ret;
+  RETURN query_id_ret;
 END;
-$$ LANGUAGE plpgsql
+$$
+LANGUAGE plpgsql

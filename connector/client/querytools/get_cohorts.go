@@ -83,7 +83,11 @@ func (getCohorts *GetCohorts) Execute() (results [][]medcomodels.Cohort, err err
 				logrus.Errorf("Get cohort execution error : %s", Error)
 				errChan <- Error
 			} else {
-				logrus.Infof("Node %d got cohorts %+v", idx, res)
+				cohortsStrings := make([]string, len(res))
+				for i, cohort := range res {
+					cohortsStrings[i] = cohort.CohortName
+				}
+				logrus.Infof("Node %d got cohorts %v", idx, cohortsStrings)
 				resultChan <- nodeResult{cohorts: res, nodeIndex: idx}
 			}
 		}(idx)

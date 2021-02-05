@@ -10,7 +10,8 @@ DECLARE
 BEGIN
   EXECUTE format('UPDATE query_tools.explore_query_results
 SET clear_result_set_size=$2, clear_result_set=$3, query_status=%L , i2b2_encrypted_patient_set_id=$4, i2b2_non_encrypted_patient_set_id=$5
-WHERE query_id = $1 AND status = %L', 'completed', 'running')
+WHERE query_id = $1 AND query_status = %L
+RETURNING query_id', 'completed', 'running')
   USING query_id,
   clear_result_set_size,
   clear_result_set,

@@ -1,6 +1,6 @@
 -- pl/pgsql function that updates the query id and the update date of a cohort identified by its cohort name and the user's ID
 
-CREATE OR REPLACE FUNCTION query_tools.update_explore_query_instance(cohort_name varchar, user_id varchar, query_id integer, update_date timestamp)
+CREATE OR REPLACE FUNCTION query_tools.update_cohort(cohort_name varchar, user_id varchar, query_id integer, update_date timestamp)
   RETURNS integer
   VOLATILE
   PARALLEL UNSAFE

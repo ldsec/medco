@@ -22,7 +22,7 @@ func TestExploreResults(t *testing.T) {
 	queryID, err := InsertExploreResultInstance("test", "name1", "")
 	assert.NoError(t, err)
 
-	defer utilserver.DBConnection.Exec(exploreResultDeletion, queryID)
+	defer utilserver.DBConnection.Exec("SELECT query_tools.query_result_deletion($1)", queryID)
 
 	// both sets undefined
 	err = UpdateExploreResultInstance(queryID, 0, []int{1, 2, 3}, nil, nil)
@@ -38,7 +38,7 @@ func TestExploreResults(t *testing.T) {
 
 	queryIDError, err := InsertExploreResultInstance("test", "name2", "")
 	assert.NoError(t, err)
-	defer utilserver.DBConnection.Exec(exploreResultDeletion, queryIDError)
+	defer utilserver.DBConnection.Exec("SELECT query_tools.query_result_deletion($1)", queryIDError)
 
 	err = UpdateErrorExploreResultInstance(queryIDError)
 	assert.NoError(t, err)
@@ -62,16 +62,11 @@ func TestCheckQueryID(t *testing.T) {
 }
 
 func TestGetQueryDefinition(t *testing.T) {
+	const queryDefinition = `{"panels":[{"items":[{"encrypted":false,"queryTerm":"/E2ETEST/SPHNv2020.1/DeathStatus/"}],"not":false,"panelTiming":"any"}],"queryTiming":"any"}`
+
 	utilserver.TestDBConnection(t)
 	res, err := GetQueryDefinition(-1)
 	assert.NoError(t, err)
 	assert.Equal(t, queryDefinition, res)
 
 }
-
-const exploreResultDeletion = `
-DELETE FROM query_tools.explore_query_results
-WHERE query_id = $1
-`
-
-const queryDefinition = `{"panels":[{"items":[{"encrypted":false,"queryTerm":"/E2ETEST/SPHNv2020.1/DeathStatus/"}],"not":false,"panelTiming":"any"}],"queryTiming":"any"}`

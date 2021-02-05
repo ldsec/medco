@@ -16,9 +16,9 @@ import (
 
 // GetPatientList runs a SQL query on db and returns the list of patient IDs for given queryID and userID
 func GetPatientList(userID string, cohortName string) (patientNums []int64, err error) {
-	description := fmt.Sprintf("GetPatientList (ID %s, cohort name ID %s), SQL: %s", userID, cohortName, getPatientList)
+	description := fmt.Sprintf("GetPatientList (ID %s, cohort name ID %s), procedure: %s", userID, cohortName, "query_tools.get_patient_list")
 	logrus.Debugf("running: %s", description)
-	row := utilserver.DBConnection.QueryRow(getPatientList, userID, cohortName)
+	row := utilserver.DBConnection.QueryRow("SELECT query_tools.get_patient_list($1 ,$2);", userID, cohortName)
 	patientNumsString := new(string)
 	err = row.Scan(patientNumsString)
 	if err != nil {
@@ -51,44 +51,51 @@ func GetSavedCohorts(userID string, limit int) ([]medcomodels.Cohort, error) {
 	var description string
 	var rows *sql.Rows
 	var err error
-	if limit > 0 {
-		description = fmt.Sprintf("GetSavedCohorts(user ID %s, limit %d), SQL: %s", userID, limit, getCohorts)
-		logrus.Debugf("running: %s", description)
-		rows, err = utilserver.DBConnection.Query(getCohorts, userID, limit)
 
-	} else {
-		description = fmt.Sprintf("GetSavedCohorts(user ID %s), SQL: %s", userID, getCohortsNoLimit)
-		logrus.Debugf("running: %s", description)
-		rows, err = utilserver.DBConnection.Query(getCohortsNoLimit, userID)
-
-	}
+	description = fmt.Sprintf("GetSavedCohorts(user ID %s, limit %d), procedure: %s", userID, limit, "query_tools.get_cohorts")
+	logrus.Debugf("running: %s", description)
+	rows, err = utilserver.DBConnection.Query("SELECT query_tools.get_cohorts($1, $2);", userID, limit)
 
 	if err != nil {
-		err = fmt.Errorf("while executing SQL: %s, DB operation: %s", err.Error(), description)
+		err = fmt.Errorf("while executing procedure: %s, DB operation: %s", err.Error(), description)
 		return nil, err
 	}
 	var id int
 	var qid int
 	var name string
-	var createDateString string
 	var createDate time.Time
-	var updateDateString string
 	var updateDate time.Time
 	var cohorts = make([]medcomodels.Cohort, 0)
+	record := new(string)
 	for rows.Next() {
-		err = rows.Scan(&id, &qid, &name, &createDateString, &updateDateString)
+		err = rows.Scan(record)
 		if err != nil {
 			err = fmt.Errorf("while scanning SQL record: %s, DB operation: %s", err.Error(), description)
 			return nil, err
 		}
-		createDate, err = time.Parse(time.RFC3339, createDateString)
+
+		cells := strings.Split(strings.Trim(*record, "()"), ",")
+
+		id, err = strconv.Atoi(cells[0])
 		if err != nil {
-			err = fmt.Errorf("while parsing create date string \"%s\": %s, DB operation: %s", createDateString, err.Error(), description)
+			err = fmt.Errorf("while parsing cohort ID string \"%s\": %s, DB operation: %s", cells[0], err.Error(), description)
 			return nil, err
 		}
-		updateDate, err = time.Parse(time.RFC3339, updateDateString)
+		name = cells[2]
+		qid, err = strconv.Atoi(cells[1])
 		if err != nil {
-			err = fmt.Errorf("while parsing update date string \"%s\": %s, DB operation: %s", updateDateString, err.Error(), description)
+			err = fmt.Errorf("while parsing query ID string \"%s\": %s, DB operation: %s", cells[1], err.Error(), description)
+			return nil, err
+		}
+
+		createDate, err = time.Parse("2006-01-02 15:04:05", strings.Trim(cells[3], `"`))
+		if err != nil {
+			err = fmt.Errorf("while parsing create date string \"%s\": %s, DB operation: %s", cells[3], err.Error(), description)
+			return nil, err
+		}
+		updateDate, err = time.Parse("2006-01-02 15:04:05", strings.Trim(cells[4], `"`))
+		if err != nil {
+			err = fmt.Errorf("while parsing update date string \"%s\": %s, DB operation: %s", cells[4], err.Error(), description)
 			return nil, err
 		}
 		newCohort := medcomodels.Cohort{
@@ -113,9 +120,9 @@ func GetSavedCohorts(userID string, limit int) ([]medcomodels.Cohort, error) {
 
 // GetDate runs a SQL query on db and returns the update date of cohort corresponding to  cohortID
 func GetDate(userID string, cohortID int) (time.Time, error) {
-	description := fmt.Sprintf("GetDate (user ID %s, cohort ID %d), SQL: %s", userID, cohortID, getDate)
+	description := fmt.Sprintf("GetDate (user ID %s, cohort ID %d), procedure: %s", userID, cohortID, "query_tools.get_date")
 	logrus.Debugf("running: %s", description)
-	row := utilserver.DBConnection.QueryRow(getDate, userID, cohortID)
+	row := utilserver.DBConnection.QueryRow("SELECT query_tools.get_date($1, $2);", userID, cohortID)
 	timeString := new(string)
 	err := row.Scan(timeString)
 	if err != nil {
@@ -139,16 +146,16 @@ func GetDate(userID string, cohortID int) (time.Time, error) {
 // InsertCohort runs a SQL query to either insert a new cohort or update an existing one
 func InsertCohort(userID string, queryID int, cohortName string, createDate, updateDate time.Time) (int, error) {
 	description := fmt.Sprintf(
-		"InsertCohort (user ID: %s, query ID: %d, cohort name: %s, create date: %s, update date: %s), SQL: %s",
+		"InsertCohort (user ID: %s, query ID: %d, cohort name: %s, create date: %s, update date: %s), procedure: %s",
 		userID,
 		queryID,
 		cohortName,
 		createDate.Format(time.RFC3339),
 		updateDate.Format(time.RFC3339),
-		insertCohort,
+		"query_tools.insert_cohort",
 	)
 	logrus.Debugf("running: %s", description)
-	row := utilserver.DBConnection.QueryRow(insertCohort, userID, queryID, cohortName, createDate, updateDate)
+	row := utilserver.DBConnection.QueryRow("SELECT query_tools.insert_cohort($1, $2, $3, $4, $5)", userID, queryID, cohortName, createDate, updateDate)
 	res := new(string)
 	err := row.Scan(res)
 	if err != nil {
@@ -167,92 +174,58 @@ func InsertCohort(userID string, queryID int, cohortName string, createDate, upd
 
 // UpdateCohort runs a SQL query to either insert a new cohort or update an existing one
 func UpdateCohort(cohortName, userID string, queryID int, updateDate time.Time) (int, error) {
-	description := fmt.Sprintf("UpdateCohort (cohort name: %s, user ID: %s, query ID: %d, update time: %s), SQL: %s", cohortName, userID, queryID, updateDate.Format(time.RFC3339), updateCohort)
+	description := fmt.Sprintf("UpdateCohort (cohort name: %s, user ID: %s, query ID: %d, update time: %s), procedure: %s", cohortName, userID, queryID, updateDate.Format(time.RFC3339), "query_tools.update_cohort")
 	logrus.Debugf("running: %s", description)
-	row := utilserver.DBConnection.QueryRow(updateCohort, cohortName, userID, queryID, updateDate)
-	res := new(string)
-	err := row.Scan(res)
-	if err != nil {
-		err = fmt.Errorf("while scanning SQL record: %s", err.Error())
-		return -1, err
-	}
-	cohortID, err := strconv.Atoi(*res)
-	if err != nil {
-		err = fmt.Errorf("while parsing integer string \"%s\": %s, DB operation: %s", *res, err.Error(), description)
-		return -1, err
-	}
-	logrus.Debugf("successful cohort update, cohort ID: %d, DB operation: %s", cohortID, description)
+	row := utilserver.DBConnection.QueryRow("SELECT query_tools.update_cohort($1, $2, $3, $4);", cohortName, userID, queryID, updateDate)
+	var cohortID sql.NullInt32
+	err := row.Scan(&cohortID)
 
-	return cohortID, err
+	if err != nil {
+		err = fmt.Errorf("during cohort update: %s, DB operation: %s", err.Error(), description)
+		return -1, err
+	}
+	if !cohortID.Valid {
+		err = fmt.Errorf("nothing was updated, DB operation: %s", description)
+		return -1, err
+	}
+	logrus.Debugf("successful cohort update, cohort ID: %d, DB operation: %s", cohortID.Int32, description)
+
+	return int(cohortID.Int32), err
 }
 
 // DoesCohortExist check whether a cohort exists for provided user ID and a cohort name.
 func DoesCohortExist(userID, cohortName string) (bool, error) {
-	description := fmt.Sprintf("DoesCohortExist (user ID: %s, cohort name: %s), SQL: %s", userID, cohortName, doesCohortExist)
+	description := fmt.Sprintf("DoesCohortExist (user ID: %s, cohort name: %s), procedure: %s", userID, cohortName, "does_cohort_exist")
 	logrus.Debugf("running: %s", description)
-	row := utilserver.DBConnection.QueryRow(doesCohortExist, userID, cohortName)
-	res := new(string)
+	row := utilserver.DBConnection.QueryRow("SELECT query_tools.does_cohort_exist($1, $2)", userID, cohortName)
+	res := new(bool)
 	err := row.Scan(res)
 	if err != nil {
 		err = fmt.Errorf("while scanning SQL record: %s, DB operation: %s", err.Error(), description)
 		return false, err
 	}
 
-	cohortNumber, err := strconv.Atoi(*res)
-	retValue := cohortNumber > 0
-	logrus.Debugf("successful cohort existence check: %t, DB operation: %s", retValue, description)
-	return retValue, err
+	logrus.Debugf("successful cohort existence check: %t, DB operation: %s", *res, description)
+	return *res, err
 }
 
 // RemoveCohort deletes cohort
 func RemoveCohort(userID, cohortName string) error {
-	description := fmt.Sprintf("RemoveCohort (deleting user ID: %s, cohort name: %s), SQL: %s", userID, cohortName, removeCohort)
+	description := fmt.Sprintf("RemoveCohort (deleting user ID: %s, cohort name: %s), procedure: %s", userID, cohortName, "query_tools.remove_cohort")
 	logrus.Debugf("running: %s", description)
-	_, err := utilserver.DBConnection.Exec(removeCohort, userID, cohortName)
+	res := utilserver.DBConnection.QueryRow("SELECT query_tools.remove_cohort($1, $2);", userID, cohortName)
+	var cohortID sql.NullInt32
+	err := res.Scan(&cohortID)
+
 	if err != nil {
-		err = fmt.Errorf("while executing SQL: %s, DB operation: %s", err.Error(), description)
+		err = fmt.Errorf("while executing procedure: %s, DB operation: %s", err.Error(), description)
+		return err
+	}
+
+	if !cohortID.Valid {
+		err = fmt.Errorf("cohort to be removed was not found, DB operation: %s", description)
 		return err
 	}
 	logrus.Debugf("successfully deleted, DB operation: %s", description)
 	return nil
 }
-
-const insertCohort string = `
-INSERT INTO query_tools.saved_cohorts(user_id,query_id,cohort_name,create_date,update_date)
-VALUES ($1,$2,$3,$4,$5)
-RETURNING cohort_id
-`
-
-const updateCohort string = `
-UPDATE query_tools.saved_cohorts
-SET query_id=$3, update_date= $4
-WHERE cohort_name = $1 AND user_id = $2
-RETURNING cohort_id
-`
-
-const getCohorts string = `
-SELECT cohort_id, query_id, cohort_name, create_date, update_date FROM query_tools.saved_cohorts
-WHERE user_id = $1
-ORDER BY cohort_name
-LIMIT $2
-`
-
-const getCohortsNoLimit string = `
-SELECT cohort_id, query_id, cohort_name, create_date, update_date FROM query_tools.saved_cohorts
-WHERE user_id = $1
-`
-
-const getDate string = `
-SELECT update_date FROM query_tools.saved_cohorts
-WHERE user_id =$1 and cohort_id=$2
-`
-
-const doesCohortExist string = `
-SELECT COUNT(cohort_id) FROM query_tools.saved_cohorts
-WHERE user_id = $1 and cohort_name = $2
-`
-
-const removeCohort string = `
-DELETE FROM query_tools.saved_cohorts
-WHERE user_id = $1 AND cohort_name = $2
-`
