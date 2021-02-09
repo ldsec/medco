@@ -10,7 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// CohortsPatientList holds the parameters structure to retriev the patient list of a saved cohort
+// CohortsPatientList holds the parameters structure to retrieve the patient list of a saved cohort
 type CohortsPatientList struct {
 	CohortName    string
 	ID            string
