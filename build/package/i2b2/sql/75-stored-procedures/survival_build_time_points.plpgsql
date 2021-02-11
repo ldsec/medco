@@ -1,5 +1,5 @@
 
--- pl/pgsql function that implement the construction of relative times for survival analysis
+-- pl/pgsql function that implements the construction of relative times for survival analysis
 
 CREATE OR REPLACE FUNCTION i2b2demodata_i2b2.build_timepoints(patient_list integer[], start_code varchar[], start_modifier_code varchar[], start_earliest boolean, end_code varchar[], end_modifier_code varchar[], end_earliest boolean, time_limit integer) 
 RETURNS TABLE( timepoint bigint, end_type integer, p_count bigint)

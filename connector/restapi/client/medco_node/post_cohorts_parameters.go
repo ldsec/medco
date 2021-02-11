@@ -60,11 +60,11 @@ for the post cohorts operation typically these are written to a http.Request
 */
 type PostCohortsParams struct {
 
-	/*CohortRequest
-	  Cohort that has been updated or created
+	/*CohortsRequest
+	  Cohort that has been updated or created.
 
 	*/
-	CohortRequest PostCohortsBody
+	CohortsRequest PostCohortsBody
 	/*Name
 	  Name of the cohort to update
 
@@ -109,15 +109,15 @@ func (o *PostCohortsParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithCohortRequest adds the cohortRequest to the post cohorts params
-func (o *PostCohortsParams) WithCohortRequest(cohortRequest PostCohortsBody) *PostCohortsParams {
-	o.SetCohortRequest(cohortRequest)
+// WithCohortsRequest adds the cohortsRequest to the post cohorts params
+func (o *PostCohortsParams) WithCohortsRequest(cohortsRequest PostCohortsBody) *PostCohortsParams {
+	o.SetCohortsRequest(cohortsRequest)
 	return o
 }
 
-// SetCohortRequest adds the cohortRequest to the post cohorts params
-func (o *PostCohortsParams) SetCohortRequest(cohortRequest PostCohortsBody) {
-	o.CohortRequest = cohortRequest
+// SetCohortsRequest adds the cohortsRequest to the post cohorts params
+func (o *PostCohortsParams) SetCohortsRequest(cohortsRequest PostCohortsBody) {
+	o.CohortsRequest = cohortsRequest
 }
 
 // WithName adds the name to the post cohorts params
@@ -139,7 +139,7 @@ func (o *PostCohortsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 	}
 	var res []error
 
-	if err := r.SetBodyParam(o.CohortRequest); err != nil {
+	if err := r.SetBodyParam(o.CohortsRequest); err != nil {
 		return err
 	}
 

@@ -20,10 +20,10 @@ func getConceptCodes(path string) ([]string, error) {
 		return nil, err
 	}
 
-	description := fmt.Sprintf("getConceptCodes (table name: %s, path: %s), SQL: %s", tableName, preparedPath, conceptCodes)
+	description := fmt.Sprintf("getConceptCodes (table name: %s, path: %s), procedure: %s", tableName, preparedPath, "medco_ont.get_concept_codes")
 	logrus.Debugf(" running: %s", description)
 
-	rows, err := utilserver.I2B2DBConnection.Query(conceptCodes, tableName, preparedPath)
+	rows, err := utilserver.I2B2DBConnection.Query("SELECT medco_ont.get_concept_codes($1, $2);", tableName, preparedPath)
 	if err != nil {
 		err = fmt.Errorf("while selecting concept codes: %s, DB operation: %s", err.Error(), description)
 		logrus.Error(err)
@@ -69,9 +69,9 @@ func getModifierCodes(path string, appliedPath string) ([]string, error) {
 	}
 
 	preparedAppliedPath := prepareEqual(appliedPath)
-	description := fmt.Sprintf("getModifierCodes (table name: %s, path: %s, applied path: %s), SQL: %s", tableName, preparedPath, preparedAppliedPath, modifierCodes)
+	description := fmt.Sprintf("getModifierCodes (table name: %s, path: %s, applied path: %s), procedure: %s", tableName, preparedPath, preparedAppliedPath, "medco_ont.get_modifier_codes")
 	logrus.Debugf("running: %s", description)
-	rows, err := utilserver.I2B2DBConnection.Query(modifierCodes, tableName, preparedPath, preparedAppliedPath)
+	rows, err := utilserver.I2B2DBConnection.Query("SELECT medco_ont.get_modifier_codes($1, $2, $3);", tableName, preparedPath, preparedAppliedPath)
 	if err != nil {
 		err = fmt.Errorf("while selecting modifier codes: %s, DB operation: %s", err.Error(), description)
 		return nil, err
@@ -105,9 +105,9 @@ func getModifierCodes(path string, appliedPath string) ([]string, error) {
 // getTableName returns an error when no entry was found for the provided table code.
 func getTableName(tableCD string) (string, error) {
 	upper := strings.ToUpper(tableCD)
-	description := fmt.Sprintf("getTableName (table code: %s), SQL : %s", upper, tableName)
+	description := fmt.Sprintf("getTableName (table code: %s), procedure: %s", upper, "medco_ont.table_name")
 	logrus.Debugf("runnig: %s", description)
-	row := utilserver.I2B2DBConnection.QueryRow(tableName, upper)
+	row := utilserver.I2B2DBConnection.QueryRow("SELECT medco_ont.table_name($1);", upper)
 	ret := new(string)
 	err := row.Scan(ret)
 	if err != nil {
@@ -150,16 +150,3 @@ func prepareLike(pathURI string) string {
 func prepareEqual(pathURI string) string {
 	return strings.Replace(pathURI, "/", `\`, -1)
 }
-
-const conceptCodes = `
-SELECT medco_ont.get_concept_codes($1,$2);
-`
-
-const modifierCodes = `
-SELECT medco_ont.get_modifier_codes($1, $2,$3);
-`
-
-const tableName = `
-SELECT c_table_name from medco_ont.table_access
-WHERE c_table_cd = $1;
-`

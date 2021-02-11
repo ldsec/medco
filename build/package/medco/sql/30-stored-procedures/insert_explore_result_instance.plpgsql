@@ -1,0 +1,21 @@
+-- pl/pgsql function that inserts a new explore result instance with running status
+
+CREATE OR REPLACE FUNCTION query_tools.insert_explore_result_instance(user_id varchar, query_name varchar, query_definition varchar)
+  RETURNS integer
+  VOLATILE
+  PARALLEL UNSAFE
+  AS $$
+DECLARE
+  new_query_id integer;
+BEGIN
+  EXECUTE format('INSERT INTO query_tools.explore_query_results(user_id,query_name, query_status,query_definition)
+VALUES ($1,$2,%L,$3)
+RETURNING query_id', 'running')
+  USING user_id,
+  query_name,
+  query_definition
+  INTO new_query_id;
+  RETURN new_query_id;
+END;
+$$
+LANGUAGE plpgsql

@@ -32,11 +32,11 @@ type PutCohortsParams struct {
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
 
-	/*Cohort that has been updated or created
+	/*Cohort that has been updated or created.
 	  Required: true
 	  In: body
 	*/
-	CohortRequest PutCohortsBody
+	CohortsRequest PutCohortsBody
 	/*Name of the cohort to update
 	  Required: true
 	  Pattern: ^\w+$
@@ -59,9 +59,9 @@ func (o *PutCohortsParams) BindRequest(r *http.Request, route *middleware.Matche
 		var body PutCohortsBody
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
-				res = append(res, errors.Required("cohortRequest", "body", ""))
+				res = append(res, errors.Required("cohortsRequest", "body", ""))
 			} else {
-				res = append(res, errors.NewParseError("cohortRequest", "body", "", err))
+				res = append(res, errors.NewParseError("cohortsRequest", "body", "", err))
 			}
 		} else {
 			// validate body object
@@ -70,11 +70,11 @@ func (o *PutCohortsParams) BindRequest(r *http.Request, route *middleware.Matche
 			}
 
 			if len(res) == 0 {
-				o.CohortRequest = body
+				o.CohortsRequest = body
 			}
 		}
 	} else {
-		res = append(res, errors.Required("cohortRequest", "body", ""))
+		res = append(res, errors.Required("cohortsRequest", "body", ""))
 	}
 	rName, rhkName, _ := route.Params.GetOK("name")
 	if err := o.bindName(rName, rhkName, route.Formats); err != nil {

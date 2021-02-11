@@ -264,6 +264,41 @@ func init() {
         }
       }
     },
+    "/node/explore/cohorts/patient-list": {
+      "post": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
+        ],
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Retrieve the encrypted patient list for a given cohort name",
+        "operationId": "postCohortsPatientList",
+        "parameters": [
+          {
+            "$ref": "#/parameters/cohortsPatientListRequest"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/getCohortsPatientListResponse"
+          },
+          "403": {
+            "$ref": "#/responses/forbiddenResponse"
+          },
+          "404": {
+            "$ref": "#/responses/notFoundResponse"
+          },
+          "default": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      }
+    },
     "/node/explore/cohorts/{name}": {
       "put": {
         "security": [
@@ -921,9 +956,36 @@ func init() {
     }
   },
   "parameters": {
+    "cohortsPatientListRequest": {
+      "description": "Cohort patient list request",
+      "name": "cohortsPatientListRequest",
+      "in": "body",
+      "required": true,
+      "schema": {
+        "type": "object",
+        "required": [
+          "cohortName",
+          "userPublicKey"
+        ],
+        "properties": {
+          "cohortName": {
+            "type": "string",
+            "pattern": "^\\w+$"
+          },
+          "id": {
+            "type": "string",
+            "pattern": "^[\\w:-]+$"
+          },
+          "userPublicKey": {
+            "type": "string",
+            "pattern": "^[\\w=-]+$"
+          }
+        }
+      }
+    },
     "cohortsRequest": {
-      "description": "Cohort that has been updated or created",
-      "name": "cohortRequest",
+      "description": "Cohort that has been updated or created.",
+      "name": "cohortsRequest",
       "in": "body",
       "required": true,
       "schema": {
@@ -1187,6 +1249,34 @@ func init() {
           },
           "search": {
             "$ref": "#/definitions/exploreSearchModifier"
+          }
+        }
+      }
+    },
+    "forbiddenResponse": {
+      "description": "Request is valid and user is authenticated, but not authorized to perform this action.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "getCohortsPatientListResponse": {
+      "description": "Queried patient list",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "timers": {
+            "$ref": "#/definitions/timers"
           }
         }
       }
@@ -1818,6 +1908,103 @@ func init() {
         }
       }
     },
+    "/node/explore/cohorts/patient-list": {
+      "post": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
+        ],
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Retrieve the encrypted patient list for a given cohort name",
+        "operationId": "postCohortsPatientList",
+        "parameters": [
+          {
+            "description": "Cohort patient list request",
+            "name": "cohortsPatientListRequest",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "cohortName",
+                "userPublicKey"
+              ],
+              "properties": {
+                "cohortName": {
+                  "type": "string",
+                  "pattern": "^\\w+$"
+                },
+                "id": {
+                  "type": "string",
+                  "pattern": "^[\\w:-]+$"
+                },
+                "userPublicKey": {
+                  "type": "string",
+                  "pattern": "^[\\w=-]+$"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Queried patient list",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "timers": {
+                  "$ref": "#/definitions/timers"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Request is valid and user is authenticated, but not authorized to perform this action.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/node/explore/cohorts/{name}": {
       "put": {
         "security": [
@@ -1842,8 +2029,8 @@ func init() {
             "required": true
           },
           {
-            "description": "Cohort that has been updated or created",
-            "name": "cohortRequest",
+            "description": "Cohort that has been updated or created.",
+            "name": "cohortsRequest",
             "in": "body",
             "required": true,
             "schema": {
@@ -1940,8 +2127,8 @@ func init() {
             "required": true
           },
           {
-            "description": "Cohort that has been updated or created",
-            "name": "cohortRequest",
+            "description": "Cohort that has been updated or created.",
+            "name": "cohortsRequest",
             "in": "body",
             "required": true,
             "schema": {
@@ -2982,9 +3169,36 @@ func init() {
     }
   },
   "parameters": {
+    "cohortsPatientListRequest": {
+      "description": "Cohort patient list request",
+      "name": "cohortsPatientListRequest",
+      "in": "body",
+      "required": true,
+      "schema": {
+        "type": "object",
+        "required": [
+          "cohortName",
+          "userPublicKey"
+        ],
+        "properties": {
+          "cohortName": {
+            "type": "string",
+            "pattern": "^\\w+$"
+          },
+          "id": {
+            "type": "string",
+            "pattern": "^[\\w:-]+$"
+          },
+          "userPublicKey": {
+            "type": "string",
+            "pattern": "^[\\w=-]+$"
+          }
+        }
+      }
+    },
     "cohortsRequest": {
-      "description": "Cohort that has been updated or created",
-      "name": "cohortRequest",
+      "description": "Cohort that has been updated or created.",
+      "name": "cohortsRequest",
       "in": "body",
       "required": true,
       "schema": {
@@ -3248,6 +3462,34 @@ func init() {
           },
           "search": {
             "$ref": "#/definitions/exploreSearchModifier"
+          }
+        }
+      }
+    },
+    "forbiddenResponse": {
+      "description": "Request is valid and user is authenticated, but not authorized to perform this action.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "getCohortsPatientListResponse": {
+      "description": "Queried patient list",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "timers": {
+            "$ref": "#/definitions/timers"
           }
         }
       }

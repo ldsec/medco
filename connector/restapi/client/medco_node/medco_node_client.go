@@ -39,6 +39,8 @@ type ClientService interface {
 
 	PostCohorts(params *PostCohortsParams, authInfo runtime.ClientAuthInfoWriter) (*PostCohortsOK, error)
 
+	PostCohortsPatientList(params *PostCohortsPatientListParams, authInfo runtime.ClientAuthInfoWriter) (*PostCohortsPatientListOK, error)
+
 	PutCohorts(params *PutCohortsParams, authInfo runtime.ClientAuthInfoWriter) (*PutCohortsOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
@@ -279,6 +281,40 @@ func (a *Client) PostCohorts(params *PostCohortsParams, authInfo runtime.ClientA
 	}
 	// unexpected success response
 	unexpectedSuccess := result.(*PostCohortsDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+  PostCohortsPatientList retrieves the encrypted patient list for a given cohort name
+*/
+func (a *Client) PostCohortsPatientList(params *PostCohortsPatientListParams, authInfo runtime.ClientAuthInfoWriter) (*PostCohortsPatientListOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPostCohortsPatientListParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "postCohortsPatientList",
+		Method:             "POST",
+		PathPattern:        "/node/explore/cohorts/patient-list",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &PostCohortsPatientListReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*PostCohortsPatientListOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*PostCohortsPatientListDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 

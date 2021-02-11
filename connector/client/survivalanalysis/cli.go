@@ -398,62 +398,9 @@ func printResults(clearResults []ClearResults, timers []medcomodels.Timers, clie
 	}
 	logrus.Info("results printed")
 
-	// print timers
-	logrus.Info("dumping timers")
-	dumpCSV, err := utilclient.NewCSV(timerFile)
+	err = medcoclient.DumpTimers(timerFile, timers, clientTimers)
 	if err != nil {
-		err = fmt.Errorf("while creating CSV file handler: %s", err)
-		logrus.Error(err)
-		return
-	}
-	dumpCSV.Write([]string{"node_index", "timer_description", "duration_milliseconds"})
-	if err != nil {
-		err = fmt.Errorf("while writing headers for timer file: %s", err)
-		logrus.Error(err)
-		return
-	}
-	// each remote time profilings
-	for nodeIdx, nodeTimers := range timers {
-		sortedTimers := nodeTimers.SortTimers()
-		for _, duration := range sortedTimers {
-			dumpCSV.Write([]string{
-				strconv.Itoa(nodeIdx),
-				duration[0],
-				duration[1],
-			})
-			if err != nil {
-				err = fmt.Errorf("while writing record for timer file: %s", err)
-				logrus.Error(err)
-				return
-			}
-		}
-
-	}
-	// and local
-	localSortedTimers := clientTimers.SortTimers()
-	for _, duration := range localSortedTimers {
-		dumpCSV.Write([]string{
-			"client",
-			duration[0],
-			duration[1],
-		})
-		if err != nil {
-			err = fmt.Errorf("while writing record for timer file: %s", err)
-			logrus.Error(err)
-			return
-		}
-	}
-
-	err = dumpCSV.Flush()
-	if err != nil {
-		err = fmt.Errorf("while flushing timer file: %s", err)
-		logrus.Error(err)
-		return
-	}
-	logrus.Info()
-	err = dumpCSV.Close()
-	if err != nil {
-		err = fmt.Errorf("while closing timer file: %s", err)
+		err = fmt.Errorf("while dumping timers: %s", err.Error())
 		logrus.Error(err)
 		return
 	}

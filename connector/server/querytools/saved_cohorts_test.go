@@ -15,15 +15,17 @@ func init() {
 }
 
 func TestGetPatientList(t *testing.T) {
+	const expectedPatientNumber = 228
 	utilserver.TestDBConnection(t)
 
 	pList, err := GetPatientList("test", "testCohort")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(pList) != 228 {
-		t.Fatalf("Expected 228 patients, got: %d", len(pList))
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, expectedPatientNumber, len(pList))
+
+	_, err = GetPatientList("thisUserDoesNotExist", "testCohort")
+	assert.Error(t, err)
+	_, err = GetPatientList("test", "thisCohortDoesNotExist")
+	assert.Error(t, err)
 
 }
 
@@ -31,9 +33,7 @@ func TestGetSavedCohorts(t *testing.T) {
 	utilserver.TestDBConnection(t)
 
 	cohorts, err := GetSavedCohorts("test", 0)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.NoError(t, err)
 	assert.Equal(t, true, len(cohorts) > 0)
 	//change user_id
 
@@ -50,9 +50,7 @@ func TestGetDate(t *testing.T) {
 		t.Fatal(err)
 	}
 	expectedDate, err := time.Parse(time.RFC3339, "2020-08-25T13:57:00Z")
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.NoError(t, err)
 	assert.Equal(t, expectedDate, updateDate)
 
 	//change cohort_id
@@ -94,6 +92,7 @@ func TestInsertCohortAndUpdateCohortAndRemoveCohort(t *testing.T) {
 	}
 
 	assert.Equal(t, true, found)
+
 	time.Sleep(10 * time.Second)
 	now2 := time.Now()
 	cohortID, err = UpdateCohort("testCohort2", "test", -1, now2)
@@ -101,8 +100,11 @@ func TestInsertCohortAndUpdateCohortAndRemoveCohort(t *testing.T) {
 	cohorts, err = GetSavedCohorts("test", 0)
 	assert.NoError(t, err)
 
+	cohorts2, err := GetSavedCohorts("test", 0)
+	assert.NoError(t, err)
+
 	found = false
-	for _, cohort := range cohorts {
+	for _, cohort := range cohorts2 {
 		if cohort.CohortID == cohortID {
 			found = true
 			assert.Equal(t, cohortID, cohort.CohortID)
@@ -120,7 +122,7 @@ func TestInsertCohortAndUpdateCohortAndRemoveCohort(t *testing.T) {
 	assert.NoError(t, err)
 
 	err = RemoveCohort("test", "testCohort2")
-	assert.NoError(t, err)
+	assert.Error(t, err)
 
 }
 

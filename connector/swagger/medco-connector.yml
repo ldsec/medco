@@ -327,6 +327,26 @@ paths:
       security:
         - medco-jwt: ["medco-explore"]
 
+  /node/explore/cohorts/patient-list:
+    post:
+      tags:
+        - "medco-node"
+      summary: "Retrieve the encrypted patient list for a given cohort name"
+      operationId: "postCohortsPatientList"
+      parameters:
+        - $ref: '#/parameters/cohortsPatientListRequest'
+      responses:
+        200:
+          $ref: '#/responses/getCohortsPatientListResponse'
+        404:
+          $ref: '#/responses/notFoundResponse'
+        403:
+          $ref: '#/responses/forbiddenResponse'
+        default:
+          $ref: '#/responses/errorResponse'
+      security:
+        - medco-jwt: ["medco-explore"]
+
 
 securityDefinitions:
   medco-jwt:
@@ -368,8 +388,8 @@ parameters:
 
   cohortsRequest:
     in: "body"
-    description: "Cohort that has been updated or created"
-    name: "cohortRequest"
+    description: "Cohort that has been updated or created."
+    name: "cohortsRequest"
     required: true
     schema:
       type: "object"
@@ -384,6 +404,27 @@ parameters:
         - patientSetID
         - creationDate
         - updateDate
+  
+  cohortsPatientListRequest:
+    in: "body"
+    description: "Cohort patient list request"
+    name: "cohortsPatientListRequest"
+    required: true
+    schema:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          pattern: '^[\w:-]+$'
+        cohortName:
+          type: "string"
+          pattern: '^\w+$'
+        userPublicKey:
+          type: "string"
+          pattern: '^[\w=-]+$'
+      required:
+        - cohortName
+        - userPublicKey
 
   survivalAnalysisRequest:
     in: "body"
@@ -509,6 +550,14 @@ responses:
       properties:
         message:
           type: "string"
+  
+  forbiddenResponse:
+    description: "Request is valid and user is authenticated, but not authorized to perform this action."
+    schema:
+      type: "object"
+      properties:
+        message:
+          type: "string"
 
   networkMetadataResponse:
     description: "Network metadata (public key and nodes list)."
@@ -596,6 +645,18 @@ responses:
                   $ref: "#/definitions/panel"
               queryTiming:
                 $ref: "#/definitions/timing"
+
+  getCohortsPatientListResponse:
+    description: "Queried patient list"
+    schema:
+      type: "object"
+      properties:
+        results:
+          type: "array"
+          items:
+            type: "string"
+        timers:
+          $ref: "#/definitions/timers"
 
   survivalAnalysisResponse:
     description: "Queried survival analysis"

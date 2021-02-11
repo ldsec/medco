@@ -1,0 +1,16 @@
+-- pl/pgsql function that returns the table name for a given table code
+
+CREATE OR REPLACE FUNCTION medco_ont.table_name(table_cd varchar)
+  RETURNS varchar
+  STABLE
+  PARALLEL SAFE
+  AS $$
+DECLARE
+  table_name_ varchar;
+BEGIN
+  EXECUTE 'SELECT c_table_name from medco_ont.table_access WHERE c_table_cd = $1;'
+  USING table_cd INTO table_name_;
+  RETURN table_name_;
+END;
+$$
+LANGUAGE plpgsql
