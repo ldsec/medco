@@ -8,31 +8,28 @@ import (
 )
 
 // SubGroupExplore executes an I2B2 Explore query with panels
-func SubGroupExplore(queryName string, subGroupIndex int, panels []*models.Panel) (int64, []int64, error) {
+func SubGroupExplore(queryName string, subGroupIndex int, panels []*models.Panel) ([]int64, error) {
 
-	patientCount, patientSetID, err := i2b2.ExecutePsmQuery(queryName+"_SUBGROUP_"+strconv.Itoa(subGroupIndex), panels, "ANY")
+	_, patientSetID, err := i2b2.ExecutePsmQuery(queryName+"_SUBGROUP_"+strconv.Itoa(subGroupIndex), panels, "ANY")
 	if err != nil {
-		return 0, nil, err
+		return nil, err
 	}
 	patientIDs, _, err := i2b2.GetPatientSet(patientSetID, false)
 	if err != nil {
-		return 0, nil, err
+		return nil, err
 	}
-	pCount, err := strconv.ParseInt(patientCount, 10, 64)
-	if err != nil {
-		return 0, nil, err
-	}
+
 	pIDs := make([]int64, len(patientIDs))
 
 	for i, pID := range patientIDs {
 		id, err := strconv.ParseInt(pID, 10, 64)
 		if err != nil {
-			return 0, nil, err
+			return nil, err
 		}
 		pIDs[i] = id
 	}
 
-	return pCount, pIDs, nil
+	return pIDs, nil
 
 }
 

@@ -105,16 +105,16 @@ func getModifierCodes(path string, appliedPath string) ([]string, error) {
 // getTableName returns an error when no entry was found for the provided table code.
 func getTableName(tableCD string) (string, error) {
 	description := fmt.Sprintf("getTableName (table code: %s), procedure: %s", tableCD, "medco_ont.table_name")
-	logrus.Debugf("runnig: %s", description)
+	logrus.Debugf("querying the name of the ontology table for the code embedded in I2B2 item definition: %s", description)
 	row := utilserver.I2B2DBConnection.QueryRow("SELECT medco_ont.table_name($1);", tableCD)
 	ret := new(string)
 	err := row.Scan(ret)
 	if err != nil {
-		err = fmt.Errorf("while getting table name: %s, DB operation: %s", err.Error(), description)
+		err = fmt.Errorf("while getting ontology table name: %s, DB operation: %s", err.Error(), description)
 		logrus.Error(err)
 		return "", err
 	}
-	logrus.Debugf(`successfully selected table name "%s", DB operation: %s`, *ret, description)
+	logrus.Debugf(`successfully ontology table name "%s", DB operation: %s`, *ret, description)
 
 	return strings.ToLower(*ret), nil
 }
