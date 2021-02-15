@@ -101,7 +101,7 @@ func getModifierCodes(path string, appliedPath string) ([]string, error) {
 	return res, nil
 }
 
-// getTableName get the ontology table name for a given table code (in I2B2, the first node ofa URI is the table CD)
+// getTableName get the ontology table name for a given table code (in I2B2, the first node of a URI is the table CD)
 // getTableName returns an error when no entry was found for the provided table code.
 func getTableName(tableCD string) (string, error) {
 	description := fmt.Sprintf("getTableName (table code: %s), procedure: %s", tableCD, "medco_ont.table_name")
