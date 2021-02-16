@@ -758,10 +758,12 @@ func (o *SurvivalAnalysisOKBodyResultsItems0) UnmarshalBinary(b []byte) error {
 type SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0 struct {
 
 	// events
-	Events *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0Events `json:"events,omitempty"`
+	// Required: true
+	Events *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0Events `json:"events"`
 
 	// timepoint
-	Timepoint int64 `json:"timepoint,omitempty"`
+	// Required: true
+	Timepoint *int64 `json:"timepoint"`
 }
 
 // Validate validates this survival analysis o k body results items0 group results items0
@@ -769,6 +771,10 @@ func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0) Validate(formats
 	var res []error
 
 	if err := o.validateEvents(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateTimepoint(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -780,8 +786,8 @@ func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0) Validate(formats
 
 func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0) validateEvents(formats strfmt.Registry) error {
 
-	if swag.IsZero(o.Events) { // not required
-		return nil
+	if err := validate.Required("events", "body", o.Events); err != nil {
+		return err
 	}
 
 	if o.Events != nil {
@@ -791,6 +797,15 @@ func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0) validateEvents(f
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0) validateTimepoint(formats strfmt.Registry) error {
+
+	if err := validate.Required("timepoint", "body", o.Timepoint); err != nil {
+		return err
 	}
 
 	return nil
@@ -820,14 +835,47 @@ func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0) UnmarshalBinary(
 type SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0Events struct {
 
 	// censoringevent
-	Censoringevent string `json:"censoringevent,omitempty"`
+	// Required: true
+	Censoringevent *string `json:"censoringevent"`
 
 	// eventofinterest
-	Eventofinterest string `json:"eventofinterest,omitempty"`
+	// Required: true
+	Eventofinterest *string `json:"eventofinterest"`
 }
 
 // Validate validates this survival analysis o k body results items0 group results items0 events
 func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0Events) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateCensoringevent(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateEventofinterest(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0Events) validateCensoringevent(formats strfmt.Registry) error {
+
+	if err := validate.Required("events"+"."+"censoringevent", "body", o.Censoringevent); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0Events) validateEventofinterest(formats strfmt.Registry) error {
+
+	if err := validate.Required("events"+"."+"eventofinterest", "body", o.Eventofinterest); err != nil {
+		return err
+	}
+
 	return nil
 }
 
