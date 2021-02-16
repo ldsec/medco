@@ -23,10 +23,6 @@ func TestGetTableName(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, expected, res)
 
-	res, err = getTableName("sPhN")
-	assert.NoError(t, err)
-	assert.Equal(t, expected, res)
-
 	_, err = getTableName("this table does not exist")
 	assert.Error(t, err)
 }
@@ -45,10 +41,6 @@ func TestGetCodes(t *testing.T) {
 	assert.ElementsMatch(t, expectedList, res)
 
 	res, err = getConceptCodes("/E2ETEST/e2etest")
-	assert.NoError(t, err)
-	assert.ElementsMatch(t, expectedList, res)
-
-	res, err = getConceptCodes("/e2etest/e2etest")
 	assert.NoError(t, err)
 	assert.ElementsMatch(t, expectedList, res)
 
