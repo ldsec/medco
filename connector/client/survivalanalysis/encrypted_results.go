@@ -62,9 +62,9 @@ func encryptedResultsFromAPIResponse(bodyResults []*survival_analysis.SurvivalAn
 			}
 		}, len(group.GroupResults))
 		for j, timePoint := range group.GroupResults {
-			res[i].TimePoints[j].Time = int(timePoint.Timepoint)
-			res[i].TimePoints[j].EncryptedEvents.EventsOfInterest = timePoint.Events.Eventofinterest
-			res[i].TimePoints[j].EncryptedEvents.CensoringEvents = timePoint.Events.Censoringevent
+			res[i].TimePoints[j].Time = int(*timePoint.Timepoint)
+			res[i].TimePoints[j].EncryptedEvents.EventsOfInterest = *timePoint.Events.Eventofinterest
+			res[i].TimePoints[j].EncryptedEvents.CensoringEvents = *timePoint.Events.Censoringevent
 		}
 	}
 	return res
