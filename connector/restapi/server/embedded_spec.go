@@ -847,7 +847,7 @@ func init() {
                 }
               },
               "operator": {
-                "description": "# NUMBER operators EQ: equals NE: not equals GT: greater than GE: greater than or equal LT: less than LE: less than or equal BETWEEN: between (value syntax: \"x and y\")\n# TEXT operators IN: in (value syntax: \"'x','y','z'\") LIKE[exact]: equal LIKE[begin]: begins with LIKE[end]: ends with LIKE[contains]: contains\n",
+                "description": "# NUMBER operators EQ: equal NE: not equal GT: greater than GE: greater than or equal LT: less than LE: less than or equal BETWEEN: between (value syntax: \"x and y\") # TEXT operators IN: in (value syntax: \"'x','y','z'\") LIKE[exact]: equal LIKE[begin]: begins with LIKE[end]: ends with LIKE[contains]: contains\n",
                 "type": "string",
                 "enum": [
                   "EQ",
@@ -1387,9 +1387,17 @@ func init() {
                   "type": "array",
                   "items": {
                     "type": "object",
+                    "required": [
+                      "timepoint",
+                      "events"
+                    ],
                     "properties": {
                       "events": {
                         "type": "object",
+                        "required": [
+                          "eventofinterest",
+                          "censoringevent"
+                        ],
                         "properties": {
                           "censoringevent": {
                             "type": "string"
@@ -2658,7 +2666,7 @@ func init() {
           }
         },
         "operator": {
-          "description": "# NUMBER operators EQ: equals NE: not equals GT: greater than GE: greater than or equal LT: less than LE: less than or equal BETWEEN: between (value syntax: \"x and y\")\n# TEXT operators IN: in (value syntax: \"'x','y','z'\") LIKE[exact]: equal LIKE[begin]: begins with LIKE[end]: ends with LIKE[contains]: contains\n",
+          "description": "# NUMBER operators EQ: equal NE: not equal GT: greater than GE: greater than or equal LT: less than LE: less than or equal BETWEEN: between (value syntax: \"x and y\") # TEXT operators IN: in (value syntax: \"'x','y','z'\") LIKE[exact]: equal LIKE[begin]: begins with LIKE[end]: ends with LIKE[contains]: contains\n",
           "type": "string",
           "enum": [
             "EQ",
@@ -2727,9 +2735,17 @@ func init() {
     },
     "ResultsItems0GroupResultsItems0": {
       "type": "object",
+      "required": [
+        "timepoint",
+        "events"
+      ],
       "properties": {
         "events": {
           "type": "object",
+          "required": [
+            "eventofinterest",
+            "censoringevent"
+          ],
           "properties": {
             "censoringevent": {
               "type": "string"
@@ -2746,6 +2762,10 @@ func init() {
     },
     "ResultsItems0GroupResultsItems0Events": {
       "type": "object",
+      "required": [
+        "eventofinterest",
+        "censoringevent"
+      ],
       "properties": {
         "censoringevent": {
           "type": "string"
@@ -3600,9 +3620,17 @@ func init() {
                   "type": "array",
                   "items": {
                     "type": "object",
+                    "required": [
+                      "timepoint",
+                      "events"
+                    ],
                     "properties": {
                       "events": {
                         "type": "object",
+                        "required": [
+                          "eventofinterest",
+                          "censoringevent"
+                        ],
                         "properties": {
                           "censoringevent": {
                             "type": "string"

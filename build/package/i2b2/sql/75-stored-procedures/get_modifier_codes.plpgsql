@@ -13,9 +13,9 @@ BEGIN
       'SELECT c_basecode
 	      FROM medco_ont.%I
 	      WHERE (c_basecode IS NOT NULL AND c_basecode != %L
-			    AND c_facttablecolumn = %L
+			    AND upper(c_facttablecolumn) = %L
 		      AND c_fullname LIKE $1 AND m_applied_path = $2);',
-      ontology, '', 'modifier_cd'
+      ontology, '', 'MODIFIER_CD'
     )
     USING path, applied_path;
   END;
