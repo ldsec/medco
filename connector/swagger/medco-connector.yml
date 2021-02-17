@@ -686,6 +686,12 @@ responses:
                           type: "string"
                         censoringevent:
                           type: "string"
+                      required:
+                        - eventofinterest
+                        - censoringevent
+                  required:
+                    - timepoint
+                    - events
         timers:
           $ref: "#/definitions/timers"
 
