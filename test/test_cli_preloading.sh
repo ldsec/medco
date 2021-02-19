@@ -6,3 +6,4 @@ do
   bash "$script"
 done
 echo "CLI test 1/2 successful!"
+

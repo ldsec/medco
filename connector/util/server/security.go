@@ -2,6 +2,7 @@ package utilserver
 
 import (
 	"errors"
+
 	"github.com/ldsec/medco/connector/restapi/models"
 	"github.com/lestrrat-go/jwx/jwt"
 	"github.com/sirupsen/logrus"
@@ -109,6 +110,8 @@ func extractAuthorizationsFromToken(token jwt.Token, provider *oidcProvider) (ua
 			ua.RestAPI = append(ua.RestAPI, models.RestAPIAuthorizationMedcoGenomicAnnotations)
 		case string(models.RestAPIAuthorizationMedcoSurvivalAnalysis):
 			ua.RestAPI = append(ua.RestAPI, models.RestAPIAuthorizationMedcoSurvivalAnalysis)
+		case string(models.RestAPIAuthorizationMedcoExploreStatistics):
+			ua.RestAPI = append(ua.RestAPI, models.RestAPIAuthorizationMedcoExploreStatistics)
 
 		// explore query type authorizations
 		case string(models.ExploreQueryTypePatientList):

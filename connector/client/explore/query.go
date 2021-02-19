@@ -89,7 +89,7 @@ type nodeResult struct {
 // Execute executes the MedCo client query synchronously on all the nodes
 func (clientQuery *ExploreQuery) Execute() (nodesResult map[int]*ExploreQueryResult, err error) {
 
-	queryResultsChan := make(chan nodeResult)
+	queryResultsChan := make(chan nodeResult, 1)
 	queryErrChan := make(chan error)
 
 	// execute requests on all nodes

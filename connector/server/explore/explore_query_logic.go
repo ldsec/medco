@@ -44,10 +44,8 @@ func NewExploreQuery(queryName string, query *models.ExploreQuery, user *models.
 	return new, new.isValid()
 }
 
-// Execute implements the I2b2 MedCo query logic
-func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
-	overallTimer := time.Now()
-	var timer time.Time
+// FetchLocalPatients returns the patients stored in the local i2b2 database that correspond to the i2b2 query panel
+func (q *ExploreQuery) FetchLocalPatients(timer time.Time) (patientIDs []string, patientDummyFlags []string, patientCount string, patientSetID string, queryID int, deferredErrorStatusUpdate func(), err error) {
 
 	// create medco connector result instance
 	queryDefinition, err := q.Query.MarshalBinary()
@@ -57,26 +55,27 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	}
 	logrus.Info("Creating Explore Result instance")
 	timer = time.Now()
-	queryID, err := querytoolsserver.InsertExploreResultInstance(q.User.ID, q.ID, string(queryDefinition))
+	queryID, err = querytoolsserver.InsertExploreResultInstance(q.User.ID, q.ID, string(queryDefinition))
 	q.Result.Timers.AddTimers("medco-connector-create-result-instance", timer, nil)
 	logrus.Infof("Created Explore Result Instance : %d", queryID)
 	if err != nil {
 		err = fmt.Errorf("while inserting explore result instance: %s", err.Error())
 		return
 	}
-	defer func(e error) {
-		if e != nil {
-			logrus.Info("Updating Explore Result instance with error status")
-			qtError := querytoolsserver.UpdateErrorExploreResultInstance(queryID)
-			if qtError != nil {
-				e = fmt.Errorf("while inserting a status error in result instance table: %s", qtError.Error())
-			} else {
+
+	deferredErrorStatusUpdate = func(e error, queryID int) func() {
+		return func() {
+			if e != nil {
 				logrus.Info("Updating Explore Result instance with error status")
+				qtError := querytoolsserver.UpdateErrorExploreResultInstance(queryID)
+				if qtError != nil {
+					e = fmt.Errorf("while inserting a status error in result instance table: %s", qtError.Error())
+				} else {
+					logrus.Info("Updating Explore Result instance with error status")
+				}
 			}
 		}
-	}(err)
-
-	// todo: breakdown in i2b2 / count / patient list
+	}(err, queryID)
 
 	err = q.isValid()
 	if err != nil {
@@ -105,7 +104,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 		return
 	}
 
-	patientCount, patientSetID, err := i2b2.ExecutePsmQuery(q.ID, q.Query.Panels, q.Query.QueryTiming)
+	patientCount, patientSetID, err = i2b2.ExecutePsmQuery(q.ID, q.Query.Panels, q.Query.QueryTiming)
 	if err != nil {
 		err = fmt.Errorf("during I2B2 PSM query exection: %s", err.Error())
 		return
@@ -116,11 +115,25 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 
 	// i2b2 PDO query to get the dummy flags
 	timer = time.Now()
-	patientIDs, patientDummyFlags, err := i2b2.GetPatientSet(patientSetID, true)
+	patientIDs, patientDummyFlags, err = i2b2.GetPatientSet(patientSetID, true)
+
+	return
+}
+
+// Execute implements the I2b2 MedCo query logic
+func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
+	var timer time.Time
+	overallTimer := time.Now()
+
+	patientIDs, patientDummyFlags, patientCount, patientSetID, queryID, deferredErrorStatusUpdate, err := q.FetchLocalPatients(timer)
+
+	defer deferredErrorStatusUpdate()
+
 	if err != nil {
 		err = fmt.Errorf("during I2B2 patient set query exection: %s", err.Error())
 		return
 	}
+
 	q.Result.Timers.AddTimers("medco-connector-i2b2-PDO", timer, nil)
 	logrus.Info(q.ID, ": got ", len(patientIDs), " patient IDs and ", len(patientDummyFlags), " dummy flags with i2b2")
 

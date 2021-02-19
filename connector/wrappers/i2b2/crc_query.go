@@ -111,5 +111,7 @@ func GetPatientSet(patientSetID string, generateDummyFlags bool) (patientIDs []s
 			}
 		}
 	}
+
+	logrus.Info("done with GetPatientSet")
 	return
 }

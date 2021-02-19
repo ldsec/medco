@@ -20,6 +20,7 @@ import (
 	"github.com/go-openapi/swag"
 
 	"github.com/ldsec/medco/connector/restapi/models"
+	"github.com/ldsec/medco/connector/restapi/server/operations/explore_statistics"
 	"github.com/ldsec/medco/connector/restapi/server/operations/genomic_annotations"
 	"github.com/ldsec/medco/connector/restapi/server/operations/medco_network"
 	"github.com/ldsec/medco/connector/restapi/server/operations/medco_node"
@@ -62,6 +63,9 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 		}),
 		MedcoNodeExploreSearchModifierHandler: medco_node.ExploreSearchModifierHandlerFunc(func(params medco_node.ExploreSearchModifierParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_node.ExploreSearchModifier has not yet been implemented")
+		}),
+		ExploreStatisticsExploreStatisticsHandler: explore_statistics.ExploreStatisticsHandlerFunc(func(params explore_statistics.ExploreStatisticsParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation explore_statistics.ExploreStatistics has not yet been implemented")
 		}),
 		MedcoNodeGetCohortsHandler: medco_node.GetCohortsHandlerFunc(func(params medco_node.GetCohortsParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_node.GetCohorts has not yet been implemented")
@@ -147,6 +151,8 @@ type MedcoConnectorAPI struct {
 	MedcoNodeExploreSearchConceptHandler medco_node.ExploreSearchConceptHandler
 	// MedcoNodeExploreSearchModifierHandler sets the operation handler for the explore search modifier operation
 	MedcoNodeExploreSearchModifierHandler medco_node.ExploreSearchModifierHandler
+	// ExploreStatisticsExploreStatisticsHandler sets the operation handler for the explore statistics operation
+	ExploreStatisticsExploreStatisticsHandler explore_statistics.ExploreStatisticsHandler
 	// MedcoNodeGetCohortsHandler sets the operation handler for the get cohorts operation
 	MedcoNodeGetCohortsHandler medco_node.GetCohortsHandler
 	// MedcoNodeGetExploreQueryHandler sets the operation handler for the get explore query operation
@@ -259,6 +265,9 @@ func (o *MedcoConnectorAPI) Validate() error {
 	}
 	if o.MedcoNodeExploreSearchModifierHandler == nil {
 		unregistered = append(unregistered, "medco_node.ExploreSearchModifierHandler")
+	}
+	if o.ExploreStatisticsExploreStatisticsHandler == nil {
+		unregistered = append(unregistered, "explore_statistics.ExploreStatisticsHandler")
 	}
 	if o.MedcoNodeGetCohortsHandler == nil {
 		unregistered = append(unregistered, "medco_node.GetCohortsHandler")
@@ -405,6 +414,10 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/node/explore/search/modifier"] = medco_node.NewExploreSearchModifier(o.context, o.MedcoNodeExploreSearchModifierHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/node/explore-statistics/query"] = explore_statistics.NewExploreStatistics(o.context, o.ExploreStatisticsExploreStatisticsHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}

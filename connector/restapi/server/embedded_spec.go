@@ -231,6 +231,41 @@ func init() {
         }
       }
     },
+    "/node/explore-statistics/query": {
+      "post": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore-statistics"
+            ]
+          }
+        ],
+        "tags": [
+          "explore statistics"
+        ],
+        "summary": "Queries the server to obtain the histogram of the distribution linked to the concept sent as parameter to the request.",
+        "operationId": "exploreStatistics",
+        "parameters": [
+          {
+            "$ref": "#/parameters/exploreStatisticsRequest"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/exploreStatisticsResponse"
+          },
+          "400": {
+            "$ref": "#/responses/badRequestResponse"
+          },
+          "404": {
+            "$ref": "#/responses/notFoundResponse"
+          },
+          "default": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      }
+    },
     "/node/explore/cohorts": {
       "get": {
         "security": [
@@ -619,6 +654,28 @@ func init() {
         }
       }
     },
+    "clearInterval": {
+      "description": "Explore statistics encrypted bucket of the histogram",
+      "type": "object",
+      "required": [
+        "count",
+        "lowerBound",
+        "higherBound"
+      ],
+      "properties": {
+        "count": {
+          "description": "The encrypted count for this bucket",
+          "type": "integer",
+          "format": "int64"
+        },
+        "higherBound": {
+          "type": "string"
+        },
+        "lowerBound": {
+          "type": "string"
+        }
+      }
+    },
     "exploreQuery": {
       "description": "MedCo-Explore query",
       "properties": {
@@ -822,6 +879,27 @@ func init() {
         }
       }
     },
+    "intervalBucket": {
+      "description": "Explore statistics encrypted bucket of the histogram",
+      "type": "object",
+      "required": [
+        "encCount",
+        "lowerBound",
+        "higherBound"
+      ],
+      "properties": {
+        "encCount": {
+          "description": "The encrypted count for this bucket",
+          "type": "string"
+        },
+        "higherBound": {
+          "type": "string"
+        },
+        "lowerBound": {
+          "type": "string"
+        }
+      }
+    },
     "metadataxml": {
       "type": "object",
       "properties": {
@@ -965,7 +1043,8 @@ func init() {
         "medco-network",
         "medco-explore",
         "medco-genomic-annotations",
-        "medco-survival-analysis"
+        "medco-survival-analysis",
+        "medco-explore-statistics"
       ]
     },
     "timers": {
@@ -1120,6 +1199,75 @@ func init() {
       "required": true,
       "schema": {
         "$ref": "#/definitions/exploreSearch"
+      }
+    },
+    "exploreStatisticsRequest": {
+      "description": "User public key, cohort name, modifier or concept information, interval size, minimum and maximum value of concept or modifier",
+      "name": "body",
+      "in": "body",
+      "required": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "string",
+            "pattern": "^[\\w:-]+$"
+          },
+          "bucketSize": {
+            "type": "number"
+          },
+          "cohortDefinition": {
+            "type": "object",
+            "properties": {
+              "panels": {
+                "description": "i2b2 panels (linked by an AND)",
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/panel"
+                }
+              },
+              "queryTiming": {
+                "$ref": "#/definitions/timing"
+              }
+            }
+          },
+          "concepts": {
+            "description": "A list of the paths of concepts used as analytes",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
+            }
+          },
+          "minObservation": {
+            "type": "number"
+          },
+          "modifiers": {
+            "description": "A list describing the modifiers used as analytes",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "modifierKey",
+                "appliedPath"
+              ],
+              "properties": {
+                "appliedPath": {
+                  "type": "string",
+                  "pattern": "^((\\/[^\\/]+)+\\/%?)$"
+                },
+                "modifierKey": {
+                  "type": "string",
+                  "pattern": "^((\\/[^\\/]+)+\\/)$"
+                }
+              }
+            }
+          },
+          "userPublicKey": {
+            "type": "string",
+            "pattern": "^[\\w=-]+$"
+          }
+        }
       }
     },
     "survivalAnalysisRequest": {
@@ -1347,6 +1495,45 @@ func init() {
           },
           "search": {
             "$ref": "#/definitions/exploreSearch"
+          }
+        }
+      }
+    },
+    "exploreStatisticsResponse": {
+      "description": "Explore statistics histograms",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "globalTimers": {
+            "description": "Timers for work happening outside of the construction of the histograms",
+            "$ref": "#/definitions/timers"
+          },
+          "results": {
+            "description": "Each item of this array contains the histogram of a specific analyte (concept or modifier).",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "analyteName": {
+                  "description": "The name of the analyte used to build this histogram",
+                  "type": "string"
+                },
+                "intervals": {
+                  "description": "the encrypted counts of each bucket of the histogram",
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "$ref": "#/definitions/intervalBucket"
+                  }
+                },
+                "timers": {
+                  "$ref": "#/definitions/timers"
+                },
+                "unit": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       }
@@ -1926,6 +2113,133 @@ func init() {
                 },
                 "timers": {
                   "$ref": "#/definitions/timers"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad user input in request.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/node/explore-statistics/query": {
+      "post": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore-statistics"
+            ]
+          }
+        ],
+        "tags": [
+          "explore statistics"
+        ],
+        "summary": "Queries the server to obtain the histogram of the distribution linked to the concept sent as parameter to the request.",
+        "operationId": "exploreStatistics",
+        "parameters": [
+          {
+            "description": "User public key, cohort name, modifier or concept information, interval size, minimum and maximum value of concept or modifier",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ID": {
+                  "type": "string",
+                  "pattern": "^[\\w:-]+$"
+                },
+                "bucketSize": {
+                  "type": "number"
+                },
+                "cohortDefinition": {
+                  "type": "object",
+                  "properties": {
+                    "panels": {
+                      "description": "i2b2 panels (linked by an AND)",
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/definitions/panel"
+                      }
+                    },
+                    "queryTiming": {
+                      "$ref": "#/definitions/timing"
+                    }
+                  }
+                },
+                "concepts": {
+                  "description": "A list of the paths of concepts used as analytes",
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
+                  }
+                },
+                "minObservation": {
+                  "type": "number"
+                },
+                "modifiers": {
+                  "description": "A list describing the modifiers used as analytes",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/ModifiersItems0"
+                  }
+                },
+                "userPublicKey": {
+                  "type": "string",
+                  "pattern": "^[\\w=-]+$"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Explore statistics histograms",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "globalTimers": {
+                  "description": "Timers for work happening outside of the construction of the histograms",
+                  "$ref": "#/definitions/timers"
+                },
+                "results": {
+                  "description": "Each item of this array contains the histogram of a specific analyte (concept or modifier).",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/ResultsItems0"
+                  }
                 }
               }
             }
@@ -2687,6 +3001,21 @@ func init() {
         }
       }
     },
+    "ExploreStatisticsParamsBodyCohortDefinition": {
+      "type": "object",
+      "properties": {
+        "panels": {
+          "description": "i2b2 panels (linked by an AND)",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/panel"
+          }
+        },
+        "queryTiming": {
+          "$ref": "#/definitions/timing"
+        }
+      }
+    },
     "GetCohortsOKBodyItems0": {
       "type": "object",
       "properties": {
@@ -2776,6 +3105,23 @@ func init() {
         },
         "Version": {
           "type": "string"
+        }
+      }
+    },
+    "ModifiersItems0": {
+      "type": "object",
+      "required": [
+        "modifierKey",
+        "appliedPath"
+      ],
+      "properties": {
+        "appliedPath": {
+          "type": "string",
+          "pattern": "^((\\/[^\\/]+)+\\/%?)$"
+        },
+        "modifierKey": {
+          "type": "string",
+          "pattern": "^((\\/[^\\/]+)+\\/)$"
         }
       }
     },
@@ -2877,16 +3223,22 @@ func init() {
     "ResultsItems0": {
       "type": "object",
       "properties": {
-        "groupID": {
+        "analyteName": {
+          "description": "The name of the analyte used to build this histogram",
           "type": "string"
         },
-        "groupResults": {
+        "intervals": {
+          "description": "the encrypted counts of each bucket of the histogram",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/ResultsItems0GroupResultsItems0"
+            "type": "object",
+            "$ref": "#/definitions/intervalBucket"
           }
         },
-        "initialCount": {
+        "timers": {
+          "$ref": "#/definitions/timers"
+        },
+        "unit": {
           "type": "string"
         }
       }
@@ -3051,6 +3403,28 @@ func init() {
           "items": {
             "$ref": "#/definitions/restApiAuthorization"
           }
+        }
+      }
+    },
+    "clearInterval": {
+      "description": "Explore statistics encrypted bucket of the histogram",
+      "type": "object",
+      "required": [
+        "count",
+        "lowerBound",
+        "higherBound"
+      ],
+      "properties": {
+        "count": {
+          "description": "The encrypted count for this bucket",
+          "type": "integer",
+          "format": "int64"
+        },
+        "higherBound": {
+          "type": "string"
+        },
+        "lowerBound": {
+          "type": "string"
         }
       }
     },
@@ -3257,6 +3631,27 @@ func init() {
         }
       }
     },
+    "intervalBucket": {
+      "description": "Explore statistics encrypted bucket of the histogram",
+      "type": "object",
+      "required": [
+        "encCount",
+        "lowerBound",
+        "higherBound"
+      ],
+      "properties": {
+        "encCount": {
+          "description": "The encrypted count for this bucket",
+          "type": "string"
+        },
+        "higherBound": {
+          "type": "string"
+        },
+        "lowerBound": {
+          "type": "string"
+        }
+      }
+    },
     "metadataxml": {
       "type": "object",
       "properties": {
@@ -3342,7 +3737,8 @@ func init() {
         "medco-network",
         "medco-explore",
         "medco-genomic-annotations",
-        "medco-survival-analysis"
+        "medco-survival-analysis",
+        "medco-explore-statistics"
       ]
     },
     "timers": {
@@ -3485,6 +3881,75 @@ func init() {
       "required": true,
       "schema": {
         "$ref": "#/definitions/exploreSearch"
+      }
+    },
+    "exploreStatisticsRequest": {
+      "description": "User public key, cohort name, modifier or concept information, interval size, minimum and maximum value of concept or modifier",
+      "name": "body",
+      "in": "body",
+      "required": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "string",
+            "pattern": "^[\\w:-]+$"
+          },
+          "bucketSize": {
+            "type": "number"
+          },
+          "cohortDefinition": {
+            "type": "object",
+            "properties": {
+              "panels": {
+                "description": "i2b2 panels (linked by an AND)",
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/panel"
+                }
+              },
+              "queryTiming": {
+                "$ref": "#/definitions/timing"
+              }
+            }
+          },
+          "concepts": {
+            "description": "A list of the paths of concepts used as analytes",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
+            }
+          },
+          "minObservation": {
+            "type": "number"
+          },
+          "modifiers": {
+            "description": "A list describing the modifiers used as analytes",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "modifierKey",
+                "appliedPath"
+              ],
+              "properties": {
+                "appliedPath": {
+                  "type": "string",
+                  "pattern": "^((\\/[^\\/]+)+\\/%?)$"
+                },
+                "modifierKey": {
+                  "type": "string",
+                  "pattern": "^((\\/[^\\/]+)+\\/)$"
+                }
+              }
+            }
+          },
+          "userPublicKey": {
+            "type": "string",
+            "pattern": "^[\\w=-]+$"
+          }
+        }
       }
     },
     "survivalAnalysisRequest": {
@@ -3712,6 +4177,45 @@ func init() {
           },
           "search": {
             "$ref": "#/definitions/exploreSearch"
+          }
+        }
+      }
+    },
+    "exploreStatisticsResponse": {
+      "description": "Explore statistics histograms",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "globalTimers": {
+            "description": "Timers for work happening outside of the construction of the histograms",
+            "$ref": "#/definitions/timers"
+          },
+          "results": {
+            "description": "Each item of this array contains the histogram of a specific analyte (concept or modifier).",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "analyteName": {
+                  "description": "The name of the analyte used to build this histogram",
+                  "type": "string"
+                },
+                "intervals": {
+                  "description": "the encrypted counts of each bucket of the histogram",
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "$ref": "#/definitions/intervalBucket"
+                  }
+                },
+                "timers": {
+                  "$ref": "#/definitions/timers"
+                },
+                "unit": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       }

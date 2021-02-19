@@ -22,6 +22,9 @@ var QueryToolsTimeoutSeconds int64
 // SurvivalAnalysisTimeoutSeconds is the timeout for the client survival analysis in seconds (default to 5 minutes)
 var SurvivalAnalysisTimeoutSeconds int64
 
+// ExploreStatisticsTimeoutSeconds is the timeout for the client explore statistics in seconds (default to 1 minutes)
+var ExploreStatisticsTimeoutSeconds int64
+
 // TokenTimeoutSeconds is the timeout for the client access token request (default to 10 seconds)
 var TokenTimeoutSeconds int64
 
@@ -62,6 +65,12 @@ func init() {
 	if err != nil || SurvivalAnalysisTimeoutSeconds < 0 {
 		logrus.Warn("invalid client survival analysis timeout")
 		SurvivalAnalysisTimeoutSeconds = 5 * 60
+	}
+
+	ExploreStatisticsTimeoutSeconds, err = strconv.ParseInt(os.Getenv("EXPLORE_STATISTICS_TIMEOUT_SECONDS"), 10, 64)
+	if err != nil || ExploreStatisticsTimeoutSeconds < 0 {
+		logrus.Warn("invalid client explore statistics timeout")
+		ExploreStatisticsTimeoutSeconds = 60
 	}
 
 	GenomicAnnotationsQueryTimeoutSeconds, err = strconv.ParseInt(os.Getenv("CLIENT_GENOMIC_ANNOTATIONS_QUERY_TIMEOUT_SECONDS"), 10, 64)

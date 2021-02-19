@@ -8,6 +8,9 @@ up:
 up-d:
 	docker-compose -f docker-compose.yml up -d
 
+debug:
+	docker-compose -f docker-compose.yml up > logfile
+	
 stop:
 	docker-compose -f docker-compose.yml stop
 
