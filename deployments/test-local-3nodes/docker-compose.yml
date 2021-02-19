@@ -47,6 +47,7 @@ services:
       - OIDC_JWT_ISSUERS=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/auth/realms/master
       - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD:?}
       - MC_DB_NAME=medcoconnectorsrv0
+      - I2B2_DB_NAME=i2b2medcosrv0
       - "MEDCO_NODES_URL=\
       ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-0,\
       ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-1,\
@@ -104,6 +105,7 @@ services:
       - OIDC_JWT_ISSUERS=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/auth/realms/master
       - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD:?}
       - MC_DB_NAME=medcoconnectorsrv1
+      - I2B2_DB_NAME=i2b2medcosrv1
       - "MEDCO_NODES_URL=\
       ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-0,\
       ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-1,\
@@ -161,6 +163,7 @@ services:
       - OIDC_JWT_ISSUERS=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/auth/realms/master
       - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD:?}
       - MC_DB_NAME=medcoconnectorsrv2
+      - I2B2_DB_NAME=i2b2medcosrv2
       - "MEDCO_NODES_URL=\
       ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-0,\
       ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-1,\
