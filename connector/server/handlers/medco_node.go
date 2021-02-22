@@ -282,7 +282,7 @@ func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal 
 	for _, existingCohort := range cohorts {
 		if existingCohort.CohortName == cohortName {
 			return medco_node.NewPostCohortsConflict().WithPayload(&medco_node.PostCohortsConflictBody{
-				Message: "Cohort %s already exists. Try update-saved-cohorts instead of add-saved-cohorts",
+				Message: fmt.Sprintf("Cohort %s already exists. Try update-saved-cohorts instead of add-saved-cohorts", cohortName),
 			})
 		}
 	}
