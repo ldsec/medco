@@ -92,8 +92,6 @@ func NewQuery(UserID,
 // Execute runs the survival analysis query
 func (q *Query) Execute() error {
 
-	patientLists := make([][]int64, 0)
-	initialCounts := make([]int64, 0)
 	eventGroups := make(EventGroups, 0)
 	timeLimitInDays := q.TimeLimit * granularityValues[q.TimeGranularity]
 	timer := time.Now()
@@ -156,11 +154,34 @@ func (q *Query) Execute() error {
 			logrus.Infof("successful I2B2 explore query %d", i)
 			timers.AddTimers(fmt.Sprintf("medco-connector-i2b2-query-group%d", i), timer, nil)
 			patientList = intersect(cohort, patientList)
-			initialCount := int64(len(patientList))
-			patientLists = append(patientLists, patientList)
-			initialCounts = append(initialCounts, initialCount)
-			logrus.Debugf("Initial Counts %v", initialCounts)
 
+			timer = time.Now()
+
+			//  --- sql query on observation fact table
+			sqlTimePoints, negativePatientList, err := buildTimePoints(
+				patientList,
+				startConceptCodes,
+				startModifierCodes,
+				*q.StartsWhen == survival_analysis.SurvivalAnalysisBodyStartsWhenEarliest,
+				endConceptCodes,
+				endModifierCodes,
+				*q.EndsWhen == survival_analysis.SurvivalAnalysisBodyEndsWhenEarliest,
+				timeLimitInDays,
+			)
+			patientList = setDiff(patientList, negativePatientList)
+			initialCount := int64(len(patientList))
+			timers.AddTimers(fmt.Sprintf("medco-connector-build-timepoints%d", i), timer, nil)
+			if err != nil {
+
+				// error details dumped in server node console, but survival request does not send them to the client
+				logrus.Errorf("error while getting building time points: %s", err.Error())
+				err = fmt.Errorf("error while getting building time points")
+				errChan <- err
+				return
+			}
+			logrus.Debugf("got %d time points", len(sqlTimePoints))
+			logrus.Debugf("got %d patients without negative time point", initialCount)
+			logrus.Tracef("%+v", sqlTimePoints)
 			timer = time.Now()
 			initialCountEncrypt, err := unlynx.EncryptWithCothorityKey(initialCount)
 			timers.AddTimers(fmt.Sprintf("medco-connector-encrypt-init-count-group%d", i), timer, nil)
@@ -172,30 +193,6 @@ func (q *Query) Execute() error {
 			}
 			logrus.Debug("initialcount ", initialCountEncrypt)
 			newEventGroup.EncInitialCount = initialCountEncrypt
-			timer = time.Now()
-
-			//  --- sql query on observation fact table
-			sqlTimePoints, err := buildTimePoints(
-				patientList,
-				startConceptCodes,
-				startModifierCodes,
-				*q.StartsWhen == survival_analysis.SurvivalAnalysisBodyStartsWhenEarliest,
-				endConceptCodes,
-				endModifierCodes,
-				*q.EndsWhen == survival_analysis.SurvivalAnalysisBodyEndsWhenEarliest,
-				timeLimitInDays,
-			)
-			timers.AddTimers(fmt.Sprintf("medco-connector-build-timepoints%d", i), timer, nil)
-			if err != nil {
-
-				// error details dumped in server node console, but survival request does not send them to the client
-				logrus.Errorf("error while getting building time points: %s", err.Error())
-				err = fmt.Errorf("error while getting building time points")
-				errChan <- err
-				return
-			}
-			logrus.Debugf("got %d time points", len(sqlTimePoints))
-			logrus.Tracef("%+v", sqlTimePoints)
 
 			// change time granularity, fill zeros in arrays and encrypt group results
 			processGroupResultTimers := processGroupResult(errChan, newEventGroup, sqlTimePoints, timeLimitInDays, q.TimeGranularity, i)

@@ -49,3 +49,22 @@ func intersect(x []int64, y []int64) []int64 {
 
 	return result
 }
+
+// setDiff returns the elements of the first set without those found in the second set
+// both x and y are assumed to contain unique elements
+func setDiff(x []int64, y []int64) []int64 {
+	set := make(map[int64]struct{})
+	for _, elm := range y {
+		set[elm] = struct{}{}
+	}
+
+	result := make([]int64, 0)
+	for _, elm := range x {
+		if _, ok := set[elm]; !ok {
+			result = append(result, elm)
+		}
+	}
+
+	return result
+
+}

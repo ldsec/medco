@@ -22,7 +22,7 @@ func buildTimePoints(
 	endConceptModifiers []string,
 	endEarliest bool,
 	timeLimit int,
-) (timePoints medcomodels.TimePoints, err error) {
+) (timePoints medcomodels.TimePoints, patientsWithNegativePoints []int64, err error) {
 
 	pList := make([]string, len(patientList))
 	for i, pNum := range patientList {
@@ -72,10 +72,12 @@ func buildTimePoints(
 
 	record := new(string)
 
+	var patientNum int64
 	var timePoint int64
-	var counts int64
 	var eventType int
 
+	uniquePatients := make(map[int64]struct{})
+	patientsWithNegativePoints = make([]int64, 0)
 	for rows.Next() {
 
 		scanErr := rows.Scan(record)
@@ -86,20 +88,36 @@ func buildTimePoints(
 		}
 		logrus.Tracef("Record: %s", *record)
 		cells := strings.Split(strings.Trim(*record, "()"), ",")
-		timePoint, err = strconv.ParseInt(cells[0], 10, 64)
+		patientNum, err = strconv.ParseInt(cells[0], 10, 64)
 		if err != nil {
-			err = fmt.Errorf("while scanning parsing integer string (relative time) \"%s\": %s", cells[0], err.Error())
+			err = fmt.Errorf("while scanning parsing integer string (patient number) \"%s\": %s", cells[0], err.Error())
 			return
 		}
-		eventType, err = strconv.Atoi(cells[1])
+		timePoint, err = strconv.ParseInt(cells[1], 10, 64)
 		if err != nil {
-			err = fmt.Errorf("while scanning parsing integer string (type of event) \"%s\": %s", cells[2], err.Error())
+			err = fmt.Errorf("while scanning parsing integer string (relative time) \"%s\": %s", cells[2], err.Error())
 			return
 		}
-		counts, err = strconv.ParseInt(cells[2], 10, 64)
+		eventType, err = strconv.Atoi(cells[2])
 		if err != nil {
-			err = fmt.Errorf("while scanning parsing integer string (number of events) \"%s\": %s", cells[1], err.Error())
+			err = fmt.Errorf("while scanning parsing integer string (event type) \"%s\": %s", cells[1], err.Error())
 			return
+		}
+
+		// check patient unicity
+
+		if _, isIn := uniquePatients[patientNum]; isIn {
+			err = fmt.Errorf("while checking the unicity of a patient: patient %d already found", patientNum)
+			return
+		}
+		uniquePatients[patientNum] = struct{}{}
+
+		// skip, but keep track of patient with negative value
+
+		if timePoint < 0 {
+			logrus.Debug(fmt.Sprintf("patient %d has a negative time point %d, skipped", patientNum, timePoint))
+			patientsWithNegativePoints = append(patientsWithNegativePoints)
+			continue
 		}
 
 		// 1 is for event of interest, 0 for censoring event
@@ -109,10 +127,10 @@ func buildTimePoints(
 		}
 		switch eventType {
 		case 0:
-			allTimePoints[timePoint].Events.CensoringEvents = counts
+			allTimePoints[timePoint].Events.CensoringEvents++
 			break
 		case 1:
-			allTimePoints[timePoint].Events.EventsOfInterest = counts
+			allTimePoints[timePoint].Events.EventsOfInterest++
 			break
 		default:
 			err = fmt.Errorf("Unexpected envent type code %d, must be either 0 (event of interest) or 1 (censoring event)", eventType)

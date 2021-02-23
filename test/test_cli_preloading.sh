@@ -146,11 +146,14 @@ survivalSubGroup1="$(printf -- "time_granularity,node_index,group_id,initial_cou
 survivalSubGroup2="$(printf -- "week,0,Male,270,0,0,0\nweek,0,Male,270,1,3,0\nweek,0,Male,270,2,0,0\nweek,0,Male,270,3,0,0\nweek,0,Male,270,4,0,0\nweek,0,Male,270,5,0,0")"
 
 # test7
+survivalWrong="$(printf -- "time_granularity,node_index,group_id,initial_count,time_point,event_of_interest_count,censoring_event_count\nday,0,Full cohort,684,0,0,0\nday,0,Full cohort,684,1,0,0\nday,0,Full cohort,684,2,0,0\nday,0,Full cohort,684,3,0,0\nday,0,Full cohort,684,4,0,0\nday,0,Full cohort,684,5,0,0")"
+
+# test8
 function timing() { echo "query clr::/E2ETEST/SPHNv2020.1/DeathStatus/ OR clr::/E2ETEST/SPHNv2020.1/DeathStatus/ ${1} AND clr::/E2ETEST/SPHNv2020.1/DeathStatus/:/E2ETEST/DeathStatus-status/death/:/SPHNv2020.1/DeathStatus/ ${2} AND clr::/E2ETEST/I2B2/Demographics/Gender/Female/ OR clr::/E2ETEST/I2B2/Demographics/Gender/Male/ ${3} -t ${4}"; };
 timingResultNonZeroExpected="$(printf -- "count\n165\n165\n165")"
 timingResultZeroExpected="$(printf -- "count\n0\n0\n0")"
 
-# test8
+# test9
 function cohortPatientListWithCredentials() { docker-compose -f docker-compose.tools.yml run medco-cli-client --user ${1} --password ${2} --o /data/result.csv \
   cpl -c testCohort -d /data/timers.csv; };
 patientList="$(printf -- "Node idx 0\n1137,1138,1139,1140,1141,1142,1143,1144,1145,1146,1147,1148,1149,1150,1151,1152,1153,1154,1155,1156,1157,1158,1159,1160,1161,1162,1163,1164,1165,1166,1167,1168,1169,1170,1171,1172,1173,1174,1175,1176,1177,1178,1179,1180,1181,1182,1183,1184,1185,1186,1187,1188,1189,1190,1191,1192,1193,1194,1195,1196,1197,\
@@ -292,7 +295,33 @@ test6 () {
   fi
 }
 
-test7() {
+test7 () {
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD -o /data/result.csv srva  -c testCohort -l 6 -g day \
+   -s clr::/SPHN/SPHNv2020.1/FophDiagnosis/ \
+   -w first \
+   -e clr::/SPHN/SPHNv2020.1/DeathStatus/:/SPHN/DeathStatus-status/death/:/SPHNv2020.1/DeathStatus/ \
+   -z earliest \
+   -d /data/timers.csv
+  
+  result="$(awk -F',' 'NR==1{print $0}' ../timers.csv)"
+  if [ "${result}" != "${timerHeaders}" ];
+  then
+  echo "timer headers for survival $1: test failed"
+  echo "result: ${result}" && echo "expected result: ${timerHeaders}"
+  exit 1
+  fi
+  
+  result="$(awk -F',' 'NR==1, NR==7 {print $0}' ../result.csv)"
+  if [ "${result}" != "${survivalWrong}" ];
+  then
+  echo "survival analysis wrong parameters: test failed"
+  echo "result: ${result}" && echo "expected result: ${survivalWrong}"
+  exit 1
+  fi
+
+}
+
+test8() {
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv \
   $(timing $1 $2 $3 $4)
   result="$(awk -F "\"*,\"*" '{print $2}' ../result.csv)"
@@ -305,7 +334,7 @@ test7() {
 
 }
 
-test8() {
+test9() {
 
   cohortPatientListWithCredentials "test" "test"
 
@@ -418,17 +447,19 @@ test5 "year" "${survivalYears}"
 
 test6 "${survivalSubGroup1}" "${survivalSubGroup2}"
 
+test7
+
 echo "Testing query with timing settings features..."
 USERNAME=${1:-test}
-test7 "any" "any" "any" "any" "${timingResultNonZeroExpected}"
-test7 "sameinstancenum" "sameinstancenum" "sameinstancenum" "sameinstancenum" "${timingResultZeroExpected}"
-test7 "samevisit" "samevisit" "samevisit" "samevisit" "${timingResultZeroExpected}"
-test7 "sameinstancenum" "sameinstancenum" "any" "sameinstancenum" "${timingResultNonZeroExpected}"
-test7 "samevisit" "samevisit" "any" "samevisit" "${timingResultNonZeroExpected}"
+test8 "any" "any" "any" "any" "${timingResultNonZeroExpected}"
+test8 "sameinstancenum" "sameinstancenum" "sameinstancenum" "sameinstancenum" "${timingResultZeroExpected}"
+test8 "samevisit" "samevisit" "samevisit" "samevisit" "${timingResultZeroExpected}"
+test8 "sameinstancenum" "sameinstancenum" "any" "sameinstancenum" "${timingResultNonZeroExpected}"
+test8 "samevisit" "samevisit" "any" "samevisit" "${timingResultNonZeroExpected}"
 
 echo "Testing cohorts-patient-list"
 
-test8 
+test9 
 
 echo "CLI test 1/2 successful!"
 popd
