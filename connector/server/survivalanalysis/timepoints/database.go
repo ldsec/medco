@@ -118,7 +118,7 @@ func EndEvents(patientWithStartEventList map[int64]time.Time, conceptCodes, modi
 			return nil, err
 		}
 
-		if !patientWithStartEventList[patientID].After(endDate) {
+		if patientWithStartEventList[patientID].Before(endDate) {
 
 			// here, an aggregate was not performed, so it is expected to find a patient ID more than once
 
@@ -176,21 +176,21 @@ func CensoringEvents(patientWithoutEndEvent map[int64]struct{}, endConceptCodes 
 			err = errors.Errorf("while parsing patient number \"%s\": %s; DB operation: %s", recordEntries[0], err.Error(), description)
 			return nil, err
 		}
-		startDate, err := time.Parse(SQLDateFormat, recordEntries[1])
+		censoringDate, err := time.Parse(SQLDateFormat, recordEntries[1])
 		if err != nil {
 			err = errors.Errorf("while parsing patient number \"%s\": %s; DB operation: %s", recordEntries[1], err.Error(), description)
 			return nil, err
 		}
 
 		if _, isIn := patientsWithCensoringEvent[patientID]; isIn {
-			err = errors.Errorf("while filling patient-to-start-date map: patient %d already found in map, this is not expected; DB operation: %s", patientID, description)
+			err = errors.Errorf("while filling patient-to-censoring-date map: patient %d already found in map, this is not expected; DB operation: %s", patientID, description)
 			return nil, err
 		}
 
-		patientsWithCensoringEvent[patientID] = startDate
+		patientsWithCensoringEvent[patientID] = censoringDate
 
 	}
 
-	logrus.Debugf("Successfully found %d patients with start event; DB operation: %s", len(patientsWithCensoringEvent), description)
+	logrus.Debugf("Successfully found %d patients with right censoring event; DB operation: %s", len(patientsWithCensoringEvent), description)
 	return patientsWithCensoringEvent, nil
 }
