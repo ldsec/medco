@@ -88,22 +88,14 @@ func TestEndEvents(t *testing.T) {
 	result, err := endEvents(fullStartEventMap, []string{"A168", "A125"}, []string{"@"})
 	assert.NoError(t, err)
 
-	expectedFirstList := make([]time.Time, 0)
-	for _, dateString := range []string{"1971-04-15", "1972-02-15"} {
-		date, parseErr := time.Parse(SQLDateFormat, dateString)
-		assert.NoError(t, parseErr)
-		expectedFirstList = append(expectedFirstList, date)
-	}
+	expectedFirstList := createDateListFromString(t, []string{"1971-04-15", "1972-02-15"})
+
 	firstList, isIn := result[1137]
 	assert.True(t, isIn)
 	assert.ElementsMatch(t, expectedFirstList, firstList)
 
-	expectedSecondList := make([]time.Time, 0)
-	for _, dateString := range []string{"1970-03-14", "1971-06-12"} {
-		date, parseErr := time.Parse(SQLDateFormat, dateString)
-		assert.NoError(t, parseErr)
-		expectedSecondList = append(expectedSecondList, date)
-	}
+	expectedSecondList := createDateListFromString(t, []string{"1970-03-14", "1971-06-12"})
+
 	secondList, isIn := result[1138]
 	assert.True(t, isIn)
 	assert.ElementsMatch(t, expectedSecondList, secondList)
@@ -119,16 +111,35 @@ func TestEndEvents(t *testing.T) {
 	result, err = endEvents(oneCollisionStartEventMap, []string{"A168", "A125"}, []string{"@"})
 	assert.NoError(t, err)
 
-	expectedList := make([]time.Time, 0)
-	for _, dateString := range []string{"1971-06-12"} {
-		date, parseErr := time.Parse(SQLDateFormat, dateString)
-		assert.NoError(t, parseErr)
-		expectedList = append(expectedList, date)
-	}
+	expectedList := createDateListFromString(t, []string{"1971-06-12"})
+
 	list, isIn := result[1138]
 	assert.True(t, isIn)
 	assert.ElementsMatch(t, expectedList, list)
 
-	// expect
+	// expect empty results
+	latest, err := time.Parse(SQLDateFormat, "1972-02-15")
+	assert.NoError(t, err)
 
+	latestStartEventMap := map[int64]time.Time{
+		1137: latest,
+		1138: latest,
+	}
+	result, err = endEvents(latestStartEventMap, []string{"A168", "A125"}, []string{"@"})
+	assert.NoError(t, err)
+
+	_, isIn = result[1138]
+	assert.False(t, isIn)
+
+}
+
+func createDateListFromString(t *testing.T, dateStrings []string) (timeList []time.Time) {
+	timeList = make([]time.Time, len(dateStrings))
+
+	for i, dateString := range dateStrings {
+		date, parseErr := time.Parse(SQLDateFormat, dateString)
+		assert.NoError(t, parseErr)
+		timeList[i] = date
+	}
+	return
 }
