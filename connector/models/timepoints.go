@@ -32,7 +32,7 @@ func (points TimePoints) Swap(i, j int) {
 }
 
 // TimePointsFromTable is a testing helper function that builds TimePoints instance from a 2D int array
-func TimePointsFromTable(array [][]int) TimePoints {
+func TimePointsFromTable(array [][]int64) TimePoints {
 	res := make(TimePoints, len(array))
 	for i, point := range array {
 		res[i] =

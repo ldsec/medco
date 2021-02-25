@@ -67,7 +67,7 @@ func buildTimePoints(
 	// initialize the response
 	allTimePoints := make(medcomodels.TimePoints, timeLimit)
 	for i := range allTimePoints {
-		allTimePoints[i].Time = i
+		allTimePoints[i].Time = int64(i)
 	}
 
 	record := new(string)

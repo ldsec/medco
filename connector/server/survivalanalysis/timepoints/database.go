@@ -13,7 +13,7 @@ import (
 
 const SQLDateFormat = "2006-01-02"
 
-func StartEvent(patientList []int64, conceptCodes, modifierCodes []string, earliest bool) (map[int64]time.Time, error) {
+func startEvent(patientList []int64, conceptCodes, modifierCodes []string, earliest bool) (map[int64]time.Time, error) {
 
 	setStrings := make([]string, len(patientList))
 
@@ -73,7 +73,7 @@ func StartEvent(patientList []int64, conceptCodes, modifierCodes []string, earli
 
 }
 
-func EndEvents(patientWithStartEventList map[int64]time.Time, conceptCodes, modifierCodes []string) (map[int64][]time.Time, error) {
+func endEvents(patientWithStartEventList map[int64]time.Time, conceptCodes, modifierCodes []string) (map[int64][]time.Time, error) {
 	setStrings := make([]string, 0, len(patientWithStartEventList))
 
 	for patient := range patientWithStartEventList {
@@ -137,7 +137,7 @@ func EndEvents(patientWithStartEventList map[int64]time.Time, conceptCodes, modi
 
 }
 
-func CensoringEvents(patientWithStartEventList map[int64]time.Time, patientWithoutEndEvent map[int64]struct{}, endConceptCodes []string, endModifierCodes []string) (map[int64]time.Time, map[int64]struct{}, error) {
+func censoringEvents(patientWithStartEventList map[int64]time.Time, patientWithoutEndEvent map[int64]struct{}, endConceptCodes []string, endModifierCodes []string) (map[int64]time.Time, map[int64]struct{}, error) {
 	setStrings := make([]string, 0, len(patientWithoutEndEvent))
 
 	for patient := range patientWithoutEndEvent {
