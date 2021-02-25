@@ -369,7 +369,7 @@ func printResults(clearResults []ClearResults, timers []medcomodels.Timers, clie
 					strconv.Itoa(nodeIdx),
 					group.GroupID,
 					strconv.FormatInt(group.InitialCount, 10),
-					strconv.Itoa(timePoint.Time),
+					strconv.FormatInt(timePoint.Time, 10),
 					strconv.FormatInt(timePoint.Events.EventsOfInterest, 10),
 					strconv.FormatInt(timePoint.Events.CensoringEvents, 10),
 				})

@@ -390,15 +390,15 @@ func prepareArguments(
 // Relative times greater than timeLimit are discarded.
 // Note that the time limit unit for this function is day.
 func expansion(timePoints medcomodels.TimePoints, timeLimitDay int, granularity string) (medcomodels.TimePoints, error) {
-	var timeLimit int
+	var timeLimit int64
 	if granFunction, isIn := granularityFunctions[granularity]; isIn {
-		timeLimit = granFunction(timeLimitDay)
+		timeLimit = granFunction(int64(timeLimitDay))
 	} else {
 		return nil, fmt.Errorf("granularity %s is not implemented", granularity)
 	}
 
 	res := make(medcomodels.TimePoints, timeLimit)
-	availableTimePoints := make(map[int]struct {
+	availableTimePoints := make(map[int64]struct {
 		EventsOfInterest int64
 		CensoringEvents  int64
 	}, len(timePoints))
@@ -406,15 +406,15 @@ func expansion(timePoints medcomodels.TimePoints, timeLimitDay int, granularity 
 
 		availableTimePoints[timePoint.Time] = timePoint.Events
 	}
-	for i := 0; i < timeLimit; i++ {
-		if events, ok := availableTimePoints[i]; ok {
+	for i := int64(0); i < timeLimit; i++ {
+		if events, ok := availableTimePoints[int64(i)]; ok {
 			res[i] = medcomodels.TimePoint{
-				Time:   i,
+				Time:   int64(i),
 				Events: events,
 			}
 		} else {
 			res[i] = medcomodels.TimePoint{
-				Time: i,
+				Time: int64(i),
 				Events: struct {
 					EventsOfInterest int64
 					CensoringEvents  int64

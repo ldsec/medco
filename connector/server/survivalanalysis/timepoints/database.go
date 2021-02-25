@@ -137,7 +137,7 @@ func EndEvents(patientWithStartEventList map[int64]time.Time, conceptCodes, modi
 
 }
 
-func CensoringEvents(patientWithoutEndEvent map[int64]struct{}, endConceptCodes []string, endModifierCodes []string) (map[int64]time.Time, error) {
+func CensoringEvents(patientWithStartEventList map[int64]time.Time, patientWithoutEndEvent map[int64]struct{}, endConceptCodes []string, endModifierCodes []string) (map[int64]time.Time, map[int64]struct{}, error) {
 	setStrings := make([]string, 0, len(patientWithoutEndEvent))
 
 	for patient := range patientWithoutEndEvent {
@@ -154,17 +154,18 @@ func CensoringEvents(patientWithoutEndEvent map[int64]struct{}, endConceptCodes 
 	row, err := utilserver.I2B2DBConnection.Query("SELECT i2b2demodata_i2b2.censoring_event($1,$2,$3)", setDefinition, conceptDefinition, modifierDefinition)
 	if err != nil {
 		err = errors.Errorf("while calling database for retrieving right censoring event dates: %s; DB operation: %s", err.Error(), description)
-		return nil, err
+		return nil, nil, err
 	}
 
 	patientsWithCensoringEvent := make(map[int64]time.Time, len(patientWithoutEndEvent))
+	patientsWithoutCensoringEvent := make(map[int64]struct{}, len(patientWithoutEndEvent))
 
 	var record = new(string)
 	for row.Next() {
 		err = row.Scan(record)
 		if err != nil {
 			err = errors.Errorf("while reading database record stream for retrieving start event dates: %s; DB operation: %s", err.Error(), description)
-			return nil, err
+			return nil, nil, err
 		}
 
 		recordEntries := strings.Split(strings.Trim(*record, "()"), ",")
@@ -174,23 +175,37 @@ func CensoringEvents(patientWithoutEndEvent map[int64]struct{}, endConceptCodes 
 		patientID, err := strconv.ParseInt(recordEntries[0], 10, 64)
 		if err != nil {
 			err = errors.Errorf("while parsing patient number \"%s\": %s; DB operation: %s", recordEntries[0], err.Error(), description)
-			return nil, err
+			return nil, nil, err
 		}
 		censoringDate, err := time.Parse(SQLDateFormat, recordEntries[1])
 		if err != nil {
 			err = errors.Errorf("while parsing patient number \"%s\": %s; DB operation: %s", recordEntries[1], err.Error(), description)
-			return nil, err
+			return nil, nil, err
 		}
 
-		if _, isIn := patientsWithCensoringEvent[patientID]; isIn {
-			err = errors.Errorf("while filling patient-to-censoring-date map: patient %d already found in map, this is not expected; DB operation: %s", patientID, description)
-			return nil, err
+		if _, ok := patientWithStartEventList[patientID]; !ok {
+			err = errors.Errorf("while looking for a start date patient %d was not found in sart event map, this is not expected; DB operation: %s", patientID, description)
+			return nil, nil, err
 		}
 
-		patientsWithCensoringEvent[patientID] = censoringDate
+		if patientWithStartEventList[patientID].Before(censoringDate) {
+
+			if _, isIn := patientsWithCensoringEvent[patientID]; isIn {
+				err = errors.Errorf("while filling patient-to-censoring-date map: patient %d already found in map, this is not expected; DB operation: %s", patientID, description)
+				return nil, nil, err
+			}
+
+			patientsWithCensoringEvent[patientID] = censoringDate
+		} else {
+			if _, isIn := patientsWithoutCensoringEvent[patientID]; isIn {
+				err = errors.Errorf("while filling patient-without-censoring set: patient %d already found in set, this is not expected; DB operation: %s", patientID, description)
+				return nil, nil, err
+			}
+			patientsWithoutCensoringEvent[patientID] = struct{}{}
+		}
 
 	}
 
 	logrus.Debugf("Successfully found %d patients with right censoring event; DB operation: %s", len(patientsWithCensoringEvent), description)
-	return patientsWithCensoringEvent, nil
+	return patientsWithCensoringEvent, patientsWithoutCensoringEvent, nil
 }

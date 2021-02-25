@@ -12,7 +12,7 @@ type Result struct {
 
 // TimePointResult holds information about time point, events, execution times and error
 type TimePointResult struct {
-	TimePoint int
+	TimePoint int64
 	Result    Result
 }
 
