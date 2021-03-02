@@ -133,6 +133,82 @@ func TestEndEvents(t *testing.T) {
 
 }
 
+func TestCensoringEvents(t *testing.T) {
+	utilserver.TestI2B2DBConnection(t)
+
+	absoluteEarliest, err := time.Parse(SQLDateFormat, "1970-03-13")
+	assert.NoError(t, err)
+
+	fullStartEventMap := map[int64]time.Time{
+		1137: absoluteEarliest,
+		1138: absoluteEarliest,
+	}
+
+	patientsNoEndEvent := map[int64]struct{}{
+		1137: {},
+		1138: {},
+	}
+
+	// the second argument is a subset of the first argument, an error is expected
+	emptyResult, patientWithoutCensoring, err := censoringEvents(map[int64]time.Time{}, patientsNoEndEvent, []string{"A168", "A125"}, []string{"@"})
+	assert.Error(t, err)
+
+	emptyResult, patientWithoutCensoring, err = censoringEvents(fullStartEventMap, map[int64]struct{}{}, []string{"A168", "A125"}, []string{"@"})
+	assert.NoError(t, err)
+	assert.Empty(t, emptyResult)
+	assert.Empty(t, patientWithoutCensoring)
+
+	timeStrings := createDateListFromString(t, []string{"1972-02-15", "1971-06-12"})
+	expectedCensoring := map[int64]time.Time{
+		1137: timeStrings[0],
+		1138: timeStrings[1],
+	}
+
+	expectedCensoringAuxiliary := func(t *testing.T, patientWithoutCensoring map[int64]struct{}, results map[int64]time.Time) {
+		assert.NoError(t, err)
+		assert.Empty(t, patientWithoutCensoring)
+		firstTime, isIn := results[1137]
+		assert.True(t, isIn)
+		assert.Equal(t, expectedCensoring[1137], firstTime)
+		secondTime, isIn := results[1138]
+		assert.True(t, isIn)
+		assert.Equal(t, expectedCensoring[1138], secondTime)
+	}
+
+	results, patientWithoutCensoring, err := censoringEvents(fullStartEventMap, patientsNoEndEvent, []string{}, []string{"@"})
+	expectedCensoringAuxiliary(t, patientWithoutCensoring, results)
+
+	results, patientWithoutCensoring, err = censoringEvents(fullStartEventMap, patientsNoEndEvent, []string{"A168", "A125"}, []string{})
+	expectedCensoringAuxiliary(t, patientWithoutCensoring, results)
+
+	results, patientWithoutCensoring, err = censoringEvents(fullStartEventMap, patientsNoEndEvent, []string{"A168", "A125"}, []string{"@"})
+	expectedCensoringAuxiliary(t, patientWithoutCensoring, results)
+
+	// put all possible concept and modifier codes, expecting empty results, but no error
+	emptyResult, patientWithoutCensoring, err = censoringEvents(fullStartEventMap, patientsNoEndEvent, []string{"A168", "A125", "DEM|SEX:f"}, []string{"@", "126:1", "171:0"})
+	assert.NoError(t, err)
+	assert.Empty(t, emptyResult)
+	assert.Empty(t, patientWithoutCensoring)
+
+	// put start events that do not occur before any other events
+	absoluteLatest, err := time.Parse(SQLDateFormat, "1972-02-15")
+	assert.NoError(t, err)
+
+	lateStartEventMap := map[int64]time.Time{
+		1137: absoluteLatest,
+		1138: absoluteLatest,
+	}
+
+	emptyResult, patientWithoutCensoring, err = censoringEvents(lateStartEventMap, patientsNoEndEvent, []string{}, []string{})
+	assert.NoError(t, err)
+	assert.Empty(t, emptyResult)
+	_, isIn := patientWithoutCensoring[1137]
+	assert.True(t, isIn)
+	_, isIn = patientWithoutCensoring[1138]
+	assert.True(t, isIn)
+
+}
+
 func createDateListFromString(t *testing.T, dateStrings []string) (timeList []time.Time) {
 	timeList = make([]time.Time, len(dateStrings))
 
