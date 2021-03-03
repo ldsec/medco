@@ -16,5 +16,5 @@ func TestSortTimePoints(t *testing.T) {
 
 }
 
-var timePoints = TimePointsFromTable([][]int{{13, 2, 5}, {1, 1, 0}, {5, 1, 0}})
-var sortedTimePoints = TimePointsFromTable([][]int{{1, 1, 0}, {5, 1, 0}, {13, 2, 5}})
+var timePoints = TimePointsFromTable([][]int64{{13, 2, 5}, {1, 1, 0}, {5, 1, 0}})
+var sortedTimePoints = TimePointsFromTable([][]int64{{1, 1, 0}, {5, 1, 0}, {13, 2, 5}})
