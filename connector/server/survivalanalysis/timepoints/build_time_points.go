@@ -1,7 +1,10 @@
 package timepoints
 
-import medcomodels "github.com/ldsec/medco/connector/models"
+import (
+	medcomodels "github.com/ldsec/medco/connector/models"
+)
 
+// BuildTimePoints runs the SQL queries, process their results to build sequential data and aggregate them
 func BuildTimePoints(
 	patientSet []int64,
 	startConceptCodes []string,
@@ -13,11 +16,12 @@ func BuildTimePoints(
 	maxLimit int64,
 ) (
 	eventAggregates map[int64]*medcomodels.Events,
-	patientWithoutAnyEvent map[int64]struct{},
+	patientWithoutStartEvent map[int64]struct{},
+	patientWithoutAnyEndEvent map[int64]struct{},
 	err error,
 ) {
 
-	patientsToStartEvent, err := startEvent(patientSet, startConceptCodes, startModifierCodes, startEarliest)
+	patientsToStartEvent, patientWithoutStartEvent, err := startEvent(patientSet, startConceptCodes, startModifierCodes, startEarliest)
 	if err != nil {
 		return
 	}
@@ -29,7 +33,7 @@ func BuildTimePoints(
 	if err != nil {
 		return
 	}
-	patientsToCensoringEvent, patientWithoutAnyEvent, err := censoringEvents(patientsToStartEvent, patientsWithoutEnd, endConceptCodes, endModifierCodes)
+	patientsToCensoringEvent, patientWithoutAnyEndEvent, err := censoringEvents(patientsToStartEvent, patientsWithoutEnd, endConceptCodes, endModifierCodes)
 	if err != nil {
 		return
 	}

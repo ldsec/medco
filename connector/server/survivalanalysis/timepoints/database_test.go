@@ -1,3 +1,5 @@
+// +build integration_test
+
 package timepoints
 
 import (
@@ -16,24 +18,29 @@ func TestStartEvent(t *testing.T) {
 	utilserver.TestI2B2DBConnection(t)
 
 	// test empty, it should not throw an error
-	emptyResult, err := startEvent([]int64{}, []string{"A168", "A125"}, []string{"@"}, true)
+	emptyResult, patientsWithoutStartEvent, err := startEvent([]int64{}, []string{"A168", "A125"}, []string{"@"}, true)
 	assert.NoError(t, err)
 	assert.Empty(t, emptyResult)
+	assert.Empty(t, patientsWithoutStartEvent)
 
-	emptyResult, err = startEvent([]int64{1137, 1138}, []string{}, []string{"@"}, true)
+	emptyResult, patientsWithoutStartEvent, err = startEvent([]int64{1137, 1138}, []string{}, []string{"@"}, true)
 	assert.NoError(t, err)
 	assert.Empty(t, emptyResult)
+	assert.NotEmpty(t, patientsWithoutStartEvent)
 
-	emptyResult, err = startEvent([]int64{1137, 1138}, []string{"A168", "A125"}, []string{}, true)
+	emptyResult, patientsWithoutStartEvent, err = startEvent([]int64{1137, 1138}, []string{"A168", "A125"}, []string{}, true)
 	assert.NoError(t, err)
 	assert.Empty(t, emptyResult)
+	assert.NotEmpty(t, patientsWithoutStartEvent)
 
-	// test with correct parameters
-	result, err := startEvent([]int64{1137, 1138}, []string{"A168", "A125"}, []string{"@"}, true)
+	// test with correct parameters, and an extra patient
+	result, patientsWithoutStartEvent, err := startEvent([]int64{1137, 1138, 9999999}, []string{"A168", "A125"}, []string{"@"}, true)
 	assert.NoError(t, err)
 	expectedFirstTime, err := time.Parse(SQLDateFormat, "1971-04-15")
 	expectedSecondTime, err := time.Parse(SQLDateFormat, "1970-03-14")
 	assert.NoError(t, err)
+	_, isIn := patientsWithoutStartEvent[9999999]
+	assert.True(t, isIn)
 
 	firstTime, isIn := result[1137]
 	assert.True(t, isIn)
@@ -44,11 +51,12 @@ func TestStartEvent(t *testing.T) {
 	assert.Equal(t, expectedSecondTime, secondTime)
 
 	// another test with latest instead of earliest
-	result, err = startEvent([]int64{1137, 1138}, []string{"A168", "A125"}, []string{"@"}, false)
+	result, patientsWithoutStartEvent, err = startEvent([]int64{1137, 1138}, []string{"A168", "A125"}, []string{"@"}, false)
 	assert.NoError(t, err)
 	expectedFirstTime, err = time.Parse(SQLDateFormat, "1972-02-15")
 	expectedSecondTime, err = time.Parse(SQLDateFormat, "1971-06-12")
 	assert.NoError(t, err)
+	assert.Empty(t, patientsWithoutStartEvent)
 
 	firstTime, isIn = result[1137]
 	assert.True(t, isIn)

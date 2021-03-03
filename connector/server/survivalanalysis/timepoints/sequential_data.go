@@ -6,6 +6,7 @@ import (
 	"time"
 
 	medcomodels "github.com/ldsec/medco/connector/models"
+	"github.com/sirupsen/logrus"
 )
 
 func patientAndEndEvents(startEvent map[int64]time.Time, endEvents map[int64][]time.Time, endEarliest bool) (map[int64]struct{}, map[int64]int64, error) {
@@ -48,6 +49,7 @@ func patientAndEndEvents(startEvent map[int64]time.Time, endEvents map[int64][]t
 
 func patientAndCensoring(startEvent map[int64]time.Time, patientsWithoutEndEvent map[int64]struct{}, patientWithCensoring map[int64]time.Time) (map[int64]int64, error) {
 	patientsWithStartAndEndEvents := make(map[int64]int64, len(startEvent))
+	logrus.Infof("tremeta %d", len(patientsWithoutEndEvent))
 	for patientID := range patientsWithoutEndEvent {
 		if endDate, isIn := patientWithCensoring[patientID]; isIn {
 			startDate := startEvent[patientID]
@@ -76,7 +78,7 @@ func compileTimePoints(patientWithEndEvents, patientWithCensoringEvents map[int6
 		if timePoint > maxLimit {
 			continue
 		}
-		if _, isIn := timePointTable[timePoint]; isIn {
+		if _, isIn := timePointTable[timePoint]; !isIn {
 			timePointTable[timePoint] = &medcomodels.Events{
 				EventsOfInterest: 1,
 				CensoringEvents:  0,
@@ -87,11 +89,11 @@ func compileTimePoints(patientWithEndEvents, patientWithCensoringEvents map[int6
 		}
 	}
 
-	for _, timePoint := range patientWithEndEvents {
+	for _, timePoint := range patientWithCensoringEvents {
 		if timePoint > maxLimit {
 			continue
 		}
-		if _, isIn := timePointTable[timePoint]; isIn {
+		if _, isIn := timePointTable[timePoint]; !isIn {
 			timePointTable[timePoint] = &medcomodels.Events{
 				EventsOfInterest: 0,
 				CensoringEvents:  1,

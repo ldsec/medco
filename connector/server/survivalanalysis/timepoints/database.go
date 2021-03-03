@@ -13,7 +13,7 @@ import (
 
 const SQLDateFormat = "2006-01-02"
 
-func startEvent(patientList []int64, conceptCodes, modifierCodes []string, earliest bool) (map[int64]time.Time, error) {
+func startEvent(patientList []int64, conceptCodes, modifierCodes []string, earliest bool) (map[int64]time.Time, map[int64]struct{}, error) {
 
 	setStrings := make([]string, len(patientList))
 
@@ -31,17 +31,18 @@ func startEvent(patientList []int64, conceptCodes, modifierCodes []string, earli
 	row, err := utilserver.I2B2DBConnection.Query("SELECT i2b2demodata_i2b2.start_event($1,$2,$3,$4)", setDefinition, conceptDefinition, modifierDefinition, earliest)
 	if err != nil {
 		err = errors.Errorf("while calling database for retrieving start event dates: %s; DB operation: %s", err.Error(), description)
-		return nil, err
+		return nil, nil, err
 	}
 
 	patientsWithStartEvent := make(map[int64]time.Time, len(patientList))
+	patientsWithoutStartEvent := make(map[int64]struct{}, len(patientList))
 
 	var record = new(string)
 	for row.Next() {
 		err = row.Scan(record)
 		if err != nil {
 			err = errors.Errorf("while reading database record stream for retrieving start event dates: %s; DB operation: %s", err.Error(), description)
-			return nil, err
+			return nil, nil, err
 		}
 
 		recordEntries := strings.Split(strings.Trim(*record, "()"), ",")
@@ -51,25 +52,30 @@ func startEvent(patientList []int64, conceptCodes, modifierCodes []string, earli
 		patientID, err := strconv.ParseInt(recordEntries[0], 10, 64)
 		if err != nil {
 			err = errors.Errorf("while parsing patient number \"%s\": %s; DB operation: %s", recordEntries[0], err.Error(), description)
-			return nil, err
+			return nil, nil, err
 		}
 		startDate, err := time.Parse(SQLDateFormat, recordEntries[1])
 		if err != nil {
 			err = errors.Errorf("while parsing patient number \"%s\": %s; DB operation: %s", recordEntries[1], err.Error(), description)
-			return nil, err
+			return nil, nil, err
 		}
 
 		if _, isIn := patientsWithStartEvent[patientID]; isIn {
 			err = errors.Errorf("while filling patient-to-start-date map: patient %d already found in map, this is not expected; DB operation: %s", patientID, description)
-			return nil, err
+			return nil, nil, err
 		}
 
 		patientsWithStartEvent[patientID] = startDate
 
 	}
+	for _, patientNumber := range patientList {
+		if _, isIn := patientsWithStartEvent[patientNumber]; !isIn {
+			patientsWithoutStartEvent[patientNumber] = struct{}{}
+		}
+	}
 
 	logrus.Debugf("Successfully found %d patients with start event; DB operation: %s", len(patientsWithStartEvent), description)
-	return patientsWithStartEvent, nil
+	return patientsWithStartEvent, patientsWithoutStartEvent, nil
 
 }
 
