@@ -1,6 +1,8 @@
 package timepoints
 
 import (
+	"time"
+
 	medcomodels "github.com/ldsec/medco/connector/models"
 )
 
@@ -18,32 +20,52 @@ func BuildTimePoints(
 	eventAggregates map[int64]*medcomodels.Events,
 	patientWithoutStartEvent map[int64]struct{},
 	patientWithoutAnyEndEvent map[int64]struct{},
+	timers medcomodels.Timers,
 	err error,
 ) {
+	timers = make(medcomodels.Timers)
 
+	timer := time.Now()
 	patientsToStartEvent, patientWithoutStartEvent, err := startEvent(patientSet, startConceptCodes, startModifierCodes, startEarliest)
 	if err != nil {
 		return
 	}
+	timers.AddTimers("build-time-points-start-event", timer, nil)
+
+	timer = time.Now()
 	patientsToEndEvents, err := endEvents(patientsToStartEvent, endConceptCodes, endModifierCodes)
 	if err != nil {
 		return
 	}
+	timers.AddTimers("build-time-points-end-events", timer, nil)
+
+	timer = time.Now()
 	patientsWithoutEnd, startToEndEvent, err := patientAndEndEvents(patientsToStartEvent, patientsToEndEvents, endEarliest)
 	if err != nil {
 		return
 	}
+	timers.AddTimers("build-time-points-sequential-data-event-of-interest", timer, nil)
+
+	timer = time.Now()
 	patientsToCensoringEvent, patientWithoutAnyEndEvent, err := censoringEvents(patientsToStartEvent, patientsWithoutEnd, endConceptCodes, endModifierCodes)
 	if err != nil {
 		return
 	}
+	timers.AddTimers("build-time-points-censoring-event", timer, nil)
+
+	timer = time.Now()
 	startToCensoringEvent, err := patientAndCensoring(patientsToStartEvent, patientsWithoutEnd, patientsToCensoringEvent)
 	if err != nil {
 		return
 	}
+	timers.AddTimers("build-time-points-sequential-data-censoring-event", timer, nil)
+
+	timer = time.Now()
 	eventAggregates = compileTimePoints(startToEndEvent, startToCensoringEvent, maxLimit)
 	if err != nil {
 		return
 	}
+	timers.AddTimers("build-time-points-aggregate-sequential-data", timer, nil)
+
 	return
 }
