@@ -156,7 +156,7 @@ func (q *Query) Execute() error {
 			logrus.Infof("successful I2B2 explore query %d", i)
 			timers.AddTimers(fmt.Sprintf("medco-connector-i2b2-query-group%d", i), timer, nil)
 			patientList = intersect(cohort, patientList)
-			logrus.Debugf("There are % patients in the subgroup", len(patientList))
+			logrus.Debugf("There are %d patients in the subgroup", len(patientList))
 
 			// --- build time points
 

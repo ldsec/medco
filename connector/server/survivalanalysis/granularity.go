@@ -48,7 +48,7 @@ func month(val int64) int64 {
 }
 
 func year(val int64) int64 {
-	return int64(ceil(int(val), dInMonth))
+	return int64(ceil(int(val), dInYear))
 }
 
 func binTimePoint(timePoints medcomodels.TimePoints, groupingFunction func(int64) int64) medcomodels.TimePoints {

@@ -11,7 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const SQLDateFormat = "2006-01-02"
+const sqlDateFormat = "2006-01-02"
 
 func startEvent(patientList []int64, conceptCodes, modifierCodes []string, earliest bool) (map[int64]time.Time, map[int64]struct{}, error) {
 
@@ -54,7 +54,7 @@ func startEvent(patientList []int64, conceptCodes, modifierCodes []string, earli
 			err = errors.Errorf("while parsing patient number \"%s\": %s; DB operation: %s", recordEntries[0], err.Error(), description)
 			return nil, nil, err
 		}
-		startDate, err := time.Parse(SQLDateFormat, recordEntries[1])
+		startDate, err := time.Parse(sqlDateFormat, recordEntries[1])
 		if err != nil {
 			err = errors.Errorf("while parsing patient number \"%s\": %s; DB operation: %s", recordEntries[1], err.Error(), description)
 			return nil, nil, err
@@ -118,7 +118,7 @@ func endEvents(patientWithStartEventList map[int64]time.Time, conceptCodes, modi
 			err = errors.Errorf("while parsing patient number \"%s\": %s; DB operation: %s", recordEntries[0], err.Error(), description)
 			return nil, err
 		}
-		endDate, err := time.Parse(SQLDateFormat, recordEntries[1])
+		endDate, err := time.Parse(sqlDateFormat, recordEntries[1])
 		if err != nil {
 			err = errors.Errorf("while parsing end date \"%s\": %s; DB operation: %s", recordEntries[1], err.Error(), description)
 			return nil, err
@@ -134,7 +134,7 @@ func endEvents(patientWithStartEventList map[int64]time.Time, conceptCodes, modi
 				patientsWithEndEvent[patientID] = []time.Time{endDate}
 			}
 		} else {
-			logrus.Tracef("dropped end date: end date %s before start date %s; patientID: %d", endDate.Format(SQLDateFormat), patientWithStartEventList[patientID].Format(SQLDateFormat), patientID)
+			logrus.Tracef("dropped end date: end date %s before start date %s; patientID: %d", endDate.Format(sqlDateFormat), patientWithStartEventList[patientID].Format(sqlDateFormat), patientID)
 		}
 
 	}
@@ -183,7 +183,7 @@ func censoringEvents(patientWithStartEventList map[int64]time.Time, patientWitho
 			err = errors.Errorf("while parsing patient number \"%s\": %s; DB operation: %s", recordEntries[0], err.Error(), description)
 			return nil, nil, err
 		}
-		censoringDate, err := time.Parse(SQLDateFormat, recordEntries[1])
+		censoringDate, err := time.Parse(sqlDateFormat, recordEntries[1])
 		if err != nil {
 			err = errors.Errorf("while parsing patient number \"%s\": %s; DB operation: %s", recordEntries[1], err.Error(), description)
 			return nil, nil, err
