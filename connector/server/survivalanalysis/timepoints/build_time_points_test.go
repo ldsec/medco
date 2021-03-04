@@ -33,8 +33,9 @@ func TestAuxiliary(t *testing.T) {
 
 func TestBuildTimePoints(t *testing.T) {
 	utilserver.TestI2B2DBConnection(t)
-	eventAggregates, patientsWithoutStartEvent, patientsWithoutEndEvent, err := BuildTimePoints(bigList, []string{"A168"}, []string{"@"}, true, []string{"A125"}, []string{"126:1"}, true, 2000)
+	eventAggregates, patientsWithoutStartEvent, patientsWithoutEndEvent, timers, err := BuildTimePoints(bigList, []string{"A168"}, []string{"@"}, true, []string{"A125"}, []string{"126:1"}, true, 2000)
 	assert.NoError(t, err)
+	assert.NotEmpty(t, timers)
 	assert.Empty(t, patientsWithoutStartEvent)
 	assert.Empty(t, patientsWithoutEndEvent)
 	assert.Equal(t, len(bigTimePoints), len(eventAggregates), eventAggregates)
@@ -45,8 +46,9 @@ func TestBuildTimePoints(t *testing.T) {
 	}
 
 	// reverting arguments, should not throw an error
-	eventAggregates, patientsWithoutStartEvent, patientsWithoutEndEvent, err = BuildTimePoints(bigList, []string{"A125"}, []string{"126:1"}, true, []string{"A168"}, []string{"@"}, true, 2000)
+	eventAggregates, patientsWithoutStartEvent, patientsWithoutEndEvent, timers, err = BuildTimePoints(bigList, []string{"A125"}, []string{"126:1"}, true, []string{"A168"}, []string{"@"}, true, 2000)
 	assert.NoError(t, err)
+	assert.NotEmpty(t, timers)
 	assert.NotEmpty(t, patientsWithoutStartEvent)
 	assert.NotEmpty(t, patientsWithoutEndEvent)
 	assert.Empty(t, eventAggregates)

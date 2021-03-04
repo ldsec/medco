@@ -36,8 +36,8 @@ func TestStartEvent(t *testing.T) {
 	// test with correct parameters, and an extra patient
 	result, patientsWithoutStartEvent, err := startEvent([]int64{1137, 1138, 9999999}, []string{"A168", "A125"}, []string{"@"}, true)
 	assert.NoError(t, err)
-	expectedFirstTime, err := time.Parse(SQLDateFormat, "1971-04-15")
-	expectedSecondTime, err := time.Parse(SQLDateFormat, "1970-03-14")
+	expectedFirstTime, err := time.Parse(sqlDateFormat, "1971-04-15")
+	expectedSecondTime, err := time.Parse(sqlDateFormat, "1970-03-14")
 	assert.NoError(t, err)
 	_, isIn := patientsWithoutStartEvent[9999999]
 	assert.True(t, isIn)
@@ -53,8 +53,8 @@ func TestStartEvent(t *testing.T) {
 	// another test with latest instead of earliest
 	result, patientsWithoutStartEvent, err = startEvent([]int64{1137, 1138}, []string{"A168", "A125"}, []string{"@"}, false)
 	assert.NoError(t, err)
-	expectedFirstTime, err = time.Parse(SQLDateFormat, "1972-02-15")
-	expectedSecondTime, err = time.Parse(SQLDateFormat, "1971-06-12")
+	expectedFirstTime, err = time.Parse(sqlDateFormat, "1972-02-15")
+	expectedSecondTime, err = time.Parse(sqlDateFormat, "1971-06-12")
 	assert.NoError(t, err)
 	assert.Empty(t, patientsWithoutStartEvent)
 
@@ -71,7 +71,7 @@ func TestStartEvent(t *testing.T) {
 func TestEndEvents(t *testing.T) {
 	utilserver.TestI2B2DBConnection(t)
 
-	absoluteEarliest, err := time.Parse(SQLDateFormat, "1970-03-13")
+	absoluteEarliest, err := time.Parse(sqlDateFormat, "1970-03-13")
 	assert.NoError(t, err)
 
 	fullStartEventMap := map[int64]time.Time{
@@ -109,7 +109,7 @@ func TestEndEvents(t *testing.T) {
 	assert.ElementsMatch(t, expectedSecondList, secondList)
 
 	// expect shorter list if the start date is equal or bigger
-	collidingEarliest, err := time.Parse(SQLDateFormat, "1970-03-14")
+	collidingEarliest, err := time.Parse(sqlDateFormat, "1970-03-14")
 	assert.NoError(t, err)
 
 	oneCollisionStartEventMap := map[int64]time.Time{
@@ -126,7 +126,7 @@ func TestEndEvents(t *testing.T) {
 	assert.ElementsMatch(t, expectedList, list)
 
 	// expect empty results
-	latest, err := time.Parse(SQLDateFormat, "1972-02-15")
+	latest, err := time.Parse(sqlDateFormat, "1972-02-15")
 	assert.NoError(t, err)
 
 	latestStartEventMap := map[int64]time.Time{
@@ -144,7 +144,7 @@ func TestEndEvents(t *testing.T) {
 func TestCensoringEvents(t *testing.T) {
 	utilserver.TestI2B2DBConnection(t)
 
-	absoluteEarliest, err := time.Parse(SQLDateFormat, "1970-03-13")
+	absoluteEarliest, err := time.Parse(sqlDateFormat, "1970-03-13")
 	assert.NoError(t, err)
 
 	fullStartEventMap := map[int64]time.Time{
@@ -199,7 +199,7 @@ func TestCensoringEvents(t *testing.T) {
 	assert.Empty(t, patientWithoutCensoring)
 
 	// put start events that do not occur before any other events
-	absoluteLatest, err := time.Parse(SQLDateFormat, "1972-02-15")
+	absoluteLatest, err := time.Parse(sqlDateFormat, "1972-02-15")
 	assert.NoError(t, err)
 
 	lateStartEventMap := map[int64]time.Time{
@@ -221,7 +221,7 @@ func createDateListFromString(t *testing.T, dateStrings []string) (timeList []ti
 	timeList = make([]time.Time, len(dateStrings))
 
 	for i, dateString := range dateStrings {
-		date, parseErr := time.Parse(SQLDateFormat, dateString)
+		date, parseErr := time.Parse(sqlDateFormat, dateString)
 		assert.NoError(t, parseErr)
 		timeList[i] = date
 	}
