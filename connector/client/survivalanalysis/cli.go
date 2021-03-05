@@ -158,7 +158,12 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 	// --- convert panels
 	timer := time.Now()
 	logrus.Info("converting panels")
-	panels := convertPanel(parameters)
+	panels, err := convertPanel(parameters)
+	if err != nil {
+		err = fmt.Errorf("while converting panels: %s", err.Error())
+		logrus.Error(err)
+		return
+	}
 	logrus.Info("panels converted")
 	for _, panel := range panels {
 		logrus.Trace(modelPanelsToString(panel))
@@ -302,14 +307,25 @@ resLoop:
 
 }
 
-func convertPanel(parameters *Parameters) []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0 {
+func convertPanel(parameters *Parameters) ([]*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0, error) {
 	panels := make([]*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0, len(parameters.SubGroups))
+	var err error
 	for i, selection := range parameters.SubGroups {
 		newSelection := &survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0{}
-		newSelection.GroupName = fmt.Sprintf(selection.GroupName)
+		newSelection.GroupName = selection.GroupName
+		newSelection.SubGroupTiming, err = timingFromStringToModel(selection.GroupTiming)
+		if err != nil {
+			err = fmt.Errorf("while parsing sub group timing: %s", err.Error())
+			return nil, err
+		}
 		newPanels := make([]*models.Panel, len(selection.Panels))
 		for j, panel := range selection.Panels {
 			newPanel := &models.Panel{}
+			newPanel.PanelTiming, err = timingFromStringToModel(panel.PanelTiming)
+			if err != nil {
+				err = fmt.Errorf("while parsing panel timing: %s", err.Error())
+				return nil, err
+			}
 			newPanel.Not = new(bool)
 			*newPanel.Not = panel.Not
 			newItems := make([]*models.PanelItemsItems0, len(panel.Items))
@@ -340,7 +356,7 @@ func convertPanel(parameters *Parameters) []*survival_analysis.SurvivalAnalysisP
 		newSelection.Panels = newPanels
 		panels[i] = newSelection
 	}
-	return panels
+	return panels, nil
 }
 
 func printResults(clearResults []ClearResults, timers []medcomodels.Timers, clientTimers medcomodels.Timers, timeResolution, resultFile, timerFile string) (err error) {
@@ -463,5 +479,18 @@ func modelPanelsToString(subGroup *survival_analysis.SurvivalAnalysisParamsBodyS
 		panelStrings = append(panelStrings, fmt.Sprintf("{Items:%s Not:%t}", itemArray, *panel.Not))
 	}
 	panelArray := "[" + strings.Join(panelStrings, " ") + "]"
-	return fmt.Sprintf("{GroupName:%s Panels:%s", subGroup.GroupName, panelArray)
+	return fmt.Sprintf("{GroupName:%s QueryTiming:%s Panels:%s", subGroup.GroupName, subGroup.SubGroupTiming, panelArray)
+}
+
+func timingFromStringToModel(timingString string) (models.Timing, error) {
+	switch candidate := strings.ToLower(strings.TrimSpace(timingString)); candidate {
+	case string(models.TimingAny):
+		return models.TimingAny, nil
+	case string(models.TimingSameinstancenum):
+		return models.TimingSameinstancenum, nil
+	case string(models.TimingSamevisit):
+		return models.TimingSamevisit, nil
+	default:
+		return "", fmt.Errorf("candidate %s is not implemented, musit be one of any, sameinstancenum, samevisit", timingString)
+	}
 }

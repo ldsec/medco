@@ -1064,6 +1064,9 @@ type SurvivalAnalysisParamsBodySubGroupDefinitionsItems0 struct {
 
 	// panels
 	Panels []*models.Panel `json:"panels"`
+
+	// sub group timing
+	SubGroupTiming models.Timing `json:"subGroupTiming,omitempty"`
 }
 
 // Validate validates this survival analysis params body sub group definitions items0
@@ -1075,6 +1078,10 @@ func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) Validate(formats s
 	}
 
 	if err := o.validatePanels(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateSubGroupTiming(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -1117,6 +1124,22 @@ func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) validatePanels(for
 			}
 		}
 
+	}
+
+	return nil
+}
+
+func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) validateSubGroupTiming(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.SubGroupTiming) { // not required
+		return nil
+	}
+
+	if err := o.SubGroupTiming.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("subGroupTiming")
+		}
+		return err
 	}
 
 	return nil

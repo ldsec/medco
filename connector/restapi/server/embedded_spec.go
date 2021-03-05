@@ -1142,6 +1142,9 @@ func init() {
                   "items": {
                     "$ref": "#/definitions/panel"
                   }
+                },
+                "subGroupTiming": {
+                  "$ref": "#/definitions/timing"
                 }
               }
             }
@@ -2787,6 +2790,9 @@ func init() {
           "items": {
             "$ref": "#/definitions/panel"
           }
+        },
+        "subGroupTiming": {
+          "$ref": "#/definitions/timing"
         }
       }
     },
@@ -3375,6 +3381,9 @@ func init() {
                   "items": {
                     "$ref": "#/definitions/panel"
                   }
+                },
+                "subGroupTiming": {
+                  "$ref": "#/definitions/timing"
                 }
               }
             }

@@ -451,6 +451,8 @@ parameters:
               groupName:
                 type: "string"
                 pattern: '^\w+$'
+              subGroupTiming:
+                $ref: '#/definitions/timing'
               panels:
                 type: "array"
                 items:
