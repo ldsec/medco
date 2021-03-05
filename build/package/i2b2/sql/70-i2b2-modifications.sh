@@ -23,4 +23,7 @@ psql $PSQL_PARAMS -d "$I2B2_DB_NAME" <<-EOSQL
     ALTER TABLE i2b2demodata_i2b2.observation_fact ALTER COLUMN encounter_num TYPE bigint;
     ALTER TABLE i2b2demodata_i2b2.encounter_mapping ALTER COLUMN encounter_num TYPE bigint;
 
+    -- change tval_char to type text
+    ALTER TABLE i2b2demodata_i2b2.observation_fact ALTER COLUMN tval_char TYPE text;
+
 EOSQL
