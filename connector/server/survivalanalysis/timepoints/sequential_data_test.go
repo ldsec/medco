@@ -306,14 +306,3 @@ func TestCompileTimePoints(t *testing.T) {
 	assert.Error(t, err)
 
 }
-
-func createDateListFromString(t *testing.T, dateStrings []string) (timeList []time.Time) {
-	timeList = make([]time.Time, len(dateStrings))
-
-	for i, dateString := range dateStrings {
-		date, parseErr := time.Parse(sqlDateFormat, dateString)
-		assert.NoError(t, parseErr)
-		timeList[i] = date
-	}
-	return
-}
