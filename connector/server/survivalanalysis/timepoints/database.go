@@ -13,6 +13,8 @@ import (
 
 const sqlDateFormat = "2006-01-02"
 
+// startEvent calls the postgres procedure to get the list of patients and start event. Concept codes and modifier codes defines the start event.
+// As multiple candidates are possible, earliest flag defines if the earliest or the latest date must be considered the start event.
 func startEvent(patientList []int64, conceptCodes, modifierCodes []string, earliest bool) (map[int64]time.Time, map[int64]struct{}, error) {
 
 	setStrings := make([]string, len(patientList))
@@ -27,7 +29,7 @@ func startEvent(patientList []int64, conceptCodes, modifierCodes []string, earli
 	description := fmt.Sprintf("get start event (patient list: %s, start concept codes: %s, start modifier codes: %s, begins with earliest occurence: %t): procedure: %s",
 		setDefinition, conceptDefinition, modifierDefinition, earliest, "i2b2demodata_i2b2.start_event")
 
-	logrus.Debugf("Retrieving the start event dates for the patients: %s", description)
+	logrus.Debugf("Survival analysis: timepoints: retrieving the start event dates for the patients: %s", description)
 	row, err := utilserver.I2B2DBConnection.Query("SELECT i2b2demodata_i2b2.start_event($1,$2,$3,$4)", setDefinition, conceptDefinition, modifierDefinition, earliest)
 	if err != nil {
 		err = errors.Errorf("while calling database for retrieving start event dates: %s; DB operation: %s", err.Error(), description)
@@ -74,11 +76,13 @@ func startEvent(patientList []int64, conceptCodes, modifierCodes []string, earli
 		}
 	}
 
-	logrus.Debugf("Successfully found %d patients with start event; DB operation: %s", len(patientsWithStartEvent), description)
+	logrus.Debugf("Survival analysis: timepoints: successfully found %d patients with start event; DB operation: %s", len(patientsWithStartEvent), description)
 	return patientsWithStartEvent, patientsWithoutStartEvent, nil
 
 }
 
+// endEvent calls the postgres procedure to get the list of patients and end event. Concept codes and modifier codes defines the end event.
+// As multiple candidates are possible, the list of potential end events strictly happenning after the start event is stored in the return map.
 func endEvents(patientWithStartEventList map[int64]time.Time, conceptCodes, modifierCodes []string) (map[int64][]time.Time, error) {
 	setStrings := make([]string, 0, len(patientWithStartEventList))
 
@@ -92,7 +96,7 @@ func endEvents(patientWithStartEventList map[int64]time.Time, conceptCodes, modi
 	description := fmt.Sprintf("get start event (patient list: %s, end concept codes: %s, end modifier codes: %s): procedure: %s",
 		setDefinition, conceptDefinition, modifierDefinition, "i2b2demodata_i2b2.end_events")
 
-	logrus.Debugf("Retrieving the end event dates for the patients: %s", description)
+	logrus.Debugf("Survival analysis: timepoints: retrieving the end event dates for the patients: %s", description)
 	row, err := utilserver.I2B2DBConnection.Query("SELECT i2b2demodata_i2b2.end_events($1,$2,$3)", setDefinition, conceptDefinition, modifierDefinition)
 	if err != nil {
 		err = errors.Errorf("while calling database for retrieving end event dates: %s; DB operation: %s", err.Error(), description)
@@ -138,12 +142,15 @@ func endEvents(patientWithStartEventList map[int64]time.Time, conceptCodes, modi
 		}
 
 	}
-	logrus.Debugf("Successfully found %d patients with end event; DB operation: %s", len(patientsWithEndEvent), description)
+	logrus.Debugf("Survival analysis: timepoints: successfully found %d patients with end event; DB operation: %s", len(patientsWithEndEvent), description)
 	return patientsWithEndEvent, nil
 
 }
 
-func censoringEvents(patientWithStartEventList map[int64]time.Time, patientWithoutEndEvent map[int64]struct{}, endConceptCodes []string, endModifierCodes []string) (map[int64]time.Time, map[int64]struct{}, error) {
+// censoringEvent calls the postgres procedure to get the list of patients and censoring event. All observations whose concept or modifier code is different than those provided are potential censoring event.
+// The event with the latest end date should be considered (for each observation, if the end date is missing, the start date should be taken instead).
+// If the start event does not occur before the end event, the event is dropped and the patient is inserted in the set of patient-without-censoring-events (they should miss both event of interest and censoring event).
+func censoringEvent(patientWithStartEventList map[int64]time.Time, patientWithoutEndEvent map[int64]struct{}, endConceptCodes []string, endModifierCodes []string) (map[int64]time.Time, map[int64]struct{}, error) {
 	setStrings := make([]string, 0, len(patientWithoutEndEvent))
 
 	for patient := range patientWithoutEndEvent {
@@ -156,7 +163,7 @@ func censoringEvents(patientWithStartEventList map[int64]time.Time, patientWitho
 	description := fmt.Sprintf("get start event (patient list: %s, start concept codes: %s, start modifier codes: %s): procedure: %s",
 		setDefinition, conceptDefinition, modifierDefinition, "i2b2demodata_i2b2.censoring_event")
 
-	logrus.Debugf("Retrieving the censoring event dates for the patients: %s", description)
+	logrus.Debugf("Survival analysis: timepoints: retrieving the censoring event dates for the patients: %s", description)
 	row, err := utilserver.I2B2DBConnection.Query("SELECT i2b2demodata_i2b2.censoring_event($1,$2,$3)", setDefinition, conceptDefinition, modifierDefinition)
 	if err != nil {
 		err = errors.Errorf("while calling database for retrieving right censoring event dates: %s; DB operation: %s", err.Error(), description)
@@ -212,6 +219,6 @@ func censoringEvents(patientWithStartEventList map[int64]time.Time, patientWitho
 
 	}
 
-	logrus.Debugf("Successfully found %d patients with right censoring event; DB operation: %s", len(patientsWithCensoringEvent), description)
+	logrus.Debugf("Survival analysis: timepoints: successfully found %d patients with right censoring event; DB operation: %s", len(patientsWithCensoringEvent), description)
 	return patientsWithCensoringEvent, patientsWithoutCensoringEvent, nil
 }

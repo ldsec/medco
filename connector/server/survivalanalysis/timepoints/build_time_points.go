@@ -47,7 +47,7 @@ func BuildTimePoints(
 	timers.AddTimers("build-time-points-sequential-data-event-of-interest", timer, nil)
 
 	timer = time.Now()
-	patientsToCensoringEvent, patientWithoutAnyEndEvent, err := censoringEvents(patientsToStartEvent, patientsWithoutEnd, endConceptCodes, endModifierCodes)
+	patientsToCensoringEvent, patientWithoutAnyEndEvent, err := censoringEvent(patientsToStartEvent, patientsWithoutEnd, endConceptCodes, endModifierCodes)
 	if err != nil {
 		return
 	}
@@ -61,7 +61,7 @@ func BuildTimePoints(
 	timers.AddTimers("build-time-points-sequential-data-censoring-event", timer, nil)
 
 	timer = time.Now()
-	eventAggregates = compileTimePoints(startToEndEvent, startToCensoringEvent, maxLimit)
+	eventAggregates, err = compileTimePoints(startToEndEvent, startToCensoringEvent, maxLimit)
 	if err != nil {
 		return
 	}
