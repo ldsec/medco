@@ -1,0 +1,31 @@
+
+-- pl/pgsql function that retrieves the absolute date of the start event in the sense of survival analysis
+
+CREATE OR REPLACE FUNCTION i2b2demodata_i2b2.start_event(patient_list integer[], start_code varchar[], start_modifier_code varchar[], start_earliest boolean) 
+RETURNS TABLE( patient_num bigint, start_date date)
+STABLE
+PARALLEL SAFE
+AS $$
+DECLARE
+  qq1 text := 'SELECT patient_num::bigint, ';
+  qq2 text := ' AS start_date FROM i2b2demodata_i2b2.observation_fact
+              WHERE patient_num=ANY($1) AND concept_cd=ANY($2) AND modifier_cd=ANY($3)
+              GROUP BY patient_num';
+
+BEGIN
+
+IF start_earliest THEN
+    qq1 := qq1 || 'MIN(start_date::date)' ;
+  ELSE
+    qq1 := qq1 || 'MAX(start_date::date)' ;
+END IF ;
+
+qq1 := qq1 || qq2;
+
+
+RETURN QUERY EXECUTE qq1
+USING patient_list, start_code, start_modifier_code;
+
+
+END;
+$$ LANGUAGE plpgsql
