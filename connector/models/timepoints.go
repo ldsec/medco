@@ -2,11 +2,14 @@ package medcomodels
 
 // TimePoint contains a relative time, the numbers of events of interest and censoring events occured at that time
 type TimePoint struct {
-	Time   int
-	Events struct {
-		EventsOfInterest int64
-		CensoringEvents  int64
-	}
+	Time   int64
+	Events Events
+}
+
+// Events contains the number of events of interest and censoring events occuring at the same relative time
+type Events struct {
+	EventsOfInterest int64
+	CensoringEvents  int64
 }
 
 // TimePoints is a slice containing the time points and respectif counts of censoring events and events of interest.
@@ -29,7 +32,7 @@ func (points TimePoints) Swap(i, j int) {
 }
 
 // TimePointsFromTable is a testing helper function that builds TimePoints instance from a 2D int array
-func TimePointsFromTable(array [][]int) TimePoints {
+func TimePointsFromTable(array [][]int64) TimePoints {
 	res := make(TimePoints, len(array))
 	for i, point := range array {
 		res[i] =

@@ -20,8 +20,8 @@ var granularityValues = map[string]int{
 	"year":  dInYear,
 }
 
-var granularityFunctions = map[string]func(int) int{
-	"day":   func(x int) int { return x },
+var granularityFunctions = map[string]func(int64) int64{
+	"day":   func(x int64) int64 { return x },
 	"week":  week,
 	"month": month,
 	"year":  year,
@@ -39,24 +39,24 @@ func ceil(val int, granularity int) int {
 	return int(math.Ceil(float64(val) / float64(granularity)))
 }
 
-func week(val int) int {
-	return ceil(val, dInWeek)
+func week(val int64) int64 {
+	return int64(ceil(int(val), dInWeek))
 }
 
-func month(val int) int {
-	return ceil(val, dInMonth)
+func month(val int64) int64 {
+	return int64(ceil(int(val), dInMonth))
 }
 
-func year(val int) int {
-	return ceil(val, dInYear)
+func year(val int64) int64 {
+	return int64(ceil(int(val), dInYear))
 }
 
-func binTimePoint(timePoints medcomodels.TimePoints, groupingFunction func(int) int) medcomodels.TimePoints {
-	bins := make(map[int]struct {
+func binTimePoint(timePoints medcomodels.TimePoints, groupingFunction func(int64) int64) medcomodels.TimePoints {
+	bins := make(map[int64]struct {
 		EventsOfInterest int64
 		CensoringEvents  int64
 	})
-	var ceiled int
+	var ceiled int64
 	for _, tp := range timePoints {
 		ceiled = groupingFunction(tp.Time)
 		if val, isInside := bins[ceiled]; isInside {
@@ -81,7 +81,7 @@ func binTimePoint(timePoints medcomodels.TimePoints, groupingFunction func(int) 
 	newSQLTimePoints := make(medcomodels.TimePoints, 0)
 	for time, agg := range bins {
 		newSQLTimePoints = append(newSQLTimePoints, medcomodels.TimePoint{
-			Time: time,
+			Time: int64(time),
 			Events: struct {
 				EventsOfInterest int64
 				CensoringEvents  int64

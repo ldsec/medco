@@ -3,6 +3,7 @@ package survivalserver
 import (
 	"encoding/base64"
 	"fmt"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -13,6 +14,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	querytoolsserver "github.com/ldsec/medco/connector/server/querytools"
+	"github.com/ldsec/medco/connector/server/survivalanalysis/timepoints"
 	utilserver "github.com/ldsec/medco/connector/util/server"
 	"github.com/ldsec/medco/connector/wrappers/i2b2"
 	"github.com/ldsec/medco/connector/wrappers/unlynx"
@@ -75,14 +77,14 @@ func NewQuery(UserID,
 			EncEvents EventGroups
 		}{}}
 	if StartModifier != nil {
-		logrus.Debugf("Provided start modifier with key %s and applied path %s", *StartModifier.ModifierKey, *StartModifier.AppliedPath)
+		logrus.Debugf("Survival analysis: provided start modifier with key %s and applied path %s", *StartModifier.ModifierKey, *StartModifier.AppliedPath)
 	} else {
-		logrus.Debug("No start modifier provided")
+		logrus.Debug("Survival analysis: no start modifier provided")
 	}
 	if EndModifier != nil {
-		logrus.Debugf("Provided end modifier with key %s and applied path %s", *EndModifier.ModifierKey, *EndModifier.AppliedPath)
+		logrus.Debugf("Survival analysis: provided end modifier with key %s and applied path %s", *EndModifier.ModifierKey, *EndModifier.AppliedPath)
 	} else {
-		logrus.Debug("No end modifier provided")
+		logrus.Debug("Survival analysis: no end modifier provided")
 	}
 	res.Result.Timers = make(map[string]time.Duration)
 
@@ -92,8 +94,6 @@ func NewQuery(UserID,
 // Execute runs the survival analysis query
 func (q *Query) Execute() error {
 
-	patientLists := make([][]int64, 0)
-	initialCounts := make([]int64, 0)
 	eventGroups := make(EventGroups, 0)
 	timeLimitInDays := q.TimeLimit * granularityValues[q.TimeGranularity]
 	timer := time.Now()
@@ -145,8 +145,8 @@ func (q *Query) Execute() error {
 			panels := append(definition.Panels, newPanel)
 
 			timer = time.Now()
-			logrus.Infof("I2B2 explore for subgroup %d", i)
-			logrus.Tracef("panels %+v", panels)
+			logrus.Infof("Survival analysis: I2B2 explore for subgroup %d", i)
+			logrus.Tracef("Survival analysis: panels %+v", panels)
 			patientList, err := SubGroupExplore(q.QueryName, i, panels, definition.SubGroupTiming)
 			if err != nil {
 				logrus.Errorf("during subgroup explore procedure: %s", err.Error())
@@ -154,29 +154,14 @@ func (q *Query) Execute() error {
 				errChan <- err
 				return
 			}
-			logrus.Infof("successful I2B2 explore query %d", i)
+			logrus.Infof("Survival analysis: successful I2B2 explore query %d", i)
 			timers.AddTimers(fmt.Sprintf("medco-connector-i2b2-query-group%d", i), timer, nil)
 			patientList = intersect(cohort, patientList)
-			initialCount := int64(len(patientList))
-			patientLists = append(patientLists, patientList)
-			initialCounts = append(initialCounts, initialCount)
-			logrus.Debugf("Initial Counts %v", initialCounts)
+			logrus.Debugf("Survival analysis: there are %d patients in the subgroup", len(patientList))
 
-			timer = time.Now()
-			initialCountEncrypt, err := unlynx.EncryptWithCothorityKey(initialCount)
-			timers.AddTimers(fmt.Sprintf("medco-connector-encrypt-init-count-group%d", i), timer, nil)
-			if err != nil {
-				logrus.Errorf("while encrypting initial count: %s", err.Error())
-				err = fmt.Errorf("while encrypting initial count")
-				errChan <- err
-				return
-			}
-			logrus.Debug("initialcount ", initialCountEncrypt)
-			newEventGroup.EncInitialCount = initialCountEncrypt
-			timer = time.Now()
+			// --- build time points
 
-			//  --- sql query on observation fact table
-			sqlTimePoints, err := buildTimePoints(
+			timepointsEventsMap, patientWithoutStartEvent, patientWithoutEndEvent, timepointTimers, err := timepoints.BuildTimePoints(
 				patientList,
 				startConceptCodes,
 				startModifierCodes,
@@ -184,25 +169,49 @@ func (q *Query) Execute() error {
 				endConceptCodes,
 				endModifierCodes,
 				*q.EndsWhen == survival_analysis.SurvivalAnalysisBodyEndsWhenEarliest,
-				timeLimitInDays,
+				int64(timeLimitInDays),
 			)
-			timers.AddTimers(fmt.Sprintf("medco-connector-build-timepoints%d", i), timer, nil)
-			if err != nil {
 
+			if err != nil {
 				// error details dumped in server node console, but survival request does not send them to the client
 				logrus.Errorf("error while getting building time points: %s", err.Error())
 				err = fmt.Errorf("error while getting building time points")
 				errChan <- err
 				return
 			}
-			logrus.Debugf("got %d time points", len(sqlTimePoints))
-			logrus.Tracef("%+v", sqlTimePoints)
+			timers.AddTimers("", time.Now(), timepointTimers)
+			logrus.Debugf("Survival analysis: found %d patients without the start event", len(patientWithoutStartEvent))
+			logrus.Debugf("Survival analysis: found %d patients without the end (censoring or of interest) event", len(patientWithoutEndEvent))
+			timePoints := timePointMapToList(timepointsEventsMap)
+
+			// --- initial count
+			if len(patientList) < len(patientWithoutStartEvent) {
+				logrus.Errorf("length of the patient list %d cannot be smaller than this of patients without start event %d", len(patientList), len(patientWithoutStartEvent))
+				err = fmt.Errorf("while computing initial count")
+				errChan <- err
+				return
+			}
+
+			timer = time.Now()
+			initialCount := int64(len(patientList) - len(patientWithoutStartEvent))
+			initialCountEncrypt, err := unlynx.EncryptWithCothorityKey(initialCount)
+			timers.AddTimers(fmt.Sprintf("medco-connector-encrypt-init-count-group%d", i), timer, nil)
+			if err != nil {
+				logrus.Errorf("while encrypting initial count %d: %s", initialCount, err.Error())
+				err = fmt.Errorf("while encrypting initial count")
+				errChan <- err
+				return
+			}
+			logrus.Debug("Survival analysis: initialcount ", initialCountEncrypt)
+			newEventGroup.EncInitialCount = initialCountEncrypt
+
+			timer = time.Now()
 
 			// change time granularity, fill zeros in arrays and encrypt group results
-			processGroupResultTimers := processGroupResult(errChan, newEventGroup, sqlTimePoints, timeLimitInDays, q.TimeGranularity, i)
+			processGroupResultTimers := processGroupResult(errChan, newEventGroup, timePoints, timeLimitInDays, q.TimeGranularity, i)
 			q.Result.Timers.AddTimers("", timer, processGroupResultTimers)
 
-			logrus.Tracef("Event groups %v", newEventGroup)
+			logrus.Tracef("Survival analysis: event groups %v", newEventGroup)
 			timers.AddTimers(fmt.Sprintf("medco-connector-local-encryption%d", i), timer, nil)
 			channels[i] <- struct {
 				*EventGroup
@@ -231,7 +240,7 @@ func (q *Query) Execute() error {
 	// aggregate and key switch locally encrypted results
 
 	for _, group := range eventGroups {
-		logrus.Tracef("eventGroup %v", group)
+		logrus.Tracef("Survival analysis: eventGroup %v", group)
 	}
 	timer = time.Now()
 	var aksTimers medcomodels.Timers
@@ -337,7 +346,7 @@ func prepareArguments(
 	timers = make(map[string]time.Duration)
 	// --- cohort patient list
 	timer := time.Now()
-	logrus.Info("get patients")
+	logrus.Info("Survival analysis: get patients")
 	cohort, err = querytoolsserver.GetPatientList(userID, cohortName)
 
 	if err != nil {
@@ -346,10 +355,10 @@ func prepareArguments(
 	}
 
 	timers.AddTimers("medco-connector-get-patient-list", timer, nil)
-	logrus.Info("got patients")
+	logrus.Info("Survival analysis: got patients")
 
 	// --- get concept and modifier codes from the ontology
-	logrus.Info("get concept and modifier codes")
+	logrus.Info("Survival analysis: get concept and modifier codes")
 	err = utilserver.I2B2DBConnection.Ping()
 	if err != nil {
 		err = fmt.Errorf("while connecting to clear project database: %s", err.Error())
@@ -383,7 +392,7 @@ func prepareArguments(
 		err = fmt.Errorf("while retrieving end modifier code: %s", err.Error())
 		return
 	}
-	logrus.Info("got concept and modifier codes")
+	logrus.Info("Survival analysis: got concept and modifier codes")
 	return
 }
 
@@ -391,15 +400,15 @@ func prepareArguments(
 // Relative times greater than timeLimit are discarded.
 // Note that the time limit unit for this function is day.
 func expansion(timePoints medcomodels.TimePoints, timeLimitDay int, granularity string) (medcomodels.TimePoints, error) {
-	var timeLimit int
+	var timeLimit int64
 	if granFunction, isIn := granularityFunctions[granularity]; isIn {
-		timeLimit = granFunction(timeLimitDay)
+		timeLimit = granFunction(int64(timeLimitDay))
 	} else {
 		return nil, fmt.Errorf("granularity %s is not implemented", granularity)
 	}
 
 	res := make(medcomodels.TimePoints, timeLimit)
-	availableTimePoints := make(map[int]struct {
+	availableTimePoints := make(map[int64]struct {
 		EventsOfInterest int64
 		CensoringEvents  int64
 	}, len(timePoints))
@@ -407,15 +416,15 @@ func expansion(timePoints medcomodels.TimePoints, timeLimitDay int, granularity 
 
 		availableTimePoints[timePoint.Time] = timePoint.Events
 	}
-	for i := 0; i < timeLimit; i++ {
-		if events, ok := availableTimePoints[i]; ok {
+	for i := int64(0); i < timeLimit; i++ {
+		if events, ok := availableTimePoints[int64(i)]; ok {
 			res[i] = medcomodels.TimePoint{
-				Time:   i,
+				Time:   int64(i),
 				Events: events,
 			}
 		} else {
 			res[i] = medcomodels.TimePoint{
-				Time: i,
+				Time: int64(i),
 				Events: struct {
 					EventsOfInterest int64
 					CensoringEvents  int64
@@ -432,7 +441,7 @@ func expansion(timePoints medcomodels.TimePoints, timeLimitDay int, granularity 
 
 // getCode takes the full path of a I2B2 concept and returns its code
 func getCode(path string) (string, error) {
-	logrus.Debugf("get code concept path %s", path)
+	logrus.Debugf("Survival analysis: get code concept path %s", path)
 	res, err := i2b2.GetOntologyConceptInfo(path)
 	if err != nil {
 		return "", err
@@ -444,7 +453,7 @@ func getCode(path string) (string, error) {
 	if res[0].Code == "" {
 		return "", errors.New("Code is empty")
 	}
-	logrus.Debugf("got concept code %s", res[0].Code)
+	logrus.Debugf("Survival analysis: got concept code %s", res[0].Code)
 
 	return res[0].Code, nil
 
@@ -452,7 +461,7 @@ func getCode(path string) (string, error) {
 
 // getModifierPath takes the full path of a I2B2 modifier and its applied paht and returns its code
 func getModifierCode(path string, appliedPath string) (string, error) {
-	logrus.Debugf("get modifier code modifier path %s applied path %s", path, appliedPath)
+	logrus.Debugf("Survival analysis: get modifier code modifier path %s applied path %s", path, appliedPath)
 	res, err := i2b2.GetOntologyModifierInfo(path, appliedPath)
 	if err != nil {
 		return "", err
@@ -468,7 +477,7 @@ func getModifierCode(path string, appliedPath string) (string, error) {
 	if res[0].AppliedPath != appliedPath {
 		return "", fmt.Errorf("applied paths don't match. Is applied path %s available for modifier key %s ?", appliedPath, path)
 	}
-	logrus.Debugf("got modifier code %s", res[0].Code)
+	logrus.Debugf("Survival analysis: got modifier code %s", res[0].Code)
 
 	return res[0].Code, nil
 }
@@ -486,8 +495,8 @@ func processGroupResult(errChan chan error, newEventGroup *EventGroup, sqlTimePo
 		return
 	}
 	timers.AddTimers(fmt.Sprintf("medco-connector-change-timepoints-to-new-resolution%d", index), timer, nil)
-	logrus.Debugf("changed resolution for %s,  got %d timepoints", timeGranularity, len(sqlTimePoints))
-	logrus.Tracef("time points with resolution %s %+v", timeGranularity, sqlTimePoints)
+	logrus.Debugf("Survival analysis: changed resolution for %s,  got %d timepoints", timeGranularity, len(sqlTimePoints))
+	logrus.Tracef("Survival analysis: time points with resolution %s %+v", timeGranularity, sqlTimePoints)
 
 	// --- expand
 	timer = time.Now()
@@ -498,8 +507,8 @@ func processGroupResult(errChan chan error, newEventGroup *EventGroup, sqlTimePo
 		return
 	}
 	timers.AddTimers(fmt.Sprintf("medco-connector-expansion %d", index), timer, nil)
-	logrus.Debugf("expanded to %d timepoints", len(sqlTimePoints))
-	logrus.Tracef("expanded time points %v", sqlTimePoints)
+	logrus.Debugf("Survival analysis: expanded to %d timepoints", len(sqlTimePoints))
+	logrus.Tracef("Survival analysis: expanded time points %v", sqlTimePoints)
 
 	// --- locally encrypt
 	timer = time.Now()
@@ -556,4 +565,25 @@ func fullCohort(startConcept string) []*survival_analysis.SurvivalAnalysisParams
 			SubGroupTiming: models.TimingAny,
 		},
 	}
+}
+
+// timePointMapToList takes the relative-time-to-event-aggregates map and put its content in a list of TimePoint.
+// A TimePoint structure contains the same information as the event aggregates plus a field referring to the relative time.
+func timePointMapToList(timePointsMap map[int64]*medcomodels.Events) (list medcomodels.TimePoints) {
+	list = make(medcomodels.TimePoints, 0, len(timePointsMap))
+	for relativeTime, event := range timePointsMap {
+		list = append(list, medcomodels.TimePoint{
+			Time: relativeTime,
+			Events: medcomodels.Events{
+				EventsOfInterest: event.EventsOfInterest,
+				CensoringEvents:  event.CensoringEvents,
+			},
+		})
+	}
+
+	sort.Slice(list, func(i, j int) bool {
+		return list[i].Time < list[j].Time
+	})
+
+	return
 }
