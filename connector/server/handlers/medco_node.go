@@ -174,8 +174,8 @@ func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *m
 				CohortName:      cohort.CohortName,
 				CohortID:        int64(cohort.CohortID),
 				QueryID:         queryID,
-				CreationDate:    cohort.CreationDate.Format(time.RFC3339),
-				UpdateDate:      cohort.UpdateDate.Format(time.RFC3339),
+				CreationDate:    cohort.CreationDate.Format(time.RFC3339Nano),
+				UpdateDate:      cohort.UpdateDate.Format(time.RFC3339Nano),
 				QueryDefinition: queryDefinition,
 			},
 		)
@@ -329,8 +329,8 @@ func MedCoNodePutCohortsHandler(params medco_node.PutCohortsParams, principal *m
 			if existingCohort.UpdateDate.After(updateDate) {
 				return medco_node.NewPutCohortsConflict().WithPayload(&medco_node.PutCohortsConflictBody{
 					Message: fmt.Sprintf("The cohort update date is more recent in server DB than the date provided by client. Server: %s, client: %s.",
-						existingCohort.UpdateDate.Format(time.RFC3339),
-						updateDate.Format(time.RFC3339),
+						existingCohort.UpdateDate.Format(time.RFC3339Nano),
+						updateDate.Format(time.RFC3339Nano),
 					),
 				})
 			}
