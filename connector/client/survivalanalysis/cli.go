@@ -49,7 +49,7 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 	}()
 
 	// --- get token
-	logrus.Info("requesting access token")
+	logrus.Info("Survival analysis: requesting access token")
 	go func() {
 		defer wait.Done()
 		accessToken, err := utilclient.RetrieveOrGetNewAccessToken(token, username, password, disableTLSCheck)
@@ -58,15 +58,15 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 			return
 		}
 		tokenChan <- accessToken
-		logrus.Info("access token received")
-		logrus.Tracef("token %s", accessToken)
+		logrus.Info("Survival analysis: access token received")
+		logrus.Tracef("Survival analysis: token %s", accessToken)
 		return
 
 	}()
 
 	// --- get parameters
 	if parameterFileURL != "" {
-		logrus.Info("reading parameters")
+		logrus.Info("Survival analysis: reading parameters")
 		go func() {
 			defer wait.Done()
 			parameters, err := NewParametersFromFile(parameterFileURL)
@@ -75,8 +75,8 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 				return
 			}
 			parametersChan <- parameters
-			logrus.Info("parameters read")
-			logrus.Tracef("parameters %+v", parameters)
+			logrus.Info("Survival analysis: parameters read")
+			logrus.Tracef("Survival analysis: parameters %+v", parameters)
 			return
 		}()
 	} else {
@@ -157,16 +157,21 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 
 	// --- convert panels
 	timer := time.Now()
-	logrus.Info("converting panels")
-	panels := convertPanel(parameters)
-	logrus.Info("panels converted")
+	logrus.Info("Survival analysis: converting panels")
+	panels, err := convertPanel(parameters)
+	if err != nil {
+		err = fmt.Errorf("while converting panels: %s", err.Error())
+		logrus.Error(err)
+		return
+	}
+	logrus.Info("Survival analysis: panels converted")
 	for _, panel := range panels {
 		logrus.Trace(modelPanelsToString(panel))
 	}
 
 	// --- execute query
 	timer = time.Now()
-	logrus.Info("executing query")
+	logrus.Info("Survival analysis: executing query")
 	results, timers, userPrivateKey, err := executeQuery(accessToken, panels, parameters, disableTLSCheck)
 	if err != nil {
 		err = fmt.Errorf("while executing survival analysis results: %s", err.Error())
@@ -174,13 +179,13 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 		return
 	}
 	clientTimers.AddTimers("medco-connector-survival-query-remote-execution", timer, nil)
-	logrus.Info("query executed")
-	logrus.Tracef("encrypted results: %+v", results)
-	logrus.Tracef("timers: %v", timers)
+	logrus.Info("Survival analysis: query executed")
+	logrus.Tracef("Survival analysis: encrypted results: %+v", results)
+	logrus.Tracef("Survival analysis: timers: %v", timers)
 
 	// --- decrypt result
 	timer = time.Now()
-	logrus.Info("decrypting results")
+	logrus.Info("Survival analysis: decrypting results")
 	clearResults := make([]ClearResults, len(results))
 	for idx, encryptedResults := range results {
 		clearResults[idx], err = encryptedResults.Decrypt(userPrivateKey)
@@ -191,13 +196,13 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 		}
 	}
 	clientTimers.AddTimers("medco-connector-decryptions", timer, nil)
-	logrus.Info("results decrypted")
-	logrus.Tracef("clear results: %+v", clearResults)
+	logrus.Info("Survival analysis: results decrypted")
+	logrus.Tracef("Survival analysis: clear results: %+v", clearResults)
 
 	// --- printing results
 	printResults(clearResults, timers, clientTimers, parameters.TimeResolution, resultFile, timerFile)
 
-	logrus.Info("Operation completed")
+	logrus.Info("Survival analysis: operation completed")
 	return
 
 }
@@ -212,7 +217,7 @@ func executeQuery(accessToken string, panels []*survival_analysis.SurvivalAnalys
 	var APIendModifier *survival_analysis.SurvivalAnalysisParamsBodyEndModifier
 
 	if startMod := parameters.StartModifier; startMod != nil {
-		logrus.Debug("start modifier provided")
+		logrus.Debug("Survival analysis: start modifier provided")
 		APIstartModifier = &survival_analysis.SurvivalAnalysisParamsBodyStartModifier{
 			ModifierKey: new(string),
 			AppliedPath: new(string),
@@ -222,6 +227,7 @@ func executeQuery(accessToken string, panels []*survival_analysis.SurvivalAnalys
 	}
 
 	if endMod := parameters.EndModifier; endMod != nil {
+		logrus.Debug("Survival analysis: end modifier provided")
 		APIendModifier = &survival_analysis.SurvivalAnalysisParamsBodyEndModifier{
 			ModifierKey: new(string),
 			AppliedPath: new(string),
@@ -302,14 +308,25 @@ resLoop:
 
 }
 
-func convertPanel(parameters *Parameters) []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0 {
+func convertPanel(parameters *Parameters) ([]*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0, error) {
 	panels := make([]*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0, len(parameters.SubGroups))
+	var err error
 	for i, selection := range parameters.SubGroups {
 		newSelection := &survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0{}
-		newSelection.GroupName = fmt.Sprintf(selection.GroupName)
+		newSelection.GroupName = selection.GroupName
+		newSelection.SubGroupTiming, err = timingFromStringToModel(selection.GroupTiming)
+		if err != nil {
+			err = fmt.Errorf("while parsing sub group timing: %s", err.Error())
+			return nil, err
+		}
 		newPanels := make([]*models.Panel, len(selection.Panels))
 		for j, panel := range selection.Panels {
 			newPanel := &models.Panel{}
+			newPanel.PanelTiming, err = timingFromStringToModel(panel.PanelTiming)
+			if err != nil {
+				err = fmt.Errorf("while parsing panel timing: %s", err.Error())
+				return nil, err
+			}
 			newPanel.Not = new(bool)
 			*newPanel.Not = panel.Not
 			newItems := make([]*models.PanelItemsItems0, len(panel.Items))
@@ -340,11 +357,11 @@ func convertPanel(parameters *Parameters) []*survival_analysis.SurvivalAnalysisP
 		newSelection.Panels = newPanels
 		panels[i] = newSelection
 	}
-	return panels
+	return panels, nil
 }
 
 func printResults(clearResults []ClearResults, timers []medcomodels.Timers, clientTimers medcomodels.Timers, timeResolution, resultFile, timerFile string) (err error) {
-	logrus.Info("printing results")
+	logrus.Info("Survival analysis: printing results")
 	csv, err := utilclient.NewCSV(resultFile)
 	if err != nil {
 		err = fmt.Errorf("while creating CSV file handler: %s", err)
@@ -396,7 +413,7 @@ func printResults(clearResults []ClearResults, timers []medcomodels.Timers, clie
 		logrus.Error(err)
 		return
 	}
-	logrus.Info("results printed")
+	logrus.Info("Survival analysis: results printed")
 
 	err = medcoclient.DumpTimers(timerFile, timers, clientTimers)
 	if err != nil {
@@ -405,7 +422,7 @@ func printResults(clearResults []ClearResults, timers []medcomodels.Timers, clie
 		return
 	}
 
-	logrus.Info("timers dumped")
+	logrus.Info("Survival analysis: timers dumped")
 	return
 
 }
@@ -463,5 +480,18 @@ func modelPanelsToString(subGroup *survival_analysis.SurvivalAnalysisParamsBodyS
 		panelStrings = append(panelStrings, fmt.Sprintf("{Items:%s Not:%t}", itemArray, *panel.Not))
 	}
 	panelArray := "[" + strings.Join(panelStrings, " ") + "]"
-	return fmt.Sprintf("{GroupName:%s Panels:%s", subGroup.GroupName, panelArray)
+	return fmt.Sprintf("{GroupName:%s QueryTiming:%s Panels:%s", subGroup.GroupName, subGroup.SubGroupTiming, panelArray)
+}
+
+func timingFromStringToModel(timingString string) (models.Timing, error) {
+	switch candidate := strings.ToLower(strings.TrimSpace(timingString)); candidate {
+	case string(models.TimingAny):
+		return models.TimingAny, nil
+	case string(models.TimingSameinstancenum):
+		return models.TimingSameinstancenum, nil
+	case string(models.TimingSamevisit):
+		return models.TimingSamevisit, nil
+	default:
+		return "", fmt.Errorf("candidate %s is not implemented, musit be one of any, sameinstancenum, samevisit", timingString)
+	}
 }

@@ -139,18 +139,19 @@ func (q *Query) Execute() error {
 				Items: []*models.PanelItemsItems0{
 					item,
 				},
-				Not: &not,
+				Not:         &not,
+				PanelTiming: models.TimingAny,
 			}
 			panels := append(definition.Panels, newPanel)
 
 			timer = time.Now()
 			logrus.Infof("Survival analysis: I2B2 explore for subgroup %d", i)
 			logrus.Tracef("Survival analysis: panels %+v", panels)
-			patientList, err := SubGroupExplore(q.QueryName, i, panels)
+			patientList, err := SubGroupExplore(q.QueryName, i, panels, definition.SubGroupTiming)
 			if err != nil {
-				logrus.Errorf("during subgroup explore procedure: %s", err.Error())
-				err = fmt.Errorf("during subgroup explore procedure")
-				errChan <- err
+				returnedErr := fmt.Errorf("during subgroup explore procedure")
+				logrus.Errorf("%s: %s", returnedErr.Error(), err.Error())
+				errChan <- returnedErr
 				return
 			}
 			logrus.Infof("Survival analysis: successful I2B2 explore query %d", i)
@@ -552,14 +553,16 @@ func fullCohort(startConcept string) []*survival_analysis.SurvivalAnalysisParams
 	}
 	newPanels := make([]*models.Panel, 1)
 	newPanels[0] = &models.Panel{
-		Items: newItems,
-		Not:   not,
+		Items:       newItems,
+		Not:         not,
+		PanelTiming: models.TimingAny,
 	}
 
 	return []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0{
 		{
-			GroupName: "Full cohort",
-			Panels:    newPanels,
+			GroupName:      "Full cohort",
+			Panels:         newPanels,
+			SubGroupTiming: models.TimingAny,
 		},
 	}
 }
