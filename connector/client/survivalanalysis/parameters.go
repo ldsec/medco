@@ -21,13 +21,15 @@ type Parameters struct {
 	EndModifier      *modifier `yaml:"end_modifier,omitempty"`
 	EndsWhen         string    `yaml:"ends_when"`
 	SubGroups        []*struct {
-		GroupName string `yaml:"group_name"`
-		Panels    []*struct {
+		GroupName   string `yaml:"group_name"`
+		GroupTiming string `yaml:"group_timing"`
+		Panels      []*struct {
 			Not   bool `yaml:"not"`
 			Items []*struct {
 				Path     string    `yaml:"path"`
 				Modifier *modifier `yaml:"modifier,omitempty"`
 			} `yaml:"items"`
+			PanelTiming string `yaml:"panel_timing"`
 		} `yaml:"panels"`
 	} `yaml:"sub_groups,omitempty"`
 }

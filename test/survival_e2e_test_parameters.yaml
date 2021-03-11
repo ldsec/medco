@@ -10,12 +10,16 @@ end_modifier:
 ends_when: "earliest"
 sub_groups:
   - group_name: "Female"
+    group_timing: "any"
     panels:
       - not: false
+        panel_timing: "any"
         items:
           - path: "/I2B2/I2B2/Demographics/Gender/Female/"
   - group_name: "Male"
+    group_timing: "any"
     panels:
       - not: false
+        panel_timing: "any"
         items:
           - path: "/I2B2/I2B2/Demographics/Gender/Male/"

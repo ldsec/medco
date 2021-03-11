@@ -133,8 +133,7 @@ type PanelItemsItems0 struct {
 	// modifier
 	Modifier *PanelItemsItems0Modifier `json:"modifier,omitempty"`
 
-	// # NUMBER operators EQ: equals NE: not equals GT: greater than GE: greater than or equal LT: less than LE: less than or equal BETWEEN: between (value syntax: "x and y")
-	// # TEXT operators IN: in (value syntax: "'x','y','z'") LIKE[exact]: equal LIKE[begin]: begins with LIKE[end]: ends with LIKE[contains]: contains
+	// # NUMBER operators EQ: equal NE: not equal GT: greater than GE: greater than or equal LT: less than LE: less than or equal BETWEEN: between (value syntax: "x and y") # TEXT operators IN: in (value syntax: "'x','y','z'") LIKE[exact]: equal LIKE[begin]: begins with LIKE[end]: ends with LIKE[contains]: contains
 	//
 	// Enum: [EQ NE GT GE LT LE BETWEEN IN LIKE[exact] LIKE[begin] LIKE[end] LIKE[contains]]
 	Operator string `json:"operator,omitempty"`

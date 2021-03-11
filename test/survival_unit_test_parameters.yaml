@@ -13,8 +13,10 @@ end_modifier:
 ends_when: "earliest"
 sub_groups:
   - group_name: "AAA"
+    group_timing: "any"
     panels:
       - not: false
+        panel_timing: "any"
         items:
           - path: "/path/1/"
           - path: "/path/2/"
@@ -22,10 +24,13 @@ sub_groups:
               modifier_key: "/key1/"
               applied_path: "/appliedpath1/"
       - not : true
+        panel_timing: "sameinstancenum"
         items:
           - path: "/path/3/"
   - group_name: "BBB"
+    group_timing: "sameinstancenum"
     panels:
       - not: false
+        panel_timing: "any"
         items:
           - path: "/path/4/"
