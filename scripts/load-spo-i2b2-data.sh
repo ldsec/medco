@@ -19,6 +19,8 @@ TRUNCATE TABLE i2b2demodata_i2b2.visit_dimension;
 TRUNCATE TABLE i2b2demodata_i2b2.provider_dimension;
 TRUNCATE TABLE i2b2demodata_i2b2.observation_fact;
 
+\copy i2b2demodata_i2b2.patient_mapping FROM './PATIENT_MAPPING.csv' ESCAPE '"' DELIMITER ',' CSV HEADER;
+\copy i2b2demodata_i2b2.encounter_mapping FROM './ENCOUNTER_MAPPING.csv' ESCAPE '"' DELIMITER ',' CSV HEADER;
 \copy i2b2demodata_i2b2.concept_dimension FROM './CONCEPT_DIMENSION.csv' ESCAPE '"' DELIMITER ',' CSV HEADER;
 \copy i2b2demodata_i2b2.modifier_dimension FROM './MODIFIER_DIMENSION.csv' ESCAPE '"' DELIMITER ',' CSV HEADER;
 \copy i2b2demodata_i2b2.patient_dimension FROM './PATIENT_DIMENSION.csv' ESCAPE '"' DELIMITER ',' CSV HEADER;
