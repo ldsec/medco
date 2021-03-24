@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
-# example: bash medco-demo.epfl.ch i2b2medcosrv0 medcoconnectorsrv0
+# example: bash load-spo-i2b2-data.sh ../test/data/spo-synthetic/node_0 medco-demo.epfl.ch i2b2medcosrv0 medcoconnectorsrv0
+# example loading all in one: for NODE_NB in 0 1 2; do bash load-spo-i2b2-data.sh ../test/data/spo-synthetic/node_${NODE_NB} medco-demo.epfl.ch i2b2medcosrv${NODE_NB} medcoconnectorsrv${NODE_NB}; done
 
-DB_HOST=$1
-I2B2MEDCODB=$2
-MEDCOCONNECTORDB=$3
-SCRIPT_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+DATA_FOLDER=$1
+DB_HOST=$2
+I2B2MEDCODB=$3
+MEDCOCONNECTORDB=$4
 
-pushd "$SCRIPT_FOLDER/../test/data/spo-synthetic"
+pushd "$DATA_FOLDER"
 PGPASSWORD=i2b2 psql -v ON_ERROR_STOP=1 -h "${DB_HOST}" -U "i2b2" -p 5432 -d "${I2B2MEDCODB}" <<-EOSQL
 BEGIN;
 TRUNCATE TABLE i2b2demodata_i2b2.patient_mapping;
