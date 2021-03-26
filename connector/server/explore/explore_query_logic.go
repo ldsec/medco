@@ -54,11 +54,6 @@ func PrepareAggregationValue(subjectCountQueryInfo *models.ExploreSearchCountPar
 	userPublicKey := *subjectCountQueryInfo.UserPublicKey
 	baseQueryID := *subjectCountQueryInfo.QueryID
 
-	if len(searchElement.SubjectCount) == 0 {
-		logrus.Debug("empty subject count for ", searchElement.DisplayName)
-		return
-	}
-
 	logrus.Debug("subject count is not empty ", searchElement.SubjectCount, " ", userPublicKey, " ", baseQueryID)
 	subjectCountInt, err := strconv.Atoi(searchElement.SubjectCount)
 	if err != nil {

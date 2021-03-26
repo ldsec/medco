@@ -79,13 +79,12 @@ func aggregateGroupedSearchResultSubjectCounts(subjectCountQueryInfo *models.Exp
 
 	//the idea is to compute the aggregated totalnum only for search elements with a defined totalnum in i2b2
 	var encryptedTotalnums []string = []string{}
-	var keptSearchElements []*models.ExploreSearchResultElement = []*models.ExploreSearchResultElement{}
 
 	var debugString string = ""
 	for _, searchElement := range searchResult {
 		if searchElement.SubjectCount == "" {
-			logrus.Debug("Empty subject count for ", searchElement.Name)
-			continue
+			logrus.Info("Empty subject count for ", searchElement.Name)
+			searchElement.SubjectCount = "0"
 		}
 
 		debugString += searchElement.SubjectCount + " " + searchElement.DisplayName + " "
@@ -97,17 +96,7 @@ func aggregateGroupedSearchResultSubjectCounts(subjectCountQueryInfo *models.Exp
 			return
 		}
 
-		keptSearchElements = append(keptSearchElements, searchElement)
 		encryptedTotalnums = append(encryptedTotalnums, encryptedTotalnum)
-	}
-
-	if len(encryptedTotalnums) == 0 {
-		logrus.Warn("no subject count to aggregate")
-		return
-	}
-
-	if len(searchResult) != len(encryptedTotalnums) {
-		logrus.Warn("The search result is not of the same length than the encrypted totalnums %d != %d", len(searchResult), len(encryptedTotalnums))
 	}
 
 	logrus.Debug("Encrypted all concepts ", debugString, " about to launch aggregation with query id ", *subjectCountQueryInfo.QueryID)
@@ -127,7 +116,7 @@ func aggregateGroupedSearchResultSubjectCounts(subjectCountQueryInfo *models.Exp
 		return
 	}
 
-	for i, searchElement := range keptSearchElements {
+	for i, searchElement := range searchResult {
 		searchElement.SubjectCountEncrypted = aggregatedCounts[i]
 	}
 
