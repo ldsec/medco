@@ -21,6 +21,7 @@ import (
 
 	"github.com/ldsec/medco/connector/restapi/models"
 	"github.com/ldsec/medco/connector/restapi/server/operations/genomic_annotations"
+	"github.com/ldsec/medco/connector/restapi/server/operations/medchain"
 	"github.com/ldsec/medco/connector/restapi/server/operations/medco_network"
 	"github.com/ldsec/medco/connector/restapi/server/operations/medco_node"
 	"github.com/ldsec/medco/connector/restapi/server/operations/survival_analysis"
@@ -86,6 +87,9 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 		}),
 		SurvivalAnalysisSurvivalAnalysisHandler: survival_analysis.SurvivalAnalysisHandlerFunc(func(params survival_analysis.SurvivalAnalysisParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation survival_analysis.SurvivalAnalysis has not yet been implemented")
+		}),
+		MedchainWsProxyHandler: medchain.WsProxyHandlerFunc(func(params medchain.WsProxyParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation medchain.WsProxy has not yet been implemented")
 		}),
 
 		MedcoJwtAuth: func(token string, scopes []string) (*models.User, error) {
@@ -160,6 +164,8 @@ type MedcoConnectorAPI struct {
 	MedcoNodePutCohortsHandler medco_node.PutCohortsHandler
 	// SurvivalAnalysisSurvivalAnalysisHandler sets the operation handler for the survival analysis operation
 	SurvivalAnalysisSurvivalAnalysisHandler survival_analysis.SurvivalAnalysisHandler
+	// MedchainWsProxyHandler sets the operation handler for the ws proxy operation
+	MedchainWsProxyHandler medchain.WsProxyHandler
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
 	ServeError func(http.ResponseWriter, *http.Request, error)
@@ -278,6 +284,9 @@ func (o *MedcoConnectorAPI) Validate() error {
 	}
 	if o.SurvivalAnalysisSurvivalAnalysisHandler == nil {
 		unregistered = append(unregistered, "survival_analysis.SurvivalAnalysisHandler")
+	}
+	if o.MedchainWsProxyHandler == nil {
+		unregistered = append(unregistered, "medchain.WsProxyHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -429,6 +438,10 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/node/analysis/survival/query"] = survival_analysis.NewSurvivalAnalysis(o.context, o.SurvivalAnalysisSurvivalAnalysisHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/medchain/ws"] = medchain.NewWsProxy(o.context, o.MedchainWsProxyHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP

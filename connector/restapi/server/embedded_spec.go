@@ -172,6 +172,30 @@ func init() {
         }
       }
     },
+    "/medchain/ws": {
+      "get": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medchain"
+            ]
+          }
+        ],
+        "tags": [
+          "medchain"
+        ],
+        "summary": "WebSocket endpoint that proxies communications to the associated MedChain node only if authorized.",
+        "operationId": "wsProxy",
+        "responses": {
+          "403": {
+            "$ref": "#/responses/forbiddenResponse"
+          },
+          "default": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      }
+    },
     "/network": {
       "get": {
         "security": [
@@ -1458,6 +1482,10 @@ func init() {
     {
       "description": "Survival analysis API",
       "name": "survival-analysis"
+    },
+    {
+      "description": "MedChain API",
+      "name": "medchain"
     }
   ],
   "externalDocs": {
@@ -1622,6 +1650,46 @@ func init() {
           },
           "404": {
             "description": "Annotation or annotation value not found."
+          },
+          "default": {
+            "description": "Error response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/medchain/ws": {
+      "get": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medchain"
+            ]
+          }
+        ],
+        "tags": [
+          "medchain"
+        ],
+        "summary": "WebSocket endpoint that proxies communications to the associated MedChain node only if authorized.",
+        "operationId": "wsProxy",
+        "responses": {
+          "403": {
+            "description": "Request is valid and user is authenticated, but not authorized to perform this action.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "default": {
             "description": "Error response.",
@@ -3697,6 +3765,10 @@ func init() {
     {
       "description": "Survival analysis API",
       "name": "survival-analysis"
+    },
+    {
+      "description": "MedChain API",
+      "name": "medchain"
     }
   ],
   "externalDocs": {

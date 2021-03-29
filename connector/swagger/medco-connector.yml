@@ -16,8 +16,10 @@ tags:
     description: "MedCo Node API"
   - name: "genomic-annotations"
     description: "Genomic Annotations Query API"
-  - name : "survival-analysis"
+  - name: "survival-analysis"
     description : "Survival analysis API"
+  - name: "medchain"
+    description: "MedChain API"
 schemes:
   - "http"
 consumes:
@@ -347,6 +349,19 @@ paths:
       security:
         - medco-jwt: ["medco-explore"]
 
+  /medchain/ws:
+    get:
+      tags:
+        - "medchain"
+      summary: "WebSocket endpoint that proxies communications to the associated MedChain node only if authorized."
+      operationId: "wsProxy"
+      responses:
+        403:
+          $ref: '#/responses/forbiddenResponse'
+        default:
+          $ref: '#/responses/errorResponse'
+      security:
+        - medco-jwt: [ "medchain" ]
 
 securityDefinitions:
   medco-jwt:

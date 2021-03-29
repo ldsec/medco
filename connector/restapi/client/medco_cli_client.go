@@ -11,6 +11,7 @@ import (
 	"github.com/go-openapi/strfmt"
 
 	"github.com/ldsec/medco/connector/restapi/client/genomic_annotations"
+	"github.com/ldsec/medco/connector/restapi/client/medchain"
 	"github.com/ldsec/medco/connector/restapi/client/medco_network"
 	"github.com/ldsec/medco/connector/restapi/client/medco_node"
 	"github.com/ldsec/medco/connector/restapi/client/survival_analysis"
@@ -59,6 +60,7 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *MedcoCli {
 	cli := new(MedcoCli)
 	cli.Transport = transport
 	cli.GenomicAnnotations = genomic_annotations.New(transport, formats)
+	cli.Medchain = medchain.New(transport, formats)
 	cli.MedcoNetwork = medco_network.New(transport, formats)
 	cli.MedcoNode = medco_node.New(transport, formats)
 	cli.SurvivalAnalysis = survival_analysis.New(transport, formats)
@@ -108,6 +110,8 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 type MedcoCli struct {
 	GenomicAnnotations genomic_annotations.ClientService
 
+	Medchain medchain.ClientService
+
 	MedcoNetwork medco_network.ClientService
 
 	MedcoNode medco_node.ClientService
@@ -121,6 +125,7 @@ type MedcoCli struct {
 func (c *MedcoCli) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
 	c.GenomicAnnotations.SetTransport(transport)
+	c.Medchain.SetTransport(transport)
 	c.MedcoNetwork.SetTransport(transport)
 	c.MedcoNode.SetTransport(transport)
 	c.SurvivalAnalysis.SetTransport(transport)
