@@ -972,6 +972,7 @@ definitions:
       - medco-explore
       - medco-genomic-annotations
       - medco-survival-analysis
+      - medchain
 
   user:
     type: "object"

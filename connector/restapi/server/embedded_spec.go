@@ -920,7 +920,8 @@ func init() {
         "medco-network",
         "medco-explore",
         "medco-genomic-annotations",
-        "medco-survival-analysis"
+        "medco-survival-analysis",
+        "medchain"
       ]
     },
     "timers": {
@@ -3215,7 +3216,8 @@ func init() {
         "medco-network",
         "medco-explore",
         "medco-genomic-annotations",
-        "medco-survival-analysis"
+        "medco-survival-analysis",
+        "medchain"
       ]
     },
     "timers": {
