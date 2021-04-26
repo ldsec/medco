@@ -65,7 +65,9 @@ ENV HOST=0.0.0.0 \
     OIDC_JWKS_TIMEOUT_SECONDS=30 \
     MEDCO_OBFUSCATION_MIN=5 \
     MEDCO_NODES_URL="http://medco-connector-srv0/medco,http://medco-connector-srv1/medco,http://medco-connector-srv2/medco" \
-    MEDCO_OBFUSCATION_MIN=5
+    MEDCO_OBFUSCATION_MIN=5 \
+    MEDCHAIN_ENABLED=false \
+    MEDCHAIN_WS_URL=ws://medchain:2101/
 
 # medco-unlynx
 ENV UNLYNX_DEBUG_LEVEL="1"

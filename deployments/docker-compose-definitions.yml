@@ -120,6 +120,8 @@ services:
       - I2B2_DB_USER=i2b2
       - I2B2_DB_PASSWORD=i2b2
       - I2B2_DB_NAME=i2b2medco
+      - MEDCHAIN_ENABLED=false
+      - MEDCHAIN_WS_URL=ws://medchain:8080/
     volumes:
       - ./dev-local-3nodes/configuration:/medco-configuration
 
@@ -180,3 +182,14 @@ services:
       - ./dev-local-3nodes/configuration:/medco-configuration
       - ../test/data:/data
     network_mode: host
+
+  medchain:
+    image: ghcr.io/ldsec/medchain:${MEDCO_VERSION:?}
+    build:
+      context: ../build/package/medchain
+    ports:
+      - "2100"
+      - "2101"
+    environment:
+      - MEDCO_NODE_IDX=0
+      - MEDCHAIN_DEBUG_LEVEL=1

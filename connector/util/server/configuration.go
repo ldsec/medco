@@ -93,6 +93,12 @@ var I2B2DBLoginPassword string
 // I2B2DBConnection is the connection to the i2b2 database
 var I2B2DBConnection *sql.DB
 
+// MedChainEnabled is true if MedChain is enabled on this connector to perform authorization and record query logs
+var MedChainEnabled bool
+
+// MedChainWsURL is the WebSocket URL of the MedChain associated to this connector
+var MedChainWsURL string
+
 func init() {
 	SetLogLevel(os.Getenv("LOG_LEVEL"))
 
@@ -178,6 +184,12 @@ func init() {
 	if err != nil {
 		logrus.Error("Impossible to initialize connection to I2B2 DB")
 		return
+	}
+
+	MedChainEnabled = os.Getenv("MEDCHAIN_ENABLED") == "true"
+	MedChainWsURL = os.Getenv("MEDCHAIN_WS_URL")
+	if MedChainEnabled {
+		logrus.Infof("MedChain is enabled, with URL %v", MedChainWsURL)
 	}
 }
 
