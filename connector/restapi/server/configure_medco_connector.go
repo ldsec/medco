@@ -4,6 +4,7 @@ package server
 
 import (
 	"crypto/tls"
+	"github.com/ldsec/medco/connector/restapi/server/operations/medchain"
 	"net/http"
 
 	"github.com/ldsec/medco/connector/server/handlers"
@@ -95,6 +96,9 @@ func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
 
 	// /node/analysis/survival/query
 	api.SurvivalAnalysisSurvivalAnalysisHandler = survival_analysis.SurvivalAnalysisHandlerFunc(handlers.MedCoSurvivalAnalysisHandler)
+
+	// /medchain/ws
+	api.MedchainWsProxyHandler = medchain.WsProxyHandlerFunc(handlers.MedchainWsProxyHandler)
 
 	api.ServerShutdown = func() {}
 
