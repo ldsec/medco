@@ -148,6 +148,16 @@ func closeSQLConn(conn *sql.Rows) {
 	}
 }
 
+//This function is responsible for putting the totalnum values for the modifiers passed passed as parameter.
+// By default I2B2's API does not return modifiers' "totalnum" attribute. To solve the missing patients count issue, when the back-end detects an element is a modifier,
+// additional code fetches (using a mix of Golang and PostgreSQL) the patients count of that modifier.
+// This additional logic is present in the function called "populateModifierTotalnum"
+//  In this routine we do no make assumptions on which schema and table contains the children modifiers information.
+//  Here's how we find the subjects counts associated to those modifiers
+// 	_ Select all schemas in the i2b2 database which contain a "table_access" table.
+// 	_ For each schema, find in the "schema.table_access" table the ontology table containing the modifiers.
+// 	_ When we found the table and schema containing the modifiers retrieve their subjects counts in the appropriate ontology table.
+// Then we associate subject count with correct modifier.
 func populateModifierTotalnum(modifiers []*models.ExploreSearchResultElement, unparsedModifiers []Modifier) (err error) {
 	if len(modifiers) == 0 {
 		return

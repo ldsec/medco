@@ -18,6 +18,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+//This method is responsible for aggregating the subject counts of each concept and modifier fetched from browsing the ontology.
+//The subject counts are normally in clear in each search element passed as parameter to this function. This clear subject count is removed whatever the outcome of this function execution.
+//It populates the searched elements with the encrypted subject counts.
 func aggregateGroupedSearchResultSubjectCounts(subjectCountQueryInfo *models.ExploreSearchCountParams,
 	searchResult []*models.ExploreSearchResultElement, principal *models.User) (err error) {
 
