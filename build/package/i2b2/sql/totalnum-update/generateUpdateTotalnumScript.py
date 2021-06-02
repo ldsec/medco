@@ -3,9 +3,9 @@
 --looking for patients associated to concepts with 0 totalnum
 SELECT c_fullname, patient_num
 	FROM medco_ont.sphn, i2b2demodata_i2b2.observation_fact
-	where c_totalnum is null 
+	where c_totalnum is null
 		and c_basecode = concept_cd
-	order by c_fullname limit 100 
+	order by c_fullname limit 100
 # This could be a good unit test: i.e. checking that no rows are returned by the previous query.
 # That is, there is no concept or modifier with a null totalnum that has any patient associated to it.
 """
@@ -47,8 +47,8 @@ postgreSQL_script = """
  */
 CREATE OR REPLACE FUNCTION aggregateModifiersCounts() RETURNS void AS $$
 	DECLARE
-		min_depth int := (SELECT MIN(c_hlevel) FROM {metadata_schema_name}.{metadata_table_name} s WHERE s.c_facttablecolumn ILIKE 'MODIFIER_CD');
-		max_depth int := (SELECT MAX(c_hlevel) FROM {metadata_schema_name}.{metadata_table_name} s WHERE s.c_facttablecolumn ILIKE 'MODIFIER_CD');
+		min_depth int := (SELECT MIN(c_hlevel) FROM {metadata_schema_name}.{metadata_table_name} s WHERE UPPER(s.c_facttablecolumn) = 'MODIFIER_CD');
+		max_depth int := (SELECT MAX(c_hlevel) FROM {metadata_schema_name}.{metadata_table_name} s WHERE UPPER(s.c_facttablecolumn) = 'MODIFIER_CD');
 	BEGIN
 
 		raise info 'before for loop';
@@ -61,17 +61,17 @@ CREATE OR REPLACE FUNCTION aggregateModifiersCounts() RETURNS void AS $$
 			INSERT INTO {metadata_schema_name}.concept_to_id
 				SELECT DISTINCT cti.identifier, parent.c_fullname, (height-1)
 				FROM {metadata_schema_name}.{metadata_table_name} child, {metadata_schema_name}.concept_to_id cti, {metadata_schema_name}.{metadata_table_name} parent
-				WHERE cti.c_hlevel = height AND child.c_hlevel = height AND child.c_facttablecolumn ILIKE 'MODIFIER_CD'
+				WHERE cti.c_hlevel = height AND child.c_hlevel = height AND UPPER(child.c_facttablecolumn) = 'MODIFIER_CD'
 					AND cti.c_fullname = child.c_fullname AND
 					(
 						( --the parent is a modifier at the height just above.
-							parent.c_hlevel = (height - 1) AND parent.c_facttablecolumn ILIKE 'MODIFIER_CD' AND
+							parent.c_hlevel = (height - 1) AND UPPER(parent.c_facttablecolumn) = 'MODIFIER_CD' AND
 							child.c_fullname LIKE (parent.c_fullname || '%') ESCAPE '|'
 							-- Use | as an escape character instead of the backslash which appears in windows paths and breaks sql queries.
 						)
 						OR
 						( --the parent is a concept
-							parent.c_facttablecolumn ILIKE 'CONCEPT_CD' AND parent.c_fullname LIKE child.m_applied_path ESCAPE '|'
+							UPPER(parent.c_facttablecolumn) = 'CONCEPT_CD' AND parent.c_fullname LIKE child.m_applied_path ESCAPE '|'
 						)
 					)
 			;
@@ -88,8 +88,8 @@ $$ LANGUAGE plpgsql;
  */
 CREATE OR REPLACE FUNCTION aggregateConceptsCounts() RETURNS void AS $$
 	DECLARE
-		min_depth int := (SELECT MIN(c_hlevel) FROM {metadata_schema_name}.{metadata_table_name} s WHERE s.c_facttablecolumn ILIKE 'CONCEPT_CD');
-		max_depth int := (SELECT MAX(c_hlevel) FROM {metadata_schema_name}.{metadata_table_name} s WHERE s.c_facttablecolumn ILIKE 'CONCEPT_CD');
+		min_depth int := (SELECT MIN(c_hlevel) FROM {metadata_schema_name}.{metadata_table_name} s WHERE UPPER(s.c_facttablecolumn) = 'CONCEPT_CD');
+		max_depth int := (SELECT MAX(c_hlevel) FROM {metadata_schema_name}.{metadata_table_name} s WHERE UPPER(s.c_facttablecolumn) = 'CONCEPT_CD');
 	BEGIN
 
 		raise info 'before for loop';
@@ -102,10 +102,10 @@ CREATE OR REPLACE FUNCTION aggregateConceptsCounts() RETURNS void AS $$
 			INSERT INTO {metadata_schema_name}.concept_to_id
 				SELECT DISTINCT cti.identifier, parent.c_fullname, (height-1)
 				FROM {metadata_schema_name}.{metadata_table_name} child, {metadata_schema_name}.concept_to_id cti, {metadata_schema_name}.{metadata_table_name} parent
-				WHERE cti.c_hlevel = height AND child.c_hlevel = height AND child.c_facttablecolumn ILIKE 'CONCEPT_CD'
+				WHERE cti.c_hlevel = height AND child.c_hlevel = height AND UPPER(child.c_facttablecolumn) = 'CONCEPT_CD'
 					AND cti.c_fullname = child.c_fullname
 					--the parent is a concept at the height just above.
-					AND parent.c_hlevel = (height - 1) AND parent.c_facttablecolumn ILIKE 'CONCEPT_CD' AND
+					AND parent.c_hlevel = (height - 1) AND UPPER(parent.c_facttablecolumn) = 'CONCEPT_CD' AND
 					child.c_fullname LIKE (parent.c_fullname || '%') ESCAPE '|'
 					-- Use | as an escape character instead of the backslash which appears in windows paths and breaks sql queries.
 			;
@@ -148,7 +148,7 @@ UPDATE {metadata_schema_name}.{metadata_table_name} s
 		SELECT COUNT (DISTINCT o.{observation_id} ) FROM {data_schema_name}.observation_fact o
 		WHERE s.c_basecode = o.modifier_cd AND o.modifier_cd != '@'  -- '@' is for concepts
 	)
-WHERE s.c_facttablecolumn ILIKE 'MODIFIER_CD' AND s.c_basecode != '@';
+WHERE UPPER(s.c_facttablecolumn) = 'MODIFIER_CD' AND s.c_basecode != '@';
 
 raise info 'Done filling totalnum counting observations or patients directly linked to the modifiers';
 
@@ -157,7 +157,7 @@ INSERT INTO {metadata_schema_name}.concept_to_id
 SELECT DISTINCT o.{observation_id}, s.c_fullname, s.c_hlevel
 FROM {data_schema_name}.observation_fact o, {metadata_schema_name}.{metadata_table_name} s
 WHERE s.c_basecode = o.modifier_cd
-	AND s.c_facttablecolumn ILIKE 'MODIFIER_CD' AND s.c_basecode != '@'
+	AND UPPER(s.c_facttablecolumn) = 'MODIFIER_CD' AND s.c_basecode != '@'
 	AND o.modifier_cd != '@';  -- '@' is for concepts
 
 --In this code we insert into concept_to_id the distinct (patient number, concept fullname, concept level) tuples that can be linked together by directly checking references between observation_fact and metadata
@@ -165,7 +165,7 @@ INSERT INTO {metadata_schema_name}.concept_to_id
 SELECT DISTINCT o.{observation_id}, s.c_fullname, s.c_hlevel
 FROM {data_schema_name}.observation_fact o, {metadata_schema_name}.{metadata_table_name} s
 WHERE s.c_basecode = o.concept_cd AND o.modifier_cd = '@'  -- '@' is for concepts
-	AND s.c_facttablecolumn ILIKE 'CONCEPT_CD';
+	AND UPPER(s.c_facttablecolumn) = 'CONCEPT_CD';
 
 
 PERFORM aggregateModifiersCounts();
@@ -203,7 +203,6 @@ _ The ontolgy schema name, that is the name of the schema that contains your met
 _ The name of your metadata table which holds information about the modifiers and concepts such as the totalnum column.
 _ The owner of the temporary table that will be used in order to perform the count query.
 _ The data schema name, that is, the name of the schema which contains your observation_fact table.
-_ Whether the c_facttablecolumn of the ontology contains upper-cased or lower-cased information (e.g. 'MODIFIER_CD' or 'modifier_cd').
 
 You also have to choose which information the c_totalnum column of the ontology table will contain.
 Option 1: The number of distinct patients associated to the concept/modifier.
