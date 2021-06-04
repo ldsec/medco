@@ -11,28 +11,35 @@ import (
 	"golang.org/x/xerrors"
 )
 
+// QueryStatus denotes the status of a query.
 type QueryStatus string
 
 const (
+	// QuerySuccessStatus denotes a "success" status
 	QuerySuccessStatus QueryStatus = contracts.QuerySuccessStatus
-	QueryFailedStatus  QueryStatus = contracts.QueryFailedStatus
+	// QueryFailedStatus denotes a "failed" status
+	QueryFailedStatus QueryStatus = contracts.QueryFailedStatus
 )
 
+// Client is used to interact with medchain.
 type Client struct {
 	bcClient *byzcoin.Client
 	signer   darc.Signer
 	counter  uint64
 }
 
-func NewClient(path string) (*Client, error) {
+// NewClient creates a new Client by parsing a Byzcoin configuration file
+// at `path` and uses `signer` for signing the transactions
+func NewClient(path string, signer darc.Signer) (*Client, error) {
 	_, bc, err := lib.LoadConfig(path)
 	if err != nil {
 		return nil, xerrors.Errorf("failed to initialize byzcoin client: %v", err)
 	}
 
-	return &Client{bcClient: bc}, nil
+	return &Client{bcClient: bc, signer: signer}, nil
 }
 
+// GetAuthorization returns the Authorization a user has for a given query in a project.
 func (c *Client) GetAuthorization(projectInstID byzcoin.InstanceID, userID, queryID, queryDef string) (*contracts.Authorization, byzcoin.InstanceID, error) {
 	instr := byzcoin.Instruction{
 		InstanceID: projectInstID,
@@ -100,6 +107,7 @@ func (c *Client) GetAuthorization(projectInstID byzcoin.InstanceID, userID, quer
 	return project.Authorizations.Find(userID), queryInstID, nil
 }
 
+// UpdateStatus updates the status for a given query.
 func (c *Client) UpdateStatus(queryID byzcoin.InstanceID, status QueryStatus) error {
 	instruction := byzcoin.Instruction{
 		// that's the key part, where we provide the instanceID of the project
