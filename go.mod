@@ -15,7 +15,7 @@ require (
 	github.com/gorilla/websocket v1.4.2
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/koding/websocketproxy v0.0.0-20181220232114-7ed82d81a28c
-	github.com/ldsec/medchain v0.0.0-00010101000000-000000000000
+	github.com/ldsec/medchain v0.0.0-20210604112110-7b20e8f77f68
 	github.com/ldsec/unlynx v1.4.1
 	github.com/lestrrat-go/jwx v0.9.0
 	github.com/lib/pq v1.10.0
