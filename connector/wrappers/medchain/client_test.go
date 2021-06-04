@@ -166,7 +166,7 @@ func TestClient_UpdateStatus_Correct(t *testing.T) {
 	err = client.UpdateStatus(queryInstID, QuerySuccessStatus)
 	require.NoError(t, err)
 
-	resp, err := cl.GetProofFromLatest(queryInstID[:])
+	resp, err := cl.GetProofFromLatest(queryInstID.Slice())
 	require.NoError(t, err)
 
 	_, val, _, _, _ := resp.Proof.KeyValue()

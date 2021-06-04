@@ -72,7 +72,7 @@ func (c *Client) GetAuthorization(projectInstID byzcoin.InstanceID, userID, quer
 
 	queryInstID := ctx.Instructions[0].DeriveID("")
 
-	resp, err := c.bcClient.GetProofFromLatest(queryInstID[:])
+	resp, err := c.bcClient.GetProofFromLatest(queryInstID.Slice())
 	if err != nil {
 		return nil, byzcoin.InstanceID{}, xerrors.Errorf("failed to get proof: %v", err)
 	}
@@ -88,7 +88,7 @@ func (c *Client) GetAuthorization(projectInstID byzcoin.InstanceID, userID, quer
 		return nil, byzcoin.InstanceID{}, xerrors.Errorf("failed to authorize query: status %s", contracts.QueryRejectedStatus)
 	}
 
-	projectResponse, err := c.bcClient.GetProofFromLatest(projectInstID[:])
+	projectResponse, err := c.bcClient.GetProofFromLatest(projectInstID.Slice())
 	if err != nil {
 		return nil, byzcoin.InstanceID{}, xerrors.Errorf("failed to get project proof: %v", err)
 	}
