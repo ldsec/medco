@@ -35,7 +35,7 @@ func TestClient_GetAuthorization_Rejected(t *testing.T) {
 	ctx, err := addProject(t, projectName, "d", gDarc, signer, cl)
 	require.NoError(t, err)
 
-	client := Client{bcClient: cl, counter: 1, signer: signer}
+	client := Client{bcClient: cl, signer: signer}
 
 	projectInstID := ctx.Instructions[0].DeriveID("")
 
@@ -95,7 +95,7 @@ func TestClient_GetAuthorization_Pending(t *testing.T) {
 	_, err = cl.AddTransactionAndWait(ctx, 10)
 	require.NoError(t, err)
 
-	client := Client{bcClient: cl, counter: 2, signer: signer}
+	client := Client{bcClient: cl, signer: signer}
 
 	auth, _, err := client.GetAuthorization(projectInstID, userID, "testQueryID", queryTerm)
 	require.NoError(t, err)
@@ -157,7 +157,7 @@ func TestClient_UpdateStatus_Correct(t *testing.T) {
 	_, err = cl.AddTransactionAndWait(ctx, 10)
 	require.NoError(t, err)
 
-	client := Client{bcClient: cl, counter: 2, signer: signer}
+	client := Client{bcClient: cl, signer: signer}
 
 	auth, queryInstID, err := client.GetAuthorization(projectInstID, userID, "testQueryID", queryTerm)
 	require.NoError(t, err)
@@ -227,7 +227,7 @@ func TestClient_UpdateStatus_Invalid(t *testing.T) {
 	_, err = cl.AddTransactionAndWait(ctx, 10)
 	require.NoError(t, err)
 
-	client := Client{bcClient: cl, counter: 2, signer: signer}
+	client := Client{bcClient: cl, signer: signer}
 
 	auth, queryInstID, err := client.GetAuthorization(projectInstID, userID, "testQueryID", queryTerm)
 	require.NoError(t, err)

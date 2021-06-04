@@ -1,8 +1,6 @@
 package medchain
 
 import (
-	"sync/atomic"
-
 	"github.com/ldsec/medchain/contracts"
 	"go.dedis.ch/cothority/v3/byzcoin"
 	"go.dedis.ch/cothority/v3/byzcoin/bcadmin/lib"
@@ -25,7 +23,6 @@ const (
 type Client struct {
 	bcClient *byzcoin.Client
 	signer   darc.Signer
-	counter  uint64
 }
 
 // NewClient creates a new Client by parsing a Byzcoin configuration file
@@ -56,7 +53,6 @@ func (c *Client) GetAuthorization(projectInstID byzcoin.InstanceID, userID, quer
 				Value: []byte(queryDef),
 			}},
 		},
-		SignerCounter: []uint64{atomic.AddUint64(&c.counter, 1)},
 	}
 
 	ctx, err := c.bcClient.CreateTransaction(instr)
@@ -64,9 +60,9 @@ func (c *Client) GetAuthorization(projectInstID byzcoin.InstanceID, userID, quer
 		return nil, byzcoin.InstanceID{}, xerrors.Errorf("failed to create transaction: %v", err)
 	}
 
-	err = ctx.FillSignersAndSignWith(c.signer)
+	err = c.bcClient.SignTransaction(ctx, c.signer)
 	if err != nil {
-		return nil, byzcoin.InstanceID{}, xerrors.Errorf("failed to sign transaction: %v", err)
+		return nil, byzcoin.InstanceID{}, xerrors.Errorf("failed to sign transaction :%v", err)
 	}
 
 	_, err = c.bcClient.AddTransactionAndWait(ctx, 10)
@@ -110,8 +106,6 @@ func (c *Client) GetAuthorization(projectInstID byzcoin.InstanceID, userID, quer
 // UpdateStatus updates the status for a given query.
 func (c *Client) UpdateStatus(queryID byzcoin.InstanceID, status QueryStatus) error {
 	instruction := byzcoin.Instruction{
-		// that's the key part, where we provide the instanceID of the project
-		// instance we just spawned. This instance will spawn the query.
 		InstanceID: queryID,
 		Invoke: &byzcoin.Invoke{
 			Command:    contracts.QueryUpdateAction,
@@ -121,7 +115,6 @@ func (c *Client) UpdateStatus(queryID byzcoin.InstanceID, status QueryStatus) er
 				Value: []byte(status),
 			}},
 		},
-		SignerCounter: []uint64{atomic.AddUint64(&c.counter, 1)},
 	}
 
 	ctx, err := c.bcClient.CreateTransaction(instruction)
@@ -129,9 +122,9 @@ func (c *Client) UpdateStatus(queryID byzcoin.InstanceID, status QueryStatus) er
 		return xerrors.Errorf("failed to create transaction: %v", err)
 	}
 
-	err = ctx.FillSignersAndSignWith(c.signer)
+	err = c.bcClient.SignTransaction(ctx, c.signer)
 	if err != nil {
-		return xerrors.Errorf("failed to sign transaction: %v", err)
+		return xerrors.Errorf("failed to sign transaction :%v", err)
 	}
 
 	_, err = c.bcClient.AddTransactionAndWait(ctx, 10)
