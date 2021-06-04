@@ -2,6 +2,10 @@ package handlers
 
 import (
 	"fmt"
+	"net/http"
+	"net/url"
+	"strings"
+
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/gorilla/websocket"
@@ -10,9 +14,6 @@ import (
 	"github.com/ldsec/medco/connector/restapi/server/operations/medchain"
 	utilserver "github.com/ldsec/medco/connector/util/server"
 	"github.com/sirupsen/logrus"
-	"net/http"
-	"net/url"
-	"strings"
 )
 
 // MedchainWsProxyHandler handles /medchain/ws API endpoint
@@ -34,11 +35,11 @@ func MedchainWsProxyHandler(params medchain.WsProxyParams, _ *models.User) middl
 	proxyBackend := func(r *http.Request) *url.URL {
 
 		// extract the URL path by removing elements before the medco proxy path "/medchain/ws"
-		splitUrl := strings.Split(r.URL.Path, "medchain/ws")
-		if len(splitUrl) == 1 {
+		splitURL := strings.Split(r.URL.Path, "medchain/ws")
+		if len(splitURL) == 1 {
 			medchainNodeURL.Path = "/"
 		} else {
-			medchainNodeURL.Path = splitUrl[1]
+			medchainNodeURL.Path = splitURL[1]
 		}
 
 		// extract URL Fragment and RawQuery
