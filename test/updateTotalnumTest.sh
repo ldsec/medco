@@ -36,25 +36,27 @@ export I2B2_DB_USER="i2b2";
 export PGPASSWORD=i2b2
 
 #updating the c_totalnum field in the database of the first local medco node
-export I2B2_DB_NAME="i2b2medcosrv0" 
+export I2B2_DB_NAME="i2b2medcosrv0"
 
 
 #for each option p (patient) or o (observation) we test the psql generating script.
 for option in p o; do
-    python3 generateUpdateTotalnumScript.py "${ontology_schema}" "${table_copy}" i2b2 i2b2demodata_i2b2 "${option}"
+    python3 ../build/package/i2b2/sql/totalnum-update/generateUpdateTotalnumScript.py "${ontology_schema}" "${table_copy}" i2b2 i2b2demodata_i2b2 "${option}"
 
 
     psql $PSQL_PARAMS -d "${I2B2_DB_NAME}" <<-EOSQL
+    DROP TABLE IF EXISTS ${ontology_schema}.${table_copy};
     CREATE TABLE ${ontology_schema}.${table_copy} AS TABLE ${ontology_schema}.e2etest;
 EOSQL
 
     psql $PSQL_PARAMS -d "${I2B2_DB_NAME}" -f updateTotalnum.psql
-    
+
     #verification phase we do some selects on e2etest data to check if totalnum was updated correctly.
     totalnums="$(
     psql $PSQL_PARAMS -d "${I2B2_DB_NAME}" <<-EOSQL
-    SELECT c_fullname, c_totalnum FROM ${ontology_schema}.${table_copy} 
-        WHERE c_fullname LIKE '%modifiers%' ESCAPE '|' OR c_fullname LIKE '%e2etest%' ESCAPE '|';
+    SELECT c_fullname, c_totalnum FROM ${ontology_schema}.${table_copy}
+        WHERE c_fullname LIKE '%modifiers\_\' ESCAPE '|' OR c_fullname LIKE '%e2etest\_\'  ESCAPE '|'
+            OR c_fullname = '\e2etest\' OR c_fullname = '\modifiers\'
 EOSQL
     )"
 
@@ -82,7 +84,7 @@ EOSQL
     while IFS= read -r expected_line; do
         if ! echo "${trimmed_result}" | grep "$expected_line" --quiet --fixed-strings; then
             echo "test failed line not contained in expected result:...$expected_line..."
-            echo "expected result:${trimmed_result}"
+            echo "expected result:${expected_totalnum}"
             exit 1
         fi
     done <<< "$expected_totalnum"
@@ -93,6 +95,6 @@ EOSQL
 EOSQL
 
     echo "Test succeeded for option '${option}'."
-    echo 
+    echo
 
 done
