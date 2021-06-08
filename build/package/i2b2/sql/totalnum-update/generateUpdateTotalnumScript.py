@@ -18,8 +18,6 @@ SELECT c_fullname, patient_num
 
 
 
-
-#TODO You need to treat c_facttablecolumn like it is case insensitive
 postgreSQL_script = """
 -- set client_min_messages to 'info';
 
@@ -47,8 +45,8 @@ postgreSQL_script = """
  */
 CREATE OR REPLACE FUNCTION aggregateModifiersCounts() RETURNS void AS $$
 	DECLARE
-		min_depth int := (SELECT MIN(c_hlevel) FROM {metadata_schema_name}.{metadata_table_name} s WHERE UPPER(s.c_facttablecolumn) = 'MODIFIER_CD');
-		max_depth int := (SELECT MAX(c_hlevel) FROM {metadata_schema_name}.{metadata_table_name} s WHERE UPPER(s.c_facttablecolumn) = 'MODIFIER_CD');
+		min_depth int := (SELECT MIN(c_hlevel) FROM {metadata_schema_name}.{metadata_table_name} s WHERE LOWER(s.c_facttablecolumn) = 'modifier_cd');
+		max_depth int := (SELECT MAX(c_hlevel) FROM {metadata_schema_name}.{metadata_table_name} s WHERE LOWER(s.c_facttablecolumn) = 'modifier_cd');
 	BEGIN
 
 		raise info 'before for loop';
@@ -61,17 +59,17 @@ CREATE OR REPLACE FUNCTION aggregateModifiersCounts() RETURNS void AS $$
 			INSERT INTO {metadata_schema_name}.concept_to_id
 				SELECT DISTINCT cti.identifier, parent.c_fullname, (height-1)
 				FROM {metadata_schema_name}.{metadata_table_name} child, {metadata_schema_name}.concept_to_id cti, {metadata_schema_name}.{metadata_table_name} parent
-				WHERE cti.c_hlevel = height AND child.c_hlevel = height AND UPPER(child.c_facttablecolumn) = 'MODIFIER_CD'
+				WHERE cti.c_hlevel = height AND child.c_hlevel = height AND LOWER(child.c_facttablecolumn) = 'modifier_cd'
 					AND cti.c_fullname = child.c_fullname AND
 					(
 						( --the parent is a modifier at the height just above.
-							parent.c_hlevel = (height - 1) AND UPPER(parent.c_facttablecolumn) = 'MODIFIER_CD' AND
+							parent.c_hlevel = (height - 1) AND LOWER(parent.c_facttablecolumn) = 'modifier_cd' AND
 							child.c_fullname LIKE (parent.c_fullname || '%') ESCAPE '|'
 							-- Use | as an escape character instead of the backslash which appears in windows paths and breaks sql queries.
 						)
 						OR
 						( --the parent is a concept
-							UPPER(parent.c_facttablecolumn) = 'CONCEPT_CD' AND parent.c_fullname LIKE child.m_applied_path ESCAPE '|'
+							LOWER(parent.c_facttablecolumn) = 'concept_cd' AND parent.c_fullname LIKE child.m_applied_path ESCAPE '|'
 						)
 					)
 			;
@@ -88,8 +86,8 @@ $$ LANGUAGE plpgsql;
  */
 CREATE OR REPLACE FUNCTION aggregateConceptsCounts() RETURNS void AS $$
 	DECLARE
-		min_depth int := (SELECT MIN(c_hlevel) FROM {metadata_schema_name}.{metadata_table_name} s WHERE UPPER(s.c_facttablecolumn) = 'CONCEPT_CD');
-		max_depth int := (SELECT MAX(c_hlevel) FROM {metadata_schema_name}.{metadata_table_name} s WHERE UPPER(s.c_facttablecolumn) = 'CONCEPT_CD');
+		min_depth int := (SELECT MIN(c_hlevel) FROM {metadata_schema_name}.{metadata_table_name} s WHERE LOWER(s.c_facttablecolumn) = 'concept_cd');
+		max_depth int := (SELECT MAX(c_hlevel) FROM {metadata_schema_name}.{metadata_table_name} s WHERE LOWER(s.c_facttablecolumn) = 'concept_cd');
 	BEGIN
 
 		raise info 'before for loop';
@@ -102,10 +100,10 @@ CREATE OR REPLACE FUNCTION aggregateConceptsCounts() RETURNS void AS $$
 			INSERT INTO {metadata_schema_name}.concept_to_id
 				SELECT DISTINCT cti.identifier, parent.c_fullname, (height-1)
 				FROM {metadata_schema_name}.{metadata_table_name} child, {metadata_schema_name}.concept_to_id cti, {metadata_schema_name}.{metadata_table_name} parent
-				WHERE cti.c_hlevel = height AND child.c_hlevel = height AND UPPER(child.c_facttablecolumn) = 'CONCEPT_CD'
+				WHERE cti.c_hlevel = height AND child.c_hlevel = height AND LOWER(child.c_facttablecolumn) = 'concept_cd'
 					AND cti.c_fullname = child.c_fullname
 					--the parent is a concept at the height just above.
-					AND parent.c_hlevel = (height - 1) AND UPPER(parent.c_facttablecolumn) = 'CONCEPT_CD' AND
+					AND parent.c_hlevel = (height - 1) AND LOWER(parent.c_facttablecolumn) = 'concept_cd' AND
 					child.c_fullname LIKE (parent.c_fullname || '%') ESCAPE '|'
 					-- Use | as an escape character instead of the backslash which appears in windows paths and breaks sql queries.
 			;
@@ -117,13 +115,18 @@ $$ LANGUAGE plpgsql;
 DO $$
 BEGIN
 
+--create a temporary index on the lower case version of the c_facttablecolumn. This is useful to optimize the performances of the '= LOWER(c_facttablecolumn)' condition present in this script
+CREATE INDEX idx_factcolumn_lower ON {metadata_schema_name}.{metadata_table_name} ((LOWER(c_facttablecolumn)));
+raise info 'created temporary index on lower cased c_facttablecolumn column of {metadata_schema_name}.{metadata_table_name}';
+
+
 DROP TABLE IF EXISTS {metadata_schema_name}.concept_to_id;
 
---a temporary table used for computation of totalnum that links a modifer with a {subject}
+--a temporary table used for computation of totalnum that links a concept/modifier with a {subject}
 CREATE TABLE {metadata_schema_name}.concept_to_id(
-	identifier integer NOT NULL,
-	c_fullname character varying(2000) COLLATE pg_catalog."default",
-	c_hlevel integer NOT NULL
+	identifier integer NOT NULL, -- the identifier of the {subject}
+	c_fullname character varying(2000) COLLATE pg_catalog."default", -- the full name of the concept or modifier.
+	c_hlevel integer NOT NULL -- the height of the concept/modifier
 );
 
 
@@ -148,7 +151,7 @@ UPDATE {metadata_schema_name}.{metadata_table_name} s
 		SELECT COUNT (DISTINCT o.{observation_id} ) FROM {data_schema_name}.observation_fact o
 		WHERE s.c_basecode = o.modifier_cd AND o.modifier_cd != '@'  -- '@' is for concepts
 	)
-WHERE UPPER(s.c_facttablecolumn) = 'MODIFIER_CD' AND s.c_basecode != '@';
+WHERE LOWER(s.c_facttablecolumn) = 'modifier_cd' AND s.c_basecode != '@';
 
 raise info 'Done filling totalnum counting observations or patients directly linked to the modifiers';
 
@@ -157,7 +160,7 @@ INSERT INTO {metadata_schema_name}.concept_to_id
 SELECT DISTINCT o.{observation_id}, s.c_fullname, s.c_hlevel
 FROM {data_schema_name}.observation_fact o, {metadata_schema_name}.{metadata_table_name} s
 WHERE s.c_basecode = o.modifier_cd
-	AND UPPER(s.c_facttablecolumn) = 'MODIFIER_CD' AND s.c_basecode != '@'
+	AND LOWER(s.c_facttablecolumn) = 'modifier_cd' AND s.c_basecode != '@'
 	AND o.modifier_cd != '@';  -- '@' is for concepts
 
 --In this code we insert into concept_to_id the distinct (patient number, concept fullname, concept level) tuples that can be linked together by directly checking references between observation_fact and metadata
@@ -165,7 +168,7 @@ INSERT INTO {metadata_schema_name}.concept_to_id
 SELECT DISTINCT o.{observation_id}, s.c_fullname, s.c_hlevel
 FROM {data_schema_name}.observation_fact o, {metadata_schema_name}.{metadata_table_name} s
 WHERE s.c_basecode = o.concept_cd AND o.modifier_cd = '@'  -- '@' is for concepts
-	AND UPPER(s.c_facttablecolumn) = 'CONCEPT_CD';
+	AND LOWER(s.c_facttablecolumn) = 'concept_cd';
 
 
 PERFORM aggregateModifiersCounts();
@@ -187,7 +190,9 @@ WHERE count_to_name.fullname = s.c_fullname;
 
 
 --We are done with the temporary table.
--- DROP TABLE {metadata_schema_name}.concept_to_id;
+DROP TABLE {metadata_schema_name}.concept_to_id;
+
+DROP INDEX idx_factcolumn_lower;
 
 --no need to explicitly commit since this is a implicit pgsql anonymous function which automatically commit the results at the END statement.
 END;
