@@ -7,6 +7,8 @@ set -Eeuo pipefail
 # 3 concepts: 1, 2, 3
 # observation_fact: p1: c1; p2: c1, c2; p3: c2, c3; p4: c1, c2, c3
 # the same data is replicated on the 3 different nodes
+# Totalnum for e2etest is the total number of patients linked (directly or indirectly)
+# to the concept.
 
 psql $PSQL_PARAMS -d "$I2B2_DB_NAME" <<-EOSQL
 
@@ -56,42 +58,42 @@ psql $PSQL_PARAMS -d "$I2B2_DB_NAME" <<-EOSQL
         c_dimcode, c_comment, c_tooltip, update_date, download_date, import_date,
         valuetype_cd, m_applied_path, c_basecode, c_metadataxml) values
             (
-                '0', '\e2etest\', 'End-To-End Test', 'N', 'CA', '60',
+                '0', '\e2etest\', 'End-To-End Test', 'N', 'CA', '4',
                 'concept_cd', 'concept_dimension', 'concept_path',
                 'T', 'LIKE', '\e2etest\', 'End-To-End Test', '\e2etest\',
                 'NOW()', 'NOW()', 'NOW()', 'ENC_ID', '@', '', NULL
             ), (
-                '1', '\e2etest\1\', 'E2E Concept 1', 'N', 'LA', '10',
+                '1', '\e2etest\1\', 'E2E Concept 1', 'N', 'LA', '4',
                 'concept_cd', 'concept_dimension', 'concept_path',
                 'T', 'LIKE', '\e2etest\1\', 'E2E Concept 1', '\e2etest\1\',
                 'NOW()', 'NOW()', 'NOW()', 'ENC_ID', '@', 'ENC_ID:1', '<?xml version="1.0"?><ValueMetadata></ValueMetadata>'
             ), (
-                '1', '\e2etest\2\', 'E2E Concept 2', 'N', 'LA', '20',
+                '1', '\e2etest\2\', 'E2E Concept 2', 'N', 'LA', '4',
                 'concept_cd', 'concept_dimension', 'concept_path',
                 'T', 'LIKE', '\e2etest\2\', 'E2E Concept 2', '\e2etest\2\',
                 'NOW()', 'NOW()', 'NOW()', 'ENC_ID', '@', 'ENC_ID:2', NULL
             ), (
-                '1', '\e2etest\3\', 'E2E Concept 3', 'N', 'LA', '30',
+                '1', '\e2etest\3\', 'E2E Concept 3', 'N', 'LA', '4',
                 'concept_cd', 'concept_dimension', 'concept_path',
                 'T', 'LIKE', '\e2etest\3\', 'E2E Concept 3', '\e2etest\3\',
                 'NOW()', 'NOW()', 'NOW()', 'ENC_ID', '@', 'ENC_ID:3', NULL
             ), (
-                '1', '\modifiers\', 'E2E Modifiers test', 'N', 'DA', '2',
+                '1', '\modifiers\', 'E2E Modifiers test', 'N', 'DA', '4',
                 'modifier_cd', 'modifier_dimension', 'modifier_path',
                 'T', 'LIKE', '\modifiers\', 'End-To-End Modifiers Test', '\modifiers\',
                 'NOW()', 'NOW()', 'NOW()', 'ENC_ID', '\e2etest\%', 'ENC_ID:4', NULL
             ), (
-                '2', '\modifiers\1\', 'E2E Modifier 1', 'N', 'RA', '3',
+                '2', '\modifiers\1\', 'E2E Modifier 1', 'N', 'RA', '2',
                 'modifier_cd', 'modifier_dimension', 'modifier_path',
                 'T', 'LIKE', '\modifiers\1\', 'E2E Modifier 1', '\modifiers\1\',
                 'NOW()', 'NOW()', 'NOW()', 'ENC_ID', '\e2etest\1\', 'ENC_ID:5', '<?xml version="1.0"?><ValueMetadata></ValueMetadata>'
             ), (
-                '2', '\modifiers\2\', 'E2E Modifier 2', 'N', 'RA', '4',
+                '2', '\modifiers\2\', 'E2E Modifier 2', 'N', 'RA', '2',
                 'modifier_cd', 'modifier_dimension', 'modifier_path',
                 'T', 'LIKE', '\modifiers\2\', 'E2E Modifier 2', '\modifiers\2\',
                 'NOW()', 'NOW()', 'NOW()', 'ENC_ID', '\e2etest\2\', 'ENC_ID:6', NULL
             ), (
-                '2', '\modifiers\3\', 'E2E Modifier 3', 'N', 'RA', '5',
+                '2', '\modifiers\3\', 'E2E Modifier 3', 'N', 'RA', '2',
                 'modifier_cd', 'modifier_dimension', 'modifier_path',
                 'T', 'LIKE', '\modifiers\3\', 'E2E Modifier 3', '\modifiers\3\',
                 'NOW()', 'NOW()', 'NOW()', 'ENC_ID', '\e2etest\3\', 'ENC_ID:7', NULL

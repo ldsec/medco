@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # This test script verifies that behaviour of the postgres update totalnum script is the one expected.
-# This script does that by copying e2etest in a copy version of the table in order to not break the e2etest table.
+# This script does that by copying e2etest in a copy version of the table in order to keep the e2etest table as is.
 # Then this script applied the update totalnum postgres script on this copied version of the table.
 # When this is done we select all lines of interest in the ontology to verify that the c_totalnum attribute has been updated as expected.
 
@@ -16,7 +16,7 @@ expected_totalnum_patient="\e2etest\     |          4
 \modifiers\3\ |          2"
 
 
-expected_totalnum_observation="\e2etest\    |   10
+expected_totalnum_observation="\e2etest\    |   17
 \e2etest\1\ |   13
 \e2etest\2\ |    12
 \e2etest\3\ |    12
@@ -39,7 +39,7 @@ export PGPASSWORD=i2b2
 export I2B2_DB_NAME="i2b2medcosrv0"
 
 
-#for each option p (patient) or o (observation) we test the psql generating script.
+#for each option p (patient) or o (observation) we test the psql totalnum updating script.
 for option in p o; do
     python3 ../build/package/i2b2/sql/totalnum-update/generateUpdateTotalnumScript.py "${ontology_schema}" "${table_copy}" i2b2 i2b2demodata_i2b2 "${option}"
 
