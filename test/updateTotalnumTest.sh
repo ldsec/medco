@@ -1,10 +1,17 @@
 #!/usr/bin/env bash
 
+
+# This test script is to be executed
 # This test script verifies that behaviour of the postgres update totalnum script is the one expected.
 # This script does that by copying e2etest in a copy version of the table in order to keep the e2etest table as is.
 # Then this script applied the update totalnum postgres script on this copied version of the table.
 # When this is done we select all lines of interest in the ontology to verify that the c_totalnum attribute has been updated as expected.
 
+MEDCO_DB_HOST="${1:-localhost}"
+MEDCO_DB_PORT="${2:-5432}"
+I2B2_DB_USER="${3:-i2b2}"
+PGPASSWORD="${4:-i2b2}"
+I2B2_DB_NAME="${5:-i2b2medcosrv0}"
 
 expected_totalnum_patient="\e2etest\     |          4
 \e2etest\1\   |          4
@@ -30,13 +37,13 @@ table_copy=e2etest_testcpy
 
 ontology_schema=medco_ont
 
-export PSQL_PARAMS="-h localhost -p 5432 -U i2b2"
-export I2B2_DB_USER="i2b2";
+export PSQL_PARAMS="-h ${MEDCO_DB_HOST} -p ${MEDCO_DB_PORT} -U ${I2B2_DB_USER}"
+export I2B2_DB_USER
 
-export PGPASSWORD=i2b2
+export PGPASSWORD
 
 #updating the c_totalnum field in the database of the first local medco node
-export I2B2_DB_NAME="i2b2medcosrv0"
+export I2B2_DB_NAME
 
 
 #for each option p (patient) or o (observation) we test the psql totalnum updating script.
