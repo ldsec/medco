@@ -112,11 +112,11 @@ CREATE OR REPLACE FUNCTION aggregateConceptsCounts() RETURNS void AS $$
 	END;
 $$ LANGUAGE plpgsql;
 
+--create a temporary index on the lower case version of the c_facttablecolumn. This is useful to optimize the performances of the '= LOWER(c_facttablecolumn)' condition present in this script
+CREATE INDEX index_factcolumn_lower ON {metadata_schema_name}.{metadata_table_name} ((lower(c_facttablecolumn)));
 
 DO $$
 BEGIN
---create a temporary index on the lower case version of the c_facttablecolumn. This is useful to optimize the performances of the '= LOWER(c_facttablecolumn)' condition present in this script
-CREATE INDEX idx_factcolumn_lower ON {metadata_schema_name}.{metadata_table_name} ((LOWER(c_facttablecolumn)));
 raise info 'created temporary index on lower cased c_facttablecolumn column of {metadata_schema_name}.{metadata_table_name}';
 
 DROP TABLE IF EXISTS {metadata_schema_name}.concept_to_id;
@@ -191,12 +191,12 @@ WHERE count_to_name.fullname = s.c_fullname;
 --We are done with the temporary table.
 DROP TABLE {metadata_schema_name}.concept_to_id;
 
-DROP INDEX IF EXISTS idx_factcolumn_lower;
 
 --no need to explicitly commit since this is a implicit pgsql anonymous function which automatically commit the results at the END statement.
 END;
 $$ LANGUAGE plpgsql;
 
+DROP INDEX IF EXISTS index_factcolumn_lower;
 
 """
 
