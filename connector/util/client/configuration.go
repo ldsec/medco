@@ -32,6 +32,7 @@ var WaitTickSeconds int64
 // MedCoConnectorURL is the URL of the MedCo connector this client is attached to
 var MedCoConnectorURL string
 
+// MedCoNodesURLs is a list of the urls of the different medco nodes in the network
 var MedCoNodesURLs []string
 
 // OidcReqTokenURL is the URL from which the JWT is retrieved
