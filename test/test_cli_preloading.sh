@@ -6,7 +6,7 @@ PASSWORD=${2:-test}
 
 
 # test1
-#If one of the tables doesn't appear in the result. Be sure it is present in the database. And if it is, be sure 
+#If one of the tables doesn't appear in the result. Be sure it is present in the database. And if it is, be sure
 #that the c_visualattribute column, related to that table, inside the table_access table is set to 'CA' and not 'CH' which hides the table when fetching the children of "/"
 searchConceptChildren1="/"
 resultSearchConceptChildren1="PATH  TYPE
@@ -16,9 +16,9 @@ resultSearchConceptChildren1="PATH  TYPE
 
 searchConceptChildren2="/E2ETEST/e2etest/"
 resultSearchConceptChildren2="PATH  TYPE
-                              /E2ETEST/e2etest/1/ concept 30
-                              /E2ETEST/e2etest/2/ concept 60
-                              /E2ETEST/e2etest/3/ concept 90
+                              /E2ETEST/e2etest/1/ concept 12
+                              /E2ETEST/e2etest/2/ concept 12
+                              /E2ETEST/e2etest/3/ concept 12
                               /E2ETEST/modifiers/ modifier_folder"
 
 searchModifierChildren="/E2ETEST/modifiers/ /e2etest/% /E2ETEST/e2etest/1/"
@@ -145,19 +145,19 @@ test1 () {
   result="$(cat ../result.csv | sed 's/\t/ /g' | tr -s ' ' )"
   expectedResult="${3}"
 
- 
+
   while IFS= read -r expectedLine; do
     # awk command allows to remove trailing and leading spaces c.f. https://unix.stackexchange.com/questions/102008/how-do-i-trim-leading-and-trailing-whitespace-from-each-line-of-some-output
     #the tr -s ' ' command allows to change spaces that repeat into a single space
-    trimmedExpectedLine="$(echo "$expectedLine" | tr -s ' ' | awk '{$1=$1;print}')" 
+    trimmedExpectedLine="$(echo "$expectedLine" | tr -s ' ' | awk '{$1=$1;print}')"
     if ! echo "${result}" | grep "$trimmedExpectedLine" --quiet --fixed-strings; then
       echo "$1 $2: test failed"
       echo "This expected line is not within the result -->${trimmedExpectedLine}<-- "
-      echo "Observed result: ${result}"  
+      echo "Observed result: ${result}"
       exit 1
     fi
   done <<< "$expectedResult"
- 
+
 }
 
 test2 () {
@@ -236,7 +236,7 @@ test5 () {
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD -o /data/result.csv srva  -c testCohort -l 6 -g ${1} \
    -s clr::/SPHN/SPHNv2020.1/FophDiagnosis/ \
    -e clr::/SPHN/SPHNv2020.1/DeathStatus/:/SPHN/DeathStatus-status/death/:/SPHNv2020.1/DeathStatus/ -d /data/timers.csv
-  
+
   result="$(awk -F',' 'NR==1{print $0}' ../timers.csv)"
   if [ "${result}" != "${timerHeaders}" ];
   then
@@ -244,7 +244,7 @@ test5 () {
   echo "result: ${result}" && echo "expected result: ${timerHeaders}"
   exit 1
   fi
-  
+
   result="$(awk -F',' 'NR==1, NR==7 {print $0}' ../result.csv)"
   if [ "${result}" != "${2}" ];
   then
