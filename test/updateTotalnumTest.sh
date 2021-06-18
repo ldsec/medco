@@ -7,11 +7,7 @@
 # Then this script applied the update totalnum postgres script on this copied version of the table.
 # When this is done we select all lines of interest in the ontology to verify that the c_totalnum attribute has been updated as expected.
 
-# MEDCO_DB_HOST="${1:-localhost}"
-# MEDCO_DB_PORT="${2:-5432}"
-# I2B2_DB_USER="${3:-i2b2}"
-# PGPASSWORD="${4:-i2b2}"
-# I2B2_DB_NAME="${5:-i2b2medcosrv0}"
+
 
 MEDCO_DB_HOST="localhost"
 MEDCO_DB_PORT="5432"
