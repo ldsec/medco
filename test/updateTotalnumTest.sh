@@ -46,6 +46,16 @@ export PGPASSWORD
 export I2B2_DB_NAME
 
 
+#TODO delete this debugging code
+psql $PSQL_PARAMS -d "${I2B2_DB_NAME}" <<-EOSQL
+    select schema_name from information_schema.schemata
+EOSQL
+
+psql $PSQL_PARAMS -d "${I2B2_DB_NAME}" <<-EOSQL
+    select * from information_schema.tables
+EOSQL
+
+
 #for each option p (patient) or o (observation) we test the psql totalnum updating script.
 for option in p o; do
     python3 build/package/i2b2/sql/totalnum-update/generateUpdateTotalnumScript.py "${ontology_schema}" "${table_copy}" i2b2 i2b2demodata_i2b2 "${option}"
