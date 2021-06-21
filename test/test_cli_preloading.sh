@@ -52,6 +52,8 @@ resultSearchConceptInfo="  <ExploreSearchResultElement>
       </Metadata>
       <Name>E2E Concept 1</Name>
       <Path>/E2ETEST/e2etest/1/</Path>
+      <SubjectCount></SubjectCount>
+      <SubjectCountEncrypted></SubjectCountEncrypted>
       <Type>concept</Type>
   </ExploreSearchResultElement>"
 
@@ -82,6 +84,8 @@ resultSearchModifierInfo="<ExploreSearchResultElement>
       </Metadata>
       <Name>E2E Modifier 1</Name>
       <Path>/E2ETEST/modifiers/1/</Path>
+      <SubjectCount></SubjectCount>
+      <SubjectCountEncrypted></SubjectCountEncrypted>
       <Type>modifier</Type>
   </ExploreSearchResultElement>"
 
