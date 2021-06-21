@@ -19,7 +19,7 @@ resultSearchConceptChildren2="PATH  TYPE
                               /E2ETEST/e2etest/1/ concept 12
                               /E2ETEST/e2etest/2/ concept 12
                               /E2ETEST/e2etest/3/ concept 12
-                              /E2ETEST/modifiers/ modifier_folder"
+                              /E2ETEST/modifiers/ modifier_folder 12"
 
 searchModifierChildren="/E2ETEST/modifiers/ /e2etest/% /E2ETEST/e2etest/1/"
 resultSearchModifierChildren="PATH  TYPE
