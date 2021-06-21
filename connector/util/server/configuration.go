@@ -99,6 +99,12 @@ var MedChainEnabled bool
 // MedChainWsURL is the WebSocket URL of the MedChain associated to this connector
 var MedChainWsURL string
 
+// MedChainBCConfigPath is the path to the Byzcoin configuration file
+var MedChainBCConfigPath string
+
+// MedChainSignerKeyPath is the path to the signer's key
+var MedChainSignerKeyPath string
+
 func init() {
 	SetLogLevel(os.Getenv("LOG_LEVEL"))
 
@@ -188,6 +194,8 @@ func init() {
 
 	MedChainEnabled = os.Getenv("MEDCHAIN_ENABLED") == "true"
 	MedChainWsURL = os.Getenv("MEDCHAIN_WS_URL")
+	MedChainBCConfigPath = os.Getenv("MEDCHAIN_BC_CONFIG")
+	MedChainSignerKeyPath = os.Getenv("MEDCHAIN_SIGNER_KEY_PATH")
 	if MedChainEnabled {
 		logrus.Infof("MedChain is enabled, with URL %v", MedChainWsURL)
 	}

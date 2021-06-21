@@ -1,7 +1,10 @@
 package medchain
 
 import (
+	"fmt"
+
 	"github.com/ldsec/medchain/contracts"
+	utilserver "github.com/ldsec/medco/connector/util/server"
 	"go.dedis.ch/cothority/v3/byzcoin"
 	"go.dedis.ch/cothority/v3/byzcoin/bcadmin/lib"
 	"go.dedis.ch/cothority/v3/darc"
@@ -22,22 +25,32 @@ const (
 // Client is used to interact with medchain.
 type Client struct {
 	bcClient *byzcoin.Client
-	signer   darc.Signer
+	signer   *darc.Signer
 }
 
-// NewClient creates a new Client by parsing a Byzcoin configuration file
-// at `path` and uses `signer` for signing the transactions
-func NewClient(path string, signer darc.Signer) (*Client, error) {
-	_, bc, err := lib.LoadConfig(path)
+func newClient() (*Client, error) {
+	fmt.Printf("bcConfigPath: %s\n", utilserver.MedChainBCConfigPath)
+	_, bc, err := lib.LoadConfig(utilserver.MedChainBCConfigPath)
 	if err != nil {
 		return nil, xerrors.Errorf("failed to initialize byzcoin client: %v", err)
+	}
+
+	signer, err := lib.LoadSigner(utilserver.MedChainSignerKeyPath)
+	if err != nil {
+		return nil, xerrors.Errorf("failed to load signer: %v", err)
 	}
 
 	return &Client{bcClient: bc, signer: signer}, nil
 }
 
-// GetAuthorization returns the Authorization a user has for a given query in a project.
-func (c *Client) GetAuthorization(projectInstID byzcoin.InstanceID, userID, queryID, queryDef string) (*contracts.Authorization, byzcoin.InstanceID, error) {
+// GetAuthorization returns the query terms a user with the given userID is
+// allowed to execute along with the query instance ID
+func GetAuthorization(projectInstID [32]byte, userID, queryID, queryDef string) ([]string, [32]byte, error) {
+	c, err := newClient()
+	if err != nil {
+		return nil, [32]byte{}, xerrors.Errorf("failed to create client: %v", err)
+	}
+
 	instr := byzcoin.Instruction{
 		InstanceID: projectInstID,
 		Spawn: &byzcoin.Spawn{
@@ -60,7 +73,7 @@ func (c *Client) GetAuthorization(projectInstID byzcoin.InstanceID, userID, quer
 		return nil, byzcoin.InstanceID{}, xerrors.Errorf("failed to create transaction: %v", err)
 	}
 
-	err = c.bcClient.SignTransaction(ctx, c.signer)
+	err = c.bcClient.SignTransaction(ctx, *c.signer)
 	if err != nil {
 		return nil, byzcoin.InstanceID{}, xerrors.Errorf("failed to sign transaction :%v", err)
 	}
@@ -88,7 +101,7 @@ func (c *Client) GetAuthorization(projectInstID byzcoin.InstanceID, userID, quer
 		return nil, byzcoin.InstanceID{}, xerrors.Errorf("failed to authorize query: status %s", contracts.QueryRejectedStatus)
 	}
 
-	projectResponse, err := c.bcClient.GetProofFromLatest(projectInstID.Slice())
+	projectResponse, err := c.bcClient.GetProofFromLatest(byzcoin.InstanceID(projectInstID).Slice())
 	if err != nil {
 		return nil, byzcoin.InstanceID{}, xerrors.Errorf("failed to get project proof: %v", err)
 	}
@@ -100,11 +113,17 @@ func (c *Client) GetAuthorization(projectInstID byzcoin.InstanceID, userID, quer
 		return nil, byzcoin.InstanceID{}, xerrors.Errorf("failed to decode project contract: %v", err)
 	}
 
-	return project.Authorizations.Find(userID), queryInstID, nil
+	authorization := project.Authorizations.Find(userID)
+	return authorization.QueryTerms, queryInstID, nil
 }
 
 // UpdateStatus updates the status for a given query.
-func (c *Client) UpdateStatus(queryID byzcoin.InstanceID, status QueryStatus) error {
+func UpdateStatus(queryID [32]byte, status QueryStatus) error {
+	c, err := newClient()
+	if err != nil {
+		return xerrors.Errorf("failed to create client: %v", err)
+	}
+
 	instruction := byzcoin.Instruction{
 		InstanceID: queryID,
 		Invoke: &byzcoin.Invoke{
@@ -122,7 +141,7 @@ func (c *Client) UpdateStatus(queryID byzcoin.InstanceID, status QueryStatus) er
 		return xerrors.Errorf("failed to create transaction: %v", err)
 	}
 
-	err = c.bcClient.SignTransaction(ctx, c.signer)
+	err = c.bcClient.SignTransaction(ctx, *c.signer)
 	if err != nil {
 		return xerrors.Errorf("failed to sign transaction :%v", err)
 	}

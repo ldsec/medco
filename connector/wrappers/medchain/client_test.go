@@ -1,17 +1,43 @@
 package medchain
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/ldsec/medchain/contracts"
+	utilserver "github.com/ldsec/medco/connector/util/server"
 	"github.com/stretchr/testify/require"
 	"go.dedis.ch/cothority/v3"
 	"go.dedis.ch/cothority/v3/byzcoin"
+	"go.dedis.ch/cothority/v3/byzcoin/bcadmin/lib"
 	"go.dedis.ch/cothority/v3/darc"
 	"go.dedis.ch/onet/v3"
 	"go.dedis.ch/protobuf"
+	"golang.org/x/xerrors"
 )
+
+func init() {
+	lib.ConfigPath = os.TempDir()
+}
+
+func saveConfigAndSigner(cfg lib.Config, signer darc.Signer) (string, string, error) {
+	cfgPath, err := lib.SafeSaveConfig(cfg)
+	if err != nil {
+		return "", "", xerrors.Errorf("failed to save config: %v", err)
+	}
+
+	err = lib.SaveKey(signer)
+	if err != nil {
+		return "", "", xerrors.Errorf("failed to save key: %v", err)
+	}
+
+	return cfgPath,
+		filepath.Join(lib.ConfigPath, fmt.Sprintf("key-%s.cfg", signer.Identity())),
+		nil
+}
 
 func TestClient_GetAuthorization_Rejected(t *testing.T) {
 	local := onet.NewTCPTest(cothority.Suite)
@@ -30,18 +56,36 @@ func TestClient_GetAuthorization_Rejected(t *testing.T) {
 	cl, _, err := byzcoin.NewLedger(genesisMsg, false)
 	require.NoError(t, err)
 
+	cfg := lib.Config{
+		Roster:        cl.Roster,
+		ByzCoinID:     cl.ID,
+		AdminDarc:     *gDarc,
+		AdminIdentity: signer.Identity(),
+	}
+
+	cfgPath, signerPath, err := saveConfigAndSigner(cfg, signer)
+	require.NoError(t, err)
+	defer func() {
+		os.Remove(cfgPath)
+		os.Remove(signerPath)
+	}()
+
+	utilserver.MedChainBCConfigPath = cfgPath
+	utilserver.MedChainSignerKeyPath = signerPath
+
 	projectName := "name"
 
 	ctx, err := addProject(t, projectName, "d", gDarc, signer, cl)
 	require.NoError(t, err)
 
-	client := Client{bcClient: cl, signer: signer}
-
 	projectInstID := ctx.Instructions[0].DeriveID("")
 
-	auth, _, err := client.GetAuthorization(projectInstID, "test", "testQueryID", "testQueryDef")
+	auth, _, err := GetAuthorization(projectInstID, "test", "testQueryID", "testQueryDef")
 	require.Nil(t, auth)
 	require.EqualError(t, err, "failed to authorize query: status "+contracts.QueryRejectedStatus)
+
+	utilserver.I2B2DBConnection.Close()
+	utilserver.DBConnection.Close()
 
 	local.WaitDone(genesisMsg.BlockInterval)
 }
@@ -63,6 +107,23 @@ func TestClient_GetAuthorization_Pending(t *testing.T) {
 	cl, _, err := byzcoin.NewLedger(genesisMsg, false)
 	require.NoError(t, err)
 
+	cfg := lib.Config{
+		Roster:        cl.Roster,
+		ByzCoinID:     cl.ID,
+		AdminDarc:     *gDarc,
+		AdminIdentity: signer.Identity(),
+	}
+
+	cfgPath, signerPath, err := saveConfigAndSigner(cfg, signer)
+	require.NoError(t, err)
+	defer func() {
+		os.Remove(cfgPath)
+		os.Remove(signerPath)
+	}()
+
+	utilserver.MedChainBCConfigPath = cfgPath
+	utilserver.MedChainSignerKeyPath = signerPath
+
 	projectName := "name"
 	userID := "testUserID"
 	queryTerm := "testQueryTerm"
@@ -95,15 +156,15 @@ func TestClient_GetAuthorization_Pending(t *testing.T) {
 	_, err = cl.AddTransactionAndWait(ctx, 10)
 	require.NoError(t, err)
 
-	client := Client{bcClient: cl, signer: signer}
-
-	auth, _, err := client.GetAuthorization(projectInstID, userID, "testQueryID", queryTerm)
+	queryTerms, _, err := GetAuthorization(projectInstID, userID, "testQueryID", queryTerm)
 	require.NoError(t, err)
 
-	require.NotNil(t, auth)
-	require.Equal(t, 1, len(auth.QueryTerms))
-	require.Equal(t, queryTerm, auth.QueryTerms[0])
-	require.Equal(t, userID, auth.UserID)
+	require.NotNil(t, queryTerms)
+	require.Equal(t, 1, len(queryTerms))
+	require.Equal(t, queryTerm, queryTerms[0])
+
+	utilserver.I2B2DBConnection.Close()
+	utilserver.DBConnection.Close()
 
 	local.WaitDone(genesisMsg.BlockInterval)
 }
@@ -125,6 +186,23 @@ func TestClient_UpdateStatus_Correct(t *testing.T) {
 	cl, _, err := byzcoin.NewLedger(genesisMsg, false)
 	require.NoError(t, err)
 
+	cfg := lib.Config{
+		Roster:        cl.Roster,
+		ByzCoinID:     cl.ID,
+		AdminDarc:     *gDarc,
+		AdminIdentity: signer.Identity(),
+	}
+
+	cfgPath, signerPath, err := saveConfigAndSigner(cfg, signer)
+	require.NoError(t, err)
+	defer func() {
+		os.Remove(cfgPath)
+		os.Remove(signerPath)
+	}()
+
+	utilserver.MedChainBCConfigPath = cfgPath
+	utilserver.MedChainSignerKeyPath = signerPath
+
 	projectName := "name"
 	userID := "testUserID"
 	queryTerm := "testQueryTerm"
@@ -157,16 +235,14 @@ func TestClient_UpdateStatus_Correct(t *testing.T) {
 	_, err = cl.AddTransactionAndWait(ctx, 10)
 	require.NoError(t, err)
 
-	client := Client{bcClient: cl, signer: signer}
-
-	auth, queryInstID, err := client.GetAuthorization(projectInstID, userID, "testQueryID", queryTerm)
+	queryTerms, queryInstID, err := GetAuthorization(projectInstID, userID, "testQueryID", queryTerm)
 	require.NoError(t, err)
-	require.NotNil(t, auth)
+	require.NotNil(t, queryTerms)
 
-	err = client.UpdateStatus(queryInstID, QuerySuccessStatus)
+	err = UpdateStatus(queryInstID, QuerySuccessStatus)
 	require.NoError(t, err)
 
-	resp, err := cl.GetProofFromLatest(queryInstID.Slice())
+	resp, err := cl.GetProofFromLatest(byzcoin.InstanceID(queryInstID).Slice())
 	require.NoError(t, err)
 
 	_, val, _, _, _ := resp.Proof.KeyValue()
@@ -174,6 +250,9 @@ func TestClient_UpdateStatus_Correct(t *testing.T) {
 	err = protobuf.Decode(val, &query)
 
 	require.Equal(t, QuerySuccessStatus, QueryStatus(query.Status))
+
+	utilserver.I2B2DBConnection.Close()
+	utilserver.DBConnection.Close()
 
 	local.WaitDone(genesisMsg.BlockInterval)
 }
@@ -195,6 +274,23 @@ func TestClient_UpdateStatus_Invalid(t *testing.T) {
 	cl, _, err := byzcoin.NewLedger(genesisMsg, false)
 	require.NoError(t, err)
 
+	cfg := lib.Config{
+		Roster:        cl.Roster,
+		ByzCoinID:     cl.ID,
+		AdminDarc:     *gDarc,
+		AdminIdentity: signer.Identity(),
+	}
+
+	cfgPath, signerPath, err := saveConfigAndSigner(cfg, signer)
+	require.NoError(t, err)
+	defer func() {
+		os.Remove(cfgPath)
+		os.Remove(signerPath)
+	}()
+
+	utilserver.MedChainBCConfigPath = cfgPath
+	utilserver.MedChainSignerKeyPath = signerPath
+
 	projectName := "name"
 	userID := "testUserID"
 	queryTerm := "testQueryTerm"
@@ -227,14 +323,15 @@ func TestClient_UpdateStatus_Invalid(t *testing.T) {
 	_, err = cl.AddTransactionAndWait(ctx, 10)
 	require.NoError(t, err)
 
-	client := Client{bcClient: cl, signer: signer}
-
-	auth, queryInstID, err := client.GetAuthorization(projectInstID, userID, "testQueryID", queryTerm)
+	queryTerms, queryInstID, err := GetAuthorization(projectInstID, userID, "testQueryID", queryTerm)
 	require.NoError(t, err)
-	require.NotNil(t, auth)
+	require.NotNil(t, queryTerms)
 
-	err = client.UpdateStatus(queryInstID, "invalid")
+	err = UpdateStatus(queryInstID, "invalid")
 	require.Error(t, err)
+
+	utilserver.I2B2DBConnection.Close()
+	utilserver.DBConnection.Close()
 
 	local.WaitDone(genesisMsg.BlockInterval)
 }
