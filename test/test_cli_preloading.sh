@@ -10,9 +10,9 @@ PASSWORD=${2:-test}
 #that the c_visualattribute column, related to that table, inside the table_access table is set to 'CA' and not 'CH' which hides the table when fetching the children of "/"
 searchConceptChildren1="/"
 resultSearchConceptChildren1="PATH  TYPE
-                              /E2ETEST/e2etest/ concept_container
-                              /I2B2/I2B2/ concept_container
-                              /SPHN/SPHNv2020.1/  concept_container"
+                              /E2ETEST/e2etest/ concept_container 0
+                              /I2B2/I2B2/ concept_container 0
+                              /SPHN/SPHNv2020.1/  concept_container 0"
 
 searchConceptChildren2="/E2ETEST/e2etest/"
 resultSearchConceptChildren2="PATH  TYPE
@@ -23,7 +23,7 @@ resultSearchConceptChildren2="PATH  TYPE
 
 searchModifierChildren="/E2ETEST/modifiers/ /e2etest/% /E2ETEST/e2etest/1/"
 resultSearchModifierChildren="PATH  TYPE
-                              /E2ETEST/modifiers/1/ modifier"
+                              /E2ETEST/modifiers/1/ modifier 6"
 
 searchConceptInfo="/E2ETEST/e2etest/1/"
 resultSearchConceptInfo="  <ExploreSearchResultElement>
@@ -141,22 +141,17 @@ timingResultZeroExpected="$(printf -- "count\n0\n0\n0")"
 #test whether each line from expected result is contained within the result.csv file
 test1 () {
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv $1 $2
-  pwd
-  result="$(cat ../result.csv | sed 's/\t/ /g' | tr -s ' ' )"
-  expectedResult="${3}"
+
+  result="$(cat ../result.csv | tr -d '\r\n\t ')"
+  expectedResult="$(echo "${3}" | tr -d '\r\n\t ')"
+  if [ "${result}" != "${expectedResult}" ];
+  then
+    echo "$1 $2: test failed"
+    echo "result: ${result}" && echo "expected result: ${expectedResult}"
+    exit 1
+  fi
 
 
-  while IFS= read -r expectedLine; do
-    # awk command allows to remove trailing and leading spaces c.f. https://unix.stackexchange.com/questions/102008/how-do-i-trim-leading-and-trailing-whitespace-from-each-line-of-some-output
-    #the tr -s ' ' command allows to change spaces that repeat into a single space
-    trimmedExpectedLine="$(echo "$expectedLine" | tr -s ' ' | awk '{$1=$1;print}')"
-    if ! echo "${result}" | grep "$trimmedExpectedLine" --quiet --fixed-strings; then
-      echo "$1 $2: test failed"
-      echo "This expected line is not within the result -->${trimmedExpectedLine}<-- "
-      echo "Observed result: ${result}"
-      exit 1
-    fi
-  done <<< "$expectedResult"
 
 }
 
