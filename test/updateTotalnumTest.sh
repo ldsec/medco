@@ -22,17 +22,22 @@ expected_totalnum_patient="\e2etest\     |          4
 \modifiers\   |          4
 \modifiers\1\ |          2
 \modifiers\2\ |          2
-\modifiers\3\ |          2"
+\modifiers\3\ |          2
+\modifiers\2text\   | 3
+\modifiers\3text\   | 3"
 
 
-expected_totalnum_observation="\e2etest\    |   17
-\e2etest\1\ |   13
-\e2etest\2\ |    12
-\e2etest\3\ |    12
-\modifiers\ |    10
+
+expected_totalnum_observation="\e2etest\    |   23
+\e2etest\1\ |   19
+\e2etest\2\ |    18
+\e2etest\3\ |    18
+\modifiers\ |    16
 \modifiers\1\   |  2
 \modifiers\2\   |  2
-\modifiers\3\   |  2"
+\modifiers\3\   |  2
+\modifiers\2text\   | 3
+\modifiers\3text\   | 3"
 
 
 table_copy=e2etest_testcpy
@@ -48,16 +53,6 @@ export PGPASSWORD
 export I2B2_DB_NAME
 
 
-#TODO delete this debugging code
-psql $PSQL_PARAMS -d "${I2B2_DB_NAME}" <<-EOSQL
-    select schema_name from information_schema.schemata
-EOSQL
-
-psql $PSQL_PARAMS -d "${I2B2_DB_NAME}" <<-EOSQL
-    select * from information_schema.tables
-EOSQL
-
-
 #for each option p (patient) or o (observation) we test the psql totalnum updating script.
 for option in p o; do
     python3 build/package/i2b2/sql/totalnum-update/generateUpdateTotalnumScript.py "${ontology_schema}" "${table_copy}" i2b2 i2b2demodata_i2b2 "${option}"
@@ -70,11 +65,12 @@ EOSQL
 
     psql $PSQL_PARAMS -d "${I2B2_DB_NAME}" -f updateTotalnum.psql
 
-    #verification phase we do some selects on e2etest data to check if totalnum was updated correctly.
+    #verification phase we do some selects on e2etest data to check if totalnum was updated correctly for e2etest\modifiers and e2etest\concepts
     totalnums="$(
     psql $PSQL_PARAMS -d "${I2B2_DB_NAME}" <<-EOSQL
     SELECT c_fullname, c_totalnum FROM ${ontology_schema}.${table_copy}
         WHERE c_fullname LIKE '%modifiers\_\' ESCAPE '|' OR c_fullname LIKE '%e2etest\_\'  ESCAPE '|'
+            OR c_fullname LIKE '%modifiers\_text\' ESCAPE '|'
             OR c_fullname = '\e2etest\' OR c_fullname = '\modifiers\'
 EOSQL
     )"
