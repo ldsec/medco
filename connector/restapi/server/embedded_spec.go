@@ -712,6 +712,9 @@ func init() {
         "code": {
           "type": "string"
         },
+        "comment": {
+          "type": "string"
+        },
         "displayName": {
           "type": "string"
         },
@@ -3019,6 +3022,9 @@ func init() {
           "type": "string"
         },
         "code": {
+          "type": "string"
+        },
+        "comment": {
           "type": "string"
         },
         "displayName": {

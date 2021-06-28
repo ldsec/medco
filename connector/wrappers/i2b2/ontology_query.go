@@ -222,6 +222,7 @@ func parseI2b2Concept(concept Concept) (result *models.ExploreSearchResultElemen
 		Metadata:    concept.Metadataxml,
 		Path:        convertPathFromI2b2Format(concept.Key),
 		AppliedPath: "@",
+		Comment:     concept.Comment,
 		//Type: models.SearchResultElementTypeConcept,
 		//Leaf: false,
 	}
