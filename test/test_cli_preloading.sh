@@ -27,6 +27,7 @@ searchConceptInfo="/E2ETEST/e2etest/1/"
 resultSearchConceptInfo="  <ExploreSearchResultElement>
       <AppliedPath>@</AppliedPath>
       <Code>ENC_ID:1</Code>
+      <Comment>E2E Concept 1</Comment>
       <DisplayName>E2E Concept 1</DisplayName>
       <Leaf>true</Leaf>
       <MedcoEncryption>
@@ -57,6 +58,7 @@ searchModifierInfo="/E2ETEST/modifiers/1/ /e2etest/1/"
 resultSearchModifierInfo="<ExploreSearchResultElement>
       <AppliedPath>/e2etest/1/</AppliedPath>
       <Code>ENC_ID:5</Code>
+      <Comment>E2E Modifier 1</Comment>
       <DisplayName>E2E Modifier 1</DisplayName>
       <Leaf>true</Leaf>
       <MedcoEncryption>
