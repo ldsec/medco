@@ -3,6 +3,7 @@ package main
 import (
 	// Empty imports to have the init-functions called which should
 	// register the protocol
+	_ "github.com/ldsec/medchain/contracts"
 	_ "github.com/ldsec/medco/unlynx/services"
 	_ "github.com/ldsec/unlynx/protocols"
 	"github.com/urfave/cli"

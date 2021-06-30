@@ -1,15 +1,36 @@
 [[servers]]
-  Address = "tls://172.31.1.101:2000"
+  Address = "tls://172.31.0.101:2000"
   Suite = "Ed25519"
   Public = "e65a2a74ddbfa1712192b2048707345822989bdf9cf73b35d18e1366017ae3dd"
   Description = "Unlynx Server 0"
+  [servers.Services]
+    [servers.Services.ByzCoin]
+      Public = "1cab8652afa4c3e091c1627b6123de571209e11dd1d4ca9cc1149380c141e8971085d02aa7f632bf3510b55cd1c71798874fe7f47720c61dbd47208cef6e4c7720813c1d6e15729470c7e84a2a7cb1e978029c255cf99a4f2d64a2b7c504573173cc6aa73506586c70929dcd1016bc44e205c65a9f668012ca2b31b252208be2"
+      Suite = "bn256.adapter"
+    [servers.Services.Skipchain]
+      Public = "59fd29a2936d1bc4a007ef062dc523f20845db1b83f36f2447a69de4e1a314ce1a33a40cc2247f57a4927a00a6be4e627050233f2f8090bc3d6329fc1560e3df206eb862ccec13538d720fd4f70bbe86272e72a2e9c6fbc05294b2800bf8edab6ee525932945e6c8a796dfe3eeb69afe0bc2cf93e8af45f17995c108311988cc"
+      Suite = "bn256.adapter"
 [[servers]]
-  Address = "tls://172.31.1.111:2002"
+  Address = "tls://172.31.0.111:2002"
   Suite = "Ed25519"
   Public = "504f7f48a57acf0dcf7b3771cc38855f31bbefaa504574f6f92c97a20ee4e837"
   Description = "Unlynx Server 1"
+  [servers.Services]
+    [servers.Services.ByzCoin]
+      Public = "8b5ed5440378f4237912a90f1ff41f7342c4ec01fad2a21ed69747cd78ed2cdd495c75cdb19f6ea239ffa18634e306cb6906652da08ddacb56625aefbf3370fd4f814d61934ffd09c4d51a1a2524de18a06dca578a13d185627df22991507e3122ea29ec04c55ebf2b4535a5b9ff90937065c1e68c918aad7eddc6f66e1fae74"
+      Suite = "bn256.adapter"
+    [servers.Services.Skipchain]
+      Public = "895579a5ca19af9f13bbe0505d6e54f63f7f7af696a484a55ebaec94df3681a38a1d779e651b0326678da29f3483695ad924092bcd15187d210351f04c15cba55b7348593a414a06147699b70248fe63c16282e6d57ce2fe695d0307a8afb41b3e38d5494b7f49cd251b72af8e93fa393e93a6d653192f5e1e44f73d0f6c2c1d"
+      Suite = "bn256.adapter"
 [[servers]]
-  Address = "tls://172.31.1.121:2004"
+  Address = "tls://172.31.0.121:2004"
   Suite = "Ed25519"
   Public = "2c5195464fe086f21e1b0205bff64014ab4cd9459c8d2ca9695c7460039d90c5"
   Description = "Unlynx Server 2"
+  [servers.Services]
+    [servers.Services.ByzCoin]
+      Public = "048463f11a1de3e0a5669a803cff90d2fec17619921937a710153f0cc6757d1c40a884467efa0d3a39bbe711ba5f12876ff420054174ef35fdedfff3bdc963ef3bda6c9d3a29c2d6f3296579fa07525f9c98a14b4a95ffce0e5ae48599ba01776bcd9e166ef5322f79f9e037ac6026ec5098890e2a668afce056ca02ed12a415"
+      Suite = "bn256.adapter"
+    [servers.Services.Skipchain]
+      Public = "012b1fb93d9f094d9d0668c0e0615a67f4f754ec4c289d7dca8d2ae68b9b33642eb8cfe791d74fe9be9f6385964a0cd2b7b8ab7714af8afb3ee2b44c164dea67530635b9245ea4a4444635c3f95faf3cc8cd9b1b36a9d8c9e3ad9b390f4c07487f3dd4aa2ea4f2f39121fe907cec063cefb2edd40e0c55940890511024fb6d77"
+      Suite = "bn256.adapter"
