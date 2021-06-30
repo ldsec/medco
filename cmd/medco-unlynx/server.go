@@ -6,6 +6,9 @@ import (
 	_ "github.com/ldsec/medco/unlynx/services"
 	_ "github.com/ldsec/unlynx/protocols"
 	"github.com/urfave/cli"
+	_ "go.dedis.ch/cothority/v3/byzcoin"
+	_ "go.dedis.ch/cothority/v3/byzcoin/contracts"
+	_ "go.dedis.ch/cothority/v3/skipchain"
 	"go.dedis.ch/onet/v3/app"
 )
 
