@@ -156,7 +156,7 @@ func closeSQLConn(conn *sql.Rows) {
 //  Here's how we find the subjects counts associated to those modifiers
 // 	_ Select all schemas in the i2b2 database which contain a "table_access" table.
 // 	_ For each schema, find in the "schema.table_access" table the ontology table containing the modifiers.
-// 	_ When we found the table and schema containing the modifiers retrieve their subjects counts in the appropriate ontology table.
+// 	_ When we find the table and schema containing the modifiers, retrieve their subjects counts in the appropriate ontology table.
 // Then we associate subject count with correct modifier.
 func populateModifierTotalnum(modifiers []*models.ExploreSearchResultElement, unparsedModifiers []Modifier) (err error) {
 	if len(modifiers) == 0 {
