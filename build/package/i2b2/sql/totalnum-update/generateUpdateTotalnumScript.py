@@ -120,7 +120,7 @@ DROP TABLE IF EXISTS {metadata_schema_name}.concept_to_id;
 CREATE TABLE {metadata_schema_name}.concept_to_id(
 	identifier integer NOT NULL, -- the identifier of the {subject}
 	c_fullname character varying(2000) COLLATE pg_catalog."default", -- the full name of the concept or modifier.
-	c_hlevel integer NOT NULL -- the height of the concept/modifier
+	c_hlevel integer NOT NULL -- the level of the concept/modifier
 );
 
 
