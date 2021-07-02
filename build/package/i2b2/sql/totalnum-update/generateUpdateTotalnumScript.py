@@ -75,7 +75,7 @@ CREATE OR REPLACE FUNCTION aggregateModifiersCounts() RETURNS void AS $$
 $$ LANGUAGE plpgsql;
 
 /**
- * This code traverses iteratively the different heights of concepts.
+ * This code traverses iteratively the different levels of concepts.
  * At each iteration the code adds the {subject}s that relate to the concepts to the set of {subject}s that relate to the parent concept.
  * After having done that totalnum is updated for the parents of the current iteration.
  */
