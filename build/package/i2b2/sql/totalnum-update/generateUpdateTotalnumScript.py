@@ -10,9 +10,8 @@ SELECT c_fullname, patient_num
 # That is, there is no concept or modifier with a null totalnum that has any patient associated to it.
 """
 
-# This is a script which is used to generate a postgresql script that will update the c_totalnum value of a concept or modifier
-# so that c_totalnum contains the number of patients or observation (depends on your choice) linked directly or inderectly
-# to the concept/modifier.
+# This is a script which is used to generate a postgresql script that will update the c_totalnum value of a concept/modifier
+# so that c_totalnum contains the number of patients with observations (or the number of observations, depending on your choice) for the concept/modifier and its children.
 
 #tip: The generate psql script is easier to read than the postgreSQL_script that is waiting to be formatted by the execution of this script.
 
