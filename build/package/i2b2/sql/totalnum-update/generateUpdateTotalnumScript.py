@@ -149,7 +149,7 @@ WHERE LOWER(s.c_facttablecolumn) = 'modifier_cd' AND s.c_basecode != '@';
 
 raise info 'Done filling totalnum counting observations or patients directly linked to the modifiers';
 
---In this code we insert into concept_to_id the distinct (patient number, modfier fullname, modifier level) tuples that can be linked together by directly checking references between observation_fact and metadata
+--In this code we insert into concept_to_id the distinct (patient/observation ID, modifier fullname, modifier level) tuples that can be linked together by directly checking references between observation_fact and metadata
 INSERT INTO {metadata_schema_name}.concept_to_id
 SELECT DISTINCT o.{observation_id}, s.c_fullname, s.c_hlevel
 FROM {data_schema_name}.observation_fact o, {metadata_schema_name}.{metadata_table_name} s
@@ -157,7 +157,7 @@ WHERE s.c_basecode = o.modifier_cd
 	AND LOWER(s.c_facttablecolumn) = 'modifier_cd' AND s.c_basecode != '@'
 	AND o.modifier_cd != '@';  -- '@' is for concepts
 
---In this code we insert into concept_to_id the distinct (patient number, concept fullname, concept level) tuples that can be linked together by directly checking references between observation_fact and metadata
+--In this code we insert into concept_to_id the distinct (patient/observation ID, concept fullname, concept level) tuples that can be linked together by directly checking references between observation_fact and metadata
 INSERT INTO {metadata_schema_name}.concept_to_id
 SELECT DISTINCT o.{observation_id}, s.c_fullname, s.c_hlevel
 FROM {data_schema_name}.observation_fact o, {metadata_schema_name}.{metadata_table_name} s
