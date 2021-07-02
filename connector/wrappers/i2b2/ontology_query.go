@@ -137,7 +137,7 @@ func createSelectTableContainingModifierQuery(schemaName string) string {
 	return "SELECT DISTINCT c_table_name FROM " + schemaName + ".table_access WHERE $1 LIKE c_fullname || '%' ESCAPE '|'"
 }
 
-func closeSQLConn(conn *sql.Rows) {
+func closeQueryResult(conn *sql.Rows) {
 	logrus.Debug("about to close conn ", conn)
 	if conn == nil {
 		return
