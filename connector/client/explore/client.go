@@ -165,7 +165,6 @@ func decryptSubjectCount(payloadResults []*models.ExploreSearchResultElement, wg
 	return
 }
 
-//TODO comment
 func executeAndDecryptRequest(executeSearchRequest func() ([]*models.ExploreSearchResultElement, error), wg *sync.WaitGroup, resultMutex *sync.Mutex, pubKey string, privKey string, nodesResults *[][]*models.ExploreSearchResultElement) (err error) {
 	results, err := executeSearchRequest()
 
