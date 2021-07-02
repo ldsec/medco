@@ -174,7 +174,7 @@ PERFORM aggregateConceptsCounts();
 raise info 'After call to aggregate concepts {subject} function.';
 
 UPDATE {metadata_schema_name}.{metadata_table_name} s
-SET c_totalnum = count_to_name.count -- count is either the count of distinct patients or the count of distinct observations per concept, modifier depending on what you what you chose to count upon.
+SET c_totalnum = count_to_name.count -- count is either the count of distinct patients or the count of distinct observations per concept, modifier depending on what you chose to count upon.
 FROM (
 	SELECT COUNT(DISTINCT cti.identifier) AS count, cti.c_fullname AS fullname
 	FROM {metadata_schema_name}.concept_to_id cti
