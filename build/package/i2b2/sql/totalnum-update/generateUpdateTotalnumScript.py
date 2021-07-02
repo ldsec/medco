@@ -52,13 +52,13 @@ CREATE OR REPLACE FUNCTION aggregateModifiersCounts() RETURNS void AS $$
 
 			--link the {subject}s of the modifier children to their parent modifers or concept.
 			INSERT INTO {metadata_schema_name}.concept_to_id
-				SELECT DISTINCT cti.identifier, parent.c_fullname, (height-1)
+				SELECT DISTINCT cti.identifier, parent.c_fullname, (level-1)
 				FROM {metadata_schema_name}.{metadata_table_name} child, {metadata_schema_name}.concept_to_id cti, {metadata_schema_name}.{metadata_table_name} parent
-				WHERE cti.c_hlevel = height AND child.c_hlevel = height AND LOWER(child.c_facttablecolumn) = 'modifier_cd'
+				WHERE cti.c_hlevel = level AND child.c_hlevel = level AND LOWER(child.c_facttablecolumn) = 'modifier_cd'
 					AND cti.c_fullname = child.c_fullname AND
 					(
-						( --the parent is a modifier at the height just above.
-							parent.c_hlevel = (height - 1) AND LOWER(parent.c_facttablecolumn) = 'modifier_cd' AND
+						( --the parent is a modifier at the level just above.
+							parent.c_hlevel = (level - 1) AND LOWER(parent.c_facttablecolumn) = 'modifier_cd' AND
 							child.c_fullname LIKE (parent.c_fullname || '%') ESCAPE '|'
 							-- Use | as an escape character instead of the backslash which appears in windows paths and breaks sql queries.
 						)
