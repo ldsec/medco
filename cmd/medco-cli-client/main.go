@@ -109,8 +109,18 @@ func main() {
 			Usage: "Survival start concept",
 		},
 		cli.StringFlag{
+			Name:  "startsWhen, w",
+			Usage: "In case of multiple occurences of start concept in observations, specifies if the earliest or the latest is taken",
+			Value: "earliest",
+		},
+		cli.StringFlag{
 			Name:  "endConcept, e",
 			Usage: "Survival end concept",
+		},
+		cli.StringFlag{
+			Name:  "endsWhen, z",
+			Usage: "In case of multiple occurences of end concept in observations, specifies if the earliest or the latest is taken",
+			Value: "earliest",
 		},
 	}
 
@@ -160,6 +170,20 @@ func main() {
 			Name:     "cohortName, c",
 			Usage:    "Name of the new cohort",
 			Required: true,
+		},
+	}
+
+	//--- query tools command flags
+	cohortsPatientListFlag := []cli.Flag{
+		cli.StringFlag{
+			Name:     "cohortName, c",
+			Usage:    "Name of the new cohort",
+			Required: true,
+		},
+		cli.StringFlag{
+			Name:     "dumpFile, d",
+			Usage:    "Output file for the timers CSV. Printed to stdout if omitted.",
+			Required: false,
 		},
 	}
 
@@ -297,7 +321,7 @@ func main() {
 			Aliases:   []string{"srva"},
 			Usage:     "Run a survival analysis",
 			Flags:     survivalAnalysisFlag,
-			ArgsUsage: "[-p parameterFile |  [-g granularity] -c cohortName -s startConcept [-x startModifier] -e endConcept [-y endModifier]]",
+			ArgsUsage: "[-p parameterFile |  [-g granularity] -c cohortName -s startConcept [-x startModifier] -w startsWhen -e endConcept [-y endModifier] -z endsWhen]",
 			Description: "Returns the points of the survival curve with the provided parameters." +
 				"Instead of using command line arguments, paramters can also be written in parameter file." +
 				"If both parameter file URL and command line argument set are used," +
@@ -315,7 +339,9 @@ func main() {
 					c.String("cohortName"),
 					c.String("granularity"),
 					c.String("startConcept"),
+					c.String("startsWhen"),
 					c.String("endConcept"),
+					c.String("endsWhen"),
 				)
 
 			},
@@ -391,6 +417,25 @@ func main() {
 					c.GlobalString("user"),
 					c.GlobalString("password"),
 					c.String("cohortName"),
+					c.GlobalBool("disableTLSCheck"),
+				)
+			},
+		},
+		{
+			Name:        "cohorts-patient-list",
+			Aliases:     []string{"cpl"},
+			Usage:       "Retrieve patient list belonging to the cohort",
+			Flags:       cohortsPatientListFlag,
+			ArgsUsage:   "-c cohortName [-d timer dump file]",
+			Description: "Retrieve the encrypted patient list for a given cohort name and locally decrypt it.",
+			Action: func(c *cli.Context) error {
+				return querytoolsclient.ExecuteCohortsPatientList(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.String("cohortName"),
+					c.GlobalString("outputFile"),
+					c.String("dumpFile"),
 					c.GlobalBool("disableTLSCheck"),
 				)
 			},

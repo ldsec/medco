@@ -98,6 +98,7 @@ services:
       - I2B2_LOGIN_USER=medcouser
       - I2B2_LOGIN_PASSWORD=demouser
       - I2B2_WAIT_TIME_SECONDS=450
+      - I2B2_ONT_MAX_ELEMENTS=200
       - LOG_LEVEL=3
       - UNLYNX_GROUP_FILE_PATH=/medco-configuration/group.toml
       - UNLYNX_TIMEOUT_SECONDS=150

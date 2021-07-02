@@ -133,6 +133,11 @@ type SurvivalAnalysisBody struct {
 	// end modifier
 	EndModifier *SurvivalAnalysisParamsBodyEndModifier `json:"endModifier,omitempty"`
 
+	// ends when
+	// Required: true
+	// Enum: [earliest latest]
+	EndsWhen *string `json:"endsWhen"`
+
 	// start concept
 	// Required: true
 	// Pattern: ^\/$|^((\/[^\/]+)+\/?)$
@@ -140,6 +145,11 @@ type SurvivalAnalysisBody struct {
 
 	// start modifier
 	StartModifier *SurvivalAnalysisParamsBodyStartModifier `json:"startModifier,omitempty"`
+
+	// starts when
+	// Required: true
+	// Enum: [earliest latest]
+	StartsWhen *string `json:"startsWhen"`
 
 	// sub group definitions
 	// Max Items: 4
@@ -181,11 +191,19 @@ func (o *SurvivalAnalysisBody) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := o.validateEndsWhen(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := o.validateStartConcept(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := o.validateStartModifier(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateStartsWhen(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -268,6 +286,49 @@ func (o *SurvivalAnalysisBody) validateEndModifier(formats strfmt.Registry) erro
 	return nil
 }
 
+var survivalAnalysisBodyTypeEndsWhenPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["earliest","latest"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		survivalAnalysisBodyTypeEndsWhenPropEnum = append(survivalAnalysisBodyTypeEndsWhenPropEnum, v)
+	}
+}
+
+const (
+
+	// SurvivalAnalysisBodyEndsWhenEarliest captures enum value "earliest"
+	SurvivalAnalysisBodyEndsWhenEarliest string = "earliest"
+
+	// SurvivalAnalysisBodyEndsWhenLatest captures enum value "latest"
+	SurvivalAnalysisBodyEndsWhenLatest string = "latest"
+)
+
+// prop value enum
+func (o *SurvivalAnalysisBody) validateEndsWhenEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, survivalAnalysisBodyTypeEndsWhenPropEnum, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *SurvivalAnalysisBody) validateEndsWhen(formats strfmt.Registry) error {
+
+	if err := validate.Required("body"+"."+"endsWhen", "body", o.EndsWhen); err != nil {
+		return err
+	}
+
+	// value enum
+	if err := o.validateEndsWhenEnum("body"+"."+"endsWhen", "body", *o.EndsWhen); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (o *SurvivalAnalysisBody) validateStartConcept(formats strfmt.Registry) error {
 
 	if err := validate.Required("body"+"."+"startConcept", "body", o.StartConcept); err != nil {
@@ -294,6 +355,49 @@ func (o *SurvivalAnalysisBody) validateStartModifier(formats strfmt.Registry) er
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+var survivalAnalysisBodyTypeStartsWhenPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["earliest","latest"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		survivalAnalysisBodyTypeStartsWhenPropEnum = append(survivalAnalysisBodyTypeStartsWhenPropEnum, v)
+	}
+}
+
+const (
+
+	// SurvivalAnalysisBodyStartsWhenEarliest captures enum value "earliest"
+	SurvivalAnalysisBodyStartsWhenEarliest string = "earliest"
+
+	// SurvivalAnalysisBodyStartsWhenLatest captures enum value "latest"
+	SurvivalAnalysisBodyStartsWhenLatest string = "latest"
+)
+
+// prop value enum
+func (o *SurvivalAnalysisBody) validateStartsWhenEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, survivalAnalysisBodyTypeStartsWhenPropEnum, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *SurvivalAnalysisBody) validateStartsWhen(formats strfmt.Registry) error {
+
+	if err := validate.Required("body"+"."+"startsWhen", "body", o.StartsWhen); err != nil {
+		return err
+	}
+
+	// value enum
+	if err := o.validateStartsWhenEnum("body"+"."+"startsWhen", "body", *o.StartsWhen); err != nil {
+		return err
 	}
 
 	return nil
@@ -654,10 +758,12 @@ func (o *SurvivalAnalysisOKBodyResultsItems0) UnmarshalBinary(b []byte) error {
 type SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0 struct {
 
 	// events
-	Events *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0Events `json:"events,omitempty"`
+	// Required: true
+	Events *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0Events `json:"events"`
 
 	// timepoint
-	Timepoint int64 `json:"timepoint,omitempty"`
+	// Required: true
+	Timepoint *int64 `json:"timepoint"`
 }
 
 // Validate validates this survival analysis o k body results items0 group results items0
@@ -665,6 +771,10 @@ func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0) Validate(formats
 	var res []error
 
 	if err := o.validateEvents(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateTimepoint(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -676,8 +786,8 @@ func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0) Validate(formats
 
 func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0) validateEvents(formats strfmt.Registry) error {
 
-	if swag.IsZero(o.Events) { // not required
-		return nil
+	if err := validate.Required("events", "body", o.Events); err != nil {
+		return err
 	}
 
 	if o.Events != nil {
@@ -687,6 +797,15 @@ func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0) validateEvents(f
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0) validateTimepoint(formats strfmt.Registry) error {
+
+	if err := validate.Required("timepoint", "body", o.Timepoint); err != nil {
+		return err
 	}
 
 	return nil
@@ -716,14 +835,47 @@ func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0) UnmarshalBinary(
 type SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0Events struct {
 
 	// censoringevent
-	Censoringevent string `json:"censoringevent,omitempty"`
+	// Required: true
+	Censoringevent *string `json:"censoringevent"`
 
 	// eventofinterest
-	Eventofinterest string `json:"eventofinterest,omitempty"`
+	// Required: true
+	Eventofinterest *string `json:"eventofinterest"`
 }
 
 // Validate validates this survival analysis o k body results items0 group results items0 events
 func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0Events) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateCensoringevent(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateEventofinterest(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0Events) validateCensoringevent(formats strfmt.Registry) error {
+
+	if err := validate.Required("events"+"."+"censoringevent", "body", o.Censoringevent); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0Events) validateEventofinterest(formats strfmt.Registry) error {
+
+	if err := validate.Required("events"+"."+"eventofinterest", "body", o.Eventofinterest); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -912,6 +1064,9 @@ type SurvivalAnalysisParamsBodySubGroupDefinitionsItems0 struct {
 
 	// panels
 	Panels []*models.Panel `json:"panels"`
+
+	// sub group timing
+	SubGroupTiming models.Timing `json:"subGroupTiming,omitempty"`
 }
 
 // Validate validates this survival analysis params body sub group definitions items0
@@ -923,6 +1078,10 @@ func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) Validate(formats s
 	}
 
 	if err := o.validatePanels(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateSubGroupTiming(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -965,6 +1124,22 @@ func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) validatePanels(for
 			}
 		}
 
+	}
+
+	return nil
+}
+
+func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) validateSubGroupTiming(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.SubGroupTiming) { // not required
+		return nil
+	}
+
+	if err := o.SubGroupTiming.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("subGroupTiming")
+		}
+		return err
 	}
 
 	return nil

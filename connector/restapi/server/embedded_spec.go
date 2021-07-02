@@ -264,6 +264,41 @@ func init() {
         }
       }
     },
+    "/node/explore/cohorts/patient-list": {
+      "post": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
+        ],
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Retrieve the encrypted patient list for a given cohort name",
+        "operationId": "postCohortsPatientList",
+        "parameters": [
+          {
+            "$ref": "#/parameters/cohortsPatientListRequest"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/getCohortsPatientListResponse"
+          },
+          "403": {
+            "$ref": "#/responses/forbiddenResponse"
+          },
+          "404": {
+            "$ref": "#/responses/notFoundResponse"
+          },
+          "default": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      }
+    },
     "/node/explore/cohorts/{name}": {
       "put": {
         "security": [
@@ -844,7 +879,7 @@ func init() {
                 }
               },
               "operator": {
-                "description": "EQ: equals NE: not equals GT: greater than GE: greater than or equal LT: less than LE: less than or equal BETWEEN: between (value syntax: x and y)\n",
+                "description": "# NUMBER operators EQ: equal NE: not equal GT: greater than GE: greater than or equal LT: less than LE: less than or equal BETWEEN: between (value syntax: \"x and y\") # TEXT operators IN: in (value syntax: \"'x','y','z'\") LIKE[exact]: equal LIKE[begin]: begins with LIKE[end]: ends with LIKE[contains]: contains\n",
                 "type": "string",
                 "enum": [
                   "EQ",
@@ -853,16 +888,27 @@ func init() {
                   "GE",
                   "LT",
                   "LE",
-                  "BETWEEN"
+                  "BETWEEN",
+                  "IN",
+                  "LIKE[exact]",
+                  "LIKE[begin]",
+                  "LIKE[end]",
+                  "LIKE[contains]"
                 ]
               },
               "queryTerm": {
                 "type": "string",
                 "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/)$"
               },
-              "value": {
+              "type": {
                 "type": "string",
-                "pattern": "^[+-]?([0-9]*[.])?[0-9]+"
+                "enum": [
+                  "NUMBER",
+                  "TEXT"
+                ]
+              },
+              "value": {
+                "type": "string"
               }
             }
           }
@@ -942,9 +988,36 @@ func init() {
     }
   },
   "parameters": {
+    "cohortsPatientListRequest": {
+      "description": "Cohort patient list request",
+      "name": "cohortsPatientListRequest",
+      "in": "body",
+      "required": true,
+      "schema": {
+        "type": "object",
+        "required": [
+          "cohortName",
+          "userPublicKey"
+        ],
+        "properties": {
+          "cohortName": {
+            "type": "string",
+            "pattern": "^\\w+$"
+          },
+          "id": {
+            "type": "string",
+            "pattern": "^[\\w:-]+$"
+          },
+          "userPublicKey": {
+            "type": "string",
+            "pattern": "^[\\w=-]+$"
+          }
+        }
+      }
+    },
     "cohortsRequest": {
-      "description": "Cohort that has been updated or created",
-      "name": "cohortRequest",
+      "description": "Cohort that has been updated or created.",
+      "name": "cohortsRequest",
       "in": "body",
       "required": true,
       "schema": {
@@ -1017,7 +1090,9 @@ func init() {
           "timeLimit",
           "timeGranularity",
           "startConcept",
-          "endConcept"
+          "startsWhen",
+          "endConcept",
+          "endsWhen"
         ],
         "properties": {
           "ID": {
@@ -1049,6 +1124,13 @@ func init() {
               }
             }
           },
+          "endsWhen": {
+            "type": "string",
+            "enum": [
+              "earliest",
+              "latest"
+            ]
+          },
           "startConcept": {
             "type": "string",
             "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
@@ -1070,6 +1152,13 @@ func init() {
               }
             }
           },
+          "startsWhen": {
+            "type": "string",
+            "enum": [
+              "earliest",
+              "latest"
+            ]
+          },
           "subGroupDefinitions": {
             "type": "array",
             "maxItems": 4,
@@ -1085,6 +1174,9 @@ func init() {
                   "items": {
                     "$ref": "#/definitions/panel"
                   }
+                },
+                "subGroupTiming": {
+                  "$ref": "#/definitions/timing"
                 }
               }
             }
@@ -1196,6 +1288,34 @@ func init() {
         }
       }
     },
+    "forbiddenResponse": {
+      "description": "Request is valid and user is authenticated, but not authorized to perform this action.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "getCohortsPatientListResponse": {
+      "description": "Queried patient list",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "timers": {
+            "$ref": "#/definitions/timers"
+          }
+        }
+      }
+    },
     "getCohortsResponse": {
       "description": "Queried cohorts",
       "schema": {
@@ -1211,6 +1331,20 @@ func init() {
             },
             "creationDate": {
               "type": "string"
+            },
+            "queryDefinition": {
+              "type": "object",
+              "properties": {
+                "panels": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/panel"
+                  }
+                },
+                "queryTiming": {
+                  "$ref": "#/definitions/timing"
+                }
+              }
             },
             "queryId": {
               "type": "integer"
@@ -1288,9 +1422,17 @@ func init() {
                   "type": "array",
                   "items": {
                     "type": "object",
+                    "required": [
+                      "timepoint",
+                      "events"
+                    ],
                     "properties": {
                       "events": {
                         "type": "object",
+                        "required": [
+                          "eventofinterest",
+                          "censoringevent"
+                        ],
                         "properties": {
                           "censoringevent": {
                             "type": "string"
@@ -1609,7 +1751,9 @@ func init() {
                 "timeLimit",
                 "timeGranularity",
                 "startConcept",
-                "endConcept"
+                "startsWhen",
+                "endConcept",
+                "endsWhen"
               ],
               "properties": {
                 "ID": {
@@ -1641,6 +1785,13 @@ func init() {
                     }
                   }
                 },
+                "endsWhen": {
+                  "type": "string",
+                  "enum": [
+                    "earliest",
+                    "latest"
+                  ]
+                },
                 "startConcept": {
                   "type": "string",
                   "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
@@ -1661,6 +1812,13 @@ func init() {
                       "pattern": "^((\\/[^\\/]+)+\\/)$"
                     }
                   }
+                },
+                "startsWhen": {
+                  "type": "string",
+                  "enum": [
+                    "earliest",
+                    "latest"
+                  ]
                 },
                 "subGroupDefinitions": {
                   "type": "array",
@@ -1793,6 +1951,103 @@ func init() {
         }
       }
     },
+    "/node/explore/cohorts/patient-list": {
+      "post": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
+        ],
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Retrieve the encrypted patient list for a given cohort name",
+        "operationId": "postCohortsPatientList",
+        "parameters": [
+          {
+            "description": "Cohort patient list request",
+            "name": "cohortsPatientListRequest",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "cohortName",
+                "userPublicKey"
+              ],
+              "properties": {
+                "cohortName": {
+                  "type": "string",
+                  "pattern": "^\\w+$"
+                },
+                "id": {
+                  "type": "string",
+                  "pattern": "^[\\w:-]+$"
+                },
+                "userPublicKey": {
+                  "type": "string",
+                  "pattern": "^[\\w=-]+$"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Queried patient list",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "timers": {
+                  "$ref": "#/definitions/timers"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Request is valid and user is authenticated, but not authorized to perform this action.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/node/explore/cohorts/{name}": {
       "put": {
         "security": [
@@ -1817,8 +2072,8 @@ func init() {
             "required": true
           },
           {
-            "description": "Cohort that has been updated or created",
-            "name": "cohortRequest",
+            "description": "Cohort that has been updated or created.",
+            "name": "cohortsRequest",
             "in": "body",
             "required": true,
             "schema": {
@@ -1915,8 +2170,8 @@ func init() {
             "required": true
           },
           {
-            "description": "Cohort that has been updated or created",
-            "name": "cohortRequest",
+            "description": "Cohort that has been updated or created.",
+            "name": "cohortsRequest",
             "in": "body",
             "required": true,
             "schema": {
@@ -2324,11 +2579,39 @@ func init() {
         "creationDate": {
           "type": "string"
         },
+        "queryDefinition": {
+          "type": "object",
+          "properties": {
+            "panels": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/panel"
+              }
+            },
+            "queryTiming": {
+              "$ref": "#/definitions/timing"
+            }
+          }
+        },
         "queryId": {
           "type": "integer"
         },
         "updateDate": {
           "type": "string"
+        }
+      }
+    },
+    "GetCohortsOKBodyItems0QueryDefinition": {
+      "type": "object",
+      "properties": {
+        "panels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/panel"
+          }
+        },
+        "queryTiming": {
+          "$ref": "#/definitions/timing"
         }
       }
     },
@@ -2418,7 +2701,7 @@ func init() {
           }
         },
         "operator": {
-          "description": "EQ: equals NE: not equals GT: greater than GE: greater than or equal LT: less than LE: less than or equal BETWEEN: between (value syntax: x and y)\n",
+          "description": "# NUMBER operators EQ: equal NE: not equal GT: greater than GE: greater than or equal LT: less than LE: less than or equal BETWEEN: between (value syntax: \"x and y\") # TEXT operators IN: in (value syntax: \"'x','y','z'\") LIKE[exact]: equal LIKE[begin]: begins with LIKE[end]: ends with LIKE[contains]: contains\n",
           "type": "string",
           "enum": [
             "EQ",
@@ -2427,16 +2710,27 @@ func init() {
             "GE",
             "LT",
             "LE",
-            "BETWEEN"
+            "BETWEEN",
+            "IN",
+            "LIKE[exact]",
+            "LIKE[begin]",
+            "LIKE[end]",
+            "LIKE[contains]"
           ]
         },
         "queryTerm": {
           "type": "string",
           "pattern": "^([\\w=-]+)$|^((\\/[^\\/]+)+\\/)$"
         },
-        "value": {
+        "type": {
           "type": "string",
-          "pattern": "^[+-]?([0-9]*[.])?[0-9]+"
+          "enum": [
+            "NUMBER",
+            "TEXT"
+          ]
+        },
+        "value": {
+          "type": "string"
         }
       }
     },
@@ -2476,9 +2770,17 @@ func init() {
     },
     "ResultsItems0GroupResultsItems0": {
       "type": "object",
+      "required": [
+        "timepoint",
+        "events"
+      ],
       "properties": {
         "events": {
           "type": "object",
+          "required": [
+            "eventofinterest",
+            "censoringevent"
+          ],
           "properties": {
             "censoringevent": {
               "type": "string"
@@ -2495,6 +2797,10 @@ func init() {
     },
     "ResultsItems0GroupResultsItems0Events": {
       "type": "object",
+      "required": [
+        "eventofinterest",
+        "censoringevent"
+      ],
       "properties": {
         "censoringevent": {
           "type": "string"
@@ -2516,6 +2822,9 @@ func init() {
           "items": {
             "$ref": "#/definitions/panel"
           }
+        },
+        "subGroupTiming": {
+          "$ref": "#/definitions/timing"
         }
       }
     },
@@ -2950,9 +3259,36 @@ func init() {
     }
   },
   "parameters": {
+    "cohortsPatientListRequest": {
+      "description": "Cohort patient list request",
+      "name": "cohortsPatientListRequest",
+      "in": "body",
+      "required": true,
+      "schema": {
+        "type": "object",
+        "required": [
+          "cohortName",
+          "userPublicKey"
+        ],
+        "properties": {
+          "cohortName": {
+            "type": "string",
+            "pattern": "^\\w+$"
+          },
+          "id": {
+            "type": "string",
+            "pattern": "^[\\w:-]+$"
+          },
+          "userPublicKey": {
+            "type": "string",
+            "pattern": "^[\\w=-]+$"
+          }
+        }
+      }
+    },
     "cohortsRequest": {
-      "description": "Cohort that has been updated or created",
-      "name": "cohortRequest",
+      "description": "Cohort that has been updated or created.",
+      "name": "cohortsRequest",
       "in": "body",
       "required": true,
       "schema": {
@@ -3025,7 +3361,9 @@ func init() {
           "timeLimit",
           "timeGranularity",
           "startConcept",
-          "endConcept"
+          "startsWhen",
+          "endConcept",
+          "endsWhen"
         ],
         "properties": {
           "ID": {
@@ -3057,6 +3395,13 @@ func init() {
               }
             }
           },
+          "endsWhen": {
+            "type": "string",
+            "enum": [
+              "earliest",
+              "latest"
+            ]
+          },
           "startConcept": {
             "type": "string",
             "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
@@ -3078,6 +3423,13 @@ func init() {
               }
             }
           },
+          "startsWhen": {
+            "type": "string",
+            "enum": [
+              "earliest",
+              "latest"
+            ]
+          },
           "subGroupDefinitions": {
             "type": "array",
             "maxItems": 4,
@@ -3093,6 +3445,9 @@ func init() {
                   "items": {
                     "$ref": "#/definitions/panel"
                   }
+                },
+                "subGroupTiming": {
+                  "$ref": "#/definitions/timing"
                 }
               }
             }
@@ -3204,6 +3559,34 @@ func init() {
         }
       }
     },
+    "forbiddenResponse": {
+      "description": "Request is valid and user is authenticated, but not authorized to perform this action.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "getCohortsPatientListResponse": {
+      "description": "Queried patient list",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "timers": {
+            "$ref": "#/definitions/timers"
+          }
+        }
+      }
+    },
     "getCohortsResponse": {
       "description": "Queried cohorts",
       "schema": {
@@ -3219,6 +3602,20 @@ func init() {
             },
             "creationDate": {
               "type": "string"
+            },
+            "queryDefinition": {
+              "type": "object",
+              "properties": {
+                "panels": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/panel"
+                  }
+                },
+                "queryTiming": {
+                  "$ref": "#/definitions/timing"
+                }
+              }
             },
             "queryId": {
               "type": "integer"
@@ -3296,9 +3693,17 @@ func init() {
                   "type": "array",
                   "items": {
                     "type": "object",
+                    "required": [
+                      "timepoint",
+                      "events"
+                    ],
                     "properties": {
                       "events": {
                         "type": "object",
+                        "required": [
+                          "eventofinterest",
+                          "censoringevent"
+                        ],
                         "properties": {
                           "censoringevent": {
                             "type": "string"

@@ -1,3 +1,5 @@
+// +build unit_test
+
 package survivalclient
 
 import (
@@ -39,32 +41,39 @@ var parameters = &Parameters{
 		ModifierKey: "/any/start/modifier/key/",
 		AppliedPath: "/any/start/path/%",
 	},
+	StartsWhen:     "earliest",
 	EndConceptPath: "/any/end/path/",
 	EndModifier: &modifier{
 		ModifierKey: "/any/end/modifier/key/",
 		AppliedPath: "/any/end/path/%",
 	},
+	EndsWhen: "earliest",
 	SubGroups: []*struct {
-		GroupName string "yaml:\"group_name\""
-		Panels    []*struct {
+		GroupName   string "yaml:\"group_name\""
+		GroupTiming string "yaml:\"group_timing\""
+		Panels      []*struct {
 			Not   bool "yaml:\"not\""
 			Items []*struct {
 				Path     string    `yaml:"path"`
 				Modifier *modifier `yaml:"modifier,omitempty"`
 			} "yaml:\"items\""
+			PanelTiming string "yaml:\"panel_timing\""
 		} "yaml:\"panels\""
 	}{
 		{
-			GroupName: "AAA",
+			GroupTiming: "any",
+			GroupName:   "AAA",
 			Panels: []*struct {
 				Not   bool "yaml:\"not\""
 				Items []*struct {
 					Path     string    `yaml:"path"`
 					Modifier *modifier `yaml:"modifier,omitempty"`
 				} "yaml:\"items\""
+				PanelTiming string "yaml:\"panel_timing\""
 			}{
 				{
-					Not: false,
+					PanelTiming: "any",
+					Not:         false,
 					Items: []*struct {
 						Path     string    `yaml:"path"`
 						Modifier *modifier `yaml:"modifier,omitempty"`
@@ -82,7 +91,8 @@ var parameters = &Parameters{
 					},
 				},
 				{
-					Not: true,
+					PanelTiming: "sameinstancenum",
+					Not:         true,
 					Items: []*struct {
 						Path     string    `yaml:"path"`
 						Modifier *modifier `yaml:"modifier,omitempty"`
@@ -95,16 +105,19 @@ var parameters = &Parameters{
 			},
 		},
 		{
-			GroupName: "BBB",
+			GroupName:   "BBB",
+			GroupTiming: "sameinstancenum",
 			Panels: []*struct {
 				Not   bool "yaml:\"not\""
 				Items []*struct {
 					Path     string    `yaml:"path"`
 					Modifier *modifier `yaml:"modifier,omitempty"`
 				} "yaml:\"items\""
+				PanelTiming string "yaml:\"panel_timing\""
 			}{
 				{
-					Not: false,
+					Not:         false,
+					PanelTiming: "any",
 					Items: []*struct {
 						Path     string    `yaml:"path"`
 						Modifier *modifier `yaml:"modifier,omitempty"`

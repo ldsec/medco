@@ -26,7 +26,7 @@ EOSQL
     done
 
     # delete loaded data
-    rm -rf "$I2B2_DATA_DIR"/{*,.*} || true
+    rm -rf "$I2B2_DATA_DIR"/.git "$I2B2_DATA_DIR"/*
 
 fi
 

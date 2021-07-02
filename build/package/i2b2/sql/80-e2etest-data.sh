@@ -7,8 +7,7 @@ set -Eeuo pipefail
 # 3 concepts: 1, 2, 3
 # observation_fact: p1: c1; p2: c1, c2; p3: c2, c3; p4: c1, c2, c3
 # the same data is replicated on the 3 different nodes
-# Totalnum for e2etest is the total number of patients linked (directly or indirectly)
-# to the concept.
+# Totalnum for e2etest is the number of patients with observations for the concept/modifier and its children.
 
 psql $PSQL_PARAMS -d "$I2B2_DB_NAME" <<-EOSQL
 
@@ -97,6 +96,16 @@ psql $PSQL_PARAMS -d "$I2B2_DB_NAME" <<-EOSQL
                 'modifier_cd', 'modifier_dimension', 'modifier_path',
                 'T', 'LIKE', '\modifiers\3\', 'E2E Modifier 3', '\modifiers\3\',
                 'NOW()', 'NOW()', 'NOW()', 'ENC_ID', '\e2etest\3\', 'ENC_ID:7', NULL
+            ), (
+                '2', '\modifiers\2text\', 'E2E Modifier 2 text', 'N', 'RA', '0',
+                'modifier_cd', 'modifier_dimension', 'modifier_path',
+                'T', 'LIKE', '\modifiers\2text\', 'E2E Modifier 2 text', '\modifiers\2text\',
+                'NOW()', 'NOW()', 'NOW()', 'T', '\e2etest\2\', 'ENC_ID:8', NULL
+            ), (
+                '2', '\modifiers\3text\', 'E2E Modifier 3 text', 'N', 'RA', '0',
+                'modifier_cd', 'modifier_dimension', 'modifier_path',
+                'T', 'LIKE', '\modifiers\3text\', 'E2E Modifier 3 text', '\modifiers\3text\',
+                'NOW()', 'NOW()', 'NOW()', 'T', '\e2etest\3\', 'ENC_ID:9', NULL
             );
 
     -- medco_ont.sensitive_tagged
@@ -180,7 +189,9 @@ psql $PSQL_PARAMS -d "$I2B2_DB_NAME" <<-EOSQL
             ('\modifiers\', 'ENC_ID:4', 'NOW()', '1'),
             ('\modifiers\1\', 'ENC_ID:5', 'NOW()', '1'),
             ('\modifiers\2\', 'ENC_ID:6', 'NOW()', '1'),
-            ('\modifiers\3\', 'ENC_ID:7', 'NOW()', '1');
+            ('\modifiers\3\', 'ENC_ID:7', 'NOW()', '1'),
+            ('\modifiers\2text\', 'ENC_ID:8', 'NOW()', '1'),
+            ('\modifiers\3text\', 'ENC_ID:9', 'NOW()', '1');
 
     -- i2b2demodata_i2b2.provider_dimension
     insert into i2b2demodata_i2b2.provider_dimension
@@ -225,12 +236,16 @@ psql $PSQL_PARAMS -d "$I2B2_DB_NAME" <<-EOSQL
             ('1', '1', 'TAG_ID:11', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1', NULL, NULL, NULL),
             ('1', '1', 'ENC_ID:1', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1', 'N', 'E', '10'),
             ('1', '1', 'ENC_ID:1', 'e2etest', 'NOW()', 'ENC_ID:5', '1', 'NOW()', '1', 'N', 'E', '10'),
+            ('1', '1', 'ENC_ID:2', 'e2etest', 'NOW()', 'ENC_ID:8', '1', 'NOW()', '1', 'T', 'bcde', NULL),
+            ('1', '1', 'ENC_ID:3', 'e2etest', 'NOW()', 'ENC_ID:9', '1', 'NOW()', '1', 'T', 'ab', NULL),
             ('2', '2', 'TAG_ID:11', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1', NULL, NULL, NULL),
             ('2', '2', 'TAG_ID:12', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1', NULL, NULL, NULL),
             ('2', '2', 'ENC_ID:1', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1', 'N', 'E', '20'),
             ('2', '2', 'ENC_ID:1', 'e2etest', 'NOW()', 'ENC_ID:4', '1', 'NOW()', '1', 'N', 'E', '20'),
             ('2', '2', 'ENC_ID:2', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1', 'N', 'E', '50'),
             ('2', '2', 'ENC_ID:2', 'e2etest', 'NOW()', 'ENC_ID:6', '1', 'NOW()', '1', 'N', 'E', '5'),
+            ('2', '2', 'ENC_ID:2', 'e2etest', 'NOW()', 'ENC_ID:8', '1', 'NOW()', '1', 'T', 'abc', NULL),
+            ('2', '2', 'ENC_ID:3', 'e2etest', 'NOW()', 'ENC_ID:9', '1', 'NOW()', '1', 'T', 'def', NULL),
             ('3', '3', 'TAG_ID:12', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1', NULL, NULL, NULL),
             ('3', '3', 'TAG_ID:13', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1', NULL, NULL, NULL),
             ('3', '3', 'ENC_ID:1', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1', 'N', 'E', '30'),
@@ -239,9 +254,11 @@ psql $PSQL_PARAMS -d "$I2B2_DB_NAME" <<-EOSQL
             ('3', '3', 'ENC_ID:2', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1', 'N', 'E', '25'),
             ('3', '3', 'ENC_ID:2', 'e2etest', 'NOW()', 'ENC_ID:4', '1', 'NOW()', '1', 'N', 'E', '30'),
             ('3', '3', 'ENC_ID:2', 'e2etest', 'NOW()', 'ENC_ID:6', '1', 'NOW()', '1', 'N', 'E', '15'),
+            ('3', '3', 'ENC_ID:2', 'e2etest', 'NOW()', 'ENC_ID:8', '1', 'NOW()', '1', 'T', 'de', NULL),
             ('3', '3', 'ENC_ID:3', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1', 'N', 'E', '77'),
             ('3', '3', 'ENC_ID:3', 'e2etest', 'NOW()', 'ENC_ID:4', '1', 'NOW()', '1', 'N', 'E', '66'),
             ('3', '3', 'ENC_ID:3', 'e2etest', 'NOW()', 'ENC_ID:7', '1', 'NOW()', '1', 'N', 'E', '88'),
+            ('3', '3', 'ENC_ID:3', 'e2etest', 'NOW()', 'ENC_ID:9', '1', 'NOW()', '1', 'T', 'abcdef', NULL),
             ('4', '4', 'TAG_ID:11', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1', NULL, NULL, NULL),
             ('4', '4', 'TAG_ID:12', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1', NULL, NULL, NULL),
             ('4', '4', 'TAG_ID:13', 'e2etest', 'NOW()', '@', '1', 'NOW()', '1', NULL, NULL, NULL),

@@ -25,8 +25,10 @@ func MedCoSurvivalAnalysisHandler(param survival_analysis.SurvivalAnalysisParams
 		*param.Body.TimeGranularity,
 		*param.Body.StartConcept,
 		param.Body.StartModifier,
+		param.Body.StartsWhen,
 		*param.Body.EndConcept,
 		param.Body.EndModifier,
+		param.Body.EndsWhen,
 	)
 	logrus.Debug("survivalAnalysis: ", survivalAnalysisQuery)
 	err := survivalAnalysisQuery.Validate()
@@ -59,6 +61,7 @@ func MedCoSurvivalAnalysisHandler(param survival_analysis.SurvivalAnalysisParams
 	err = survivalAnalysisQuery.Execute()
 
 	if err != nil {
+		err = fmt.Errorf("queryID: %s, error: %s", survivalAnalysisQuery.QueryName, err.Error())
 		logrus.Error(err)
 		return survival_analysis.NewSurvivalAnalysisDefault(500).WithPayload(
 			&survival_analysis.SurvivalAnalysisDefaultBody{
@@ -72,10 +75,18 @@ func MedCoSurvivalAnalysisHandler(param survival_analysis.SurvivalAnalysisParams
 
 		timePoints := make([]*survival_analysis.SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0, 0)
 		for _, timePoint := range group.TimePointResults {
-			timePoints = append(timePoints, &survival_analysis.SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0{Timepoint: int64(timePoint.TimePoint),
+			timeValue := new(int64)
+			eventOfInterest := new(string)
+			censoringEvent := new(string)
+
+			*timeValue = int64(timePoint.TimePoint)
+			*eventOfInterest = timePoint.Result.EventValueAgg
+			*censoringEvent = timePoint.Result.CensoringValueAgg
+
+			timePoints = append(timePoints, &survival_analysis.SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0{Timepoint: timeValue,
 				Events: &survival_analysis.SurvivalAnalysisOKBodyResultsItems0GroupResultsItems0Events{
-					Eventofinterest: timePoint.Result.EventValueAgg,
-					Censoringevent:  timePoint.Result.CensoringValueAgg,
+					Eventofinterest: eventOfInterest,
+					Censoringevent:  censoringEvent,
 				}})
 		}
 		resultList = append(resultList, &survival_analysis.SurvivalAnalysisOKBodyResultsItems0{

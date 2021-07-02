@@ -296,7 +296,7 @@ func (o *PostCohortsBody) Validate(formats strfmt.Registry) error {
 
 func (o *PostCohortsBody) validateCreationDate(formats strfmt.Registry) error {
 
-	if err := validate.Required("cohortRequest"+"."+"creationDate", "body", o.CreationDate); err != nil {
+	if err := validate.Required("cohortsRequest"+"."+"creationDate", "body", o.CreationDate); err != nil {
 		return err
 	}
 
@@ -305,7 +305,7 @@ func (o *PostCohortsBody) validateCreationDate(formats strfmt.Registry) error {
 
 func (o *PostCohortsBody) validatePatientSetID(formats strfmt.Registry) error {
 
-	if err := validate.Required("cohortRequest"+"."+"patientSetID", "body", o.PatientSetID); err != nil {
+	if err := validate.Required("cohortsRequest"+"."+"patientSetID", "body", o.PatientSetID); err != nil {
 		return err
 	}
 
@@ -314,7 +314,7 @@ func (o *PostCohortsBody) validatePatientSetID(formats strfmt.Registry) error {
 
 func (o *PostCohortsBody) validateUpdateDate(formats strfmt.Registry) error {
 
-	if err := validate.Required("cohortRequest"+"."+"updateDate", "body", o.UpdateDate); err != nil {
+	if err := validate.Required("cohortsRequest"+"."+"updateDate", "body", o.UpdateDate); err != nil {
 		return err
 	}
 

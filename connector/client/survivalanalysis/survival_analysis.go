@@ -33,10 +33,13 @@ type SurvivalAnalysis struct {
 
 	cohortName string
 
-	startConceptPath    string
-	startModifier       *survival_analysis.SurvivalAnalysisParamsBodyStartModifier
-	endConceptPath      string
-	endModifier         *survival_analysis.SurvivalAnalysisParamsBodyEndModifier
+	startConceptPath string
+	startModifier    *survival_analysis.SurvivalAnalysisParamsBodyStartModifier
+	startsWhen       string
+	endConceptPath   string
+	endModifier      *survival_analysis.SurvivalAnalysisParamsBodyEndModifier
+	endsWhen         string
+
 	subGroupDefinitions []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0
 
 	limit       int
@@ -59,8 +62,10 @@ func NewSurvivalAnalysis(
 	granularity,
 	startConcept string,
 	startModifier *survival_analysis.SurvivalAnalysisParamsBodyStartModifier,
+	startsWhen string,
 	endConcept string,
 	endModifier *survival_analysis.SurvivalAnalysisParamsBodyEndModifier,
+	endsWhen string,
 	disableTLSCheck bool,
 ) (q *SurvivalAnalysis, err error) {
 	q = &SurvivalAnalysis{
@@ -70,8 +75,10 @@ func NewSurvivalAnalysis(
 		subGroupDefinitions: subGroupDefinitions,
 		startConceptPath:    startConcept,
 		startModifier:       startModifier,
+		startsWhen:          startsWhen,
 		endConceptPath:      endConcept,
 		endModifier:         endModifier,
+		endsWhen:            endsWhen,
 		limit:               limit,
 		granularity:         granularity,
 		formats:             strfmt.Default,
@@ -105,6 +112,7 @@ func NewSurvivalAnalysis(
 
 	q.userPublicKey, q.userPrivateKey, err = unlynx.GenerateKeyPair()
 	if err != nil {
+		logrus.Errorf("while generating key pair: %s", err.Error())
 		return
 	}
 

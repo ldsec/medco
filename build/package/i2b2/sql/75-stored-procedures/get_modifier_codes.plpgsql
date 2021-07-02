@@ -1,0 +1,22 @@
+-- pl/pgsql function to return modifier codes for a given modifier path and its descendants, for a given applied path
+
+
+CREATE OR REPLACE FUNCTION medco_ont.get_modifier_codes(ontology character varying,path character varying,applied_path character varying)
+    RETURNS SETOF character varying
+    LANGUAGE 'plpgsql'
+    STABLE
+    PARALLEL SAFE
+AS $BODY$ 
+BEGIN
+
+    RETURN QUERY EXECUTE format(
+      'SELECT c_basecode
+	      FROM medco_ont.%I
+	      WHERE (c_basecode IS NOT NULL AND c_basecode != %L
+			    AND upper(c_facttablecolumn) = %L
+		      AND c_fullname LIKE $1 AND m_applied_path = $2);',
+      ontology, '', 'MODIFIER_CD'
+    )
+    USING path, applied_path;
+  END;
+  $BODY$;

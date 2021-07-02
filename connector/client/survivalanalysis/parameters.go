@@ -16,16 +16,20 @@ type Parameters struct {
 	CohortName       string    `yaml:"cohort_name"`
 	StartConceptPath string    `yaml:"start_concept_path"`
 	StartModifier    *modifier `yaml:"start_modifier,omitempty"`
+	StartsWhen       string    `yaml:"starts_when"`
 	EndConceptPath   string    `yaml:"end_concept_path"`
 	EndModifier      *modifier `yaml:"end_modifier,omitempty"`
+	EndsWhen         string    `yaml:"ends_when"`
 	SubGroups        []*struct {
-		GroupName string `yaml:"group_name"`
-		Panels    []*struct {
+		GroupName   string `yaml:"group_name"`
+		GroupTiming string `yaml:"group_timing"`
+		Panels      []*struct {
 			Not   bool `yaml:"not"`
 			Items []*struct {
 				Path     string    `yaml:"path"`
 				Modifier *modifier `yaml:"modifier,omitempty"`
 			} `yaml:"items"`
+			PanelTiming string `yaml:"panel_timing"`
 		} `yaml:"panels"`
 	} `yaml:"sub_groups,omitempty"`
 }
@@ -82,13 +86,15 @@ func (p *Parameters) String() string {
 		endModifierString = fmt.Sprintf("{ModifierKey:%s AppliedPath:%s}", endMod.ModifierKey, endMod.AppliedPath)
 	}
 
-	return fmt.Sprintf("{TimeResolution:%s TimeLimit:%d CohortName:%s StartConceptPath:%s StartModifier:%s EndConceptPath:%s EndModifier:%s SubGroups:%s}",
+	return fmt.Sprintf("{TimeResolution:%s TimeLimit:%d CohortName:%s StartConceptPath:%s StartModifier:%s StartsWhen:%s EndConceptPath:%s EndModifier:%s EndsWhen:%s SubGroups:%s}",
 		p.TimeResolution,
 		p.TimeLimit,
 		p.CohortName,
 		p.StartConceptPath,
 		startModifierString,
+		p.StartsWhen,
 		p.EndConceptPath,
 		endModifierString,
+		p.EndsWhen,
 		subGroupArray)
 }

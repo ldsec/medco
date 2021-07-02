@@ -131,6 +131,7 @@ func TestExecutePsmQueryWithValue(t *testing.T) {
 		Encrypted: &encrypted,
 		QueryTerm: &queryTerm,
 		Operator:  "EQ",
+		Type:      "NUMBER",
 		Value:     "10",
 	}
 

@@ -2,10 +2,14 @@ package querytoolsclient
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
 
+	medcoclient "github.com/ldsec/medco/connector/client"
+
+	"github.com/ldsec/medco/connector/restapi/models"
 	utilclient "github.com/ldsec/medco/connector/util/client"
 
 	"github.com/sirupsen/logrus"
@@ -45,11 +49,14 @@ func ExecuteGetCohorts(token, username, password string, disableTLSCheck bool, r
 		return err
 	}
 	logrus.Debug("Writing headers")
-	resultCSV.Write([]string{"node_index", "cohort_name", "cohort_id", "query_id", "creation_date", "update_date"})
+	resultCSV.Write([]string{"node_index", "cohort_name", "cohort_id", "query_id", "creation_date", "update_date", "query_timing", "panels"})
 
 	for nodeIndex, nodeResult := range cohorts {
 		for _, cohortInfo := range nodeResult {
 			logrus.Debugf("Writing result %d", nodeIndex)
+			panelJSONs, err := marshal(cohortInfo.QueryDefinition.Panels)
+			// removing the quotes from the marshalling process eases parsing of the produced file
+			panelJSONs = strings.Replace(panelJSONs, `"`, "", -1)
 			err = resultCSV.Write([]string{
 				strconv.Itoa(nodeIndex),
 				cohortInfo.CohortName,
@@ -57,6 +64,8 @@ func ExecuteGetCohorts(token, username, password string, disableTLSCheck bool, r
 				strconv.Itoa(cohortInfo.QueryID),
 				cohortInfo.CreationDate.Format(time.RFC3339),
 				cohortInfo.UpdateDate.Format(time.RFC3339),
+				string(cohortInfo.QueryDefinition.QueryTiming),
+				panelJSONs,
 			})
 			if err != nil {
 				err = fmt.Errorf("cohorts request writing results: %s", err.Error())
@@ -195,4 +204,87 @@ func ExecuteRemoveCohorts(token, username, password, cohortName string, disableT
 	}
 	return nil
 
+}
+
+// ExecuteCohortsPatientList executes a cohorts patient list query
+func ExecuteCohortsPatientList(token, username, password, cohortName, resultFile, timerFile string, disableTLSCheck bool) error {
+	accessToken, err := utilclient.RetrieveOrGetNewAccessToken(token, username, password, disableTLSCheck)
+	if err != nil {
+		err = fmt.Errorf("while retrieving access token: %s", err.Error())
+		logrus.Error(err)
+		return err
+	}
+	logrus.Debug("access token received")
+	logrus.Tracef("token %s", accessToken)
+
+	// calling API
+	cohortsPatientList, err := NewCohortsPatientList(accessToken, cohortName, disableTLSCheck)
+	if err != nil {
+		err = fmt.Errorf("while creating new cohorts patient list request: %s", err.Error())
+		logrus.Error(err.Error())
+		return err
+	}
+	patientLists, nodeTimers, localTimers, err := cohortsPatientList.Execute()
+	if err != nil {
+		err = fmt.Errorf("while executing patient list request, request ID %s: %s", cohortsPatientList.id, err.Error())
+		logrus.Error(err.Error())
+		return err
+	}
+
+	// displaying results
+	resultCSV, err := utilclient.NewCSV(resultFile)
+	if err != nil {
+		err = fmt.Errorf("cohorts patient list request writing results: %s", err.Error())
+		logrus.Error(err)
+		return err
+	}
+	for i, list := range patientLists {
+		resultCSV.Write([]string{fmt.Sprintf("Node idx %d", i)})
+
+		// the list is not required to be sorted, but it is guaranteed here for testing purpose
+		sort.Slice(list, func(a int, b int) bool { return list[a] < list[b] })
+
+		listString := make([]string, len(list))
+		for j, pNum := range list {
+			listString[j] = strconv.FormatInt(pNum, 10)
+		}
+		resultCSV.Write(listString)
+	}
+	err = resultCSV.Flush()
+	if err != nil {
+		err = fmt.Errorf("cohorts patient list request flushing result file: %s", err.Error())
+		logrus.Error(err)
+		return err
+	}
+	err = resultCSV.Close()
+	if err != nil {
+		err = fmt.Errorf("cohorts patient list request closing result file: %s", err.Error())
+		logrus.Error(err)
+		return err
+	}
+
+	// dumping timers
+	err = medcoclient.DumpTimers(timerFile, nodeTimers, localTimers)
+	if err != nil {
+		err = fmt.Errorf("while dumping timers: %s", err.Error())
+		logrus.Error(err)
+		return err
+	}
+
+	return nil
+}
+func marshal(panels []*models.Panel) (res string, err error) {
+	panelStrings := make([]string, 0)
+	var marshalledPanel []byte
+	for _, panel := range panels {
+		if panel != nil {
+			marshalledPanel, err = panel.MarshalBinary()
+			if err != nil {
+				err = fmt.Errorf("while marshalling I2B2 panel: %s", err.Error())
+				return "", err
+			}
+			panelStrings = append(panelStrings, string(marshalledPanel))
+		}
+	}
+	return fmt.Sprintf(`{"panels":[%s]}`, strings.Join(panelStrings, ",")), nil
 }

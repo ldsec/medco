@@ -7,7 +7,9 @@ package medco_node
 
 import (
 	"net/http"
+	"strconv"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
@@ -120,6 +122,9 @@ type GetCohortsOKBodyItems0 struct {
 	// creation date
 	CreationDate string `json:"creationDate,omitempty"`
 
+	// query definition
+	QueryDefinition *GetCohortsOKBodyItems0QueryDefinition `json:"queryDefinition,omitempty"`
+
 	// query Id
 	QueryID int64 `json:"queryId,omitempty"`
 
@@ -129,6 +134,33 @@ type GetCohortsOKBodyItems0 struct {
 
 // Validate validates this get cohorts o k body items0
 func (o *GetCohortsOKBodyItems0) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateQueryDefinition(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *GetCohortsOKBodyItems0) validateQueryDefinition(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.QueryDefinition) { // not required
+		return nil
+	}
+
+	if o.QueryDefinition != nil {
+		if err := o.QueryDefinition.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("queryDefinition")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -143,6 +175,95 @@ func (o *GetCohortsOKBodyItems0) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (o *GetCohortsOKBodyItems0) UnmarshalBinary(b []byte) error {
 	var res GetCohortsOKBodyItems0
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+// GetCohortsOKBodyItems0QueryDefinition get cohorts o k body items0 query definition
+//
+// swagger:model GetCohortsOKBodyItems0QueryDefinition
+type GetCohortsOKBodyItems0QueryDefinition struct {
+
+	// panels
+	Panels []*models.Panel `json:"panels"`
+
+	// query timing
+	QueryTiming models.Timing `json:"queryTiming,omitempty"`
+}
+
+// Validate validates this get cohorts o k body items0 query definition
+func (o *GetCohortsOKBodyItems0QueryDefinition) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validatePanels(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateQueryTiming(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *GetCohortsOKBodyItems0QueryDefinition) validatePanels(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.Panels) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(o.Panels); i++ {
+		if swag.IsZero(o.Panels[i]) { // not required
+			continue
+		}
+
+		if o.Panels[i] != nil {
+			if err := o.Panels[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("queryDefinition" + "." + "panels" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (o *GetCohortsOKBodyItems0QueryDefinition) validateQueryTiming(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.QueryTiming) { // not required
+		return nil
+	}
+
+	if err := o.QueryTiming.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("queryDefinition" + "." + "queryTiming")
+		}
+		return err
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *GetCohortsOKBodyItems0QueryDefinition) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *GetCohortsOKBodyItems0QueryDefinition) UnmarshalBinary(b []byte) error {
+	var res GetCohortsOKBodyItems0QueryDefinition
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

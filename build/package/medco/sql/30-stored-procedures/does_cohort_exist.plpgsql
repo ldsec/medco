@@ -1,0 +1,17 @@
+-- pl/pgsql function checks the existence of a cohort identified by its cohort name and the user's ID
+
+CREATE OR REPLACE FUNCTION query_tools.does_cohort_exist(user_id varchar, cohort_name varchar)
+  RETURNS boolean
+  STABLE
+  PARALLEL SAFE
+  AS $$
+DECLARE
+  size_ integer;
+BEGIN
+  EXECUTE 'SELECT COUNT(cohort_id) FROM query_tools.saved_cohorts
+WHERE user_id = $1 and cohort_name = $2'
+  USING user_id, cohort_name INTO size_;
+  RETURN (size_ = 1);
+END;
+$$
+LANGUAGE plpgsql

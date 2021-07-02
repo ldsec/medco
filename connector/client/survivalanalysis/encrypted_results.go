@@ -13,7 +13,7 @@ type EncryptedResults []struct {
 	GroupID               string
 	EncryptedInitialCount string
 	TimePoints            []struct {
-		Time            int
+		Time            int64
 		EncryptedEvents struct {
 			EventsOfInterest string
 			CensoringEvents  string
@@ -55,16 +55,16 @@ func encryptedResultsFromAPIResponse(bodyResults []*survival_analysis.SurvivalAn
 		res[i].GroupID = group.GroupID
 		res[i].EncryptedInitialCount = group.InitialCount
 		res[i].TimePoints = make([]struct {
-			Time            int
+			Time            int64
 			EncryptedEvents struct {
 				EventsOfInterest string
 				CensoringEvents  string
 			}
 		}, len(group.GroupResults))
 		for j, timePoint := range group.GroupResults {
-			res[i].TimePoints[j].Time = int(timePoint.Timepoint)
-			res[i].TimePoints[j].EncryptedEvents.EventsOfInterest = timePoint.Events.Eventofinterest
-			res[i].TimePoints[j].EncryptedEvents.CensoringEvents = timePoint.Events.Censoringevent
+			res[i].TimePoints[j].Time = *timePoint.Timepoint
+			res[i].TimePoints[j].EncryptedEvents.EventsOfInterest = *timePoint.Events.Eventofinterest
+			res[i].TimePoints[j].EncryptedEvents.CensoringEvents = *timePoint.Events.Censoringevent
 		}
 	}
 	return res

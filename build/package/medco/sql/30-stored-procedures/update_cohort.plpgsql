@@ -1,0 +1,23 @@
+-- pl/pgsql function that updates the query id and the update date of a cohort identified by its cohort name and the user's ID
+
+CREATE OR REPLACE FUNCTION query_tools.update_cohort(cohort_name varchar, user_id varchar, query_id integer, update_date timestamp)
+  RETURNS integer
+  VOLATILE
+  PARALLEL UNSAFE
+  AS $$
+DECLARE
+  cohort_id integer;
+BEGIN
+  EXECUTE 'UPDATE query_tools.saved_cohorts
+SET query_id=$3, update_date= $4
+WHERE cohort_name = $1 AND user_id = $2
+RETURNING cohort_id'
+  USING cohort_name,
+  user_id,
+  query_id,
+  update_date
+  INTO cohort_id;
+  RETURN cohort_id;
+END;
+$$
+LANGUAGE plpgsql

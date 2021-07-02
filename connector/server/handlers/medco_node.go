@@ -6,13 +6,14 @@ import (
 	"sort"
 	"time"
 
+	medcoserver "github.com/ldsec/medco/connector/server/explore"
+
 	querytoolsserver "github.com/ldsec/medco/connector/server/querytools"
 
 	"github.com/go-openapi/runtime/middleware"
 	medcomodels "github.com/ldsec/medco/connector/models"
 	"github.com/ldsec/medco/connector/restapi/models"
 	"github.com/ldsec/medco/connector/restapi/server/operations/medco_node"
-	medcoserver "github.com/ldsec/medco/connector/server/explore"
 	utilserver "github.com/ldsec/medco/connector/util/server"
 	"github.com/ldsec/medco/connector/wrappers/i2b2"
 	"github.com/sirupsen/logrus"
@@ -287,19 +288,39 @@ func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *m
 	userID := principal.ID
 	cohorts, err := querytoolsserver.GetSavedCohorts(userID, int(*params.Limit))
 	if err != nil {
-		medco_node.NewGetCohortsDefault(500).WithPayload(&medco_node.GetCohortsDefaultBody{
+		return medco_node.NewGetCohortsDefault(500).WithPayload(&medco_node.GetCohortsDefaultBody{
 			Message: "Get cohort execution error: " + err.Error(),
 		})
 	}
 	payload := &medco_node.GetCohortsOK{}
 	for _, cohort := range cohorts {
+		queryID := int64(cohort.QueryID)
+		var queryDefinition *medco_node.GetCohortsOKBodyItems0QueryDefinition
+		queryDefinitionString, err := querytoolsserver.GetQueryDefinition(int(queryID))
+		if err != nil {
+			medco_node.NewGetCohortsDefault(500).WithPayload(&medco_node.GetCohortsDefaultBody{
+				Message: "Get cohort execution error: " + err.Error(),
+			})
+		}
+		queryModel := &models.ExploreQuery{}
+		err = queryModel.UnmarshalBinary([]byte(queryDefinitionString))
+		if err != nil {
+			logrus.Warnf("skipping query definition unmarshalling with string %s: %s", queryDefinitionString, err.Error())
+		} else {
+			queryDefinition = &medco_node.GetCohortsOKBodyItems0QueryDefinition{
+				Panels:      queryModel.Panels,
+				QueryTiming: queryModel.QueryTiming,
+			}
+		}
+
 		payload.Payload = append(payload.Payload,
 			&medco_node.GetCohortsOKBodyItems0{
-				CohortName:   cohort.CohortName,
-				CohortID:     int64(cohort.CohortID),
-				QueryID:      int64(cohort.QueryID),
-				CreationDate: cohort.CreationDate.Format(time.RFC3339),
-				UpdateDate:   cohort.UpdateDate.Format(time.RFC3339),
+				CohortName:      cohort.CohortName,
+				CohortID:        int64(cohort.CohortID),
+				QueryID:         queryID,
+				CreationDate:    cohort.CreationDate.Format(time.RFC3339Nano),
+				UpdateDate:      cohort.UpdateDate.Format(time.RFC3339Nano),
+				QueryDefinition: queryDefinition,
 			},
 		)
 	}
@@ -308,10 +329,65 @@ func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *m
 
 }
 
+// MedCoNodePostCohortsPatientListHandler handles POST /medco/node/explore/cohorts/patientList  API endpoint
+func MedCoNodePostCohortsPatientListHandler(params medco_node.PostCohortsPatientListParams, principal *models.User) middleware.Responder {
+	body := params.CohortsPatientListRequest
+	authorizedQueryType, err := utilserver.FetchAuthorizedExploreQueryType(principal)
+	if err != nil {
+		return medco_node.NewPostCohortsPatientListForbidden().WithPayload(&medco_node.PostCohortsPatientListForbiddenBody{
+			Message: fmt.Sprintf("User %s is not authorized to use MedCo Explore", principal.ID),
+		})
+	}
+
+	// if the user is authorized to get the patient list in Explore Query, it is the same for getting list from saved cohorts
+	queryType, err := medcoserver.NewExploreQueryType(authorizedQueryType)
+	if err != nil {
+		return medco_node.NewPostCohortsPatientListNotFound().WithPayload(&medco_node.PostCohortsPatientListNotFoundBody{
+			Message: "Bad query type: " + err.Error(),
+		})
+	}
+
+	if !queryType.PatientList {
+		return medco_node.NewPostCohortsPatientListForbidden().WithPayload(&medco_node.PostCohortsPatientListForbiddenBody{
+			Message: fmt.Sprintf("User %s is not authorized to query patient lists", principal.ID),
+		})
+	}
+
+	// check if the cohort exists
+	doesExist, err := querytoolsserver.DoesCohortExist(principal.ID, *body.CohortName)
+	if err != nil {
+		return medco_node.NewPostCohortsPatientListDefault(500).WithPayload(&medco_node.PostCohortsPatientListDefaultBody{
+			Message: "DB error while checking if the cohort exists: " + err.Error(),
+		})
+	}
+	if !doesExist {
+		return medco_node.NewPostCohortsPatientListNotFound().WithPayload(&medco_node.PostCohortsPatientListNotFoundBody{
+			Message: fmt.Sprintf("No cohort named %s found for user %s", *body.CohortName, principal.ID),
+		})
+	}
+
+	// user is authorized and cohort exists
+	cohortsPatientList := querytoolsserver.NewCohortsPatientList(body.ID, *body.UserPublicKey, *body.CohortName, principal)
+
+	err = cohortsPatientList.Execute()
+	if err != nil {
+		return medco_node.NewPostCohortsPatientListDefault(500).WithPayload(&medco_node.PostCohortsPatientListDefaultBody{
+			Message: "During execution of cohorts patient list: " + err.Error(),
+		})
+	}
+
+	payload := &medco_node.PostCohortsPatientListOKBody{
+		Results: cohortsPatientList.Result.EncPatientList,
+		Timers:  cohortsPatientList.Result.Timers.TimersToAPIModel(),
+	}
+	return medco_node.NewPostCohortsPatientListOK().WithPayload(payload)
+
+}
+
 // MedCoNodePostCohortsHandler handles POST /medco/node/explore/cohorts  API endpoint
 func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal *models.User) middleware.Responder {
 
-	cohort := params.CohortRequest
+	cohort := params.CohortsRequest
 	cohortName := params.Name
 
 	hasID, err := querytoolsserver.CheckQueryID(principal.ID, int(*cohort.PatientSetID))
@@ -350,7 +426,7 @@ func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal 
 	for _, existingCohort := range cohorts {
 		if existingCohort.CohortName == cohortName {
 			return medco_node.NewPostCohortsConflict().WithPayload(&medco_node.PostCohortsConflictBody{
-				Message: "Cohort %s already exists. Try update-saved-cohorts instead of add-saved-cohorts",
+				Message: fmt.Sprintf("Cohort %s already exists. Try update-saved-cohorts instead of add-saved-cohorts", cohortName),
 			})
 		}
 	}
@@ -362,7 +438,7 @@ func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal 
 // MedCoNodePutCohortsHandler handles PUT /medco/node/explore/cohorts  API endpoint
 func MedCoNodePutCohortsHandler(params medco_node.PutCohortsParams, principal *models.User) middleware.Responder {
 
-	cohort := params.CohortRequest
+	cohort := params.CohortsRequest
 	cohortName := params.Name
 
 	hasID, err := querytoolsserver.CheckQueryID(principal.ID, int(*cohort.PatientSetID))
@@ -397,8 +473,8 @@ func MedCoNodePutCohortsHandler(params medco_node.PutCohortsParams, principal *m
 			if existingCohort.UpdateDate.After(updateDate) {
 				return medco_node.NewPutCohortsConflict().WithPayload(&medco_node.PutCohortsConflictBody{
 					Message: fmt.Sprintf("The cohort update date is more recent in server DB than the date provided by client. Server: %s, client: %s.",
-						existingCohort.UpdateDate.Format(time.RFC3339),
-						updateDate.Format(time.RFC3339),
+						existingCohort.UpdateDate.Format(time.RFC3339Nano),
+						updateDate.Format(time.RFC3339Nano),
 					),
 				})
 			}

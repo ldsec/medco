@@ -327,6 +327,26 @@ paths:
       security:
         - medco-jwt: ["medco-explore"]
 
+  /node/explore/cohorts/patient-list:
+    post:
+      tags:
+        - "medco-node"
+      summary: "Retrieve the encrypted patient list for a given cohort name"
+      operationId: "postCohortsPatientList"
+      parameters:
+        - $ref: '#/parameters/cohortsPatientListRequest'
+      responses:
+        200:
+          $ref: '#/responses/getCohortsPatientListResponse'
+        404:
+          $ref: '#/responses/notFoundResponse'
+        403:
+          $ref: '#/responses/forbiddenResponse'
+        default:
+          $ref: '#/responses/errorResponse'
+      security:
+        - medco-jwt: ["medco-explore"]
+
 
 securityDefinitions:
   medco-jwt:
@@ -368,8 +388,8 @@ parameters:
 
   cohortsRequest:
     in: "body"
-    description: "Cohort that has been updated or created"
-    name: "cohortRequest"
+    description: "Cohort that has been updated or created."
+    name: "cohortsRequest"
     required: true
     schema:
       type: "object"
@@ -384,6 +404,27 @@ parameters:
         - patientSetID
         - creationDate
         - updateDate
+  
+  cohortsPatientListRequest:
+    in: "body"
+    description: "Cohort patient list request"
+    name: "cohortsPatientListRequest"
+    required: true
+    schema:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          pattern: '^[\w:-]+$'
+        cohortName:
+          type: "string"
+          pattern: '^\w+$'
+        userPublicKey:
+          type: "string"
+          pattern: '^[\w=-]+$'
+      required:
+        - cohortName
+        - userPublicKey
 
   survivalAnalysisRequest:
     in: "body"
@@ -410,6 +451,8 @@ parameters:
               groupName:
                 type: "string"
                 pattern: '^\w+$'
+              subGroupTiming:
+                $ref: '#/definitions/timing'
               panels:
                 type: "array"
                 items:
@@ -441,6 +484,11 @@ parameters:
           required:
             - modifierKey
             - appliedPath
+        startsWhen:
+          type: "string"
+          enum:
+            - earliest
+            - latest
         endConcept:
           type: "string"
           pattern: '^\/$|^((\/[^\/]+)+\/?)$'
@@ -456,6 +504,11 @@ parameters:
           required:
             - modifierKey
             - appliedPath
+        endsWhen:
+          type: "string"
+          enum:
+            - earliest
+            - latest
       required:
         - ID
         - userPublicKey
@@ -463,7 +516,9 @@ parameters:
         - timeLimit
         - timeGranularity
         - startConcept
+        - startsWhen
         - endConcept
+        - endsWhen
 
 responses:
   errorResponse:
@@ -492,6 +547,14 @@ responses:
 
   badRequestResponse:
     description: "Bad user input in request."
+    schema:
+      type: "object"
+      properties:
+        message:
+          type: "string"
+  
+  forbiddenResponse:
+    description: "Request is valid and user is authenticated, but not authorized to perform this action."
     schema:
       type: "object"
       properties:
@@ -575,6 +638,27 @@ responses:
             type: "string"
           updateDate:
             type: "string"
+          queryDefinition:
+            type: "object"
+            properties:
+              panels:
+                type: "array"
+                items:
+                  $ref: "#/definitions/panel"
+              queryTiming:
+                $ref: "#/definitions/timing"
+
+  getCohortsPatientListResponse:
+    description: "Queried patient list"
+    schema:
+      type: "object"
+      properties:
+        results:
+          type: "array"
+          items:
+            type: "string"
+        timers:
+          $ref: "#/definitions/timers"
 
   survivalAnalysisResponse:
     description: "Queried survival analysis"
@@ -604,6 +688,12 @@ responses:
                           type: "string"
                         censoringevent:
                           type: "string"
+                      required:
+                        - eventofinterest
+                        - censoringevent
+                  required:
+                    - timepoint
+                    - events
         timers:
           $ref: "#/definitions/timers"
 
@@ -798,6 +888,7 @@ definitions:
             operator:
               type: "string"
               enum:
+                # NUMBER operators
                 - EQ
                 - NE
                 - GT
@@ -805,17 +896,34 @@ definitions:
                 - LT
                 - LE
                 - BETWEEN
+                # TEXT operators
+                - IN
+                - LIKE[exact]
+                - LIKE[begin]
+                - LIKE[end]
+                - LIKE[contains]
               description: >
-                EQ: equals
-                NE: not equals
+                # NUMBER operators
+                EQ: equal
+                NE: not equal
                 GT: greater than
                 GE: greater than or equal
                 LT: less than
                 LE: less than or equal
-                BETWEEN: between (value syntax: x and y)
+                BETWEEN: between (value syntax: "x and y")
+                # TEXT operators
+                IN: in (value syntax: "'x','y','z'")
+                LIKE[exact]: equal
+                LIKE[begin]: begins with
+                LIKE[end]: ends with
+                LIKE[contains]: contains
             value:
               type: "string"
-              pattern: '^[+-]?([0-9]*[.])?[0-9]+'
+            type:
+              type: "string"
+              enum:
+                - NUMBER
+                - TEXT
             modifier:
               type: "object"
               required: [appliedPath, modifierKey]
@@ -890,7 +998,7 @@ definitions:
             type: "array"
             items:
               $ref: "#/definitions/exploreQueryType"
-  
+
   timing:
     type: string
     enum:

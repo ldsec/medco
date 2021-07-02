@@ -133,9 +133,9 @@ type PanelItemsItems0 struct {
 	// modifier
 	Modifier *PanelItemsItems0Modifier `json:"modifier,omitempty"`
 
-	// EQ: equals NE: not equals GT: greater than GE: greater than or equal LT: less than LE: less than or equal BETWEEN: between (value syntax: x and y)
+	// # NUMBER operators EQ: equal NE: not equal GT: greater than GE: greater than or equal LT: less than LE: less than or equal BETWEEN: between (value syntax: "x and y") # TEXT operators IN: in (value syntax: "'x','y','z'") LIKE[exact]: equal LIKE[begin]: begins with LIKE[end]: ends with LIKE[contains]: contains
 	//
-	// Enum: [EQ NE GT GE LT LE BETWEEN]
+	// Enum: [EQ NE GT GE LT LE BETWEEN IN LIKE[exact] LIKE[begin] LIKE[end] LIKE[contains]]
 	Operator string `json:"operator,omitempty"`
 
 	// query term
@@ -143,8 +143,11 @@ type PanelItemsItems0 struct {
 	// Pattern: ^([\w=-]+)$|^((\/[^\/]+)+\/)$
 	QueryTerm *string `json:"queryTerm"`
 
+	// type
+	// Enum: [NUMBER TEXT]
+	Type string `json:"type,omitempty"`
+
 	// value
-	// Pattern: ^[+-]?([0-9]*[.])?[0-9]+
 	Value string `json:"value,omitempty"`
 }
 
@@ -168,7 +171,7 @@ func (m *PanelItemsItems0) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateValue(formats); err != nil {
+	if err := m.validateType(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -209,7 +212,7 @@ var panelItemsItems0TypeOperatorPropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["EQ","NE","GT","GE","LT","LE","BETWEEN"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["EQ","NE","GT","GE","LT","LE","BETWEEN","IN","LIKE[exact]","LIKE[begin]","LIKE[end]","LIKE[contains]"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -239,6 +242,21 @@ const (
 
 	// PanelItemsItems0OperatorBETWEEN captures enum value "BETWEEN"
 	PanelItemsItems0OperatorBETWEEN string = "BETWEEN"
+
+	// PanelItemsItems0OperatorIN captures enum value "IN"
+	PanelItemsItems0OperatorIN string = "IN"
+
+	// PanelItemsItems0OperatorLIKEExact captures enum value "LIKE[exact]"
+	PanelItemsItems0OperatorLIKEExact string = "LIKE[exact]"
+
+	// PanelItemsItems0OperatorLIKEBegin captures enum value "LIKE[begin]"
+	PanelItemsItems0OperatorLIKEBegin string = "LIKE[begin]"
+
+	// PanelItemsItems0OperatorLIKEEnd captures enum value "LIKE[end]"
+	PanelItemsItems0OperatorLIKEEnd string = "LIKE[end]"
+
+	// PanelItemsItems0OperatorLIKEContains captures enum value "LIKE[contains]"
+	PanelItemsItems0OperatorLIKEContains string = "LIKE[contains]"
 )
 
 // prop value enum
@@ -276,13 +294,43 @@ func (m *PanelItemsItems0) validateQueryTerm(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *PanelItemsItems0) validateValue(formats strfmt.Registry) error {
+var panelItemsItems0TypeTypePropEnum []interface{}
 
-	if swag.IsZero(m.Value) { // not required
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["NUMBER","TEXT"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		panelItemsItems0TypeTypePropEnum = append(panelItemsItems0TypeTypePropEnum, v)
+	}
+}
+
+const (
+
+	// PanelItemsItems0TypeNUMBER captures enum value "NUMBER"
+	PanelItemsItems0TypeNUMBER string = "NUMBER"
+
+	// PanelItemsItems0TypeTEXT captures enum value "TEXT"
+	PanelItemsItems0TypeTEXT string = "TEXT"
+)
+
+// prop value enum
+func (m *PanelItemsItems0) validateTypeEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, panelItemsItems0TypeTypePropEnum, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *PanelItemsItems0) validateType(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Type) { // not required
 		return nil
 	}
 
-	if err := validate.Pattern("value", "body", string(m.Value), `^[+-]?([0-9]*[.])?[0-9]+`); err != nil {
+	// value enum
+	if err := m.validateTypeEnum("type", "body", m.Type); err != nil {
 		return err
 	}
 

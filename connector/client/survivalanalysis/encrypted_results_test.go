@@ -1,3 +1,5 @@
+// +build unit_test
+
 package survivalclient
 
 import (
@@ -30,7 +32,7 @@ var testEncryptedResults = EncryptedResults{
 	{GroupID: "testGroup1",
 		EncryptedInitialCount: "YKu4hdlub0k7VKrHmVEMwDTnNLEcuHypqrhTfvXK9ABDGR4f1jw7vHhO3jNViQI4I-W8tGu8G2FpjamnEyN1OA==",
 		TimePoints: []struct {
-			Time            int
+			Time            int64
 			EncryptedEvents struct {
 				EventsOfInterest string
 				CensoringEvents  string

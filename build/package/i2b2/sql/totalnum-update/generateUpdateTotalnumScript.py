@@ -10,9 +10,8 @@ SELECT c_fullname, patient_num
 # That is, there is no concept or modifier with a null totalnum that has any patient associated to it.
 """
 
-# This is a script which is used to generate a postgresql script that will update the c_totalnum value of a concept or modifier
-# so that c_totalnum contains the number of patients or observation (depends on your choice) linked directly or inderectly
-# to the concept/modifier.
+# This is a script which is used to generate a postgresql script that will update the c_totalnum value of a concept/modifier
+# so that c_totalnum contains the number of patients with observations (or the number of observations, depending on your choice) for the concept/modifier and its children.
 
 #tip: The generate psql script is easier to read than the postgreSQL_script that is waiting to be formatted by the execution of this script.
 
@@ -32,38 +31,34 @@ postgreSQL_script = """
   * 1) A modifier is a parent of another modifier if the parent's c_fullname is the suffix of another child c_fullname.
   * 2) A concept is a parent of a modifier if the parent concept c_fullname is equal to the m_applied_path column of the child.
   * 3) Like rule 1 but the parent and child are both concepts
-  *
-  * Hence one may see multiple layers of modifiers and concepts
-  *
-  * The script uses a bottom approach to compute this formula
   */
 
 /**
- * This code traverses iteratively the different heights of modfiers.
+ * This code traverses iteratively the different hierarchical levels of the modifiers.
  * At each iteration the code adds the {subject}s that relate to the modifiers to the set of {subject}s that relate to the parent (concept or modifier).
  * After having done that totalnum is updated for the parent of the current iteration.
  */
 CREATE OR REPLACE FUNCTION aggregateModifiersCounts() RETURNS void AS $$
 	DECLARE
-		min_depth int := (SELECT MIN(c_hlevel) FROM {metadata_schema_name}.{metadata_table_name} s WHERE LOWER(s.c_facttablecolumn) = 'modifier_cd');
-		max_depth int := (SELECT MAX(c_hlevel) FROM {metadata_schema_name}.{metadata_table_name} s WHERE LOWER(s.c_facttablecolumn) = 'modifier_cd');
+		min_level int := (SELECT MIN(c_hlevel) FROM {metadata_schema_name}.{metadata_table_name} s WHERE LOWER(s.c_facttablecolumn) = 'modifier_cd');
+		max_level int := (SELECT MAX(c_hlevel) FROM {metadata_schema_name}.{metadata_table_name} s WHERE LOWER(s.c_facttablecolumn) = 'modifier_cd');
 	BEGIN
 
 		raise info 'before for loop';
-		-- the children height is height and the parent height is height-1.
-		FOR height IN REVERSE max_depth..min_depth
+		-- the children level is level and the parent level is level-1.
+		FOR level IN REVERSE max_level..min_level
 		LOOP
-			raise info 'we are at height %', height;
+			raise info 'we are at level %', level;
 
 			--link the {subject}s of the modifier children to their parent modifers or concept.
 			INSERT INTO {metadata_schema_name}.concept_to_id
-				SELECT DISTINCT cti.identifier, parent.c_fullname, (height-1)
+				SELECT DISTINCT cti.identifier, parent.c_fullname, (level-1)
 				FROM {metadata_schema_name}.{metadata_table_name} child, {metadata_schema_name}.concept_to_id cti, {metadata_schema_name}.{metadata_table_name} parent
-				WHERE cti.c_hlevel = height AND child.c_hlevel = height AND LOWER(child.c_facttablecolumn) = 'modifier_cd'
+				WHERE cti.c_hlevel = level AND child.c_hlevel = level AND LOWER(child.c_facttablecolumn) = 'modifier_cd'
 					AND cti.c_fullname = child.c_fullname AND
 					(
-						( --the parent is a modifier at the height just above.
-							parent.c_hlevel = (height - 1) AND LOWER(parent.c_facttablecolumn) = 'modifier_cd' AND
+						( --the parent is a modifier at the level just above.
+							parent.c_hlevel = (level - 1) AND LOWER(parent.c_facttablecolumn) = 'modifier_cd' AND
 							child.c_fullname LIKE (parent.c_fullname || '%') ESCAPE '|'
 							-- Use | as an escape character instead of the backslash which appears in windows paths and breaks sql queries.
 						)
@@ -80,30 +75,30 @@ CREATE OR REPLACE FUNCTION aggregateModifiersCounts() RETURNS void AS $$
 $$ LANGUAGE plpgsql;
 
 /**
- * This code traverses iteratively the different heights of concepts.
+ * This code traverses iteratively the different levels of concepts.
  * At each iteration the code adds the {subject}s that relate to the concepts to the set of {subject}s that relate to the parent concept.
  * After having done that totalnum is updated for the parents of the current iteration.
  */
 CREATE OR REPLACE FUNCTION aggregateConceptsCounts() RETURNS void AS $$
 	DECLARE
-		min_depth int := (SELECT MIN(c_hlevel) FROM {metadata_schema_name}.{metadata_table_name} s WHERE LOWER(s.c_facttablecolumn) = 'concept_cd');
-		max_depth int := (SELECT MAX(c_hlevel) FROM {metadata_schema_name}.{metadata_table_name} s WHERE LOWER(s.c_facttablecolumn) = 'concept_cd');
+		min_level int := (SELECT MIN(c_hlevel) FROM {metadata_schema_name}.{metadata_table_name} s WHERE LOWER(s.c_facttablecolumn) = 'concept_cd');
+		max_level int := (SELECT MAX(c_hlevel) FROM {metadata_schema_name}.{metadata_table_name} s WHERE LOWER(s.c_facttablecolumn) = 'concept_cd');
 	BEGIN
 
 		raise info 'before for loop';
-		-- the children height is height and the parent height is height-1.
-		FOR height IN REVERSE max_depth..min_depth
+		-- the children level is level and the parent level is level-1.
+		FOR level IN REVERSE max_level..min_level
 		LOOP
-			raise info 'we are at height %', height;
+			raise info 'we are at level %', level;
 
 			--link the {subject}s of the modifier children to their parent modifers or concept.
 			INSERT INTO {metadata_schema_name}.concept_to_id
-				SELECT DISTINCT cti.identifier, parent.c_fullname, (height-1)
+				SELECT DISTINCT cti.identifier, parent.c_fullname, (level-1)
 				FROM {metadata_schema_name}.{metadata_table_name} child, {metadata_schema_name}.concept_to_id cti, {metadata_schema_name}.{metadata_table_name} parent
-				WHERE cti.c_hlevel = height AND child.c_hlevel = height AND LOWER(child.c_facttablecolumn) = 'concept_cd'
+				WHERE cti.c_hlevel = level AND child.c_hlevel = level AND LOWER(child.c_facttablecolumn) = 'concept_cd'
 					AND cti.c_fullname = child.c_fullname
-					--the parent is a concept at the height just above.
-					AND parent.c_hlevel = (height - 1) AND LOWER(parent.c_facttablecolumn) = 'concept_cd' AND
+					--the parent is a concept at the level just above.
+					AND parent.c_hlevel = (level - 1) AND LOWER(parent.c_facttablecolumn) = 'concept_cd' AND
 					child.c_fullname LIKE (parent.c_fullname || '%') ESCAPE '|'
 					-- Use | as an escape character instead of the backslash which appears in windows paths and breaks sql queries.
 			;
@@ -125,7 +120,7 @@ DROP TABLE IF EXISTS {metadata_schema_name}.concept_to_id;
 CREATE TABLE {metadata_schema_name}.concept_to_id(
 	identifier integer NOT NULL, -- the identifier of the {subject}
 	c_fullname character varying(2000) COLLATE pg_catalog."default", -- the full name of the concept or modifier.
-	c_hlevel integer NOT NULL -- the height of the concept/modifier
+	c_hlevel integer NOT NULL -- the level of the concept/modifier
 );
 
 
@@ -179,7 +174,7 @@ PERFORM aggregateConceptsCounts();
 raise info 'After call to aggregate concepts {subject} function.';
 
 UPDATE {metadata_schema_name}.{metadata_table_name} s
-SET c_totalnum = count_to_name.count -- count is either the count of distinct patients or the count of distinct observations per concept, modifier depending on what you what you chose to count upon.
+SET c_totalnum = count_to_name.count -- count is either the count of distinct patients or the count of distinct observations per concept, modifier depending on what you chose to count upon.
 FROM (
 	SELECT COUNT(DISTINCT cti.identifier) AS count, cti.c_fullname AS fullname
 	FROM {metadata_schema_name}.concept_to_id cti

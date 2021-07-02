@@ -78,6 +78,9 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 		MedcoNodePostCohortsHandler: medco_node.PostCohortsHandlerFunc(func(params medco_node.PostCohortsParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_node.PostCohorts has not yet been implemented")
 		}),
+		MedcoNodePostCohortsPatientListHandler: medco_node.PostCohortsPatientListHandlerFunc(func(params medco_node.PostCohortsPatientListParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation medco_node.PostCohortsPatientList has not yet been implemented")
+		}),
 		MedcoNodePutCohortsHandler: medco_node.PutCohortsHandlerFunc(func(params medco_node.PutCohortsParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_node.PutCohorts has not yet been implemented")
 		}),
@@ -151,6 +154,8 @@ type MedcoConnectorAPI struct {
 	GenomicAnnotationsGetVariantsHandler genomic_annotations.GetVariantsHandler
 	// MedcoNodePostCohortsHandler sets the operation handler for the post cohorts operation
 	MedcoNodePostCohortsHandler medco_node.PostCohortsHandler
+	// MedcoNodePostCohortsPatientListHandler sets the operation handler for the post cohorts patient list operation
+	MedcoNodePostCohortsPatientListHandler medco_node.PostCohortsPatientListHandler
 	// MedcoNodePutCohortsHandler sets the operation handler for the put cohorts operation
 	MedcoNodePutCohortsHandler medco_node.PutCohortsHandler
 	// SurvivalAnalysisSurvivalAnalysisHandler sets the operation handler for the survival analysis operation
@@ -264,6 +269,9 @@ func (o *MedcoConnectorAPI) Validate() error {
 	}
 	if o.MedcoNodePostCohortsHandler == nil {
 		unregistered = append(unregistered, "medco_node.PostCohortsHandler")
+	}
+	if o.MedcoNodePostCohortsPatientListHandler == nil {
+		unregistered = append(unregistered, "medco_node.PostCohortsPatientListHandler")
 	}
 	if o.MedcoNodePutCohortsHandler == nil {
 		unregistered = append(unregistered, "medco_node.PutCohortsHandler")
@@ -409,6 +417,10 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/node/explore/cohorts/{name}"] = medco_node.NewPostCohorts(o.context, o.MedcoNodePostCohortsHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/node/explore/cohorts/patient-list"] = medco_node.NewPostCohortsPatientList(o.context, o.MedcoNodePostCohortsPatientListHandler)
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
