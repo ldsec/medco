@@ -86,10 +86,10 @@ CREATE OR REPLACE FUNCTION aggregateConceptsCounts() RETURNS void AS $$
 	BEGIN
 
 		raise info 'before for loop';
-		-- the children height is height and the parent height is height-1.
-		FOR height IN REVERSE max_depth..min_depth
+		-- the children level is level and the parent level is level-1.
+		FOR level IN REVERSE max_level..min_level
 		LOOP
-			raise info 'we are at height %', height;
+			raise info 'we are at level %', level;
 
 			--link the {subject}s of the modifier children to their parent modifers or concept.
 			INSERT INTO {metadata_schema_name}.concept_to_id
