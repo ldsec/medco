@@ -34,7 +34,7 @@ postgreSQL_script = """
   */
 
 /**
- * This code traverses iteratively the different heights of modfiers.
+ * This code traverses iteratively the different hierarchical levels of the modifiers.
  * At each iteration the code adds the {subject}s that relate to the modifiers to the set of {subject}s that relate to the parent (concept or modifier).
  * After having done that totalnum is updated for the parent of the current iteration.
  */
