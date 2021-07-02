@@ -31,10 +31,6 @@ postgreSQL_script = """
   * 1) A modifier is a parent of another modifier if the parent's c_fullname is the suffix of another child c_fullname.
   * 2) A concept is a parent of a modifier if the parent concept c_fullname is equal to the m_applied_path column of the child.
   * 3) Like rule 1 but the parent and child are both concepts
-  *
-  * Hence one may see multiple layers of modifiers and concepts
-  *
-  * The script uses a bottom approach to compute this formula
   */
 
 /**
