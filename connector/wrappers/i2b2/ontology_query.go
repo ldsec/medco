@@ -165,7 +165,7 @@ func populateModifierTotalnum(modifiers []*models.ExploreSearchResultElement, un
 
 	//select all schemas in the i2b2 database which contain the table_access table.
 	schemasNamesRows, err := utilserver.I2B2DBConnection.Query(getSchemasWithATableAccessTable)
-	defer closeSQLConn(schemasNamesRows)
+	defer closeQueryResult(schemasNamesRows)
 
 	if err != nil {
 		return fmt.Errorf("Unable to fetch schemas containing a table called `table access`: %v", err)
@@ -190,7 +190,7 @@ func populateModifierTotalnum(modifiers []*models.ExploreSearchResultElement, un
 		logrus.Debug("The full name of the searched modifier ", i2b2ModifierParentPath)
 		matchingTables, err = utilserver.I2B2DBConnection.Query(selectTableContainingModifier, i2b2ModifierParentPath)
 
-		defer closeSQLConn(matchingTables)
+		defer closeQueryResult(matchingTables)
 
 		if err != nil {
 			return fmt.Errorf("Error while executing the query fetching the table name containing the modifier: %v", err)
@@ -239,7 +239,7 @@ func populateModifierTotalnum(modifiers []*models.ExploreSearchResultElement, un
 	logrus.Debug("The query for getting fullname, totalnum ", getTotalnumsQuery)
 
 	modifiersRows, err := utilserver.I2B2DBConnection.Query(getTotalnumsQuery, queryParams...)
-	defer closeSQLConn(modifiersRows)
+	defer closeQueryResult(modifiersRows)
 
 	if err != nil {
 		return fmt.Errorf("Error while executing query to fetch totalnums: %v ", err)
