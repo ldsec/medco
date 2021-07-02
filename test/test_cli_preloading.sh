@@ -6,8 +6,8 @@ PASSWORD=${2:-test}
 
 
 # test1
-#If one of the tables doesn't appear in the result. Be sure it is present in the database. And if it is, be sure
-#that the c_visualattribute column, related to that table, inside the table_access table is set to 'CA' and not 'CH' which hides the table when fetching the children of "/"
+#If one of the tables doesn't appear in the result, be sure that it is present in the database and that the related
+#c_visualattribute column inside the table_access table is set to 'CA' and not 'CH'
 searchConceptChildren1="/"
 resultSearchConceptChildren1="PATH  TYPE
                               /E2ETEST/e2etest/ concept_container 0
