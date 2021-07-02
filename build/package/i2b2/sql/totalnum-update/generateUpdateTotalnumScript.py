@@ -81,8 +81,8 @@ $$ LANGUAGE plpgsql;
  */
 CREATE OR REPLACE FUNCTION aggregateConceptsCounts() RETURNS void AS $$
 	DECLARE
-		min_depth int := (SELECT MIN(c_hlevel) FROM {metadata_schema_name}.{metadata_table_name} s WHERE LOWER(s.c_facttablecolumn) = 'concept_cd');
-		max_depth int := (SELECT MAX(c_hlevel) FROM {metadata_schema_name}.{metadata_table_name} s WHERE LOWER(s.c_facttablecolumn) = 'concept_cd');
+		min_level int := (SELECT MIN(c_hlevel) FROM {metadata_schema_name}.{metadata_table_name} s WHERE LOWER(s.c_facttablecolumn) = 'concept_cd');
+		max_level int := (SELECT MAX(c_hlevel) FROM {metadata_schema_name}.{metadata_table_name} s WHERE LOWER(s.c_facttablecolumn) = 'concept_cd');
 	BEGIN
 
 		raise info 'before for loop';
