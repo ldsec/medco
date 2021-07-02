@@ -7,8 +7,7 @@ set -Eeuo pipefail
 # 3 concepts: 1, 2, 3
 # observation_fact: p1: c1; p2: c1, c2; p3: c2, c3; p4: c1, c2, c3
 # the same data is replicated on the 3 different nodes
-# Totalnum for e2etest is the total number of patients linked (directly or indirectly)
-# to the concept.
+# Totalnum for e2etest is the number of patients with observations for the concept/modifier and its children.
 
 psql $PSQL_PARAMS -d "$I2B2_DB_NAME" <<-EOSQL
 
