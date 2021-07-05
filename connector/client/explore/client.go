@@ -176,7 +176,6 @@ func executeAndDecryptRequest(executeSearchRequest func() ([]*models.ExploreSear
 	return
 }
 
-//TODO comment
 func executeConceptRequest(clientRequest *ExploreSearchConcept, queryID string, pubKey string) (results []*models.ExploreSearchResultElement, err error) {
 	result, err := clientRequest.Execute(queryID, pubKey)
 	if err != nil {
@@ -187,7 +186,6 @@ func executeConceptRequest(clientRequest *ExploreSearchConcept, queryID string, 
 	return
 }
 
-//TODO comment
 func executeModifierRequest(clientRequest *ExploreSearchModifier, queryID string, pubKey string) (results []*models.ExploreSearchResultElement, err error) {
 
 	result, err := clientRequest.Execute(queryID, pubKey)
@@ -204,7 +202,6 @@ func getQueryID() string {
 	return fmt.Sprintf("Medco_Subject_Count_Query_%d%d%d%d%d%d%d", d.Year(), d.Month(), d.Day(), d.Hour(), d.Minute(), d.Second(), d.Nanosecond())
 }
 
-//TODO comment
 func printSearchResult(results []*models.ExploreSearchResultElement, resultOutputFilePath string) {
 	output := "PATH" + "\t" + "TYPE" + "\n"
 	for _, child := range results {
