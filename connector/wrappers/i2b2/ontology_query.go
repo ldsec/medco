@@ -148,7 +148,7 @@ func closeQueryResult(conn *sql.Rows) {
 	}
 }
 
-//This function is responsible for putting the totalnum values for the modifiers passed passed as parameter.
+//This function is responsible for putting the totalnum values for the modifiers passed as parameter.
 // By default I2B2's API does not return modifiers' "totalnum" attribute. To solve the missing patients count issue, when the back-end detects an element is a modifier,
 // additional code fetches (using a mix of Golang and PostgreSQL) the patients count of that modifier.
 // This additional logic is present in the function called "populateModifierTotalnum"

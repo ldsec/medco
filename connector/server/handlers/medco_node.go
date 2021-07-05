@@ -68,9 +68,8 @@ func aggregateGroupedSearchResultSubjectCounts(subjectCountQueryInfo *models.Exp
 	}
 
 	logrus.Debug("new explore query type ", queryType)
-	//otherwise we have to deal with the global count case and perform homomorphic aggregation per concept.
 
-	//Sorting search result based on Path. This is important in order to add subject counts corresponding to the same concepts accross medco nodes.
+	//Sorting search result based on Path. This is important in order to add subject counts corresponding to the same concepts across medco nodes.
 	sort.Slice(searchResult, func(i, j int) bool {
 		return searchResult[i].Path < searchResult[j].Path
 	})
@@ -78,9 +77,10 @@ func aggregateGroupedSearchResultSubjectCounts(subjectCountQueryInfo *models.Exp
 	timers.AddTimers("query-preparation", beforePreparation, nil)
 	beforeCothorityEncryption := time.Now()
 
-	//the idea is to compute the aggregated totalnum only for search elements with a defined totalnum in i2b2
+	
 	var encryptedTotalnums []string = []string{}
 
+// encrypt the local totalnums
 	var debugString string = ""
 	for _, searchElement := range searchResult {
 		if searchElement.SubjectCount == "" {
@@ -105,6 +105,7 @@ func aggregateGroupedSearchResultSubjectCounts(subjectCountQueryInfo *models.Exp
 	timers.AddTimers("cothority-key-encryption-totalnums", beforeCothorityEncryption, nil)
 
 	logrus.Debug("length of encrypted totalnums of size ", len(encryptedTotalnums))
+// aggregate totalnums across the nodes (encrypted)
 	aggregatedCounts, err := medcoserver.ExecuteTotalnumsAggregation(*subjectCountQueryInfo.QueryID, encryptedTotalnums, *subjectCountQueryInfo.UserPublicKey, queryType, timers)
 
 	if err != nil {
