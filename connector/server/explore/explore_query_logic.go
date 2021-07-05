@@ -51,10 +51,7 @@ func PrepareAggregationValue(subjectCountQueryInfo *models.ExploreSearchCountPar
 		logrus.Debug("empty subject count query info")
 		return
 	}
-	userPublicKey := *subjectCountQueryInfo.UserPublicKey
-	baseQueryID := *subjectCountQueryInfo.QueryID
 
-	
 	subjectCountInt, err := strconv.Atoi(searchElement.SubjectCount)
 	if err != nil {
 		logrus.Error("Cannot convert subject count to integer", err)

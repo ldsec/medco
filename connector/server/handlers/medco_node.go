@@ -77,10 +77,9 @@ func aggregateGroupedSearchResultSubjectCounts(subjectCountQueryInfo *models.Exp
 	timers.AddTimers("query-preparation", beforePreparation, nil)
 	beforeCothorityEncryption := time.Now()
 
-	
 	var encryptedTotalnums []string = []string{}
 
-// encrypt the local totalnums
+	// encrypt the local totalnums
 	var debugString string = ""
 	for _, searchElement := range searchResult {
 		if searchElement.SubjectCount == "" {
@@ -105,7 +104,7 @@ func aggregateGroupedSearchResultSubjectCounts(subjectCountQueryInfo *models.Exp
 	timers.AddTimers("cothority-key-encryption-totalnums", beforeCothorityEncryption, nil)
 
 	logrus.Debug("length of encrypted totalnums of size ", len(encryptedTotalnums))
-// aggregate totalnums across the nodes (encrypted)
+	// aggregate totalnums across the nodes (encrypted)
 	aggregatedCounts, err := medcoserver.ExecuteTotalnumsAggregation(*subjectCountQueryInfo.QueryID, encryptedTotalnums, *subjectCountQueryInfo.UserPublicKey, queryType, timers)
 
 	if err != nil {
