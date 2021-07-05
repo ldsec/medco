@@ -4,7 +4,7 @@
 # This test script is to be executed from the root directory of the project
 # This test script verifies that behaviour of the postgres update totalnum script is the one expected.
 # This script does that by copying e2etest in a copy version of the table in order to keep the e2etest table as is.
-# Then this script applied the update totalnum postgres script on this copied version of the table.
+# Then this script applies the update totalnum postgres script on this copied version of the table.
 # When this is done we select all lines of interest in the ontology to verify that the c_totalnum attribute has been updated as expected.
 
 
