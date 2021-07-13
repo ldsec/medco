@@ -34,7 +34,7 @@ func ExecuteClientQuery(token, username, password, queryString, queryTiming, res
 
 	// encrypt item keys
 	for _, panel := range panels {
-		for _, item := range panel.Items {
+		for _, item := range panel.ConceptItems {
 			if *item.Encrypted {
 				queryTermInt, err := strconv.ParseInt(*item.QueryTerm, 10, 64)
 				if err != nil {

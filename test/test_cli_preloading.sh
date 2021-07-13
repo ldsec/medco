@@ -129,9 +129,9 @@ resultQuery13="$(printf -- "count\n0\n0\n0")"
 # test4
 getSavedCohortHeaders="node_index,cohort_name,cohort_id,query_id,creation_date,update_date,query_timing,panels"
 getSavedCohort1="$(printf -- "node_index cohort_name cohort_id query_id query_timing panels\n\
-0 testCohort -1 -1 any \"{panels:[{items:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any}]}\"\n\
-1 testCohort -1 -1 any \"{panels:[{items:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any}]}\"\n\
-2 testCohort -1 -1 any \"{panels:[{items:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any}]}\"")"
+0 testCohort -1 -1 any \"{panels:[{conceptItems:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any,patientSetIDItems:null}]}\"\n\
+1 testCohort -1 -1 any \"{panels:[{conceptItems:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any,patientSetIDItems:null}]}\"\n\
+2 testCohort -1 -1 any \"{panels:[{conceptItems:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any,patientSetIDItems:null}]}\"")"
 getSavedCohort2="$(printf -- "node_index cohort_name query_id\n0 testCohort2 -1\n0 testCohort -1\n1 testCohort2 -1\n1 testCohort -1\n2 testCohort2 -1\n2 testCohort -1")"
 
 # test5

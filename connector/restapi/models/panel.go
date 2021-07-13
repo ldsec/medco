@@ -15,13 +15,13 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// Panel panel
+// Panel collection of i2b2 items (linked by OR)
 //
 // swagger:model panel
 type Panel struct {
 
-	// i2b2 items (linked by an OR)
-	Items []*PanelItemsItems0 `json:"items"`
+	// items containing i2b2 concepts (and optionally modifiers)
+	ConceptItems []*PanelConceptItemsItems0 `json:"conceptItems"`
 
 	// exclude the i2b2 panel
 	// Required: true
@@ -29,13 +29,16 @@ type Panel struct {
 
 	// panel timing
 	PanelTiming Timing `json:"panelTiming,omitempty"`
+
+	// items containing patient set IDs
+	PatientSetIDItems []int64 `json:"patientSetIDItems"`
 }
 
 // Validate validates this panel
 func (m *Panel) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateItems(formats); err != nil {
+	if err := m.validateConceptItems(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -53,21 +56,21 @@ func (m *Panel) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Panel) validateItems(formats strfmt.Registry) error {
+func (m *Panel) validateConceptItems(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Items) { // not required
+	if swag.IsZero(m.ConceptItems) { // not required
 		return nil
 	}
 
-	for i := 0; i < len(m.Items); i++ {
-		if swag.IsZero(m.Items[i]) { // not required
+	for i := 0; i < len(m.ConceptItems); i++ {
+		if swag.IsZero(m.ConceptItems[i]) { // not required
 			continue
 		}
 
-		if m.Items[i] != nil {
-			if err := m.Items[i].Validate(formats); err != nil {
+		if m.ConceptItems[i] != nil {
+			if err := m.ConceptItems[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("items" + "." + strconv.Itoa(i))
+					return ve.ValidateName("conceptItems" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -121,17 +124,17 @@ func (m *Panel) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-// PanelItemsItems0 panel items items0
+// PanelConceptItemsItems0 panel concept items items0
 //
-// swagger:model PanelItemsItems0
-type PanelItemsItems0 struct {
+// swagger:model PanelConceptItemsItems0
+type PanelConceptItemsItems0 struct {
 
 	// encrypted
 	// Required: true
 	Encrypted *bool `json:"encrypted"`
 
 	// modifier
-	Modifier *PanelItemsItems0Modifier `json:"modifier,omitempty"`
+	Modifier *PanelConceptItemsItems0Modifier `json:"modifier,omitempty"`
 
 	// # NUMBER operators EQ: equal NE: not equal GT: greater than GE: greater than or equal LT: less than LE: less than or equal BETWEEN: between (value syntax: "x and y") # TEXT operators IN: in (value syntax: "'x','y','z'") LIKE[exact]: equal LIKE[begin]: begins with LIKE[end]: ends with LIKE[contains]: contains
 	//
@@ -151,8 +154,8 @@ type PanelItemsItems0 struct {
 	Value string `json:"value,omitempty"`
 }
 
-// Validate validates this panel items items0
-func (m *PanelItemsItems0) Validate(formats strfmt.Registry) error {
+// Validate validates this panel concept items items0
+func (m *PanelConceptItemsItems0) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateEncrypted(formats); err != nil {
@@ -181,7 +184,7 @@ func (m *PanelItemsItems0) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *PanelItemsItems0) validateEncrypted(formats strfmt.Registry) error {
+func (m *PanelConceptItemsItems0) validateEncrypted(formats strfmt.Registry) error {
 
 	if err := validate.Required("encrypted", "body", m.Encrypted); err != nil {
 		return err
@@ -190,7 +193,7 @@ func (m *PanelItemsItems0) validateEncrypted(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *PanelItemsItems0) validateModifier(formats strfmt.Registry) error {
+func (m *PanelConceptItemsItems0) validateModifier(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Modifier) { // not required
 		return nil
@@ -208,7 +211,7 @@ func (m *PanelItemsItems0) validateModifier(formats strfmt.Registry) error {
 	return nil
 }
 
-var panelItemsItems0TypeOperatorPropEnum []interface{}
+var panelConceptItemsItems0TypeOperatorPropEnum []interface{}
 
 func init() {
 	var res []string
@@ -216,58 +219,58 @@ func init() {
 		panic(err)
 	}
 	for _, v := range res {
-		panelItemsItems0TypeOperatorPropEnum = append(panelItemsItems0TypeOperatorPropEnum, v)
+		panelConceptItemsItems0TypeOperatorPropEnum = append(panelConceptItemsItems0TypeOperatorPropEnum, v)
 	}
 }
 
 const (
 
-	// PanelItemsItems0OperatorEQ captures enum value "EQ"
-	PanelItemsItems0OperatorEQ string = "EQ"
+	// PanelConceptItemsItems0OperatorEQ captures enum value "EQ"
+	PanelConceptItemsItems0OperatorEQ string = "EQ"
 
-	// PanelItemsItems0OperatorNE captures enum value "NE"
-	PanelItemsItems0OperatorNE string = "NE"
+	// PanelConceptItemsItems0OperatorNE captures enum value "NE"
+	PanelConceptItemsItems0OperatorNE string = "NE"
 
-	// PanelItemsItems0OperatorGT captures enum value "GT"
-	PanelItemsItems0OperatorGT string = "GT"
+	// PanelConceptItemsItems0OperatorGT captures enum value "GT"
+	PanelConceptItemsItems0OperatorGT string = "GT"
 
-	// PanelItemsItems0OperatorGE captures enum value "GE"
-	PanelItemsItems0OperatorGE string = "GE"
+	// PanelConceptItemsItems0OperatorGE captures enum value "GE"
+	PanelConceptItemsItems0OperatorGE string = "GE"
 
-	// PanelItemsItems0OperatorLT captures enum value "LT"
-	PanelItemsItems0OperatorLT string = "LT"
+	// PanelConceptItemsItems0OperatorLT captures enum value "LT"
+	PanelConceptItemsItems0OperatorLT string = "LT"
 
-	// PanelItemsItems0OperatorLE captures enum value "LE"
-	PanelItemsItems0OperatorLE string = "LE"
+	// PanelConceptItemsItems0OperatorLE captures enum value "LE"
+	PanelConceptItemsItems0OperatorLE string = "LE"
 
-	// PanelItemsItems0OperatorBETWEEN captures enum value "BETWEEN"
-	PanelItemsItems0OperatorBETWEEN string = "BETWEEN"
+	// PanelConceptItemsItems0OperatorBETWEEN captures enum value "BETWEEN"
+	PanelConceptItemsItems0OperatorBETWEEN string = "BETWEEN"
 
-	// PanelItemsItems0OperatorIN captures enum value "IN"
-	PanelItemsItems0OperatorIN string = "IN"
+	// PanelConceptItemsItems0OperatorIN captures enum value "IN"
+	PanelConceptItemsItems0OperatorIN string = "IN"
 
-	// PanelItemsItems0OperatorLIKEExact captures enum value "LIKE[exact]"
-	PanelItemsItems0OperatorLIKEExact string = "LIKE[exact]"
+	// PanelConceptItemsItems0OperatorLIKEExact captures enum value "LIKE[exact]"
+	PanelConceptItemsItems0OperatorLIKEExact string = "LIKE[exact]"
 
-	// PanelItemsItems0OperatorLIKEBegin captures enum value "LIKE[begin]"
-	PanelItemsItems0OperatorLIKEBegin string = "LIKE[begin]"
+	// PanelConceptItemsItems0OperatorLIKEBegin captures enum value "LIKE[begin]"
+	PanelConceptItemsItems0OperatorLIKEBegin string = "LIKE[begin]"
 
-	// PanelItemsItems0OperatorLIKEEnd captures enum value "LIKE[end]"
-	PanelItemsItems0OperatorLIKEEnd string = "LIKE[end]"
+	// PanelConceptItemsItems0OperatorLIKEEnd captures enum value "LIKE[end]"
+	PanelConceptItemsItems0OperatorLIKEEnd string = "LIKE[end]"
 
-	// PanelItemsItems0OperatorLIKEContains captures enum value "LIKE[contains]"
-	PanelItemsItems0OperatorLIKEContains string = "LIKE[contains]"
+	// PanelConceptItemsItems0OperatorLIKEContains captures enum value "LIKE[contains]"
+	PanelConceptItemsItems0OperatorLIKEContains string = "LIKE[contains]"
 )
 
 // prop value enum
-func (m *PanelItemsItems0) validateOperatorEnum(path, location string, value string) error {
-	if err := validate.EnumCase(path, location, value, panelItemsItems0TypeOperatorPropEnum, true); err != nil {
+func (m *PanelConceptItemsItems0) validateOperatorEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, panelConceptItemsItems0TypeOperatorPropEnum, true); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m *PanelItemsItems0) validateOperator(formats strfmt.Registry) error {
+func (m *PanelConceptItemsItems0) validateOperator(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Operator) { // not required
 		return nil
@@ -281,7 +284,7 @@ func (m *PanelItemsItems0) validateOperator(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *PanelItemsItems0) validateQueryTerm(formats strfmt.Registry) error {
+func (m *PanelConceptItemsItems0) validateQueryTerm(formats strfmt.Registry) error {
 
 	if err := validate.Required("queryTerm", "body", m.QueryTerm); err != nil {
 		return err
@@ -294,7 +297,7 @@ func (m *PanelItemsItems0) validateQueryTerm(formats strfmt.Registry) error {
 	return nil
 }
 
-var panelItemsItems0TypeTypePropEnum []interface{}
+var panelConceptItemsItems0TypeTypePropEnum []interface{}
 
 func init() {
 	var res []string
@@ -302,28 +305,28 @@ func init() {
 		panic(err)
 	}
 	for _, v := range res {
-		panelItemsItems0TypeTypePropEnum = append(panelItemsItems0TypeTypePropEnum, v)
+		panelConceptItemsItems0TypeTypePropEnum = append(panelConceptItemsItems0TypeTypePropEnum, v)
 	}
 }
 
 const (
 
-	// PanelItemsItems0TypeNUMBER captures enum value "NUMBER"
-	PanelItemsItems0TypeNUMBER string = "NUMBER"
+	// PanelConceptItemsItems0TypeNUMBER captures enum value "NUMBER"
+	PanelConceptItemsItems0TypeNUMBER string = "NUMBER"
 
-	// PanelItemsItems0TypeTEXT captures enum value "TEXT"
-	PanelItemsItems0TypeTEXT string = "TEXT"
+	// PanelConceptItemsItems0TypeTEXT captures enum value "TEXT"
+	PanelConceptItemsItems0TypeTEXT string = "TEXT"
 )
 
 // prop value enum
-func (m *PanelItemsItems0) validateTypeEnum(path, location string, value string) error {
-	if err := validate.EnumCase(path, location, value, panelItemsItems0TypeTypePropEnum, true); err != nil {
+func (m *PanelConceptItemsItems0) validateTypeEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, panelConceptItemsItems0TypeTypePropEnum, true); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m *PanelItemsItems0) validateType(formats strfmt.Registry) error {
+func (m *PanelConceptItemsItems0) validateType(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Type) { // not required
 		return nil
@@ -338,7 +341,7 @@ func (m *PanelItemsItems0) validateType(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (m *PanelItemsItems0) MarshalBinary() ([]byte, error) {
+func (m *PanelConceptItemsItems0) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -346,8 +349,8 @@ func (m *PanelItemsItems0) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *PanelItemsItems0) UnmarshalBinary(b []byte) error {
-	var res PanelItemsItems0
+func (m *PanelConceptItemsItems0) UnmarshalBinary(b []byte) error {
+	var res PanelConceptItemsItems0
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -355,10 +358,10 @@ func (m *PanelItemsItems0) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-// PanelItemsItems0Modifier panel items items0 modifier
+// PanelConceptItemsItems0Modifier panel concept items items0 modifier
 //
-// swagger:model PanelItemsItems0Modifier
-type PanelItemsItems0Modifier struct {
+// swagger:model PanelConceptItemsItems0Modifier
+type PanelConceptItemsItems0Modifier struct {
 
 	// applied path
 	// Required: true
@@ -371,8 +374,8 @@ type PanelItemsItems0Modifier struct {
 	ModifierKey *string `json:"modifierKey"`
 }
 
-// Validate validates this panel items items0 modifier
-func (m *PanelItemsItems0Modifier) Validate(formats strfmt.Registry) error {
+// Validate validates this panel concept items items0 modifier
+func (m *PanelConceptItemsItems0Modifier) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAppliedPath(formats); err != nil {
@@ -389,7 +392,7 @@ func (m *PanelItemsItems0Modifier) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *PanelItemsItems0Modifier) validateAppliedPath(formats strfmt.Registry) error {
+func (m *PanelConceptItemsItems0Modifier) validateAppliedPath(formats strfmt.Registry) error {
 
 	if err := validate.Required("modifier"+"."+"appliedPath", "body", m.AppliedPath); err != nil {
 		return err
@@ -402,7 +405,7 @@ func (m *PanelItemsItems0Modifier) validateAppliedPath(formats strfmt.Registry) 
 	return nil
 }
 
-func (m *PanelItemsItems0Modifier) validateModifierKey(formats strfmt.Registry) error {
+func (m *PanelConceptItemsItems0Modifier) validateModifierKey(formats strfmt.Registry) error {
 
 	if err := validate.Required("modifier"+"."+"modifierKey", "body", m.ModifierKey); err != nil {
 		return err
@@ -416,7 +419,7 @@ func (m *PanelItemsItems0Modifier) validateModifierKey(formats strfmt.Registry) 
 }
 
 // MarshalBinary interface implementation
-func (m *PanelItemsItems0Modifier) MarshalBinary() ([]byte, error) {
+func (m *PanelConceptItemsItems0Modifier) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -424,8 +427,8 @@ func (m *PanelItemsItems0Modifier) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *PanelItemsItems0Modifier) UnmarshalBinary(b []byte) error {
-	var res PanelItemsItems0Modifier
+func (m *PanelConceptItemsItems0Modifier) UnmarshalBinary(b []byte) error {
+	var res PanelConceptItemsItems0Modifier
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

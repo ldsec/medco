@@ -243,7 +243,7 @@ func (q *ExploreQuery) maskPatientIDs(patientIDs []string, patientDummyFlags []s
 
 func (q *ExploreQuery) getEncQueryTerms() (encQueryTerms []string) {
 	for _, panel := range q.Query.Panels {
-		for _, item := range panel.Items {
+		for _, item := range panel.ConceptItems {
 			if *item.Encrypted {
 				encQueryTerms = append(encQueryTerms, *item.QueryTerm)
 			}
@@ -255,7 +255,7 @@ func (q *ExploreQuery) getEncQueryTerms() (encQueryTerms []string) {
 func (q *ExploreQuery) convertI2b2PsmQueryPanels(taggedQueryTerms map[string]string) (err error) {
 
 	for _, panel := range q.Query.Panels {
-		for _, item := range panel.Items {
+		for _, item := range panel.ConceptItems {
 			if *item.Encrypted {
 				if tag, ok := taggedQueryTerms[*item.QueryTerm]; ok {
 					itemKey := `/SENSITIVE_TAGGED/medco/tagged/` + tag + `\`

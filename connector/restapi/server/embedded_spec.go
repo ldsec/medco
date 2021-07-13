@@ -811,13 +811,14 @@ func init() {
       }
     },
     "panel": {
+      "description": "collection of i2b2 items (linked by OR)",
       "type": "object",
       "required": [
         "not"
       ],
       "properties": {
-        "items": {
-          "description": "i2b2 items (linked by an OR)",
+        "conceptItems": {
+          "description": "items containing i2b2 concepts (and optionally modifiers)",
           "type": "array",
           "items": {
             "type": "object",
@@ -887,6 +888,13 @@ func init() {
         },
         "panelTiming": {
           "$ref": "#/definitions/timing"
+        },
+        "patientSetIDItems": {
+          "description": "items containing patient set IDs",
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
         }
       }
     },
@@ -2641,7 +2649,7 @@ func init() {
         }
       }
     },
-    "PanelItemsItems0": {
+    "PanelConceptItemsItems0": {
       "type": "object",
       "required": [
         "encrypted",
@@ -2702,7 +2710,7 @@ func init() {
         }
       }
     },
-    "PanelItemsItems0Modifier": {
+    "PanelConceptItemsItems0Modifier": {
       "type": "object",
       "required": [
         "appliedPath",
@@ -3120,16 +3128,17 @@ func init() {
       }
     },
     "panel": {
+      "description": "collection of i2b2 items (linked by OR)",
       "type": "object",
       "required": [
         "not"
       ],
       "properties": {
-        "items": {
-          "description": "i2b2 items (linked by an OR)",
+        "conceptItems": {
+          "description": "items containing i2b2 concepts (and optionally modifiers)",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/PanelItemsItems0"
+            "$ref": "#/definitions/PanelConceptItemsItems0"
           }
         },
         "not": {
@@ -3138,6 +3147,13 @@ func init() {
         },
         "panelTiming": {
           "$ref": "#/definitions/timing"
+        },
+        "patientSetIDItems": {
+          "description": "items containing patient set IDs",
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
         }
       }
     },
