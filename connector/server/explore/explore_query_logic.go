@@ -199,7 +199,10 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 
 		logrus.Info(q.ID, ": patient set ID requested")
 
-		q.Result.PatientSetID = queryID
+		q.Result.PatientSetID, err = strconv.Atoi(patientSetID)
+		if err != nil {
+			return fmt.Errorf("while parsing patient set id: %v", err)
+		}
 	}
 	//update medco connector result instance
 	timer = time.Now()

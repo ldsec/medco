@@ -127,6 +127,8 @@ query13="clr::/E2ETEST/e2etest/3/:/E2ETEST/modifiers/3text/:/e2etest/3/::LIKE[en
 resultQuery13="$(printf -- "count\n0\n0\n0")"
 
 # test4
+
+# test5
 getSavedCohortHeaders="node_index,cohort_name,cohort_id,query_id,creation_date,update_date,query_timing,panels"
 getSavedCohort1="$(printf -- "node_index cohort_name cohort_id query_id query_timing panels\n\
 0 testCohort -1 -1 any \"{panels:[{conceptItems:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any,patientSetIDItems:null}]}\"\n\
@@ -193,6 +195,33 @@ test3 () {
 }
 
 test4 () {
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv "query enc::1"
+  psID1="$(awk -F "\"*,\"*" '{if (NR == 2) {print $4}}' ../result.csv)"
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv "query enc::2"
+  psID2="$(awk -F "\"*,\"*" '{if (NR == 2) {print $4}}' ../result.csv)"
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv "query enc::1 OR enc::2"
+  result1="$(awk -F "\"*,\"*" '{print $2}' ../result.csv)"
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv "query enc::1 AND enc::2"
+  result2="$(awk -F "\"*,\"*" '{print $2}' ../result.csv)"
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv "query ps::${psID1} OR enc::2"
+  resultWithPsID1="$(awk -F "\"*,\"*" '{print $2}' ../result.csv)"
+  if [ "${result1}" != "${resultWithPsID1}" ];
+  then
+  echo "test 4 failed"
+  echo "result: ${resultWithPsID1}" && echo "expected result: ${result1}"
+  exit 1
+  fi
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv "query enc::1 AND enc::${psID2}"
+  resultWithPsID2="$(awk -F "\"*,\"*" '{print $2}' ../result.csv)"
+  if [ "${result2}" != "${resultWithPsID2}" ];
+  then
+  echo "test 4 failed"
+  echo "result: ${resultWithPsID2}" && echo "expected result: ${result2}"
+  exit 1
+  fi
+}
+
+test5 () {
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv get-saved-cohorts
   result="$(awk -F',' 'NR==1{print $0}' ../result.csv)"
   if [ "${result}" != "${getSavedCohortHeaders}" ];
@@ -243,7 +272,7 @@ test4 () {
 
 }
 
-test5 () {
+test6 () {
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD -o /data/result.csv srva  -c testCohort -l 6 -g ${1} \
    -s clr::/SPHN/SPHNv2020.1/FophDiagnosis/ \
    -w first \
@@ -269,7 +298,7 @@ test5 () {
 
 }
 
-test6 () {
+test7 () {
   docker-compose -f docker-compose.tools.yml run \
     -v "${PWD}/../../test/survival_e2e_test_parameters.yaml":/parameters/survival_e2e_test_parameters.yaml \
     medco-cli-client --user $USERNAME --password $PASSWORD -o /data/result.csv srva -d /data/timers.csv \
@@ -292,7 +321,7 @@ test6 () {
   fi
 }
 
-test7() {
+test8() {
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv \
   $(timing $1 $2 $3 $4)
   result="$(awk -F "\"*,\"*" '{print $2}' ../result.csv)"
@@ -305,7 +334,7 @@ test7() {
 
 }
 
-test8() {
+test9() {
 
   cohortPatientListWithCredentials "test" "test"
 
@@ -404,31 +433,36 @@ test2 "query " "${query5}" "${resultQuery5b}"
 USERNAME="${1:-test}_explore_count_global_obfuscated"
 test3 "query " "${query5}" "${resultQuery5b}"
 
+echo "Testing query with patient set id as query term..."
+USERNAME=${1:-test}
+
+test 4
+
 echo "Testing saved-cohorts features..."
 USERNAME=${1:-test}
 
-test4
+test5
 
 echo "Testing survival analysis features..."
 USERNAME=${1:-test}
-test5 "day" "${survivalDays}"
-test5 "week" "${survivalWeeks}"
-test5 "month" "${survivalMonths}"
-test5 "year" "${survivalYears}"
+test6 "day" "${survivalDays}"
+test6 "week" "${survivalWeeks}"
+test6 "month" "${survivalMonths}"
+test6 "year" "${survivalYears}"
 
-test6 "${survivalSubGroup1}" "${survivalSubGroup2}"
+test7 "${survivalSubGroup1}" "${survivalSubGroup2}"
 
 echo "Testing query with timing settings features..."
 USERNAME=${1:-test}
-test7 "any" "any" "any" "any" "${timingResultNonZeroExpected}"
-test7 "sameinstancenum" "sameinstancenum" "sameinstancenum" "sameinstancenum" "${timingResultZeroExpected}"
-test7 "samevisit" "samevisit" "samevisit" "samevisit" "${timingResultZeroExpected}"
-test7 "sameinstancenum" "sameinstancenum" "any" "sameinstancenum" "${timingResultNonZeroExpected}"
-test7 "samevisit" "samevisit" "any" "samevisit" "${timingResultNonZeroExpected}"
+test8 "any" "any" "any" "any" "${timingResultNonZeroExpected}"
+test8 "sameinstancenum" "sameinstancenum" "sameinstancenum" "sameinstancenum" "${timingResultZeroExpected}"
+test8 "samevisit" "samevisit" "samevisit" "samevisit" "${timingResultZeroExpected}"
+test8 "sameinstancenum" "sameinstancenum" "any" "sameinstancenum" "${timingResultNonZeroExpected}"
+test8 "samevisit" "samevisit" "any" "samevisit" "${timingResultNonZeroExpected}"
 
 echo "Testing cohorts-patient-list"
 
-test8 
+test9
 
 echo "CLI test 1/2 successful!"
 popd

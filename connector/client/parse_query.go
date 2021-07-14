@@ -111,7 +111,8 @@ func ParseQueryString(queryString string) (panels []*models.Panel, err error) {
 // and an optional field, the constraint field, separated by "::".
 //		type::content[::constraint]
 // Possible values of the type field are: "ps", "enc", "clr", "file".
-// 1. When the type field is equal to "ps", the content field contains the patient set ID. The constraint field is not present in this case.
+// 1. When the type field is equal to "ps", the content field contains the patient set ID. Here we assume that the
+//		patient set ID is the same for all nodes. The constraint field is not present in this case.
 // 2. When the type field is equal to "enc", the content field contains the concept ID. The constraint field is not present in this case.
 // 3. When the type field is equal to "clr", the content field contains the concept field (containing the concept path)
 // 		and, possibly, the modifier field, which in turn contains the modifier key and applied path fields, separated by ":".
