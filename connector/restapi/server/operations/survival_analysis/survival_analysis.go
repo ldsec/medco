@@ -120,6 +120,11 @@ type SurvivalAnalysisBody struct {
 	// Pattern: ^[\w:-]+$
 	ID *string `json:"ID"`
 
+	// censoring from
+	// Required: true
+	// Enum: [encounters observations]
+	CensoringFrom *string `json:"censoringFrom"`
+
 	// cohort name
 	// Required: true
 	// Pattern: ^\w+$
@@ -176,6 +181,10 @@ func (o *SurvivalAnalysisBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := o.validateID(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateCensoringFrom(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -236,6 +245,49 @@ func (o *SurvivalAnalysisBody) validateID(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Pattern("body"+"."+"ID", "body", string(*o.ID), `^[\w:-]+$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var survivalAnalysisBodyTypeCensoringFromPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["encounters","observations"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		survivalAnalysisBodyTypeCensoringFromPropEnum = append(survivalAnalysisBodyTypeCensoringFromPropEnum, v)
+	}
+}
+
+const (
+
+	// SurvivalAnalysisBodyCensoringFromEncounters captures enum value "encounters"
+	SurvivalAnalysisBodyCensoringFromEncounters string = "encounters"
+
+	// SurvivalAnalysisBodyCensoringFromObservations captures enum value "observations"
+	SurvivalAnalysisBodyCensoringFromObservations string = "observations"
+)
+
+// prop value enum
+func (o *SurvivalAnalysisBody) validateCensoringFromEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, survivalAnalysisBodyTypeCensoringFromPropEnum, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *SurvivalAnalysisBody) validateCensoringFrom(formats strfmt.Registry) error {
+
+	if err := validate.Required("body"+"."+"censoringFrom", "body", o.CensoringFrom); err != nil {
+		return err
+	}
+
+	// value enum
+	if err := o.validateCensoringFromEnum("body"+"."+"censoringFrom", "body", *o.CensoringFrom); err != nil {
 		return err
 	}
 

@@ -1,0 +1,32 @@
+
+-- pl/pgsql function that retrieves the list of right-censored patients in the sense of survival analysis
+
+CREATE OR REPLACE FUNCTION i2b2demodata_i2b2.censored_dates(patient_list integer[],from_encounter boolean) 
+RETURNS TABLE( patient_num bigint)
+STABLE
+PARALLEL SAFE
+AS $$
+DECLARE
+  qq1 text := 'SELECT patient_num::bigint, MAX(COALESCE(end_date::date,start_date::date)) AS end_date
+              FROM '
+  qq2 text := ' WHERE patient_num=ANY($1)';
+
+BEGIN
+IF from_encounter THEN
+    qq1 := qq1 || 'i2b2demodata_i2b2.visit_dimension';
+  ELSE
+    qq1 := qq1 || 'i2b2demodata_i2b2.observation_fact';
+ENDIF;
+
+
+
+qq1 := qq1 || qq2;
+
+
+
+RETURN QUERY EXECUTE qq1
+USING patient_list, end_code, end_modifie;
+
+
+END;
+$$ LANGUAGE plpgsql
