@@ -28,6 +28,7 @@ type ExploreQuery struct {
 		EncCount       string
 		EncPatientList []string
 		Timers         medcomodels.Timers
+		QueryID        int
 		PatientSetID   int
 	}
 }
@@ -196,6 +197,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 			q.Result.EncPatientList = ksMaskedPatientIDs
 			logrus.Info(q.ID, ": key switched patient IDs")
 		}
+		q.Result.QueryID = queryID
 
 		logrus.Info(q.ID, ": patient set ID requested")
 

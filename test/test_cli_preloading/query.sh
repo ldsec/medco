@@ -27,15 +27,15 @@ test2 () {
 
 test3 () {
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv "query enc::1"
-  psID1="$(awk -F "\"*,\"*" '{if (NR == 2) {print $4}}' ../result.csv)"
+  psID1="$(awk -F "\"*,\"*" '{if (NR == 2) {print $5}}' ../result.csv)"
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv "query enc::2"
-  psID2="$(awk -F "\"*,\"*" '{if (NR == 2) {print $4}}' ../result.csv)"
+  psID2="$(awk -F "\"*,\"*" '{if (NR == 2) {print $5}}' ../result.csv)"
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv "query enc::1 OR enc::2"
-  result1="$(awk -F "\"*,\"*" '{print $2}' ../result.csv)"
+  result1="$(awk -F "\"*,\"*" '{print $3}' ../result.csv)"
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv "query enc::1 AND enc::2"
-  result2="$(awk -F "\"*,\"*" '{print $2}' ../result.csv)"
+  result2="$(awk -F "\"*,\"*" '{print $3}' ../result.csv)"
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv "query ps::${psID1} OR enc::2"
-  resultWithPsID1="$(awk -F "\"*,\"*" '{print $2}' ../result.csv)"
+  resultWithPsID1="$(awk -F "\"*,\"*" '{print $3}' ../result.csv)"
   if [ "${result1}" != "${resultWithPsID1}" ];
   then
   echo "test 3 failed"
@@ -43,7 +43,7 @@ test3 () {
   exit 1
   fi
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv "query enc::1 AND ps::${psID2}"
-  resultWithPsID2="$(awk -F "\"*,\"*" '{print $2}' ../result.csv)"
+  resultWithPsID2="$(awk -F "\"*,\"*" '{print $3}' ../result.csv)"
   if [ "${result2}" != "${resultWithPsID2}" ];
   then
   echo "test 3 failed"

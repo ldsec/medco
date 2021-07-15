@@ -74,7 +74,7 @@ func printResultsCSV(nodesResult map[int]*ExploreQueryResult, CSVFileURL string)
 		return
 	}
 
-	csvHeaders := []string{"node_name", "count", "patient_list", "patient_set_id"}
+	csvHeaders := []string{"node_name", "count", "patient_list", "query_id", "patient_set_id"}
 	csvNodesResults := make([][]string, 0)
 
 	// CSV values: results
@@ -83,6 +83,7 @@ func printResultsCSV(nodesResult map[int]*ExploreQueryResult, CSVFileURL string)
 			strconv.Itoa(nodeIdx),
 			strconv.FormatInt(queryResult.Count, 10),
 			fmt.Sprint(queryResult.PatientList),
+			strconv.FormatInt(queryResult.QueryID, 10),
 			strconv.FormatInt(queryResult.PatientSetID, 10),
 		})
 	}

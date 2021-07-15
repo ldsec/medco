@@ -624,6 +624,9 @@ func init() {
         "patientSetID": {
           "type": "integer"
         },
+        "queryID": {
+          "type": "integer"
+        },
         "status": {
           "type": "string",
           "enum": [
@@ -999,7 +1002,7 @@ func init() {
       "schema": {
         "type": "object",
         "required": [
-          "patientSetID",
+          "queryID",
           "creationDate",
           "updateDate"
         ],
@@ -1007,7 +1010,7 @@ func init() {
           "creationDate": {
             "type": "string"
           },
-          "patientSetID": {
+          "queryID": {
             "type": "integer"
           },
           "updateDate": {
@@ -2055,7 +2058,7 @@ func init() {
             "schema": {
               "type": "object",
               "required": [
-                "patientSetID",
+                "queryID",
                 "creationDate",
                 "updateDate"
               ],
@@ -2063,7 +2066,7 @@ func init() {
                 "creationDate": {
                   "type": "string"
                 },
-                "patientSetID": {
+                "queryID": {
                   "type": "integer"
                 },
                 "updateDate": {
@@ -2153,7 +2156,7 @@ func init() {
             "schema": {
               "type": "object",
               "required": [
-                "patientSetID",
+                "queryID",
                 "creationDate",
                 "updateDate"
               ],
@@ -2161,7 +2164,7 @@ func init() {
                 "creationDate": {
                   "type": "string"
                 },
-                "patientSetID": {
+                "queryID": {
                   "type": "integer"
                 },
                 "updateDate": {
@@ -2941,6 +2944,9 @@ func init() {
         "patientSetID": {
           "type": "integer"
         },
+        "queryID": {
+          "type": "integer"
+        },
         "status": {
           "type": "string",
           "enum": [
@@ -3246,7 +3252,7 @@ func init() {
       "schema": {
         "type": "object",
         "required": [
-          "patientSetID",
+          "queryID",
           "creationDate",
           "updateDate"
         ],
@@ -3254,7 +3260,7 @@ func init() {
           "creationDate": {
             "type": "string"
           },
-          "patientSetID": {
+          "queryID": {
             "type": "integer"
           },
           "updateDate": {
