@@ -175,3 +175,23 @@ func GetQueryDefinition(queryID int) (string, error) {
 	return *res, nil
 
 }
+
+// GetPatientSetID retrieves the patient set ID related to a certain query.
+func GetPatientSetID(queryID int) (int, error) {
+
+	description := fmt.Sprintf("GetPatientSetID (ID %d), procedure: %s", queryID, "query_tools.get_patient_set_id")
+	logrus.Debugf("running: %s", description)
+
+	row := utilserver.DBConnection.QueryRow("SELECT query_tools.get_patient_set_id($1);", queryID)
+	res := new(int)
+	err := row.Scan(res)
+	if err != nil {
+		err = fmt.Errorf("while scanning SQL record: %s, DB operation: %s", err.Error(), description)
+		return -1, err
+	}
+
+	logrus.Debugf("DB operation successful, result: %d, DB operation: %s", *res, description)
+
+	return *res, nil
+
+}

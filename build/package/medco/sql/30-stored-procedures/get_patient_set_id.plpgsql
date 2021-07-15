@@ -1,0 +1,17 @@
+-- pl/pgsql function that returns the patient set id of a query
+
+CREATE OR REPLACE FUNCTION query_tools.get_patient_set_id(query_id integer)
+  RETURNS integer
+  STABLE
+  PARALLEL SAFE
+  AS $$
+DECLARE
+  patient_set_id integer;
+BEGIN
+  EXECUTE 'SELECT i2b2_non_encrypted_patient_set_id FROM query_tools.explore_query_results
+WHERE query_id = $1'
+  USING query_id INTO patient_set_id;
+  RETURN patient_set_id;
+END;
+$$
+LANGUAGE plpgsql

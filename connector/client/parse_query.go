@@ -74,7 +74,7 @@ func ParseQueryString(queryString string) (panels []*models.Panel, err error) {
 					return
 				}
 
-				items, err := ParseQueryItem(elements[0])
+				conceptItems, cohortItems, err := ParseQueryItem(elements[0])
 				if err != nil {
 					return nil, err
 				}
@@ -86,17 +86,19 @@ func ParseQueryString(queryString string) (panels []*models.Panel, err error) {
 				}
 
 				for i := 0; i < int(multiplier); i++ {
-					newPanel.Items = append(newPanel.Items, items...)
+					newPanel.ConceptItems = append(newPanel.ConceptItems, conceptItems...)
+					newPanel.CohortItems = append(newPanel.CohortItems, cohortItems...)
 				}
 
 			} else {
 
-				items, err := ParseQueryItem(queryItem)
+				conceptItems, cohortItems, err := ParseQueryItem(queryItem)
 				if err != nil {
 					return nil, err
 				}
 
-				newPanel.Items = append(newPanel.Items, items...)
+				newPanel.ConceptItems = append(newPanel.ConceptItems, conceptItems...)
+				newPanel.CohortItems = append(newPanel.CohortItems, cohortItems...)
 			}
 		}
 		panels = append(panels, &newPanel)
@@ -104,56 +106,63 @@ func ParseQueryString(queryString string) (panels []*models.Panel, err error) {
 	return
 }
 
-// ParseQueryItem parses a string into an item
+// ParseQueryItem parses a string into an item.
 // queryItem is composed of two mandatory fields, the type field and the content field,
 // and an optional field, the constraint field, separated by "::".
 //		type::content[::constraint]
-// Possible values of the type field are: "enc", "clr", "file".
-// 1. When the type field is equal to "enc", the content field contains the concept ID. The constraint field is not present in this case.
-// 2. When the type field is equal to "clr", the content field contains the concept field (containing the concept path)
+// Possible values of the type field are: "chr", "enc", "clr", "file".
+// 1. When the type field is equal to "chr", the content field contains the cohort name. The constraint field is not present in this case.
+// 2. When the type field is equal to "enc", the content field contains the concept ID. The constraint field is not present in this case.
+// 3. When the type field is equal to "clr", the content field contains the concept field (containing the concept path)
 // 		and, possibly, the modifier field, which in turn contains the modifier key and applied path fields, separated by ":".
 // 		The optional constraint field can be present, containing the operator, type and value fields separated by ":".
 //		The constraint field applies to the concept or, if the modifier field is present, to the modifier.
-// 3. When the type field is equal to "file", the content field contains the path of the file containing the items. The constraint field is not present in this case.
-func ParseQueryItem(queryItem string) (items []*models.PanelItemsItems0, err error) {
+// 4. When the type field is equal to "file", the content field contains the path of the file containing the items. The constraint field is not present in this case.
+func ParseQueryItem(queryItem string) (conceptItems []*models.PanelConceptItemsItems0, cohortItems []string, err error) {
 
 	queryItemFields := strings.Split(queryItem, "::")
 	if len(queryItemFields) != 2 && len(queryItemFields) != 3 {
-		return nil, fmt.Errorf("invalid query item format: %s", queryItem)
+		return nil, nil, fmt.Errorf("invalid query item format: %s", queryItem)
 	}
 
 	switch queryItemFields[0] {
+	case "chr":
+		if len(queryItemFields) != 2 {
+			return nil, nil, fmt.Errorf("invalid chr query item format: %v", queryItemFields)
+		}
+
+		cohortItems = append(cohortItems, queryItemFields[1])
 	case "enc":
 		if len(queryItemFields) != 2 {
-			return nil, fmt.Errorf("invalid enc query item format: %v", queryItemFields)
+			return nil, nil, fmt.Errorf("invalid enc query item format: %v", queryItemFields)
 		}
 
 		_, err = strconv.ParseInt(queryItemFields[1], 10, 64)
 		if err != nil {
 			logrus.Error("invalid ID ", queryItemFields[1])
-			return nil, err
+			return nil, nil, err
 		}
 
-		item := new(models.PanelItemsItems0)
+		item := new(models.PanelConceptItemsItems0)
 		encrypted := true
 		item.Encrypted = &encrypted
 		item.QueryTerm = &queryItemFields[1]
 
-		items = append(items, item)
+		conceptItems = append(conceptItems, item)
 	case "clr":
 		contentFieldFields := strings.Split(queryItemFields[1], ":")
 		if len(contentFieldFields) != 1 && len(contentFieldFields) != 3 {
-			return nil, fmt.Errorf("invalid content field format: %v", contentFieldFields)
+			return nil, nil, fmt.Errorf("invalid content field format: %v", contentFieldFields)
 		}
 
-		item := new(models.PanelItemsItems0)
+		item := new(models.PanelConceptItemsItems0)
 		encrypted := false
 
 		item.Encrypted = &encrypted
 		item.QueryTerm = &contentFieldFields[0]
 
 		if len(contentFieldFields) == 3 { // there is a modifier field
-			modifier := &models.PanelItemsItems0Modifier{
+			modifier := &models.PanelConceptItemsItems0Modifier{
 				AppliedPath: &contentFieldFields[2],
 				ModifierKey: &contentFieldFields[1],
 			}
@@ -164,7 +173,7 @@ func ParseQueryItem(queryItem string) (items []*models.PanelItemsItems0, err err
 		if len(queryItemFields) == 3 { // there is a constrain field
 			constrainFieldFields := strings.Split(queryItemFields[2], ":")
 			if len(constrainFieldFields) != 3 {
-				return nil, fmt.Errorf("invalid constrain field format: %v", constrainFieldFields)
+				return nil, nil, fmt.Errorf("invalid constrain field format: %v", constrainFieldFields)
 			}
 
 			item.Operator = constrainFieldFields[0]
@@ -172,25 +181,25 @@ func ParseQueryItem(queryItem string) (items []*models.PanelItemsItems0, err err
 			item.Value = constrainFieldFields[2]
 		}
 
-		items = append(items, item)
+		conceptItems = append(conceptItems, item)
 	case "file":
 		if len(queryItemFields) != 2 {
-			return nil, fmt.Errorf("invalid file query item format: %v", queryItemFields)
+			return nil, nil, fmt.Errorf("invalid file query item format: %v", queryItemFields)
 		}
-		items, err = loadQueryFile(queryItemFields[1])
+		conceptItems, cohortItems, err = loadQueryFile(queryItemFields[1])
 	default:
-		return nil, fmt.Errorf("invalid query item type: %s", queryItemFields[0])
+		return nil, nil, fmt.Errorf("invalid query item type: %s", queryItemFields[0])
 	}
 
 	return
 }
 
 // TODO: might fail if alleles of queries are too big, what to do? ignore or fail?
-// loadQueryFile load and parse a query file (containing either regular or genomic IDs) into query items
-// A regular ID is an ID in the format parsable by parseQueryItem, a genomic ID is a sequence of 4 comma separated values
+// loadQueryFile loads and parses a query file (containing either regular or genomic IDs) into query items.
+// A regular ID is an ID in the format parsable by parseQueryItem, a genomic ID is a sequence of 4 comma separated values.
 // Each query item (i.e. regular or genomic ID) must occupy a line in the file.
-// As expected, all query items in a file are part of the same panel, and therefore OR-ed
-func loadQueryFile(queryFilePath string) (queryItems []*models.PanelItemsItems0, err error) {
+// As expected, all query items in a file are part of the same panel, and therefore OR-ed.
+func loadQueryFile(queryFilePath string) (conceptItems []*models.PanelConceptItemsItems0, cohortItems []string, err error) {
 	logrus.Debug("Client query: loading file ", queryFilePath)
 
 	queryFile, err := os.Open(queryFilePath)
@@ -202,13 +211,14 @@ func loadQueryFile(queryFilePath string) (queryItems []*models.PanelItemsItems0,
 	fileScanner := bufio.NewScanner(queryFile)
 	for fileScanner.Scan() {
 		queryTermFields := strings.Split(fileScanner.Text(), ",")
-		var queryItem []*models.PanelItemsItems0
+		var conceptItem []*models.PanelConceptItemsItems0
+		var cohortItem []string
 
 		if len(queryTermFields) == 1 { // regular ID
 
-			queryItem, err = ParseQueryItem(queryTermFields[0])
+			conceptItem, cohortItem, err = ParseQueryItem(queryTermFields[0])
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 
 		} else if len(queryTermFields) == 4 { // genomic ID, generate the variant ID
@@ -216,18 +226,18 @@ func loadQueryFile(queryFilePath string) (queryItems []*models.PanelItemsItems0,
 			startPos, err := strconv.ParseInt(queryTermFields[1], 10, 64)
 			if err != nil {
 				logrus.Error("error parsing start position: ", err)
-				return nil, err
+				return nil, nil, err
 			}
 
 			variantID, err := identifiers.GetVariantID(queryTermFields[0], startPos, queryTermFields[2], queryTermFields[3])
 			if err != nil {
 				logrus.Error("error generating genomic query term: ", err)
-				return nil, err
+				return nil, nil, err
 			}
 
-			queryItem, err = ParseQueryItem("enc::" + strconv.FormatInt(variantID, 64))
+			conceptItem, cohortItem, err = ParseQueryItem("enc::" + strconv.FormatInt(variantID, 64))
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 
 		} else {
@@ -236,7 +246,8 @@ func loadQueryFile(queryFilePath string) (queryItems []*models.PanelItemsItems0,
 			return
 		}
 
-		queryItems = append(queryItems, queryItem...)
+		conceptItems = append(conceptItems, conceptItem...)
+		cohortItems = append(cohortItems, cohortItem...)
 	}
 
 	return
