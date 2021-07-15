@@ -8,7 +8,7 @@ PARALLEL SAFE
 AS $$
 DECLARE
   qq1 text := 'SELECT patient_num::bigint, MAX(COALESCE(end_date::date,start_date::date)) AS end_date
-              FROM '
+              FROM ';
   qq2 text := ' WHERE patient_num=ANY($1)';
 
 BEGIN
@@ -16,7 +16,7 @@ IF from_encounter THEN
     qq1 := qq1 || 'i2b2demodata_i2b2.visit_dimension';
   ELSE
     qq1 := qq1 || 'i2b2demodata_i2b2.observation_fact';
-ENDIF;
+END IF;
 
 
 
