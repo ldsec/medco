@@ -29,12 +29,12 @@ test3 () {
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv query enc::1
   queryIDs1="$(awk -F "\"*,\"*" '{if (NR != 1) {print}}' ../result.csv | sort | awk -F "\"*,\"*" '{print $4}' | awk 'BEGIN{ORS=","}1' | sed 's/.$//')"
   echo "queryIDs1 $queryIDs1"
-  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD add-saved-cohorts -c testCohortQuery1 -p $queryIDs1
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD add-saved-cohorts -c testCohortQuery1 -q $queryIDs1
 
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv query enc::2
   queryIDs2="$(awk -F "\"*,\"*" '{if (NR != 1) {print}}' ../result.csv | sort | awk -F "\"*,\"*" '{print $4}' | awk 'BEGIN{ORS=","}1' | sed 's/.$//')"
   echo "queryIDs2 $queryIDs2"
-  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD add-saved-cohorts -c testCohortQuery2 -p $queryIDs2
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD add-saved-cohorts -c testCohortQuery2 -q $queryIDs2
 
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv query enc::1 OR enc::2
   result1="$(awk -F "\"*,\"*" '{print $3}' ../result.csv)"

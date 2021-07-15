@@ -28,7 +28,7 @@ test1 () {
   exit 1
   fi
 
-  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD add-saved-cohorts -c testCohort2 -p $(echo -1,-1,-1)
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD add-saved-cohorts -c testCohort2 -q $(echo -1,-1,-1)
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv get-saved-cohorts
   result="$(awk -F',' '{print $1,$2,$4}' ../result.csv)"
   if [ "${result}" != "${getSavedCohort2}" ];
@@ -39,7 +39,7 @@ test1 () {
   fi
 
 
-  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD update-saved-cohorts -c testCohort2 -p $(echo -1,-1,-1)
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD update-saved-cohorts -c testCohort2 -q $(echo -1,-1,-1)
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv get-saved-cohorts
   result="$(awk -F',' '{print $1,$2,$4}' ../result.csv)"
   if [ "${result}" != "${getSavedCohort2}" ];
