@@ -20,6 +20,9 @@ import (
 // swagger:model panel
 type Panel struct {
 
+	// items containing cohort names
+	CohortItems []string `json:"cohortItems"`
+
 	// items containing i2b2 concepts (and optionally modifiers)
 	ConceptItems []*PanelConceptItemsItems0 `json:"conceptItems"`
 
@@ -29,9 +32,6 @@ type Panel struct {
 
 	// panel timing
 	PanelTiming Timing `json:"panelTiming,omitempty"`
-
-	// items containing patient set IDs
-	PatientSetIDItems []int64 `json:"patientSetIDItems"`
 }
 
 // Validate validates this panel

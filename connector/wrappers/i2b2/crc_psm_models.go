@@ -80,9 +80,10 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, res
 			i2b2Panel.Items = append(i2b2Panel.Items, i2b2Item)
 		}
 
-		for _, patientSetID := range queryPanel.PatientSetIDItems {
+		for _, cohort := range queryPanel.CohortItems {
+
 			i2b2Item := Item{
-				ItemKey: "patient_set_coll_id:" + strconv.FormatInt(patientSetID, 10),
+				ItemKey: cohort,
 			}
 			i2b2Panel.Items = append(i2b2Panel.Items, i2b2Item)
 		}

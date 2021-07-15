@@ -820,6 +820,13 @@ func init() {
         "not"
       ],
       "properties": {
+        "cohortItems": {
+          "description": "items containing cohort names",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "conceptItems": {
           "description": "items containing i2b2 concepts (and optionally modifiers)",
           "type": "array",
@@ -891,13 +898,6 @@ func init() {
         },
         "panelTiming": {
           "$ref": "#/definitions/timing"
-        },
-        "patientSetIDItems": {
-          "description": "items containing patient set IDs",
-          "type": "array",
-          "items": {
-            "type": "integer"
-          }
         }
       }
     },
@@ -3140,6 +3140,13 @@ func init() {
         "not"
       ],
       "properties": {
+        "cohortItems": {
+          "description": "items containing cohort names",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "conceptItems": {
           "description": "items containing i2b2 concepts (and optionally modifiers)",
           "type": "array",
@@ -3153,13 +3160,6 @@ func init() {
         },
         "panelTiming": {
           "$ref": "#/definitions/timing"
-        },
-        "patientSetIDItems": {
-          "description": "items containing patient set IDs",
-          "type": "array",
-          "items": {
-            "type": "integer"
-          }
         }
       }
     },

@@ -74,7 +74,7 @@ func ParseQueryString(queryString string) (panels []*models.Panel, err error) {
 					return
 				}
 
-				conceptItems, psIDItems, err := ParseQueryItem(elements[0])
+				conceptItems, cohortItems, err := ParseQueryItem(elements[0])
 				if err != nil {
 					return nil, err
 				}
@@ -87,18 +87,18 @@ func ParseQueryString(queryString string) (panels []*models.Panel, err error) {
 
 				for i := 0; i < int(multiplier); i++ {
 					newPanel.ConceptItems = append(newPanel.ConceptItems, conceptItems...)
-					newPanel.PatientSetIDItems = append(newPanel.PatientSetIDItems, psIDItems...)
+					newPanel.CohortItems = append(newPanel.CohortItems, cohortItems...)
 				}
 
 			} else {
 
-				conceptItems, psIDItems, err := ParseQueryItem(queryItem)
+				conceptItems, cohortItems, err := ParseQueryItem(queryItem)
 				if err != nil {
 					return nil, err
 				}
 
 				newPanel.ConceptItems = append(newPanel.ConceptItems, conceptItems...)
-				newPanel.PatientSetIDItems = append(newPanel.PatientSetIDItems, psIDItems...)
+				newPanel.CohortItems = append(newPanel.CohortItems, cohortItems...)
 			}
 		}
 		panels = append(panels, &newPanel)
@@ -110,16 +110,15 @@ func ParseQueryString(queryString string) (panels []*models.Panel, err error) {
 // queryItem is composed of two mandatory fields, the type field and the content field,
 // and an optional field, the constraint field, separated by "::".
 //		type::content[::constraint]
-// Possible values of the type field are: "ps", "enc", "clr", "file".
-// 1. When the type field is equal to "ps", the content field contains the patient set ID. Here we assume that the
-//		patient set ID is the same for all nodes. The constraint field is not present in this case.
+// Possible values of the type field are: "chr", "enc", "clr", "file".
+// 1. When the type field is equal to "chr", the content field contains the cohort name. The constraint field is not present in this case.
 // 2. When the type field is equal to "enc", the content field contains the concept ID. The constraint field is not present in this case.
 // 3. When the type field is equal to "clr", the content field contains the concept field (containing the concept path)
 // 		and, possibly, the modifier field, which in turn contains the modifier key and applied path fields, separated by ":".
 // 		The optional constraint field can be present, containing the operator, type and value fields separated by ":".
 //		The constraint field applies to the concept or, if the modifier field is present, to the modifier.
 // 4. When the type field is equal to "file", the content field contains the path of the file containing the items. The constraint field is not present in this case.
-func ParseQueryItem(queryItem string) (conceptItems []*models.PanelConceptItemsItems0, psIDItems []int64, err error) {
+func ParseQueryItem(queryItem string) (conceptItems []*models.PanelConceptItemsItems0, cohortItems []string, err error) {
 
 	queryItemFields := strings.Split(queryItem, "::")
 	if len(queryItemFields) != 2 && len(queryItemFields) != 3 {
@@ -127,18 +126,12 @@ func ParseQueryItem(queryItem string) (conceptItems []*models.PanelConceptItemsI
 	}
 
 	switch queryItemFields[0] {
-	case "ps":
+	case "chr":
 		if len(queryItemFields) != 2 {
-			return nil, nil, fmt.Errorf("invalid ps query item format: %v", queryItemFields)
+			return nil, nil, fmt.Errorf("invalid chr query item format: %v", queryItemFields)
 		}
 
-		psID, err := strconv.ParseInt(queryItemFields[1], 10, 64)
-		if err != nil {
-			logrus.Error("invalid patient set ID ", queryItemFields[1])
-			return nil, nil, err
-		}
-
-		psIDItems = append(psIDItems, psID)
+		cohortItems = append(cohortItems, queryItemFields[1])
 	case "enc":
 		if len(queryItemFields) != 2 {
 			return nil, nil, fmt.Errorf("invalid enc query item format: %v", queryItemFields)
@@ -193,7 +186,7 @@ func ParseQueryItem(queryItem string) (conceptItems []*models.PanelConceptItemsI
 		if len(queryItemFields) != 2 {
 			return nil, nil, fmt.Errorf("invalid file query item format: %v", queryItemFields)
 		}
-		conceptItems, psIDItems, err = loadQueryFile(queryItemFields[1])
+		conceptItems, cohortItems, err = loadQueryFile(queryItemFields[1])
 	default:
 		return nil, nil, fmt.Errorf("invalid query item type: %s", queryItemFields[0])
 	}
@@ -206,7 +199,7 @@ func ParseQueryItem(queryItem string) (conceptItems []*models.PanelConceptItemsI
 // A regular ID is an ID in the format parsable by parseQueryItem, a genomic ID is a sequence of 4 comma separated values.
 // Each query item (i.e. regular or genomic ID) must occupy a line in the file.
 // As expected, all query items in a file are part of the same panel, and therefore OR-ed.
-func loadQueryFile(queryFilePath string) (conceptItems []*models.PanelConceptItemsItems0, psIDItems []int64, err error) {
+func loadQueryFile(queryFilePath string) (conceptItems []*models.PanelConceptItemsItems0, cohortItems []string, err error) {
 	logrus.Debug("Client query: loading file ", queryFilePath)
 
 	queryFile, err := os.Open(queryFilePath)
@@ -219,11 +212,11 @@ func loadQueryFile(queryFilePath string) (conceptItems []*models.PanelConceptIte
 	for fileScanner.Scan() {
 		queryTermFields := strings.Split(fileScanner.Text(), ",")
 		var conceptItem []*models.PanelConceptItemsItems0
-		var psIDItem []int64
+		var cohortItem []string
 
 		if len(queryTermFields) == 1 { // regular ID
 
-			conceptItems, psIDItem, err = ParseQueryItem(queryTermFields[0])
+			conceptItem, cohortItem, err = ParseQueryItem(queryTermFields[0])
 			if err != nil {
 				return nil, nil, err
 			}
@@ -242,7 +235,7 @@ func loadQueryFile(queryFilePath string) (conceptItems []*models.PanelConceptIte
 				return nil, nil, err
 			}
 
-			conceptItem, psIDItem, err = ParseQueryItem("enc::" + strconv.FormatInt(variantID, 64))
+			conceptItem, cohortItem, err = ParseQueryItem("enc::" + strconv.FormatInt(variantID, 64))
 			if err != nil {
 				return nil, nil, err
 			}
@@ -254,7 +247,7 @@ func loadQueryFile(queryFilePath string) (conceptItems []*models.PanelConceptIte
 		}
 
 		conceptItems = append(conceptItems, conceptItem...)
-		psIDItems = append(psIDItems, psIDItem...)
+		cohortItems = append(cohortItems, cohortItem...)
 	}
 
 	return

@@ -272,6 +272,34 @@ func (q *ExploreQuery) convertI2b2PsmQueryPanels(taggedQueryTerms map[string]str
 				}
 			}
 		}
+
+		// change the cohort name with the patient set ID
+		if len(panel.CohortItems) > 0 {
+			cohorts, err := querytoolsserver.GetSavedCohorts(q.User.ID, 100)
+			if err != nil {
+				return fmt.Errorf("while retrieving cohorts: %v", err)
+			}
+			if len(cohorts) == 0 {
+				return fmt.Errorf("no cohorts for user: %v", q.User.ID)
+			}
+			for i, item := range panel.CohortItems {
+				foundCohort := false
+				for _, cohort := range cohorts {
+					if cohort.CohortName == item {
+						psID, err := querytoolsserver.GetPatientSetID(cohort.QueryID)
+						if err != nil {
+							return fmt.Errorf("while retrieving patient set ID: %v", cohort.QueryID)
+						}
+						panel.CohortItems[i] = "patient_set_coll_id:" + strconv.Itoa(psID)
+						foundCohort = true
+						break
+					}
+				}
+				if !foundCohort {
+					return fmt.Errorf("no cohort with name: %v found for user: %v", item, q.User.ID)
+				}
+			}
+		}
 	}
 
 	return

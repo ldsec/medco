@@ -26,15 +26,21 @@ test2 () {
 }
 
 test3 () {
-  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv "query enc::1"
-  psID1="$(awk -F "\"*,\"*" '{if (NR == 2) {print $5}}' ../result.csv)"
-  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv "query enc::2"
-  psID2="$(awk -F "\"*,\"*" '{if (NR == 2) {print $5}}' ../result.csv)"
-  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv "query enc::1 OR enc::2"
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv query enc::1
+  queryIDs1="$(awk -F "\"*,\"*" '{if (NR != 1) {print}}' ../result.csv | sort | awk -F "\"*,\"*" '{print $4}' | awk 'BEGIN{ORS=","}1' | sed 's/.$//')"
+  echo "queryIDs1 $queryIDs1"
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD add-saved-cohorts -c testCohortQuery1 -p $queryIDs1
+
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv query enc::2
+  queryIDs2="$(awk -F "\"*,\"*" '{if (NR != 1) {print}}' ../result.csv | sort | awk -F "\"*,\"*" '{print $4}' | awk 'BEGIN{ORS=","}1' | sed 's/.$//')"
+  echo "queryIDs2 $queryIDs2"
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD add-saved-cohorts -c testCohortQuery2 -p $queryIDs2
+
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv query enc::1 OR enc::2
   result1="$(awk -F "\"*,\"*" '{print $3}' ../result.csv)"
-  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv "query enc::1 AND enc::2"
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv query enc::1 AND enc::2
   result2="$(awk -F "\"*,\"*" '{print $3}' ../result.csv)"
-  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv "query ps::${psID1} OR enc::2"
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv query chr::testCohortQuery1 OR enc::2
   resultWithPsID1="$(awk -F "\"*,\"*" '{print $3}' ../result.csv)"
   if [ "${result1}" != "${resultWithPsID1}" ];
   then
@@ -42,7 +48,7 @@ test3 () {
   echo "result: ${resultWithPsID1}" && echo "expected result: ${result1}"
   exit 1
   fi
-  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv "query enc::1 AND ps::${psID2}"
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv query enc::1 AND chr::testCohortQuery2
   resultWithPsID2="$(awk -F "\"*,\"*" '{print $3}' ../result.csv)"
   if [ "${result2}" != "${resultWithPsID2}" ];
   then
@@ -142,9 +148,9 @@ test1 "query " "${query5}" "${resultQuery5b}"
 USERNAME="${1:-test}_explore_count_global_obfuscated"
 test2 "query " "${query5}" "${resultQuery5b}"
 
-echo "Testing query with patient set id as query term..."
-USERNAME=${1:-test}
-test 3
+echo "Testing query with cohort as query term..."
+USERNAME="${1:-test}"
+test3
 
 echo "Testing query with timing settings features..."
 

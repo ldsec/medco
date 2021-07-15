@@ -98,7 +98,7 @@ func eqValid() medco_node.ExploreQueryBody {
 							Value:     "10",
 						},
 					},
-					PatientSetIDItems: []int64{123, 456},
+					CohortItems: []string{},
 				},
 			},
 		},

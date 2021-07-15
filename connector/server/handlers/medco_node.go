@@ -258,7 +258,7 @@ func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal 
 	if !hasID {
 
 		return medco_node.NewPostCohortsNotFound().WithPayload(&medco_node.PostCohortsNotFoundBody{
-			Message: fmt.Sprintf("User does not have a stored query result with ID: %d", *cohort.QueryID),
+			Message: fmt.Sprintf("User %s does not have a stored query result with ID: %d", principal.ID, *cohort.QueryID),
 		})
 	}
 
