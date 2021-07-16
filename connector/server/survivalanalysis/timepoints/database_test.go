@@ -182,6 +182,9 @@ func TestCensoringEvent(t *testing.T) {
 	results, patientWithoutCensoring, err := censoredDates(fullStartEventMap, patientsNoEndEvent, false)
 	expectedCensoringAuxiliary(t, patientWithoutCensoring, results)
 
+	results, patientWithoutCensoring, err = censoredDates(fullStartEventMap, patientsNoEndEvent, true)
+	expectedCensoringAuxiliary(t, patientWithoutCensoring, results)
+
 	// put start events that do not occur before any other events
 	absoluteLatest, err := time.Parse(sqlDateFormat, "1972-02-15")
 	assert.NoError(t, err)
@@ -195,6 +198,14 @@ func TestCensoringEvent(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Empty(t, emptyResult)
 	_, isIn := patientWithoutCensoring[1137]
+	assert.True(t, isIn)
+	_, isIn = patientWithoutCensoring[1138]
+	assert.True(t, isIn)
+
+	emptyResult, patientWithoutCensoring, err = censoredDates(lateStartEventMap, patientsNoEndEvent, true)
+	assert.NoError(t, err)
+	assert.Empty(t, emptyResult)
+	_, isIn = patientWithoutCensoring[1137]
 	assert.True(t, isIn)
 	_, isIn = patientWithoutCensoring[1138]
 	assert.True(t, isIn)

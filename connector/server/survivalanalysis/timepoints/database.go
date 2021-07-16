@@ -147,67 +147,7 @@ func endEvents(patientWithStartEventList map[int64]time.Time, conceptCodes, modi
 
 }
 
-// censoringEvent calls the postgres procedure to get the list of patients and censoring event. All observations whose concept or modifier code is different than those provided are potential censoring event.
-// The event with the latest end date should be considered (for each observation, if the end date is missing, the start date should be taken instead).
-// If the start event does not occur before the end event, the event is dropped and the patient is inserted in the set of patient-without-censoring-events (they should miss both event of interest and censoring event).
-func censoredPatients(patientWithStartEventList map[int64]time.Time, patientWithoutEndEvent map[int64]struct{}, endConceptCodes []string, endModifierCodes []string) (map[int64]struct{}, error) {
-	setStrings := make([]string, 0, len(patientWithoutEndEvent))
-
-	for patient := range patientWithoutEndEvent {
-		setStrings = append(setStrings, strconv.FormatInt(patient, 10))
-	}
-	setDefinition := "{" + strings.Join(setStrings, ",") + "}"
-	conceptDefinition := "{" + strings.Join(endConceptCodes, ",") + "}"
-	modifierDefinition := "{" + strings.Join(endModifierCodes, ",") + "}"
-
-	description := fmt.Sprintf("get censored patients (patient list: %s, start concept codes: %s, start modifier codes: %s): procedure: %s",
-		setDefinition, conceptDefinition, modifierDefinition, "i2b2demodata_i2b2.censored_patients")
-
-	logrus.Debugf("Survival analysis: timepoints: retrieving list of censored patients for the patients: %s", description)
-	row, err := utilserver.I2B2DBConnection.Query("SELECT i2b2demodata_i2b2.censored_patients($1,$2,$3)", setDefinition, conceptDefinition, modifierDefinition)
-	if err != nil {
-		err = errors.Errorf("while calling database for retrieving right censoring event dates: %s; DB operation: %s", err.Error(), description)
-		return nil, err
-	}
-
-	censored := make(map[int64]struct{}, len(patientWithoutEndEvent))
-
-	var record = new(string)
-	for row.Next() {
-		err = row.Scan(record)
-		if err != nil {
-			err = errors.Errorf("while reading database record stream for retrieving censored patients: %s; DB operation: %s", err.Error(), description)
-			return nil, err
-		}
-
-		recordEntries := strings.Split(strings.Trim(*record, "()"), ",")
-		if len(recordEntries) != 1 {
-			err = errors.Errorf("while parsing SQL record stream: expected to find 1 items in a string like \"(<integer>)\" in record %s", *record)
-		}
-		patientID, err := strconv.ParseInt(recordEntries[0], 10, 64)
-		if err != nil {
-			err = errors.Errorf("while parsing patient number \"%s\": %s; DB operation: %s", recordEntries[0], err.Error(), description)
-			return nil, err
-		}
-
-		if _, ok := patientWithStartEventList[patientID]; !ok {
-			err = errors.Errorf("while looking for a start date patient %d was not found in sart event map, this is not expected; DB operation: %s", patientID, description)
-			return nil, err
-		}
-
-		if _, isIn := censored[patientID]; isIn {
-			err = errors.Errorf("while filling patient-without-censoring set: patient %d already found in set, this is not expected; DB operation: %s", patientID, description)
-			return nil, err
-		}
-		censored[patientID] = struct{}{}
-
-	}
-
-	logrus.Debugf("Survival analysis: timepoints: successfully found %d patients with right censoring event; DB operation: %s", len(censored), description)
-	return censored, nil
-}
-
-// censoringEvent calls the postgres procedure to get the list of patients and censoring event. All observations whose concept or modifier code is different than those provided are potential censoring event.
+// censoredDates calls the postgres procedure to get the list of censored patients and the censure date.
 // The event with the latest end date should be considered (for each observation, if the end date is missing, the start date should be taken instead).
 // If the start event does not occur before the end event, the event is dropped and the patient is inserted in the set of patient-without-censoring-events (they should miss both event of interest and censoring event).
 func censoredDates(patientWithStartEventList map[int64]time.Time, patientWithoutEndEvent map[int64]struct{}, fromEncounter bool) (map[int64]time.Time, map[int64]struct{}, error) {
@@ -221,7 +161,7 @@ func censoredDates(patientWithStartEventList map[int64]time.Time, patientWithout
 	description := fmt.Sprintf("get censored dates (patient list: %s): procedure: %s",
 		setDefinition, "i2b2demodata_i2b2.censoring_event")
 
-	logrus.Debugf("Survival analysis: timepoints: retrieving the censoring event dates for the patients: %s; from encounter: %t", description)
+	logrus.Debugf("Survival analysis: timepoints: retrieving the censoring event dates for the patients: %s; from encounter: %t", description, fromEncounter)
 	row, err := utilserver.I2B2DBConnection.Query("SELECT i2b2demodata_i2b2.censored_dates($1, $2)", setDefinition, fromEncounter)
 	if err != nil {
 		err = errors.Errorf("while calling database for retrieving right censoring dates: %s; DB operation: %s", err.Error(), description)
@@ -235,7 +175,7 @@ func censoredDates(patientWithStartEventList map[int64]time.Time, patientWithout
 	for row.Next() {
 		err = row.Scan(record)
 		if err != nil {
-			err = errors.Errorf("while reading database record stream for retrieving start event dates: %s; DB operation: %s", err.Error(), description)
+			err = errors.Errorf("while reading database record stream for retrieving censored dates: %s; DB operation: %s", err.Error(), description)
 			return nil, nil, err
 		}
 
@@ -255,7 +195,7 @@ func censoredDates(patientWithStartEventList map[int64]time.Time, patientWithout
 		}
 
 		if _, ok := patientWithStartEventList[patientID]; !ok {
-			err = errors.Errorf("while looking for a start date patient %d was not found in sart event map, this is not expected; DB operation: %s", patientID, description)
+			err = errors.Errorf("while looking for a censored patient %d was not found in sart event map, this is not expected; DB operation: %s", patientID, description)
 			return nil, nil, err
 		}
 
