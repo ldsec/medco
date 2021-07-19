@@ -20,6 +20,7 @@ type Parameters struct {
 	EndConceptPath   string    `yaml:"end_concept_path"`
 	EndModifier      *modifier `yaml:"end_modifier,omitempty"`
 	EndsWhen         string    `yaml:"ends_when"`
+	CensoringFrom    string    `yaml:"censoring_from"`
 	SubGroups        []*struct {
 		GroupName   string `yaml:"group_name"`
 		GroupTiming string `yaml:"group_timing"`

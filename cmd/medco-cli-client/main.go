@@ -122,6 +122,11 @@ func main() {
 			Usage: "In case of multiple occurences of end concept in observations, specifies if the earliest or the latest is taken",
 			Value: "earliest",
 		},
+		cli.StringFlag{
+			Name:  "censoringFrom, r",
+			Usage: "Determine whether the right-censoring date must be taken from observations or encounters",
+			Value: "encounters",
+		},
 	}
 
 	//--- query tools command flags
@@ -342,6 +347,7 @@ func main() {
 					c.String("startsWhen"),
 					c.String("endConcept"),
 					c.String("endsWhen"),
+					c.String("censoringFrom"),
 				)
 
 			},

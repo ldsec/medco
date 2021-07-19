@@ -29,6 +29,7 @@ func MedCoSurvivalAnalysisHandler(param survival_analysis.SurvivalAnalysisParams
 		*param.Body.EndConcept,
 		param.Body.EndModifier,
 		param.Body.EndsWhen,
+		param.Body.CensoringFrom,
 	)
 	logrus.Debug("survivalAnalysis: ", survivalAnalysisQuery)
 	err := survivalAnalysisQuery.Validate()

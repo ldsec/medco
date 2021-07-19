@@ -28,6 +28,7 @@ func (clientSurvivalAnalysis *SurvivalAnalysis) submitToNode(nodeIdx int) (resul
 		EndsWhen:            new(string),
 		TimeGranularity:     new(string),
 		TimeLimit:           new(int64),
+		CensoringFrom:       new(string),
 	}
 
 	*body.ID = clientSurvivalAnalysis.id
@@ -39,6 +40,7 @@ func (clientSurvivalAnalysis *SurvivalAnalysis) submitToNode(nodeIdx int) (resul
 	*body.EndsWhen = clientSurvivalAnalysis.endsWhen
 	*body.TimeGranularity = strings.ToLower(clientSurvivalAnalysis.granularity)
 	*body.TimeLimit = int64(clientSurvivalAnalysis.limit)
+	*body.CensoringFrom = clientSurvivalAnalysis.censoringFrom
 
 	params.SetBody(body)
 	response, err := clientSurvivalAnalysis.httpMedCoClients[nodeIdx].SurvivalAnalysis.SurvivalAnalysis(params, httptransport.BearerToken(clientSurvivalAnalysis.authToken))

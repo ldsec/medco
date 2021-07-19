@@ -8,6 +8,7 @@ end_modifier:
   modifier_key: "/SPHN/DeathStatus-status/death/"
   applied_path: "/SPHNv2020.1/DeathStatus/"
 ends_when: "earliest"
+censoring_from: "observations"
 sub_groups:
   - group_name: "Female"
     group_timing: "any"

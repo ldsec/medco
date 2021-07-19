@@ -47,7 +47,8 @@ var parameters = &Parameters{
 		ModifierKey: "/any/end/modifier/key/",
 		AppliedPath: "/any/end/path/%",
 	},
-	EndsWhen: "earliest",
+	EndsWhen:      "earliest",
+	CensoringFrom: "visits",
 	SubGroups: []*struct {
 		GroupName   string "yaml:\"group_name\""
 		GroupTiming string "yaml:\"group_timing\""

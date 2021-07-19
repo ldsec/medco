@@ -14,6 +14,7 @@ import (
 // endEarliest defines if it must take the earliest or the latest among candidates. Candidates must occur striclty after the start event, an error is thrown otherwise.
 // The list of candidate events is not expected to be empty, an error is thrown if it is the case.
 // The patient-to-difference-in-day map is returned alongside the list of patients present in the patient-to-start-event map and absent from patient-to-end-event.
+// The latter forms the list of right-censored patients.
 func patientAndEndEvents(startEvent map[int64]time.Time, endEvents map[int64][]time.Time, endEarliest bool) (map[int64]struct{}, map[int64]int64, error) {
 
 	patientsWithoutEndEvent := make(map[int64]struct{}, len(startEvent))
