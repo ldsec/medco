@@ -10,21 +10,25 @@ import (
 )
 
 // ExecutePsmQuery executes an i2b2 PSM query and returns the corresponding patient set id
-func ExecutePsmQuery(queryName string, panels []*models.Panel, queryTiming models.Timing) (patientCount string, patientSetID string, err error) {
+func ExecutePsmQuery(queryName string, panels []*models.Panel, sequences []*models.TimingSequenceInfo, queryTiming models.Timing) (patientCount string, patientSetID string, err error) {
 
 	// craft and execute request
 	xmlResponse := &Response{
 		MessageBody: &CrcPsmRespMessageBody{},
 	}
-
+	xmlQuery, err := NewCrcPsmReqFromQueryDef(
+		queryName,
+		panels,
+		sequences,
+		[]ResultOutputName{Patientset, PatientCountXML},
+		queryTiming,
+	)
+	if err != nil {
+		return
+	}
 	err = i2b2XMLRequest(
 		utilserver.I2b2HiveURL+"/QueryToolService/request",
-		NewCrcPsmReqFromQueryDef(
-			queryName,
-			panels,
-			[]ResultOutputName{Patientset, PatientCountXML},
-			queryTiming,
-		),
+		xmlQuery,
 		xmlResponse,
 	)
 

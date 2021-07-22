@@ -25,6 +25,9 @@ type ExploreQuery struct {
 	// query timing
 	QueryTiming Timing `json:"queryTiming,omitempty"`
 
+	// A collection of timingSequenceInfo that, if present, determines the temporal relations between the panels. The element at position i determines the relation between the panels at position i and i + 1.
+	QueryTimingSequence []*TimingSequenceInfo `json:"queryTimingSequence"`
+
 	// user public key
 	// Pattern: ^[\w=-]+$
 	UserPublicKey string `json:"userPublicKey,omitempty"`
@@ -39,6 +42,10 @@ func (m *ExploreQuery) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateQueryTiming(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateQueryTimingSequence(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -88,6 +95,31 @@ func (m *ExploreQuery) validateQueryTiming(formats strfmt.Registry) error {
 			return ve.ValidateName("queryTiming")
 		}
 		return err
+	}
+
+	return nil
+}
+
+func (m *ExploreQuery) validateQueryTimingSequence(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.QueryTimingSequence) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.QueryTimingSequence); i++ {
+		if swag.IsZero(m.QueryTimingSequence[i]) { // not required
+			continue
+		}
+
+		if m.QueryTimingSequence[i] != nil {
+			if err := m.QueryTimingSequence[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("queryTimingSequence" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil

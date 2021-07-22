@@ -147,7 +147,7 @@ func (q *Query) Execute() error {
 			timer = time.Now()
 			logrus.Infof("Survival analysis: I2B2 explore for subgroup %d", i)
 			logrus.Tracef("Survival analysis: panels %+v", panels)
-			patientList, err := SubGroupExplore(q.QueryName, i, panels, definition.SubGroupTiming)
+			patientList, err := SubGroupExplore(q.QueryName, i, panels, definition.QueryTimingSequence, definition.SubGroupTiming)
 			if err != nil {
 				returnedErr := fmt.Errorf("during subgroup explore procedure")
 				logrus.Errorf("%s: %s", returnedErr.Error(), err.Error())

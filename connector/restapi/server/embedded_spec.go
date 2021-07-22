@@ -603,6 +603,13 @@ func init() {
         "queryTiming": {
           "$ref": "#/definitions/timing"
         },
+        "queryTimingSequence": {
+          "description": "A collection of timingSequenceInfo that, if present, determines the temporal relations between the panels. The element at position i determines the relation between the panels at position i and i + 1.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/timingSequenceInfo"
+          }
+        },
         "userPublicKey": {
           "type": "string",
           "pattern": "^[\\w=-]+$"
@@ -937,6 +944,62 @@ func init() {
         "sameinstancenum"
       ]
     },
+    "timingSequenceInfo": {
+      "description": "The info according to which the temporal relation between two panels is determined. The observations identified by the first panel occur before the observations identified by the second panel if the {whichDateFirst} of the {whichObservationFirst} observation in the first panel occurs {when} the {whichDateSecond} of the {whichObservationSecond} observation in the second panel. ",
+      "type": "object",
+      "required": [
+        "whichDateFirst",
+        "whichObservationFirst",
+        "when",
+        "whichDateSecond",
+        "whichObservationSecond"
+      ],
+      "properties": {
+        "when": {
+          "type": "string",
+          "default": "BEFORE",
+          "enum": [
+            "BEFORE",
+            "BEFOREORSAMETIME",
+            "SAMETIME"
+          ]
+        },
+        "whichDateFirst": {
+          "type": "string",
+          "default": "STARTDATE",
+          "enum": [
+            "STARTDATE",
+            "ENDDATE"
+          ]
+        },
+        "whichDateSecond": {
+          "type": "string",
+          "default": "STARTDATE",
+          "enum": [
+            "STARTDATE",
+            "ENDDATE"
+          ]
+        },
+        "whichObservationFirst": {
+          "type": "string",
+          "default": "ANY",
+          "enum": [
+            "FIRST",
+            "LAST",
+            "ANY"
+          ]
+        },
+        "whichObservationSecond": {
+          "type": "string",
+          "default": "ANY",
+          "enum": [
+            "FIRST",
+            "LAST",
+            "ANY"
+          ]
+        }
+      }
+    },
     "user": {
       "type": "object",
       "properties": {
@@ -1152,6 +1215,12 @@ func init() {
                   "type": "array",
                   "items": {
                     "$ref": "#/definitions/panel"
+                  }
+                },
+                "queryTimingSequence": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/timingSequenceInfo"
                   }
                 },
                 "subGroupTiming": {
@@ -2802,6 +2871,12 @@ func init() {
             "$ref": "#/definitions/panel"
           }
         },
+        "queryTimingSequence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/timingSequenceInfo"
+          }
+        },
         "subGroupTiming": {
           "$ref": "#/definitions/timing"
         }
@@ -2922,6 +2997,13 @@ func init() {
         },
         "queryTiming": {
           "$ref": "#/definitions/timing"
+        },
+        "queryTimingSequence": {
+          "description": "A collection of timingSequenceInfo that, if present, determines the temporal relations between the panels. The element at position i determines the relation between the panels at position i and i + 1.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/timingSequenceInfo"
+          }
         },
         "userPublicKey": {
           "type": "string",
@@ -3187,6 +3269,62 @@ func init() {
         "sameinstancenum"
       ]
     },
+    "timingSequenceInfo": {
+      "description": "The info according to which the temporal relation between two panels is determined. The observations identified by the first panel occur before the observations identified by the second panel if the {whichDateFirst} of the {whichObservationFirst} observation in the first panel occurs {when} the {whichDateSecond} of the {whichObservationSecond} observation in the second panel. ",
+      "type": "object",
+      "required": [
+        "whichDateFirst",
+        "whichObservationFirst",
+        "when",
+        "whichDateSecond",
+        "whichObservationSecond"
+      ],
+      "properties": {
+        "when": {
+          "type": "string",
+          "default": "BEFORE",
+          "enum": [
+            "BEFORE",
+            "BEFOREORSAMETIME",
+            "SAMETIME"
+          ]
+        },
+        "whichDateFirst": {
+          "type": "string",
+          "default": "STARTDATE",
+          "enum": [
+            "STARTDATE",
+            "ENDDATE"
+          ]
+        },
+        "whichDateSecond": {
+          "type": "string",
+          "default": "STARTDATE",
+          "enum": [
+            "STARTDATE",
+            "ENDDATE"
+          ]
+        },
+        "whichObservationFirst": {
+          "type": "string",
+          "default": "ANY",
+          "enum": [
+            "FIRST",
+            "LAST",
+            "ANY"
+          ]
+        },
+        "whichObservationSecond": {
+          "type": "string",
+          "default": "ANY",
+          "enum": [
+            "FIRST",
+            "LAST",
+            "ANY"
+          ]
+        }
+      }
+    },
     "user": {
       "type": "object",
       "properties": {
@@ -3402,6 +3540,12 @@ func init() {
                   "type": "array",
                   "items": {
                     "$ref": "#/definitions/panel"
+                  }
+                },
+                "queryTimingSequence": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/timingSequenceInfo"
                   }
                 },
                 "subGroupTiming": {

@@ -457,6 +457,10 @@ parameters:
                 type: "array"
                 items:
                   $ref: '#/definitions/panel'
+              queryTimingSequence:
+                type: "array"
+                items:
+                  $ref: "#/definitions/timingSequenceInfo"
           maxItems: 4
         timeLimit:
           type: "integer"
@@ -1002,7 +1006,7 @@ definitions:
 
   timingSequenceInfo:
     type: "object"
-    required: [whichDateFirst, whichEventFirst, when, whichDateSecond, whichEventSecond]
+    required: [whichDateFirst, whichObservationFirst, when, whichDateSecond, whichObservationSecond]
     description: "The info according to which the temporal relation between two panels is determined.
     The observations identified by the first panel occur before the observations identified by the second panel if
     the {whichDateFirst} of the {whichObservationFirst} observation in the first panel

@@ -3,6 +3,7 @@ package i2b2
 import (
 	"encoding/xml"
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -11,7 +12,7 @@ import (
 )
 
 // NewCrcPsmReqFromQueryDef returns a new request object for i2b2 psm request
-func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, resultOutputs []ResultOutputName, queryTiming models.Timing) Request {
+func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, querySequences []*models.TimingSequenceInfo, resultOutputs []ResultOutputName, queryTiming models.Timing) (Request, error) {
 
 	// PSM header
 	psmHeader := PsmHeader{
@@ -37,6 +38,8 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, res
 		SpecificityScale: "0",
 	}
 
+	var panelsOnlyConcepts []Panel
+
 	// embed query in request
 	for p, queryPanel := range queryPanels {
 
@@ -52,8 +55,10 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, res
 			PanelTiming:          strings.ToUpper(string(queryPanel.PanelTiming)),
 			TotalItemOccurrences: "1",
 		}
+		i2b2PanelNoCohort := i2b2Panel
 
 		for _, queryItem := range queryPanel.ConceptItems {
+
 			i2b2Item := Item{
 				ItemKey: convertPathToI2b2Format(*queryItem.QueryTerm),
 			}
@@ -78,7 +83,9 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, res
 				}
 			}
 			i2b2Panel.Items = append(i2b2Panel.Items, i2b2Item)
+			i2b2PanelNoCohort.Items = append(i2b2Panel.Items, i2b2Item)
 		}
+		panelsOnlyConcepts = append(panelsOnlyConcepts, i2b2PanelNoCohort)
 
 		for _, cohort := range queryPanel.CohortItems {
 
@@ -89,6 +96,42 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, res
 		}
 
 		psmRequest.Panels = append(psmRequest.Panels, i2b2Panel)
+
+	}
+
+	// embed subqueries and subquery constraint if sequences are in use
+	if querySequences != nil && len(querySequences) > 0 {
+		if len(querySequences) != len(panelsOnlyConcepts)+1 {
+			err := fmt.Errorf("the number of items in query sequence info is not equal to this of panels + 1")
+			return NewRequest(), err
+		}
+
+		for i, queryPanel := range panelsOnlyConcepts {
+			subQueryStringID := queryName + "_SUBQUERY_" + strconv.Itoa(i)
+			subquery := Subquery{
+				QueryType:   "EVENT",
+				QueryName:   subQueryStringID,
+				QueryID:     subQueryStringID,
+				QueryTiming: "SAMEINSTANCENUM",
+				Panels:      []Panel{queryPanel},
+			}
+			psmRequest.Subqueries = append(psmRequest.Subqueries, subquery)
+		}
+
+		for _, querySequence := range querySequences {
+			subqueryConstraint := SubqueryConstraint{
+				Operator: *querySequence.When,
+				FirstQuery: SubqueryConstraintOperand{
+					AggregateOperator: *querySequence.WhichObservationFirst,
+					JoinColumn:        *querySequence.WhichDateFirst,
+				},
+				SecondQuery: SubqueryConstraintOperand{
+					AggregateOperator: *querySequence.WhichDateSecond,
+					JoinColumn:        *querySequence.WhichObservationSecond,
+				},
+			}
+			psmRequest.SubqueryConstraints = append(psmRequest.SubqueryConstraints, subqueryConstraint)
+		}
 	}
 
 	// embed result outputs
@@ -103,7 +146,7 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, res
 	return NewRequestWithBody(CrcPsmReqFromQueryDefMessageBody{
 		PsmHeader:  psmHeader,
 		PsmRequest: psmRequest,
-	})
+	}), nil
 }
 
 // --- request
@@ -135,12 +178,14 @@ type PsmRequestFromQueryDef struct {
 	Type string `xml:"xsi:type,attr"`
 	Xsi  string `xml:"xmlns:xsi,attr"`
 
-	QueryName        string  `xml:"query_definition>query_name"`
-	QueryDescription string  `xml:"query_definition>query_description"`
-	QueryID          string  `xml:"query_definition>query_id"`
-	QueryTiming      string  `xml:"query_definition>query_timing"`
-	SpecificityScale string  `xml:"query_definition>specificity_scale"`
-	Panels           []Panel `xml:"query_definition>panel"`
+	QueryName           string               `xml:"query_definition>query_name"`
+	QueryDescription    string               `xml:"query_definition>query_description"`
+	QueryID             string               `xml:"query_definition>query_id"`
+	QueryTiming         string               `xml:"query_definition>query_timing"`
+	SpecificityScale    string               `xml:"query_definition>specificity_scale"`
+	Panels              []Panel              `xml:"query_definition>panel"`
+	Subqueries          []Subquery           `xml:"query_definition>subquery"`
+	SubqueryConstraints []SubqueryConstraint `xml:"query_definition>subquery_constraint"`
 
 	ResultOutputs []ResultOutput `xml:"result_output_list>result_output"`
 }
@@ -181,6 +226,31 @@ type ConstrainByValue struct {
 	ValueType       string `xml:"value_type"`
 	ValueOperator   string `xml:"value_operator"`
 	ValueConstraint string `xml:"value_constraint"`
+}
+
+// Subquery is an i2b2 XML subquery
+type Subquery struct {
+	QueryType        string  `xml:"query_type"`
+	QueryName        string  `xml:"query_name"`
+	QueryDescription string  `xml:"query_description"`
+	QueryID          string  `xml:"query_id"`
+	QueryTiming      string  `xml:"query_timing"`
+	SpecificityScale string  `xml:"specificity_scale"`
+	Panels           []Panel `xml:"panel"`
+}
+
+// SubqueryConstraint is an i2b2 XML suquery_constraint
+type SubqueryConstraint struct {
+	FirstQuery  SubqueryConstraintOperand `xml:"first_query"`
+	Operator    string                    `xml:"operator"`
+	SecondQuery SubqueryConstraintOperand `xml:"second_query"`
+}
+
+// SubqueryConstraintOperand is a helper structure for SubqueryConstraint
+type SubqueryConstraintOperand struct {
+	QueryID           string `xml:"query_id"`
+	JoinColumn        string `xml:"join_column"`
+	AggregateOperator string `xml:"aggregate_operator"`
 }
 
 // ResultOutput is an i2b2 XML requested result type
