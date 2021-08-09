@@ -24,16 +24,16 @@ type PostCohorts struct {
 	// authToken is the OIDC authentication JWT
 	authToken string
 
-	patientSetID []int
-	cohortName   string
+	queryID    []int
+	cohortName string
 }
 
 // NewPostCohorts creates a new post cohorts query
-func NewPostCohorts(token string, patientSetID []int, cohortName string, disableTLSCheck bool) (postCohorts *PostCohorts, err error) {
+func NewPostCohorts(token string, queryID []int, cohortName string, disableTLSCheck bool) (postCohorts *PostCohorts, err error) {
 	postCohorts = &PostCohorts{
-		authToken:    token,
-		cohortName:   cohortName,
-		patientSetID: patientSetID,
+		authToken:  token,
+		cohortName: cohortName,
+		queryID:    queryID,
 	}
 
 	getMetadataResp, err := medcoclient.MetaData(token, disableTLSCheck)
@@ -43,8 +43,8 @@ func NewPostCohorts(token string, patientSetID []int, cohortName string, disable
 	}
 
 	nofNodes := len(getMetadataResp.Payload.Nodes)
-	if len(patientSetID) != nofNodes {
-		err = fmt.Errorf("number of provided patient set IDs must be the same as that of MedCo nodes: provided %d, connected nodes %d", len(patientSetID), nofNodes)
+	if len(queryID) != nofNodes {
+		err = fmt.Errorf("number of provided patient set IDs must be the same as that of MedCo nodes: provided %d, connected nodes %d", len(queryID), nofNodes)
 		logrus.Error(err)
 		return
 	}
@@ -118,12 +118,12 @@ func (postCohorts *PostCohorts) submitToNode(nodeIdx int) (*medco_node.PostCohor
 	body := medco_node.PostCohortsBody{
 		CreationDate: new(string),
 		UpdateDate:   new(string),
-		PatientSetID: new(int64),
+		QueryID:      new(int64),
 	}
 
 	*body.CreationDate = creationDate.Format(time.RFC3339)
 	*body.UpdateDate = updateDate.Format(time.RFC3339)
-	*body.PatientSetID = int64(postCohorts.patientSetID[nodeIdx])
+	*body.QueryID = int64(postCohorts.queryID[nodeIdx])
 
 	params.SetCohortsRequest(body)
 	params.SetName(postCohorts.cohortName)

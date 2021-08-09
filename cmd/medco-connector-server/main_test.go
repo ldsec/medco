@@ -75,64 +75,56 @@ func TestExploreSearchConcept(t *testing.T) {
 	}
 }
 
-type exploreQueryRequest struct {
-	ID    string       `json:"id"`
-	Query exploreQuery `json:"query"`
-}
-
-type exploreQuery struct {
-	UserPub string  `json:"userPublicKey"`
-	Panels  []panel `json:"panels"`
-}
-
-type panel struct {
-	Not   bool   `json:"not"`
-	Items []item `json:"items"`
-}
-
-type item struct {
-	QueryTerm string `json:"queryTerm"`
-	Operator  string `json:"operator"`
-	Value     string `json:"value"`
-	Type      string `json:"type"`
-	Encrypted bool   `json:"encrypted"`
-}
-
 type teqTests struct {
 	ok    bool
-	query exploreQueryRequest
+	query medco_node.ExploreQueryBody
 }
 
-func eqValid() exploreQueryRequest {
-	return exploreQueryRequest{
-		"id", exploreQuery{
-			"userPub", []panel{
-				{false, []item{
-					{"queryTerm", "EQ", "10", "NUMBER", false},
-				}},
+func eqValid() medco_node.ExploreQueryBody {
+
+	return medco_node.ExploreQueryBody{
+		"id", &models.ExploreQuery{
+			UserPublicKey: "userPub",
+			Panels: []*models.Panel{
+				{
+					Not: func() *bool { b := false; return &b }(),
+					ConceptItems: []*models.PanelConceptItemsItems0{
+						{
+							Encrypted: func() *bool { b := false; return &b }(),
+							Modifier:  nil,
+							Operator:  "EQ",
+							QueryTerm: func() *string { s := "queryTerm"; return &s }(),
+							Type:      "NUMBER",
+							Value:     "10",
+						},
+					},
+					CohortItems: []string{},
+				},
 			},
-		}}
+		},
+	}
 }
 
 func TestExploreQuery(t *testing.T) {
+
 	tests := []teqTests{{true, eqValid()}}
 	for i := 0; i < 9; i++ {
 		tests = append(tests, teqTests{false, eqValid()})
 	}
 	tests[1].query.ID = "123@"
-	tests[2].query.Query.UserPub = "123@"
-	tests[3].query.Query.Panels[0].Items[0].Type = "non-enum"
-	tests[4].query.Query.Panels[0].Items[0].Operator = "non-enum"
-	tests[5].query.Query.Panels[0].Items[0].QueryTerm = "word@"
-	tests[6].query.Query.Panels[0].Items[0].QueryTerm = "abc/def"
-	tests[7].query.Query.Panels[0].Items[0].QueryTerm = "abc/def/"
-	tests[8].query.Query.Panels[0].Items[0].QueryTerm = "/abc/def//"
-	tests[9].query.Query.Panels[0].Items[0].QueryTerm = "/abc/def"
+	tests[2].query.Query.UserPublicKey = "123@"
+	tests[3].query.Query.Panels[0].ConceptItems[0].Type = "non-enum"
+	tests[4].query.Query.Panels[0].ConceptItems[0].Operator = "non-enum"
+	tests[5].query.Query.Panels[0].ConceptItems[0].QueryTerm = func() *string { s := "word@"; return &s }()
+	tests[6].query.Query.Panels[0].ConceptItems[0].QueryTerm = func() *string { s := "word@"; return &s }()
+	tests[7].query.Query.Panels[0].ConceptItems[0].QueryTerm = func() *string { s := "abc/def/"; return &s }()
+	tests[8].query.Query.Panels[0].ConceptItems[0].QueryTerm = func() *string { s := "/abc/def//"; return &s }()
+	tests[9].query.Query.Panels[0].ConceptItems[0].QueryTerm = func() *string { s := "/abc/def"; return &s }()
 	for i := 0; i < 2; i++ {
 		tests = append(tests, teqTests{true, eqValid()})
 	}
-	tests[10].query.Query.Panels[0].Items[0].QueryTerm = "word=-word"
-	tests[11].query.Query.Panels[0].Items[0].QueryTerm = "/abc123@/def123@/"
+	tests[10].query.Query.Panels[0].ConceptItems[0].QueryTerm = func() *string { s := "word=-word"; return &s }()
+	tests[11].query.Query.Panels[0].ConceptItems[0].QueryTerm = func() *string { s := "/abc123@/def123@/"; return &s }()
 
 	for _, test := range tests {
 		body, err := json.Marshal(test.query)
@@ -149,6 +141,7 @@ func TestExploreQuery(t *testing.T) {
 
 		log.Lvlf2("checking for %t with body: %s", test.ok, body)
 		err = ctx.BindValidRequest(req, ri, &medco_node.ExploreQueryParams{})
+		fmt.Println(err)
 		require.Equal(t, test.ok, err == nil, "wrong result for %+v: %s",
 			test, err)
 	}

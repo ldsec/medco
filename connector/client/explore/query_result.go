@@ -14,6 +14,7 @@ type ExploreQueryResult struct {
 	PatientList  []int64
 	Times        map[string]time.Duration
 	PatientSetID int64
+	QueryID      int64
 }
 
 // newQueryResult parses a query result from a node and decrypts its fields
@@ -23,6 +24,7 @@ func newQueryResult(nodeResult *models.ExploreQueryResultElement, privateKey str
 	}
 
 	parsedResult.PatientSetID = nodeResult.PatientSetID
+	parsedResult.QueryID = nodeResult.QueryID
 	// decrypt count
 	parsedResult.Count, err = unlynx.Decrypt(nodeResult.EncryptedCount, privateKey)
 	if err != nil {
