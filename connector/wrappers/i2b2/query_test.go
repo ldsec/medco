@@ -85,6 +85,7 @@ func TestExecutePsmQuery(t *testing.T) {
 			},
 				Not: &not,
 			}},
+		nil,
 		models.TimingAny)
 
 	if err != nil {
@@ -115,6 +116,7 @@ func TestExecutePsmQueryWithValue(t *testing.T) {
 			},
 				Not: &not,
 			}},
+		nil,
 		models.TimingAny)
 
 	if err != nil {
@@ -149,6 +151,7 @@ func TestExecutePsmQueryWithModifiers(t *testing.T) {
 			},
 				Not: &not,
 			}},
+		nil,
 		models.TimingAny)
 
 	if err != nil {
@@ -179,6 +182,7 @@ func TestExecutePsmQueryWithModifiers(t *testing.T) {
 			},
 				Not: &not,
 			}},
+		nil,
 		models.TimingAny)
 
 	if err != nil {
@@ -216,6 +220,60 @@ func TestExecutePsmQueryWithModifierAndValue(t *testing.T) {
 			},
 				Not: &not,
 			}},
+		nil,
+		models.TimingAny)
+
+	if err != nil {
+		t.Fail()
+	}
+	t.Log("count:"+patientCount, "set ID:"+patientSetID)
+}
+
+func TestExecutePsmQueryWithSequence(t *testing.T) {
+
+	encrypted1 := false
+	queryTerm1 := `/E2ETEST/e2etest/1/`
+
+	item1 := &models.PanelConceptItemsItems0{
+		Encrypted: &encrypted1,
+		QueryTerm: &queryTerm1,
+	}
+
+	encrypted2 := false
+	queryTerm2 := `/E2ETEST/e2etest/2/`
+
+	item2 := &models.PanelConceptItemsItems0{
+		Encrypted: &encrypted2,
+		QueryTerm: &queryTerm2,
+	}
+
+	when := models.TimingSequenceInfoWhenBEFORE
+	whichDateFirst := models.TimingSequenceInfoWhichDateFirstSTARTDATE
+	whichDateSecond := models.TimingSequenceInfoWhichDateSecondSTARTDATE
+	whichObservationFirst := models.TimingSequenceInfoWhichObservationFirstFIRST
+	whichObservationSecond := models.TimingSequenceInfoWhichObservationSecondFIRST
+
+	not := false
+	patientCount, patientSetID, err := ExecutePsmQuery(
+		"testQuery",
+		[]*models.Panel{
+			{ConceptItems: []*models.PanelConceptItemsItems0{
+				item1,
+			},
+				Not: &not,
+			},
+			{ConceptItems: []*models.PanelConceptItemsItems0{
+				item2,
+			},
+				Not: &not,
+			}},
+		[]*models.TimingSequenceInfo{
+			{When: &when,
+				WhichDateFirst:         &whichDateFirst,
+				WhichDateSecond:        &whichDateSecond,
+				WhichObservationFirst:  &whichObservationFirst,
+				WhichObservationSecond: &whichObservationSecond},
+		},
 		models.TimingAny)
 
 	if err != nil {
