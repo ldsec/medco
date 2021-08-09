@@ -168,7 +168,7 @@ func main() {
 		// cli.IntSlice produces wrong results
 		cli.StringFlag{
 			Name:     "cohortName, c",
-			Usage:    "Name of the new cohort",
+			Usage:    "Name of the cohort to remove",
 			Required: true,
 		},
 	}

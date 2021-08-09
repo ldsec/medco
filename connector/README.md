@@ -17,7 +17,7 @@ It communicates with the [*unlynx wrapper*](../unlynx) to execute the distribute
 - *wrappers*: client library wrappers for external service (i2b2, unlynx, etc.)
 
 ## Swagger
-The *connector* APIs are defined using [go-swagger](https://github.com/go-swagger/go-swagger) by the file 
+The *connector* APIs are defined using [go-swagger](https://github.com/go-swagger/go-swagger) (version v0.25.0) by the file 
 [swagger/medco-connector.yml](swagger/medco-connector.yml).
 To re-generate the server, client and models code you can run from the root of the repository:
 ```shell
