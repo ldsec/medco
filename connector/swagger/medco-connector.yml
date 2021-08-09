@@ -394,14 +394,14 @@ parameters:
     schema:
       type: "object"
       properties:
-        patientSetID:
+        queryID:
           type: "integer"
         creationDate:
           type: "string"
         updateDate:
           type: "string"
       required:
-        - patientSetID
+        - queryID
         - creationDate
         - updateDate
   
@@ -855,13 +855,14 @@ definitions:
   panel:
     type: "object"
     required: [not]
+    description: "collection of i2b2 items (linked by OR)"
     properties:
       not:
         type: "boolean"
         description: "exclude the i2b2 panel"
-      items:
+      conceptItems:
         type: "array"
-        description: "i2b2 items (linked by an OR)"
+        description: "items containing i2b2 concepts (and optionally modifiers)"
         items:
           type: "object"
           required: [encrypted, queryTerm]
@@ -920,6 +921,11 @@ definitions:
                   pattern: '^((\/[^\/]+)+\/)$'
             encrypted:
               type: "boolean"
+      cohortItems:
+        type: "array"
+        description: "items containing cohort names"
+        items:
+          type: "string"
       panelTiming:
         $ref: "#/definitions/timing"
 
@@ -950,6 +956,8 @@ definitions:
         type: "array"
         items:
           type: "string"
+      queryID:
+        type: "integer"
       patientSetID:
         type: "integer"
       timers:

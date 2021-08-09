@@ -624,6 +624,9 @@ func init() {
         "patientSetID": {
           "type": "integer"
         },
+        "queryID": {
+          "type": "integer"
+        },
         "status": {
           "type": "string",
           "enum": [
@@ -811,13 +814,21 @@ func init() {
       }
     },
     "panel": {
+      "description": "collection of i2b2 items (linked by OR)",
       "type": "object",
       "required": [
         "not"
       ],
       "properties": {
-        "items": {
-          "description": "i2b2 items (linked by an OR)",
+        "cohortItems": {
+          "description": "items containing cohort names",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "conceptItems": {
+          "description": "items containing i2b2 concepts (and optionally modifiers)",
           "type": "array",
           "items": {
             "type": "object",
@@ -991,7 +1002,7 @@ func init() {
       "schema": {
         "type": "object",
         "required": [
-          "patientSetID",
+          "queryID",
           "creationDate",
           "updateDate"
         ],
@@ -999,7 +1010,7 @@ func init() {
           "creationDate": {
             "type": "string"
           },
-          "patientSetID": {
+          "queryID": {
             "type": "integer"
           },
           "updateDate": {
@@ -2063,7 +2074,7 @@ func init() {
             "schema": {
               "type": "object",
               "required": [
-                "patientSetID",
+                "queryID",
                 "creationDate",
                 "updateDate"
               ],
@@ -2071,7 +2082,7 @@ func init() {
                 "creationDate": {
                   "type": "string"
                 },
-                "patientSetID": {
+                "queryID": {
                   "type": "integer"
                 },
                 "updateDate": {
@@ -2161,7 +2172,7 @@ func init() {
             "schema": {
               "type": "object",
               "required": [
-                "patientSetID",
+                "queryID",
                 "creationDate",
                 "updateDate"
               ],
@@ -2169,7 +2180,7 @@ func init() {
                 "creationDate": {
                   "type": "string"
                 },
-                "patientSetID": {
+                "queryID": {
                   "type": "integer"
                 },
                 "updateDate": {
@@ -2657,7 +2668,7 @@ func init() {
         }
       }
     },
-    "PanelItemsItems0": {
+    "PanelConceptItemsItems0": {
       "type": "object",
       "required": [
         "encrypted",
@@ -2718,7 +2729,7 @@ func init() {
         }
       }
     },
-    "PanelItemsItems0Modifier": {
+    "PanelConceptItemsItems0Modifier": {
       "type": "object",
       "required": [
         "appliedPath",
@@ -2949,6 +2960,9 @@ func init() {
         "patientSetID": {
           "type": "integer"
         },
+        "queryID": {
+          "type": "integer"
+        },
         "status": {
           "type": "string",
           "enum": [
@@ -3136,16 +3150,24 @@ func init() {
       }
     },
     "panel": {
+      "description": "collection of i2b2 items (linked by OR)",
       "type": "object",
       "required": [
         "not"
       ],
       "properties": {
-        "items": {
-          "description": "i2b2 items (linked by an OR)",
+        "cohortItems": {
+          "description": "items containing cohort names",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/PanelItemsItems0"
+            "type": "string"
+          }
+        },
+        "conceptItems": {
+          "description": "items containing i2b2 concepts (and optionally modifiers)",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PanelConceptItemsItems0"
           }
         },
         "not": {
@@ -3246,7 +3268,7 @@ func init() {
       "schema": {
         "type": "object",
         "required": [
-          "patientSetID",
+          "queryID",
           "creationDate",
           "updateDate"
         ],
@@ -3254,7 +3276,7 @@ func init() {
           "creationDate": {
             "type": "string"
           },
-          "patientSetID": {
+          "queryID": {
             "type": "integer"
           },
           "updateDate": {

@@ -97,9 +97,9 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 		if parameterFileURL != "" {
 			parameters = <-parametersChan
 		} else {
-			var startPanel []*models.PanelItemsItems0
-			var endPanel []*models.PanelItemsItems0
-			startPanel, err = medcoclient.ParseQueryItem(startItem)
+			var startPanel []*models.PanelConceptItemsItems0
+			var endPanel []*models.PanelConceptItemsItems0
+			startPanel, _, err = medcoclient.ParseQueryItem(startItem)
 			if err != nil {
 				logrus.Error("while parsing start item: ", err.Error())
 				return
@@ -112,7 +112,7 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 			}
 			startConcept := *(startPanel[0].QueryTerm)
 
-			endPanel, err = medcoclient.ParseQueryItem(endItem)
+			endPanel, _, err = medcoclient.ParseQueryItem(endItem)
 			if err != nil {
 				logrus.Error("while parsing end item", err)
 				return
@@ -336,15 +336,15 @@ func convertPanel(parameters *Parameters) ([]*survival_analysis.SurvivalAnalysis
 			}
 			newPanel.Not = new(bool)
 			*newPanel.Not = panel.Not
-			newItems := make([]*models.PanelItemsItems0, len(panel.Items))
+			newItems := make([]*models.PanelConceptItemsItems0, len(panel.Items))
 			for k, item := range panel.Items {
 				encrypted := new(bool)
 				itemString := new(string)
 				*encrypted = false
 				*itemString = item.Path
-				var modifier *models.PanelItemsItems0Modifier
+				var modifier *models.PanelConceptItemsItems0Modifier
 				if mod := item.Modifier; mod != nil {
-					modifier = &models.PanelItemsItems0Modifier{
+					modifier = &models.PanelConceptItemsItems0Modifier{
 						ModifierKey: new(string),
 						AppliedPath: new(string),
 					}
@@ -352,13 +352,13 @@ func convertPanel(parameters *Parameters) ([]*survival_analysis.SurvivalAnalysis
 					*modifier.AppliedPath = mod.AppliedPath
 
 				}
-				newItems[k] = &models.PanelItemsItems0{
+				newItems[k] = &models.PanelConceptItemsItems0{
 					Encrypted: encrypted,
 					QueryTerm: itemString,
 					Modifier:  modifier,
 				}
 			}
-			newPanel.Items = newItems
+			newPanel.ConceptItems = newItems
 			newPanels[j] = newPanel
 		}
 		newSelection.Panels = newPanels
@@ -452,7 +452,7 @@ func inputValidation(parameterFileURL string, limit int, cohortName, startConcep
 	return nil
 }
 
-func panelValidation(panel []*models.PanelItemsItems0) (err error) {
+func panelValidation(panel []*models.PanelConceptItemsItems0) (err error) {
 	if len(panel) == 0 {
 		err = fmt.Errorf("panels are empty. Was the start item string empry ?")
 		logrus.Error(err)
@@ -474,8 +474,8 @@ func modelPanelsToString(subGroup *survival_analysis.SurvivalAnalysisParamsBodyS
 
 	panelStrings := make([]string, 0, len(subGroup.Panels))
 	for _, panel := range subGroup.Panels {
-		itemStrings := make([]string, 0, len(panel.Items))
-		for _, item := range panel.Items {
+		itemStrings := make([]string, 0, len(panel.ConceptItems))
+		for _, item := range panel.ConceptItems {
 			itemStrings = append(itemStrings, fmt.Sprintf("{Encrypted:%t Modifier:%v Operator:%s QueryTerm:%s Value:%s}",
 				*item.Encrypted,
 				item.Modifier,

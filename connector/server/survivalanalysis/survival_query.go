@@ -135,11 +135,11 @@ func (q *Query) Execute() error {
 			newEventGroup := &EventGroup{GroupID: definition.GroupName}
 
 			not := false
-			item := &models.PanelItemsItems0{
+			item := &models.PanelConceptItemsItems0{
 				QueryTerm: &q.StartConcept,
 			}
 			newPanel := &models.Panel{
-				Items: []*models.PanelItemsItems0{
+				ConceptItems: []*models.PanelConceptItemsItems0{
 					item,
 				},
 				Not:         &not,
@@ -544,22 +544,22 @@ func processGroupResult(errChan chan error, newEventGroup *EventGroup, sqlTimePo
 
 // fullCohort is called to build an explore definition when no subgroups are provided
 func fullCohort(startConcept string) []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0 {
-	newItems := make([]*models.PanelItemsItems0, 1)
+	newItems := make([]*models.PanelConceptItemsItems0, 1)
 	encrypted := new(bool)
 	not := new(bool)
 	*encrypted = false
 	*not = false
 	term := new(string)
 	*term = startConcept
-	newItems[0] = &models.PanelItemsItems0{
+	newItems[0] = &models.PanelConceptItemsItems0{
 		Encrypted: encrypted,
 		QueryTerm: term,
 	}
 	newPanels := make([]*models.Panel, 1)
 	newPanels[0] = &models.Panel{
-		Items:       newItems,
-		Not:         not,
-		PanelTiming: models.TimingAny,
+		ConceptItems: newItems,
+		Not:          not,
+		PanelTiming:  models.TimingAny,
 	}
 
 	return []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0{
