@@ -252,3 +252,117 @@ func loadQueryFile(queryFilePath string) (conceptItems []*models.PanelConceptIte
 
 	return
 }
+
+func parseSequences(queryString string) (stringWithoutSequence string, sequences []*models.TimingSequenceInfo, err error) {
+	if !strings.Contains(queryString, "seq--") {
+		stringWithoutSequence = queryString
+		return
+	}
+
+	queryItemsWithoutSequence := make([]string, 0)
+	var seq *models.TimingSequenceInfo
+	for _, term := range strings.Split(queryString, " ") {
+		if strings.Contains(term, "seq--") {
+			sequencesString := strings.Replace(term, "seq--", "", -1)
+			for _, sequenceString := range strings.Split(sequencesString, "--") {
+				seq, err = parseSequence(sequenceString)
+				if err != nil {
+					return
+				}
+				sequences = append(sequences, seq)
+			}
+
+		} else {
+			queryItemsWithoutSequence = append(queryItemsWithoutSequence, term)
+		}
+	}
+
+	stringWithoutSequence = strings.Join(queryItemsWithoutSequence, " ")
+
+	return
+
+}
+
+func parseSequence(sequenceString string) (sequence *models.TimingSequenceInfo, err error) {
+	sequenceInfoStrings := strings.Split(sequenceString, ",")
+
+	// the 5 items are:
+	// 1. the operator (before, before or same time, same time)
+	// 2. which occurence should be considered for the left operand (first, any, last)
+	// 3. what date should be considered fot the left operand (startdate, enddate)
+	// 4. which occurence should be considered for the right operand (first, any, last)
+	// 5. what date should be considered fot the right operand (startdate, enddate)
+	if len(sequenceInfoStrings) != 5 {
+		err = fmt.Errorf("sequence info is expected to be composed of 5 elements separated by commas: sequence info string \"%s\"", sequenceString)
+		return
+	}
+
+	sequence = &models.TimingSequenceInfo{}
+
+	sequence.When = new(string)
+
+	switch sequenceInfoStrings[0] {
+	case "before":
+		*sequence.When = models.TimingSequenceInfoWhenBEFORE
+	case "beforeorsametime":
+		*sequence.When = models.TimingSequenceInfoWhenBEFOREORSAMETIME
+	case "sametime":
+		*sequence.When = models.TimingSequenceInfoWhenSAMETIME
+	default:
+		err = fmt.Errorf(`the first element of the info string is expected to be "before", "beforeorsametime" or "sametime": got "%s"`, sequenceInfoStrings[0])
+		return
+	}
+
+	sequence.WhichObservationFirst = new(string)
+
+	switch sequenceInfoStrings[1] {
+	case "first":
+		*sequence.WhichObservationFirst = models.TimingSequenceInfoWhichObservationFirstFIRST
+	case "any":
+		*sequence.WhichObservationFirst = models.TimingSequenceInfoWhichObservationFirstANY
+	case "last":
+		*sequence.WhichObservationFirst = models.TimingSequenceInfoWhichObservationFirstLAST
+	default:
+		err = fmt.Errorf(`the second element of the info string is expected to be "first", "any" or "last": got "%s"`, sequenceInfoStrings[1])
+		return
+	}
+
+	sequence.WhichDateFirst = new(string)
+
+	switch sequenceInfoStrings[2] {
+	case "startdate":
+		*sequence.WhichDateFirst = models.TimingSequenceInfoWhichDateFirstSTARTDATE
+	case "enddate":
+		*sequence.WhichDateFirst = models.TimingSequenceInfoWhichDateFirstENDDATE
+	default:
+		err = fmt.Errorf(`the third element of the info string is expected to be "startdate" or "enddate": got "%s"`, sequenceInfoStrings[2])
+		return
+	}
+
+	sequence.WhichObservationSecond = new(string)
+
+	switch sequenceInfoStrings[3] {
+	case "first":
+		*sequence.WhichObservationSecond = models.TimingSequenceInfoWhichObservationSecondFIRST
+	case "any":
+		*sequence.WhichObservationSecond = models.TimingSequenceInfoWhichObservationSecondANY
+	case "last":
+		*sequence.WhichObservationSecond = models.TimingSequenceInfoWhichObservationSecondLAST
+	default:
+		err = fmt.Errorf(`the fourth element of the info string is expected to be "first", "any" or "last": got "%s"`, sequenceInfoStrings[3])
+		return
+	}
+
+	sequence.WhichDateSecond = new(string)
+
+	switch sequenceInfoStrings[4] {
+	case "startdate":
+		*sequence.WhichDateSecond = models.TimingSequenceInfoWhichDateSecondSTARTDATE
+	case "enddate":
+		*sequence.WhichDateSecond = models.TimingSequenceInfoWhichDateSecondENDDATE
+	default:
+		err = fmt.Errorf(`the fifth element of the info string is expected to be "startdate" or "enddate": got "%s"`, sequenceInfoStrings[4])
+		return
+	}
+	return
+}
