@@ -52,6 +52,8 @@ func NewExploreQuery(authToken string, panels []*models.Panel, timing models.Tim
 	// check that, if sequences are defined, their number is correct
 	if sequences != nil && len(sequences) > 0 && len(panels) != len(sequences)+1 {
 		err = fmt.Errorf("the number of sequence information groups + 1 is not equal to the number of panels: got %d sequence information groups and %d panels", len(sequences), len(panels))
+		logrus.Error(err)
+		return
 	}
 
 	// retrieve network information

@@ -258,6 +258,10 @@ func loadQueryFile(queryFilePath string) (conceptItems []*models.PanelConceptIte
 // The different attributes inside a group must be separated with commas ",".
 func ParseSequences(sequenceString string) (sequences []*models.TimingSequenceInfo, err error) {
 
+	if sequenceString == "" {
+		return
+	}
+
 	var seq *models.TimingSequenceInfo
 
 	for _, sequenceString := range strings.Split(sequenceString, ":") {
