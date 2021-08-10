@@ -247,7 +247,7 @@ func TestExecutePsmQueryWithSequence(t *testing.T) {
 		QueryTerm: &queryTerm2,
 	}
 
-	when := models.TimingSequenceInfoWhenBEFORE
+	when := models.TimingSequenceInfoWhenLESS
 	whichDateFirst := models.TimingSequenceInfoWhichDateFirstSTARTDATE
 	whichDateSecond := models.TimingSequenceInfoWhichDateSecondSTARTDATE
 	whichObservationFirst := models.TimingSequenceInfoWhichObservationFirstFIRST
