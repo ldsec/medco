@@ -18,7 +18,7 @@ import (
 
 // ExecuteClientQuery executes and displays the result of the MedCo client query
 // endpoint on the server: /node/explore/query
-func ExecuteClientQuery(token, username, password, queryString, queryTiming, resultOutputFilePath string, disableTLSCheck bool) (err error) {
+func ExecuteClientQuery(token, username, password, queryString, queryTiming, querySequences, resultOutputFilePath string, disableTLSCheck bool) (err error) {
 
 	// get token
 	accessToken, err := utilclient.RetrieveOrGetNewAccessToken(token, username, password, disableTLSCheck)
@@ -28,6 +28,12 @@ func ExecuteClientQuery(token, username, password, queryString, queryTiming, res
 
 	// parse query string
 	panels, err := medcoclient.ParseQueryString(queryString)
+	if err != nil {
+		return
+	}
+
+	// parse query sequences
+	sequences, err := medcoclient.ParseSequences(querySequences)
 	if err != nil {
 		return
 	}
@@ -50,7 +56,7 @@ func ExecuteClientQuery(token, username, password, queryString, queryTiming, res
 	}
 
 	// execute query
-	clientQuery, err := NewExploreQuery(accessToken, panels, models.Timing(strings.ToLower(queryTiming)), disableTLSCheck)
+	clientQuery, err := NewExploreQuery(accessToken, panels, models.Timing(strings.ToLower(queryTiming)), sequences, disableTLSCheck)
 	if err != nil {
 		return
 	}

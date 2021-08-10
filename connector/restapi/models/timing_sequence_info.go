@@ -21,7 +21,7 @@ type TimingSequenceInfo struct {
 
 	// when
 	// Required: true
-	// Enum: [BEFORE BEFOREORSAMETIME SAMETIME]
+	// Enum: [LESS LESSEQUAL EQUAL]
 	When *string `json:"when"`
 
 	// which date first
@@ -79,7 +79,7 @@ var timingSequenceInfoTypeWhenPropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["BEFORE","BEFOREORSAMETIME","SAMETIME"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["LESS","LESSEQUAL","EQUAL"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -89,14 +89,14 @@ func init() {
 
 const (
 
-	// TimingSequenceInfoWhenBEFORE captures enum value "BEFORE"
-	TimingSequenceInfoWhenBEFORE string = "BEFORE"
+	// TimingSequenceInfoWhenLESS captures enum value "LESS"
+	TimingSequenceInfoWhenLESS string = "LESS"
 
-	// TimingSequenceInfoWhenBEFOREORSAMETIME captures enum value "BEFOREORSAMETIME"
-	TimingSequenceInfoWhenBEFOREORSAMETIME string = "BEFOREORSAMETIME"
+	// TimingSequenceInfoWhenLESSEQUAL captures enum value "LESSEQUAL"
+	TimingSequenceInfoWhenLESSEQUAL string = "LESSEQUAL"
 
-	// TimingSequenceInfoWhenSAMETIME captures enum value "SAMETIME"
-	TimingSequenceInfoWhenSAMETIME string = "SAMETIME"
+	// TimingSequenceInfoWhenEQUAL captures enum value "EQUAL"
+	TimingSequenceInfoWhenEQUAL string = "EQUAL"
 )
 
 // prop value enum

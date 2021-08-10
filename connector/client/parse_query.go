@@ -253,32 +253,21 @@ func loadQueryFile(queryFilePath string) (conceptItems []*models.PanelConceptIte
 	return
 }
 
-func parseSequences(queryString string) (stringWithoutSequence string, sequences []*models.TimingSequenceInfo, err error) {
-	if !strings.Contains(queryString, "seq--") {
-		stringWithoutSequence = queryString
-		return
-	}
+// ParseSequences parses a string to a list of temporal sequence information.
+// Multiple sequence information groups must be separated with columns ":".
+// The different attributes inside a group must be separated with commas ",".
+func ParseSequences(sequenceString string) (sequences []*models.TimingSequenceInfo, err error) {
 
-	queryItemsWithoutSequence := make([]string, 0)
 	var seq *models.TimingSequenceInfo
-	for _, term := range strings.Split(queryString, " ") {
-		if strings.Contains(term, "seq--") {
-			sequencesString := strings.Replace(term, "seq--", "", -1)
-			for _, sequenceString := range strings.Split(sequencesString, "--") {
-				seq, err = parseSequence(sequenceString)
-				if err != nil {
-					return
-				}
-				sequences = append(sequences, seq)
-			}
 
-		} else {
-			queryItemsWithoutSequence = append(queryItemsWithoutSequence, term)
+	for _, sequenceString := range strings.Split(sequenceString, ":") {
+		seq, err = parseSequence(sequenceString)
+		if err != nil {
+			err = fmt.Errorf("while parsing temporal sequence information: %s", err.Error())
+			return
 		}
+		sequences = append(sequences, seq)
 	}
-
-	stringWithoutSequence = strings.Join(queryItemsWithoutSequence, " ")
-
 	return
 
 }
@@ -303,11 +292,11 @@ func parseSequence(sequenceString string) (sequence *models.TimingSequenceInfo, 
 
 	switch sequenceInfoStrings[0] {
 	case "before":
-		*sequence.When = models.TimingSequenceInfoWhenBEFORE
+		*sequence.When = models.TimingSequenceInfoWhenLESS
 	case "beforeorsametime":
-		*sequence.When = models.TimingSequenceInfoWhenBEFOREORSAMETIME
+		*sequence.When = models.TimingSequenceInfoWhenLESSEQUAL
 	case "sametime":
-		*sequence.When = models.TimingSequenceInfoWhenSAMETIME
+		*sequence.When = models.TimingSequenceInfoWhenEQUAL
 	default:
 		err = fmt.Errorf(`the first element of the info string is expected to be "before", "beforeorsametime" or "sametime": got "%s"`, sequenceInfoStrings[0])
 		return

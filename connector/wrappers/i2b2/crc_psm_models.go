@@ -55,7 +55,7 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, que
 			PanelTiming:          strings.ToUpper(string(queryPanel.PanelTiming)),
 			TotalItemOccurrences: "1",
 		}
-		i2b2PanelNoCohort := i2b2Panel
+		i2b2PanelConcept := i2b2Panel
 
 		for _, queryItem := range queryPanel.ConceptItems {
 
@@ -83,9 +83,9 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, que
 				}
 			}
 			i2b2Panel.Items = append(i2b2Panel.Items, i2b2Item)
-			i2b2PanelNoCohort.Items = append(i2b2Panel.Items, i2b2Item)
+			i2b2PanelConcept.Items = append(i2b2PanelConcept.Items, i2b2Item)
 		}
-		panelsOnlyConcepts = append(panelsOnlyConcepts, i2b2PanelNoCohort)
+		panelsOnlyConcepts = append(panelsOnlyConcepts, i2b2PanelConcept)
 
 		for _, cohort := range queryPanel.CohortItems {
 
@@ -108,6 +108,7 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, que
 
 		for i, queryPanel := range panelsOnlyConcepts {
 			subQueryStringID := queryName + "_SUBQUERY_" + strconv.Itoa(i)
+			queryPanel.PanelNumber = strconv.Itoa(0)
 			subquery := Subquery{
 				QueryType:   "EVENT",
 				QueryName:   subQueryStringID,
@@ -118,16 +119,18 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, que
 			psmRequest.Subqueries = append(psmRequest.Subqueries, subquery)
 		}
 
-		for _, querySequence := range querySequences {
+		for i, querySequence := range querySequences {
 			subqueryConstraint := SubqueryConstraint{
 				Operator: *querySequence.When,
 				FirstQuery: SubqueryConstraintOperand{
+					QueryID:           psmRequest.Subqueries[i].QueryID,
 					AggregateOperator: *querySequence.WhichObservationFirst,
 					JoinColumn:        *querySequence.WhichDateFirst,
 				},
 				SecondQuery: SubqueryConstraintOperand{
-					AggregateOperator: *querySequence.WhichDateSecond,
-					JoinColumn:        *querySequence.WhichObservationSecond,
+					QueryID:           psmRequest.Subqueries[i+1].QueryID,
+					AggregateOperator: *querySequence.WhichObservationSecond,
+					JoinColumn:        *querySequence.WhichDateSecond,
 				},
 			}
 			psmRequest.SubqueryConstraints = append(psmRequest.SubqueryConstraints, subqueryConstraint)

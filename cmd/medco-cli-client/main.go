@@ -55,6 +55,10 @@ func main() {
 			Usage: "Query timing: any|samevisit|sameinstancenum",
 			Value: "any",
 		},
+		cli.StringFlag{
+			Name:  "sequences, s",
+			Usage: "Event sequence: before|beforeorsametime|sametime,first|any|last,startdate|enddate,first|any|last,startdate|enddate",
+		},
 	}
 
 	//--- genomic annotations get values command flags
@@ -261,7 +265,7 @@ func main() {
 			Aliases:   []string{"q"},
 			Usage:     "Query the MedCo network",
 			Flags:     queryFlags,
-			ArgsUsage: "[-t timing] query_string",
+			ArgsUsage: "[-t timing] [-s sequences] query_string",
 			Action: func(c *cli.Context) error {
 				return exploreclient.ExecuteClientQuery(
 					c.GlobalString("token"),
@@ -269,6 +273,7 @@ func main() {
 					c.GlobalString("password"),
 					strings.Join(c.Args(), " "),
 					c.String("timing"),
+					c.String("sequences"),
 					c.GlobalString("outputFile"),
 					c.GlobalBool("disableTLSCheck"),
 				)

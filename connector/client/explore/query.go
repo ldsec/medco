@@ -3,6 +3,7 @@ package exploreclient
 import (
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 	"time"
@@ -33,16 +34,24 @@ type ExploreQuery struct {
 	// panels contains the panels of the query
 	panels []*models.Panel
 
+	sequences []*models.TimingSequenceInfo
+
 	queryTiming models.Timing
 }
 
 // NewExploreQuery creates a new MedCo client query
-func NewExploreQuery(authToken string, panels []*models.Panel, timing models.Timing, disableTLSCheck bool) (q *ExploreQuery, err error) {
+func NewExploreQuery(authToken string, panels []*models.Panel, timing models.Timing, sequences []*models.TimingSequenceInfo, disableTLSCheck bool) (q *ExploreQuery, err error) {
 
 	q = &ExploreQuery{
 		authToken:   authToken,
 		panels:      panels,
 		queryTiming: timing,
+		sequences:   sequences,
+	}
+
+	// check that, if sequences are defined, their number is correct
+	if sequences != nil && len(sequences) > 0 && len(panels) != len(sequences)+1 {
+		err = fmt.Errorf("the number of sequence information groups + 1 is not equal to the number of panels: got %d sequence information groups and %d panels", len(sequences), len(panels))
 	}
 
 	// retrieve network information
@@ -170,9 +179,10 @@ func (clientQuery *ExploreQuery) generateModel() (queryModel *models.ExploreQuer
 
 	// query model
 	queryModel = &models.ExploreQuery{
-		UserPublicKey: clientQuery.userPublicKey,
-		Panels:        clientQuery.panels,
-		QueryTiming:   clientQuery.queryTiming,
+		UserPublicKey:       clientQuery.userPublicKey,
+		Panels:              clientQuery.panels,
+		QueryTiming:         clientQuery.queryTiming,
+		QueryTimingSequence: clientQuery.sequences,
 	}
 
 	return

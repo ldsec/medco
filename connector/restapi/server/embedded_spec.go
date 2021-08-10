@@ -957,11 +957,11 @@ func init() {
       "properties": {
         "when": {
           "type": "string",
-          "default": "BEFORE",
+          "default": "LESS",
           "enum": [
-            "BEFORE",
-            "BEFOREORSAMETIME",
-            "SAMETIME"
+            "LESS",
+            "LESSEQUAL",
+            "EQUAL"
           ]
         },
         "whichDateFirst": {
@@ -3282,11 +3282,11 @@ func init() {
       "properties": {
         "when": {
           "type": "string",
-          "default": "BEFORE",
+          "default": "LESS",
           "enum": [
-            "BEFORE",
-            "BEFOREORSAMETIME",
-            "SAMETIME"
+            "LESS",
+            "LESSEQUAL",
+            "EQUAL"
           ]
         },
         "whichDateFirst": {
