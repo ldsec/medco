@@ -109,6 +109,7 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, que
 		for i, queryPanel := range panelsOnlyConcepts {
 			subQueryStringID := queryName + "_SUBQUERY_" + strconv.Itoa(i)
 			queryPanel.PanelNumber = strconv.Itoa(0)
+			queryPanel.PanelTiming = "SAMEINSTANCENUM"
 			subquery := Subquery{
 				QueryType:   "EVENT",
 				QueryName:   subQueryStringID,
