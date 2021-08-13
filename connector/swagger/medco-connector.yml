@@ -750,6 +750,8 @@ definitions:
         type: "string"
       code:
         type: "string"
+      comment:
+        type: "string"
       type:
         type: "string"
         enum:
