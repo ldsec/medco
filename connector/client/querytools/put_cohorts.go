@@ -119,12 +119,12 @@ func (putCohorts *PutCohorts) submitToNode(nodeIdx int) (*medco_node.PutCohortsO
 	body := medco_node.PutCohortsBody{
 		CreationDate: new(string),
 		UpdateDate:   new(string),
-		PatientSetID: new(int64),
+		QueryID:      new(int64),
 	}
 
 	*body.CreationDate = creationDate.Format(time.RFC3339)
 	*body.UpdateDate = updateDate.Format(time.RFC3339)
-	*body.PatientSetID = int64(putCohorts.patientSetID[nodeIdx])
+	*body.QueryID = int64(putCohorts.patientSetID[nodeIdx])
 
 	params.SetCohortsRequest(body)
 	params.SetName(putCohorts.cohortName)

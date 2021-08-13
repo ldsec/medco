@@ -28,6 +28,7 @@ type ExploreQuery struct {
 		EncCount       string
 		EncPatientList []string
 		Timers         medcomodels.Timers
+		QueryID        int
 		PatientSetID   int
 	}
 }
@@ -196,10 +197,14 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 			q.Result.EncPatientList = ksMaskedPatientIDs
 			logrus.Info(q.ID, ": key switched patient IDs")
 		}
+		q.Result.QueryID = queryID
 
 		logrus.Info(q.ID, ": patient set ID requested")
 
-		q.Result.PatientSetID = queryID
+		q.Result.PatientSetID, err = strconv.Atoi(patientSetID)
+		if err != nil {
+			return fmt.Errorf("while parsing patient set id: %v", err)
+		}
 	}
 	//update medco connector result instance
 	timer = time.Now()
@@ -243,7 +248,7 @@ func (q *ExploreQuery) maskPatientIDs(patientIDs []string, patientDummyFlags []s
 
 func (q *ExploreQuery) getEncQueryTerms() (encQueryTerms []string) {
 	for _, panel := range q.Query.Panels {
-		for _, item := range panel.Items {
+		for _, item := range panel.ConceptItems {
 			if *item.Encrypted {
 				encQueryTerms = append(encQueryTerms, *item.QueryTerm)
 			}
@@ -255,7 +260,7 @@ func (q *ExploreQuery) getEncQueryTerms() (encQueryTerms []string) {
 func (q *ExploreQuery) convertI2b2PsmQueryPanels(taggedQueryTerms map[string]string) (err error) {
 
 	for _, panel := range q.Query.Panels {
-		for _, item := range panel.Items {
+		for _, item := range panel.ConceptItems {
 			if *item.Encrypted {
 				if tag, ok := taggedQueryTerms[*item.QueryTerm]; ok {
 					itemKey := `/SENSITIVE_TAGGED/medco/tagged/` + tag + `\`
@@ -264,6 +269,34 @@ func (q *ExploreQuery) convertI2b2PsmQueryPanels(taggedQueryTerms map[string]str
 					err = errors.New("query error: encrypted term does not have corresponding tag")
 					logrus.Error(err)
 					return
+				}
+			}
+		}
+
+		// change the cohort name with the patient set ID
+		if len(panel.CohortItems) > 0 {
+			cohorts, err := querytoolsserver.GetSavedCohorts(q.User.ID, 100)
+			if err != nil {
+				return fmt.Errorf("while retrieving cohorts: %v", err)
+			}
+			if len(cohorts) == 0 {
+				return fmt.Errorf("no cohorts for user: %v", q.User.ID)
+			}
+			for i, item := range panel.CohortItems {
+				foundCohort := false
+				for _, cohort := range cohorts {
+					if cohort.CohortName == item {
+						psID, err := querytoolsserver.GetPatientSetID(cohort.QueryID)
+						if err != nil {
+							return fmt.Errorf("while retrieving patient set ID: %v", cohort.QueryID)
+						}
+						panel.CohortItems[i] = "patient_set_coll_id:" + strconv.Itoa(psID)
+						foundCohort = true
+						break
+					}
+				}
+				if !foundCohort {
+					return fmt.Errorf("no cohort with name: %v found for user: %v", item, q.User.ID)
 				}
 			}
 		}

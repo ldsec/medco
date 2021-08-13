@@ -263,9 +263,9 @@ type PutCohortsBody struct {
 	// Required: true
 	CreationDate *string `json:"creationDate"`
 
-	// patient set ID
+	// query ID
 	// Required: true
-	PatientSetID *int64 `json:"patientSetID"`
+	QueryID *int64 `json:"queryID"`
 
 	// update date
 	// Required: true
@@ -280,7 +280,7 @@ func (o *PutCohortsBody) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := o.validatePatientSetID(formats); err != nil {
+	if err := o.validateQueryID(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -303,9 +303,9 @@ func (o *PutCohortsBody) validateCreationDate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *PutCohortsBody) validatePatientSetID(formats strfmt.Registry) error {
+func (o *PutCohortsBody) validateQueryID(formats strfmt.Registry) error {
 
-	if err := validate.Required("cohortsRequest"+"."+"patientSetID", "body", o.PatientSetID); err != nil {
+	if err := validate.Required("cohortsRequest"+"."+"queryID", "body", o.QueryID); err != nil {
 		return err
 	}
 
