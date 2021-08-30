@@ -60,5 +60,5 @@ MedCo provides a client command-line interface to interact with the *connector* 
 To learn how to use it, check the [CLI documentation](https://ldsec.gitbook.io/medco-documentation/system-administrators/cli).
 
 ## License
-*medco* is licensed under a End User Software License Agreement ('EULA') for non-commercial use.
+*medco* is licensed under an [Academic, Non-Commercial License Agreement](LICENSE).
 If you need more information, please contact us.

@@ -34,7 +34,7 @@ func ExecuteClientQuery(token, username, password, queryString, queryTiming, res
 
 	// encrypt item keys
 	for _, panel := range panels {
-		for _, item := range panel.Items {
+		for _, item := range panel.ConceptItems {
 			if *item.Encrypted {
 				queryTermInt, err := strconv.ParseInt(*item.QueryTerm, 10, 64)
 				if err != nil {
@@ -74,7 +74,7 @@ func printResultsCSV(nodesResult map[int]*ExploreQueryResult, CSVFileURL string)
 		return
 	}
 
-	csvHeaders := []string{"node_name", "count", "patient_list", "patient_set_id"}
+	csvHeaders := []string{"node_name", "count", "patient_list", "query_id", "patient_set_id"}
 	csvNodesResults := make([][]string, 0)
 
 	// CSV values: results
@@ -83,6 +83,7 @@ func printResultsCSV(nodesResult map[int]*ExploreQueryResult, CSVFileURL string)
 			strconv.Itoa(nodeIdx),
 			strconv.FormatInt(queryResult.Count, 10),
 			fmt.Sprint(queryResult.PatientList),
+			strconv.FormatInt(queryResult.QueryID, 10),
 			strconv.FormatInt(queryResult.PatientSetID, 10),
 		})
 	}

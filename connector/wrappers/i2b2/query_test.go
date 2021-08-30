@@ -71,7 +71,7 @@ func TestExecutePsmQuery(t *testing.T) {
 
 	encrypted := true
 	queryTerm := `/SENSITIVE_TAGGED/medco/tagged/8d3533369426ae172271e98cef8be2bbfe9919087c776083b1ea1de803fc87aa/`
-	item := &models.PanelItemsItems0{
+	item := &models.PanelConceptItemsItems0{
 		Encrypted: &encrypted,
 		QueryTerm: &queryTerm,
 	}
@@ -80,7 +80,7 @@ func TestExecutePsmQuery(t *testing.T) {
 	patientCount, patientSetID, err := ExecutePsmQuery(
 		"testQuery",
 		[]*models.Panel{
-			{Items: []*models.PanelItemsItems0{
+			{ConceptItems: []*models.PanelConceptItemsItems0{
 				item,
 			},
 				Not: &not,
@@ -98,7 +98,7 @@ func TestExecutePsmQueryWithValue(t *testing.T) {
 	encrypted := false
 	queryTerm := `/E2ETEST/e2etest/1/`
 
-	item := &models.PanelItemsItems0{
+	item := &models.PanelConceptItemsItems0{
 		Encrypted: &encrypted,
 		QueryTerm: &queryTerm,
 		Operator:  "EQ",
@@ -110,7 +110,7 @@ func TestExecutePsmQueryWithValue(t *testing.T) {
 	patientCount, patientSetID, err := ExecutePsmQuery(
 		"testQuery",
 		[]*models.Panel{
-			{Items: []*models.PanelItemsItems0{
+			{ConceptItems: []*models.PanelConceptItemsItems0{
 				item,
 			},
 				Not: &not,
@@ -129,12 +129,12 @@ func TestExecutePsmQueryWithModifiers(t *testing.T) {
 	queryTerm := `/E2ETEST/e2etest/1/`
 	appliedPath := `/e2etest/1/`
 	modifierKey := `/E2ETEST/modifiers/1/`
-	modifier := models.PanelItemsItems0Modifier{
+	modifier := models.PanelConceptItemsItems0Modifier{
 		AppliedPath: &appliedPath,
 		ModifierKey: &modifierKey,
 	}
 
-	item := &models.PanelItemsItems0{
+	item := &models.PanelConceptItemsItems0{
 		Encrypted: &encrypted,
 		QueryTerm: &queryTerm,
 		Modifier:  &modifier,
@@ -144,7 +144,7 @@ func TestExecutePsmQueryWithModifiers(t *testing.T) {
 	patientCount, patientSetID, err := ExecutePsmQuery(
 		"testQuery",
 		[]*models.Panel{
-			{Items: []*models.PanelItemsItems0{
+			{ConceptItems: []*models.PanelConceptItemsItems0{
 				item,
 			},
 				Not: &not,
@@ -160,12 +160,12 @@ func TestExecutePsmQueryWithModifiers(t *testing.T) {
 	queryTerm = `/E2ETEST/e2etest/3/`
 	appliedPath = `/e2etest/%`
 	modifierKey = `/E2ETEST/modifiers/`
-	modifier = models.PanelItemsItems0Modifier{
+	modifier = models.PanelConceptItemsItems0Modifier{
 		AppliedPath: &appliedPath,
 		ModifierKey: &modifierKey,
 	}
 
-	item = &models.PanelItemsItems0{
+	item = &models.PanelConceptItemsItems0{
 		Encrypted: &encrypted,
 		QueryTerm: &queryTerm,
 		Modifier:  &modifier,
@@ -174,7 +174,7 @@ func TestExecutePsmQueryWithModifiers(t *testing.T) {
 	patientCount, patientSetID, err = ExecutePsmQuery(
 		"testQuery",
 		[]*models.Panel{
-			{Items: []*models.PanelItemsItems0{
+			{ConceptItems: []*models.PanelConceptItemsItems0{
 				item,
 			},
 				Not: &not,
@@ -194,12 +194,12 @@ func TestExecutePsmQueryWithModifierAndValue(t *testing.T) {
 
 	appliedPath := `/e2etest/1/`
 	modifierKey := `/E2ETEST/modifiers/1/`
-	modifier := &models.PanelItemsItems0Modifier{
+	modifier := &models.PanelConceptItemsItems0Modifier{
 		AppliedPath: &appliedPath,
 		ModifierKey: &modifierKey,
 	}
 
-	item := &models.PanelItemsItems0{
+	item := &models.PanelConceptItemsItems0{
 		Encrypted: &encrypted,
 		QueryTerm: &queryTerm,
 		Operator:  "EQ",
@@ -211,7 +211,7 @@ func TestExecutePsmQueryWithModifierAndValue(t *testing.T) {
 	patientCount, patientSetID, err := ExecutePsmQuery(
 		"testQuery",
 		[]*models.Panel{
-			{Items: []*models.PanelItemsItems0{
+			{ConceptItems: []*models.PanelConceptItemsItems0{
 				item,
 			},
 				Not: &not,
