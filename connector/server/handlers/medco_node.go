@@ -136,6 +136,7 @@ func MedCoNodeExploreQueryHandler(params medco_node.ExploreQueryParams, principa
 			Timers:               timers,
 			Status:               models.ExploreQueryResultElementStatusAvailable,
 			PatientSetID:         int64(query.Result.PatientSetID),
+			QueryID:              int64(query.Result.QueryID),
 		}})
 }
 
@@ -246,7 +247,7 @@ func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal 
 	cohort := params.CohortsRequest
 	cohortName := params.Name
 
-	hasID, err := querytoolsserver.CheckQueryID(principal.ID, int(*cohort.PatientSetID))
+	hasID, err := querytoolsserver.CheckQueryID(principal.ID, int(*cohort.QueryID))
 	if err != nil {
 		return medco_node.NewPostCohortsDefault(500).WithPayload(&medco_node.PostCohortsDefaultBody{
 			Message: fmt.Sprintf("During execution of CheckQueryID"),
@@ -257,7 +258,7 @@ func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal 
 	if !hasID {
 
 		return medco_node.NewPostCohortsNotFound().WithPayload(&medco_node.PostCohortsNotFoundBody{
-			Message: fmt.Sprintf("User does not have a stored query result with ID: %d", *cohort.PatientSetID),
+			Message: fmt.Sprintf("User %s does not have a stored query result with ID: %d", principal.ID, *cohort.QueryID),
 		})
 	}
 
@@ -286,7 +287,7 @@ func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal 
 			})
 		}
 	}
-	querytoolsserver.InsertCohort(principal.ID, int(*cohort.PatientSetID), cohortName, creationDate, updateDate)
+	querytoolsserver.InsertCohort(principal.ID, int(*cohort.QueryID), cohortName, creationDate, updateDate)
 
 	return medco_node.NewPostCohortsOK()
 }
@@ -297,17 +298,17 @@ func MedCoNodePutCohortsHandler(params medco_node.PutCohortsParams, principal *m
 	cohort := params.CohortsRequest
 	cohortName := params.Name
 
-	hasID, err := querytoolsserver.CheckQueryID(principal.ID, int(*cohort.PatientSetID))
+	hasID, err := querytoolsserver.CheckQueryID(principal.ID, int(*cohort.QueryID))
 	if err != nil {
 		return medco_node.NewPutCohortsDefault(500).WithPayload(&medco_node.PutCohortsDefaultBody{
-			Message: fmt.Sprintf("User does not have a stored query result with ID: %d", *cohort.PatientSetID),
+			Message: fmt.Sprintf("User does not have a stored query result with ID: %d", *cohort.QueryID),
 		})
 	}
 	logrus.Trace("has ID", hasID)
 
 	if !hasID {
 		return medco_node.NewPutCohortsNotFound().WithPayload(&medco_node.PutCohortsNotFoundBody{
-			Message: fmt.Sprintf("There is no result instance with id %d", int(*cohort.PatientSetID)),
+			Message: fmt.Sprintf("There is no result instance with id %d", int(*cohort.QueryID)),
 		})
 	}
 
@@ -342,7 +343,7 @@ func MedCoNodePutCohortsHandler(params medco_node.PutCohortsParams, principal *m
 		return medco_node.NewPutCohortsNotFound()
 	}
 
-	querytoolsserver.UpdateCohort(cohortName, principal.ID, int(*cohort.PatientSetID), updateDate)
+	querytoolsserver.UpdateCohort(cohortName, principal.ID, int(*cohort.QueryID), updateDate)
 
 	return medco_node.NewPutCohortsOK()
 }

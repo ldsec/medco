@@ -25,6 +25,9 @@ type ExploreSearchResultElement struct {
 	// code
 	Code string `json:"code,omitempty"`
 
+	// comment
+	Comment string `json:"comment,omitempty"`
+
 	// display name
 	DisplayName string `json:"displayName,omitempty"`
 

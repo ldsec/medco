@@ -137,8 +137,8 @@ func main() {
 	postCohortFlag := []cli.Flag{
 		// cli.IntSlice produces wrong results
 		cli.StringFlag{
-			Name:     "patientSetIDs, p",
-			Usage:    "List of patient set IDs, there must be one per node",
+			Name:     "queryIDs, q",
+			Usage:    "List of query IDs, there must be one per node",
 			Required: true,
 		},
 		cli.StringFlag{
@@ -152,8 +152,8 @@ func main() {
 	putCohortFlag := []cli.Flag{
 		// cli.IntSlice produces wrong results
 		cli.StringFlag{
-			Name:     "patientSetIDs, p",
-			Usage:    "List of patient set IDs, there must be one per node",
+			Name:     "queryIDs, q",
+			Usage:    "List of query IDs, there must be one per node",
 			Required: true,
 		},
 		cli.StringFlag{
@@ -168,7 +168,7 @@ func main() {
 		// cli.IntSlice produces wrong results
 		cli.StringFlag{
 			Name:     "cohortName, c",
-			Usage:    "Name of the new cohort",
+			Usage:    "Name of the cohort to remove",
 			Required: true,
 		},
 	}
@@ -371,15 +371,15 @@ func main() {
 			Aliases:     []string{"addsc"},
 			Usage:       "Create a new cohort.",
 			Flags:       postCohortFlag,
-			ArgsUsage:   "-c cohortName -p patientSetIDs",
-			Description: "Creates a new cohort with given name. The patient set IDs correspond to explore query result IDs.",
+			ArgsUsage:   "-c cohortName -q queryIDs",
+			Description: "Creates a new cohort with given name. The query IDs correspond to explore query IDs.",
 			Action: func(c *cli.Context) error {
 				return querytoolsclient.ExecutePostCohorts(
 					c.GlobalString("token"),
 					c.GlobalString("user"),
 					c.GlobalString("password"),
 					c.String("cohortName"),
-					c.String("patientSetIDs"),
+					c.String("queryIDs"),
 					c.GlobalBool("disableTLSCheck"),
 				)
 			},
@@ -390,15 +390,15 @@ func main() {
 			Aliases:     []string{"upsc"},
 			Usage:       "Updates an existing cohort.",
 			Flags:       putCohortFlag,
-			ArgsUsage:   "-c cohortName -p patientSetIDs",
-			Description: "Updates a new cohort with given name. The patient set IDs correspond to explore query result IDs.",
+			ArgsUsage:   "-c cohortName -q queryIDs",
+			Description: "Updates a new cohort with given name. The query IDs correspond to explore query IDs.",
 			Action: func(c *cli.Context) error {
 				return querytoolsclient.ExecutePutCohorts(
 					c.GlobalString("token"),
 					c.GlobalString("user"),
 					c.GlobalString("password"),
 					c.String("cohortName"),
-					c.String("patientSetIDs"),
+					c.String("queryIDs"),
 					c.GlobalBool("disableTLSCheck"),
 				)
 			},

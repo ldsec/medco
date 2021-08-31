@@ -28,6 +28,9 @@ type ExploreQueryResultElement struct {
 	// patient set ID
 	PatientSetID int64 `json:"patientSetID,omitempty"`
 
+	// query ID
+	QueryID int64 `json:"queryID,omitempty"`
+
 	// status
 	// Enum: [queued pending error available]
 	Status string `json:"status,omitempty"`

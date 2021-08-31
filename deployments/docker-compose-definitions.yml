@@ -58,6 +58,8 @@ services:
     environment:
       - PGADMIN_DEFAULT_EMAIL=admin
       - PGADMIN_DEFAULT_PASSWORD=admin
+    logging:
+      driver: none
 
   keycloak:
     image: ghcr.io/ldsec/keycloak-medco:${MEDCO_VERSION:?}

@@ -53,7 +53,7 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, res
 			TotalItemOccurrences: "1",
 		}
 
-		for _, queryItem := range queryPanel.Items {
+		for _, queryItem := range queryPanel.ConceptItems {
 			i2b2Item := Item{
 				ItemKey: convertPathToI2b2Format(*queryItem.QueryTerm),
 			}
@@ -76,6 +76,14 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, res
 						ValueConstraint: queryItem.Value,
 					}
 				}
+			}
+			i2b2Panel.Items = append(i2b2Panel.Items, i2b2Item)
+		}
+
+		for _, cohort := range queryPanel.CohortItems {
+
+			i2b2Item := Item{
+				ItemKey: cohort,
 			}
 			i2b2Panel.Items = append(i2b2Panel.Items, i2b2Item)
 		}
