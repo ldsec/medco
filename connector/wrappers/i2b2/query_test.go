@@ -5,6 +5,8 @@ package i2b2
 import (
 	"testing"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/ldsec/medco/connector/restapi/models"
 	utilserver "github.com/ldsec/medco/connector/util/server"
 	"github.com/stretchr/testify/assert"
@@ -232,6 +234,23 @@ func TestGetPatientSet(t *testing.T) {
 	}
 	t.Log(patientIDs)
 	t.Log(patientDummyFlags)
+}
+
+func TestGetOntologyElements(t *testing.T) {
+
+	utilserver.SetForTesting()
+	utilserver.TestI2B2DBConnection(t)
+
+	result, err := GetOntologyElements("code/ICD10", 10)
+	assert.NoError(t, err)
+
+	n := 0
+	for _, element := range result {
+		logrus.Info(element.Path)
+		n++
+	}
+	assert.Equal(t, n, 2)
+
 }
 
 func TestGetOntologyTermInfo(t *testing.T) {

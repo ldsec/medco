@@ -58,6 +58,9 @@ func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
 	// /medco/network
 	api.MedcoNetworkGetMetadataHandler = medco_network.GetMetadataHandlerFunc(handlers.MedCoNetworkGetMetadataHandler)
 
+	// /medco/node/explore/search
+	api.MedcoNodeExploreSearchHandler = medco_node.ExploreSearchHandlerFunc(handlers.MedCoNodeExploreSearchHandler)
+
 	// /medco/node/explore/search/concept
 	api.MedcoNodeExploreSearchConceptHandler = medco_node.ExploreSearchConceptHandlerFunc(handlers.MedCoNodeExploreSearchConceptHandler)
 

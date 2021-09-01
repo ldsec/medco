@@ -1,0 +1,35 @@
+-- this function returns (maximum lim) ontology elements whose paths contain the given search_string.
+
+CREATE OR REPLACE FUNCTION medco_ont.get_ontology_elements(search_string varchar, lim integer DEFAULT 10)
+      RETURNS TABLE (
+        c_fullname varchar,
+        c_name varchar,
+        c_visualattributes char(3),
+        c_basecode varchar,
+        c_metadataxml text,
+        c_comment text,
+        m_applied_path varchar)
+    LANGUAGE 'plpgsql'
+    STABLE
+    PARALLEL SAFE
+AS $BODY$
+DECLARE
+      rec record;
+      strSQL text;
+BEGIN
+
+	strSQL := '';
+
+    FOR rec IN SELECT DISTINCT c_table_name FROM medco_ont.table_access
+    LOOP
+		strSQL := strSQL || 'SELECT c_fullname, c_name, c_visualattributes, c_basecode, c_metadataxml, c_comment, m_applied_path
+          		FROM medco_ont.' || lower(rec.c_table_name) || '
+         		WHERE (c_basecode IS NOT NULL AND c_basecode != '''' AND lower(c_fullname) LIKE $1)
+				UNION ALL ';
+    END LOOP;
+    strSQL := trim(trailing ' UNION ALL ' from strSQL) || ' ORDER BY c_fullname LIMIT $2;';
+
+	RETURN QUERY EXECUTE strSQL USING '%' || lower(search_string) || '%', lim;
+
+END;
+$BODY$;
