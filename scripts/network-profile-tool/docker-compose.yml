@@ -1,4 +1,4 @@
-version: '2.4'
+version: "2.4"
 services:
   i2b2:
     extends:
@@ -100,5 +100,3 @@ volumes:
 networks:
   medco-network:
     driver: bridge
-    driver_opts:
-      com.docker.network.bridge.name: "docker0"
