@@ -173,12 +173,6 @@ server_count=1
 for server_ssh in "${SSH_SERVER_LIST[@]}"; do
     echo "MedCo install step 1 on $(get_server_address "$server_ssh")... ($server_count/$#)"
 
-    if [ $CLEANUP = 1 ]; then
-        echo -n "Cleanup Docker images/containers..."
-        
-        ok
-    fi
-
     echo -n "Launch step 1..."
     MEDCO_SETUP_NODE_IDX=$((server_count - 1))
     NODE_NUMBER=$(get_node_number $MEDCO_SETUP_NODE_IDX)
