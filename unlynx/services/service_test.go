@@ -313,7 +313,7 @@ func TestCheckDDTSecrets(t *testing.T) {
 	_, err = servicesmedco.CheckDDTSecrets("secrets.toml", addr, nil)
 	assert.Nil(t, err, "Error while writing the secrets to the TOML file")
 
-	addr = network.NewLocalAddress("local://127.0.0.1:2000")
+	addr = network.NewLocalAddress("local://127.0.0.1:2002")
 	_, err = servicesmedco.CheckDDTSecrets("secrets.toml", addr, nil)
 	assert.Nil(t, err, "Error while writing the secrets to the TOML file")
 }

@@ -16,8 +16,8 @@ services:
       file: ../docker-compose-definitions.yml
       service: medco-unlynx
     ports:
-      - "2000:2000"
       - "2001:2001"
+      - "2002:2002"
     environment:
       - MEDCO_NODE_IDX=${MEDCO_NODE_IDX:?}
     volumes:

@@ -44,12 +44,12 @@ echo -n "${NODE_DNS_NAME}" > "${CONF_FOLDER}/srv${NODE_IDX}-nodednsname.txt"
 echo "### Generating unlynx keys"
 if [[ -z ${PUB_KEY} ]]; then
     docker run -v "$CONF_FOLDER:/medco-configuration" -u "$(id -u):$(id -g)" "${MEDCO_DOCKER}" medco-unlynx \
-        server setupNonInteractive --serverBinding "${NODE_DNS_NAME}:2000" --description "${PROFILE_NAME}_medco_unlynx_server" \
+        server setupNonInteractive --serverBinding "${NODE_DNS_NAME}:2002" --description "${PROFILE_NAME}_medco_unlynx_server" \
         --privateTomlPath "/medco-configuration/srv${NODE_IDX}-private.toml" \
         --publicTomlPath "/medco-configuration/srv${NODE_IDX}-public.toml"
 else
     docker run -v "$CONF_FOLDER:/medco-configuration" -u "$(id -u):$(id -g)" "${MEDCO_DOCKER}" medco-unlynx \
-        server setupNonInteractive --serverBinding "${NODE_DNS_NAME}:2000" --description "${PROFILE_NAME}_medco_unlynx_server" \
+        server setupNonInteractive --serverBinding "${NODE_DNS_NAME}:2002" --description "${PROFILE_NAME}_medco_unlynx_server" \
         --privateTomlPath "/medco-configuration/srv${NODE_IDX}-private.toml" \
         --publicTomlPath "/medco-configuration/srv${NODE_IDX}-public.toml" \
         --pubKey "${PUB_KEY}" --privKey "${PRIV_KEY}"
