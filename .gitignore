@@ -1,6 +1,6 @@
 test/data/*
 !test/data/download.sh
-deployments/test-network-*
+deployments/network-*
 
 # generic files and folder exclude
 *.exe
