@@ -18,7 +18,7 @@ CLEANUP=1
 
 MEDCO_REPO_NAME=$(echo ${MEDCO_REPO%".git"} | awk -F/ '{print $NF}')
 TOOLS_LIST="docker,docker-compose,git,nmap,openssl"
-REQUIRED_PORTS="22" # TODO: Set ports 80,443,5432,2000,2001
+REQUIRED_PORTS="80,443,5432,2001,2002"
 
 
 # ----------------------------------
@@ -158,7 +158,7 @@ for server_ssh in "${SSH_SERVER_LIST[@]}"; do
 
     echo -n "Cloning MedCo..."
     clone_command=$($server_ssh "git clone --branch $MEDCO_SETUP_VER $MEDCO_REPO $MEDCO_SETUP_DIR" 2>&1) # TODO: Add --depth 1 when PR#110 is merged and associated with a new tag
-    $server_ssh "cd $MEDCO_SETUP_DIR && git checkout origin/add-custom-docker-network -- scripts/network-profile-tool/docker-compose.yml" 2>&1 # TODO: Remove when PR#110 is merged and associated with a new tag
+    $server_ssh "cd $MEDCO_SETUP_DIR && git checkout f8e5770 -- scripts/network-profile-tool/docker-compose.yml" 2>&1 # TODO: Remove when PR#110 is merged and associated with a new tag
     if [ $? != 0 ]; then
             die "The machine $(get_server_address "$server_ssh") cannot clone the MedCo repo.\n$clone_command"
     fi
