@@ -744,8 +744,10 @@ definitions:
         description: 'String to search for in concepts and modifiers paths.'
       limit:
         type: integer
-        default: 10
         description: 'Maximum number of returned ontology elements.'
+    default:
+      searchString: ""
+      limit: 10
 
   exploreSearchConcept:
     type: "object"

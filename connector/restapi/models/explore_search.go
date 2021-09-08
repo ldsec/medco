@@ -6,6 +6,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
@@ -18,11 +20,24 @@ import (
 type ExploreSearch struct {
 
 	// Maximum number of returned ontology elements.
-	Limit *int64 `json:"limit,omitempty"`
+	Limit int64 `json:"limit,omitempty"`
 
 	// String to search for in concepts and modifiers paths.
 	// Required: true
 	SearchString *string `json:"searchString"`
+}
+
+func (m *ExploreSearch) UnmarshalJSON(b []byte) error {
+	type ExploreSearchAlias ExploreSearch
+	var t ExploreSearchAlias
+	if err := json.Unmarshal([]byte("{\"limit\":10,\"searchString\":\"\"}"), &t); err != nil {
+		return err
+	}
+	if err := json.Unmarshal(b, &t); err != nil {
+		return err
+	}
+	*m = ExploreSearch(t)
+	return nil
 }
 
 // Validate validates this explore search

@@ -684,14 +684,17 @@ func init() {
     },
     "exploreSearch": {
       "type": "object",
+      "default": {
+        "limit": 10,
+        "searchString": ""
+      },
       "required": [
         "searchString"
       ],
       "properties": {
         "limit": {
           "description": "Maximum number of returned ontology elements.",
-          "type": "integer",
-          "default": 10
+          "type": "integer"
         },
         "searchString": {
           "description": "String to search for in concepts and modifiers paths.",
@@ -3107,14 +3110,17 @@ func init() {
     },
     "exploreSearch": {
       "type": "object",
+      "default": {
+        "limit": 10,
+        "searchString": ""
+      },
       "required": [
         "searchString"
       ],
       "properties": {
         "limit": {
           "description": "Maximum number of returned ontology elements.",
-          "type": "integer",
-          "default": 10
+          "type": "integer"
         },
         "searchString": {
           "description": "String to search for in concepts and modifiers paths.",
