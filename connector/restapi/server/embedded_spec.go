@@ -496,6 +496,35 @@ func init() {
         }
       }
     },
+    "/node/explore/search": {
+      "post": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
+        ],
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Returns info about the concepts and modifiers identified by the exploreSearchRequest parameters.",
+        "operationId": "exploreSearch",
+        "parameters": [
+          {
+            "$ref": "#/parameters/exploreSearchRequest"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/exploreSearchResponse"
+          },
+          "default": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      }
+    },
     "/node/explore/search/concept": {
       "post": {
         "security": [
@@ -508,7 +537,7 @@ func init() {
         "tags": [
           "medco-node"
         ],
-        "summary": "Returns info about the concept and its (both concepts and modifiers) children",
+        "summary": "Returns info about the concept and its (both concepts and modifiers) children.",
         "operationId": "exploreSearchConcept",
         "parameters": [
           {
@@ -537,7 +566,7 @@ func init() {
         "tags": [
           "medco-node"
         ],
-        "summary": "Returns info about the modifier and its children",
+        "summary": "Returns info about the modifier and its children.",
         "operationId": "exploreSearchModifier",
         "parameters": [
           {
@@ -652,6 +681,26 @@ func init() {
         "count_global",
         "count_global_obfuscated"
       ]
+    },
+    "exploreSearch": {
+      "type": "object",
+      "default": {
+        "limit": 10,
+        "searchString": ""
+      },
+      "required": [
+        "searchString"
+      ],
+      "properties": {
+        "limit": {
+          "description": "Maximum number of returned ontology elements.",
+          "type": "integer"
+        },
+        "searchString": {
+          "description": "String to search for in concepts and modifiers paths.",
+          "type": "string"
+        }
+      }
     },
     "exploreSearchConcept": {
       "type": "object",
@@ -1058,6 +1107,15 @@ func init() {
         "$ref": "#/definitions/exploreSearchModifier"
       }
     },
+    "exploreSearchRequest": {
+      "description": "MedCo-Explore ontology search request.",
+      "name": "searchRequest",
+      "in": "body",
+      "required": true,
+      "schema": {
+        "$ref": "#/definitions/exploreSearch"
+      }
+    },
     "survivalAnalysisRequest": {
       "description": "User public key, patient list and time codes strings for the survival analysis",
       "name": "body",
@@ -1237,7 +1295,7 @@ func init() {
       }
     },
     "exploreSearchConceptResponse": {
-      "description": "MedCo-Explore search concept query response.",
+      "description": "MedCo-Explore search concept response.",
       "schema": {
         "type": "object",
         "properties": {
@@ -1254,7 +1312,7 @@ func init() {
       }
     },
     "exploreSearchModifierResponse": {
-      "description": "MedCo-Explore search modifier children query response.",
+      "description": "MedCo-Explore search modifier response.",
       "schema": {
         "type": "object",
         "properties": {
@@ -1266,6 +1324,23 @@ func init() {
           },
           "search": {
             "$ref": "#/definitions/exploreSearchModifier"
+          }
+        }
+      }
+    },
+    "exploreSearchResponse": {
+      "description": "MedCo-Explore search response.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/exploreSearchResultElement"
+            }
+          },
+          "search": {
+            "$ref": "#/definitions/exploreSearch"
           }
         }
       }
@@ -2410,6 +2485,63 @@ func init() {
         }
       }
     },
+    "/node/explore/search": {
+      "post": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
+        ],
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Returns info about the concepts and modifiers identified by the exploreSearchRequest parameters.",
+        "operationId": "exploreSearch",
+        "parameters": [
+          {
+            "description": "MedCo-Explore ontology search request.",
+            "name": "searchRequest",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/exploreSearch"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "MedCo-Explore search response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/exploreSearchResultElement"
+                  }
+                },
+                "search": {
+                  "$ref": "#/definitions/exploreSearch"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/node/explore/search/concept": {
       "post": {
         "security": [
@@ -2422,7 +2554,7 @@ func init() {
         "tags": [
           "medco-node"
         ],
-        "summary": "Returns info about the concept and its (both concepts and modifiers) children",
+        "summary": "Returns info about the concept and its (both concepts and modifiers) children.",
         "operationId": "exploreSearchConcept",
         "parameters": [
           {
@@ -2437,7 +2569,7 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "MedCo-Explore search concept query response.",
+            "description": "MedCo-Explore search concept response.",
             "schema": {
               "type": "object",
               "properties": {
@@ -2479,7 +2611,7 @@ func init() {
         "tags": [
           "medco-node"
         ],
-        "summary": "Returns info about the modifier and its children",
+        "summary": "Returns info about the modifier and its children.",
         "operationId": "exploreSearchModifier",
         "parameters": [
           {
@@ -2494,7 +2626,7 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "MedCo-Explore search modifier children query response.",
+            "description": "MedCo-Explore search modifier response.",
             "schema": {
               "type": "object",
               "properties": {
@@ -2976,6 +3108,26 @@ func init() {
         "count_global_obfuscated"
       ]
     },
+    "exploreSearch": {
+      "type": "object",
+      "default": {
+        "limit": 10,
+        "searchString": ""
+      },
+      "required": [
+        "searchString"
+      ],
+      "properties": {
+        "limit": {
+          "description": "Maximum number of returned ontology elements.",
+          "type": "integer"
+        },
+        "searchString": {
+          "description": "String to search for in concepts and modifiers paths.",
+          "type": "string"
+        }
+      }
+    },
     "exploreSearchConcept": {
       "type": "object",
       "required": [
@@ -3311,6 +3463,15 @@ func init() {
         "$ref": "#/definitions/exploreSearchModifier"
       }
     },
+    "exploreSearchRequest": {
+      "description": "MedCo-Explore ontology search request.",
+      "name": "searchRequest",
+      "in": "body",
+      "required": true,
+      "schema": {
+        "$ref": "#/definitions/exploreSearch"
+      }
+    },
     "survivalAnalysisRequest": {
       "description": "User public key, patient list and time codes strings for the survival analysis",
       "name": "body",
@@ -3490,7 +3651,7 @@ func init() {
       }
     },
     "exploreSearchConceptResponse": {
-      "description": "MedCo-Explore search concept query response.",
+      "description": "MedCo-Explore search concept response.",
       "schema": {
         "type": "object",
         "properties": {
@@ -3507,7 +3668,7 @@ func init() {
       }
     },
     "exploreSearchModifierResponse": {
-      "description": "MedCo-Explore search modifier children query response.",
+      "description": "MedCo-Explore search modifier response.",
       "schema": {
         "type": "object",
         "properties": {
@@ -3519,6 +3680,23 @@ func init() {
           },
           "search": {
             "$ref": "#/definitions/exploreSearchModifier"
+          }
+        }
+      }
+    },
+    "exploreSearchResponse": {
+      "description": "MedCo-Explore search response.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/exploreSearchResultElement"
+            }
+          },
+          "search": {
+            "$ref": "#/definitions/exploreSearch"
           }
         }
       }

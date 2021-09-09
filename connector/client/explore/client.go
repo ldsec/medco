@@ -16,7 +16,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// ExecuteClientQuery executes and displays the result of the MedCo client query
+// ExecuteClientQuery executes and displays the result of the MedCo client query.
 // endpoint on the server: /node/explore/query
 func ExecuteClientQuery(token, username, password, queryString, queryTiming, resultOutputFilePath string, disableTLSCheck bool) (err error) {
 
@@ -65,7 +65,7 @@ func ExecuteClientQuery(token, username, password, queryString, queryTiming, res
 	return
 }
 
-// printResultsCSV prints on a specified output in a CSV format the results, each node being one line
+// printResultsCSV prints on a specified output in a CSV format the results, each node being one line.
 func printResultsCSV(nodesResult map[int]*ExploreQueryResult, CSVFileURL string) (err error) {
 
 	CSVFile, err := utilclient.NewCSV(CSVFileURL)
@@ -140,7 +140,52 @@ func printResultsCSV(nodesResult map[int]*ExploreQueryResult, CSVFileURL string)
 	return
 }
 
-// ExecuteClientSearchConceptChildren executes and displays the result of the MedCo concept children search
+// ExecuteClientSearch executes and displays the result of the MedCo search.
+// endpoint on the server: /node/explore/search
+func ExecuteClientSearch(token, username, password, searchString, resultOutputFilePath string, disableTLSCheck bool) (err error) {
+
+	// get token
+	accessToken, err := utilclient.RetrieveOrGetNewAccessToken(token, username, password, disableTLSCheck)
+	if err != nil {
+		return err
+	}
+
+	// execute search
+	clientSearch, err := NewExploreSearch(accessToken, searchString, disableTLSCheck)
+	if err != nil {
+		return err
+	}
+
+	result, err := clientSearch.Execute()
+	if err != nil {
+		return
+	}
+
+	output := ""
+
+	for _, element := range result.Payload.Results {
+		tmp, err := xml.MarshalIndent(element, "  ", "    ")
+		if err != nil {
+			return err
+		}
+		output += fmt.Sprintln(string(tmp))
+	}
+
+	if resultOutputFilePath == "" {
+		fmt.Println(output)
+	} else {
+		outputFile, err := os.Create(resultOutputFilePath)
+		if err != nil {
+			logrus.Error("error opening file: ", err)
+		}
+		outputFile.WriteString(output)
+		outputFile.Close()
+	}
+
+	return
+}
+
+// ExecuteClientSearchConceptChildren executes and displays the result of the MedCo concept children search.
 // endpoint on the server: /node/explore/search/concept
 func ExecuteClientSearchConceptChildren(token, username, password, conceptPath, resultOutputFilePath string, disableTLSCheck bool) (err error) {
 
@@ -180,7 +225,7 @@ func ExecuteClientSearchConceptChildren(token, username, password, conceptPath, 
 	return
 }
 
-// ExecuteClientSearchModifierChildren executes and displays the result of the MedCo modifier children search
+// ExecuteClientSearchModifierChildren executes and displays the result of the MedCo modifier children search.
 // endpoint on the server: /node/explore/search/modifier
 func ExecuteClientSearchModifierChildren(token, username, password, modifierPath, appliedPath, appliedConcept, resultOutputFilePath string, disableTLSCheck bool) (err error) {
 
@@ -220,7 +265,7 @@ func ExecuteClientSearchModifierChildren(token, username, password, modifierPath
 	return
 }
 
-// ExecuteClientSearchConceptInfo executes and displays the result of the MedCo concept info search
+// ExecuteClientSearchConceptInfo executes and displays the result of the MedCo concept info search.
 // endpoint on the server: /node/explore/search/concept
 func ExecuteClientSearchConceptInfo(token, username, password, conceptPath, resultOutputFilePath string, disableTLSCheck bool) (err error) {
 
@@ -264,7 +309,7 @@ func ExecuteClientSearchConceptInfo(token, username, password, conceptPath, resu
 	return
 }
 
-// ExecuteClientSearchModifierInfo executes and displays the result of the MedCo modifier info search
+// ExecuteClientSearchModifierInfo executes and displays the result of the MedCo modifier info search.
 // endpoint on the server: /node/explore/search/modifier
 func ExecuteClientSearchModifierInfo(token, username, password, modifierPath, appliedPath, resultOutputFilePath string, disableTLSCheck bool) (err error) {
 
@@ -308,7 +353,7 @@ func ExecuteClientSearchModifierInfo(token, username, password, modifierPath, ap
 	return
 }
 
-// ExecuteClientGenomicAnnotationsGetValues displays the genomic annotations values matching the "annotation" parameter
+// ExecuteClientGenomicAnnotationsGetValues displays the genomic annotations values matching the "annotation" parameter.
 // endpoint on the server: /genomic-annotations/{annotation}
 func ExecuteClientGenomicAnnotationsGetValues(token, username, password, annotation, value string, limit int64, disableTLSCheck bool) (err error) {
 
@@ -337,7 +382,7 @@ func ExecuteClientGenomicAnnotationsGetValues(token, username, password, annotat
 
 }
 
-// ExecuteClientGenomicAnnotationsGetVariants displays the variant ids corresponding to the annotation and value parameters
+// ExecuteClientGenomicAnnotationsGetVariants displays the variant ids corresponding to the annotation and value parameters.
 // endpoint on the server: /genomic-annotations/{annotation}/{value}
 func ExecuteClientGenomicAnnotationsGetVariants(token, username, password, annotation, value string, zygosity string, encrypted bool, disableTLSCheck bool) (err error) {
 

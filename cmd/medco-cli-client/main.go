@@ -190,6 +190,22 @@ func main() {
 	// --- app commands
 	cliApp.Commands = []cli.Command{
 		{
+			Name: "search",
+			Usage: "Get info about the ontology elements (both concepts and modifiers)" +
+				" whose paths contain the search string passed as argument.",
+			ArgsUsage: "searchString",
+			Action: func(c *cli.Context) error {
+				return exploreclient.ExecuteClientSearch(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.Args().Get(0),
+					c.GlobalString(("outputFile")),
+					c.GlobalBool("disableTLSCheck"))
+			},
+		},
+
+		{
 			Name:      "concept-children",
 			Aliases:   []string{"con-c"},
 			Usage:     "Get the concept children (both concepts and modifiers)",
