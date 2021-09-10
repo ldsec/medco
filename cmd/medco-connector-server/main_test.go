@@ -1,5 +1,3 @@
-// +build unit_test
-
 package main
 
 import (
@@ -83,7 +81,8 @@ type teqTests struct {
 func eqValid() medco_node.ExploreQueryBody {
 
 	return medco_node.ExploreQueryBody{
-		"id", &models.ExploreQuery{
+		ID: "id",
+		Query: &models.ExploreQuery{
 			UserPublicKey: "userPub",
 			Panels: []*models.Panel{
 				{
