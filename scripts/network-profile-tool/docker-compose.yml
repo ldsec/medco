@@ -1,4 +1,4 @@
-version: '2.4'
+version: "2.4"
 services:
   i2b2:
     extends:
@@ -8,6 +8,8 @@ services:
       - WILDFLY_ADMIN_PASSWORD=${I2B2_WILDFLY_PASSWORD:?}
       - I2B2_SERVICE_PASSWORD=${I2B2_SERVICE_PASSWORD:?}
       - DEFAULT_USER_PASSWORD=${I2B2_USER_PASSWORD:?}
+    networks:
+      - medco-network
 
   medco-unlynx:
     extends:
@@ -20,6 +22,8 @@ services:
       - MEDCO_NODE_IDX=${MEDCO_NODE_IDX:?}
     volumes:
       - ./configuration:/medco-configuration
+    networks:
+      - medco-network
 
   medco-connector:
     extends:
@@ -35,6 +39,8 @@ services:
       - MEDCO_NODES_URL=${MEDCO_NODES_URL:?}
     volumes:
       - ./configuration:/medco-configuration
+    networks:
+      - medco-network
 
   glowing-bear-medco:
     extends:
@@ -46,6 +52,8 @@ services:
       - GB_KEYCLOAK_REALM=${KEYCLOAK_REALM:?}
       - GB_KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID:?}
       - GB_FOOTER_TEXT=MedCo network ${MEDCO_NETWORK_NAME:?}, node ${MEDCO_NODE_IDX:?} / ${MEDCO_NODE_DNS_NAME:?}
+    networks:
+      - medco-network
 
   nginx:
     extends:
@@ -61,6 +69,8 @@ services:
       - ./configuration/group.toml:/medco-configuration/group.toml
       - ./configuration/certificate.crt:/medco-configuration/certificate.crt
       - ./configuration/certificate.key:/medco-configuration/certificate.key
+    networks:
+      - medco-network
 
   postgresql:
     extends:
@@ -70,6 +80,8 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?}
     ports:
       - "5432:5432"
+    networks:
+      - medco-network
 
   keycloak:
     extends:
@@ -79,6 +91,12 @@ services:
       - KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD:?}
     depends_on:
       - postgresql
+    networks:
+      - medco-network
 
 volumes:
   medcodb:
+
+networks:
+  medco-network:
+    driver: bridge
