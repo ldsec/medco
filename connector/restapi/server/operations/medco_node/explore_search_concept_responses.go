@@ -14,7 +14,7 @@ import (
 // ExploreSearchConceptOKCode is the HTTP code returned for type ExploreSearchConceptOK
 const ExploreSearchConceptOKCode int = 200
 
-/*ExploreSearchConceptOK MedCo-Explore search concept query response.
+/*ExploreSearchConceptOK MedCo-Explore search concept response.
 
 swagger:response exploreSearchConceptOK
 */

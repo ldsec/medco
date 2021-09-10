@@ -54,6 +54,9 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 		MedcoNodeExploreQueryHandler: medco_node.ExploreQueryHandlerFunc(func(params medco_node.ExploreQueryParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_node.ExploreQuery has not yet been implemented")
 		}),
+		MedcoNodeExploreSearchHandler: medco_node.ExploreSearchHandlerFunc(func(params medco_node.ExploreSearchParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation medco_node.ExploreSearch has not yet been implemented")
+		}),
 		MedcoNodeExploreSearchConceptHandler: medco_node.ExploreSearchConceptHandlerFunc(func(params medco_node.ExploreSearchConceptParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_node.ExploreSearchConcept has not yet been implemented")
 		}),
@@ -138,6 +141,8 @@ type MedcoConnectorAPI struct {
 	MedcoNodeDeleteCohortsHandler medco_node.DeleteCohortsHandler
 	// MedcoNodeExploreQueryHandler sets the operation handler for the explore query operation
 	MedcoNodeExploreQueryHandler medco_node.ExploreQueryHandler
+	// MedcoNodeExploreSearchHandler sets the operation handler for the explore search operation
+	MedcoNodeExploreSearchHandler medco_node.ExploreSearchHandler
 	// MedcoNodeExploreSearchConceptHandler sets the operation handler for the explore search concept operation
 	MedcoNodeExploreSearchConceptHandler medco_node.ExploreSearchConceptHandler
 	// MedcoNodeExploreSearchModifierHandler sets the operation handler for the explore search modifier operation
@@ -245,6 +250,9 @@ func (o *MedcoConnectorAPI) Validate() error {
 	}
 	if o.MedcoNodeExploreQueryHandler == nil {
 		unregistered = append(unregistered, "medco_node.ExploreQueryHandler")
+	}
+	if o.MedcoNodeExploreSearchHandler == nil {
+		unregistered = append(unregistered, "medco_node.ExploreSearchHandler")
 	}
 	if o.MedcoNodeExploreSearchConceptHandler == nil {
 		unregistered = append(unregistered, "medco_node.ExploreSearchConceptHandler")
@@ -385,6 +393,10 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/node/explore/query"] = medco_node.NewExploreQuery(o.context, o.MedcoNodeExploreQueryHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/node/explore/search"] = medco_node.NewExploreSearch(o.context, o.MedcoNodeExploreSearchHandler)
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
