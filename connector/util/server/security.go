@@ -3,6 +3,7 @@ package utilserver
 import (
 	"encoding/json"
 	"errors"
+
 	"github.com/ldsec/medco/connector/restapi/models"
 	"github.com/lestrrat-go/jwx/jwt"
 	"github.com/sirupsen/logrus"
