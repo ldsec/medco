@@ -5,15 +5,17 @@ package loadergenomic_test
 
 import (
 	"encoding/base64"
+	"os"
+	"testing"
+
+	loadergenomic "github.com/ldsec/medco/loader/genomic"
+	libunlynx "github.com/ldsec/unlynx/lib"
+
 	"github.com/ldsec/medco/loader"
-	"github.com/ldsec/medco/loader/genomic"
-	"github.com/ldsec/unlynx/lib"
 	"github.com/stretchr/testify/assert"
 	"go.dedis.ch/onet/v3"
 	"go.dedis.ch/onet/v3/app"
 	"go.dedis.ch/onet/v3/log"
-	"os"
-	"testing"
 )
 
 func init() {

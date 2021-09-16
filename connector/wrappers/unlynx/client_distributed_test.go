@@ -4,16 +4,18 @@
 package unlynx
 
 import (
-	"github.com/ldsec/medco/connector/util/server"
-	libunlynx "github.com/ldsec/unlynx/lib"
-	"github.com/sirupsen/logrus"
-	"go.dedis.ch/onet/v3"
-	"go.dedis.ch/onet/v3/app"
 	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
 	"time"
+
+	utilserver "github.com/ldsec/medco/connector/util/server"
+
+	libunlynx "github.com/ldsec/unlynx/lib"
+	"github.com/sirupsen/logrus"
+	"go.dedis.ch/onet/v3"
+	"go.dedis.ch/onet/v3/app"
 )
 
 // warning: needs medco deployment dev-3nodes-local running

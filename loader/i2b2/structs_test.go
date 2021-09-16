@@ -5,11 +5,13 @@ package loaderi2b2_test
 
 import (
 	"encoding/csv"
-	"github.com/ldsec/medco/loader/i2b2"
-	"github.com/ldsec/unlynx/lib"
-	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
+
+	loaderi2b2 "github.com/ldsec/medco/loader/i2b2"
+	libunlynx "github.com/ldsec/unlynx/lib"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // ----------------------------------------------------------------------------------------------------------- //

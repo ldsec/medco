@@ -32,7 +32,7 @@ func AuthenticateUser(token string) (user *models.User, err error) {
 	}
 
 	// parse and validate claims
-	var parsedToken jwt.Token
+	parsedToken := jwt.New()
 	if err = json.Unmarshal(tokenPayload, &parsedToken); err != nil {
 		logrus.Warn("authentication failed (token parsing error): ", err)
 		return
