@@ -38,11 +38,11 @@ func AuthenticateUser(token string) (user *models.User, err error) {
 		return
 	}
 
-	err = parsedToken.Verify(
+	err = jwt.Validate(parsedToken,
 		jwt.WithIssuer(matchingProvider.JwtIssuer),
 		jwt.WithAudience(matchingProvider.ClientID),
-		jwt.WithAcceptableSkew(matchingProvider.JwtAcceptableSkew),
-	)
+		jwt.WithAcceptableSkew(matchingProvider.JwtAcceptableSkew))
+
 	if err != nil {
 		logrus.Warn("authentication failed (invalid claim): ", err)
 		return
@@ -60,12 +60,12 @@ func AuthenticateUser(token string) (user *models.User, err error) {
 	}
 
 	// extract user authorizations
-	user.Authorizations, err = extractAuthorizationsFromToken(&parsedToken, matchingProvider)
+	user.Authorizations, err = extractAuthorizationsFromToken(parsedToken, matchingProvider)
 	return
 }
 
 // extractAuthorizationsFromToken parsed the token to extract the user's authorizations
-func extractAuthorizationsFromToken(token *jwt.Token, provider *oidcProvider) (ua *models.UserAuthorizations, err error) {
+func extractAuthorizationsFromToken(token jwt.Token, provider *oidcProvider) (ua *models.UserAuthorizations, err error) {
 
 	// retrieve roles, within the keycloak pre-determined structure (this is ugly)
 	var extractedRoles []string
