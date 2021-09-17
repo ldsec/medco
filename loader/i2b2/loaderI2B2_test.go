@@ -1,5 +1,4 @@
 //go:build unit_test
-// +build unit_test
 
 package loaderi2b2_test
 
