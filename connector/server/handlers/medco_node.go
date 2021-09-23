@@ -16,6 +16,27 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// MedCoNodeExploreSearchHandler handles the /medco/node/explore/search API endpoint.
+func MedCoNodeExploreSearchHandler(params medco_node.ExploreSearchParams, principal *models.User) middleware.Responder {
+
+	logrus.Infof("received request at /medco/node/explore/search with parameters: %s %d", *params.SearchRequest.SearchString, params.SearchRequest.Limit)
+
+	var searchResult []*models.ExploreSearchResultElement
+
+	searchResult, err := i2b2.GetOntologyElements(*params.SearchRequest.SearchString, params.SearchRequest.Limit)
+	if err != nil {
+		return medco_node.NewExploreSearchDefault(500).WithPayload(&medco_node.ExploreSearchDefaultBody{
+			Message: "Search execution error: " + err.Error(),
+		})
+	}
+
+	return medco_node.NewExploreSearchOK().WithPayload(&medco_node.ExploreSearchOKBody{
+		Search:  params.SearchRequest,
+		Results: searchResult,
+	})
+
+}
+
 // MedCoNodeExploreSearchConceptHandler handles the /medco/node/explore/search/concept API endpoint
 func MedCoNodeExploreSearchConceptHandler(params medco_node.ExploreSearchConceptParams, principal *models.User) middleware.Responder {
 

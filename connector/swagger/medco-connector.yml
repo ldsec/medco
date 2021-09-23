@@ -45,11 +45,27 @@ paths:
       security:
         - medco-jwt: ["medco-network"]
 
+  /node/explore/search:
+    post:
+      tags:
+        - "medco-node"
+      summary: "Returns info about the concepts and modifiers identified by the exploreSearchRequest parameters."
+      operationId: "exploreSearch"
+      parameters:
+        - $ref: "#/parameters/exploreSearchRequest"
+      responses:
+        200:
+          $ref: "#/responses/exploreSearchResponse"
+        default:
+          $ref: "#/responses/errorResponse"
+      security:
+        - medco-jwt: [ "medco-explore" ]
+
   /node/explore/search/concept:
     post:
       tags:
         - "medco-node"
-      summary: "Returns info about the concept and its (both concepts and modifiers) children"
+      summary: "Returns info about the concept and its (both concepts and modifiers) children."
       operationId: "exploreSearchConcept"
       parameters:
         - $ref: "#/parameters/exploreSearchConceptRequest"
@@ -65,7 +81,7 @@ paths:
     post:
       tags:
         - "medco-node"
-      summary: "Returns info about the modifier and its children"
+      summary: "Returns info about the modifier and its children."
       operationId: "exploreSearchModifier"
       parameters:
         - $ref: "#/parameters/exploreSearchModifierRequest"
@@ -356,6 +372,14 @@ securityDefinitions:
     description: "MedCo JWT token."
 
 parameters:
+  exploreSearchRequest:
+    in: 'body'
+    name: "searchRequest"
+    description: "MedCo-Explore ontology search request."
+    required: true
+    schema:
+      $ref: "#/definitions/exploreSearch"
+
   exploreSearchConceptRequest:
     in: "body"
     name: "searchConceptRequest"
@@ -585,8 +609,20 @@ responses:
         nodeIndex:
           type: "integer"
 
+  exploreSearchResponse:
+    description: "MedCo-Explore search response."
+    schema:
+      type: "object"
+      properties:
+        search:
+          $ref: "#/definitions/exploreSearch"
+        results:
+          type: "array"
+          items:
+            $ref: "#/definitions/exploreSearchResultElement"
+
   exploreSearchConceptResponse:
-    description: "MedCo-Explore search concept query response."
+    description: "MedCo-Explore search concept response."
     schema:
       type: "object"
       properties:
@@ -598,7 +634,7 @@ responses:
             $ref: "#/definitions/exploreSearchResultElement"
 
   exploreSearchModifierResponse:
-    description: "MedCo-Explore search modifier children query response."
+    description: "MedCo-Explore search modifier response."
     schema:
       type: "object"
       properties:
@@ -698,6 +734,21 @@ responses:
           $ref: "#/definitions/timers"
 
 definitions:
+  exploreSearch:
+    type: "object"
+    required:
+      - searchString
+    properties:
+      searchString:
+        type: "string"
+        description: 'String to search for in concepts and modifiers paths.'
+      limit:
+        type: integer
+        description: 'Maximum number of returned ontology elements.'
+    default:
+      searchString: ""
+      limit: 10
+
   exploreSearchConcept:
     type: "object"
     required:

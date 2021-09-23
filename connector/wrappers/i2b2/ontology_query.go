@@ -1,7 +1,10 @@
 package i2b2
 
 import (
+	"database/sql"
+	"encoding/xml"
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -10,7 +13,67 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// GetOntologyConceptChildren makes request to browse the i2b2 ontology
+// GetOntologyElements retrieves the info about the ontology elements.
+func GetOntologyElements(path string, limit int64) (results []*models.ExploreSearchResultElement, err error) {
+
+	// transform to i2b2 format
+	path = strings.Replace(strings.TrimSpace(path), "/", `\\`, -1)
+
+	if len(path) == 0 {
+		err = fmt.Errorf("empty path")
+		logrus.Error(err)
+		return
+	}
+
+	row, err := utilserver.I2B2DBConnection.Query("SELECT * FROM medco_ont.get_ontology_elements($1,$2)", path, limit)
+	if err != nil {
+		return nil, fmt.Errorf("while calling i2b2 database for retrieving ontology elements: %v", err)
+	}
+
+	var fullName, name, visualAttributes, baseCode, metaDataXML, comment, appliedPath sql.NullString
+
+	for row.Next() {
+		err = row.Scan(&fullName, &name, &visualAttributes, &baseCode, &metaDataXML, &comment, &appliedPath)
+		if err != nil {
+			return nil, fmt.Errorf("while reading database record stream for retrieving ontology elements: %v", err)
+		}
+
+		var metadataXML models.Metadataxml
+		if metaDataXML.Valid {
+			err = xml.Unmarshal([]byte(metaDataXML.String), &metadataXML)
+			if err != nil {
+				return nil, fmt.Errorf("while unmarshalling xml metadata of ontology element %s: %v", fullName.String, err)
+			}
+		}
+
+		kind, leaf := parseVisualAttributes(visualAttributes.String)
+		ontologyElement := &models.ExploreSearchResultElement{
+			Path:        convertPathFromI2b2Format(fullName.String),
+			AppliedPath: appliedPath.String,
+			Type:        kind,
+			Name:        name.String,
+			DisplayName: name.String,
+			Code:        baseCode.String,
+			Metadata:    &metadataXML,
+			Comment:     comment.String,
+			MedcoEncryption: &models.ExploreSearchResultElementMedcoEncryption{
+				Encrypted:   func() *bool { b := false; return &b }(),
+				ChildrenIds: []int64{},
+			},
+			Leaf: leaf,
+		}
+
+		if ontologyElement.AppliedPath != "@" {
+			ontologyElement.AppliedPath = convertPathFromI2b2Format(ontologyElement.AppliedPath)
+		}
+
+		results = append(results, ontologyElement)
+	}
+
+	return
+}
+
+// GetOntologyConceptChildren retrieves the children of the concept identified by path.
 func GetOntologyConceptChildren(path string) (results []*models.ExploreSearchResultElement, err error) {
 
 	// craft and make request
@@ -60,11 +123,11 @@ func GetOntologyConceptChildren(path string) (results []*models.ExploreSearchRes
 	return
 }
 
-// GetOntologyModifiers retrieves the modifiers that apply to self
-func GetOntologyModifiers(self string) (results []*models.ExploreSearchResultElement, err error) {
+// GetOntologyModifiers retrieves the modifiers that apply to the concept identified by path.
+func GetOntologyModifiers(path string) (results []*models.ExploreSearchResultElement, err error) {
 
 	// craft and make request
-	self = convertPathToI2b2Format(strings.TrimSpace(self))
+	path = convertPathToI2b2Format(strings.TrimSpace(path))
 
 	xmlResponse := &Response{
 		MessageBody: &OntRespModifiersMessageBody{},
@@ -72,7 +135,7 @@ func GetOntologyModifiers(self string) (results []*models.ExploreSearchResultEle
 
 	err = i2b2XMLRequest(
 		utilserver.I2b2HiveURL+"/OntologyService/getModifiers",
-		NewOntReqGetModifiersMessageBody(self),
+		NewOntReqGetModifiersMessageBody(path),
 		xmlResponse,
 	)
 	if err != nil {
@@ -93,11 +156,11 @@ func GetOntologyModifiers(self string) (results []*models.ExploreSearchResultEle
 	return
 }
 
-// GetOntologyModifierChildren retrieves the children of the parent modifier which have a certain appliedPath and which apply to appliedConcept
-func GetOntologyModifierChildren(parent, appliedPath, appliedConcept string) (results []*models.ExploreSearchResultElement, err error) {
+// GetOntologyModifierChildren retrieves the children of the modifier identified by path and appliedPath, and that apply to appliedConcept.
+func GetOntologyModifierChildren(path, appliedPath, appliedConcept string) (results []*models.ExploreSearchResultElement, err error) {
 
 	// craft and make request
-	parent = convertPathToI2b2Format(strings.TrimSpace(parent))
+	path = convertPathToI2b2Format(strings.TrimSpace(path))
 	appliedPath = convertPathToI2b2Format(strings.TrimSpace(appliedPath))[1:]
 	appliedConcept = convertPathToI2b2Format(strings.TrimSpace(appliedConcept))
 
@@ -107,7 +170,7 @@ func GetOntologyModifierChildren(parent, appliedPath, appliedConcept string) (re
 
 	err = i2b2XMLRequest(
 		utilserver.I2b2HiveURL+"/OntologyService/getModifierChildren",
-		NewOntReqGetModifierChildrenMessageBody(parent, appliedPath, appliedConcept),
+		NewOntReqGetModifierChildrenMessageBody(path, appliedPath, appliedConcept),
 		xmlResponse,
 	)
 	if err != nil {
@@ -128,7 +191,7 @@ func GetOntologyModifierChildren(parent, appliedPath, appliedConcept string) (re
 	return
 }
 
-// GetOntologyConceptInfo makes request to get information about a node given its path
+// GetOntologyConceptInfo retrieves the info of the concept identified by path.
 func GetOntologyConceptInfo(path string) (results []*models.ExploreSearchResultElement, err error) {
 
 	if path == "/" {
@@ -166,7 +229,7 @@ func GetOntologyConceptInfo(path string) (results []*models.ExploreSearchResultE
 	return
 }
 
-// GetOntologyModifierInfo retrieves the info of the modifier identified by path and appliedPath
+// GetOntologyModifierInfo retrieves the info of the modifier identified by path and appliedPath.
 func GetOntologyModifierInfo(path, appliedPath string) (results []*models.ExploreSearchResultElement, err error) {
 
 	// craft and make request
@@ -201,13 +264,7 @@ func GetOntologyModifierInfo(path, appliedPath string) (results []*models.Explor
 }
 
 func parseI2b2Concept(concept Concept) (result *models.ExploreSearchResultElement, err error) {
-	// todo: add leaf, ensure type OK
-	//          type:
-	//            type: "string"
-	//            enum:
-	//              - CONCEPT_PARENT_NODE
-	//              - CONCEPT_INTERNAL_NODE
-	//              - CONCEPT_LEAF
+
 	true := true
 	false := false
 
@@ -223,37 +280,9 @@ func parseI2b2Concept(concept Concept) (result *models.ExploreSearchResultElemen
 		Path:        convertPathFromI2b2Format(concept.Key),
 		AppliedPath: "@",
 		Comment:     concept.Comment,
-		//Type: models.SearchResultElementTypeConcept,
-		//Leaf: false,
 	}
 
-	switch concept.Visualattributes[0] {
-	// i2b2 leaf
-	case 'L':
-		result.Leaf = &true
-		result.Type = models.ExploreSearchResultElementTypeConcept
-	case 'R':
-		result.Leaf = &true
-		result.Type = models.ExploreSearchResultElementTypeModifier
-
-	// i2b2 container
-	case 'C':
-		result.Leaf = &false
-		result.Type = models.ExploreSearchResultElementTypeConceptContainer
-	case 'O':
-		result.Leaf = &false
-		result.Type = models.ExploreSearchResultElementTypeModifierContainer
-
-	// i2b2 folder (& default)
-	default:
-		fallthrough
-	case 'F':
-		result.Leaf = &false
-		result.Type = models.ExploreSearchResultElementTypeConceptFolder
-	case 'D':
-		result.Leaf = &false
-		result.Type = models.ExploreSearchResultElementTypeModifierFolder
-	}
+	result.Type, result.Leaf = parseVisualAttributes(concept.Visualattributes)
 
 	splitCode := strings.Split(concept.Basecode, ":")
 
@@ -323,6 +352,42 @@ func parseI2b2Modifier(modifier Modifier) (result *models.ExploreSearchResultEle
 	result.AppliedPath = convertPathFromI2b2Format(modifier.AppliedPath)
 	return
 
+}
+
+func parseVisualAttributes(visualAttributes string) (kind string, leaf *bool) {
+
+	false := false
+	true := true
+
+	switch visualAttributes[0] {
+	// i2b2 leaf
+	case 'L':
+		leaf = &true
+		kind = models.ExploreSearchResultElementTypeConcept
+	case 'R':
+		leaf = &true
+		kind = models.ExploreSearchResultElementTypeModifier
+
+	// i2b2 container
+	case 'C':
+		leaf = &false
+		kind = models.ExploreSearchResultElementTypeConceptContainer
+	case 'O':
+		leaf = &false
+		kind = models.ExploreSearchResultElementTypeModifierContainer
+
+	// i2b2 folder (& default)
+	default:
+		fallthrough
+	case 'F':
+		leaf = &false
+		kind = models.ExploreSearchResultElementTypeConceptFolder
+	case 'D':
+		leaf = &false
+		kind = models.ExploreSearchResultElementTypeModifierFolder
+	}
+
+	return
 }
 
 func convertPathToI2b2Format(path string) string {
