@@ -1,0 +1,21 @@
+version: '2.4'
+services:
+  medco-unlynx:
+    build:
+      context: ../
+      dockerfile: build/package/unlynx/Dockerfile
+    command: medco-unlynx
+    environment:
+    - UNLYNX_DEBUG_LEVEL=1
+
+  medco-client:
+    build:
+      context: ../
+      dockerfile: build/package/unlynx-client/Dockerfile
+    command: medco-unlynx
+    environment:
+      - UNLYNX_DEBUG_LEVEL=1
+
+  #nginx:
+  #  build:
+  #    context: ../build/package/nginx-unlynx
