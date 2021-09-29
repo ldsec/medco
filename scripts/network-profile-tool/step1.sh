@@ -56,8 +56,11 @@ else
 fi
 echo "### Unlynx keys generated!"
 
+read -rp "Do you wish to use self-signed certificates [y/N]: " response
+typeset -l response
+if [[ $response =~ ^([yY])$ ]]; then
 
-# ===================== HTTPS cert ==========================
+# ===================== self-signed HTTPS cert ==========================
 echo "### Generating self-signed HTTPS certificate"
 cat > "${SCRIPT_FOLDER}/openssl.cnf" <<EOF
 [req]
@@ -92,8 +95,24 @@ openssl x509 -req -days 3650 -in "${CONF_FOLDER}/certificate.csr" -signkey "${CO
     -out "${CONF_FOLDER}/certificate.crt" -extensions v3_req -extfile "${SCRIPT_FOLDER}/openssl.cnf"
 cp "${CONF_FOLDER}/certificate.crt" "${CONF_FOLDER}/srv${NODE_IDX}-certificate.crt"
 rm "${SCRIPT_FOLDER}/openssl.cnf"
-echo "### Certificate generated!"
+echo "### Self-signed certificate generated!"
 
+elif [[ $response =~ ^([nN])$ ]]; then
+
+# ===================== HTTPS cert ==========================
+read -rp "Full path to *.crt: " path_crt
+cp "$path_crt" "${CONF_FOLDER}/srv${NODE_IDX}-certificate.crt"
+echo "### Certificate selected!"
+read -rp "Full path to *.key: " path_key
+cp "$path_key" "${CONF_FOLDER}/srv${NODE_IDX}-certificate.key"
+echo "### Key selected!"
+
+else
+
+echo "You must select (y/N)"
+exit 1
+
+fi
 
 # ===================== compose profile =====================
 echo "### Generating compose profile"

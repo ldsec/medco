@@ -5,12 +5,19 @@ set -Eeuo pipefail
 pushd /etc/nginx/conf.d/
 
 # append stream directive to default configuration of nginx
-envsubst '${MEDCO_NODE_IDX} ${UNLYNX_PORT_0} ${UNLYNX_PORT_1}' < nginx.conf.template > nginx.conf.template_temp
+if [[ ${PROD_CONFIG} == "false" ]]; then
+  envsubst '${MEDCO_NODE_IDX} ${UNLYNX_PORT_0} ${UNLYNX_PORT_1}' < nginx.conf.template > nginx.conf.template_temp
+  cat ../nginx.conf nginx.conf.template_temp > nginx_new.conf
 
-cat ../nginx.conf nginx.conf.template_temp > nginx_new.conf
-mv nginx_new.conf ../nginx.conf
-rm nginx.conf.template_temp
-cat ../nginx.conf
+  mv nginx_new.conf ../nginx.conf
+  rm nginx.conf.template_temp
+else
+  envsubst '${UNLYNX_PORT_0} ${UNLYNX_PORT_1}' < nginx.conf.prod.template > nginx.conf.template_temp
+
+  cat ../nginx.conf nginx.conf.template_temp > nginx_new.conf
+  mv nginx_new.conf ../nginx.conf
+  rm nginx.conf.template_temp
+fi
 
 envsubst '$HTTP_SCHEME' < servers.conf.template > servers.conf
 envsubst '$ALL_TIMEOUTS_SECONDS' < common/server-revproxy-base.conf.inc.template > common/server-revproxy-base.conf.inc

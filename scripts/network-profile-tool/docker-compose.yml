@@ -15,9 +15,6 @@ services:
     extends:
       file: ../docker-compose-definitions.yml
       service: medco-unlynx
-    ports:
-      - "2001:2001"
-      - "2002:2002"
     environment:
       - MEDCO_NODE_IDX=${MEDCO_NODE_IDX:?}
     volumes:
@@ -62,6 +59,7 @@ services:
     ports:
       - "80:80"
       - "443:443"
+      - "2001:2001"
     environment:
       - HTTP_SCHEME=https
       - PROD_CONFIG=true
