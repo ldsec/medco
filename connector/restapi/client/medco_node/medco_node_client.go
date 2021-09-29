@@ -29,6 +29,8 @@ type ClientService interface {
 
 	ExploreQuery(params *ExploreQueryParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreQueryOK, error)
 
+	ExploreSearch(params *ExploreSearchParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreSearchOK, error)
+
 	ExploreSearchConcept(params *ExploreSearchConceptParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreSearchConceptOK, error)
 
 	ExploreSearchModifier(params *ExploreSearchModifierParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreSearchModifierOK, error)
@@ -111,6 +113,40 @@ func (a *Client) ExploreQuery(params *ExploreQueryParams, authInfo runtime.Clien
 	}
 	// unexpected success response
 	unexpectedSuccess := result.(*ExploreQueryDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+  ExploreSearch returns info about the concepts and modifiers identified by the explore search request parameters
+*/
+func (a *Client) ExploreSearch(params *ExploreSearchParams, authInfo runtime.ClientAuthInfoWriter) (*ExploreSearchOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewExploreSearchParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "exploreSearch",
+		Method:             "POST",
+		PathPattern:        "/node/explore/search",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &ExploreSearchReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*ExploreSearchOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*ExploreSearchDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 

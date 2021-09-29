@@ -1,4 +1,4 @@
-version: '2.4'
+version: "2.4"
 services:
   i2b2-srv0:
     extends:
@@ -26,8 +26,6 @@ services:
       - MEDCO_NODE_IDX=0
     networks:
       intra-node-srv0:
-        aliases:
-          - unlynx
       inter-nodes:
     volumes:
       - ./configuration:/medco-configuration
@@ -47,9 +45,9 @@ services:
       - MC_DB_NAME=medcoconnectorsrv0
       - I2B2_DB_NAME=i2b2medcosrv0
       - "MEDCO_NODES_URL=\
-      ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-0,\
-      ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-1,\
-      ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-2"
+        ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-0,\
+        ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-1,\
+        ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-2"
     networks:
       intra-node-srv0:
       inter-nodes:
@@ -63,12 +61,12 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "2020:2000"
+      - "2021:2001"
     environment:
       - HTTP_SCHEME=${MEDCO_NODE_HTTP_SCHEME:?}
       - MEDCO_NODE_IDX=0
-      - UNLYNX_PORT_0=2000
-      - UNLYNX_PORT_1=2001
+      - UNLYNX_PORT_0=2001
+      - UNLYNX_PORT_1=2002
     networks:
       intra-node-srv0:
       inter-nodes:
@@ -103,8 +101,6 @@ services:
       - MEDCO_NODE_IDX=1
     networks:
       intra-node-srv1:
-        aliases:
-          - unlynx
       inter-nodes:
     volumes:
       - ./configuration:/medco-configuration
@@ -124,9 +120,9 @@ services:
       - MC_DB_NAME=medcoconnectorsrv1
       - I2B2_DB_NAME=i2b2medcosrv1
       - "MEDCO_NODES_URL=\
-      ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-0,\
-      ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-1,\
-      ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-2"
+        ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-0,\
+        ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-1,\
+        ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-2"
     networks:
       intra-node-srv1:
       inter-nodes:
@@ -140,12 +136,12 @@ services:
     ports:
       - "83:80"
       - "444:443"
-      - "2022:2002"
+      - "2023:2003"
     environment:
       - HTTP_SCHEME=${MEDCO_NODE_HTTP_SCHEME:?}
       - MEDCO_NODE_IDX=1
-      - UNLYNX_PORT_0=2002
-      - UNLYNX_PORT_1=2003
+      - UNLYNX_PORT_0=2003
+      - UNLYNX_PORT_1=2004
     networks:
       intra-node-srv1:
       inter-nodes:
@@ -199,9 +195,9 @@ services:
       - MC_DB_NAME=medcoconnectorsrv2
       - I2B2_DB_NAME=i2b2medcosrv2
       - "MEDCO_NODES_URL=\
-      ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-0,\
-      ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-1,\
-      ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-2"
+        ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-0,\
+        ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-1,\
+        ${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-2"
     networks:
       intra-node-srv2:
       inter-nodes:
@@ -215,12 +211,12 @@ services:
     ports:
       - "84:80"
       - "445:443"
-      - "2024:2004"
+      - "2025:2005"
     environment:
       - HTTP_SCHEME=${MEDCO_NODE_HTTP_SCHEME:?}
       - MEDCO_NODE_IDX=2
-      - UNLYNX_PORT_0=2004
-      - UNLYNX_PORT_1=2005
+      - UNLYNX_PORT_0=2005
+      - UNLYNX_PORT_1=2006
     networks:
       intra-node-srv2:
       inter-nodes:
@@ -234,7 +230,7 @@ services:
       file: ../docker-compose-definitions.yml
       service: glowing-bear-medco
     ports:
-    - "82:80"
+      - "82:80"
     environment:
       - GB_MEDCO_NODE_URL=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-0
       - GB_KEYCLOAK_URL=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/auth

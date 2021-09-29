@@ -51,7 +51,7 @@ func NewExploreSearchConceptOK() *ExploreSearchConceptOK {
 
 /*ExploreSearchConceptOK handles this case with default header values.
 
-MedCo-Explore search concept query response.
+MedCo-Explore search concept response.
 */
 type ExploreSearchConceptOK struct {
 	Payload *ExploreSearchConceptOKBody

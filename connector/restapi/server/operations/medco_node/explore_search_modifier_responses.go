@@ -14,7 +14,7 @@ import (
 // ExploreSearchModifierOKCode is the HTTP code returned for type ExploreSearchModifierOK
 const ExploreSearchModifierOKCode int = 200
 
-/*ExploreSearchModifierOK MedCo-Explore search modifier children query response.
+/*ExploreSearchModifierOK MedCo-Explore search modifier response.
 
 swagger:response exploreSearchModifierOK
 */
