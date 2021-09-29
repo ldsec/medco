@@ -22,15 +22,13 @@ services:
     extends:
       file: ../docker-compose-definitions.yml
       service: medco-unlynx
-    ports:
-      - "2000:2000"
-      - "2001:2001"
     environment:
       - MEDCO_NODE_IDX=0
     networks:
       intra-node-srv0:
+        aliases:
+          - unlynx
       inter-nodes:
-        ipv4_address: 172.31.1.101
     volumes:
       - ./configuration:/medco-configuration
 
@@ -58,6 +56,27 @@ services:
     volumes:
       - ./configuration:/medco-configuration
 
+  nginx-srv0:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+      - "2020:2000"
+    environment:
+      - HTTP_SCHEME=${MEDCO_NODE_HTTP_SCHEME:?}
+      - MEDCO_NODE_IDX=0
+      - UNLYNX_PORT_0=2000
+      - UNLYNX_PORT_1=2001
+    networks:
+      intra-node-srv0:
+      inter-nodes:
+        ipv4_address: 172.31.1.101
+    volumes:
+      - ./configuration/certificate.crt:/medco-configuration/certificate.crt
+      - ./configuration/certificate.key:/medco-configuration/certificate.key
+
   i2b2-srv1:
     extends:
       file: ../docker-compose-definitions.yml
@@ -80,15 +99,13 @@ services:
     extends:
       file: ../docker-compose-definitions.yml
       service: medco-unlynx
-    ports:
-      - "2002:2002"
-      - "2003:2003"
     environment:
       - MEDCO_NODE_IDX=1
     networks:
       intra-node-srv1:
+        aliases:
+          - unlynx
       inter-nodes:
-        ipv4_address: 172.31.1.111
     volumes:
       - ./configuration:/medco-configuration
 
@@ -116,6 +133,27 @@ services:
     volumes:
       - ./configuration:/medco-configuration
 
+  nginx-srv1:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: nginx
+    ports:
+      - "83:80"
+      - "444:443"
+      - "2022:2002"
+    environment:
+      - HTTP_SCHEME=${MEDCO_NODE_HTTP_SCHEME:?}
+      - MEDCO_NODE_IDX=1
+      - UNLYNX_PORT_0=2002
+      - UNLYNX_PORT_1=2003
+    networks:
+      intra-node-srv1:
+      inter-nodes:
+        ipv4_address: 172.31.1.111
+    volumes:
+      - ./configuration/certificate.crt:/medco-configuration/certificate.crt
+      - ./configuration/certificate.key:/medco-configuration/certificate.key
+
   i2b2-srv2:
     extends:
       file: ../docker-compose-definitions.yml
@@ -138,15 +176,11 @@ services:
     extends:
       file: ../docker-compose-definitions.yml
       service: medco-unlynx
-    ports:
-      - "2004:2004"
-      - "2005:2005"
     environment:
       - MEDCO_NODE_IDX=2
     networks:
       intra-node-srv2:
       inter-nodes:
-        ipv4_address: 172.31.1.121
     volumes:
       - ./configuration:/medco-configuration
 
@@ -174,6 +208,27 @@ services:
     volumes:
       - ./configuration:/medco-configuration
 
+  nginx-srv2:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: nginx
+    ports:
+      - "84:80"
+      - "445:443"
+      - "2024:2004"
+    environment:
+      - HTTP_SCHEME=${MEDCO_NODE_HTTP_SCHEME:?}
+      - MEDCO_NODE_IDX=2
+      - UNLYNX_PORT_0=2004
+      - UNLYNX_PORT_1=2005
+    networks:
+      intra-node-srv2:
+      inter-nodes:
+        ipv4_address: 172.31.1.121
+    volumes:
+      - ./configuration/certificate.crt:/medco-configuration/certificate.crt
+      - ./configuration/certificate.key:/medco-configuration/certificate.key
+
   glowing-bear-medco:
     extends:
       file: ../docker-compose-definitions.yml
@@ -186,22 +241,6 @@ services:
       - GB_FOOTER_TEXT=
     networks:
       inter-nodes:
-
-  nginx:
-    extends:
-      file: ../docker-compose-definitions.yml
-      service: nginx
-    ports:
-    - "80:80"
-    - "443:443"
-    environment:
-    - HTTP_SCHEME=${MEDCO_NODE_HTTP_SCHEME:?}
-    networks:
-      intra-node-srv0:
-      inter-nodes:
-    volumes:
-    - ./configuration/certificate.crt:/medco-configuration/certificate.crt
-    - ./configuration/certificate.key:/medco-configuration/certificate.key
 
   postgresql:
     extends:

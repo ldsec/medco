@@ -204,11 +204,7 @@ func main() {
 			Flags:   mappingTableGenFlags,
 		},
 		// CLIENT END: MAPPING TABLE GENERATION ------------
-		{
-			Name:    "run",
-			Aliases: []string{"r"},
-			Action:  runUnLynx,
-		},
+
 		// BEGIN SERVER --------
 		{
 			Name:  "server",

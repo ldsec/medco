@@ -73,8 +73,6 @@ func (c *API) SendSurveyKSRequest(entities *onet.Roster, surveyID SurveyID, cPK 
 	}
 
 	resp := Result{}
-	log.Lvl1(entities)
-	log.Lvl1(c.entryPoint)
 	err := c.SendProtobuf(c.entryPoint, &skr, &resp)
 	if err != nil {
 		return nil, nil, TimeResults{}, err

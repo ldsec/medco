@@ -1,0 +1,13 @@
+
+
+stream {
+    server {
+        listen $UNLYNX_PORT_0;
+        proxy_pass medco-unlynx-srv$MEDCO_NODE_IDX:$UNLYNX_PORT_0;
+    }
+
+    server {
+        listen $UNLYNX_PORT_1;
+        proxy_pass medco-unlynx-srv$MEDCO_NODE_IDX:$UNLYNX_PORT_1;
+    }
+}
