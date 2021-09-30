@@ -101,10 +101,11 @@ elif [[ $response =~ ^([nN])$ ]]; then
 
 # ===================== HTTPS cert ==========================
 read -rp "Full path to *.crt: " path_crt
-cp "$path_crt" "${CONF_FOLDER}/srv${NODE_IDX}-certificate.crt"
+cp "$path_crt" "${CONF_FOLDER}/certificate.crt"
+cp "${CONF_FOLDER}/certificate.crt" "${CONF_FOLDER}/srv${NODE_IDX}-certificate.crt"
 echo "### Certificate selected!"
 read -rp "Full path to *.key: " path_key
-cp "$path_key" "${CONF_FOLDER}/srv${NODE_IDX}-certificate.key"
+cp "$path_key" "${CONF_FOLDER}/certificate.key"
 echo "### Key selected!"
 
 else
