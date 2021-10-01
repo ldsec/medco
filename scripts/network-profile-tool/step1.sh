@@ -110,6 +110,7 @@ echo "### Key selected!"
 
 else
 
+rm -rf "${COMPOSE_FOLDER}"
 echo "You must select (y/N)"
 exit 1
 
