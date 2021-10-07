@@ -60,6 +60,7 @@ services:
       - "80:80"
       - "443:443"
       - "2001:2001"
+      - "2002:2002"
     environment:
       - HTTP_SCHEME=https
       - PROD_CONFIG=true

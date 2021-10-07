@@ -59,6 +59,7 @@ services:
     ports:
       - "80:80"
       - "2021:2001"
+      - "2022:2002"
     environment:
       - MEDCO_NODE_IDX=0
       - UNLYNX_PORT_0=2001
@@ -127,6 +128,7 @@ services:
     ports:
       - "83:80"
       - "2023:2003"
+      - "2024:2004"
     environment:
       - MEDCO_NODE_IDX=1
       - UNLYNX_PORT_0=2003
@@ -195,6 +197,7 @@ services:
     ports:
       - "84:80"
       - "2025:2005"
+      - "2026:2006"
     environment:
       - MEDCO_NODE_IDX=2
       - UNLYNX_PORT_0=2005
