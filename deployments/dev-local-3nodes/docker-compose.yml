@@ -21,6 +21,9 @@ services:
     extends:
       file: ../docker-compose-definitions.yml
       service: medco-unlynx
+    ports:
+      - "2001:2001"
+      - "2002:2002"
     environment:
       - MEDCO_NODE_IDX=0
       - UNLYNX_DEBUG_LEVEL=3
@@ -52,7 +55,7 @@ services:
     volumes:
       - ./configuration:/medco-configuration
 
-  nginx-srv0:
+  nginx:
     extends:
       file: ../docker-compose-definitions.yml
       service: nginx
@@ -90,12 +93,16 @@ services:
     extends:
       file: ../docker-compose-definitions.yml
       service: medco-unlynx
+    ports:
+        - "2003:2003"
+        - "2004:2004"
     environment:
       - MEDCO_NODE_IDX=1
       - UNLYNX_DEBUG_LEVEL=3
     networks:
       intra-node-srv1:
       inter-nodes:
+        ipv4_address: 172.31.0.111
     volumes:
       - ./configuration:/medco-configuration
 
@@ -121,23 +128,6 @@ services:
     volumes:
       - ./configuration:/medco-configuration
 
-  nginx-srv1:
-    extends:
-      file: ../docker-compose-definitions.yml
-      service: nginx
-    ports:
-      - "83:80"
-      - "2023:2003"
-      - "2024:2004"
-    environment:
-      - MEDCO_NODE_IDX=1
-      - UNLYNX_PORT_0=2003
-      - UNLYNX_PORT_1=2004
-    networks:
-      intra-node-srv1:
-      inter-nodes:
-        ipv4_address: 172.31.0.111
-
   i2b2-srv2:
     extends:
       file: ../docker-compose-definitions.yml
@@ -159,12 +149,16 @@ services:
     extends:
       file: ../docker-compose-definitions.yml
       service: medco-unlynx
+    ports:
+        - "2005:2005"
+        - "2006:2006"
     environment:
       - MEDCO_NODE_IDX=2
       - UNLYNX_DEBUG_LEVEL=3
     networks:
       intra-node-srv2:
       inter-nodes:
+        ipv4_address: 172.31.0.121
     volumes:
       - ./configuration:/medco-configuration
 
@@ -189,23 +183,6 @@ services:
         ipv4_address: 172.31.0.122
     volumes:
       - ./configuration:/medco-configuration
-
-  nginx-srv2:
-    extends:
-      file: ../docker-compose-definitions.yml
-      service: nginx
-    ports:
-      - "84:80"
-      - "2025:2005"
-      - "2026:2006"
-    environment:
-      - MEDCO_NODE_IDX=2
-      - UNLYNX_PORT_0=2005
-      - UNLYNX_PORT_1=2006
-    networks:
-      intra-node-srv2:
-      inter-nodes:
-        ipv4_address: 172.31.0.121
 
   postgresql:
     extends:
