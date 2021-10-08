@@ -8,6 +8,7 @@ ENV HTTP_SCHEME="http" \
     UNLYNX_PORT_0=2001 \
     UNLYNX_PORT_1=2002
 
+RUN sed  -i '1i include stream.conf;' /etc/nginx/nginx.conf
 
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod a+x /usr/local/bin/docker-entrypoint.sh
