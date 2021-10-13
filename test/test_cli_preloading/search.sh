@@ -28,7 +28,7 @@ resultSearch1="  <ExploreSearchResultElement>
       </MedcoEncryption>
       <Metadata></Metadata>
       <Name>Foph Diagnosis</Name>
-      <Path>/SPHNv2020.1/FophDiagnosis/</Path>
+      <Path>/SPHN/SPHNv2020.1/FophDiagnosis/</Path>
       <Type>concept</Type>
   </ExploreSearchResultElement>"
 
