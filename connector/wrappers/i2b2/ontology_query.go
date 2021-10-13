@@ -16,6 +16,8 @@ import (
 // GetOntologyElements retrieves the info about the ontology elements.
 func GetOntologyElements(path string, limit int64) (results []*models.ExploreSearchResultElement, err error) {
 
+	results = make([]*models.ExploreSearchResultElement, 0)
+
 	// transform to i2b2 format
 	path = strings.Replace(strings.TrimSpace(path), "/", `\\`, -1)
 

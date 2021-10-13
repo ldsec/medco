@@ -24,7 +24,7 @@ BEGIN
     LOOP
 		strSQL := strSQL || 'SELECT c_fullname, c_name, c_visualattributes, c_basecode, c_metadataxml, c_comment, m_applied_path
           		FROM medco_ont.' || lower(rec.c_table_name) || '
-         		WHERE (c_basecode IS NOT NULL AND c_basecode != '''' AND lower(c_fullname) LIKE $1)
+         		WHERE lower(c_name) LIKE $1
 				UNION ALL ';
     END LOOP;
     strSQL := trim(trailing ' UNION ALL ' from strSQL) || ' ORDER BY c_fullname LIMIT $2;';

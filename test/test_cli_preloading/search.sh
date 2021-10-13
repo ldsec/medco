@@ -18,48 +18,6 @@ test () {
 
 search1="foph"
 resultSearch1="  <ExploreSearchResultElement>
-      <AppliedPath>/SPHNv2020.1/FophDiagnosis/</AppliedPath>
-      <Code>101</Code>
-      <Comment></Comment>
-      <DisplayName>Diagnosis value</DisplayName>
-      <Leaf>false</Leaf>
-      <MedcoEncryption>
-          <Encrypted>false</Encrypted>
-      </MedcoEncryption>
-      <Metadata></Metadata>
-      <Name>Diagnosis value</Name>
-      <Path>/FophDiagnosis-code/</Path>
-      <Type>modifier_folder</Type>
-  </ExploreSearchResultElement>
-  <ExploreSearchResultElement>
-      <AppliedPath>/SPHNv2020.1/FophDiagnosis/</AppliedPath>
-      <Code>101:ICD10</Code>
-      <Comment></Comment>
-      <DisplayName>ICD10</DisplayName>
-      <Leaf>false</Leaf>
-      <MedcoEncryption>
-          <Encrypted>false</Encrypted>
-      </MedcoEncryption>
-      <Metadata></Metadata>
-      <Name>ICD10</Name>
-      <Path>/FophDiagnosis-code/ICD10/</Path>
-      <Type>modifier_folder</Type>
-  </ExploreSearchResultElement>
-  <ExploreSearchResultElement>
-      <AppliedPath>/SPHNv2020.1/FophDiagnosis/</AppliedPath>
-      <Code>101:ICD10:762.5</Code>
-      <Comment></Comment>
-      <DisplayName>Placental Tranfusion</DisplayName>
-      <Leaf>true</Leaf>
-      <MedcoEncryption>
-          <Encrypted>false</Encrypted>
-      </MedcoEncryption>
-      <Metadata></Metadata>
-      <Name>Placental Tranfusion</Name>
-      <Path>/FophDiagnosis-code/ICD10/Conditions on the perinatal period(760-779)/Maternally caused (760-763)/(762) Fetus or newborn affected b~/(762-3) Placental transfusion syn~/</Path>
-      <Type>modifier</Type>
-  </ExploreSearchResultElement>
-  <ExploreSearchResultElement>
       <AppliedPath>@</AppliedPath>
       <Code>A168</Code>
       <Comment></Comment>
@@ -72,36 +30,6 @@ resultSearch1="  <ExploreSearchResultElement>
       <Name>Foph Diagnosis</Name>
       <Path>/SPHNv2020.1/FophDiagnosis/</Path>
       <Type>concept</Type>
-  </ExploreSearchResultElement>"
-
-search2="code/ICD10"
-resultSearch2="  <ExploreSearchResultElement>
-      <AppliedPath>/SPHNv2020.1/FophDiagnosis/</AppliedPath>
-      <Code>101:ICD10</Code>
-      <Comment></Comment>
-      <DisplayName>ICD10</DisplayName>
-      <Leaf>false</Leaf>
-      <MedcoEncryption>
-          <Encrypted>false</Encrypted>
-      </MedcoEncryption>
-      <Metadata></Metadata>
-      <Name>ICD10</Name>
-      <Path>/FophDiagnosis-code/ICD10/</Path>
-      <Type>modifier_folder</Type>
-  </ExploreSearchResultElement>
-  <ExploreSearchResultElement>
-      <AppliedPath>/SPHNv2020.1/FophDiagnosis/</AppliedPath>
-      <Code>101:ICD10:762.5</Code>
-      <Comment></Comment>
-      <DisplayName>Placental Tranfusion</DisplayName>
-      <Leaf>true</Leaf>
-      <MedcoEncryption>
-          <Encrypted>false</Encrypted>
-      </MedcoEncryption>
-      <Metadata></Metadata>
-      <Name>Placental Tranfusion</Name>
-      <Path>/FophDiagnosis-code/ICD10/Conditions on the perinatal period(760-779)/Maternally caused (760-763)/(762) Fetus or newborn affected b~/(762-3) Placental transfusion syn~/</Path>
-      <Type>modifier</Type>
   </ExploreSearchResultElement>"
 
 searchConceptChildren1="/"
@@ -187,7 +115,6 @@ pushd deployments/dev-local-3nodes/
 echo "Testing search..."
 
 test "search" "${search1}" "${resultSearch1}"
-test "search" "${search2}" "${resultSearch2}"
 
 echo "Testing concept-children..."
 

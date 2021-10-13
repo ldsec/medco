@@ -1,4 +1,4 @@
-FROM nginx:1.15.10
+FROM nginx:1.20.1
 
 # run-time variables
 ENV HTTP_SCHEME="http" \
