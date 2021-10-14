@@ -308,7 +308,29 @@ func (q *ExploreQuery) convertI2b2PsmQueryPanels(taggedQueryTerms map[string]str
 // isValid checks the validity of the query
 func (q *ExploreQuery) isValid() (err error) {
 	if len(q.ID) == 0 || q.Query == nil || len(q.Query.UserPublicKey) == 0 {
-		err = errors.New("Query " + q.ID + " is invalid")
+		err = errors.New("query " + q.ID + " is invalid")
+		logrus.Error(err)
+	}
+
+	nOfSequenceItems := len(q.Query.QueryTimingSequence)
+	nOfConceptPanels := 0
+	isASequenceQuery := nOfSequenceItems > 0
+
+	containsOnlyConcepts := true
+	//check number of sequential query
+	for _, panel := range q.Query.Panels {
+		containsOnlyConcepts = !(len(panel.CohortItems) > 0)
+		if len(panel.ConceptItems) > 0 {
+			nOfConceptPanels++
+		}
+	}
+	if !containsOnlyConcepts && isASequenceQuery {
+		err = fmt.Errorf("query %s is invalid: a sequential query can only have concept items in its selection panels, cohort item(s) was/were found", q.ID)
+		logrus.Error(err)
+		return
+	}
+	if nOfSequenceItems+1 != nOfConceptPanels {
+		err = fmt.Errorf("query %s is invalid: in a sequential query, the number of sequence information items + 1 must be equal to the number of panels: found %d sequence info items against %d panels", q.ID, nOfSequenceItems, nOfConceptPanels)
 		logrus.Error(err)
 	}
 	return

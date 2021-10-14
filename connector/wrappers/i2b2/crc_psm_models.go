@@ -100,7 +100,10 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, que
 	}
 
 	// embed subqueries and subquery constraint if sequences are in use
-	if querySequences != nil && len(querySequences) > 0 {
+
+	if len(querySequences) > 0 {
+		// this is tested in previous validation, where a 4XX error is returned.
+		// if the exception passes until here, a 5XX will be issued
 		if len(querySequences)+1 != len(panelsOnlyConcepts) {
 			err := fmt.Errorf("the number of items in query sequence info + 1 is not equal to this of panels")
 			return NewRequest(), err
