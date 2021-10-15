@@ -329,7 +329,7 @@ func (q *ExploreQuery) isValid() (err error) {
 		logrus.Error(err)
 		return
 	}
-	if nOfSequenceItems+1 != nOfConceptPanels {
+	if (isASequenceQuery) && (nOfSequenceItems+1 != nOfConceptPanels) {
 		err = fmt.Errorf("query %s is invalid: in a sequential query, the number of sequence information items + 1 must be equal to the number of panels: found %d sequence info items against %d panels", q.ID, nOfSequenceItems, nOfConceptPanels)
 		logrus.Error(err)
 	}
