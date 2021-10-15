@@ -5,7 +5,7 @@ USERNAME=${1:-test}
 PASSWORD=${2:-test}
 
 getSavedCohortHeaders="node_index,cohort_name,cohort_id,query_id,creation_date,update_date,query_timing,query_timing_sequence,panels"
-getSavedCohort1="$(printf -- "node_index cohort_name cohort_id query_id query_timing panels\n\
+getSavedCohort1="$(printf -- "node_index cohort_name cohort_id query_id query_timing query_timing_sequence panels\n\
 0 testCohort -1 -1 any {temporalSequence:[]} \"{panels:[{cohortItems:null,conceptItems:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any}]}\"\n\
 1 testCohort -1 -1 any {temporalSequence:[]} \"{panels:[{cohortItems:null,conceptItems:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any}]}\"\n\
 2 testCohort -1 -1 any {temporalSequence:[]} \"{panels:[{cohortItems:null,conceptItems:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any}]}\"")"
@@ -20,7 +20,7 @@ test1 () {
   exit 1
   fi
 
-  result="$(awk -vFPAT='("[^"]+")|([^,]+)' '{print $1,$2,$3,$4,$7,$8}' ../result.csv)"
+  result="$(awk -vFPAT='("[^"]+")|([^,]+)' '{print $1,$2,$3,$4,$7,$8,$9}' ../result.csv)"
   if [ "${result}" != "${getSavedCohort1}" ];
   then
   echo "get-saved-cohorts content before update: test failed"
