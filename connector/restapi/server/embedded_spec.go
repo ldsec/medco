@@ -1469,6 +1469,12 @@ func init() {
                 },
                 "queryTiming": {
                   "$ref": "#/definitions/timing"
+                },
+                "queryTimingSequence": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/timingSequenceInfo"
+                  }
                 }
               }
             },
@@ -2773,6 +2779,12 @@ func init() {
             },
             "queryTiming": {
               "$ref": "#/definitions/timing"
+            },
+            "queryTimingSequence": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/timingSequenceInfo"
+              }
             }
           }
         },
@@ -2795,6 +2807,12 @@ func init() {
         },
         "queryTiming": {
           "$ref": "#/definitions/timing"
+        },
+        "queryTimingSequence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/timingSequenceInfo"
+          }
         }
       }
     },
@@ -3900,6 +3918,12 @@ func init() {
                 },
                 "queryTiming": {
                   "$ref": "#/definitions/timing"
+                },
+                "queryTimingSequence": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/timingSequenceInfo"
+                  }
                 }
               }
             },

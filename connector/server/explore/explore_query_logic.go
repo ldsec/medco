@@ -64,17 +64,17 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 		err = fmt.Errorf("while inserting explore result instance: %s", err.Error())
 		return
 	}
-	defer func(e error) {
-		if e != nil {
+	defer func() {
+		if err != nil {
 			logrus.Info("Updating Explore Result instance with error status")
 			qtError := querytoolsserver.UpdateErrorExploreResultInstance(queryID)
 			if qtError != nil {
-				e = fmt.Errorf("while inserting a status error in result instance table: %s", qtError.Error())
+				err = fmt.Errorf("while inserting a status error in result instance table: %s", qtError.Error())
 			} else {
 				logrus.Info("Updating Explore Result instance with error status")
 			}
 		}
-	}(err)
+	}()
 
 	// todo: breakdown in i2b2 / count / patient list
 

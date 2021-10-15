@@ -4,11 +4,11 @@ set -Eeuo pipefail
 USERNAME=${1:-test}
 PASSWORD=${2:-test}
 
-getSavedCohortHeaders="node_index,cohort_name,cohort_id,query_id,creation_date,update_date,query_timing,panels"
+getSavedCohortHeaders="node_index,cohort_name,cohort_id,query_id,creation_date,update_date,query_timing,query_timing_sequence,panels"
 getSavedCohort1="$(printf -- "node_index cohort_name cohort_id query_id query_timing panels\n\
-0 testCohort -1 -1 any \"{panels:[{cohortItems:null,conceptItems:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any}]}\"\n\
-1 testCohort -1 -1 any \"{panels:[{cohortItems:null,conceptItems:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any}]}\"\n\
-2 testCohort -1 -1 any \"{panels:[{cohortItems:null,conceptItems:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any}]}\"")"
+0 testCohort -1 -1 any {temporalSequence:[]} \"{panels:[{cohortItems:null,conceptItems:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any}]}\"\n\
+1 testCohort -1 -1 any {temporalSequence:[]} \"{panels:[{cohortItems:null,conceptItems:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any}]}\"\n\
+2 testCohort -1 -1 any {temporalSequence:[]} \"{panels:[{cohortItems:null,conceptItems:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any}]}\"")"
 getSavedCohort2="$(printf -- "node_index cohort_name query_id\n0 testCohort2 -1\n0 testCohort -1\n1 testCohort2 -1\n1 testCohort -1\n2 testCohort2 -1\n2 testCohort -1")"
 test1 () {
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv get-saved-cohorts

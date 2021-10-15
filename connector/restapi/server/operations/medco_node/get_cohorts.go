@@ -192,6 +192,9 @@ type GetCohortsOKBodyItems0QueryDefinition struct {
 
 	// query timing
 	QueryTiming models.Timing `json:"queryTiming,omitempty"`
+
+	// query timing sequence
+	QueryTimingSequence []*models.TimingSequenceInfo `json:"queryTimingSequence"`
 }
 
 // Validate validates this get cohorts o k body items0 query definition
@@ -203,6 +206,10 @@ func (o *GetCohortsOKBodyItems0QueryDefinition) Validate(formats strfmt.Registry
 	}
 
 	if err := o.validateQueryTiming(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateQueryTimingSequence(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -248,6 +255,31 @@ func (o *GetCohortsOKBodyItems0QueryDefinition) validateQueryTiming(formats strf
 			return ve.ValidateName("queryDefinition" + "." + "queryTiming")
 		}
 		return err
+	}
+
+	return nil
+}
+
+func (o *GetCohortsOKBodyItems0QueryDefinition) validateQueryTimingSequence(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.QueryTimingSequence) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(o.QueryTimingSequence); i++ {
+		if swag.IsZero(o.QueryTimingSequence[i]) { // not required
+			continue
+		}
+
+		if o.QueryTimingSequence[i] != nil {
+			if err := o.QueryTimingSequence[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("queryDefinition" + "." + "queryTimingSequence" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil

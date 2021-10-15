@@ -687,6 +687,10 @@ responses:
                   $ref: "#/definitions/panel"
               queryTiming:
                 $ref: "#/definitions/timing"
+              queryTimingSequence:
+                type: "array"
+                items:
+                  $ref: "#/definitions/timingSequenceInfo"
 
   getCohortsPatientListResponse:
     description: "Queried patient list"
