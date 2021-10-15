@@ -51,7 +51,7 @@ test1 () {
 
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD remove-saved-cohorts -c testCohort2
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv get-saved-cohorts
-  result="$(awk -vFPAT='("[^"]+")|([^,]+)' '{print $1,$2,$3,$4,$7,$8}' ../result.csv)"
+  result="$(awk -vFPAT='("[^"]+")|([^,]+)' '{print $1,$2,$3,$4,$7,$8,$9}' ../result.csv)"
   if [ "${result}" != "${getSavedCohort1}" ];
   then
   echo "get-saved-cohorts content after removing new cohorts: test failed"
