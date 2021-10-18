@@ -1,4 +1,4 @@
--- this function returns (maximum lim) ontology elements whose paths contain the given search_string.
+-- this function returns (at most @lim) ontology elements whose paths contain @search_string.
 
 CREATE OR REPLACE FUNCTION medco_ont.get_ontology_elements(search_string varchar, lim integer DEFAULT 10)
       RETURNS TABLE (
@@ -10,7 +10,7 @@ CREATE OR REPLACE FUNCTION medco_ont.get_ontology_elements(search_string varchar
         c_comment text,
         m_applied_path varchar)
     LANGUAGE 'plpgsql'
-    STABLE
+    VOLATILE
     PARALLEL SAFE
 AS $BODY$
 DECLARE
@@ -20,6 +20,8 @@ BEGIN
 
 	strSQL := '';
 
+    -- create statement to retrieve all matching concepts from all tables in medco_ont.table_access
+    -- and store them into the temporary table "ontology_elements"
     FOR rec IN SELECT DISTINCT c_table_name FROM medco_ont.table_access
     LOOP
 		strSQL := strSQL || 'SELECT c_fullname, c_name, c_visualattributes, c_basecode, c_metadataxml, c_comment, m_applied_path
@@ -27,9 +29,37 @@ BEGIN
          		WHERE lower(c_name) LIKE $1
 				UNION ALL ';
     END LOOP;
-    strSQL := trim(trailing ' UNION ALL ' from strSQL) || ' ORDER BY c_fullname LIMIT $2;';
+    strSQL := 'CREATE TEMP TABLE ontology_elements AS '  || trim(trailing ' UNION ALL ' from strSQL) || ' ORDER BY c_fullname LIMIT $2;';
 
-	RETURN QUERY EXECUTE strSQL USING '%' || lower(search_string) || '%', lim;
+    -- execute the statement
+	EXECUTE strSQL USING '%' || lower(search_string) || '%', lim;
+
+	-- retrieve the table_cd(s) given the c_fullname(s) found in the previous step
+	-- and prepend them to the c_fullname(s) in the temporary table "ontology_elements"
+	FOR rec IN SELECT ontology_elements.c_fullname, ontology_elements.m_applied_path FROM ontology_elements
+	LOOP
+	    IF rec.m_applied_path = '@' THEN -- concept
+            strSQL := (SELECT c_table_cd
+            FROM medco_ont.table_access AS ta
+            WHERE POSITION(ta.c_fullname IN rec.c_fullname) > 0
+            ORDER BY LENGTH(ta.c_fullname) DESC
+            LIMIT 1);
+        ELSE -- modifier
+            strSQL := (SELECT c_table_cd
+            FROM medco_ont.table_access AS ta
+            WHERE POSITION(ta.c_fullname IN rec.m_applied_path) > 0
+            ORDER BY LENGTH(ta.c_fullname) DESC
+            LIMIT 1);
+        END IF;
+
+        UPDATE ontology_elements
+        SET c_fullname = '\\' || strSQL || ontology_elements.c_fullname
+        WHERE ontology_elements.c_fullname = rec.c_fullname;
+	END LOOP;
+
+	-- return the temporary table "ontology_elements" and drop it
+	RETURN QUERY SELECT * FROM ontology_elements;
+	DROP TABLE ontology_elements;
 
 END;
 $BODY$;
