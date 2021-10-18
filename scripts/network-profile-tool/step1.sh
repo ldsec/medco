@@ -1,21 +1,120 @@
 #!/bin/bash
-set -Eeuo pipefail
+set -Eeo pipefail
 shopt -s nullglob
 
-# command-line arguments
-if [[ $# -ne 3 && $# -ne 5 ]]; then
-    echo "Wrong number of arguments, usage: bash $0 <network name> <node index> <node DNS name> [<public key> <private key>]"
-    exit 1
+# ===================== input parsing ==================
+function example {
+    echo -e "example: $0 -nn <network name> -ni <node index> -dns <node_dns_name> [-crt <certificate_path> -key <key_path>]"
+}
+
+function usage {
+    echo -e "Wrong arguments, usage: bash $0 MANDATORY [OPTIONAL]"
+}
+
+function help {
+    echo -e "MANDATORY:"
+    echo -e "  -nn,   --network_name  VAL  Network name (e.g. test-network-deployment)"
+    echo -e "  -ni,   --node_index    VAL  Node index (e.g. 0, 1, 2)"
+    echo -e "  -dns,  --node_dns_name VAL  Server dns name\n"
+    echo -e "OPTIONAL:"
+    echo -e "  -pk,   --public_key    VAL  Unlynx node public key"
+    echo -e "  -sk,   --secret_key    VAL  Unlynx node private key"
+    echo -e "  -crt,  --certificate   VAL  Filepath to certificate (*.crt)"
+    echo -e "  -k,    --key           VAL  Filepath to certificate key (*.key)"
+    echo -e "  -h,    --help \n"
+    example
+}
+
+#Declare the number of mandatory args
+margs=3
+
+# Ensures that the number of passed args are at least equals to the declared number of mandatory args.
+# It also handles the special case of the -h or --help arg.
+function margs_precheck {
+	if [ "$2" ] && [ "$1" -lt $margs ]; then
+		if [ "$2" == "--help" ] || [ "$2" == "-h" ]; then
+			help
+			exit
+		else
+	    usage
+	    help
+	    exit 1
+		fi
+	fi
+}
+
+# Ensures that all the mandatory args are not empty
+function margs_check {
+	if [ $# -lt $margs ]; then
+	    usage
+	    help
+	    exit 1 # error
+	fi
+}
+
+# check if no inputs where selected
+if [ $# -lt 1 ]; then
+  usage
+  help
+  exit 1
 fi
-if [[ ! $1 =~ ^[a-zA-Z0-9-]+$ ]]; then
+margs_precheck $# "$1"
+
+# default values
+NETWORK_NAME=
+NODE_IDX=
+NODE_DNS_NAME=
+PUB_KEY=
+PRIV_KEY=
+CRT=
+KEY=
+
+# Args while-loop
+while [ "$1" != "" ];
+do
+   case $1 in
+   -nn  | --network_name )  shift
+                          NETWORK_NAME=$1
+                		      ;;
+   -ni  | --node_index )  shift
+   						            NODE_IDX=$(printf "%03d" "$1")
+			                    ;;
+	 -dns  | --node_dns_name )  shift
+     						          NODE_DNS_NAME=$1
+  			                  ;;
+   -pk  | --public_key  )  shift
+                          PUB_KEY=$1
+                          ;;
+   -sk  | --secret_key  )  shift
+                          PRIV_KEY=$1
+                          ;;
+   -crt  | --certificate  )  shift
+                          CRT=$1
+                          ;;
+   -k  | --key  )  shift
+                          KEY=$1
+                          ;;
+   -h   | --help )        help
+                          exit
+                          ;;
+   *)
+                          echo "$0: illegal option $1"
+                          usage
+                          help
+						              exit 1
+                          ;;
+    esac
+    shift
+done
+
+# Check if all mandatory args have assigned values
+margs_check "$NETWORK_NAME" "$NODE_IDX" "$NODE_DNS_NAME"
+
+set -u
+if [[ ! $NETWORK_NAME =~ ^[a-zA-Z0-9-]+$ ]]; then
     echo "Network name must only contain basic characters (a-z, A-Z, 0-9, -)"
     exit 1
 fi
-NETWORK_NAME="$1"
-NODE_IDX=$(printf "%03d" "$2") # padding to 3 digits
-NODE_DNS_NAME="$3"
-PUB_KEY="${4-}"
-PRIV_KEY="${5-}"
 
 # convenience variables
 PROFILE_NAME="network-${NETWORK_NAME}-node${NODE_IDX}"
@@ -56,8 +155,9 @@ else
 fi
 echo "### Unlynx keys generated!"
 
+if [ -z "$CRT" ] && [ -z "$KEY" ]; then
 
-# ===================== HTTPS cert ==========================
+# ===================== self-signed HTTPS cert ==========================
 echo "### Generating self-signed HTTPS certificate"
 cat > "${SCRIPT_FOLDER}/openssl.cnf" <<EOF
 [req]
@@ -92,8 +192,24 @@ openssl x509 -req -days 3650 -in "${CONF_FOLDER}/certificate.csr" -signkey "${CO
     -out "${CONF_FOLDER}/certificate.crt" -extensions v3_req -extfile "${SCRIPT_FOLDER}/openssl.cnf"
 cp "${CONF_FOLDER}/certificate.crt" "${CONF_FOLDER}/srv${NODE_IDX}-certificate.crt"
 rm "${SCRIPT_FOLDER}/openssl.cnf"
-echo "### Certificate generated!"
+echo "### Self-signed certificate generated!"
 
+elif [ -n "$CRT" ] && [ -n "$KEY" ]; then
+
+# ===================== HTTPS cert ==========================
+cp "$CRT" "${CONF_FOLDER}/certificate.crt"
+cp "${CONF_FOLDER}/certificate.crt" "${CONF_FOLDER}/srv${NODE_IDX}-certificate.crt"
+echo "### Certificate selected!"
+cp "$KEY" "${CONF_FOLDER}/certificate.key"
+echo "### Key selected!"
+
+else
+
+rm -rf "${COMPOSE_FOLDER}"
+echo "You must input both filepath to *.crt (-crt) and *.key (-k)."
+exit 1
+
+fi
 
 # ===================== compose profile =====================
 echo "### Generating compose profile"

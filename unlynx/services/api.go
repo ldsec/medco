@@ -62,7 +62,7 @@ func (c *API) SendSurveyDDTRequestTerms(entities *onet.Roster, surveyID SurveyID
 // SendSurveyKSRequest performs key switching in a list of values
 func (c *API) SendSurveyKSRequest(entities *onet.Roster, surveyID SurveyID, cPK kyber.Point, values libunlynx.CipherVector, proofs bool) (*SurveyID, libunlynx.CipherVector, TimeResults, error) {
 	start := time.Now()
-	log.Lvl2("Client", c.ClientID, "is creating a KS survey with ID:", surveyID)
+	log.Lvl1("Client", c.ClientID, "is creating a KS survey with ID:", surveyID)
 
 	skr := SurveyKSRequest{
 		SurveyID:     surveyID,
