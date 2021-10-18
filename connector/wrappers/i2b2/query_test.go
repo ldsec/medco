@@ -299,7 +299,7 @@ func TestGetOntologyElements(t *testing.T) {
 	utilserver.SetForTesting()
 	utilserver.TestI2B2DBConnection(t)
 
-	result, err := GetOntologyElements("code/ICD10", 10)
+	result, err := GetOntologyElements("gender", 10)
 	assert.NoError(t, err)
 
 	n := 0
@@ -307,7 +307,7 @@ func TestGetOntologyElements(t *testing.T) {
 		logrus.Info(element.Path)
 		n++
 	}
-	assert.Equal(t, n, 2)
+	assert.Equal(t, n, 3)
 
 }
 
