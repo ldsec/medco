@@ -28,7 +28,51 @@ resultSearch1="  <ExploreSearchResultElement>
       </MedcoEncryption>
       <Metadata></Metadata>
       <Name>Foph Diagnosis</Name>
-      <Path>/SPHNv2020.1/FophDiagnosis/</Path>
+      <Path>/SPHN/SPHNv2020.1/FophDiagnosis/</Path>
+      <Type>concept</Type>
+  </ExploreSearchResultElement>"
+
+search2="death"
+resultSearch2="  <ExploreSearchResultElement>
+      <AppliedPath>/SPHNv2020.1/DeathStatus/</AppliedPath>
+      <Code>126</Code>
+      <Comment></Comment>
+      <DisplayName>Value of the death status</DisplayName>
+      <Leaf>false</Leaf>
+      <MedcoEncryption>
+          <Encrypted>false</Encrypted>
+      </MedcoEncryption>
+      <Metadata></Metadata>
+      <Name>Value of the death status</Name>
+      <Path>/SPHN/DeathStatus-status/</Path>
+      <Type>modifier_folder</Type>
+  </ExploreSearchResultElement>
+  <ExploreSearchResultElement>
+      <AppliedPath>/SPHNv2020.1/DeathStatus/</AppliedPath>
+      <Code>126:1</Code>
+      <Comment></Comment>
+      <DisplayName>Death</DisplayName>
+      <Leaf>true</Leaf>
+      <MedcoEncryption>
+          <Encrypted>false</Encrypted>
+      </MedcoEncryption>
+      <Metadata></Metadata>
+      <Name>Death</Name>
+      <Path>/SPHN/DeathStatus-status/death/</Path>
+      <Type>modifier</Type>
+  </ExploreSearchResultElement>
+  <ExploreSearchResultElement>
+      <AppliedPath>@</AppliedPath>
+      <Code>A125</Code>
+      <Comment></Comment>
+      <DisplayName>Death Status</DisplayName>
+      <Leaf>true</Leaf>
+      <MedcoEncryption>
+          <Encrypted>false</Encrypted>
+      </MedcoEncryption>
+      <Metadata></Metadata>
+      <Name>Death Status</Name>
+      <Path>/SPHN/SPHNv2020.1/DeathStatus/</Path>
       <Type>concept</Type>
   </ExploreSearchResultElement>"
 
@@ -115,6 +159,7 @@ pushd deployments/dev-local-3nodes/
 echo "Testing search..."
 
 test "search" "${search1}" "${resultSearch1}"
+test "search" "${search2}" "${resultSearch2}"
 
 echo "Testing concept-children..."
 
