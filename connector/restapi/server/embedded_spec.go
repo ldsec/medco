@@ -1007,6 +1007,12 @@ func init() {
         "whichObservationSecond"
       ],
       "properties": {
+        "spans": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/timingSequenceSpan"
+          }
+        },
         "when": {
           "type": "string",
           "default": "LESS",
@@ -1049,6 +1055,38 @@ func init() {
             "LAST",
             "ANY"
           ]
+        }
+      }
+    },
+    "timingSequenceSpan": {
+      "type": "object",
+      "required": [
+        "value",
+        "units",
+        "operator"
+      ],
+      "properties": {
+        "operator": {
+          "type": "string",
+          "enum": [
+            "LESS",
+            "LESSEQUAL",
+            "EQUAL",
+            "GREATEREQUAL",
+            "GREATER"
+          ]
+        },
+        "units": {
+          "type": "string",
+          "enum": [
+            "HOUR",
+            "DAY",
+            "MONTH",
+            "YEAR"
+          ]
+        },
+        "value": {
+          "type": "integer"
         }
       }
     },
@@ -3456,6 +3494,12 @@ func init() {
         "whichObservationSecond"
       ],
       "properties": {
+        "spans": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/timingSequenceSpan"
+          }
+        },
         "when": {
           "type": "string",
           "default": "LESS",
@@ -3498,6 +3542,38 @@ func init() {
             "LAST",
             "ANY"
           ]
+        }
+      }
+    },
+    "timingSequenceSpan": {
+      "type": "object",
+      "required": [
+        "value",
+        "units",
+        "operator"
+      ],
+      "properties": {
+        "operator": {
+          "type": "string",
+          "enum": [
+            "LESS",
+            "LESSEQUAL",
+            "EQUAL",
+            "GREATEREQUAL",
+            "GREATER"
+          ]
+        },
+        "units": {
+          "type": "string",
+          "enum": [
+            "HOUR",
+            "DAY",
+            "MONTH",
+            "YEAR"
+          ]
+        },
+        "value": {
+          "type": "integer"
         }
       }
     },

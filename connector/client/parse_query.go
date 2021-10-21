@@ -279,14 +279,21 @@ func ParseSequences(sequenceString string) (sequences []*models.TimingSequenceIn
 func parseSequence(sequenceString string) (sequence *models.TimingSequenceInfo, err error) {
 	sequenceInfoStrings := strings.Split(sequenceString, ",")
 
-	// the 5 items are:
+	// the 5 mandatory items are:
 	// 1. the operator (before, before or same time, same time)
 	// 2. which occurence should be considered for the left operand (first, any, last)
 	// 3. what date should be considered fot the left operand (startdate, enddate)
 	// 4. which occurence should be considered for the right operand (first, any, last)
 	// 5. what date should be considered fot the right operand (startdate, enddate)
-	if len(sequenceInfoStrings) != 5 {
-		err = fmt.Errorf("sequence info is expected to be composed of 5 elements separated by commas: sequence info string \"%s\"", sequenceString)
+
+	// the following 3 optionally and repeating items are:
+	// 6. the span operator (less, equal or less, equal, greater or  less, greater)
+	// 7. the span value (an integer)
+	// 8. the unit (hours, days, months, years)
+
+	nOfElements := len(sequenceInfoStrings)
+	if (nOfElements < 5) || (((nOfElements - 5) % 3) != 0) {
+		err = fmt.Errorf("sequence info is expected to be composed of 5 + 3 * n elements separated by commas, n being any natural number: sequence info string \"%s\"", sequenceString)
 		return
 	}
 
@@ -294,7 +301,7 @@ func parseSequence(sequenceString string) (sequence *models.TimingSequenceInfo, 
 
 	sequence.When = new(string)
 
-	switch sequenceInfoStrings[0] {
+	switch infoWhen := sequenceInfoStrings[0]; infoWhen {
 	case "before":
 		*sequence.When = models.TimingSequenceInfoWhenLESS
 	case "beforeorsametime":
@@ -302,13 +309,13 @@ func parseSequence(sequenceString string) (sequence *models.TimingSequenceInfo, 
 	case "sametime":
 		*sequence.When = models.TimingSequenceInfoWhenEQUAL
 	default:
-		err = fmt.Errorf(`the first element of the info string is expected to be "before", "beforeorsametime" or "sametime": got "%s"`, sequenceInfoStrings[0])
+		err = fmt.Errorf(`the first element of the info string is expected to be "before", "beforeorsametime" or "sametime": got "%s"`, infoWhen)
 		return
 	}
 
 	sequence.WhichObservationFirst = new(string)
 
-	switch sequenceInfoStrings[1] {
+	switch whichObservation := sequenceInfoStrings[1]; whichObservation {
 	case "first":
 		*sequence.WhichObservationFirst = models.TimingSequenceInfoWhichObservationFirstFIRST
 	case "any":
@@ -316,25 +323,25 @@ func parseSequence(sequenceString string) (sequence *models.TimingSequenceInfo, 
 	case "last":
 		*sequence.WhichObservationFirst = models.TimingSequenceInfoWhichObservationFirstLAST
 	default:
-		err = fmt.Errorf(`the second element of the info string is expected to be "first", "any" or "last": got "%s"`, sequenceInfoStrings[1])
+		err = fmt.Errorf(`the second element of the info string is expected to be "first", "any" or "last": got "%s"`, whichObservation)
 		return
 	}
 
 	sequence.WhichDateFirst = new(string)
 
-	switch sequenceInfoStrings[2] {
+	switch whichDate := sequenceInfoStrings[2]; whichDate {
 	case "startdate":
 		*sequence.WhichDateFirst = models.TimingSequenceInfoWhichDateFirstSTARTDATE
 	case "enddate":
 		*sequence.WhichDateFirst = models.TimingSequenceInfoWhichDateFirstENDDATE
 	default:
-		err = fmt.Errorf(`the third element of the info string is expected to be "startdate" or "enddate": got "%s"`, sequenceInfoStrings[2])
+		err = fmt.Errorf(`the third element of the info string is expected to be "startdate" or "enddate": got "%s"`, whichDate)
 		return
 	}
 
 	sequence.WhichObservationSecond = new(string)
 
-	switch sequenceInfoStrings[3] {
+	switch whichObservation := sequenceInfoStrings[3]; whichObservation {
 	case "first":
 		*sequence.WhichObservationSecond = models.TimingSequenceInfoWhichObservationSecondFIRST
 	case "any":
@@ -342,19 +349,89 @@ func parseSequence(sequenceString string) (sequence *models.TimingSequenceInfo, 
 	case "last":
 		*sequence.WhichObservationSecond = models.TimingSequenceInfoWhichObservationSecondLAST
 	default:
-		err = fmt.Errorf(`the fourth element of the info string is expected to be "first", "any" or "last": got "%s"`, sequenceInfoStrings[3])
+		err = fmt.Errorf(`the fourth element of the info string is expected to be "first", "any" or "last": got "%s"`, whichObservation)
 		return
 	}
 
 	sequence.WhichDateSecond = new(string)
 
-	switch sequenceInfoStrings[4] {
+	switch whichDate := sequenceInfoStrings[4]; whichDate {
 	case "startdate":
 		*sequence.WhichDateSecond = models.TimingSequenceInfoWhichDateSecondSTARTDATE
 	case "enddate":
 		*sequence.WhichDateSecond = models.TimingSequenceInfoWhichDateSecondENDDATE
 	default:
-		err = fmt.Errorf(`the fifth element of the info string is expected to be "startdate" or "enddate": got "%s"`, sequenceInfoStrings[4])
+		err = fmt.Errorf(`the fifth element of the info string is expected to be "startdate" or "enddate": got "%s"`, whichDate)
+		return
+	}
+
+	nOfSpans := (nOfElements - 5) / 3
+
+	if nOfSpans > 0 {
+		sequence.Spans = make([]*models.TimingSequenceSpan, nOfSpans)
+		for i := 0; i < nOfSpans; i++ {
+			index := 5 + i*3
+			sequence.Spans[i], err = parseSpan(sequenceInfoStrings[index : index+3])
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	return
+}
+
+func parseSpan(spanString []string) (span *models.TimingSequenceSpan, err error) {
+	if len(spanString) != 3 {
+		err = fmt.Errorf("parseSpan expects a slice of three strings, got %d elements", len(spanString))
+		return
+	}
+	span = &models.TimingSequenceSpan{
+		Operator: new(string),
+		Value:    new(int64),
+		Units:    new(string),
+	}
+	switch operatorString := spanString[0]; operatorString {
+	case "less":
+
+		*span.Operator = models.TimingSequenceSpanOperatorLESS
+	case "lessorequal":
+
+		*span.Operator = models.TimingSequenceSpanOperatorLESSEQUAL
+	case "equal":
+
+		*span.Operator = models.TimingSequenceSpanOperatorEQUAL
+	case "moreorequal":
+
+		*span.Operator = models.TimingSequenceSpanOperatorGREATEREQUAL
+	case "more":
+
+		*span.Operator = models.TimingSequenceSpanOperatorGREATER
+	default:
+		err = fmt.Errorf(`the operator element of the span constraint is expected to be one of "less", "less or equal", "equal", "more or equal", "more": got "%s"`, operatorString)
+		return
+	}
+
+	*span.Value, err = strconv.ParseInt(spanString[1], 10, 64)
+	if err != nil {
+		err = fmt.Errorf(`while parsing integer value "%s" of span constraint: %s`, spanString[1], err.Error())
+		return
+	}
+
+	switch units := spanString[2]; units {
+	case "hours":
+
+		*span.Units = models.TimingSequenceSpanUnitsHOUR
+	case "days":
+
+		*span.Units = models.TimingSequenceSpanUnitsDAY
+	case "months":
+
+		*span.Units = models.TimingSequenceSpanUnitsMONTH
+	case "years":
+
+		*span.Units = models.TimingSequenceSpanUnitsYEAR
+	default:
+		err = fmt.Errorf(`the unit element of the span constraint is expected to be one of "hours", "days", "months", "years": got "%s"`, units)
 		return
 	}
 	return

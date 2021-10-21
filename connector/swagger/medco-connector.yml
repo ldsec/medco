@@ -1104,6 +1104,37 @@ definitions:
           - LAST
           - ANY
         default: "ANY"
+      spans:
+        type: "array"
+        items:
+          $ref: "#/definitions/timingSequenceSpan"
+
+
+  timingSequenceSpan:
+    type: "object"
+    required: [value, units, operator]
+    properties:
+      
+      value:
+        type: "integer"
+      units:
+        type: string
+        enum:
+          - HOUR
+          - DAY
+          - MONTH
+          - YEAR
+      operator:
+        type: string
+        enum:
+          - LESS
+          - LESSEQUAL
+          - EQUAL
+          - GREATEREQUAL
+          - GREATER
+      
+
+
 
   timers:
     type: "array"

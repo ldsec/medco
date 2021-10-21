@@ -7,6 +7,7 @@ package models
 
 import (
 	"encoding/json"
+	"strconv"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
@@ -18,6 +19,9 @@ import (
 //
 // swagger:model timingSequenceInfo
 type TimingSequenceInfo struct {
+
+	// spans
+	Spans []*TimingSequenceSpan `json:"spans"`
 
 	// when
 	// Required: true
@@ -49,6 +53,10 @@ type TimingSequenceInfo struct {
 func (m *TimingSequenceInfo) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateSpans(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateWhen(formats); err != nil {
 		res = append(res, err)
 	}
@@ -72,6 +80,31 @@ func (m *TimingSequenceInfo) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *TimingSequenceInfo) validateSpans(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Spans) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Spans); i++ {
+		if swag.IsZero(m.Spans[i]) { // not required
+			continue
+		}
+
+		if m.Spans[i] != nil {
+			if err := m.Spans[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("spans" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
 	return nil
 }
 

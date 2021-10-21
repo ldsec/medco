@@ -137,6 +137,17 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, que
 					JoinColumn:        *querySequence.WhichDateSecond,
 				},
 			}
+
+			for _, span := range querySequence.Spans {
+				span := Span{
+					SpanValue: int(*span.Value),
+					Units:     *span.Units,
+					Operator:  *span.Operator,
+				}
+				subqueryConstraint.Spans = append(subqueryConstraint.Spans, span)
+
+			}
+
 			psmRequest.SubqueryConstraints = append(psmRequest.SubqueryConstraints, subqueryConstraint)
 		}
 	}
@@ -251,6 +262,13 @@ type SubqueryConstraint struct {
 	FirstQuery  SubqueryConstraintOperand `xml:"first_query"`
 	Operator    string                    `xml:"operator"`
 	SecondQuery SubqueryConstraintOperand `xml:"second_query"`
+	Spans       []Span                    `xml:"span"`
+}
+
+type Span struct {
+	SpanValue int    `xml:"span_value"`
+	Units     string `xml:"units"`
+	Operator  string `xml:"operator"`
 }
 
 // SubqueryConstraintOperand is a helper structure for SubqueryConstraint
