@@ -265,6 +265,7 @@ type SubqueryConstraint struct {
 	Spans       []Span                    `xml:"span"`
 }
 
+// Span is an i2b2 XML span
 type Span struct {
 	SpanValue int    `xml:"span_value"`
 	Units     string `xml:"units"`

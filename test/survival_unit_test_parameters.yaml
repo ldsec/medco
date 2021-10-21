@@ -13,7 +13,6 @@ end_modifier:
 ends_when: "earliest"
 sub_groups:
   - group_name: "AAA"
-    group_timing: "any"
     panels:
       - not: false
         panel_timing: "any"
@@ -27,7 +26,32 @@ sub_groups:
         panel_timing: "sameinstancenum"
         items:
           - path: "/path/3/"
+    sequence_of_events:
+      - which_date_first: "startdate"
+        which_date_second: "enddate"
+        which_observation_first: "any"
+        which_observation_second: "last"
+        when: "sametime"
+        spans:
+          - operator: "before"
+            value: 34
+            units: "years"
+          - operator: "sametime"
+            value: 21
+            units: "days"
   - group_name: "BBB"
+    panels:
+      - not: false
+        panel_timing: "any"
+        items:
+          - path: "/path/4/"
+      - not : true
+        panel_timing: "sameinstancenum"
+        items:
+          - path: "/path/3/"
+    sequence_of_events:
+      - {}
+  - group_name: "CCC"
     group_timing: "sameinstancenum"
     panels:
       - not: false

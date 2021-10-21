@@ -11,32 +11,54 @@ import (
 
 // Parameters holds parameters to build a survival query
 type Parameters struct {
-	TimeResolution   string    `yaml:"time_resolution"`
-	TimeLimit        int       `yaml:"time_limit"`
-	CohortName       string    `yaml:"cohort_name"`
-	StartConceptPath string    `yaml:"start_concept_path"`
-	StartModifier    *modifier `yaml:"start_modifier,omitempty"`
-	StartsWhen       string    `yaml:"starts_when"`
-	EndConceptPath   string    `yaml:"end_concept_path"`
-	EndModifier      *modifier `yaml:"end_modifier,omitempty"`
-	EndsWhen         string    `yaml:"ends_when"`
-	SubGroups        []*struct {
-		GroupName   string `yaml:"group_name"`
-		GroupTiming string `yaml:"group_timing"`
-		Panels      []*struct {
-			Not   bool `yaml:"not"`
-			Items []*struct {
-				Path     string    `yaml:"path"`
-				Modifier *modifier `yaml:"modifier,omitempty"`
-			} `yaml:"items"`
-			PanelTiming string `yaml:"panel_timing"`
-		} `yaml:"panels"`
-	} `yaml:"sub_groups,omitempty"`
+	TimeResolution   string      `yaml:"time_resolution"`
+	TimeLimit        int         `yaml:"time_limit"`
+	CohortName       string      `yaml:"cohort_name"`
+	StartConceptPath string      `yaml:"start_concept_path"`
+	StartModifier    *modifier   `yaml:"start_modifier,omitempty"`
+	StartsWhen       string      `yaml:"starts_when"`
+	EndConceptPath   string      `yaml:"end_concept_path"`
+	EndModifier      *modifier   `yaml:"end_modifier,omitempty"`
+	EndsWhen         string      `yaml:"ends_when"`
+	SubGroups        []*subGroup `yaml:"sub_groups,omitempty"`
+}
+
+type item struct {
+	Path     string    `yaml:"path"`
+	Modifier *modifier `yaml:"modifier,omitempty"`
+}
+
+type panel struct {
+	Not         bool    `yaml:"not"`
+	Items       []*item `yaml:"items"`
+	PanelTiming string  `yaml:"panel_timing"`
+}
+
+type subGroup struct {
+	GroupName        string             `yaml:"group_name"`
+	GroupTiming      string             `yaml:"group_timing"`
+	Panels           []*panel           `yaml:"panels"`
+	SequenceOfEvents []*sequenceElement `yaml:"sequence_of_events,omitempty"`
 }
 
 type modifier struct {
 	ModifierKey string `yaml:"modifier_key"`
 	AppliedPath string `yaml:"applied_path"`
+}
+
+type sequenceElement struct {
+	WhichDateFirst         string      `yaml:"which_date_first,omitempty"`
+	WhichDateSecond        string      `yaml:"which_date_second,omitempty"`
+	WhichObservationFirst  string      `yaml:"which_observation_first,omitempty"`
+	WhichObservationSecond string      `yaml:"which_observation_second,omitempty"`
+	When                   string      `yaml:"when,omitempty"`
+	Spans                  []*timeSpan `yaml:"spans,omitempty"`
+}
+
+type timeSpan struct {
+	Operator string `yaml:"operator"`
+	Value    int64  `yaml:"value"`
+	Units    string `yaml:"units"`
 }
 
 // NewParametersFromFile builds a Parameters instance from YAML file

@@ -48,36 +48,14 @@ var parameters = &Parameters{
 		AppliedPath: "/any/end/path/%",
 	},
 	EndsWhen: "earliest",
-	SubGroups: []*struct {
-		GroupName   string "yaml:\"group_name\""
-		GroupTiming string "yaml:\"group_timing\""
-		Panels      []*struct {
-			Not   bool "yaml:\"not\""
-			Items []*struct {
-				Path     string    `yaml:"path"`
-				Modifier *modifier `yaml:"modifier,omitempty"`
-			} "yaml:\"items\""
-			PanelTiming string "yaml:\"panel_timing\""
-		} "yaml:\"panels\""
-	}{
+	SubGroups: []*subGroup{
 		{
-			GroupTiming: "any",
-			GroupName:   "AAA",
-			Panels: []*struct {
-				Not   bool "yaml:\"not\""
-				Items []*struct {
-					Path     string    `yaml:"path"`
-					Modifier *modifier `yaml:"modifier,omitempty"`
-				} "yaml:\"items\""
-				PanelTiming string "yaml:\"panel_timing\""
-			}{
+			GroupName: "AAA",
+			Panels: []*panel{
 				{
 					PanelTiming: "any",
 					Not:         false,
-					Items: []*struct {
-						Path     string    `yaml:"path"`
-						Modifier *modifier `yaml:"modifier,omitempty"`
-					}{
+					Items: []*item{
 						{
 							Path: "/path/1/",
 						},
@@ -93,35 +71,65 @@ var parameters = &Parameters{
 				{
 					PanelTiming: "sameinstancenum",
 					Not:         true,
-					Items: []*struct {
-						Path     string    `yaml:"path"`
-						Modifier *modifier `yaml:"modifier,omitempty"`
-					}{
+					Items: []*item{
 						{
 							Path: "/path/3/",
 						},
 					},
 				},
 			},
+			SequenceOfEvents: []*sequenceElement{
+				{
+					WhichDateFirst:         "startdate",
+					WhichDateSecond:        "enddate",
+					WhichObservationFirst:  "any",
+					WhichObservationSecond: "last",
+					When:                   "sametime",
+					Spans: []*timeSpan{
+						{Operator: "before",
+							Value: 34,
+							Units: "years"},
+						{Operator: "sametime",
+							Value: 21,
+							Units: "days"},
+					},
+				},
+			},
 		},
 		{
-			GroupName:   "BBB",
-			GroupTiming: "sameinstancenum",
-			Panels: []*struct {
-				Not   bool "yaml:\"not\""
-				Items []*struct {
-					Path     string    `yaml:"path"`
-					Modifier *modifier `yaml:"modifier,omitempty"`
-				} "yaml:\"items\""
-				PanelTiming string "yaml:\"panel_timing\""
-			}{
+			GroupName: "BBB",
+			Panels: []*panel{
 				{
 					Not:         false,
 					PanelTiming: "any",
-					Items: []*struct {
-						Path     string    `yaml:"path"`
-						Modifier *modifier `yaml:"modifier,omitempty"`
-					}{
+					Items: []*item{
+						{
+							Path: "/path/4/",
+						},
+					},
+				},
+				{
+					Not:         true,
+					PanelTiming: "sameinstancenum",
+					Items: []*item{
+						{
+							Path: "/path/3/",
+						},
+					},
+				},
+			},
+			SequenceOfEvents: []*sequenceElement{
+				{},
+			},
+		},
+		{
+			GroupName:   "CCC",
+			GroupTiming: "sameinstancenum",
+			Panels: []*panel{
+				{
+					Not:         false,
+					PanelTiming: "any",
+					Items: []*item{
 						{
 							Path: "/path/4/",
 						},

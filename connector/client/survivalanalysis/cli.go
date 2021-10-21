@@ -158,7 +158,7 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 	// --- convert panels
 	timer := time.Now()
 	logrus.Info("Survival analysis: converting panels")
-	panels, err := convertPanel(parameters)
+	panels, err := convertParametersToSubGroupDefinition(parameters)
 	if err != nil {
 		err = fmt.Errorf("while converting panels: %s", err.Error())
 		logrus.Error(err)
@@ -308,7 +308,7 @@ resLoop:
 
 }
 
-func convertPanel(parameters *Parameters) ([]*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0, error) {
+func convertParametersToSubGroupDefinition(parameters *Parameters) ([]*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0, error) {
 	panels := make([]*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0, len(parameters.SubGroups))
 	var err error
 	for i, selection := range parameters.SubGroups {
@@ -355,6 +355,11 @@ func convertPanel(parameters *Parameters) ([]*survival_analysis.SurvivalAnalysis
 			newPanels[j] = newPanel
 		}
 		newSelection.Panels = newPanels
+		newSelection.QueryTimingSequence, err = convertParametersToSequenceInfo(selection.SequenceOfEvents)
+		if err != nil {
+			err = fmt.Errorf("while parsing temporal sequence info: %s", err.Error())
+			return nil, err
+		}
 		panels[i] = newSelection
 	}
 	return panels, nil
