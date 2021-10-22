@@ -17,6 +17,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const (
+	defaultTiming = models.TimingAny
+)
+
 // ClientResultElement holds the information for the CLI whole susrvival analysis loop
 type ClientResultElement struct {
 	ClearTimePoint     string
@@ -355,7 +359,8 @@ func convertParametersToSubGroupDefinition(parameters *Parameters) ([]*survival_
 			newPanels[j] = newPanel
 		}
 		newSelection.Panels = newPanels
-		newSelection.QueryTimingSequence, err = convertParametersToSequenceInfo(selection.SequenceOfEvents)
+		sequenceOfEvents := defaultedSequenceOfEvents(selection.SequenceOfEvents, len(selection.Panels))
+		newSelection.QueryTimingSequence, err = convertParametersToSequenceInfo(sequenceOfEvents)
 		if err != nil {
 			err = fmt.Errorf("while parsing temporal sequence info: %s", err.Error())
 			return nil, err
@@ -492,11 +497,13 @@ func timingFromStringToModel(timingString string) (models.Timing, error) {
 	switch candidate := strings.ToLower(strings.TrimSpace(timingString)); candidate {
 	case string(models.TimingAny):
 		return models.TimingAny, nil
+	case "":
+		return defaultTiming, nil
 	case string(models.TimingSameinstancenum):
 		return models.TimingSameinstancenum, nil
 	case string(models.TimingSamevisit):
 		return models.TimingSamevisit, nil
 	default:
-		return "", fmt.Errorf("candidate %s is not implemented, musit be one of any, sameinstancenum, samevisit", timingString)
+		return "", fmt.Errorf("candidate %s is not implemented, must be one of any, sameinstancenum, samevisit", timingString)
 	}
 }

@@ -6,7 +6,38 @@ import (
 	"github.com/ldsec/medco/connector/restapi/models"
 )
 
+const (
+	defaultWhichDateFirst         = models.TimingSequenceInfoWhichDateFirstSTARTDATE
+	defaultWhichDateSecond        = models.TimingSequenceInfoWhichDateSecondSTARTDATE
+	defaultWhichObservationFirst  = models.TimingSequenceInfoWhichObservationFirstFIRST
+	defaultWhichObservationSecond = models.TimingSequenceInfoWhichObservationSecondFIRST
+	defaultWhen                   = models.TimingSequenceInfoWhenLESS
+)
+
+// defaultedSequenceOfEvents this let the possibility to use default value in the with an empty array in YAML
+// "sequence_of_events: []"
+func defaultedSequenceOfEvents(sequenceElements []*sequenceElement, nOfPanels int) (defaultedSequence []*sequenceElement) {
+	if (sequenceElements != nil) && (len(sequenceElements) == 0) {
+		defaultedSequence = make([]*sequenceElement, nOfPanels-1)
+		for i := 0; i < nOfPanels-1; i++ {
+			defaultedSequence[i] = &sequenceElement{
+				WhichDateFirst:         "startdate",
+				WhichDateSecond:        "startdate",
+				WhichObservationFirst:  "first",
+				WhichObservationSecond: "first",
+				When:                   "before",
+			}
+		}
+
+	} else {
+		defaultedSequence = sequenceElements
+	}
+	return
+
+}
+
 func convertParametersToSequenceInfo(sequenceElements []*sequenceElement) (timingSequenceInfo []*models.TimingSequenceInfo, err error) {
+
 	timingSequenceInfo = make([]*models.TimingSequenceInfo, len(sequenceElements))
 	for i, elm := range sequenceElements {
 		newSequenceInfo := &models.TimingSequenceInfo{
@@ -17,54 +48,64 @@ func convertParametersToSequenceInfo(sequenceElements []*sequenceElement) (timin
 			WhichObservationSecond: new(string),
 		}
 
-		switch when := elm.When; {
-		case (when == "") || (when == "before"):
+		switch when := elm.When; when {
+		case "":
+			*newSequenceInfo.When = defaultWhen
+		case "before":
 			*newSequenceInfo.When = models.TimingSequenceInfoWhenLESS
-		case when == "beforeorsametime":
+		case "beforeorsametime":
 			*newSequenceInfo.When = models.TimingSequenceInfoWhenLESSEQUAL
-		case when == "sametime":
+		case "sametime":
 			*newSequenceInfo.When = models.TimingSequenceInfoWhenEQUAL
 		default:
 			err = fmt.Errorf(`"%s" is not valid for "when" element of query temporal sequence`, when)
 			return
 		}
-		switch whichDateFirst := elm.WhichDateFirst; {
-		case (whichDateFirst == "") || (whichDateFirst == "startdate"):
+		switch whichDateFirst := elm.WhichDateFirst; whichDateFirst {
+		case "":
+			*newSequenceInfo.WhichDateFirst = defaultWhichDateFirst
+		case "startdate":
 			*newSequenceInfo.WhichDateFirst = models.TimingSequenceInfoWhichDateFirstSTARTDATE
-		case whichDateFirst == "enddate":
+		case "enddate":
 			*newSequenceInfo.WhichDateFirst = models.TimingSequenceInfoWhichDateFirstENDDATE
 		default:
 			err = fmt.Errorf(`"%s" is not valid for "which date first" element of query temporal sequence`, whichDateFirst)
 			return
 		}
-		switch whichDateSecond := elm.WhichDateSecond; {
-		case (whichDateSecond == "") || (whichDateSecond == "startdate"):
+		switch whichDateSecond := elm.WhichDateSecond; whichDateSecond {
+		case "":
+			*newSequenceInfo.WhichDateSecond = defaultWhichDateSecond
+		case "startdate":
 			*newSequenceInfo.WhichDateSecond = models.TimingSequenceInfoWhichDateSecondSTARTDATE
-		case whichDateSecond == "enddate":
+		case "enddate":
 			*newSequenceInfo.WhichDateSecond = models.TimingSequenceInfoWhichDateSecondENDDATE
 		default:
 			err = fmt.Errorf(`"%s" is not valid for "which date second" element of query temporal sequence`, whichDateSecond)
 			return
 		}
 
-		switch whichObservationFirst := elm.WhichObservationFirst; {
-		case (whichObservationFirst == "") || (whichObservationFirst == "first"):
+		switch whichObservationFirst := elm.WhichObservationFirst; whichObservationFirst {
+		case "":
+			*newSequenceInfo.WhichObservationFirst = defaultWhichObservationFirst
+		case "first":
 			*newSequenceInfo.WhichObservationFirst = models.TimingSequenceInfoWhichObservationFirstFIRST
-		case whichObservationFirst == "any":
+		case "any":
 			*newSequenceInfo.WhichObservationFirst = models.TimingSequenceInfoWhichObservationFirstANY
-		case whichObservationFirst == "last":
+		case "last":
 			*newSequenceInfo.WhichObservationFirst = models.TimingSequenceInfoWhichObservationFirstLAST
 		default:
 			err = fmt.Errorf(`"%s" is not valid for "which observation first" element of query temporal sequence`, whichObservationFirst)
 			return
 		}
 
-		switch whichObservationSecond := elm.WhichObservationSecond; {
-		case (whichObservationSecond == "") || (whichObservationSecond == "first"):
+		switch whichObservationSecond := elm.WhichObservationSecond; whichObservationSecond {
+		case "":
+			*newSequenceInfo.WhichObservationSecond = defaultWhichObservationSecond
+		case "first":
 			*newSequenceInfo.WhichObservationSecond = models.TimingSequenceInfoWhichObservationSecondFIRST
-		case whichObservationSecond == "any":
+		case "any":
 			*newSequenceInfo.WhichObservationSecond = models.TimingSequenceInfoWhichObservationSecondANY
-		case whichObservationSecond == "last":
+		case "last":
 			*newSequenceInfo.WhichObservationSecond = models.TimingSequenceInfoWhichObservationSecondLAST
 		default:
 			err = fmt.Errorf(`"%s" is not valid for "which observation second" element of query temporal sequence`, whichObservationSecond)

@@ -33,10 +33,10 @@ sub_groups:
         which_observation_second: "last"
         when: "sametime"
         spans:
-          - operator: "before"
+          - operator: "less"
             value: 34
             units: "years"
-          - operator: "sametime"
+          - operator: "equal"
             value: 21
             units: "days"
   - group_name: "BBB"
@@ -58,3 +58,17 @@ sub_groups:
         panel_timing: "any"
         items:
           - path: "/path/4/"
+  - group_name: "DDD"
+    panels:
+      - not: false
+        items:
+          - path: "/path/4/"
+      - not : true
+        panel_timing: "sameinstancenum"
+        items:
+          - path: "/path/3/"
+      - not : true
+        panel_timing: "sameinstancenum"
+        items:
+          - path: "/path/7/"
+    sequence_of_events: []
