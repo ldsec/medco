@@ -29,154 +29,173 @@ func TestNewParametersFromFile(t *testing.T) {
 
 	params, err := NewParametersFromFile(testParamFile)
 	assert.NoError(t, err)
-	assert.Equal(t, parameters, params)
+	assert.Equal(t, produceParameters(), params)
 
 }
 
+func TestValidate(t *testing.T) {
+	err := validateUserIntputSequenceOfEvents(produceParameters())
+	assert.NoError(t, err)
+
+	modifiedParameters := produceParameters()
+	modifiedParameters.SubGroups[0].SequenceOfEvents = append(
+		modifiedParameters.SubGroups[0].SequenceOfEvents,
+		modifiedParameters.SubGroups[0].SequenceOfEvents[0],
+	)
+	err = validateUserIntputSequenceOfEvents(modifiedParameters)
+	assert.Error(t, err)
+}
+
 func TestConversionOfParameters(t *testing.T) {
-	convertedParams, err := convertParametersToSubGroupDefinition(parameters)
+	convertedParams, err := convertParametersToSubGroupDefinition(produceParameters())
 	assert.NoError(t, err)
 	assert.Equal(t, parsedParameters, convertedParams)
 }
 
-var parameters = &Parameters{
-	TimeResolution:   "day",
-	TimeLimit:        19,
-	CohortName:       "anyName",
-	StartConceptPath: "/any/start/path/",
-	StartModifier: &modifier{
-		ModifierKey: "/any/start/modifier/key/",
-		AppliedPath: "/any/start/path/%",
-	},
-	StartsWhen:     "earliest",
-	EndConceptPath: "/any/end/path/",
-	EndModifier: &modifier{
-		ModifierKey: "/any/end/modifier/key/",
-		AppliedPath: "/any/end/path/%",
-	},
-	EndsWhen: "earliest",
-	SubGroups: []*subGroup{
-		{
-			GroupName: "AAA",
-			Panels: []*panel{
-				{
-					PanelTiming: "any",
-					Not:         false,
-					Items: []*item{
-						{
-							Path: "/path/1/",
+func produceParameters() *Parameters {
+	return &Parameters{
+		TimeResolution:   "day",
+		TimeLimit:        19,
+		CohortName:       "anyName",
+		StartConceptPath: "/any/start/path/",
+		StartModifier: &modifier{
+			ModifierKey: "/any/start/modifier/key/",
+			AppliedPath: "/any/start/path/%",
+		},
+		StartsWhen:     "earliest",
+		EndConceptPath: "/any/end/path/",
+		EndModifier: &modifier{
+			ModifierKey: "/any/end/modifier/key/",
+			AppliedPath: "/any/end/path/%",
+		},
+		EndsWhen: "earliest",
+		SubGroups: []*subGroup{
+			{
+				GroupName: "AAA",
+				Panels: []*panel{
+					{
+						PanelTiming: "any",
+						Not:         false,
+						CohortItems: []string{
+							"testCohort1",
+							"testCohort2",
 						},
-						{
-							Path: "/path/2/",
-							Modifier: &modifier{
-								ModifierKey: "/key1/",
-								AppliedPath: "/appliedpath1/",
+						ConceptItems: []*conceptItem{
+							{
+								Path: "/path/1/",
+							},
+							{
+								Path: "/path/2/",
+								Modifier: &modifier{
+									ModifierKey: "/key1/",
+									AppliedPath: "/appliedpath1/",
+								},
+							},
+						},
+					},
+					{
+						PanelTiming: "sameinstancenum",
+						Not:         true,
+						ConceptItems: []*conceptItem{
+							{
+								Path: "/path/3/",
 							},
 						},
 					},
 				},
-				{
-					PanelTiming: "sameinstancenum",
-					Not:         true,
-					Items: []*item{
-						{
-							Path: "/path/3/",
+				SequenceOfEvents: []*sequenceElement{
+					{
+						WhichDateFirst:         "startdate",
+						WhichDateSecond:        "enddate",
+						WhichObservationFirst:  "any",
+						WhichObservationSecond: "last",
+						When:                   "sametime",
+						Spans: []*timeSpan{
+							{Operator: "less",
+								Value: 34,
+								Units: "years"},
+							{Operator: "equal",
+								Value: 21,
+								Units: "days"},
 						},
 					},
 				},
 			},
-			SequenceOfEvents: []*sequenceElement{
-				{
-					WhichDateFirst:         "startdate",
-					WhichDateSecond:        "enddate",
-					WhichObservationFirst:  "any",
-					WhichObservationSecond: "last",
-					When:                   "sametime",
-					Spans: []*timeSpan{
-						{Operator: "less",
-							Value: 34,
-							Units: "years"},
-						{Operator: "equal",
-							Value: 21,
-							Units: "days"},
+			{
+				GroupName: "BBB",
+				Panels: []*panel{
+					{
+						Not:         false,
+						PanelTiming: "any",
+						ConceptItems: []*conceptItem{
+							{
+								Path: "/path/4/",
+							},
+						},
+					},
+					{
+						Not:         true,
+						PanelTiming: "sameinstancenum",
+						ConceptItems: []*conceptItem{
+							{
+								Path: "/path/3/",
+							},
+						},
 					},
 				},
+				SequenceOfEvents: []*sequenceElement{
+					{},
+				},
+			},
+			{
+				GroupName:   "CCC",
+				GroupTiming: "sameinstancenum",
+				Panels: []*panel{
+					{
+						Not:         false,
+						PanelTiming: "any",
+						ConceptItems: []*conceptItem{
+							{
+								Path: "/path/4/",
+							},
+						},
+					},
+				},
+			},
+			{
+				GroupName: "DDD",
+				Panels: []*panel{
+					{
+						Not: false,
+						ConceptItems: []*conceptItem{
+							{
+								Path: "/path/4/",
+							},
+						},
+					},
+					{
+						Not:         true,
+						PanelTiming: "sameinstancenum",
+						ConceptItems: []*conceptItem{
+							{
+								Path: "/path/3/",
+							},
+						},
+					},
+					{
+						Not:         true,
+						PanelTiming: "sameinstancenum",
+						ConceptItems: []*conceptItem{
+							{
+								Path: "/path/7/",
+							},
+						},
+					},
+				},
+				SequenceOfEvents: []*sequenceElement{},
 			},
 		},
-		{
-			GroupName: "BBB",
-			Panels: []*panel{
-				{
-					Not:         false,
-					PanelTiming: "any",
-					Items: []*item{
-						{
-							Path: "/path/4/",
-						},
-					},
-				},
-				{
-					Not:         true,
-					PanelTiming: "sameinstancenum",
-					Items: []*item{
-						{
-							Path: "/path/3/",
-						},
-					},
-				},
-			},
-			SequenceOfEvents: []*sequenceElement{
-				{},
-			},
-		},
-		{
-			GroupName:   "CCC",
-			GroupTiming: "sameinstancenum",
-			Panels: []*panel{
-				{
-					Not:         false,
-					PanelTiming: "any",
-					Items: []*item{
-						{
-							Path: "/path/4/",
-						},
-					},
-				},
-			},
-		},
-		{
-			GroupName: "DDD",
-			Panels: []*panel{
-				{
-					Not: false,
-					Items: []*item{
-						{
-							Path: "/path/4/",
-						},
-					},
-				},
-				{
-					Not:         true,
-					PanelTiming: "sameinstancenum",
-					Items: []*item{
-						{
-							Path: "/path/3/",
-						},
-					},
-				},
-				{
-					Not:         true,
-					PanelTiming: "sameinstancenum",
-					Items: []*item{
-						{
-							Path: "/path/7/",
-						},
-					},
-				},
-			},
-			SequenceOfEvents: []*sequenceElement{},
-		},
-	},
+	}
 }
 
 func defaultSequenceInfo(length int) (ret []*models.TimingSequenceInfo) {
@@ -201,6 +220,10 @@ var parsedParameters = []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDe
 			{
 				Not:         utilclient.InitializeBoolPointer(false),
 				PanelTiming: models.TimingAny,
+				CohortItems: []string{
+					"testCohort1",
+					"testCohort2",
+				},
 				ConceptItems: []*models.PanelConceptItemsItems0{
 					{
 						Encrypted: utilclient.InitializeBoolPointer(false),

@@ -14,6 +14,13 @@ const (
 	defaultWhen                   = models.TimingSequenceInfoWhenLESS
 )
 
+func validateSequenceOfEvents(sequenceElements []*sequenceElement, nOfPanels int) error {
+	if nOfSeqElms := len(sequenceElements); (nOfSeqElms > 0) && (nOfSeqElms != nOfPanels-1) {
+		return fmt.Errorf("number of temporal sequence elements should be equal to the number of panels - 1: got %d sequence elements and %d panels", nOfSeqElms, nOfPanels)
+	}
+	return nil
+}
+
 // defaultedSequenceOfEvents this let the possibility to use default value in the with an empty array in YAML
 // "sequence_of_events: []"
 func defaultedSequenceOfEvents(sequenceElements []*sequenceElement, nOfPanels int) (defaultedSequence []*sequenceElement) {

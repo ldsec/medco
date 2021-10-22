@@ -23,15 +23,16 @@ type Parameters struct {
 	SubGroups        []*subGroup `yaml:"sub_groups,omitempty"`
 }
 
-type item struct {
+type conceptItem struct {
 	Path     string    `yaml:"path"`
 	Modifier *modifier `yaml:"modifier,omitempty"`
 }
 
 type panel struct {
-	Not         bool    `yaml:"not"`
-	Items       []*item `yaml:"items"`
-	PanelTiming string  `yaml:"panel_timing"`
+	Not          bool           `yaml:"not"`
+	ConceptItems []*conceptItem `yaml:"concept_items"`
+	CohortItems  []string       `yaml:"cohort_items"`
+	PanelTiming  string         `yaml:"panel_timing"`
 }
 
 type subGroup struct {

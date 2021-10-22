@@ -16,15 +16,18 @@ sub_groups:
     panels:
       - not: false
         panel_timing: "any"
-        items:
+        concept_items:
           - path: "/path/1/"
           - path: "/path/2/"
             modifier:
               modifier_key: "/key1/"
               applied_path: "/appliedpath1/"
+        cohort_items:
+          - "testCohort1"
+          - "testCohort2"
       - not : true
         panel_timing: "sameinstancenum"
-        items:
+        concept_items:
           - path: "/path/3/"
     sequence_of_events:
       - which_date_first: "startdate"
@@ -43,11 +46,11 @@ sub_groups:
     panels:
       - not: false
         panel_timing: "any"
-        items:
+        concept_items:
           - path: "/path/4/"
       - not : true
         panel_timing: "sameinstancenum"
-        items:
+        concept_items:
           - path: "/path/3/"
     sequence_of_events:
       - {}
@@ -56,19 +59,19 @@ sub_groups:
     panels:
       - not: false
         panel_timing: "any"
-        items:
+        concept_items:
           - path: "/path/4/"
   - group_name: "DDD"
     panels:
       - not: false
-        items:
+        concept_items:
           - path: "/path/4/"
       - not : true
         panel_timing: "sameinstancenum"
-        items:
+        concept_items:
           - path: "/path/3/"
       - not : true
         panel_timing: "sameinstancenum"
-        items:
+        concept_items:
           - path: "/path/7/"
     sequence_of_events: []

@@ -78,6 +78,11 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 				errChan <- err
 				return
 			}
+			err = validateUserIntputSequenceOfEvents(parameters)
+			if err != nil {
+				errChan <- err
+				return
+			}
 			parametersChan <- parameters
 			logrus.Info("Survival analysis: parameters read")
 			logrus.Tracef("Survival analysis: parameters %+v", parameters)
@@ -312,6 +317,16 @@ resLoop:
 
 }
 
+func validateUserIntputSequenceOfEvents(parameters *Parameters) error {
+	for _, subGroup := range parameters.SubGroups {
+		err := validateSequenceOfEvents(subGroup.SequenceOfEvents, len(subGroup.Panels))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func convertParametersToSubGroupDefinition(parameters *Parameters) ([]*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0, error) {
 	panels := make([]*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0, len(parameters.SubGroups))
 	var err error
@@ -333,14 +348,14 @@ func convertParametersToSubGroupDefinition(parameters *Parameters) ([]*survival_
 			}
 			newPanel.Not = new(bool)
 			*newPanel.Not = panel.Not
-			newItems := make([]*models.PanelConceptItemsItems0, len(panel.Items))
-			for k, item := range panel.Items {
+			newConceptItems := make([]*models.PanelConceptItemsItems0, len(panel.ConceptItems))
+			for k, conceptItem := range panel.ConceptItems {
 				encrypted := new(bool)
 				itemString := new(string)
 				*encrypted = false
-				*itemString = item.Path
+				*itemString = conceptItem.Path
 				var modifier *models.PanelConceptItemsItems0Modifier
-				if mod := item.Modifier; mod != nil {
+				if mod := conceptItem.Modifier; mod != nil {
 					modifier = &models.PanelConceptItemsItems0Modifier{
 						ModifierKey: new(string),
 						AppliedPath: new(string),
@@ -349,13 +364,17 @@ func convertParametersToSubGroupDefinition(parameters *Parameters) ([]*survival_
 					*modifier.AppliedPath = mod.AppliedPath
 
 				}
-				newItems[k] = &models.PanelConceptItemsItems0{
+				newConceptItems[k] = &models.PanelConceptItemsItems0{
 					Encrypted: encrypted,
 					QueryTerm: itemString,
 					Modifier:  modifier,
 				}
 			}
-			newPanel.ConceptItems = newItems
+
+			newPanel.CohortItems = append(newPanel.CohortItems, panel.CohortItems...)
+
+			newPanel.ConceptItems = newConceptItems
+
 			newPanels[j] = newPanel
 		}
 		newSelection.Panels = newPanels
