@@ -98,7 +98,10 @@ func produceParameters() *Parameters {
 						Not:         true,
 						ConceptItems: []*conceptItem{
 							{
-								Path: "/path/3/",
+								Path:     "/path/3/",
+								Operator: "EQ",
+								Value:    "23",
+								Type:     "NUMBER",
 							},
 						},
 					},
@@ -245,6 +248,9 @@ var parsedParameters = []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDe
 					{
 						Encrypted: utilclient.InitializeBoolPointer(false),
 						QueryTerm: utilclient.InitializeStringPointer("/path/3/"),
+						Operator:  models.PanelConceptItemsItems0OperatorEQ,
+						Type:      models.PanelConceptItemsItems0TypeNUMBER,
+						Value:     "23",
 					},
 				},
 			},

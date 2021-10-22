@@ -26,6 +26,9 @@ type Parameters struct {
 type conceptItem struct {
 	Path     string    `yaml:"path"`
 	Modifier *modifier `yaml:"modifier,omitempty"`
+	Operator string    `yaml:"operator,omitempty"`
+	Type     string    `yaml:"type,omitempty"`
+	Value    string    `yaml:"value,omitempty"`
 }
 
 type panel struct {

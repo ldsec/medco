@@ -368,6 +368,9 @@ func convertParametersToSubGroupDefinition(parameters *Parameters) ([]*survival_
 					Encrypted: encrypted,
 					QueryTerm: itemString,
 					Modifier:  modifier,
+					Operator:  conceptItem.Operator,
+					Type:      conceptItem.Type,
+					Value:     conceptItem.Value,
 				}
 			}
 

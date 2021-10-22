@@ -29,6 +29,9 @@ sub_groups:
         panel_timing: "sameinstancenum"
         concept_items:
           - path: "/path/3/"
+            value: "23"
+            type: "NUMBER"
+            operator: "EQ"
     sequence_of_events:
       - which_date_first: "startdate"
         which_date_second: "enddate"
