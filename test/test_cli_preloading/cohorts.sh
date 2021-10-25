@@ -117,6 +117,23 @@ test3 () {
   fi
 }
 
+survivalSequenceOfEvents="$(printf -- "All 495\nNone 0")"
+test4 () {
+  docker-compose -f docker-compose.tools.yml run \
+    -v "${PWD}/../../test/survival_e2e_test_parameters_sequence_of_events.yaml":/parameters/survival_e2e_test_parameters.yaml \
+    medco-cli-client --user $USERNAME --password $PASSWORD -o /data/result.csv srva -d /data/timers.csv \
+    -p /parameters/survival_e2e_test_parameters.yaml
+
+    result="$(awk -F',' 'NR==7, NR==8 {print $3, $4}' ../result.csv)"
+    if [ "${result}" != "${1}" ];
+  then
+  echo "survival analysis sequence of events in sub groups: test failed"
+  echo "result: ${result}" && echo "expected result: ${1}"
+  exit 1
+  fi
+
+}
+
 function cohortPatientListWithCredentials() { docker-compose -f docker-compose.tools.yml run medco-cli-client --user ${1} --password ${2} --o /data/result.csv \
   cpl -c testCohort -d /data/timers.csv; };
 patientList="$(printf -- "Node idx 0\n1137,1138,1139,1140,1141,1142,1143,1144,1145,1146,1147,1148,1149,1150,1151,1152,1153,1154,1155,1156,1157,1158,1159,1160,1161,1162,1163,1164,1165,1166,1167,1168,1169,1170,1171,1172,1173,1174,1175,1176,1177,1178,1179,1180,1181,1182,1183,1184,1185,1186,1187,1188,1189,1190,1191,1192,1193,1194,1195,1196,1197,\
@@ -124,7 +141,7 @@ patientList="$(printf -- "Node idx 0\n1137,1138,1139,1140,1141,1142,1143,1144,11
 1267,1268,1269,1270,1271,1272,1273,1274,1275,1276,1277,1278,1279,1280,1281,1282,1283,1284,1285,1286,1287,1288,1289,1290,1291,1292,1293,1294,1295,1296,1297,1298,1299,1300,1301,1302,1303,1304,1305,1306,1307,1308,1309,1310,1311,1312,1313,1314,1315,1316,1317,1318,1319,1320,1321,1322,1323,1324,1325,1326,1327,1328,1329,1330,1331,1332,1333,1334,1335,\
 1336,1337,1338,1339,1340,1341,1342,1343,1344,1345,1346,1347,1348,1349,1350,1351,1352,1353,1354,1355,1356,1357,1358,1359,1360,1361,1362,1363,1364")"
 expectedError="is not authorized to query patient lists"
-test4() {
+test5() {
 
   cohortPatientListWithCredentials "test" "test"
 
@@ -186,8 +203,10 @@ test2 "year" "${survivalYears}"
 
 test3 "${survivalSubGroup1}" "${survivalSubGroup2}"
 
+test4 "${survivalSequenceOfEvents}"
+
 echo "Testing cohorts-patient-list"
-test4
+test5
 
 popd
 exit 0

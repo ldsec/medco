@@ -167,21 +167,22 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 	// --- convert panels
 	timer := time.Now()
 	logrus.Info("Survival analysis: converting panels")
-	panels, err := convertParametersToSubGroupDefinition(parameters)
+	subGroups, err := convertParametersToSubGroupDefinition(parameters)
 	if err != nil {
 		err = fmt.Errorf("while converting panels: %s", err.Error())
 		logrus.Error(err)
 		return
 	}
 	logrus.Info("Survival analysis: panels converted")
-	for _, panel := range panels {
-		logrus.Trace(modelPanelsToString(panel))
+	for _, subGroup := range subGroups {
+		logrus.Tracef("converted panel:", modelPanelsToString(subGroup))
+
 	}
 
 	// --- execute query
 	timer = time.Now()
 	logrus.Info("Survival analysis: executing query")
-	results, timers, userPrivateKey, err := executeQuery(accessToken, panels, parameters, disableTLSCheck)
+	results, timers, userPrivateKey, err := executeQuery(accessToken, subGroups, parameters, disableTLSCheck)
 	if err != nil {
 		err = fmt.Errorf("while executing survival analysis results: %s", err.Error())
 		logrus.Error(err)
@@ -501,18 +502,34 @@ func modelPanelsToString(subGroup *survival_analysis.SurvivalAnalysisParamsBodyS
 	for _, panel := range subGroup.Panels {
 		itemStrings := make([]string, 0, len(panel.ConceptItems))
 		for _, item := range panel.ConceptItems {
-			itemStrings = append(itemStrings, fmt.Sprintf("{Encrypted:%t Modifier:%v Operator:%s QueryTerm:%s Value:%s}",
+			itemStrings = append(itemStrings, fmt.Sprintf("{Encrypted:%t Modifier:%s QueryTerm:%s Type:%s Value:%s Operator:%s}",
 				*item.Encrypted,
-				item.Modifier,
-				item.Operator,
+				stringModifier(item.Modifier),
 				*item.QueryTerm,
-				item.Value))
+				item.Type,
+				item.Value,
+				item.Operator))
 		}
 		itemArray := "[" + strings.Join(itemStrings, " ") + "]"
 		panelStrings = append(panelStrings, fmt.Sprintf("{Items:%s Not:%t}", itemArray, *panel.Not))
 	}
 	panelArray := "[" + strings.Join(panelStrings, " ") + "]"
-	return fmt.Sprintf("{GroupName:%s QueryTiming:%s Panels:%s", subGroup.GroupName, subGroup.SubGroupTiming, panelArray)
+	return fmt.Sprintf("{GroupName:%s QueryTiming:%s Panels:%s TimingSequence:%v", subGroup.GroupName, subGroup.SubGroupTiming, panelArray, subGroup.QueryTimingSequence)
+}
+
+func stringModifier(modifier *models.PanelConceptItemsItems0Modifier) string {
+	if modifier == nil {
+		return ""
+	}
+	appliedPathString := ""
+	modifierKeyString := ""
+	if modifier.AppliedPath != nil {
+		appliedPathString = *modifier.AppliedPath
+	}
+	if modifier.ModifierKey != nil {
+		modifierKeyString = *modifier.ModifierKey
+	}
+	return fmt.Sprintf("{AppliedPath:%s ModifierKey:%s}", appliedPathString, modifierKeyString)
 }
 
 func timingFromStringToModel(timingString string) (models.Timing, error) {

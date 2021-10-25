@@ -44,7 +44,9 @@ func defaultedSequenceOfEvents(sequenceElements []*sequenceElement, nOfPanels in
 }
 
 func convertParametersToSequenceInfo(sequenceElements []*sequenceElement) (timingSequenceInfo []*models.TimingSequenceInfo, err error) {
-
+	if len(sequenceElements) == 0 {
+		return
+	}
 	timingSequenceInfo = make([]*models.TimingSequenceInfo, len(sequenceElements))
 	for i, elm := range sequenceElements {
 		newSequenceInfo := &models.TimingSequenceInfo{
@@ -131,6 +133,9 @@ func convertParametersToSequenceInfo(sequenceElements []*sequenceElement) (timin
 }
 
 func convertParametersToTimeSpan(spans []*timeSpan) (timingSequenceSpan []*models.TimingSequenceSpan, err error) {
+	if len(spans) == 0 {
+		return
+	}
 	timingSequenceSpan = make([]*models.TimingSequenceSpan, len(spans))
 	for i, span := range spans {
 		newSpan := &models.TimingSequenceSpan{

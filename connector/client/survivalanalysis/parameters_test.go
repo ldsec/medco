@@ -209,7 +209,6 @@ func defaultSequenceInfo(length int) (ret []*models.TimingSequenceInfo) {
 			WhichDateSecond:        utilclient.InitializeStringPointer(models.TimingSequenceInfoWhichDateSecondSTARTDATE),
 			WhichObservationFirst:  utilclient.InitializeStringPointer(models.TimingSequenceInfoWhichObservationFirstFIRST),
 			WhichObservationSecond: utilclient.InitializeStringPointer(models.TimingSequenceInfoWhichObservationSecondFIRST),
-			Spans:                  []*models.TimingSequenceSpan{},
 		})
 	}
 	return
@@ -319,7 +318,6 @@ var parsedParameters = []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDe
 				},
 			},
 		},
-		QueryTimingSequence: []*models.TimingSequenceInfo{},
 	},
 	{
 		GroupName:      "DDD",

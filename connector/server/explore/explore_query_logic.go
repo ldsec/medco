@@ -105,7 +105,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 		return
 	}
 
-	patientCount, patientSetID, err := i2b2.ExecutePsmQuery(q.ID, q.Query.Panels, q.Query.QueryTimingSequence, q.Query.QueryTiming)
+	patientCount, patientSetID, err := i2b2.ExecutePsmQuery(q.ID, q.Query.Panels, q.Query.QueryTimingSequence, q.Query.Panels, q.Query.QueryTiming)
 	if err != nil {
 		err = fmt.Errorf("during I2B2 PSM query exection: %s", err.Error())
 		return

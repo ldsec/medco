@@ -9,10 +9,11 @@ import (
 
 	"github.com/ldsec/medco/connector/restapi/models"
 	utilserver "github.com/ldsec/medco/connector/util/server"
+	"github.com/sirupsen/logrus"
 )
 
 // NewCrcPsmReqFromQueryDef returns a new request object for i2b2 psm request
-func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, querySequences []*models.TimingSequenceInfo, resultOutputs []ResultOutputName, queryTiming models.Timing) (Request, error) {
+func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, querySequenceOperators []*models.TimingSequenceInfo, querySequencePanels []*models.Panel, resultOutputs []ResultOutputName, queryTiming models.Timing) (Request, error) {
 
 	// PSM header
 	psmHeader := PsmHeader{
@@ -38,62 +39,11 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, que
 		SpecificityScale: "0",
 	}
 
-	var panelsOnlyConcepts []Panel
-
 	// embed query in request
 	for p, queryPanel := range queryPanels {
 
-		invert := "0"
-		if *queryPanel.Not {
-			invert = "1"
-		}
-
-		i2b2Panel := Panel{
-			PanelNumber:          strconv.Itoa(p + 1),
-			PanelAccuracyScale:   "100",
-			Invert:               invert,
-			PanelTiming:          strings.ToUpper(string(queryPanel.PanelTiming)),
-			TotalItemOccurrences: "1",
-		}
-		i2b2PanelConcept := i2b2Panel
-
-		for _, queryItem := range queryPanel.ConceptItems {
-
-			i2b2Item := Item{
-				ItemKey: convertPathToI2b2Format(*queryItem.QueryTerm),
-			}
-			if queryItem.Operator != "" && queryItem.Modifier == nil {
-				i2b2Item.ConstrainByValue = &ConstrainByValue{
-					ValueType:       queryItem.Type,
-					ValueOperator:   queryItem.Operator,
-					ValueConstraint: queryItem.Value,
-				}
-			}
-			if queryItem.Modifier != nil {
-				i2b2Item.ConstrainByModifier = &ConstrainByModifier{
-					AppliedPath: strings.ReplaceAll(*queryItem.Modifier.AppliedPath, "/", `\`),
-					ModifierKey: convertPathToI2b2Format(*queryItem.Modifier.ModifierKey),
-				}
-				if queryItem.Operator != "" {
-					i2b2Item.ConstrainByModifier.ConstrainByValue = &ConstrainByValue{
-						ValueType:       queryItem.Type,
-						ValueOperator:   queryItem.Operator,
-						ValueConstraint: queryItem.Value,
-					}
-				}
-			}
-			i2b2Panel.Items = append(i2b2Panel.Items, i2b2Item)
-			i2b2PanelConcept.Items = append(i2b2PanelConcept.Items, i2b2Item)
-		}
-		panelsOnlyConcepts = append(panelsOnlyConcepts, i2b2PanelConcept)
-
-		for _, cohort := range queryPanel.CohortItems {
-
-			i2b2Item := Item{
-				ItemKey: cohort,
-			}
-			i2b2Panel.Items = append(i2b2Panel.Items, i2b2Item)
-		}
+		i2b2Panel := apiPanelToI2b2Panel(queryPanel)
+		i2b2Panel.PanelNumber = strconv.Itoa(p + 1)
 
 		psmRequest.Panels = append(psmRequest.Panels, i2b2Panel)
 
@@ -101,44 +51,59 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, que
 
 	// embed subqueries and subquery constraint if sequences are in use
 
-	if len(querySequences) > 0 {
+	if nOfSequenceOperators := len(querySequenceOperators); nOfSequenceOperators > 0 {
+		logrus.Warnf("When using sequential query, the timings of the main query and the selection panels are set to %s", models.TimingAny)
+		psmRequest.QueryTiming = string(models.TimingAny)
+		for i := range psmRequest.Panels {
+			psmRequest.Panels[i].PanelTiming = string(models.TimingAny)
+		}
 		// this is tested in previous validation, where a 4XX error is returned.
 		// if the exception passes until here, a 5XX will be issued
-		if len(querySequences)+1 != len(panelsOnlyConcepts) {
-			err := fmt.Errorf("the number of items in query sequence info + 1 is not equal to this of panels")
+		if nOfSequenceOperators+1 != len(querySequencePanels) {
+			err := fmt.Errorf("the number of items in query sequence info + 1 is not equal to this of panels: got %d sequence operator and %d panels", nOfSequenceOperators, len(querySequencePanels))
 			return NewRequest(), err
 		}
 
-		for i, queryPanel := range panelsOnlyConcepts {
+		// same comment as before
+		if err := validateQuerySequenceOperators(querySequencePanels); err != nil {
+			return NewRequest(), err
+		}
+
+		for i, querySequencePanel := range querySequencePanels {
+			querySequenceElement := apiPanelToI2b2Panel(querySequencePanel)
+			querySequenceElement.PanelNumber = "0"
+			// for sequential query, it is necessary to override the panel timing attribute
+			logrus.Warnf("The panel timing attribute of temporal sequence element set to %s", models.TimingSameinstancenum)
+			querySequenceElement.PanelTiming = "SAMEINSTANCENUM"
+
 			subQueryStringID := queryName + "_SUBQUERY_" + strconv.Itoa(i)
-			queryPanel.PanelNumber = strconv.Itoa(0)
-			queryPanel.PanelTiming = "SAMEINSTANCENUM"
+
 			subquery := Subquery{
 				QueryType:   "EVENT",
 				QueryName:   subQueryStringID,
 				QueryID:     subQueryStringID,
 				QueryTiming: "SAMEINSTANCENUM",
-				Panels:      []Panel{queryPanel},
+				Panels:      []Panel{querySequenceElement},
 			}
 			psmRequest.Subqueries = append(psmRequest.Subqueries, subquery)
 		}
 
-		for i, querySequence := range querySequences {
+		for i, querySequenceOperator := range querySequenceOperators {
 			subqueryConstraint := SubqueryConstraint{
-				Operator: *querySequence.When,
+				Operator: *querySequenceOperator.When,
 				FirstQuery: SubqueryConstraintOperand{
 					QueryID:           psmRequest.Subqueries[i].QueryID,
-					AggregateOperator: *querySequence.WhichObservationFirst,
-					JoinColumn:        *querySequence.WhichDateFirst,
+					AggregateOperator: *querySequenceOperator.WhichObservationFirst,
+					JoinColumn:        *querySequenceOperator.WhichDateFirst,
 				},
 				SecondQuery: SubqueryConstraintOperand{
 					QueryID:           psmRequest.Subqueries[i+1].QueryID,
-					AggregateOperator: *querySequence.WhichObservationSecond,
-					JoinColumn:        *querySequence.WhichDateSecond,
+					AggregateOperator: *querySequenceOperator.WhichObservationSecond,
+					JoinColumn:        *querySequenceOperator.WhichDateSecond,
 				},
 			}
 
-			for _, span := range querySequence.Spans {
+			for _, span := range querySequenceOperator.Spans {
 				span := Span{
 					SpanValue: int(*span.Value),
 					Units:     *span.Units,
@@ -165,6 +130,17 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, que
 		PsmHeader:  psmHeader,
 		PsmRequest: psmRequest,
 	}), nil
+}
+
+func validateQuerySequenceOperators(panels []*models.Panel) error {
+
+	for _, panel := range panels {
+		if len(panel.CohortItems) > 0 {
+			return fmt.Errorf("there must be no cohort item in sequential panels, only concept items: got %v", panel.CohortItems)
+		}
+	}
+	return nil
+
 }
 
 // --- request
