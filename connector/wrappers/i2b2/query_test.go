@@ -88,6 +88,7 @@ func TestExecutePsmQuery(t *testing.T) {
 				Not: &not,
 			}},
 		nil,
+		nil,
 		models.TimingAny)
 
 	if err != nil {
@@ -118,6 +119,7 @@ func TestExecutePsmQueryWithValue(t *testing.T) {
 			},
 				Not: &not,
 			}},
+		nil,
 		nil,
 		models.TimingAny)
 
@@ -154,6 +156,7 @@ func TestExecutePsmQueryWithModifiers(t *testing.T) {
 				Not: &not,
 			}},
 		nil,
+		nil,
 		models.TimingAny)
 
 	if err != nil {
@@ -184,6 +187,7 @@ func TestExecutePsmQueryWithModifiers(t *testing.T) {
 			},
 				Not: &not,
 			}},
+		nil,
 		nil,
 		models.TimingAny)
 
@@ -223,6 +227,7 @@ func TestExecutePsmQueryWithModifierAndValue(t *testing.T) {
 				Not: &not,
 			}},
 		nil,
+		nil,
 		models.TimingAny)
 
 	if err != nil {
@@ -256,31 +261,51 @@ func TestExecutePsmQueryWithSequence(t *testing.T) {
 	whichObservationSecond := models.TimingSequenceInfoWhichObservationSecondFIRST
 
 	not := false
+	selectingPanels := []*models.Panel{
+		{ConceptItems: []*models.PanelConceptItemsItems0{
+			item1,
+		},
+			Not: &not,
+		}}
+	sequencePanels := []*models.Panel{
+		{ConceptItems: []*models.PanelConceptItemsItems0{
+			item1,
+		},
+			Not: &not,
+		},
+		{ConceptItems: []*models.PanelConceptItemsItems0{
+			item2,
+		},
+			Not: &not,
+		}}
+	timingSequenceOperators := []*models.TimingSequenceInfo{
+		{When: &when,
+			WhichDateFirst:         &whichDateFirst,
+			WhichDateSecond:        &whichDateSecond,
+			WhichObservationFirst:  &whichObservationFirst,
+			WhichObservationSecond: &whichObservationSecond},
+	}
 	patientCount, patientSetID, err := ExecutePsmQuery(
 		"testQuery",
-		[]*models.Panel{
-			{ConceptItems: []*models.PanelConceptItemsItems0{
-				item1,
-			},
-				Not: &not,
-			},
-			{ConceptItems: []*models.PanelConceptItemsItems0{
-				item2,
-			},
-				Not: &not,
-			}},
-		[]*models.TimingSequenceInfo{
-			{When: &when,
-				WhichDateFirst:         &whichDateFirst,
-				WhichDateSecond:        &whichDateSecond,
-				WhichObservationFirst:  &whichObservationFirst,
-				WhichObservationSecond: &whichObservationSecond},
-		},
+		selectingPanels,
+		timingSequenceOperators,
+		sequencePanels,
+
 		models.TimingAny)
 
-	if err != nil {
-		t.Fail()
-	}
+	assert.NoError(t, err)
+	t.Log("count:"+patientCount, "set ID:"+patientSetID)
+
+	// not a correct number of sequence panels for the number of sequence operators
+	patientCount, patientSetID, err = ExecutePsmQuery(
+		"testQuery",
+		sequencePanels,
+		timingSequenceOperators,
+		selectingPanels,
+
+		models.TimingAny)
+
+	assert.Error(t, err)
 	t.Log("count:"+patientCount, "set ID:"+patientSetID)
 }
 
