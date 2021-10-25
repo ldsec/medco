@@ -175,7 +175,7 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 	}
 	logrus.Info("Survival analysis: panels converted")
 	for _, subGroup := range subGroups {
-		logrus.Tracef("converted panel:", modelPanelsToString(subGroup))
+		logrus.Tracef("converted panel: %s", modelPanelsToString(subGroup))
 
 	}
 
