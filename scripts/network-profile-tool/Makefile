@@ -1,7 +1,10 @@
 export MEDCO_VERSION := $(shell make --no-print-directory -C ../../ medco_version)
 export GLOWING_BEAR_MEDCO_VERSION := $(shell make --no-print-directory -C ../../ gb_version)
 
-.PHONY: pull up stop down load_test_data
+.PHONY: build pull up stop down load_test_data
+build:
+	docker-compose -f docker-compose.yml -f docker-compose.tools.yml build
+
 pull:
 	docker-compose -f docker-compose.yml -f docker-compose.tools.yml pull
 

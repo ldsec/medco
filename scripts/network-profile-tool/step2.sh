@@ -1,16 +1,96 @@
 #!/bin/bash
-set -Eeuo pipefail
+set -Eeo pipefail
 shopt -s nullglob
 
-# command-line arguments
-if [[ $# -ne 2 && $# -ne 3 ]]; then
-    echo "Wrong number of arguments, usage: bash $0 <network name> <node index> [<secret0,secret1,...>]"
-    exit 1
-fi
-NETWORK_NAME="$1"
-NODE_IDX=$(printf "%03d" "$2") # padding to 3 digits
-SECRETS="${3-}"
+# ===================== input parsing ==================
+function example {
+    echo -e "example: $0 -nn <network name> -ni <node index> [-s <secret0,secret1,...>]"
+}
 
+function usage {
+    echo -e "Wrong arguments, usage: bash $0 MANDATORY [OPTIONAL]"
+}
+
+function help {
+    echo -e "MANDATORY:"
+    echo -e "  -nn,   --network_name  VAL  Network name (e.g. test-network-deployment)"
+    echo -e "  -ni,   --node_index    VAL  Node index (e.g. 0, 1, 2)"
+    echo -e "OPTIONAL:"
+    echo -e "  -s,    --secrets       VAL  Secret0,Secret1,..."
+    echo -e "  -h,    --help \n"
+    example
+}
+
+#Declare the number of mandatory args
+margs=2
+
+# Ensures that the number of passed args are at least equals to the declared number of mandatory args.
+# It also handles the special case of the -h or --help arg.
+function margs_precheck {
+	if [ "$2" ] && [ "$1" -lt $margs ]; then
+		if [ "$2" == "--help" ] || [ "$2" == "-h" ]; then
+			help
+			exit
+		else
+	    usage
+	    help
+	    exit 1
+		fi
+	fi
+}
+
+# Ensures that all the mandatory args are not empty
+function margs_check {
+	if [ $# -lt $margs ]; then
+	    usage
+	    help
+	    exit 1 # error
+	fi
+}
+
+# check if no inputs where selected
+if [ $# -lt 1 ]; then
+  usage
+  help
+  exit 1
+fi
+margs_precheck $# "$1"
+
+# default values
+NETWORK_NAME=
+NODE_IDX=
+SECRETS=
+
+# Args while-loop
+while [ "$1" != "" ];
+do
+   case $1 in
+   -nn  | --network_name )  shift
+                          NETWORK_NAME=$1
+                		      ;;
+   -ni  | --node_index )  shift
+   						            NODE_IDX=$(printf "%03d" "$1")
+			                    ;;
+	 -s  | --secrets )      shift
+     						          SECRETS=$1
+  			                  ;;
+   -h   | --help )        help
+                          exit
+                          ;;
+   *)
+                          echo "$0: illegal option $1"
+                          usage
+                          help
+						              exit 1
+                          ;;
+    esac
+    shift
+done
+
+# Check if all mandatory args have assigned values
+margs_check "$NETWORK_NAME" "$NODE_IDX"
+
+set -u
 # convenience variables
 PROFILE_NAME="network-${NETWORK_NAME}-node${NODE_IDX}"
 SCRIPT_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
