@@ -284,7 +284,7 @@ func parseSequence(sequenceString string) (sequence *models.TimingSequenceInfo, 
 	// 2. which occurence should be considered for the left operand (first, any, last)
 	// 3. what date should be considered for the left operand (startdate, enddate)
 	// 4. which occurence should be considered for the right operand (first, any, last)
-	// 5. what date should be considered fot the right operand (startdate, enddate)
+	// 5. what date should be considered for the right operand (startdate, enddate)
 
 	// the following 3 optionally and repeating items are:
 	// 6. the span operator (less, equal or less, equal, greater or  less, greater)
