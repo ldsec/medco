@@ -282,7 +282,7 @@ func parseSequence(sequenceString string) (sequence *models.TimingSequenceInfo, 
 	// the 5 mandatory items are:
 	// 1. the operator (before, before or same time, same time)
 	// 2. which occurence should be considered for the left operand (first, any, last)
-	// 3. what date should be considered fot the left operand (startdate, enddate)
+	// 3. what date should be considered for the left operand (startdate, enddate)
 	// 4. which occurence should be considered for the right operand (first, any, last)
 	// 5. what date should be considered fot the right operand (startdate, enddate)
 
