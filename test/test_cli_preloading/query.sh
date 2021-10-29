@@ -130,9 +130,9 @@ query13="clr::/E2ETEST/e2etest/3/:/E2ETEST/modifiers/3text/:/e2etest/3/::LIKE[en
 resultQuery13="$(printf -- "count\n0\n0\n0")"
 
 query14="clr::/SPHN/SPHNv2020.1/FophDiagnosis/ AND clr::/SPHN/SPHNv2020.1/DeathStatus/ AND clr::/SPHN/SPHNv2020.1/DeathStatus/"
-resultQuery14="$(printf -- "count\n228\n228\n228")"
+resultQuery14a="$(printf -- "count\n228\n228\n228")"
 
-resultQuery15="$(printf -- "count\n0\n0\n0")"
+resultQuery14b="$(printf -- "count\n0\n0\n0")"
 
 pushd deployments/dev-local-3nodes/
 echo "Testing query with test user..."
