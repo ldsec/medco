@@ -318,7 +318,7 @@ resLoop:
 
 }
 
-func validateUserIntputSequenceOfEvents(parameters *Parameters) error {
+func validateUserInputSequenceOfEvents(parameters *Parameters) error {
 	for _, subGroup := range parameters.SubGroups {
 		err := validateSequenceOfEvents(subGroup.SequenceOfEvents, len(subGroup.Panels))
 		if err != nil {
