@@ -1219,6 +1219,10 @@ func init() {
           "cohortDefinition": {
             "type": "object",
             "properties": {
+              "isPanelEmpty": {
+                "description": "This is set to true if the cohort passed as parameter is empty, this happens if the inclusion or exclusion constraints are empty",
+                "type": "boolean"
+              },
               "panels": {
                 "description": "i2b2 panels (linked by an AND)",
                 "type": "array",
@@ -2186,6 +2190,10 @@ func init() {
                 "cohortDefinition": {
                   "type": "object",
                   "properties": {
+                    "isPanelEmpty": {
+                      "description": "This is set to true if the cohort passed as parameter is empty, this happens if the inclusion or exclusion constraints are empty",
+                      "type": "boolean"
+                    },
                     "panels": {
                       "description": "i2b2 panels (linked by an AND)",
                       "type": "array",
@@ -3004,6 +3012,10 @@ func init() {
     "ExploreStatisticsParamsBodyCohortDefinition": {
       "type": "object",
       "properties": {
+        "isPanelEmpty": {
+          "description": "This is set to true if the cohort passed as parameter is empty, this happens if the inclusion or exclusion constraints are empty",
+          "type": "boolean"
+        },
         "panels": {
           "description": "i2b2 panels (linked by an AND)",
           "type": "array",
@@ -3901,6 +3913,10 @@ func init() {
           "cohortDefinition": {
             "type": "object",
             "properties": {
+              "isPanelEmpty": {
+                "description": "This is set to true if the cohort passed as parameter is empty, this happens if the inclusion or exclusion constraints are empty",
+                "type": "boolean"
+              },
               "panels": {
                 "description": "i2b2 panels (linked by an AND)",
                 "type": "array",

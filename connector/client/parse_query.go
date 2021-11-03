@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/ldsec/medco/connector/restapi/models"
-
 	"github.com/ldsec/medco/loader/identifiers"
 	"github.com/sirupsen/logrus"
 )

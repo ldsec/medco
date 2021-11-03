@@ -520,6 +520,9 @@ parameters:
                 $ref: "#/definitions/panel"
             queryTiming:
               $ref: "#/definitions/timing"
+            isPanelEmpty:
+              description: "This is set to true if the cohort passed as parameter is empty, this happens if the inclusion or exclusion constraints are empty"
+              type: "boolean"
 
 
   survivalAnalysisRequest:

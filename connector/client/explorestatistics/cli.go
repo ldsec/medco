@@ -72,8 +72,8 @@ func ExecuteClientExploreStatistics(token, username, password, cohortPanelStr, t
 	case <-signal:
 		accessToken = <-tokenChan
 		//TODO Parse multiple panels from the query
-		var queryPanel []*models.PanelItemsItems0
-		queryPanel, err = medcoclient.ParseQueryItem(query)
+		var queryPanel []*models.PanelConceptItemsItems0
+		queryPanel, _, err = medcoclient.ParseQueryItem(query)
 		if err != nil {
 			logrus.Error("while parsing start item: ", err.Error())
 			return
@@ -342,7 +342,7 @@ func inputValidation(query, cohortPanels, timing string) error {
 	return nil
 }
 
-func panelValidation(panel []*models.PanelItemsItems0) (err error) {
+func panelValidation(panel []*models.PanelConceptItemsItems0) (err error) {
 	if len(panel) == 0 {
 		err = fmt.Errorf("panels are empty. Was the start item string empry ?")
 		logrus.Error(err)

@@ -45,6 +45,9 @@ type Query struct {
 	UserID        string
 	UserPublicKey string
 	QueryName     string
+
+	//this variable is true if the
+	isPanelEmpty bool
 	// I2B2 panels defining the population upon which the analysis takes place. This is basically a constraint on the properties of the population.
 	Panels []*models.Panel
 	// query timing of the explore query defined by the panels
@@ -83,6 +86,7 @@ func NewQuery(
 		BucketSize:     params.BucketSize,
 		MinObservation: params.MinObservation,
 		Modifiers:      params.Modifiers,
+		isPanelEmpty:   params.CohortDefinition.IsPanelEmpty,
 	}
 
 	res.Response.GlobalTimers = make(map[string]time.Duration)
@@ -93,6 +97,11 @@ func NewQuery(
 func outlierRemoval(observations []QueryResult) (outputObs []QueryResult, err error) {
 	outputObs = observations
 	return
+}
+
+type CohortInformation struct {
+	PatientIDs   []int64 // a list of patient IDs
+	IsEmptyPanel bool    // True iff the client set no constraint in the panel definition. The population selected would in this case consist of all patients.
 }
 
 // Execute runs the explore statistics query.
@@ -129,12 +138,16 @@ func (q *Query) Execute(principal *models.User) (err error) {
 	signal := make(chan struct{})
 
 	//this function is an abstraction for the processing of retreving observations and then processing them for a concept or modifier (depends on RetrieveObservations)
-	processMedicalConcept := func(index int, codeNamePair codeAndName, RetrieveObservations func(string, []int64, float64) (results []QueryResult, err error)) {
+	processMedicalConcept := func(index int, codeNamePair codeAndName, RetrieveObservations func(string, CohortInformation, float64) (results []QueryResult, err error)) {
 		conceptTimer := time.Now()
 
 		defer waitGroup.Done()
 
-		conceptObservations, err := RetrieveObservations(codeNamePair.Code, cohort, q.MinObservation)
+		cohortInfo := CohortInformation{
+			PatientIDs:   cohort,
+			IsEmptyPanel: q.isPanelEmpty,
+		}
+		conceptObservations, err := RetrieveObservations(codeNamePair.Code, cohortInfo, q.MinObservation)
 		if err != nil {
 			errChan <- err
 			return
@@ -454,7 +467,12 @@ func (q *Query) prepareArguments(principal *models.User) (
 		return
 	}
 
-	patientIDs, _, _, _, _, deferredErrorStatusUpdate, err := exploreQuery.FetchLocalPatients(timer) //before we used querytoolsserver.GetPatientList
+	var patientIDs []string = make([]string, 0)
+	var deferredErrorStatusUpdate func() = func() {}
+
+	if !q.isPanelEmpty {
+		patientIDs, _, _, _, _, deferredErrorStatusUpdate, err = exploreQuery.FetchLocalPatients(timer) //before we used querytoolsserver.GetPatientList
+	}
 
 	defer deferredErrorStatusUpdate()
 	if err != nil {
@@ -462,8 +480,8 @@ func (q *Query) prepareArguments(principal *models.User) (
 		return
 	}
 
-	if len(patientIDs) == 0 {
-		err = fmt.Errorf("zero patients in the cohort")
+	if len(patientIDs) == 0 && !q.isPanelEmpty {
+		err = fmt.Errorf("zero patients in the cohort for non empty constraint")
 		return
 	}
 

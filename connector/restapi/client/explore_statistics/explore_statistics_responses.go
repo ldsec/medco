@@ -646,6 +646,9 @@ swagger:model ExploreStatisticsParamsBodyCohortDefinition
 */
 type ExploreStatisticsParamsBodyCohortDefinition struct {
 
+	// This is set to true if the cohort passed as parameter is empty, this happens if the inclusion or exclusion constraints are empty
+	IsPanelEmpty bool `json:"isPanelEmpty,omitempty"`
+
 	// i2b2 panels (linked by an AND)
 	Panels []*models.Panel `json:"panels"`
 

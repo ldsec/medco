@@ -1,6 +1,7 @@
 package referenceintervalserver
 
 import (
+	"database/sql"
 	"fmt"
 	"strconv"
 
@@ -16,22 +17,35 @@ type QueryResult struct {
 }
 
 // RetrieveObservationsForConcept returns the numerical values that correspond to the concept passed as argument for the specified cohort.
-func RetrieveObservationsForConcept(code string, patients []int64, minObservation float64) (queryResults []QueryResult, err error) {
-	logrus.Info("About to execute explore stats SQL query ", sqlModifier, ", concept:", code, ", patients: ", patients)
-	return retrieveObservations(sqlConcept, code, patients, minObservation)
+func RetrieveObservationsForConcept(code string, cohortInformation CohortInformation, minObservation float64) (queryResults []QueryResult, err error) {
+	logrus.Info("About to execute explore stats SQL query ", sqlModifier, ", concept:", code, ", patients: ", cohortInformation.PatientIDs)
+	return retrieveObservations(sqlConcept, code, cohortInformation, minObservation)
 }
 
 //RetrieveObservationsForModifier returns the numerical values that correspond to the modifier passed as argument for the specified cohort.
-func RetrieveObservationsForModifier(code string, patients []int64, minObservation float64) (queryResults []QueryResult, err error) {
-	logrus.Info("About to execute explore stats SQL query ", sqlModifier, ", modifier:", code, ", patients: ", patients)
-	return retrieveObservations(sqlModifier, code, patients, minObservation)
+func RetrieveObservationsForModifier(code string, cohortInformation CohortInformation, minObservation float64) (queryResults []QueryResult, err error) {
+	logrus.Info("About to execute explore stats SQL query ", sqlModifier, ", modifier:", code, ", patients: ", cohortInformation.PatientIDs)
+	return retrieveObservations(sqlModifier, code, cohortInformation, minObservation)
 }
 
 //retrieveObservations returns the numerical values that correspond to the concept or modifier whose code is passed as argument for the specified cohort.
-func retrieveObservations(sqlQuery, code string, patients []int64, minObservation float64) (queryResults []QueryResult, err error) {
+func retrieveObservations(sqlQuery, code string, cohortInformation CohortInformation, minObservation float64) (queryResults []QueryResult, err error) {
+	patients := cohortInformation.PatientIDs
 	strPatientList := utilserver.ConvertIntListToString(patients)
 
-	rows, err := utilserver.I2B2DBConnection.Query(sqlQuery, code, minObservation, strPatientList)
+	usePatientList := !cohortInformation.IsEmptyPanel
+
+	var rows *sql.Rows
+	if usePatientList {
+		// if some constraints on the cohort have been defined we use the patient list
+		completeSQLQuery := sqlQuery + " " + sqlCohortFilter
+		logrus.Debugf("Patient list for query %s", strPatientList)
+		rows, err = utilserver.I2B2DBConnection.Query(completeSQLQuery, code, minObservation, strPatientList)
+	} else {
+		//otherwise the cohort is the whole population in the database for which the analyte (concept or modifier) is defined
+		rows, err = utilserver.I2B2DBConnection.Query(sqlQuery, code, minObservation)
+	}
+
 	if err != nil {
 		err = fmt.Errorf("while execution SQL query: %s", err.Error())
 		return
@@ -92,5 +106,6 @@ const sqlModifier string = sqlStart + ` modifier_cd = $1 ` + sqlEnd
 const sqlConcept string = sqlStart + ` concept_cd = $1 ` + sqlEnd
 
 const sqlEnd = ` AND valtype_cd = 'N' AND tval_char = 'E' AND nval_num is not null AND units_cd is not null AND units_cd != '@'
-AND nval_num >= $2
-AND patient_num = ANY($3::integer[]) `
+AND nval_num >= $2 `
+
+const sqlCohortFilter = ` AND patient_num = ANY($3::integer[]) `
