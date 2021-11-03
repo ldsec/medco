@@ -206,8 +206,8 @@ func (q *Query) Execute(principal *models.User) (err error) {
 
 }
 
-//@param code is the code of the modifier or concept whose observations are being processed
-func (q *Query) processObservations(bucketSize float64, queryResults []QueryResult, timer time.Time, code string) (statsResults *StatsResult, err error) {
+func (q *Query) locallyProcessObservations(bucketSize float64, queryResults []QueryResult,
+	timer time.Time, code string, encryptionMethod func(int64) (string, error)) (encCounts []string, statsResults *StatsResult, err error) {
 
 	//get the minimum and maximum value of the concepts
 	var maxResult QueryResult = queryResults[0]
@@ -312,7 +312,7 @@ func (q *Query) processObservations(bucketSize float64, queryResults []QueryResu
 			logrus.Debugf("Count for bucket [ %f , %f] is %d", interval.LowerBound, interval.HigherBound, count)
 
 			//encrypt the interval count of observations with the collective authority key of medco nodes.
-			encCount, err := unlynx.EncryptWithCothorityKey(int64(count))
+			encCount, err := encryptionMethod(int64(count))
 
 			logrus.Debugf("Count %d,  encrypted %s ", count, encCount)
 			timers.AddTimers(fmt.Sprintf("medco-connector-encrypt-interval-count-group%d", i), timer, nil)
@@ -345,7 +345,7 @@ func (q *Query) processObservations(bucketSize float64, queryResults []QueryResu
 	}
 
 	logrus.Debugf("Before receiving each interval count for the concept/modifier with code %s", code)
-	encCounts := make([]string, 0, len(channels))
+	encCounts = make([]string, 0, len(channels))
 	for i, channel := range channels {
 		chanResult := <-channel
 
@@ -353,6 +353,17 @@ func (q *Query) processObservations(bucketSize float64, queryResults []QueryResu
 
 		encCounts = append(encCounts, *chanResult.encCount)
 		statsResults.Timers.AddTimers("", timer, chanResult.Timers)
+	}
+
+	return
+}
+
+//@param code is the code of the modifier or concept whose observations are being processed
+func (q *Query) processObservations(bucketSize float64, queryResults []QueryResult, timer time.Time, code string) (statsResults *StatsResult, err error) {
+	var encCounts []string
+	encCounts, statsResults, err = q.locallyProcessObservations(bucketSize, queryResults, timer, code, unlynx.EncryptWithCothorityKey)
+	if err != nil {
+		return
 	}
 
 	// aggregate and key switch locally encrypted counts of each bucket
