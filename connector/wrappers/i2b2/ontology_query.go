@@ -27,15 +27,18 @@ func GetOntologyElements(path string, limit int64) (results []*models.ExploreSea
 		return
 	}
 
-	row, err := utilserver.I2B2DBConnection.Query("SELECT * FROM medco_ont.get_ontology_elements($1,$2)", path, limit)
+	row, err := utilserver.I2B2DBConnection.Query("SELECT * FROM medco_ont.get_ontology_elements($1,$2) ORDER BY id, fullpath DESC", path, limit)
 	if err != nil {
 		return nil, fmt.Errorf("while calling i2b2 database for retrieving ontology elements: %v", err)
 	}
 
-	var fullName, name, visualAttributes, baseCode, metaDataXML, comment, appliedPath sql.NullString
+	var fullName, name, visualAttributes, baseCode, metaDataXML, comment, appliedPath, fullPath sql.NullString
+	var id int
+	currentID := 0
+	var currentElement *models.ExploreSearchResultElement
 
 	for row.Next() {
-		err = row.Scan(&fullName, &name, &visualAttributes, &baseCode, &metaDataXML, &comment, &appliedPath)
+		err = row.Scan(&fullName, &name, &visualAttributes, &baseCode, &metaDataXML, &comment, &appliedPath, &id, &fullPath)
 		if err != nil {
 			return nil, fmt.Errorf("while reading database record stream for retrieving ontology elements: %v", err)
 		}
@@ -69,7 +72,16 @@ func GetOntologyElements(path string, limit int64) (results []*models.ExploreSea
 			ontologyElement.AppliedPath = convertPathFromI2b2Format(ontologyElement.AppliedPath)
 		}
 
-		results = append(results, ontologyElement)
+		// a found element and its ancestors have the same id
+		// the result of the query is ordered, i.e. element at position i have its father at position i+1
+		if id != currentID {
+			currentID = id
+			results = append(results, ontologyElement)
+		} else {
+			currentElement.Parent = ontologyElement
+		}
+
+		currentElement = ontologyElement
 	}
 
 	return

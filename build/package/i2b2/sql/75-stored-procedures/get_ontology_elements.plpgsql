@@ -8,7 +8,9 @@ CREATE OR REPLACE FUNCTION medco_ont.get_ontology_elements(search_string varchar
         c_basecode varchar,
         c_metadataxml text,
         c_comment text,
-        m_applied_path varchar)
+        m_applied_path varchar,
+        id int,
+        fullpath text)
     LANGUAGE 'plpgsql'
     VOLATILE
     PARALLEL SAFE
@@ -16,6 +18,11 @@ AS $BODY$
 DECLARE
       rec record;
       strSQL text;
+	  tableCode text;
+	  tableName text;
+	  elements text[];
+	  parentPath text;
+	  i int;
 BEGIN
 
 	strSQL := '';
@@ -34,32 +41,95 @@ BEGIN
     -- execute the statement
 	EXECUTE strSQL USING '%' || lower(search_string) || '%', lim;
 
+	-- add id column, which will be used to group together the found element and its ancestors
+	ALTER TABLE ontology_elements ADD COLUMN id SERIAL;
+
 	-- retrieve the table_cd(s) given the c_fullname(s) found in the previous step
 	-- and prepend them to the c_fullname(s) in the temporary table "ontology_elements"
 	FOR rec IN SELECT ontology_elements.c_fullname, ontology_elements.m_applied_path FROM ontology_elements
 	LOOP
 	    IF rec.m_applied_path = '@' THEN -- concept
-            strSQL := (SELECT c_table_cd
+            tableCode := (SELECT c_table_cd
             FROM medco_ont.table_access AS ta
-            WHERE POSITION(ta.c_fullname IN rec.c_fullname) > 0
+            WHERE POSITION(ta.c_fullname IN rec.c_fullname) = 1
             ORDER BY LENGTH(ta.c_fullname) DESC
             LIMIT 1);
         ELSE -- modifier
-            strSQL := (SELECT c_table_cd
+            tableCode := (SELECT c_table_cd
             FROM medco_ont.table_access AS ta
-            WHERE POSITION(ta.c_fullname IN rec.m_applied_path) > 0
+            WHERE POSITION(ta.c_fullname IN rec.m_applied_path) = 1
             ORDER BY LENGTH(ta.c_fullname) DESC
             LIMIT 1);
         END IF;
 
         UPDATE ontology_elements
-        SET c_fullname = '\\' || strSQL || ontology_elements.c_fullname
+        SET c_fullname = '\\' || tableCode || ontology_elements.c_fullname
         WHERE ontology_elements.c_fullname = rec.c_fullname;
 	END LOOP;
 
-	-- return the temporary table "ontology_elements" and drop it
-	RETURN QUERY SELECT * FROM ontology_elements;
+	-- add to the table "ontology_elements" the parents of the already present concepts
+	FOR rec IN SELECT ontology_elements.c_fullname, ontology_elements.m_applied_path, ontology_elements.id FROM ontology_elements
+	LOOP
+		elements := regexp_split_to_array(rec.c_fullname, '\\');
+		tableCode := elements[3];
+		tableName := (SELECT lower(c_table_name)
+					FROM medco_ont.table_access
+					WHERE c_table_cd = tableCode);
+
+		parentPath := E'\\';
+		FOR i IN 4 .. array_length(elements, 1) - 2
+   		LOOP
+			parentPath := parentPath || elements[i] || E'\\';
+
+			-- retrieve information about the parent
+			EXECUTE FORMAT(
+			'INSERT INTO ontology_elements(c_fullname, c_name, c_visualattributes, c_basecode, c_metadataxml, c_comment, m_applied_path, id)
+			SELECT c_fullname, c_name, c_visualattributes, c_basecode, c_metadataxml, c_comment, m_applied_path, %L as id
+			FROM medco_ont.%I
+			WHERE c_fullname = $1', rec.id, tableName)
+			USING parentPath;
+
+			-- add the table code
+			UPDATE ontology_elements
+        	SET c_fullname = '\\' || tableCode || ontology_elements.c_fullname
+        	WHERE ontology_elements.c_fullname = parentPath;
+  		 END LOOP;
+
+		 -- if the current element is a modifier, search also for the modifier's concept ancestors
+		 -- we use the applied path as parent
+  		 IF rec.m_applied_path != '@' THEN
+  		    elements := regexp_split_to_array(rec.m_applied_path, '\\');
+
+                parentPath := E'\\';
+                FOR i IN 2 .. array_length(elements, 1) - 1
+                LOOP
+                    parentPath := parentPath || elements[i] || E'\\';
+
+                    -- retrieve information about the parent
+                    EXECUTE FORMAT(
+                    'INSERT INTO ontology_elements(c_fullname, c_name, c_visualattributes, c_basecode, c_metadataxml, c_comment, m_applied_path, id)
+                    SELECT c_fullname, c_name, c_visualattributes, c_basecode, c_metadataxml, c_comment, m_applied_path, %L as id
+                    FROM medco_ont.%I
+                    WHERE c_fullname = $1', rec.id, tableName)
+                    USING parentPath;
+
+                    -- add the table code
+                    UPDATE ontology_elements
+                    SET c_fullname = '\\' || tableCode || ontology_elements.c_fullname
+                    WHERE ontology_elements.c_fullname = parentPath;
+                 END LOOP;
+  		 END IF;
+	END LOOP;
+
+	-- return the temporary table "ontology_elements" and drop it.
+	-- the additional returned fullpath column contains the c_fullname column for the concepts
+	-- and the m_applied_path concatenated (in a smart way) to the c_fullname column for the modifiers
+	RETURN QUERY SELECT *,
+	(SELECT (regexp_matches(ol.c_fullname, '\B\B[^\B]+\B'))[1]) ||
+	(SELECT (regexp_replace(TRIM (LEADING E'\\' FROM TRIM(LEADING '@' FROM TRIM(TRAILING '%' FROM ol.m_applied_path))) ||
+	ol.c_fullname, '\B\B[^\B]+\B', '')))
+	FROM ontology_elements AS ol;
 	DROP TABLE ontology_elements;
 
 END;
-$BODY$;
+$BODY$
