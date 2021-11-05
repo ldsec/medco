@@ -44,6 +44,9 @@ type ExploreSearchResultElement struct {
 	// name
 	Name string `json:"name,omitempty"`
 
+	// parent
+	Parent *ExploreSearchResultElement `json:"parent,omitempty"`
+
 	// path
 	Path string `json:"path,omitempty"`
 
@@ -65,6 +68,10 @@ func (m *ExploreSearchResultElement) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateMetadata(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateParent(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -115,6 +122,24 @@ func (m *ExploreSearchResultElement) validateMetadata(formats strfmt.Registry) e
 		if err := m.Metadata.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("metadata")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *ExploreSearchResultElement) validateParent(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Parent) { // not required
+		return nil
+	}
+
+	if m.Parent != nil {
+		if err := m.Parent.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("parent")
 			}
 			return err
 		}

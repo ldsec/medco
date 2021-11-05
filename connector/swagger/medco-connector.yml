@@ -839,6 +839,8 @@ definitions:
               format: "int64"
       metadata:
         $ref: "#/definitions/metadataxml"
+      parent:
+        $ref: "#/definitions/exploreSearchResultElement"
 
   metadataxml:
     type: "object"

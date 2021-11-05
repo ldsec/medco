@@ -809,6 +809,9 @@ func init() {
         "name": {
           "type": "string"
         },
+        "parent": {
+          "$ref": "#/definitions/exploreSearchResultElement"
+        },
         "path": {
           "type": "string"
         },
@@ -3365,6 +3368,9 @@ func init() {
         },
         "name": {
           "type": "string"
+        },
+        "parent": {
+          "$ref": "#/definitions/exploreSearchResultElement"
         },
         "path": {
           "type": "string"

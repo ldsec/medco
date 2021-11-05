@@ -28,51 +28,235 @@ resultSearch1="  <ExploreSearchResultElement>
       </MedcoEncryption>
       <Metadata></Metadata>
       <Name>Foph Diagnosis</Name>
+      <Parent>
+          <AppliedPath>@</AppliedPath>
+          <Code></Code>
+          <Comment></Comment>
+          <DisplayName>SPHN ontology</DisplayName>
+          <Leaf>false</Leaf>
+          <MedcoEncryption>
+              <Encrypted>false</Encrypted>
+          </MedcoEncryption>
+          <Metadata></Metadata>
+          <Name>SPHN ontology</Name>
+          <Path>/SPHN/SPHNv2020.1/</Path>
+          <Type>concept_container</Type>
+      </Parent>
       <Path>/SPHN/SPHNv2020.1/FophDiagnosis/</Path>
       <Type>concept</Type>
   </ExploreSearchResultElement>"
 
-search2="death"
+search2="10"
 resultSearch2="  <ExploreSearchResultElement>
-      <AppliedPath>/SPHNv2020.1/DeathStatus/</AppliedPath>
-      <Code>126</Code>
+      <AppliedPath>/SPHNv2020.1/FophDiagnosis/</AppliedPath>
+      <Code>101:ICD10</Code>
       <Comment></Comment>
-      <DisplayName>Value of the death status</DisplayName>
+      <DisplayName>ICD10</DisplayName>
       <Leaf>false</Leaf>
       <MedcoEncryption>
           <Encrypted>false</Encrypted>
       </MedcoEncryption>
       <Metadata></Metadata>
-      <Name>Value of the death status</Name>
-      <Path>/SPHN/DeathStatus-status/</Path>
+      <Name>ICD10</Name>
+      <Parent>
+          <AppliedPath>/SPHNv2020.1/FophDiagnosis/</AppliedPath>
+          <Code>101</Code>
+          <Comment></Comment>
+          <DisplayName>Diagnosis value</DisplayName>
+          <Leaf>false</Leaf>
+          <MedcoEncryption>
+              <Encrypted>false</Encrypted>
+          </MedcoEncryption>
+          <Metadata></Metadata>
+          <Name>Diagnosis value</Name>
+          <Parent>
+              <AppliedPath>@</AppliedPath>
+              <Code>A168</Code>
+              <Comment></Comment>
+              <DisplayName>Foph Diagnosis</DisplayName>
+              <Leaf>true</Leaf>
+              <MedcoEncryption>
+                  <Encrypted>false</Encrypted>
+              </MedcoEncryption>
+              <Metadata></Metadata>
+              <Name>Foph Diagnosis</Name>
+              <Parent>
+                  <AppliedPath>@</AppliedPath>
+                  <Code></Code>
+                  <Comment></Comment>
+                  <DisplayName>SPHN ontology</DisplayName>
+                  <Leaf>false</Leaf>
+                  <MedcoEncryption>
+                      <Encrypted>false</Encrypted>
+                  </MedcoEncryption>
+                  <Metadata></Metadata>
+                  <Name>SPHN ontology</Name>
+                  <Path>/SPHN/SPHNv2020.1/</Path>
+                  <Type>concept_container</Type>
+              </Parent>
+              <Path>/SPHN/SPHNv2020.1/FophDiagnosis/</Path>
+              <Type>concept</Type>
+          </Parent>
+          <Path>/SPHN/FophDiagnosis-code/</Path>
+          <Type>modifier_folder</Type>
+      </Parent>
+      <Path>/SPHN/FophDiagnosis-code/ICD10/</Path>
       <Type>modifier_folder</Type>
-  </ExploreSearchResultElement>
-  <ExploreSearchResultElement>
-      <AppliedPath>/SPHNv2020.1/DeathStatus/</AppliedPath>
-      <Code>126:1</Code>
+  </ExploreSearchResultElement>"
+
+search3="gender"
+resultSearch3="  <ExploreSearchResultElement>
+      <AppliedPath>@</AppliedPath>
+      <Code></Code>
       <Comment></Comment>
-      <DisplayName>Death</DisplayName>
-      <Leaf>true</Leaf>
+      <DisplayName>Gender</DisplayName>
+      <Leaf>false</Leaf>
       <MedcoEncryption>
           <Encrypted>false</Encrypted>
       </MedcoEncryption>
       <Metadata></Metadata>
-      <Name>Death</Name>
-      <Path>/SPHN/DeathStatus-status/death/</Path>
-      <Type>modifier</Type>
+      <Name>Gender</Name>
+      <Parent>
+          <AppliedPath>@</AppliedPath>
+          <Code></Code>
+          <Comment></Comment>
+          <DisplayName>I2B2 demographics</DisplayName>
+          <Leaf>false</Leaf>
+          <MedcoEncryption>
+              <Encrypted>false</Encrypted>
+          </MedcoEncryption>
+          <Metadata></Metadata>
+          <Name>I2B2 demographics</Name>
+          <Parent>
+              <AppliedPath>@</AppliedPath>
+              <Code></Code>
+              <Comment></Comment>
+              <DisplayName>I2B2 ontology</DisplayName>
+              <Leaf>false</Leaf>
+              <MedcoEncryption>
+                  <Encrypted>false</Encrypted>
+              </MedcoEncryption>
+              <Metadata></Metadata>
+              <Name>I2B2 ontology</Name>
+              <Path>/I2B2/I2B2/</Path>
+              <Type>concept_container</Type>
+          </Parent>
+          <Path>/I2B2/I2B2/Demographics/</Path>
+          <Type>concept_folder</Type>
+      </Parent>
+      <Path>/I2B2/I2B2/Demographics/Gender/</Path>
+      <Type>concept_folder</Type>
   </ExploreSearchResultElement>
   <ExploreSearchResultElement>
       <AppliedPath>@</AppliedPath>
-      <Code>A125</Code>
+      <Code>DEM|SEX:f</Code>
       <Comment></Comment>
-      <DisplayName>Death Status</DisplayName>
+      <DisplayName>Female gender</DisplayName>
       <Leaf>true</Leaf>
       <MedcoEncryption>
           <Encrypted>false</Encrypted>
       </MedcoEncryption>
       <Metadata></Metadata>
-      <Name>Death Status</Name>
-      <Path>/SPHN/SPHNv2020.1/DeathStatus/</Path>
+      <Name>Female gender</Name>
+      <Parent>
+          <AppliedPath>@</AppliedPath>
+          <Code></Code>
+          <Comment></Comment>
+          <DisplayName>Gender</DisplayName>
+          <Leaf>false</Leaf>
+          <MedcoEncryption>
+              <Encrypted>false</Encrypted>
+          </MedcoEncryption>
+          <Metadata></Metadata>
+          <Name>Gender</Name>
+          <Parent>
+              <AppliedPath>@</AppliedPath>
+              <Code></Code>
+              <Comment></Comment>
+              <DisplayName>I2B2 demographics</DisplayName>
+              <Leaf>false</Leaf>
+              <MedcoEncryption>
+                  <Encrypted>false</Encrypted>
+              </MedcoEncryption>
+              <Metadata></Metadata>
+              <Name>I2B2 demographics</Name>
+              <Parent>
+                  <AppliedPath>@</AppliedPath>
+                  <Code></Code>
+                  <Comment></Comment>
+                  <DisplayName>I2B2 ontology</DisplayName>
+                  <Leaf>false</Leaf>
+                  <MedcoEncryption>
+                      <Encrypted>false</Encrypted>
+                  </MedcoEncryption>
+                  <Metadata></Metadata>
+                  <Name>I2B2 ontology</Name>
+                  <Path>/I2B2/I2B2/</Path>
+                  <Type>concept_container</Type>
+              </Parent>
+              <Path>/I2B2/I2B2/Demographics/</Path>
+              <Type>concept_folder</Type>
+          </Parent>
+          <Path>/I2B2/I2B2/Demographics/Gender/</Path>
+          <Type>concept_folder</Type>
+      </Parent>
+      <Path>/I2B2/I2B2/Demographics/Gender/Female/</Path>
+      <Type>concept</Type>
+  </ExploreSearchResultElement>
+  <ExploreSearchResultElement>
+      <AppliedPath>@</AppliedPath>
+      <Code>DEM|SEX:m</Code>
+      <Comment></Comment>
+      <DisplayName>Male gender</DisplayName>
+      <Leaf>true</Leaf>
+      <MedcoEncryption>
+          <Encrypted>false</Encrypted>
+      </MedcoEncryption>
+      <Metadata></Metadata>
+      <Name>Male gender</Name>
+      <Parent>
+          <AppliedPath>@</AppliedPath>
+          <Code></Code>
+          <Comment></Comment>
+          <DisplayName>Gender</DisplayName>
+          <Leaf>false</Leaf>
+          <MedcoEncryption>
+              <Encrypted>false</Encrypted>
+          </MedcoEncryption>
+          <Metadata></Metadata>
+          <Name>Gender</Name>
+          <Parent>
+              <AppliedPath>@</AppliedPath>
+              <Code></Code>
+              <Comment></Comment>
+              <DisplayName>I2B2 demographics</DisplayName>
+              <Leaf>false</Leaf>
+              <MedcoEncryption>
+                  <Encrypted>false</Encrypted>
+              </MedcoEncryption>
+              <Metadata></Metadata>
+              <Name>I2B2 demographics</Name>
+              <Parent>
+                  <AppliedPath>@</AppliedPath>
+                  <Code></Code>
+                  <Comment></Comment>
+                  <DisplayName>I2B2 ontology</DisplayName>
+                  <Leaf>false</Leaf>
+                  <MedcoEncryption>
+                      <Encrypted>false</Encrypted>
+                  </MedcoEncryption>
+                  <Metadata></Metadata>
+                  <Name>I2B2 ontology</Name>
+                  <Path>/I2B2/I2B2/</Path>
+                  <Type>concept_container</Type>
+              </Parent>
+              <Path>/I2B2/I2B2/Demographics/</Path>
+              <Type>concept_folder</Type>
+          </Parent>
+          <Path>/I2B2/I2B2/Demographics/Gender/</Path>
+          <Type>concept_folder</Type>
+      </Parent>
+      <Path>/I2B2/I2B2/Demographics/Gender/Male/</Path>
       <Type>concept</Type>
   </ExploreSearchResultElement>"
 
@@ -160,6 +344,7 @@ echo "Testing search..."
 
 test "search" "${search1}" "${resultSearch1}"
 test "search" "${search2}" "${resultSearch2}"
+test "search" "${search3}" "${resultSearch3}"
 
 echo "Testing concept-children..."
 
