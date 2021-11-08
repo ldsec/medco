@@ -36,7 +36,7 @@ func TestNewParametersFromFile(t *testing.T) {
 }
 
 func TestValidate(t *testing.T) {
-	err := validateUserIntputSequenceOfEvents(produceParameters())
+	err := validateUserInputSequenceOfEvents(produceParameters())
 	assert.NoError(t, err)
 
 	modifiedParameters := produceParameters()
@@ -44,7 +44,7 @@ func TestValidate(t *testing.T) {
 		modifiedParameters.SubGroups[0].SequenceOfEvents,
 		modifiedParameters.SubGroups[0].SequenceOfEvents[0],
 	)
-	err = validateUserIntputSequenceOfEvents(modifiedParameters)
+	err = validateUserInputSequenceOfEvents(modifiedParameters)
 	assert.Error(t, err)
 }
 

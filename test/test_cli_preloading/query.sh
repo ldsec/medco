@@ -180,8 +180,8 @@ test4 "samevisit" "samevisit" "any" "samevisit" "${timingResultNonZeroExpected}"
 
 echo "Testing query with event sequences features..."
 
-test5 "${query14}" "before,first,startdate,first,startdate:sametime,first,startdate,first,startdate" "${resultQuery14}"
-test5 "${query14}" "sametime,first,startdate,first,startdate,moreorequal,23,days,more,12,days,less,30,hours:sametime,first,startdate,first,startdate,moreorequal,20,days,more,11,days,more,23,hours" "${resultQuery15}"
+test5 "${query14}" "before,first,startdate,first,startdate:sametime,first,startdate,first,startdate" "${resultQuery14a}"
+test5 "${query14}" "sametime,first,startdate,first,startdate,moreorequal,23,days,more,12,days,less,30,hours:sametime,first,startdate,first,startdate,moreorequal,20,days,more,11,days,more,23,hours" "${resultQuery15b}"
 
 popd
 exit 0
