@@ -78,7 +78,7 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 				errChan <- err
 				return
 			}
-			err = validateUserIntputSequenceOfEvents(parameters)
+			err = validateUserInputSequenceOfEvents(parameters)
 			if err != nil {
 				errChan <- err
 				return
