@@ -186,7 +186,8 @@ func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *m
 			logrus.Warnf("skipping query definition unmarshalling with string %s: %s", queryDefinitionString, err.Error())
 		} else {
 			queryDefinition = &medco_node.GetCohortsOKBodyItems0QueryDefinition{
-				Panels:              queryModel.Panels,
+				SelectionPanels:     queryModel.SelectionPanels,
+				SequentialPanels:    queryModel.SequentialPanels,
 				QueryTiming:         queryModel.QueryTiming,
 				QueryTimingSequence: queryModel.QueryTimingSequence,
 			}

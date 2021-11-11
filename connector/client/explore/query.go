@@ -31,27 +31,33 @@ type ExploreQuery struct {
 	// userPrivateKey is the user private key
 	userPrivateKey string
 
-	// panels contains the panels of the query
-	panels []*models.Panel
+	// selection panels contains the panels of the query, separated by AND
+	selectionPanels []*models.Panel
 
+	// selection panels contains the panels of the query, separated by a sequence operator
+	sequentialPanels []*models.Panel
+
+	// sequences contains the list of sequence operators
 	sequences []*models.TimingSequenceInfo
 
+	// queryTiming informs of the sub-type of explore query: time-independent, simultaneous or composed with sequence operators
 	queryTiming models.Timing
 }
 
 // NewExploreQuery creates a new MedCo client query
-func NewExploreQuery(authToken string, panels []*models.Panel, timing models.Timing, sequences []*models.TimingSequenceInfo, disableTLSCheck bool) (q *ExploreQuery, err error) {
+func NewExploreQuery(authToken string, selectionPanels, sequentialPanels []*models.Panel, timing models.Timing, sequences []*models.TimingSequenceInfo, disableTLSCheck bool) (q *ExploreQuery, err error) {
 
 	q = &ExploreQuery{
-		authToken:   authToken,
-		panels:      panels,
-		queryTiming: timing,
-		sequences:   sequences,
+		authToken:        authToken,
+		selectionPanels:  selectionPanels,
+		sequentialPanels: sequentialPanels,
+		queryTiming:      timing,
+		sequences:        sequences,
 	}
 
 	// check that, if sequences are defined, their number is correct
-	if sequences != nil && len(sequences) > 0 && len(panels) != len(sequences)+1 {
-		err = fmt.Errorf("the number of sequence information groups + 1 is not equal to the number of panels: got %d sequence information groups and %d panels", len(sequences), len(panels))
+	if len(sequences) > 0 && len(sequentialPanels) != len(sequences)+1 {
+		err = fmt.Errorf("the number of sequence information groups + 1 is not equal to the number of panels: got %d sequence information groups and %d panels", len(sequences), len(sequentialPanels))
 		logrus.Error(err)
 		return
 	}
@@ -182,7 +188,8 @@ func (clientQuery *ExploreQuery) generateModel() (queryModel *models.ExploreQuer
 	// query model
 	queryModel = &models.ExploreQuery{
 		UserPublicKey:       clientQuery.userPublicKey,
-		Panels:              clientQuery.panels,
+		SelectionPanels:     clientQuery.selectionPanels,
+		SequentialPanels:    clientQuery.sequentialPanels,
 		QueryTiming:         clientQuery.queryTiming,
 		QueryTimingSequence: clientQuery.sequences,
 	}

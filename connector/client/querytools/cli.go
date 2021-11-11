@@ -49,12 +49,18 @@ func ExecuteGetCohorts(token, username, password string, disableTLSCheck bool, r
 		return err
 	}
 	logrus.Debug("Writing headers")
-	resultCSV.Write([]string{"node_index", "cohort_name", "cohort_id", "query_id", "creation_date", "update_date", "query_timing", "query_timing_sequence", "panels"})
+	resultCSV.Write([]string{"node_index", "cohort_name", "cohort_id", "query_id", "creation_date", "update_date", "query_timing", "query_timing_sequence", "selection_panels", "sequential_panels"})
 
 	for nodeIndex, nodeResult := range cohorts {
 		for _, cohortInfo := range nodeResult {
 			logrus.Debugf("Writing result %d", nodeIndex)
-			panelJSONs, err := marshalPanels(cohortInfo.QueryDefinition.Panels)
+			selectionPanelJSONs, err := marshalPanels(cohortInfo.QueryDefinition.SelectionPanels)
+			if err != nil {
+				err = fmt.Errorf("cohorts request writing results: %s", err.Error())
+				logrus.Error(err)
+				return err
+			}
+			sequentialPanelJSONs, err := marshalPanels(cohortInfo.QueryDefinition.SequentialPanels)
 			if err != nil {
 				err = fmt.Errorf("cohorts request writing results: %s", err.Error())
 				logrus.Error(err)
@@ -67,7 +73,8 @@ func ExecuteGetCohorts(token, username, password string, disableTLSCheck bool, r
 				return err
 			}
 			// removing the quotes from the marshalling process eases parsing of the produced file
-			panelJSONs = strings.Replace(panelJSONs, `"`, "", -1)
+			selectionPanelJSONs = strings.Replace(selectionPanelJSONs, `"`, "", -1)
+			sequentialPanelJSONs = strings.Replace(sequentialPanelJSONs, `"`, "", -1)
 			queryTimingSequenceJSONs = strings.Replace(queryTimingSequenceJSONs, `"`, "", -1)
 			err = resultCSV.Write([]string{
 				strconv.Itoa(nodeIndex),
@@ -78,7 +85,8 @@ func ExecuteGetCohorts(token, username, password string, disableTLSCheck bool, r
 				cohortInfo.UpdateDate.Format(time.RFC3339),
 				string(cohortInfo.QueryDefinition.QueryTiming),
 				queryTimingSequenceJSONs,
-				panelJSONs,
+				selectionPanelJSONs,
+				sequentialPanelJSONs,
 			})
 			if err != nil {
 				err = fmt.Errorf("cohorts request writing results: %s", err.Error())

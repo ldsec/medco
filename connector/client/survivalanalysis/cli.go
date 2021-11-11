@@ -320,7 +320,7 @@ resLoop:
 
 func validateUserInputSequenceOfEvents(parameters *Parameters) error {
 	for _, subGroup := range parameters.SubGroups {
-		err := validateSequenceOfEvents(subGroup.SequenceOfEvents, len(subGroup.Panels))
+		err := validateSequenceOfEvents(subGroup.SequenceOfEvents, len(subGroup.SequentialPanels))
 		if err != nil {
 			return err
 		}
@@ -339,8 +339,9 @@ func convertParametersToSubGroupDefinition(parameters *Parameters) ([]*survival_
 			err = fmt.Errorf("while parsing sub group timing: %s", err.Error())
 			return nil, err
 		}
-		newPanels := make([]*models.Panel, len(selection.Panels))
-		for j, panel := range selection.Panels {
+		tmpPanels := make([]*models.Panel, len(selection.SelectionPanels)+len(selection.SequentialPanels))
+
+		for j, panel := range append(selection.SelectionPanels, selection.SequentialPanels...) {
 			newPanel := &models.Panel{}
 			newPanel.PanelTiming, err = timingFromStringToModel(panel.PanelTiming)
 			if err != nil {
@@ -379,10 +380,11 @@ func convertParametersToSubGroupDefinition(parameters *Parameters) ([]*survival_
 
 			newPanel.ConceptItems = newConceptItems
 
-			newPanels[j] = newPanel
+			tmpPanels[j] = newPanel
 		}
-		newSelection.Panels = newPanels
-		sequenceOfEvents := defaultedSequenceOfEvents(selection.SequenceOfEvents, len(selection.Panels))
+		newSelection.SelectionPanels = tmpPanels[:len(selection.SelectionPanels)]
+		newSelection.SequentialPanels = tmpPanels[len(selection.SelectionPanels):]
+		sequenceOfEvents := defaultedSequenceOfEvents(selection.SequenceOfEvents, len(selection.SequentialPanels))
 		newSelection.QueryTimingSequence, err = convertParametersToSequenceInfo(sequenceOfEvents)
 		if err != nil {
 			err = fmt.Errorf("while parsing temporal sequence info: %s", err.Error())
@@ -498,8 +500,8 @@ func panelValidation(panel []*models.PanelConceptItemsItems0) (err error) {
 
 func modelPanelsToString(subGroup *survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) string {
 
-	panelStrings := make([]string, 0, len(subGroup.Panels))
-	for _, panel := range subGroup.Panels {
+	panelStrings := make([]string, 0, len(subGroup.SelectionPanels)+len(subGroup.SequentialPanels))
+	for _, panel := range append(subGroup.SelectionPanels, subGroup.SequentialPanels...) {
 		itemStrings := make([]string, 0, len(panel.ConceptItems))
 		for _, item := range panel.ConceptItems {
 			itemStrings = append(itemStrings, fmt.Sprintf("{Encrypted:%t Modifier:%s QueryTerm:%s Type:%s Value:%s Operator:%s}",
@@ -513,8 +515,9 @@ func modelPanelsToString(subGroup *survival_analysis.SurvivalAnalysisParamsBodyS
 		itemArray := "[" + strings.Join(itemStrings, " ") + "]"
 		panelStrings = append(panelStrings, fmt.Sprintf("{Items:%s Not:%t}", itemArray, *panel.Not))
 	}
-	panelArray := "[" + strings.Join(panelStrings, " ") + "]"
-	return fmt.Sprintf("{GroupName:%s QueryTiming:%s Panels:%s TimingSequence:%v", subGroup.GroupName, subGroup.SubGroupTiming, panelArray, subGroup.QueryTimingSequence)
+	selectionPanelArray := "[" + strings.Join(panelStrings[:len(subGroup.SelectionPanels)], " ") + "]"
+	sequentialPanelArray := "[" + strings.Join(panelStrings[len(subGroup.SelectionPanels):], " ") + "]"
+	return fmt.Sprintf("{GroupName:%s QueryTiming:%s SelectionPanels:%s SequentialPanels:%s TimingSequence:%v", subGroup.GroupName, subGroup.SubGroupTiming, selectionPanelArray, sequentialPanelArray, subGroup.QueryTimingSequence)
 }
 
 func stringModifier(modifier *models.PanelConceptItemsItems0Modifier) string {

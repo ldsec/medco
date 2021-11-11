@@ -19,14 +19,17 @@ import (
 // swagger:model exploreQuery
 type ExploreQuery struct {
 
-	// i2b2 panels (linked by an AND)
-	Panels []*Panel `json:"panels"`
-
 	// query timing
 	QueryTiming Timing `json:"queryTiming,omitempty"`
 
 	// A collection of timingSequenceInfo that, if present, determines the temporal relations between the panels. The element at position i determines the relation between the panels at position i and i + 1.
 	QueryTimingSequence []*TimingSequenceInfo `json:"queryTimingSequence"`
+
+	// i2b2 selection panels (linked by an AND)
+	SelectionPanels []*Panel `json:"selectionPanels"`
+
+	// i2b2 sequential panels (linked by a sequential operator)
+	SequentialPanels []*Panel `json:"sequentialPanels"`
 
 	// user public key
 	// Pattern: ^[\w=-]+$
@@ -37,15 +40,19 @@ type ExploreQuery struct {
 func (m *ExploreQuery) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validatePanels(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if err := m.validateQueryTiming(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateQueryTimingSequence(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateSelectionPanels(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateSequentialPanels(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -56,31 +63,6 @@ func (m *ExploreQuery) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *ExploreQuery) validatePanels(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Panels) { // not required
-		return nil
-	}
-
-	for i := 0; i < len(m.Panels); i++ {
-		if swag.IsZero(m.Panels[i]) { // not required
-			continue
-		}
-
-		if m.Panels[i] != nil {
-			if err := m.Panels[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("panels" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
-	}
-
 	return nil
 }
 
@@ -115,6 +97,56 @@ func (m *ExploreQuery) validateQueryTimingSequence(formats strfmt.Registry) erro
 			if err := m.QueryTimingSequence[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("queryTimingSequence" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *ExploreQuery) validateSelectionPanels(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.SelectionPanels) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.SelectionPanels); i++ {
+		if swag.IsZero(m.SelectionPanels[i]) { // not required
+			continue
+		}
+
+		if m.SelectionPanels[i] != nil {
+			if err := m.SelectionPanels[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("selectionPanels" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *ExploreQuery) validateSequentialPanels(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.SequentialPanels) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.SequentialPanels); i++ {
+		if swag.IsZero(m.SequentialPanels[i]) { // not required
+			continue
+		}
+
+		if m.SequentialPanels[i] != nil {
+			if err := m.SequentialPanels[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("sequentialPanels" + "." + strconv.Itoa(i))
 				}
 				return err
 			}

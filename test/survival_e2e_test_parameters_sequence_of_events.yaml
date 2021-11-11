@@ -11,7 +11,7 @@ ends_when: "earliest"
 sub_groups:
   - group_name: "All"
     group_timing: "any"
-    panels:
+    sequential_panels:
       - not: false
         panel_timing: "any"
         concept_items:
@@ -26,7 +26,7 @@ sub_groups:
     sequence_of_events: []
   - group_name: "None"
     group_timing: "any"
-    panels:
+    sequential_panels:
       - not: false
         panel_timing: "any"
         concept_items:

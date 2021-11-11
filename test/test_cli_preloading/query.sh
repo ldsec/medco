@@ -129,7 +129,7 @@ resultQuery12="$(printf -- "count\n1\n1\n1")"
 query13="clr::/E2ETEST/e2etest/3/:/E2ETEST/modifiers/3text/:/e2etest/3/::LIKE[end]:TEXT:bc"
 resultQuery13="$(printf -- "count\n0\n0\n0")"
 
-query14="clr::/SPHN/SPHNv2020.1/FophDiagnosis/ AND clr::/SPHN/SPHNv2020.1/DeathStatus/ AND clr::/SPHN/SPHNv2020.1/DeathStatus/"
+query14="clr::/SPHN/SPHNv2020.1/FophDiagnosis/ OR clr::/SPHN/SPHNv2020.1/DeathStatus/ WITH clr::/SPHN/SPHNv2020.1/FophDiagnosis/ THEN clr::/SPHN/SPHNv2020.1/DeathStatus/ THEN clr::/SPHN/SPHNv2020.1/DeathStatus/"
 resultQuery14a="$(printf -- "count\n228\n228\n228")"
 
 resultQuery14b="$(printf -- "count\n0\n0\n0")"
@@ -181,7 +181,7 @@ test4 "samevisit" "samevisit" "any" "samevisit" "${timingResultNonZeroExpected}"
 echo "Testing query with event sequences features..."
 
 test5 "${query14}" "before,first,startdate,first,startdate:sametime,first,startdate,first,startdate" "${resultQuery14a}"
-test5 "${query14}" "sametime,first,startdate,first,startdate,moreorequal,23,days,more,12,days,less,30,hours:sametime,first,startdate,first,startdate,moreorequal,20,days,more,11,days,more,23,hours" "${resultQuery15b}"
+test5 "${query14}" "sametime,first,startdate,first,startdate,moreorequal,23,days,more,12,days,less,30,hours:sametime,first,startdate,first,startdate,moreorequal,20,days,more,11,days,more,23,hours" "${resultQuery14b}"
 
 popd
 exit 0

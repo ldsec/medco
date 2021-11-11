@@ -477,7 +477,11 @@ parameters:
                 pattern: '^\w+$'
               subGroupTiming:
                 $ref: '#/definitions/timing'
-              panels:
+              selectionPanels:
+                type: "array"
+                items:
+                  $ref: '#/definitions/panel'
+              sequentialPanels:
                 type: "array"
                 items:
                   $ref: '#/definitions/panel'
@@ -681,7 +685,11 @@ responses:
           queryDefinition:
             type: "object"
             properties:
-              panels:
+              selectionPanels:
+                type: "array"
+                items:
+                  $ref: "#/definitions/panel"
+              sequentialPanels:
                 type: "array"
                 items:
                   $ref: "#/definitions/panel"
@@ -902,9 +910,14 @@ definitions:
       userPublicKey:
         type: "string"
         pattern: '^[\w=-]+$'
-      panels:
+      selectionPanels:
         type: "array"
-        description: "i2b2 panels (linked by an AND)"
+        description: "i2b2 selection panels (linked by an AND)"
+        items:
+          $ref: "#/definitions/panel"
+      sequentialPanels:
+        type: "array"
+        description: "i2b2 sequential panels (linked by a sequential operator)"
         items:
           $ref: "#/definitions/panel"
       # queryTiming and queryTimingSequence cannot be used together

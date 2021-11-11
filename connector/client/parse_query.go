@@ -14,19 +14,82 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// ParseQueryString parses the query string given as input
+// ParseQueryString separates the query string in two parts: selection panels and sequential panels.
+// Selection panels are separated by AND whereas sequential ones are separated by THEN.
+// The definitions of sequential and selection panels are separated by WITH.
+// For instance: "a AND b WITH c THEN d" is a correct syntax and gives two sequential panels and two selection panels.
+// Types of panels must be grouped, in other words there is at most 1 WITH, "a AND b WITH c THEN d WITH e AND f" is not correct and should be written
+// "a AND b AND e AND f WITH c THEN d" or "c THEN d WITH a AND b AND e AND f".
+// Inside a panel, OR and NOT can be used with either type of panels, but cohort item can only be used with selection panels.
+func ParseQueryString(queryString string) (selection, sequential []string, err error) {
+	logrus.Info("Client query is: ", queryString)
+	panelGroups := strings.Split(queryString, " WITH ")
+	nOfPanels := len(panelGroups)
+	if nOfPanels > 2 {
+		err = fmt.Errorf("in query string parsing: there should be at most 2 strings separated by the keyword 'WITH', found: %d", nOfPanels)
+		return
+	}
+	if nOfPanels == 2 {
+		thenInLeftOperand := strings.Contains(panelGroups[0], " THEN ")
+		andInLeftOperand := strings.Contains(panelGroups[0], " AND ")
+		thenInRightOperand := strings.Contains(panelGroups[1], " THEN ")
+		andInRightOperand := strings.Contains(panelGroups[1], " AND ")
+
+		if thenInLeftOperand && thenInRightOperand {
+			err = errors.New("in query string parsing: THEN keyword found in both sides of WITH operator")
+			return
+		}
+		if andInLeftOperand && andInRightOperand {
+			err = errors.New("in query string parsing: AND keyword found in both sides of WITH operator")
+			return
+		}
+
+		if andInLeftOperand && thenInLeftOperand {
+			err = errors.New("in query string parsing: mixing THEN and AND keywords in left operand of WITH keyword")
+			return
+		}
+
+		if andInRightOperand && thenInRightOperand {
+			err = errors.New("in query string parsing: mixing THEN and AND keywords in right operand of WITH keyword")
+			return
+		}
+
+		if strings.Contains(panelGroups[0], " THEN ") || strings.Contains(panelGroups[1], " AND ") {
+			selection = strings.Split(panelGroups[1], " AND ")
+			sequential = strings.Split(panelGroups[0], " THEN ")
+		} else {
+			selection = strings.Split(panelGroups[0], " AND ")
+			sequential = strings.Split(panelGroups[1], " THEN ")
+		}
+
+		return
+	}
+	if strings.Contains(panelGroups[0], " THEN ") && strings.Contains(panelGroups[0], " AND ") {
+		err = errors.New("in query string parsing: mixing THEN and AND keywords without WITH keyword")
+		return
+	}
+
+	if strings.Contains(panelGroups[0], " THEN ") {
+		sequential = strings.Split(panelGroups[0], " THEN ")
+		return
+	}
+	selection = strings.Split(panelGroups[0], " AND ")
+	return
+
+}
+
+// ParsePanels parses the panel strings given as input
 // A query string is a list of panels concatenated by " AND ".
 // Each panel is a list of query items, in the format parsed by parseQueryItem, concatenated by " OR ".
 // Each query item can be OR-ed n times with itself (and so lengthening the panel's query items list) using the syntax query_item^n.
 // The first element of a panel can be a "NOT". In this case the panel is negated.
 // The last element of a panel can be the panel timing, whose value either "any", "samevisit", or "sameinstancenum".
 // If omitted, the panel timing is defaulted to "any".
-func ParseQueryString(queryString string) (panels []*models.Panel, err error) {
-	logrus.Info("Client query is: ", queryString)
+func ParsePanels(panelStrings []string) (panels []*models.Panel, err error) {
 
 	panels = make([]*models.Panel, 0)
 
-	for _, queryPanel := range strings.Split(queryString, " AND ") {
+	for _, queryPanel := range panelStrings {
 
 		var newPanel models.Panel
 		var not bool

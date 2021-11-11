@@ -41,7 +41,8 @@ type panel struct {
 type subGroup struct {
 	GroupName        string             `yaml:"group_name"`
 	GroupTiming      string             `yaml:"group_timing"`
-	Panels           []*panel           `yaml:"panels"`
+	SelectionPanels  []*panel           `yaml:"selection_panels"`
+	SequentialPanels []*panel           `yaml:"sequential_panels"`
 	SequenceOfEvents []*sequenceElement `yaml:"sequence_of_events,omitempty"`
 }
 
@@ -92,13 +93,18 @@ func (p *Parameters) String() string {
 
 	subGroupStrings := make([]string, 0, len(p.SubGroups))
 	for _, subGroup := range p.SubGroups {
-		panelStrings := make([]string, 0, len(subGroup.Panels))
-		for _, panel := range subGroup.Panels {
-			panelStrings = append(panelStrings, fmt.Sprintf("%+v", panel))
+		selectionPanelStrings := make([]string, 0, len(subGroup.SelectionPanels))
+		for _, selectionPanel := range subGroup.SelectionPanels {
+			selectionPanelStrings = append(selectionPanelStrings, fmt.Sprintf("%+v", selectionPanel))
 		}
-		panelArray := "[" + strings.Join(panelStrings, " ") + "]"
+		sequentialPanelStrings := make([]string, 0, len(subGroup.SequentialPanels))
+		for _, sequentialPanel := range subGroup.SequentialPanels {
+			sequentialPanelStrings = append(sequentialPanelStrings, fmt.Sprintf("%+v", sequentialPanel))
+		}
+		selectionPanelArray := "[" + strings.Join(selectionPanelStrings, " ") + "]"
+		sequentialPanelArray := "[" + strings.Join(sequentialPanelStrings, " ") + "]"
 		subGroupStrings = append(subGroupStrings,
-			fmt.Sprintf("{GroupName:%s Panels:%s}", subGroup.GroupName, panelArray))
+			fmt.Sprintf("{GroupName:%s SelectionPanels:%s SequentialPanels:%s}", subGroup.GroupName, selectionPanelArray, sequentialPanelArray))
 	}
 	subGroupArray := "[" + strings.Join(subGroupStrings, " ") + "]"
 

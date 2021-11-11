@@ -27,7 +27,17 @@ func ExecuteClientQuery(token, username, password, queryString, queryTiming, que
 	}
 
 	// parse query string
-	panels, err := medcoclient.ParseQueryString(queryString)
+	selectionPanelString, sequentialPanelString, err := medcoclient.ParseQueryString(queryString)
+	if err != nil {
+		return
+	}
+
+	selectionPanels, err := medcoclient.ParsePanels(selectionPanelString)
+	if err != nil {
+		return
+	}
+
+	sequentialPanels, err := medcoclient.ParsePanels(sequentialPanelString)
 	if err != nil {
 		return
 	}
@@ -39,7 +49,7 @@ func ExecuteClientQuery(token, username, password, queryString, queryTiming, que
 	}
 
 	// encrypt item keys
-	for _, panel := range panels {
+	for _, panel := range append(selectionPanels, sequentialPanels...) {
 		for _, item := range panel.ConceptItems {
 			if *item.Encrypted {
 				queryTermInt, err := strconv.ParseInt(*item.QueryTerm, 10, 64)
@@ -56,7 +66,7 @@ func ExecuteClientQuery(token, username, password, queryString, queryTiming, que
 	}
 
 	// execute query
-	clientQuery, err := NewExploreQuery(accessToken, panels, models.Timing(strings.ToLower(queryTiming)), sequences, disableTLSCheck)
+	clientQuery, err := NewExploreQuery(accessToken, selectionPanels, sequentialPanels, models.Timing(strings.ToLower(queryTiming)), sequences, disableTLSCheck)
 	if err != nil {
 		return
 	}

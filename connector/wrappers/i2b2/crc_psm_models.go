@@ -12,6 +12,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+var (
+	any             = strings.ToUpper(string(models.TimingAny))
+	sameinstancenum = strings.ToUpper(string(models.TimingSameinstancenum))
+)
+
 // NewCrcPsmReqFromQueryDef returns a new request object for i2b2 psm request
 func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, querySequenceOperators []*models.TimingSequenceInfo, querySequencePanels []*models.Panel, resultOutputs []ResultOutputName, queryTiming models.Timing) (Request, error) {
 
@@ -53,9 +58,9 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, que
 
 	if nOfSequenceOperators := len(querySequenceOperators); nOfSequenceOperators > 0 {
 		logrus.Warnf("When using sequential query, the timings of the main query and the selection panels are set to %s", models.TimingAny)
-		psmRequest.QueryTiming = string(models.TimingAny)
+		psmRequest.QueryTiming = any
 		for i := range psmRequest.Panels {
-			psmRequest.Panels[i].PanelTiming = string(models.TimingAny)
+			psmRequest.Panels[i].PanelTiming = any
 		}
 		// this is tested in previous validation, where a 4XX error is returned.
 		// if the exception passes until here, a 5XX will be issued
@@ -74,7 +79,7 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, que
 			querySequenceElement.PanelNumber = "0"
 			// for sequential query, it is necessary to override the panel timing attribute
 			logrus.Warnf("The panel timing attribute of temporal sequence element set to %s", models.TimingSameinstancenum)
-			querySequenceElement.PanelTiming = "SAMEINSTANCENUM"
+			querySequenceElement.PanelTiming = sameinstancenum
 
 			subQueryStringID := queryName + "_SUBQUERY_" + strconv.Itoa(i)
 
@@ -82,7 +87,7 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, que
 				QueryType:   "EVENT",
 				QueryName:   subQueryStringID,
 				QueryID:     subQueryStringID,
-				QueryTiming: "SAMEINSTANCENUM",
+				QueryTiming: sameinstancenum,
 				Panels:      []Panel{querySequenceElement},
 			}
 			psmRequest.Subqueries = append(psmRequest.Subqueries, subquery)

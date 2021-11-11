@@ -74,7 +74,18 @@ func produceParameters() *Parameters {
 		SubGroups: []*subGroup{
 			{
 				GroupName: "AAA",
-				Panels: []*panel{
+				SelectionPanels: []*panel{
+					{
+						Not:         false,
+						PanelTiming: "any",
+						ConceptItems: []*conceptItem{
+							{
+								Path: "/path/4/",
+							},
+						},
+					},
+				},
+				SequentialPanels: []*panel{
 					{
 						PanelTiming: "any",
 						Not:         false,
@@ -128,7 +139,18 @@ func produceParameters() *Parameters {
 			},
 			{
 				GroupName: "BBB",
-				Panels: []*panel{
+				SelectionPanels: []*panel{
+					{
+						Not:         false,
+						PanelTiming: "any",
+						ConceptItems: []*conceptItem{
+							{
+								Path: "/path/3/",
+							},
+						},
+					},
+				},
+				SequentialPanels: []*panel{
 					{
 						Not:         false,
 						PanelTiming: "any",
@@ -155,7 +177,7 @@ func produceParameters() *Parameters {
 			{
 				GroupName:   "CCC",
 				GroupTiming: "sameinstancenum",
-				Panels: []*panel{
+				SelectionPanels: []*panel{
 					{
 						Not:         false,
 						PanelTiming: "any",
@@ -169,7 +191,18 @@ func produceParameters() *Parameters {
 			},
 			{
 				GroupName: "DDD",
-				Panels: []*panel{
+				SelectionPanels: []*panel{
+					{
+						Not:         false,
+						PanelTiming: "any",
+						ConceptItems: []*conceptItem{
+							{
+								Path: "/path/7/",
+							},
+						},
+					},
+				},
+				SequentialPanels: []*panel{
 					{
 						Not: false,
 						ConceptItems: []*conceptItem{

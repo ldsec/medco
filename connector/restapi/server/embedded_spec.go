@@ -622,13 +622,6 @@ func init() {
     "exploreQuery": {
       "description": "MedCo-Explore query",
       "properties": {
-        "panels": {
-          "description": "i2b2 panels (linked by an AND)",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/panel"
-          }
-        },
         "queryTiming": {
           "$ref": "#/definitions/timing"
         },
@@ -637,6 +630,20 @@ func init() {
           "type": "array",
           "items": {
             "$ref": "#/definitions/timingSequenceInfo"
+          }
+        },
+        "selectionPanels": {
+          "description": "i2b2 selection panels (linked by an AND)",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/panel"
+          }
+        },
+        "sequentialPanels": {
+          "description": "i2b2 sequential panels (linked by a sequential operator)",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/panel"
           }
         },
         "userPublicKey": {
@@ -1313,16 +1320,22 @@ func init() {
                   "type": "string",
                   "pattern": "^\\w+$"
                 },
-                "panels": {
+                "queryTimingSequence": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/timingSequenceInfo"
+                  }
+                },
+                "selectionPanels": {
                   "type": "array",
                   "items": {
                     "$ref": "#/definitions/panel"
                   }
                 },
-                "queryTimingSequence": {
+                "sequentialPanels": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/timingSequenceInfo"
+                    "$ref": "#/definitions/panel"
                   }
                 },
                 "subGroupTiming": {
@@ -1502,12 +1515,6 @@ func init() {
             "queryDefinition": {
               "type": "object",
               "properties": {
-                "panels": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/panel"
-                  }
-                },
                 "queryTiming": {
                   "$ref": "#/definitions/timing"
                 },
@@ -1515,6 +1522,18 @@ func init() {
                   "type": "array",
                   "items": {
                     "$ref": "#/definitions/timingSequenceInfo"
+                  }
+                },
+                "selectionPanels": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/panel"
+                  }
+                },
+                "sequentialPanels": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/panel"
                   }
                 }
               }
@@ -2812,12 +2831,6 @@ func init() {
         "queryDefinition": {
           "type": "object",
           "properties": {
-            "panels": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/panel"
-              }
-            },
             "queryTiming": {
               "$ref": "#/definitions/timing"
             },
@@ -2825,6 +2838,18 @@ func init() {
               "type": "array",
               "items": {
                 "$ref": "#/definitions/timingSequenceInfo"
+              }
+            },
+            "selectionPanels": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/panel"
+              }
+            },
+            "sequentialPanels": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/panel"
               }
             }
           }
@@ -2840,12 +2865,6 @@ func init() {
     "GetCohortsOKBodyItems0QueryDefinition": {
       "type": "object",
       "properties": {
-        "panels": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/panel"
-          }
-        },
         "queryTiming": {
           "$ref": "#/definitions/timing"
         },
@@ -2853,6 +2872,18 @@ func init() {
           "type": "array",
           "items": {
             "$ref": "#/definitions/timingSequenceInfo"
+          }
+        },
+        "selectionPanels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/panel"
+          }
+        },
+        "sequentialPanels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/panel"
           }
         }
       }
@@ -3059,16 +3090,22 @@ func init() {
           "type": "string",
           "pattern": "^\\w+$"
         },
-        "panels": {
+        "queryTimingSequence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/timingSequenceInfo"
+          }
+        },
+        "selectionPanels": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/panel"
           }
         },
-        "queryTimingSequence": {
+        "sequentialPanels": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/timingSequenceInfo"
+            "$ref": "#/definitions/panel"
           }
         },
         "subGroupTiming": {
@@ -3182,13 +3219,6 @@ func init() {
     "exploreQuery": {
       "description": "MedCo-Explore query",
       "properties": {
-        "panels": {
-          "description": "i2b2 panels (linked by an AND)",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/panel"
-          }
-        },
         "queryTiming": {
           "$ref": "#/definitions/timing"
         },
@@ -3197,6 +3227,20 @@ func init() {
           "type": "array",
           "items": {
             "$ref": "#/definitions/timingSequenceInfo"
+          }
+        },
+        "selectionPanels": {
+          "description": "i2b2 selection panels (linked by an AND)",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/panel"
+          }
+        },
+        "sequentialPanels": {
+          "description": "i2b2 sequential panels (linked by a sequential operator)",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/panel"
           }
         },
         "userPublicKey": {
@@ -3803,16 +3847,22 @@ func init() {
                   "type": "string",
                   "pattern": "^\\w+$"
                 },
-                "panels": {
+                "queryTimingSequence": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/timingSequenceInfo"
+                  }
+                },
+                "selectionPanels": {
                   "type": "array",
                   "items": {
                     "$ref": "#/definitions/panel"
                   }
                 },
-                "queryTimingSequence": {
+                "sequentialPanels": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/timingSequenceInfo"
+                    "$ref": "#/definitions/panel"
                   }
                 },
                 "subGroupTiming": {
@@ -3992,12 +4042,6 @@ func init() {
             "queryDefinition": {
               "type": "object",
               "properties": {
-                "panels": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/panel"
-                  }
-                },
                 "queryTiming": {
                   "$ref": "#/definitions/timing"
                 },
@@ -4005,6 +4049,18 @@ func init() {
                   "type": "array",
                   "items": {
                     "$ref": "#/definitions/timingSequenceInfo"
+                  }
+                },
+                "selectionPanels": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/panel"
+                  }
+                },
+                "sequentialPanels": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/panel"
                   }
                 }
               }

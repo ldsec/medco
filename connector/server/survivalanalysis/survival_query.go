@@ -145,8 +145,8 @@ func (q *Query) Execute() error {
 
 			timer = time.Now()
 			logrus.Infof("Survival analysis: I2B2 explore for subgroup %d", i)
-			logrus.Tracef("Survival analysis: panels %+v", definition.Panels)
-			patientList, err := SubGroupExplore(q.QueryName, i, startPanel, definition.Panels, definition.QueryTimingSequence, definition.SubGroupTiming)
+			logrus.Tracef("Survival analysis: selection panels %+v, sequential panels: %+v", definition.SelectionPanels, definition.SequentialPanels)
+			patientList, err := SubGroupExplore(q.QueryName, i, startPanel, definition.SelectionPanels, definition.SequentialPanels, definition.QueryTimingSequence, definition.SubGroupTiming)
 			if err != nil {
 				returnedErr := fmt.Errorf("during subgroup explore procedure")
 				logrus.Errorf("%s: %s", returnedErr.Error(), err.Error())
@@ -560,9 +560,9 @@ func fullCohort(startConcept string) []*survival_analysis.SurvivalAnalysisParams
 
 	return []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0{
 		{
-			GroupName:      "Full cohort",
-			Panels:         newPanels,
-			SubGroupTiming: any,
+			GroupName:       "Full cohort",
+			SelectionPanels: newPanels,
+			SubGroupTiming:  any,
 		},
 	}
 }

@@ -13,7 +13,12 @@ end_modifier:
 ends_when: "earliest"
 sub_groups:
   - group_name: "AAA"
-    panels:
+    selection_panels:
+      - not: false
+        panel_timing: "any"
+        concept_items:
+          - path: "/path/4/"
+    sequential_panels:
       - not: false
         panel_timing: "any"
         concept_items:
@@ -46,7 +51,12 @@ sub_groups:
             value: 21
             units: "days"
   - group_name: "BBB"
-    panels:
+    selection_panels:
+      - not: false
+        panel_timing: "any"
+        concept_items:
+          - path: "/path/3/"
+    sequential_panels:
       - not: false
         panel_timing: "any"
         concept_items:
@@ -59,13 +69,18 @@ sub_groups:
       - {}
   - group_name: "CCC"
     group_timing: "sameinstancenum"
-    panels:
+    selection_panels:
       - not: false
         panel_timing: "any"
         concept_items:
           - path: "/path/4/"
   - group_name: "DDD"
-    panels:
+    selection_panels:
+      - not: false
+        panel_timing: "any"
+        concept_items:
+          - path: "/path/7/"
+    sequential_panels:
       - not: false
         concept_items:
           - path: "/path/4/"
