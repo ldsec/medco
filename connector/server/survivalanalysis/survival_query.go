@@ -533,7 +533,7 @@ func processGroupResult(errChan chan error, newEventGroup *EventGroup, sqlTimePo
 			}})
 
 	}
-	return timers
+	return
 
 }
 

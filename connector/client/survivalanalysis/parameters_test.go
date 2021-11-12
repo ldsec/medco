@@ -253,7 +253,19 @@ var parsedParameters = []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDe
 	{
 		GroupName:      "AAA",
 		SubGroupTiming: defaultTiming,
-		Panels: []*models.Panel{
+		SelectionPanels: []*models.Panel{
+			{
+				Not:         utilclient.InitializeBoolPointer(false),
+				PanelTiming: models.TimingAny,
+				ConceptItems: []*models.PanelConceptItemsItems0{
+					{
+						Encrypted: utilclient.InitializeBoolPointer(false),
+						QueryTerm: utilclient.InitializeStringPointer("/path/4/"),
+					},
+				},
+			},
+		},
+		SequentialPanels: []*models.Panel{
 			{
 				Not:         utilclient.InitializeBoolPointer(false),
 				PanelTiming: models.TimingAny,
@@ -314,7 +326,19 @@ var parsedParameters = []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDe
 	{
 		GroupName:      "BBB",
 		SubGroupTiming: defaultTiming,
-		Panels: []*models.Panel{
+		SelectionPanels: []*models.Panel{
+			{
+				Not:         utilclient.InitializeBoolPointer(false),
+				PanelTiming: models.TimingAny,
+				ConceptItems: []*models.PanelConceptItemsItems0{
+					{
+						Encrypted: utilclient.InitializeBoolPointer(false),
+						QueryTerm: utilclient.InitializeStringPointer("/path/3/"),
+					},
+				},
+			},
+		},
+		SequentialPanels: []*models.Panel{
 			{
 				Not:         utilclient.InitializeBoolPointer(false),
 				PanelTiming: models.TimingAny,
@@ -339,9 +363,10 @@ var parsedParameters = []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDe
 		QueryTimingSequence: defaultSequenceInfo(1),
 	},
 	{
-		GroupName:      "CCC",
-		SubGroupTiming: models.TimingSameinstancenum,
-		Panels: []*models.Panel{
+		GroupName:        "CCC",
+		SubGroupTiming:   models.TimingSameinstancenum,
+		SequentialPanels: []*models.Panel{},
+		SelectionPanels: []*models.Panel{
 			{
 				Not:         utilclient.InitializeBoolPointer(false),
 				PanelTiming: models.TimingAny,
@@ -357,7 +382,19 @@ var parsedParameters = []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDe
 	{
 		GroupName:      "DDD",
 		SubGroupTiming: defaultTiming,
-		Panels: []*models.Panel{
+		SelectionPanels: []*models.Panel{
+			{
+				Not:         utilclient.InitializeBoolPointer(false),
+				PanelTiming: models.TimingAny,
+				ConceptItems: []*models.PanelConceptItemsItems0{
+					{
+						Encrypted: utilclient.InitializeBoolPointer(false),
+						QueryTerm: utilclient.InitializeStringPointer("/path/7/"),
+					},
+				},
+			},
+		},
+		SequentialPanels: []*models.Panel{
 			{
 				PanelTiming: defaultTiming,
 				Not:         utilclient.InitializeBoolPointer(false),

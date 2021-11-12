@@ -85,7 +85,7 @@ func eqValid() medco_node.ExploreQueryBody {
 	return medco_node.ExploreQueryBody{
 		"id", &models.ExploreQuery{
 			UserPublicKey: "userPub",
-			Panels: []*models.Panel{
+			SelectionPanels: []*models.Panel{
 				{
 					Not: func() *bool { b := false; return &b }(),
 					ConceptItems: []*models.PanelConceptItemsItems0{
@@ -113,18 +113,18 @@ func TestExploreQuery(t *testing.T) {
 	}
 	tests[1].query.ID = "123@"
 	tests[2].query.Query.UserPublicKey = "123@"
-	tests[3].query.Query.Panels[0].ConceptItems[0].Type = "non-enum"
-	tests[4].query.Query.Panels[0].ConceptItems[0].Operator = "non-enum"
-	tests[5].query.Query.Panels[0].ConceptItems[0].QueryTerm = func() *string { s := "word@"; return &s }()
-	tests[6].query.Query.Panels[0].ConceptItems[0].QueryTerm = func() *string { s := "word@"; return &s }()
-	tests[7].query.Query.Panels[0].ConceptItems[0].QueryTerm = func() *string { s := "abc/def/"; return &s }()
-	tests[8].query.Query.Panels[0].ConceptItems[0].QueryTerm = func() *string { s := "/abc/def//"; return &s }()
-	tests[9].query.Query.Panels[0].ConceptItems[0].QueryTerm = func() *string { s := "/abc/def"; return &s }()
+	tests[3].query.Query.SelectionPanels[0].ConceptItems[0].Type = "non-enum"
+	tests[4].query.Query.SelectionPanels[0].ConceptItems[0].Operator = "non-enum"
+	tests[5].query.Query.SelectionPanels[0].ConceptItems[0].QueryTerm = func() *string { s := "word@"; return &s }()
+	tests[6].query.Query.SelectionPanels[0].ConceptItems[0].QueryTerm = func() *string { s := "word@"; return &s }()
+	tests[7].query.Query.SelectionPanels[0].ConceptItems[0].QueryTerm = func() *string { s := "abc/def/"; return &s }()
+	tests[8].query.Query.SelectionPanels[0].ConceptItems[0].QueryTerm = func() *string { s := "/abc/def//"; return &s }()
+	tests[9].query.Query.SelectionPanels[0].ConceptItems[0].QueryTerm = func() *string { s := "/abc/def"; return &s }()
 	for i := 0; i < 2; i++ {
 		tests = append(tests, teqTests{true, eqValid()})
 	}
-	tests[10].query.Query.Panels[0].ConceptItems[0].QueryTerm = func() *string { s := "word=-word"; return &s }()
-	tests[11].query.Query.Panels[0].ConceptItems[0].QueryTerm = func() *string { s := "/abc123@/def123@/"; return &s }()
+	tests[10].query.Query.SelectionPanels[0].ConceptItems[0].QueryTerm = func() *string { s := "word=-word"; return &s }()
+	tests[11].query.Query.SelectionPanels[0].ConceptItems[0].QueryTerm = func() *string { s := "/abc123@/def123@/"; return &s }()
 
 	for _, test := range tests {
 		body, err := json.Marshal(test.query)
