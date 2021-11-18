@@ -462,8 +462,20 @@ swagger:model ExploreStatisticsOKBody
 */
 type ExploreStatisticsOKBody struct {
 
+	// The ID of the record saved in the medco db which contains information about the patient set of the cohort corresponding to the inclusion/exclusion criterias specified by the user
+	CohortQueryID int64 `json:"cohortQueryID,omitempty"`
+
+	// encrypted cohort count
+	EncryptedCohortCount string `json:"encryptedCohortCount,omitempty"`
+
+	// list of encrypted masked patient IDs.
+	EncryptedPatientList []string `json:"encryptedPatientList"`
+
 	// Timers for work happening outside of the construction of the histograms
 	GlobalTimers models.Timers `json:"globalTimers"`
+
+	// ID returned by the i2b2 query about the cohort based on the inclusion and exclusion constraints fed the input of the front end query.
+	PatientSetID int64 `json:"patientSetID,omitempty"`
 
 	// Each item of this array contains the histogram of a specific analyte (concept or modifier).
 	Results []*ExploreStatisticsOKBodyResultsItems0 `json:"results"`

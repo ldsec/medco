@@ -52,6 +52,8 @@ func ExploreStatisticsHandler(param explore_statistics.ExploreStatisticsParams, 
 		principal.ID,
 		param.Body)
 
+	query.QueryType = queryType
+
 	if err != nil {
 		logrus.Error(err)
 		explore_statistics.NewExploreStatisticsBadRequest().WithPayload(
@@ -85,6 +87,13 @@ func ExploreStatisticsHandler(param explore_statistics.ExploreStatisticsParams, 
 
 	requestResult := explore_statistics.ExploreStatisticsOKBody{
 		GlobalTimers: modelsTimers,
+	}
+
+	if queryType.PatientList {
+		requestResult.CohortQueryID = int64(query.Response.QueryID)
+		requestResult.EncryptedPatientList = query.Response.EncPatientList
+		requestResult.PatientSetID = int64(query.Response.PatientSetID)
+		requestResult.EncryptedCohortCount = query.Response.EncCount
 	}
 
 	for _, result := range query.Response.Results {

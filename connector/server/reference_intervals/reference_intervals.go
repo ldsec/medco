@@ -13,6 +13,7 @@ import (
 	"github.com/ldsec/medco/connector/restapi/models"
 	"github.com/ldsec/medco/connector/restapi/server/operations/explore_statistics"
 	medcoserver "github.com/ldsec/medco/connector/server/explore"
+	querytoolsserver "github.com/ldsec/medco/connector/server/querytools"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -44,8 +45,15 @@ type StatsResult struct {
 type Query struct {
 	UserID        string
 	UserPublicKey string
-	QueryName     string
+	//The name of the query given by the front end. It is used to distinguish this query from others.
+	QueryName string
 
+	QueryType medcoserver.ExploreQueryType
+
+	// The clear list of patients from the cohort created from the inclusion and exclusion criterias.
+	PatientsIDs []int64
+	// Whether or not the explore query instance was created in the DB
+	InstantiatedRecord bool
 	//this variable is true if the
 	isPanelEmpty bool
 	// I2B2 panels defining the population upon which the analysis takes place. This is basically a constraint on the properties of the population.
@@ -59,6 +67,7 @@ type Query struct {
 	MinObservation float64
 	Modifiers      []*explore_statistics.ExploreStatisticsParamsBodyModifiersItems0 //TODO export this class out of the survival package make it a common thing
 	Response       struct {
+		medcoserver.PatientSetResult
 		//Timers for what happens outside of the construction of the histograms
 		GlobalTimers medcomodels.Timers
 		Results      []*StatsResult
@@ -77,16 +86,17 @@ func NewQuery(
 	}
 
 	res := &Query{
-		UserID:         UserID,
-		UserPublicKey:  params.UserPublicKey,
-		Panels:         params.CohortDefinition.Panels,
-		QueryTiming:    params.CohortDefinition.QueryTiming,
-		QueryName:      params.ID,
-		Concepts:       params.Concepts,
-		BucketSize:     params.BucketSize,
-		MinObservation: params.MinObservation,
-		Modifiers:      params.Modifiers,
-		isPanelEmpty:   params.CohortDefinition.IsPanelEmpty,
+		InstantiatedRecord: false,
+		UserID:             UserID,
+		UserPublicKey:      params.UserPublicKey,
+		Panels:             params.CohortDefinition.Panels,
+		QueryTiming:        params.CohortDefinition.QueryTiming,
+		QueryName:          params.ID,
+		Concepts:           params.Concepts,
+		BucketSize:         params.BucketSize,
+		MinObservation:     params.MinObservation,
+		Modifiers:          params.Modifiers,
+		isPanelEmpty:       params.CohortDefinition.IsPanelEmpty,
 	}
 
 	res.Response.GlobalTimers = make(map[string]time.Duration)
@@ -95,6 +105,7 @@ func NewQuery(
 }
 
 func outlierRemoval(observations []QueryResult) (outputObs []QueryResult, err error) {
+	// |Z| = | (x - x bar) / S | >= 6 (where S is std deviation)
 	outputObs = observations
 	return
 }
@@ -112,7 +123,22 @@ func (q *Query) Execute(principal *models.User) (err error) {
 
 	timer := time.Now()
 
-	conceptsCodesAndNames, modifiersCodesAndNames, cohort, timers, err := q.prepareArguments(principal)
+	conceptsCodesAndNames, modifiersCodesAndNames, timers, patientsInfos, err := q.prepareArguments(principal)
+
+	defer func() {
+		// If an error occured and the current statistics query resulted in the creation of an explore query this deferred function will set an error status
+		// on the DB record for the explore query underlying this explore statistics query.
+		if err != nil && q.InstantiatedRecord {
+			logrus.Info("Updating the Explore Result instance with error status that is underlying the explore statistics query")
+			qtError := querytoolsserver.UpdateErrorExploreResultInstance(q.Response.QueryID)
+			if qtError != nil {
+				err = fmt.Errorf("while inserting a status error in result instance table: %s", qtError.Error())
+			} else {
+				logrus.Info("Updating Explore Result instance with error status")
+			}
+		}
+	}()
+
 	if err != nil {
 		modStr := ""
 		for _, mod := range q.Modifiers {
@@ -144,7 +170,7 @@ func (q *Query) Execute(principal *models.User) (err error) {
 		defer waitGroup.Done()
 
 		cohortInfo := CohortInformation{
-			PatientIDs:   cohort,
+			PatientIDs:   q.PatientsIDs,
 			IsEmptyPanel: q.isPanelEmpty,
 		}
 		conceptObservations, err := RetrieveObservations(codeNamePair.Code, cohortInfo, q.MinObservation)
@@ -201,6 +227,15 @@ func (q *Query) Execute(principal *models.User) (err error) {
 	for _, statResultChannel := range statsChannels {
 		q.Response.Results = append(q.Response.Results, <-statResultChannel)
 	}
+
+	cohortInt := make([]int, 0)
+	for i := 0; i < len(q.PatientsIDs); i++ {
+		cohortInt = append(cohortInt, int(q.PatientsIDs[i]))
+	}
+	querytoolsserver.UpdateExploreResultInstance(patientsInfos.QueryID, len(cohortInt), cohortInt, nil, nil)
+
+	// Process the answers given by the database about the cohort and fill the query
+	q.Response.ProcessPatientsList(q.QueryType, q.QueryName, patientsInfos, q.UserPublicKey, &q.Response.GlobalTimers)
 
 	return
 
@@ -455,7 +490,8 @@ type codeAndName struct {
 func (q *Query) prepareArguments(principal *models.User) (
 	conceptsInfos,
 	modifiersInfos []codeAndName,
-	cohort []int64, timers medcomodels.Timers,
+	timers medcomodels.Timers,
+	patientsInfos medcoserver.LocalPatientsInfos,
 	err error,
 ) {
 	timers = make(map[string]time.Duration)
@@ -478,25 +514,51 @@ func (q *Query) prepareArguments(principal *models.User) (
 		return
 	}
 
-	var patientIDs []string = make([]string, 0)
-	var deferredErrorStatusUpdate func() = func() {}
-
 	if !q.isPanelEmpty {
-		patientIDs, _, _, _, _, deferredErrorStatusUpdate, err = exploreQuery.FetchLocalPatients(timer) //before we used querytoolsserver.GetPatientList
+		patientsInfos, err = exploreQuery.FetchLocalPatients(timer) //before we used querytoolsserver.GetPatientList
 	}
 
-	defer deferredErrorStatusUpdate()
+	q.InstantiatedRecord = true
+
 	if err != nil {
 		logrus.Error("error while getting patient list")
 		return
 	}
 
-	if len(patientIDs) == 0 && !q.isPanelEmpty {
+	if len(patientsInfos.PatientIDs) == 0 && !q.isPanelEmpty {
 		err = fmt.Errorf("zero patients in the cohort for non empty constraint")
 		return
 	}
 
-	for _, patientID := range patientIDs {
+	// aggregate patient dummy flags
+	timer = time.Now()
+	aggPatientFlags, err := unlynx.LocallyAggregateValues(patientsInfos.PatientDummyFlags)
+	if err != nil {
+		err = fmt.Errorf("during local aggregation %s", err.Error())
+		return
+	}
+
+	q.Response.GlobalTimers.AddTimers("medco-connector-local-agg", timer, nil)
+
+	// compute and key switch count (returns optionally global aggregate or shuffled results)
+	timer = time.Now()
+	var encCount string
+	var ksCountTimers map[string]time.Duration
+	if q.QueryType.PatientList && !q.QueryType.Obfuscated {
+		logrus.Info(q.QueryName, ": count per site requested, shuffle disabled")
+		encCount, ksCountTimers, err = unlynx.KeySwitchValue(q.QueryName, aggPatientFlags, q.UserPublicKey)
+	}
+	if err != nil {
+		err = fmt.Errorf("during key switch/shuffle operation: %s", err.Error())
+		return
+	}
+	q.Response.GlobalTimers.AddTimers("medco-connector-unlynx-key-switch-count", timer, ksCountTimers)
+	logrus.Info(q.QueryName, ": processed count")
+	q.Response.EncCount = encCount
+
+	q.PatientsIDs = make([]int64, 0)
+
+	for _, patientID := range patientsInfos.PatientIDs {
 		var patientIDInt int64
 		patientIDInt, err = strconv.ParseInt(patientID, 10, 64)
 		if err != nil {
@@ -504,11 +566,11 @@ func (q *Query) prepareArguments(principal *models.User) (
 			return
 		}
 
-		cohort = append(cohort, patientIDInt)
+		q.PatientsIDs = append(q.PatientsIDs, patientIDInt)
 	}
 
 	timers.AddTimers("medco-connector-get-patient-list", timer, nil)
-	logrus.Debug("got patients for the explore statistics cohort: ", patientIDs)
+	logrus.Debug("got patients for the explore statistics cohort: ", patientsInfos.PatientIDs)
 
 	// --- get concept and modifier codes from the ontology
 	logrus.Info("get concept and modifier codes")

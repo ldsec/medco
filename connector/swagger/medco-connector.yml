@@ -778,6 +778,19 @@ responses:
     schema:
       type: "object"
       properties:
+        encryptedPatientList:
+          description: "list of encrypted masked patient IDs."
+          type: "array"
+          items:
+            type: "string"
+        encryptedCohortCount:
+          type: "string"
+        patientSetID:
+          description: "ID returned by the i2b2 query about the cohort based on the inclusion and exclusion constraints fed the input of the front end query."
+          type: "integer"
+        cohortQueryID:
+          description: "The ID of the record saved in the medco db which contains information about the patient set of the cohort corresponding to the inclusion/exclusion criterias specified by the user"
+          type: "integer"
         globalTimers:
           description: "Timers for work happening outside of the construction of the histograms"
           $ref: "#/definitions/timers"

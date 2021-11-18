@@ -1,4 +1,5 @@
 // +build integration_test
+
 package referenceintervalserver
 
 import (

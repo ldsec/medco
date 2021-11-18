@@ -1508,9 +1508,27 @@ func init() {
       "schema": {
         "type": "object",
         "properties": {
+          "cohortQueryID": {
+            "description": "The ID of the record saved in the medco db which contains information about the patient set of the cohort corresponding to the inclusion/exclusion criterias specified by the user",
+            "type": "integer"
+          },
+          "encryptedCohortCount": {
+            "type": "string"
+          },
+          "encryptedPatientList": {
+            "description": "list of encrypted masked patient IDs.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "globalTimers": {
             "description": "Timers for work happening outside of the construction of the histograms",
             "$ref": "#/definitions/timers"
+          },
+          "patientSetID": {
+            "description": "ID returned by the i2b2 query about the cohort based on the inclusion and exclusion constraints fed the input of the front end query.",
+            "type": "integer"
           },
           "results": {
             "description": "Each item of this array contains the histogram of a specific analyte (concept or modifier).",
@@ -2238,9 +2256,27 @@ func init() {
             "schema": {
               "type": "object",
               "properties": {
+                "cohortQueryID": {
+                  "description": "The ID of the record saved in the medco db which contains information about the patient set of the cohort corresponding to the inclusion/exclusion criterias specified by the user",
+                  "type": "integer"
+                },
+                "encryptedCohortCount": {
+                  "type": "string"
+                },
+                "encryptedPatientList": {
+                  "description": "list of encrypted masked patient IDs.",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
                 "globalTimers": {
                   "description": "Timers for work happening outside of the construction of the histograms",
                   "$ref": "#/definitions/timers"
+                },
+                "patientSetID": {
+                  "description": "ID returned by the i2b2 query about the cohort based on the inclusion and exclusion constraints fed the input of the front end query.",
+                  "type": "integer"
                 },
                 "results": {
                   "description": "Each item of this array contains the histogram of a specific analyte (concept or modifier).",
@@ -4202,9 +4238,27 @@ func init() {
       "schema": {
         "type": "object",
         "properties": {
+          "cohortQueryID": {
+            "description": "The ID of the record saved in the medco db which contains information about the patient set of the cohort corresponding to the inclusion/exclusion criterias specified by the user",
+            "type": "integer"
+          },
+          "encryptedCohortCount": {
+            "type": "string"
+          },
+          "encryptedPatientList": {
+            "description": "list of encrypted masked patient IDs.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "globalTimers": {
             "description": "Timers for work happening outside of the construction of the histograms",
             "$ref": "#/definitions/timers"
+          },
+          "patientSetID": {
+            "description": "ID returned by the i2b2 query about the cohort based on the inclusion and exclusion constraints fed the input of the front end query.",
+            "type": "integer"
           },
           "results": {
             "description": "Each item of this array contains the histogram of a specific analyte (concept or modifier).",
