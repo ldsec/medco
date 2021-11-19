@@ -234,11 +234,45 @@ func (q *Query) Execute(principal *models.User) (err error) {
 	}
 	querytoolsserver.UpdateExploreResultInstance(patientsInfos.QueryID, len(cohortInt), cohortInt, nil, nil)
 
+	err = q.locallyAggregatePatientCount(patientsInfos)
+	if err != nil {
+		return
+	}
 	// Process the answers given by the database about the cohort and fill the query
 	q.Response.ProcessPatientsList(q.QueryType, q.QueryName, patientsInfos, q.UserPublicKey, &q.Response.GlobalTimers)
 
 	return
 
+}
+
+func (q *Query) locallyAggregatePatientCount(patientsInfos medcoserver.LocalPatientsInfos) (err error) {
+
+	// aggregate patient dummy flags
+	timer := time.Now()
+	aggPatientFlags, err := unlynx.LocallyAggregateValues(patientsInfos.PatientDummyFlags)
+	if err != nil {
+		err = fmt.Errorf("during local aggregation %s", err.Error())
+		return
+	}
+
+	q.Response.GlobalTimers.AddTimers("medco-connector-local-agg", timer, nil)
+
+	// compute and key switch count (returns optionally global aggregate or shuffled results)
+	timer = time.Now()
+	var encCount string
+	var ksCountTimers map[string]time.Duration
+	if q.QueryType.PatientList && !q.QueryType.Obfuscated {
+		logrus.Info(q.QueryName, ": count per site requested, shuffle disabled")
+		encCount, ksCountTimers, err = unlynx.KeySwitchValue(q.QueryName, aggPatientFlags, q.UserPublicKey)
+	}
+	if err != nil {
+		err = fmt.Errorf("during key switch/shuffle operation: %s", err.Error())
+		return
+	}
+	q.Response.GlobalTimers.AddTimers("medco-connector-unlynx-key-switch-count", timer, ksCountTimers)
+	logrus.Info(q.QueryName, ": processed count")
+	q.Response.EncCount = encCount
+	return
 }
 
 func (q *Query) locallyProcessObservations(bucketSize float64, queryResults []QueryResult,
@@ -529,32 +563,6 @@ func (q *Query) prepareArguments(principal *models.User) (
 		err = fmt.Errorf("zero patients in the cohort for non empty constraint")
 		return
 	}
-
-	// aggregate patient dummy flags
-	timer = time.Now()
-	aggPatientFlags, err := unlynx.LocallyAggregateValues(patientsInfos.PatientDummyFlags)
-	if err != nil {
-		err = fmt.Errorf("during local aggregation %s", err.Error())
-		return
-	}
-
-	q.Response.GlobalTimers.AddTimers("medco-connector-local-agg", timer, nil)
-
-	// compute and key switch count (returns optionally global aggregate or shuffled results)
-	timer = time.Now()
-	var encCount string
-	var ksCountTimers map[string]time.Duration
-	if q.QueryType.PatientList && !q.QueryType.Obfuscated {
-		logrus.Info(q.QueryName, ": count per site requested, shuffle disabled")
-		encCount, ksCountTimers, err = unlynx.KeySwitchValue(q.QueryName, aggPatientFlags, q.UserPublicKey)
-	}
-	if err != nil {
-		err = fmt.Errorf("during key switch/shuffle operation: %s", err.Error())
-		return
-	}
-	q.Response.GlobalTimers.AddTimers("medco-connector-unlynx-key-switch-count", timer, ksCountTimers)
-	logrus.Info(q.QueryName, ": processed count")
-	q.Response.EncCount = encCount
 
 	q.PatientsIDs = make([]int64, 0)
 
