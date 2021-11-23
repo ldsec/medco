@@ -104,9 +104,41 @@ func NewQuery(
 	return res, nil
 }
 
+func mean(observations []QueryResult) float64 {
+	var sum float64 = 0
+	for _, o := range observations {
+		sum += o.NumericValue
+	}
+
+	return sum / float64(len(observations))
+}
+
+func std(observations []QueryResult, meanOfObs float64) float64 {
+	sigmaSquared := 0.0
+
+	for _, o := range observations {
+		d := o.NumericValue - meanOfObs
+
+		sigmaSquared += +d * d
+	}
+
+	sigmaSquared = sigmaSquared / float64(len(observations))
+
+	return math.Sqrt(sigmaSquared)
+}
+
 func outlierRemoval(observations []QueryResult) (outputObs []QueryResult, err error) {
-	// |Z| = | (x - x bar) / S | >= 6 (where S is std deviation)
-	outputObs = observations
+	// implementation of the three sigma rules:  |Z| = | (x - x bar) / S | >= 3 (where S is std deviation)
+	m := mean(observations)
+	s := std(observations, m)
+
+	for _, o := range observations {
+		Z := math.Abs((o.NumericValue - m) / s)
+		if Z <= 3 {
+			outputObs = append(outputObs, o)
+		}
+	}
+
 	return
 }
 
