@@ -127,19 +127,22 @@ func std(observations []QueryResult, meanOfObs float64) float64 {
 	return math.Sqrt(sigmaSquared)
 }
 
-func outlierRemoval(observations []QueryResult) (outputObs []QueryResult, err error) {
-	// implementation of the three sigma rules:  |Z| = | (x - x bar) / S | >= 3 (where S is std deviation)
-	m := mean(observations)
-	s := std(observations, m)
-
+func outlierRemovalHelper(observations []QueryResult, mean float64, std float64) (outputObs []QueryResult, err error) {
 	for _, o := range observations {
-		Z := math.Abs((o.NumericValue - m) / s)
+		Z := math.Abs((o.NumericValue - mean) / std)
 		if Z <= 3 {
 			outputObs = append(outputObs, o)
 		}
 	}
-
 	return
+}
+
+func outlierRemoval(observations []QueryResult) (outputObs []QueryResult, err error) {
+	// implementation of the three sigma rules:  |Z| = | (x - x bar) / S | >= 3 (where S is std deviation)
+	mean := mean(observations)
+	std := std(observations, mean)
+
+	return outlierRemovalHelper(observations, mean, std)
 }
 
 type CohortInformation struct {
