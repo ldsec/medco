@@ -56,7 +56,7 @@ jobs:
 
       - name: Start deployment and wait for it to be ready
         run: |
-          make -C deployments/dev-local-3nodes up
+          make -C deployments/dev-local-3nodes up-d
           bash test/wait_for_startup.sh $MEDCO_DB_NUMBER $MEDCO_DB_HOST $MEDCO_DB_PORT $MEDCO_DB_USER $MEDCO_DB_PASSWORD $MEDCO_DB_NAME
 
       - name: Run integration tests (depending on deployment)
