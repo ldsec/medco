@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
-# example: bash load-spo-i2b2-data.sh ../test/data/spo-synthetic/node_0 medco-demo.epfl.ch i2b2medcosrv0 medcoconnectorsrv0
-# example loading all in one: for NODE_NB in 0 1 2; do bash load-spo-i2b2-data.sh ../test/data/spo-synthetic/node_${NODE_NB} medco-demo.epfl.ch i2b2medcosrv${NODE_NB} medcoconnectorsrv${NODE_NB}; done
+# example: bash load-i2b2csv-data.sh ../test/data/spo-synthetic/node_0 medco-demo.epfl.ch i2b2medcosrv0 medcoconnectorsrv0
+# example loading all in one: for NODE_NB in 0 1 2; do bash load-i2b2csv-data.sh ../test/data/spo-synthetic/node_${NODE_NB} medco-demo.epfl.ch i2b2medcosrv${NODE_NB} medcoconnectorsrv${NODE_NB}; done
 
 DATA_FOLDER=$1
 DB_HOST=$2
@@ -66,6 +66,13 @@ CREATE TABLE IF NOT EXISTS medco_ont.sphn (
 ALTER TABLE medco_ont.sphn OWNER TO i2b2;
 TRUNCATE TABLE medco_ont.sphn;
 \copy medco_ont.sphn FROM './spo_onto_db.csv' ESCAPE '"' DELIMITER ',' CSV HEADER;
+
+CREATE INDEX IF NOT EXISTS META_FULLNAME_IDX ON medco_ont.sphn(C_FULLNAME);
+CREATE INDEX IF NOT EXISTS META_APPLIED_PATH_IDX ON medco_ont.sphn(M_APPLIED_PATH);
+CREATE INDEX IF NOT EXISTS META_EXCLUSION_IDX ON medco_ont.sphn(M_EXCLUSION_CD);
+CREATE INDEX IF NOT EXISTS META_HLEVEL_IDX ON medco_ont.sphn(C_HLEVEL);
+CREATE INDEX IF NOT EXISTS META_SYNONYM_IDX ON medco_ont.sphn(C_SYNONYM_CD);
+CREATE INDEX IF NOT EXISTS META_CNAME_IDX ON medco_ont.sphn(C_NAME);
 
 COMMIT;
 EOSQL
