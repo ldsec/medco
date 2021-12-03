@@ -43,12 +43,51 @@ func GetOntologyElements(path string, limit int64) (results []*models.ExploreSea
 			return nil, fmt.Errorf("while reading database record stream for retrieving ontology elements: %v", err)
 		}
 
-		var metadataXML models.Metadataxml
+		var metadataXML Metadataxml
+		var metadataXMLtoJSON *models.Metadataxml
 		if metaDataXML.Valid {
-			err = xml.Unmarshal([]byte(metaDataXML.String), &metadataXML)
+
+			err = xml.Unmarshal([]byte(metaDataXML.String), &metadataXML.ValueMetadata)
 			if err != nil {
 				return nil, fmt.Errorf("while unmarshalling xml metadata of ontology element %s: %v", fullName.String, err)
 			}
+
+			var unitValues []*models.UnitValues
+			for _, unitValue := range metadataXML.ValueMetadata.UnitValues {
+
+				var unitValuesConvertingUnits []*models.UnitValuesConvertingUnitsItems0
+				for _, unitValuesConvertingUnit := range unitValue.ConvertingUnits {
+					unitValuesConvertingUnits = append(unitValuesConvertingUnits, &models.UnitValuesConvertingUnitsItems0{
+						MultiplyingFactor: unitValuesConvertingUnit.MultiplyingFactor,
+						Units:             unitValuesConvertingUnit.Units,
+					})
+				}
+
+				unitValues = append(unitValues, &models.UnitValues{
+					ConvertingUnits: unitValuesConvertingUnits,
+					EqualUnits:      unitValue.EqualUnits,
+					ExcludingUnits:  unitValue.ExcludingUnits,
+					NormalUnits:     unitValue.NormalUnits,
+				})
+			}
+
+			metadataXMLtoJSON = &models.Metadataxml{
+				ValueMetadata: &models.MetadataxmlValueMetadata{
+					ChildrenEncryptIDs: metadataXML.ValueMetadata.ChildrenEncryptIDs,
+					CreationDateTime:   metadataXML.ValueMetadata.CreationDateTime,
+					DataType:           metadataXML.ValueMetadata.DataType,
+					EncryptedType:      metadataXML.ValueMetadata.EncryptedType,
+					EnumValues:         metadataXML.ValueMetadata.EnumValues,
+					Flagstouse:         metadataXML.ValueMetadata.Flagstouse,
+					NodeEncryptID:      metadataXML.ValueMetadata.NodeEncryptID,
+					Oktousevalues:      metadataXML.ValueMetadata.Oktousevalues,
+					TestID:             metadataXML.ValueMetadata.TestID,
+					TestName:           metadataXML.ValueMetadata.TestName,
+					UnitValues:         unitValues,
+					Version:            metadataXML.ValueMetadata.Version,
+				},
+			}
+
 		}
 
 		kind, leaf := parseVisualAttributes(visualAttributes.String)
@@ -59,7 +98,7 @@ func GetOntologyElements(path string, limit int64) (results []*models.ExploreSea
 			Name:        name.String,
 			DisplayName: name.String,
 			Code:        baseCode.String,
-			Metadata:    &metadataXML,
+			Metadata:    metadataXMLtoJSON,
 			Comment:     comment.String,
 			MedcoEncryption: &models.ExploreSearchResultElementMedcoEncryption{
 				Encrypted:   func() *bool { b := false; return &b }(),

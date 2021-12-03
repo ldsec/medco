@@ -6,6 +6,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
@@ -106,7 +108,7 @@ type MetadataxmlValueMetadata struct {
 	TestName string `json:"TestName,omitempty"`
 
 	// unit values
-	UnitValues *UnitValues `json:"UnitValues,omitempty"`
+	UnitValues []*UnitValues `json:"UnitValues"`
 
 	// version
 	Version string `json:"Version,omitempty"`
@@ -132,13 +134,20 @@ func (m *MetadataxmlValueMetadata) validateUnitValues(formats strfmt.Registry) e
 		return nil
 	}
 
-	if m.UnitValues != nil {
-		if err := m.UnitValues.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("ValueMetadata" + "." + "UnitValues")
-			}
-			return err
+	for i := 0; i < len(m.UnitValues); i++ {
+		if swag.IsZero(m.UnitValues[i]) { // not required
+			continue
 		}
+
+		if m.UnitValues[i] != nil {
+			if err := m.UnitValues[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("ValueMetadata" + "." + "UnitValues" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil
