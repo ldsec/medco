@@ -267,7 +267,12 @@ func (q *Query) Execute(principal *models.User) (err error) {
 	for i := 0; i < len(q.PatientsIDs); i++ {
 		cohortInt = append(cohortInt, int(q.PatientsIDs[i]))
 	}
-	querytoolsserver.UpdateExploreResultInstance(patientsInfos.QueryID, len(cohortInt), cohortInt, nil, nil)
+
+	patientSetID, err := strconv.Atoi(patientsInfos.PatientSetID)
+	if err != nil {
+		return fmt.Errorf("Error while converting patient set id to integer ", err)
+	}
+	querytoolsserver.UpdateExploreResultInstance(patientsInfos.QueryID, len(cohortInt), cohortInt, nil, &patientSetID)
 
 	err = q.locallyAggregatePatientCount(patientsInfos)
 	if err != nil {
@@ -590,7 +595,7 @@ func (q *Query) prepareArguments(principal *models.User) (
 	q.InstantiatedRecord = true
 
 	if err != nil {
-		logrus.Error("error while getting patient list")
+		logrus.Error("error while getting patient list", err)
 		return
 	}
 
