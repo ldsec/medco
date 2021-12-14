@@ -1,7 +1,6 @@
 package utilserver
 
 import (
-	"encoding/json"
 	"errors"
 	"github.com/ldsec/medco/connector/restapi/models"
 	"github.com/lestrrat-go/jwx/jwt"
@@ -31,19 +30,14 @@ func AuthenticateUser(token string) (user *models.User, err error) {
 	}
 
 	// parse and validate claims
-	var parsedToken jwt.Token
-	if err = json.Unmarshal(tokenPayload, &parsedToken); err != nil {
-		logrus.Warn("authentication failed (token parsing error): ", err)
-		return
-	}
-
-	err = parsedToken.Verify(
+	parsedToken, err := jwt.Parse(
+		tokenPayload,
 		jwt.WithIssuer(matchingProvider.JwtIssuer),
 		jwt.WithAudience(matchingProvider.ClientID),
 		jwt.WithAcceptableSkew(matchingProvider.JwtAcceptableSkew),
 	)
 	if err != nil {
-		logrus.Warn("authentication failed (invalid claim): ", err)
+		logrus.Warn("authentication failed): ", err)
 		return
 	}
 
@@ -59,12 +53,12 @@ func AuthenticateUser(token string) (user *models.User, err error) {
 	}
 
 	// extract user authorizations
-	user.Authorizations, err = extractAuthorizationsFromToken(&parsedToken, matchingProvider)
+	user.Authorizations, err = extractAuthorizationsFromToken(parsedToken, matchingProvider)
 	return
 }
 
 // extractAuthorizationsFromToken parsed the token to extract the user's authorizations
-func extractAuthorizationsFromToken(token *jwt.Token, provider *oidcProvider) (ua *models.UserAuthorizations, err error) {
+func extractAuthorizationsFromToken(token jwt.Token, provider *oidcProvider) (ua *models.UserAuthorizations, err error) {
 
 	// retrieve roles, within the keycloak pre-determined structure (this is ugly)
 	var extractedRoles []string
