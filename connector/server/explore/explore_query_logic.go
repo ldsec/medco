@@ -197,15 +197,17 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 			q.Result.EncPatientList = ksMaskedPatientIDs
 			logrus.Info(q.ID, ": key switched patient IDs")
 		}
-		q.Result.QueryID = queryID
-
-		logrus.Info(q.ID, ": patient set ID requested")
-
-		q.Result.PatientSetID, err = strconv.Atoi(patientSetID)
-		if err != nil {
-			return fmt.Errorf("while parsing patient set id: %v", err)
-		}
 	}
+
+	q.Result.QueryID = queryID
+
+	logrus.Info(q.ID, ": patient set ID requested")
+
+	q.Result.PatientSetID, err = strconv.Atoi(patientSetID)
+	if err != nil {
+		return fmt.Errorf("while parsing patient set id: %v", err)
+	}
+
 	//update medco connector result instance
 	timer = time.Now()
 	err = updateResultInstanceTable(queryID, patientCount, patientIDs, patientSetID)
