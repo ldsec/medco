@@ -16,37 +16,37 @@ All the participating nodes must do the following prior to start the generation 
 Execute the script `step1.sh` with the proper arguments in order to generate part of the deployment profile.
 Some examples follow.
 
-Generate all keys and certificates and use the same address for HTTP and unlynx:
+Generate all keys and certificates and use the same address for HTTPS and unlynx:
 ```shell
 bash step1.sh --network_name test-network-deployment --node_index 0 \
-  --http_address node0.medco.com
+  --https_address node0.medco.com
 ```
 
-Generate all keys and certificates and use different addresses for HTTP and unlynx:
+Generate all keys and certificates and use different addresses for HTTPS and unlynx:
 ```shell
 bash step1.sh --network_name test-network-deployment --node_index 0 \
-  --http_address node0.medco.com --unlynx_address 192.168.57.110:2054
+  --https_address node0.medco.com --unlynx_address 192.168.57.110:2054
 ```
 
-Generate unlynx keys and provide HTTP certificate and key:
+Generate unlynx keys and provide HTTPS certificate and key:
 ```shell
 bash step1.sh --network_name test-network-deployment --node_index 0 \
-  --http_address node0.medco.com \
+  --https_address node0.medco.com \
   --certificate ./mycert.crt --key ./mycert.key
 ```
 
-Provide HTTP certificate and key and generate unlynx keys:
+Provide HTTPS certificate and key and generate unlynx keys:
 ```shell
 bash step1.sh --network_name test-network-deployment --node_index 0 \
-  --http_address node0.medco.com \
+  --https_address node0.medco.com \
   --public_key "<unlynx_pub_key>" --secret_key "<unlynx_sec_key>"
 ```
 
 Definition of all arguments:
 - `--network_name` (mandatory): network name, e.g. `test-network-deployment`
 - `--node_index` (mandatory): node index, e.g. `0`
-- `--http_address` (mandatory): node HTTP address, either DNS name or IP address, e.g. `test.medco.com` or `192.168.43.22`
-- `--unlynx_address` (optional): unlynx address (DNS:port or IP:port), if different from node HTTP address or if a different port is desired, e.g. `128.67.78.1:2034`"
+- `--https_address` (mandatory): node HTTPS address, either DNS name or IP address, e.g. `test.medco.com` or `192.168.43.22`
+- `--unlynx_address` (optional): unlynx address (DNS:port or IP:port), if different from node HTTPS address or if a different port is desired, e.g. `128.67.78.1:2034`"
 - `--public_key` (optional): unlynx node public key, if it is not to be generated
 - `--secret_key` (optional): unlynx node private key, if it is not to be generated
 - `--certificate` (optional): filepath to certificate (*.crt), if it is not to be generated
