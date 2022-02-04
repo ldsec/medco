@@ -7,11 +7,9 @@ or production scenarios. It is composed of the following steps that must be done
 - Intermediate step: share over a separate channel a generated public archive to all other nodes, and collect public archives from all other nodes;
 - Script execution step 2: aggregate collected public archives and generate final configuration.
 
-todo review
-
 ## Preliminary step
 All the participating nodes must do the following prior to start the generation of the deployment profile:
-- Agree to a common and unique network name, e.g. "test-network-deployment";
+- Agree to a common and unique network name which must contain only basic characters: `a-z`, `A-Z`, `0-9` and `-` (note that underscores are NOT supported), e.g. `test-network-deployment-1`;
 - Agree on the participating nodes in the network and their unique index number, which must start at 0 and increase without gap in the numbering, e.g. "0, 1, 2".
 
 ## Script execution step 1
