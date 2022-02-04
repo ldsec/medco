@@ -1,4 +1,4 @@
-# Enhanced Network Profile Generation Tool
+# Network Profile Generation Tool
 
 The provided scripts can be used to generate a MedCo deployment and configuration profile for use over network for test
 or production scenarios. It is composed of the following steps that must be done from all participating nodes:
