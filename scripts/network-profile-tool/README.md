@@ -25,7 +25,7 @@ bash step1.sh --network_name test-network-deployment --node_index 0 \
 Generate all keys and certificates and use different addresses for HTTPS and unlynx:
 ```shell
 bash step1.sh --network_name test-network-deployment --node_index 0 \
-  --https_address node0.medco.com --unlynx_address 192.168.57.110:2054
+  --https_address node0.medco.com --unlynx_address 192.168.57.110
 ```
 
 Generate unlynx keys and provide HTTPS certificate and key:
@@ -46,7 +46,7 @@ Definition of all arguments:
 - `--network_name` (mandatory): network name, e.g. `test-network-deployment`
 - `--node_index` (mandatory): node index, e.g. `0`
 - `--https_address` (mandatory): node HTTPS address, either DNS name or IP address, e.g. `test.medco.com` or `192.168.43.22`
-- `--unlynx_address` (optional): unlynx address (DNS:port or IP:port), if different from node HTTPS address or if a different port is desired, e.g. `128.67.78.1:2034`"
+- `--unlynx_address` (optional): unlynx address, either DNS name or IP address, if different from node HTTPS address, e.g. `test-unlynx.medco.com` or `192.168.65.55`
 - `--public_key` (optional): unlynx node public key, if it is not to be generated
 - `--secret_key` (optional): unlynx node private key, if it is not to be generated
 - `--certificate` (optional): filepath to certificate (*.crt), if it is not to be generated

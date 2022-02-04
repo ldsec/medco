@@ -15,7 +15,7 @@ function help {
     echo -e "  -ni,   --node_index      VAL  Node index (e.g. 0, 1, 2)"
     echo -e "  -ha,   --https_address   VAL  Node HTTPS address, either DNS name or IP address (e.g. test.medco.com or 192.168.43.22)\n"
     echo -e "OPTIONAL:"
-    echo -e "  -ua,   --unlynx_address  VAL  Unlynx address (DNS:port or IP:port), if different from node HTTPS address or if a different port is desired, e.g. 128.67.78.1:2034"
+    echo -e "  -ua,   --unlynx_address  VAL  Unlynx address, either DNS name or IP address, if different from node HTTPS address (e.g. test-unlynx.medco.com or 192.168.65.55)"
     echo -e "  -pk,   --public_key      VAL  Unlynx node public key, if it is not to be generated"
     echo -e "  -sk,   --secret_key      VAL  Unlynx node private key, if it is not to be generated"
     echo -e "  -crt,  --certificate     VAL  Filepath to certificate (*.crt), if it is not to be generated"
@@ -95,10 +95,11 @@ else
 fi
 
 if [[ -z "$UNLYNX_ADDRESS" ]]; then
-  echo "### Unlynx address defaults to HTTPS address with port 2001"
+  echo "### Unlynx address defaults to HTTPS address"
   UNLYNX_ADDRESS="${HTTPS_ADDRESS}:2001"
 else
-  echo "### Unlynx address was provided and is different from HTTPS address or has a different port"
+  echo "### Unlynx address was provided and is different from HTTPS address"
+  UNLYNX_ADDRESS="${UNLYNX_ADDRESS}:2001"
 fi
 
 # generate convenience variables
