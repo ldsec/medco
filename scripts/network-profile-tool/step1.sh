@@ -2,68 +2,36 @@
 set -Eeo pipefail
 shopt -s nullglob
 
+source common.sh
+
 # ===================== input parsing ==================
 function example {
-    echo -e "example: $0 -nn <network name> -ni <node index> -dns <node_dns_name> [-crt <certificate_path> -key <key_path>]"
-}
-
-function usage {
-    echo -e "Wrong arguments, usage: bash $0 MANDATORY [OPTIONAL]"
+    echo -e "example: $0 -nn <network name> -ni <node index> -ha <HTTPS address> [-ua <unlynx address> -crt <certificate_path> -k <key_path>]"
 }
 
 function help {
     echo -e "MANDATORY:"
-    echo -e "  -nn,   --network_name  VAL  Network name (e.g. test-network-deployment)"
-    echo -e "  -ni,   --node_index    VAL  Node index (e.g. 0, 1, 2)"
-    echo -e "  -dns,  --node_dns_name VAL  Server dns name\n"
+    echo -e "  -nn,   --network_name    VAL  Network name (e.g. test-network-deployment)"
+    echo -e "  -ni,   --node_index      VAL  Node index (e.g. 0, 1, 2)"
+    echo -e "  -ha,   --https_address   VAL  Node HTTPS address, either DNS name or IP address (e.g. test.medco.com or 192.168.43.22)\n"
     echo -e "OPTIONAL:"
-    echo -e "  -pk,   --public_key    VAL  Unlynx node public key"
-    echo -e "  -sk,   --secret_key    VAL  Unlynx node private key"
-    echo -e "  -crt,  --certificate   VAL  Filepath to certificate (*.crt)"
-    echo -e "  -k,    --key           VAL  Filepath to certificate key (*.key)"
+    echo -e "  -ua,   --unlynx_address  VAL  Unlynx address, either DNS name or IP address, if different from node HTTPS address (e.g. test-unlynx.medco.com or 192.168.65.55)"
+    echo -e "  -pk,   --public_key      VAL  Unlynx node public key, if it is not to be generated"
+    echo -e "  -sk,   --secret_key      VAL  Unlynx node private key, if it is not to be generated"
+    echo -e "  -crt,  --certificate     VAL  Filepath to certificate (*.crt), if it is not to be generated"
+    echo -e "  -k,    --key             VAL  Filepath to certificate key (*.key), if it is not to be generated"
     echo -e "  -h,    --help \n"
     example
 }
 
-#Declare the number of mandatory args
-margs=3
-
-# Ensures that the number of passed args are at least equals to the declared number of mandatory args.
-# It also handles the special case of the -h or --help arg.
-function margs_precheck {
-	if [ "$2" ] && [ "$1" -lt $margs ]; then
-		if [ "$2" == "--help" ] || [ "$2" == "-h" ]; then
-			help
-			exit
-		else
-	    usage
-	    help
-	    exit 1
-		fi
-	fi
-}
-
-# Ensures that all the mandatory args are not empty
-function margs_check {
-	if [ $# -lt $margs ]; then
-	    usage
-	    help
-	    exit 1 # error
-	fi
-}
-
-# check if no inputs where selected
-if [ $# -lt 1 ]; then
-  usage
-  help
-  exit 1
-fi
-margs_precheck $# "$1"
+margs=3 # number of mandatory args
+margs_precheck $# "$1" $margs
 
 # default values
 NETWORK_NAME=
 NODE_IDX=
-NODE_DNS_NAME=
+HTTPS_ADDRESS=
+UNLYNX_ADDRESS=
 PUB_KEY=
 PRIV_KEY=
 CRT=
@@ -79,9 +47,12 @@ do
    -ni  | --node_index )  shift
    						            NODE_IDX=$(printf "%03d" "$1")
 			                    ;;
-	 -dns  | --node_dns_name )  shift
-     						          NODE_DNS_NAME=$1
+	 -ha  | --https_address )  shift
+     						          HTTPS_ADDRESS=$1
   			                  ;;
+   -ua  | --unlynx_address  )  shift
+                          UNLYNX_ADDRESS=$1
+                          ;;
    -pk  | --public_key  )  shift
                           PUB_KEY=$1
                           ;;
@@ -108,51 +79,60 @@ do
 done
 
 # Check if all mandatory args have assigned values
-margs_check "$NETWORK_NAME" "$NODE_IDX" "$NODE_DNS_NAME"
-
+margs_check $margs "$NETWORK_NAME" "$NODE_IDX" "$HTTPS_ADDRESS"
 set -u
-if [[ ! $NETWORK_NAME =~ ^[a-zA-Z0-9-]+$ ]]; then
-    echo "Network name must only contain basic characters (a-z, A-Z, 0-9, -)"
-    exit 1
+check_network_name "$NETWORK_NAME"
+
+# parse addresses
+HTTPS_IP_ADDRESS=
+HTTPS_DNS_NAME=
+if [[ $HTTPS_ADDRESS =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  echo "### HTTPS address is an IP address"
+  HTTPS_IP_ADDRESS=$HTTPS_ADDRESS
+else
+  echo "### HTTPS address is a DNS name"
+  HTTPS_DNS_NAME=$HTTPS_ADDRESS
 fi
 
-# convenience variables
-PROFILE_NAME="network-${NETWORK_NAME}-node${NODE_IDX}"
-SCRIPT_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-MEDCO_DOCKER="ghcr.io/ldsec/medco:${MEDCO_SETUP_VER:-$(shell make --no-print-directory -C ../../ medco_version)}"
-COMPOSE_FOLDER="${SCRIPT_FOLDER}/../../deployments/${PROFILE_NAME}"
-CONF_FOLDER="${COMPOSE_FOLDER}/configuration"
+if [[ -z "$UNLYNX_ADDRESS" ]]; then
+  echo "### Unlynx address defaults to HTTPS address"
+  UNLYNX_ADDRESS="${HTTPS_ADDRESS}:2001"
+else
+  echo "### Unlynx address was provided and is different from HTTPS address"
+  UNLYNX_ADDRESS="${UNLYNX_ADDRESS}:2001"
+fi
+
+# generate convenience variables
+export_variables "$NETWORK_NAME" "$NODE_IDX"
 if [[ -d ${COMPOSE_FOLDER} ]]; then
     echo "The profile folder exists. Aborting."
     exit 2
 fi
 
-read -rp "### About to generate configuration of node ${NODE_IDX} (${NODE_DNS_NAME}) for profile ${PROFILE_NAME}, <Enter> to continue, <Ctrl+C> to abort."
-
-echo "### Dependency on Docker check, script will abort if not found"
-which docker
-echo "### Dependency on OpenSSL check, script will abort if not found"
-which openssl
+echo "### About to generate configuration of node ${NODE_IDX} (${HTTPS_ADDRESS}) for profile ${PROFILE_NAME}"
+read -rp "### <Enter> to continue, <Ctrl+C> to abort."
+dependency_check
 
 # ===================== pre-requisites ======================
 mkdir "${COMPOSE_FOLDER}" "${CONF_FOLDER}"
-echo -n "${NODE_DNS_NAME}" > "${CONF_FOLDER}/srv${NODE_IDX}-nodednsname.txt"
-
+echo -n "${HTTPS_ADDRESS}" > "${CONF_FOLDER}/srv${NODE_IDX}-nodednsname.txt"
 
 # ===================== unlynx keys =========================
-echo "### Generating unlynx keys"
-if [[ -z ${PUB_KEY} ]]; then
-    docker run -v "$CONF_FOLDER:/medco-configuration" -u "$(id -u):$(id -g)" "${MEDCO_DOCKER}" medco-unlynx \
-        server setupNonInteractive --serverBinding "${NODE_DNS_NAME}:2001" --description "${PROFILE_NAME}_medco_unlynx_server" \
-        --privateTomlPath "/medco-configuration/srv${NODE_IDX}-private.toml" \
-        --publicTomlPath "/medco-configuration/srv${NODE_IDX}-public.toml"
-else
-    docker run -v "$CONF_FOLDER:/medco-configuration" -u "$(id -u):$(id -g)" "${MEDCO_DOCKER}" medco-unlynx \
-        server setupNonInteractive --serverBinding "${NODE_DNS_NAME}:2001" --description "${PROFILE_NAME}_medco_unlynx_server" \
-        --privateTomlPath "/medco-configuration/srv${NODE_IDX}-private.toml" \
-        --publicTomlPath "/medco-configuration/srv${NODE_IDX}-public.toml" \
-        --pubKey "${PUB_KEY}" --privKey "${PRIV_KEY}"
+unlynx_setup_args=(
+  medco-unlynx server setupNonInteractive
+  --serverBinding "$UNLYNX_ADDRESS"
+  --description "${PROFILE_NAME}_medco_unlynx_server"
+  --privateTomlPath "/medco-configuration/srv${NODE_IDX}-private.toml"
+  --publicTomlPath "/medco-configuration/srv${NODE_IDX}-public.toml"
+)
+
+echo "### Generating unlynx keys with address ${UNLYNX_ADDRESS}"
+if [[ -n "$PUB_KEY" ]]; then
+  echo "### Using pre-generated unlynx key ${PUB_KEY}"
+  unlynx_setup_args=("${unlynx_setup_args[@]}" --pubKey "${PUB_KEY}" --privKey "${PRIV_KEY}")
 fi
+
+"${MEDCO_BIN[@]}" "${unlynx_setup_args[@]}"
 echo "### Unlynx keys generated!"
 
 if [ -z "$CRT" ] && [ -z "$KEY" ]; then
@@ -171,9 +151,9 @@ stateOrProvinceName = Vaud
 stateOrProvinceName_default = Vaud
 localityName = Lausanne
 localityName_default = Lausanne
-organizationalUnitName = EPFL LDS
-organizationalUnitName_default = EPFL LDS
-commonName = ${NODE_DNS_NAME}
+organizationalUnitName = MedCo
+organizationalUnitName_default = MedCo
+commonName = ${HTTPS_ADDRESS}
 commonName_max = 64
 
 [ v3_req ]
@@ -182,8 +162,13 @@ keyUsage = nonRepudiation, digitalSignature, keyEncipherment
 subjectAltName = @alt_names
 
 [alt_names]
-DNS.1 = ${NODE_DNS_NAME}
 EOF
+
+if [[ -n "$HTTPS_IP_ADDRESS" ]]; then
+  echo "IP.1 = ${HTTPS_IP_ADDRESS}" >> "${SCRIPT_FOLDER}/openssl.cnf"
+else
+  echo "DNS.1 = ${HTTPS_DNS_NAME}" >> "${SCRIPT_FOLDER}/openssl.cnf"
+fi
 
 openssl genrsa -out "${CONF_FOLDER}/certificate.key" 2048
 echo -e "\n\n\n\n\n" | openssl req -new -out "${CONF_FOLDER}/certificate.csr" \
@@ -215,7 +200,7 @@ fi
 echo "### Generating compose profile"
 cp "${SCRIPT_FOLDER}/docker-compose.yml" "${SCRIPT_FOLDER}/docker-compose.tools.yml" "${SCRIPT_FOLDER}/Makefile" "${COMPOSE_FOLDER}/"
 cat > "${COMPOSE_FOLDER}/.env" <<EOF
-MEDCO_NODE_DNS_NAME=${NODE_DNS_NAME}
+MEDCO_NODE_DNS_NAME=${HTTPS_ADDRESS}
 MEDCO_NODE_IDX=${NODE_IDX}
 MEDCO_PROFILE_NAME=${PROFILE_NAME}
 MEDCO_NETWORK_NAME=${NETWORK_NAME}
