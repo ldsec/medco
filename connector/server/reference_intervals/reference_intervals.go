@@ -225,6 +225,7 @@ func (q *Query) Execute(principal *models.User) (err error) {
 
 		if err != nil {
 			errChan <- err
+			return
 		}
 
 		statsResults.AnalyteName = codeNamePair.Name
@@ -318,6 +319,10 @@ func (q *Query) locallyAggregatePatientCount(patientsInfos medcoserver.LocalPati
 func (q *Query) locallyProcessObservations(bucketSize float64, queryResults []QueryResult,
 	timer time.Time, code string, encryptionMethod func(int64) (string, error)) (encCounts []string, statsResults *StatsResult, err error) {
 
+	if len(queryResults) <= 0 {
+		err = fmt.Errorf("no observations present in the database for this combination of analytes and cohort definition")
+		return
+	}
 	//get the minimum and maximum value of the concepts
 	var maxResult QueryResult = queryResults[0]
 	for _, r := range queryResults {
@@ -472,6 +477,11 @@ func (q *Query) processObservations(bucketSize float64, queryResults []QueryResu
 	var encCounts []string
 	encCounts, statsResults, err = q.locallyProcessObservations(bucketSize, queryResults, timer, code, unlynx.EncryptWithCothorityKey)
 	if err != nil {
+		return
+	}
+
+	if statsResults == nil {
+		err = fmt.Errorf("no observations for this combination of analytes and cohort definition")
 		return
 	}
 
