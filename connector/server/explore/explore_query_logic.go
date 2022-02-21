@@ -211,6 +211,10 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 
 func (r *PatientSetResult) ProcessPatientsList(queryType ExploreQueryType, frontEndQueryName string, patientsInfos LocalPatientsInfos, userPublicKey string, Timers *medcomodels.Timers) (err error) {
 	var timer time.Time
+
+	// Returning the patient list, and id in order to save the cohort
+	r.QueryID = patientsInfos.QueryID
+
 	if !queryType.PatientList {
 		return
 	}
@@ -241,9 +245,6 @@ func (r *PatientSetResult) ProcessPatientsList(queryType ExploreQueryType, front
 		r.EncPatientList = ksMaskedPatientIDs
 		logrus.Info(frontEndQueryName, ": key switched patient IDs")
 	}
-
-	// Returning the patient list, and id in order to save the cohort
-	r.QueryID = patientsInfos.QueryID
 
 	logrus.Info(frontEndQueryName, ": patient set ID requested")
 
