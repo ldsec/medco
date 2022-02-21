@@ -89,8 +89,8 @@ func ExploreStatisticsHandler(param explore_statistics.ExploreStatisticsParams, 
 		GlobalTimers: modelsTimers,
 	}
 
+	requestResult.CohortQueryID = int64(query.Response.QueryID)
 	if queryType.PatientList {
-		requestResult.CohortQueryID = int64(query.Response.QueryID)
 		requestResult.EncryptedPatientList = query.Response.EncPatientList
 		requestResult.PatientSetID = int64(query.Response.PatientSetID)
 		requestResult.EncryptedCohortCount = query.Response.EncCount
