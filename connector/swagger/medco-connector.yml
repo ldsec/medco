@@ -863,7 +863,9 @@ definitions:
           EnumValues:
             type: "string"
           UnitValues:
-            $ref: "#/definitions/UnitValues"
+            type: array
+            items:
+              $ref: "#/definitions/UnitValues"
           EncryptedType:
             type: "string"
           NodeEncryptID:
