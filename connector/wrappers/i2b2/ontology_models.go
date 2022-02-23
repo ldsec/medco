@@ -205,6 +205,79 @@ type Modifier struct {
 	AppliedPath string `xml:"applied_path"`
 }
 
+// Metadataxml is the metadata of an i2b2 ontolgy element.
+type Metadataxml struct {
+
+	// value metadata
+	ValueMetadata *MetadataxmlValueMetadata `xml:"ValueMetadata,omitempty"`
+}
+
+// MetadataxmlValueMetadata is the metadata value of an i2b2 ontolgy element.
+type MetadataxmlValueMetadata struct {
+
+	// children encrypt i ds
+	ChildrenEncryptIDs string `xml:"ChildrenEncryptIDs,omitempty"`
+
+	// creation date time
+	CreationDateTime string `xml:"CreationDateTime,omitempty"`
+
+	// data type
+	DataType string `xml:"DataType,omitempty"`
+
+	// encrypted type
+	EncryptedType string `xml:"EncryptedType,omitempty"`
+
+	// enum values
+	EnumValues string `xml:"EnumValues,omitempty"`
+
+	// flagstouse
+	Flagstouse string `xml:"Flagstouse,omitempty"`
+
+	// node encrypt ID
+	NodeEncryptID string `xml:"NodeEncryptID,omitempty"`
+
+	// oktousevalues
+	Oktousevalues string `xml:"Oktousevalues,omitempty"`
+
+	// test ID
+	TestID string `xml:"TestID,omitempty"`
+
+	// test name
+	TestName string `xml:"TestName,omitempty"`
+
+	// unit values
+	UnitValues []*UnitValues `xml:"UnitValues"`
+
+	// version
+	Version string `xml:"Version,omitempty"`
+}
+
+// UnitValues are the unit values of an i2b2 ontology element
+type UnitValues struct {
+
+	// converting units
+	ConvertingUnits []*UnitValuesConvertingUnitsItems0 `xml:"ConvertingUnits"`
+
+	// equal units
+	EqualUnits []string `xml:"EqualUnits"`
+
+	// excluding units
+	ExcludingUnits []string `xml:"ExcludingUnits"`
+
+	// normal units
+	NormalUnits string `xml:"NormalUnits,omitempty"`
+}
+
+// UnitValuesConvertingUnitsItems0 is a converting unit of an i2b2 ontology element.
+type UnitValuesConvertingUnitsItems0 struct {
+
+	// multiplying factor
+	MultiplyingFactor string `xml:"MultiplyingFactor,omitempty"`
+
+	// units
+	Units string `xml:"Units,omitempty"`
+}
+
 // OntRespModifiersMessageBody is the message_body of the i2b2 get_modifiers response message
 type OntRespModifiersMessageBody struct {
 	XMLName   xml.Name   `xml:"message_body"`

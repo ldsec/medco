@@ -1,4 +1,4 @@
-FROM golang:1.14 as build
+FROM golang:1.15 as build
 ARG MEDCO_VERSION=dev
 
 COPY ./ /src

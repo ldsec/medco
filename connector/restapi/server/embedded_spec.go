@@ -873,7 +873,10 @@ func init() {
               "type": "string"
             },
             "UnitValues": {
-              "$ref": "#/definitions/UnitValues"
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/UnitValues"
+              }
             },
             "Version": {
               "type": "string"
@@ -2922,7 +2925,10 @@ func init() {
           "type": "string"
         },
         "UnitValues": {
-          "$ref": "#/definitions/UnitValues"
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UnitValues"
+          }
         },
         "Version": {
           "type": "string"
@@ -3470,7 +3476,10 @@ func init() {
               "type": "string"
             },
             "UnitValues": {
-              "$ref": "#/definitions/UnitValues"
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/UnitValues"
+              }
             },
             "Version": {
               "type": "string"

@@ -1,6 +1,7 @@
 package utilserver
 
 import (
+	"context"
 	"errors"
 	"github.com/lestrrat-go/jwx/jwk"
 	"github.com/lestrrat-go/jwx/jws"
@@ -33,19 +34,20 @@ type oidcProvider struct {
 
 	// cachedJWKSet is the cached set of keys used to establish the trust with the identity provider,
 	// valid until cachedJWKSetExpiration
-	cachedJWKSet *jwk.Set
+	cachedJWKSet jwk.Set
 
 	// cachedJWKSetExpiration is the expiration time of cachedJWKSet
 	cachedJWKSetExpiration time.Time
 }
 
 // retrieveJWKSets retrieves the JWK set (live or from cache if TTL not expired) and cache it
-func (oidcProvider *oidcProvider) retrieveJWKSet() (keySet *jwk.Set, err error) {
+func (oidcProvider *oidcProvider) retrieveJWKSet() (keySet jwk.Set, err error) {
 
 	if oidcProvider.cachedJWKSet == nil || oidcProvider.cachedJWKSetExpiration.Before(time.Now()) {
 
 		// fetch jwks with custom client to enforce timeout
 		oidcProvider.cachedJWKSet, err = jwk.Fetch(
+			context.Background(),
 			oidcProvider.JwksURL,
 			jwk.WithHTTPClient(&http.Client{
 				Timeout: JwksTimeout,
@@ -82,7 +84,7 @@ func verifyTokenWithJWKSets(token string) (tokenPayload []byte, matchingProvider
 			}
 
 			// signature verification attempt
-			if attemptedTokenPayload, err := jws.VerifyWithJWKSet([]byte(token), keySet, nil); err == nil {
+			if attemptedTokenPayload, err := jws.VerifySet([]byte(token), keySet); err == nil {
 				logrus.Info("Token validation successful with provider: ", provider.JwksURL)
 				if tokenPayload != nil || matchingProvider != nil {
 					logrus.Warn("More than one OIDC provider matches")
