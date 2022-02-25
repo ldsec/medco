@@ -190,7 +190,6 @@ echo "### Key selected!"
 
 else
 
-rm -rf "${COMPOSE_FOLDER}"
 echo "You must input both filepath to *.crt (-crt) and *.key (-k)."
 exit 1
 
