@@ -6,18 +6,19 @@ import (
 	"encoding/binary"
 	"encoding/csv"
 	"errors"
-	"github.com/ldsec/medco/loader"
-	"github.com/ldsec/medco/loader/identifiers"
-	"github.com/ldsec/medco/unlynx/services"
-	"github.com/ldsec/unlynx/lib"
-	"go.dedis.ch/onet/v3"
-	"go.dedis.ch/onet/v3/log"
 	"io"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/ldsec/medco/loader"
+	"github.com/ldsec/medco/loader/identifiers"
+	servicesmedco "github.com/ldsec/medco/unlynx/services"
+	libunlynx "github.com/ldsec/unlynx/lib"
+	"go.dedis.ch/onet/v3"
+	"go.dedis.ch/onet/v3/log"
 )
 
 func init() {

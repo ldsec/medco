@@ -6,7 +6,7 @@ import (
 
 	"github.com/ldsec/medco"
 
-	"github.com/ldsec/unlynx/lib"
+	libunlynx "github.com/ldsec/unlynx/lib"
 	"github.com/urfave/cli"
 	"go.dedis.ch/onet/v3/app"
 	"go.dedis.ch/onet/v3/log"

@@ -1,18 +1,20 @@
+//go:build unit_test
 // +build unit_test
 
 package servicesmedco_test
 
 import (
-	"github.com/ldsec/medco/unlynx/services"
-	"github.com/ldsec/unlynx/lib"
+	"strconv"
+	"sync"
+	"testing"
+
+	servicesmedco "github.com/ldsec/medco/unlynx/services"
+	libunlynx "github.com/ldsec/unlynx/lib"
 	"github.com/stretchr/testify/assert"
 	"go.dedis.ch/kyber/v3"
 	"go.dedis.ch/onet/v3"
 	"go.dedis.ch/onet/v3/log"
 	"go.dedis.ch/onet/v3/network"
-	"strconv"
-	"sync"
-	"testing"
 )
 
 func getParam(nbServers int) (*onet.Roster, *onet.LocalTest) {

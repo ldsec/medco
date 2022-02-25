@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ldsec/medco/connector/util/server"
-	"github.com/ldsec/medco/unlynx/services"
-	"github.com/ldsec/unlynx/lib"
+	utilserver "github.com/ldsec/medco/connector/util/server"
+	servicesmedco "github.com/ldsec/medco/unlynx/services"
+	libunlynx "github.com/ldsec/unlynx/lib"
 	"github.com/sirupsen/logrus"
 )
 

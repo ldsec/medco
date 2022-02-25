@@ -3,9 +3,10 @@ package i2b2
 import (
 	"encoding/xml"
 	"errors"
-	"github.com/ldsec/medco/connector/util/server"
 	"strconv"
 	"time"
+
+	utilserver "github.com/ldsec/medco/connector/util/server"
 )
 
 // NewRequest creates a new ready-to-use i2b2 request, with a nil message body

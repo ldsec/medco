@@ -3,7 +3,7 @@ package servicesmedco
 import (
 	"time"
 
-	"github.com/ldsec/unlynx/lib"
+	libunlynx "github.com/ldsec/unlynx/lib"
 	"go.dedis.ch/kyber/v3"
 	"go.dedis.ch/onet/v3"
 	"go.dedis.ch/onet/v3/log"

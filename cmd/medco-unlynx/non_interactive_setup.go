@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/ldsec/unlynx/lib"
+	libunlynx "github.com/ldsec/unlynx/lib"
 	"github.com/urfave/cli"
 	"go.dedis.ch/kyber/v3/util/encoding"
 	"go.dedis.ch/kyber/v3/util/key"
