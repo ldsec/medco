@@ -19,7 +19,6 @@ services:
       - MEDCO_NODE_IDX=${MEDCO_NODE_IDX:?}
     ports:
       - "2001:2001"
-      - "2002:2002"
     volumes:
       - ./configuration:/medco-configuration
     networks:
