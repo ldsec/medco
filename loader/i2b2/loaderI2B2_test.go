@@ -1,18 +1,20 @@
+//go:build unit_test
 // +build unit_test
 
 package loaderi2b2_test
 
 import (
+	"os"
+	"testing"
+
 	loader "github.com/ldsec/medco/loader"
-	"github.com/ldsec/medco/loader/i2b2"
-	"github.com/ldsec/unlynx/lib"
+	loaderi2b2 "github.com/ldsec/medco/loader/i2b2"
+	libunlynx "github.com/ldsec/unlynx/lib"
 	"github.com/stretchr/testify/assert"
 	"go.dedis.ch/kyber/v3"
 	"go.dedis.ch/onet/v3"
 	"go.dedis.ch/onet/v3/app"
 	"go.dedis.ch/onet/v3/log"
-	"os"
-	"testing"
 )
 
 var publicKey kyber.Point

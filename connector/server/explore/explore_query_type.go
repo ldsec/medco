@@ -2,6 +2,7 @@ package medcoserver
 
 import (
 	"errors"
+
 	"github.com/ldsec/medco/connector/restapi/models"
 )
 
