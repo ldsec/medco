@@ -46,7 +46,7 @@ const (
 
 	optionProvidedPrivKey = "privKey"
 
-	optionWsUrl = "wsUrl"
+	optionWsURL = "wsUrl"
 
 	optionProvidedSecrets      = "secrets"
 	optionProvidedSecretsShort = "s"
@@ -151,7 +151,7 @@ func main() {
 			Usage: "Provided private key (optional)",
 		},
 		cli.StringFlag{
-			Name:  optionWsUrl,
+			Name:  optionWsURL,
 			Usage: "Unlynx / onet WebSocket URL, e.g. ws://medco-unlynx:2002",
 		},
 	}

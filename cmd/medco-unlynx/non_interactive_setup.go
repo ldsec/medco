@@ -20,7 +20,7 @@ func NonInteractiveSetup(c *cli.Context) error {
 	description := c.String(optionDescription)
 	privateTomlPath := c.String(optionPrivateTomlPath)
 	publicTomlPath := c.String(optionPublicTomlPath)
-	wsUrlStr := c.String(optionWsUrl)
+	wsURLStr := c.String(optionWsURL)
 
 	// provided keys (optional)
 	providedPubKey := c.String(optionProvidedPubKey)
@@ -68,7 +68,7 @@ func NonInteractiveSetup(c *cli.Context) error {
 		Address:     serverBinding,
 		Services:    services,
 		Description: description,
-		URL:         wsUrlStr,
+		URL:         wsURLStr,
 	}
 
 	server := app.NewServerToml(libunlynx.SuiTe, public, serverBinding, conf.Description, services)
