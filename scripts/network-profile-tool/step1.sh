@@ -121,6 +121,7 @@ echo -n "${HTTPS_ADDRESS}" > "${CONF_FOLDER}/srv${NODE_IDX}-nodednsname.txt"
 unlynx_setup_args=(
   medco-unlynx server setupNonInteractive
   --serverBinding "$UNLYNX_ADDRESS"
+  --wsUrl "http://medco-unlynx:2002"
   --description "${PROFILE_NAME}_medco_unlynx_server"
   --privateTomlPath "/medco-configuration/srv${NODE_IDX}-private.toml"
   --publicTomlPath "/medco-configuration/srv${NODE_IDX}-public.toml"

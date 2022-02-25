@@ -2,12 +2,13 @@ package unlynx
 
 import (
 	"errors"
+	"strconv"
+	"time"
+
 	"github.com/ldsec/medco/connector/util/server"
 	"github.com/ldsec/medco/unlynx/services"
 	"github.com/ldsec/unlynx/lib"
 	"github.com/sirupsen/logrus"
-	"strconv"
-	"time"
 )
 
 // DDTagValues makes request through unlynx to compute distributed deterministic tags of encrypted values

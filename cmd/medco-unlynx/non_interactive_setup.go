@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/ldsec/unlynx/lib"
 	"github.com/urfave/cli"
 	"go.dedis.ch/kyber/v3/util/encoding"
@@ -15,14 +16,15 @@ import (
 func NonInteractiveSetup(c *cli.Context) error {
 
 	// cli arguments
-	serverBindingStr := c.String("serverBinding")
-	description := c.String("description")
-	privateTomlPath := c.String("privateTomlPath")
-	publicTomlPath := c.String("publicTomlPath")
+	serverBindingStr := c.String(optionServerBinding)
+	description := c.String(optionDescription)
+	privateTomlPath := c.String(optionPrivateTomlPath)
+	publicTomlPath := c.String(optionPublicTomlPath)
+	wsUrlStr := c.String(optionWsUrl)
 
 	// provided keys (optional)
-	providedPubKey := c.String("pubKey")
-	providedPrivKey := c.String("privKey")
+	providedPubKey := c.String(optionProvidedPubKey)
+	providedPrivKey := c.String(optionProvidedPrivKey)
 
 	if serverBindingStr == "" || description == "" || privateTomlPath == "" || publicTomlPath == "" {
 		err := fmt.Errorf("arguments not OK")
@@ -66,9 +68,12 @@ func NonInteractiveSetup(c *cli.Context) error {
 		Address:     serverBinding,
 		Services:    services,
 		Description: description,
+		URL:         wsUrlStr,
 	}
 
 	server := app.NewServerToml(libunlynx.SuiTe, public, serverBinding, conf.Description, services)
+	server.URL = conf.URL
+
 	group := app.NewGroupToml(server)
 
 	if err := conf.Save(privateTomlPath); err != nil {
