@@ -1,6 +1,4 @@
-module github.com/CHUV-DS/medco
-
-replace github.com/ldsec/medco => ./
+module github.com/ldsec/medco
 
 require (
 	github.com/BurntSushi/toml v0.4.1
@@ -13,7 +11,6 @@ require (
 	github.com/go-openapi/swag v0.19.15
 	github.com/go-openapi/validate v0.20.3
 	github.com/jessevdk/go-flags v1.5.0
-	github.com/ldsec/medco v0.0.0-00010101000000-000000000000
 	github.com/ldsec/unlynx v1.4.3
 	github.com/lestrrat-go/jwx v1.2.13
 	github.com/lib/pq v1.10.4
