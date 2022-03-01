@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/ldsec/medco"
 	"os"
+
+	"github.com/ldsec/medco"
 
 	libunlynx "github.com/ldsec/unlynx/lib"
 	"github.com/urfave/cli"
