@@ -5,8 +5,8 @@ services:
       file: ../docker-compose-definitions.yml
       service: medco-cli-client
     environment:
-      - OIDC_REQ_TOKEN_URL=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/auth/realms/master/protocol/openid-connect/token
-      - MEDCO_CONNECTOR_URL=${MEDCO_NODE_HTTP_SCHEME:?}://${MEDCO_NODE_HOST:?}/local-3nodes/medco-0
+      - OIDC_REQ_TOKEN_URL=https://${MEDCO_NODE_HOST:?}/auth/realms/master/protocol/openid-connect/token
+      - MEDCO_CONNECTOR_URL=https://${MEDCO_NODE_HOST:?}/local-3nodes/medco-0
     volumes:
       - ./configuration:/medco-configuration
 

@@ -62,7 +62,6 @@ services:
       - "80:80"
       - "443:443"
     environment:
-      - HTTP_SCHEME=https
       - PROD_CONFIG=true
     volumes:
       - ./configuration/group.toml:/medco-configuration/group.toml

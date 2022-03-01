@@ -2,12 +2,20 @@
 set -Eeuo pipefail
 
 EXEC=$@
-if [[ "$1" = "medco-connector-server" ]]; then
-  # trust the certificates of other nodes
-  if [[ `ls -1 /medco-configuration/srv*-certificate.crt 2>/dev/null | wc -l` != 0 ]]; then
-      /bin/cp -f /medco-configuration/srv*-certificate.crt /usr/local/share/ca-certificates/
-      update-ca-certificates
+
+# trust the certificates of other nodes
+if [[ -d /medco-configuration ]]; then
+  NB_CA_CERTS=$(find /medco-configuration -maxdepth 1 -name '*.crt' | wc -l)
+  if [[ "$NB_CA_CERTS" != 0 ]]; then
+    cp -f /medco-configuration/*.crt /usr/local/share/ca-certificates/
+    update-ca-certificates
+    echo "MedCo ($EXEC): $NB_CA_CERTS CA certificates added"
+  else
+    echo "MedCo ($EXEC): no CA certificate added"
   fi
+fi
+
+if [[ "$1" = "medco-connector-server" ]]; then
 
   # wait for postgres to be available
   export PGPASSWORD="$MC_DB_PASSWORD"

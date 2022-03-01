@@ -61,6 +61,7 @@ services:
       service: nginx
     ports:
       - "80:80"
+      - "443:443"
     networks:
       intra-node-srv0:
       inter-nodes:

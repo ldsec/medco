@@ -33,7 +33,6 @@ services:
     build:
       context: ../build/package/nginx
     environment:
-      - HTTP_SCHEME=http
       - ALL_TIMEOUTS_SECONDS=600
       - PROD_CONFIG=false
     volumes:
@@ -75,8 +74,8 @@ services:
   glowing-bear-medco:
     image: ghcr.io/ldsec/glowing-bear-medco:${GLOWING_BEAR_MEDCO_VERSION:?}
     environment:
-      - GB_MEDCO_NODE_URL=http://localhost/local-3nodes/medco-0
-      - GB_KEYCLOAK_URL=http://localhost/auth
+      - GB_MEDCO_NODE_URL=https://localhost/local-3nodes/medco-0
+      - GB_KEYCLOAK_URL=https://localhost/auth
       - GB_KEYCLOAK_REALM=master
       - GB_KEYCLOAK_CLIENT_ID=medco
       - GB_FOOTER_TEXT=
@@ -102,12 +101,12 @@ services:
       - UNLYNX_GROUP_FILE_PATH=/medco-configuration/group.toml
       - UNLYNX_TIMEOUT_SECONDS=150
       - OIDC_JWKS_URLS=http://keycloak:8080/auth/realms/master/protocol/openid-connect/certs
-      - OIDC_JWT_ISSUERS=http://localhost/auth/realms/master
+      - OIDC_JWT_ISSUERS=https://localhost/auth/realms/master
       - OIDC_CLIENT_IDS=medco
       - OIDC_JWT_USER_ID_CLAIMS=preferred_username
       - OIDC_JWKS_TIMEOUT_SECONDS=30
       - MEDCO_OBFUSCATION_MIN=5
-      - MEDCO_NODES_URL=http://localhost/local-3nodes/medco-0,http://localhost/local-3nodes/medco-1,http://localhost/local-3nodes/medco-2
+      - MEDCO_NODES_URL=https://localhost/local-3nodes/medco-0,https://localhost/local-3nodes/medco-1,https://localhost/local-3nodes/medco-2
       - MEDCO_NODE_IDX=0
       - MC_DB_HOST=postgresql
       - MC_DB_PORT=5432
@@ -141,8 +140,8 @@ services:
       - TOKEN_TIMEOUT_SECONDS=10
       - WAIT_TICK_SECONDS=5
       - CLIENT_GENOMIC_ANNOTATIONS_QUERY_TIMEOUT_SECONDS=10
-      - MEDCO_CONNECTOR_URL=http://localhost/local-3nodes/medco-0
-      - OIDC_REQ_TOKEN_URL=http://localhost/auth/realms/master/protocol/openid-connect/token
+      - MEDCO_CONNECTOR_URL=https://localhost/local-3nodes/medco-0
+      - OIDC_REQ_TOKEN_URL=https://localhost/auth/realms/master/protocol/openid-connect/token
       - OIDC_REQ_TOKEN_CLIENT_ID=medco
     volumes:
       - ./dev-local-3nodes/configuration:/medco-configuration
