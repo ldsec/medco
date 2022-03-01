@@ -28,6 +28,20 @@ services:
     volumes:
       - ./dev-local-3nodes/configuration:/medco-configuration
 
+  medco-unlynx-wstunnel:
+    image: ghcr.io/chuv-ds/medco-unlynx-wstunnel:${MEDCO_VERSION:?}
+    build:
+      context: ../build/package/wstunnel
+    environment:
+      - SERVER_LISTEN_URL=ws://0.0.0.0:2003
+      - SERVER_DEST_ADDRESS=medco-unlynx:2001
+      - CLIENT_XXX_LISTEN_ADDRESS=0.0.0.0:3000
+      - CLIENT_XXX_WS_SERVER_URL=ws://medco-unlynx-wstunnel-srv0:2003
+      - CLIENT_XXX_WS_SERVER_PATH_PREFIX=""
+      - CLIENT_XXX_DEST_ADDRESS=medco-unlynx:2001
+    volumes:
+      - ./dev-local-3nodes/configuration:/medco-configuration
+
   nginx:
     image: ghcr.io/ldsec/nginx-medco:${MEDCO_VERSION:?}
     build:
