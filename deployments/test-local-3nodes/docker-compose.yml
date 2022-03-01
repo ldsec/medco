@@ -13,21 +13,15 @@ services:
     ports:
       - "8090:8080"
     networks:
-      intra-node-srv0:
-        aliases:
-          - i2b2
       inter-nodes:
 
   medco-unlynx-srv0:
     extends:
       file: ../docker-compose-definitions.yml
       service: medco-unlynx
-    ports:
-      - "2001:2001"
     environment:
       - MEDCO_NODE_IDX=0
     networks:
-      intra-node-srv0:
       inter-nodes:
         ipv4_address: 172.31.1.101
     volumes:
@@ -52,7 +46,6 @@ services:
         https://${MEDCO_NODE_HOST:?}/local-3nodes/medco-1,\
         https://${MEDCO_NODE_HOST:?}/local-3nodes/medco-2"
     networks:
-      intra-node-srv0:
       inter-nodes:
     volumes:
       - ./configuration:/medco-configuration
@@ -65,7 +58,6 @@ services:
       - "80:80"
       - "443:443"
     networks:
-      intra-node-srv0:
       inter-nodes:
     volumes:
       - ./configuration/certificate.crt:/medco-configuration/certificate.crt
@@ -84,21 +76,15 @@ services:
     ports:
       - "8091:8080"
     networks:
-      intra-node-srv1:
-        aliases:
-          - i2b2
       inter-nodes:
 
   medco-unlynx-srv1:
     extends:
       file: ../docker-compose-definitions.yml
       service: medco-unlynx
-    ports:
-      - "2003:2003"
     environment:
       - MEDCO_NODE_IDX=1
     networks:
-      intra-node-srv1:
       inter-nodes:
         ipv4_address: 172.31.1.111
     volumes:
@@ -123,7 +109,6 @@ services:
         https://${MEDCO_NODE_HOST:?}/local-3nodes/medco-1,\
         https://${MEDCO_NODE_HOST:?}/local-3nodes/medco-2"
     networks:
-      intra-node-srv1:
       inter-nodes:
     volumes:
       - ./configuration:/medco-configuration
@@ -141,21 +126,15 @@ services:
     ports:
       - "8092:8080"
     networks:
-      intra-node-srv2:
-        aliases:
-          - i2b2
       inter-nodes:
 
   medco-unlynx-srv2:
     extends:
       file: ../docker-compose-definitions.yml
       service: medco-unlynx
-    ports:
-      - "2005:2005"
     environment:
       - MEDCO_NODE_IDX=2
     networks:
-      intra-node-srv2:
       inter-nodes:
         ipv4_address: 172.31.1.121
     volumes:
@@ -180,7 +159,6 @@ services:
         https://${MEDCO_NODE_HOST:?}/local-3nodes/medco-1,\
         https://${MEDCO_NODE_HOST:?}/local-3nodes/medco-2"
     networks:
-      intra-node-srv2:
       inter-nodes:
     volumes:
       - ./configuration:/medco-configuration
@@ -239,13 +217,6 @@ networks:
     ipam:
       config:
         - subnet: 172.31.1.0/24
-
-  intra-node-srv0:
-    driver: bridge
-  intra-node-srv1:
-    driver: bridge
-  intra-node-srv2:
-    driver: bridge
 
 volumes:
   medcodb:

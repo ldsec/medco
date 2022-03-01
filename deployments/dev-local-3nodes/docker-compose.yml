@@ -11,9 +11,6 @@ services:
     ports:
       - "8090:8080"
     networks:
-      intra-node-srv0:
-        aliases:
-          - i2b2
       inter-nodes:
         ipv4_address: 172.31.0.100
 
@@ -21,13 +18,10 @@ services:
     extends:
       file: ../docker-compose-definitions.yml
       service: medco-unlynx
-    ports:
-      - "2001:2001"
     environment:
       - MEDCO_NODE_IDX=0
       - UNLYNX_DEBUG_LEVEL=3
     networks:
-      intra-node-srv0:
       inter-nodes:
         ipv4_address: 172.31.0.101
     volumes:
@@ -49,7 +43,6 @@ services:
       - MC_DB_NAME=medcoconnectorsrv0
       - I2B2_DB_NAME=i2b2medcosrv0
     networks:
-      intra-node-srv0:
       inter-nodes:
         ipv4_address: 172.31.0.102
     volumes:
@@ -63,7 +56,6 @@ services:
       - "80:80"
       - "443:443"
     networks:
-      intra-node-srv0:
       inter-nodes:
         ipv4_address: 172.31.0.200
 
@@ -78,9 +70,6 @@ services:
     ports:
       - "8091:8080"
     networks:
-      intra-node-srv1:
-        aliases:
-          - i2b2
       inter-nodes:
         ipv4_address: 172.31.0.110
 
@@ -88,14 +77,10 @@ services:
     extends:
       file: ../docker-compose-definitions.yml
       service: medco-unlynx
-    ports:
-        - "2003:2003"
-        - "2004:2004"
     environment:
       - MEDCO_NODE_IDX=1
       - UNLYNX_DEBUG_LEVEL=3
     networks:
-      intra-node-srv1:
       inter-nodes:
         ipv4_address: 172.31.0.111
     volumes:
@@ -117,7 +102,6 @@ services:
       - MC_DB_NAME=medcoconnectorsrv1
       - I2B2_DB_NAME=i2b2medcosrv1
     networks:
-      intra-node-srv1:
       inter-nodes:
         ipv4_address: 172.31.0.112
     volumes:
@@ -134,9 +118,6 @@ services:
     ports:
       - "8092:8080"
     networks:
-      intra-node-srv2:
-        aliases:
-          - i2b2
       inter-nodes:
         ipv4_address: 172.31.0.120
 
@@ -144,13 +125,10 @@ services:
     extends:
       file: ../docker-compose-definitions.yml
       service: medco-unlynx
-    ports:
-        - "2005:2005"
     environment:
       - MEDCO_NODE_IDX=2
       - UNLYNX_DEBUG_LEVEL=3
     networks:
-      intra-node-srv2:
       inter-nodes:
         ipv4_address: 172.31.0.121
     volumes:
@@ -172,7 +150,6 @@ services:
       - MC_DB_NAME=medcoconnectorsrv2
       - I2B2_DB_NAME=i2b2medcosrv2
     networks:
-      intra-node-srv2:
       inter-nodes:
         ipv4_address: 172.31.0.122
     volumes:
@@ -216,13 +193,6 @@ networks:
     ipam:
       config:
         - subnet: 172.31.0.0/24
-
-  intra-node-srv0:
-    driver: bridge
-  intra-node-srv1:
-    driver: bridge
-  intra-node-srv2:
-    driver: bridge
 
 volumes:
   medcodb:
