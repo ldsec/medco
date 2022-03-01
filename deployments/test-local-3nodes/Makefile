@@ -1,5 +1,6 @@
 export MEDCO_VERSION := $(shell make --no-print-directory -C ../../ medco_version)
 export GLOWING_BEAR_MEDCO_VERSION := $(shell make --no-print-directory -C ../../ gb_version)
+export DOCKER_REGISTRY := $(shell make --no-print-directory -C ../../ docker_registry)
 
 .PHONY: build pull up stop down load_test_data
 build:

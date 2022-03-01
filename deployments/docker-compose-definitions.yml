@@ -1,7 +1,7 @@
 version: "2.4"
 services:
   i2b2:
-    image: ghcr.io/ldsec/i2b2-medco:${MEDCO_VERSION:?}
+    image: ${DOCKER_REGISTRY:?}/i2b2-medco:${MEDCO_VERSION:?}
     build:
       context: ../build/package/i2b2
     environment:
@@ -17,7 +17,7 @@ services:
       - AXIS2_LOGLEVEL=INFO
 
   medco-unlynx:
-    image: ghcr.io/ldsec/medco:${MEDCO_VERSION:?}
+    image: ${DOCKER_REGISTRY:?}/medco:${MEDCO_VERSION:?}
     build:
       context: ../
       dockerfile: build/package/medco/Dockerfile
@@ -29,7 +29,7 @@ services:
       - ./dev-local-3nodes/configuration:/medco-configuration
 
   medco-unlynx-wstunnel:
-    image: ghcr.io/chuv-ds/medco-unlynx-wstunnel:${MEDCO_VERSION:?}
+    image: ${DOCKER_REGISTRY:?}/medco-unlynx-wstunnel:${MEDCO_VERSION:?}
     build:
       context: ../build/package/wstunnel
     environment:
@@ -43,7 +43,7 @@ services:
       - ./dev-local-3nodes/configuration:/medco-configuration
 
   nginx:
-    image: ghcr.io/ldsec/nginx-medco:${MEDCO_VERSION:?}
+    image: ${DOCKER_REGISTRY:?}/nginx-medco:${MEDCO_VERSION:?}
     build:
       context: ../build/package/nginx
     environment:
@@ -62,7 +62,7 @@ services:
       - ../build/package/postgresql/initdb-data:/docker-entrypoint-initdb.d
 
   pg-admin:
-    image: ghcr.io/ldsec/pgadmin-medco:${MEDCO_VERSION:?}
+    image: ${DOCKER_REGISTRY:?}/pgadmin-medco:${MEDCO_VERSION:?}
     build:
       context: ../build/package/pgadmin
     environment:
@@ -72,7 +72,7 @@ services:
       driver: none
 
   keycloak:
-    image: ghcr.io/ldsec/keycloak-medco:${MEDCO_VERSION:?}
+    image: ${DOCKER_REGISTRY:?}/keycloak-medco:${MEDCO_VERSION:?}
     build:
       context: ../build/package/keycloak
     environment:
@@ -95,7 +95,7 @@ services:
       - GB_FOOTER_TEXT=
 
   medco-connector:
-    image: ghcr.io/ldsec/medco:${MEDCO_VERSION:?}
+    image: ${DOCKER_REGISTRY:?}/medco:${MEDCO_VERSION:?}
     build:
       context: ../
       dockerfile: build/package/medco/Dockerfile
@@ -136,7 +136,7 @@ services:
       - ./dev-local-3nodes/configuration:/medco-configuration
 
   medco-cli-client:
-    image: ghcr.io/ldsec/medco:${MEDCO_VERSION:?}
+    image: ${DOCKER_REGISTRY:?}/medco:${MEDCO_VERSION:?}
     build:
       context: ../
       dockerfile: build/package/medco/Dockerfile
@@ -163,7 +163,7 @@ services:
     network_mode: host
 
   medco-loader:
-    image: ghcr.io/ldsec/medco:${MEDCO_VERSION:?}
+    image: ${DOCKER_REGISTRY:?}/medco:${MEDCO_VERSION:?}
     build:
       context: ../
       dockerfile: build/package/medco/Dockerfile

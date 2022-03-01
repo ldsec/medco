@@ -1,5 +1,6 @@
 MEDCO_VERSION := $(shell scripts/version.sh)
 GB_VERSION := v3.0.0
+DOCKER_REGISTRY := ghcr.io/chuv-ds
 
 # test commands
 .PHONY: test test_go_fmt test_go_lint test_codecov_unit test_codecov_e2e
@@ -84,3 +85,6 @@ medco_version:
 
 gb_version:
 	@echo $(GB_VERSION)
+
+docker_registry:
+	@echo $(DOCKER_REGISTRY)

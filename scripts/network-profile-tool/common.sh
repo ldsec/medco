@@ -49,7 +49,7 @@ function margs_check {
 function export_variables {
   PROFILE_NAME="network-$1-node$2"
   SCRIPT_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-  MEDCO_DOCKER="ghcr.io/ldsec/medco:${MEDCO_SETUP_VER:-$(make --no-print-directory -C ../../ medco_version)}"
+  MEDCO_DOCKER="${DOCKER_REGISTRY:-$(make --no-print-directory -C ../../ docker_registry)}/medco:${MEDCO_SETUP_VER:-$(make --no-print-directory -C ../../ medco_version)}"
   COMPOSE_FOLDER="${SCRIPT_FOLDER}/../../deployments/${PROFILE_NAME}"
   CONF_FOLDER="${COMPOSE_FOLDER}/configuration"
   MEDCO_BIN=(docker run -v "$CONF_FOLDER:/medco-configuration" -u "$(id -u):$(id -g)" "${MEDCO_DOCKER}")
