@@ -30,3 +30,30 @@ location /local-3nodes/medco-2 {
     rewrite /local-3nodes/medco-2/(.*) /medco/$1 break;
     proxy_pass http://$upstream_host:1999;
 }
+
+location /local-3nodes/wstunnel-unlynx-0 {
+    set $upstream_host medco-unlynx-wstunnel-srv0;
+    rewrite /local-3nodes/wstunnel-unlynx-0(.*) /$1 break;
+    proxy_pass http://$upstream_host:2003;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+}
+
+location /local-3nodes/wstunnel-unlynx-1 {
+    set $upstream_host medco-unlynx-wstunnel-srv1;
+    rewrite /local-3nodes/wstunnel-unlynx-1(.*) /$1 break;
+    proxy_pass http://$upstream_host:2003;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+}
+
+location /local-3nodes/wstunnel-unlynx-2 {
+    set $upstream_host medco-unlynx-wstunnel-srv2;
+    rewrite /local-3nodes/wstunnel-unlynx-2(.*) /$1 break;
+    proxy_pass http://$upstream_host:2003;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+}

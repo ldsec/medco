@@ -46,3 +46,12 @@ location /medco {
     set $upstream_host medco-connector;
     proxy_pass http://$upstream_host:1999;
 }
+
+location /unlynx {
+    set $upstream_host medco-unlynx;
+    rewrite /unlynx(.*) /$1 break;
+    proxy_pass http://$upstream_host:2003;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+}
