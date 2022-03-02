@@ -28,7 +28,7 @@ func ExploreStatisticsHandler(param explore_statistics.ExploreStatisticsParams, 
 
 	if err != nil {
 		logrus.Error(err)
-		explore_statistics.NewExploreStatisticsBadRequest().WithPayload(
+		return explore_statistics.NewExploreStatisticsBadRequest().WithPayload(
 			&explore_statistics.ExploreStatisticsBadRequestBody{
 				Message: "Explore statistics query creation error:" + err.Error()})
 	}
@@ -36,13 +36,13 @@ func ExploreStatisticsHandler(param explore_statistics.ExploreStatisticsParams, 
 	queryType, err := medcoserver.NewExploreQueryType(authorizedQueryType)
 	if err != nil {
 		logrus.Error(err)
-		explore_statistics.NewExploreStatisticsBadRequest().WithPayload(
+		return explore_statistics.NewExploreStatisticsBadRequest().WithPayload(
 			&explore_statistics.ExploreStatisticsBadRequestBody{
 				Message: "Explore statistics query creation error:" + err.Error()})
 	}
 
 	if queryType.Obfuscated {
-		explore_statistics.NewExploreStatisticsDefault(401).WithPayload(
+		return explore_statistics.NewExploreStatisticsDefault(401).WithPayload(
 			&explore_statistics.ExploreStatisticsDefaultBody{
 				Message: "No authorization to perform such request. Only authorized to see obsfuscated result."})
 	}
@@ -56,7 +56,7 @@ func ExploreStatisticsHandler(param explore_statistics.ExploreStatisticsParams, 
 
 	if err != nil {
 		logrus.Error(err)
-		explore_statistics.NewExploreStatisticsBadRequest().WithPayload(
+		return explore_statistics.NewExploreStatisticsBadRequest().WithPayload(
 			&explore_statistics.ExploreStatisticsBadRequestBody{
 				Message: "Explore statistics query creation error:" + err.Error()})
 
@@ -66,7 +66,7 @@ func ExploreStatisticsHandler(param explore_statistics.ExploreStatisticsParams, 
 	err = query.Validate()
 	if err != nil {
 		logrus.Error(err)
-		explore_statistics.NewExploreStatisticsBadRequest().WithPayload(
+		return explore_statistics.NewExploreStatisticsBadRequest().WithPayload(
 			&explore_statistics.ExploreStatisticsBadRequestBody{
 				Message: "Explore statistics query validation error:" + err.Error()})
 
@@ -76,9 +76,9 @@ func ExploreStatisticsHandler(param explore_statistics.ExploreStatisticsParams, 
 
 	if err != nil {
 		logrus.Error(err)
-		explore_statistics.NewExploreStatisticsDefault(500).WithPayload(
+		return explore_statistics.NewExploreStatisticsDefault(500).WithPayload(
 			&explore_statistics.ExploreStatisticsDefaultBody{
-				Message: "Explore statistics query execution error:" + err.Error()})
+				Message: "Execution error (server-side): " + err.Error()})
 	}
 
 	//parse timers

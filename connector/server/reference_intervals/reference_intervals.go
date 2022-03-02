@@ -163,14 +163,16 @@ func (q *Query) Execute(principal *models.User) (err error) {
 	defer func() {
 		// If an error occured and the current statistics query resulted in the creation of an explore query this deferred function will set an error status
 		// on the DB record for the explore query underlying this explore statistics query.
-		if err != nil && q.InstantiatedRecord {
-			logrus.Info("Updating the Explore Result instance with error status that is underlying the explore statistics query")
-			qtError := querytoolsserver.UpdateErrorExploreResultInstance(q.Response.QueryID)
-			if qtError != nil {
-				err = fmt.Errorf("while inserting a status error in result instance table: %s", qtError.Error())
-			} else {
-				logrus.Info("Updating Explore Result instance with error status")
-			}
+		if err == nil || !q.InstantiatedRecord {
+			return
+		}
+
+		logrus.Info("Updating the Explore Result instance with error status that is underlying the explore statistics query")
+		qtError := querytoolsserver.UpdateErrorExploreResultInstance(patientsInfos.QueryID)
+		if qtError != nil {
+			err = fmt.Errorf("while inserting a status error in result instance table: %s", qtError.Error())
+		} else {
+			logrus.Info("Updating Explore Result instance with error status")
 		}
 	}()
 
@@ -180,7 +182,9 @@ func (q *Query) Execute(principal *models.User) (err error) {
 			modStr += *mod.ModifierKey + ", "
 		}
 
-		err = fmt.Errorf("while retrieving concept codes and patient indices: for concepts %s ... modifiers %s ... error: %s ", q.Concepts, modStr, err.Error())
+		errDebug := fmt.Errorf("while retrieving concept codes and patient indices: for concepts %s ... modifiers %s ... error: %s ", q.Concepts, modStr, err.Error())
+		//TODO return errDebug for advanced debug print
+		logrus.Error(errDebug)
 		return err
 	}
 	q.Response.GlobalTimers.AddTimers("", timer, timers)
@@ -271,7 +275,7 @@ func (q *Query) Execute(principal *models.User) (err error) {
 
 	patientSetID, err := strconv.Atoi(patientsInfos.PatientSetID)
 	if err != nil {
-		return fmt.Errorf("Error while converting patient set id to integer ", err)
+		return fmt.Errorf("error while converting patient set id to integer %s: ", err.Error())
 	}
 	querytoolsserver.UpdateExploreResultInstance(patientsInfos.QueryID, len(cohortInt), cohortInt, nil, &patientSetID)
 
@@ -292,7 +296,7 @@ func (q *Query) locallyAggregatePatientCount(patientsInfos medcoserver.LocalPati
 	timer := time.Now()
 	aggPatientFlags, err := unlynx.LocallyAggregateValues(patientsInfos.PatientDummyFlags)
 	if err != nil {
-		err = fmt.Errorf("during local aggregation %s", err.Error())
+		err = fmt.Errorf("during local aggregation of histogram buckets counts: %s", err.Error())
 		return
 	}
 
@@ -594,7 +598,11 @@ func (q *Query) prepareArguments(principal *models.User) (
 	exploreQuery, err := medcoserver.NewExploreQuery(q.QueryName+"_explore", exploreQueryParam, principal)
 
 	if err != nil {
-		err = fmt.Errorf("error when creating a new explore query in the prepareArgument method of the explore statistics. %s", err)
+		simpleErrMsg := "error when creating a new explore query related to the explore statistics query"
+		errDebug := fmt.Errorf("%s : %s", simpleErrMsg, err.Error())
+		//TODO return errDebug for advanced debug print
+		logrus.Error(errDebug)
+		err = fmt.Errorf(simpleErrMsg)
 		return
 	}
 
@@ -605,9 +613,21 @@ func (q *Query) prepareArguments(principal *models.User) (
 	q.InstantiatedRecord = true
 
 	if err != nil {
-		logrus.Error("error while getting patient list", err)
+		simpleErrMsg := "error while getting patient list corresponding to cohort definition"
+
+		errDebug := fmt.Errorf("%s : %s", simpleErrMsg, err.Error())
+		//TODO return errDebug for advanced debug print
+		logrus.Error(errDebug)
+		err = fmt.Errorf(simpleErrMsg)
 		return
 	}
+
+	patientStr := ""
+	for _, p := range patientsInfos.PatientIDs {
+		patientStr += " , " + p
+	}
+
+	logrus.Println("patients list: " + patientStr)
 
 	if len(patientsInfos.PatientIDs) == 0 && !q.isPanelEmpty {
 		err = fmt.Errorf("zero patients in the cohort for non empty constraint")
