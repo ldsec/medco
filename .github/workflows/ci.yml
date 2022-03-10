@@ -63,10 +63,10 @@ jobs:
         run: make test_go_integration
 
       - name: Run e2e queries before loading
-        run: bash test/test_cli_preloading.sh $MEDCO_USER_USERNAME $MEDCO_USER_PASSWORD
+        run: source scripts/versions.sh && bash test/test_cli_preloading.sh $MEDCO_USER_USERNAME $MEDCO_USER_PASSWORD
 
       - name: Load data in deployment
         run: source scripts/versions.sh && make -C deployments/dev-local-3nodes load_test_data
 
       - name: Run e2e queries after loading
-        run: bash test/test_cli_postloading.sh $MEDCO_USER_USERNAME $MEDCO_USER_PASSWORD
+        run: source scripts/versions.sh && bash test/test_cli_postloading.sh $MEDCO_USER_USERNAME $MEDCO_USER_PASSWORD
