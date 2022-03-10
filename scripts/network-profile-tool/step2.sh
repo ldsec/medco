@@ -16,6 +16,7 @@ function help {
     echo -e "  -nb,   --nb_nodes      VAL  Total number of nodes in the network (e.g. 3)"
     echo -e "OPTIONAL:"
     echo -e "  -s,    --secrets       VAL  Unlynx DDT secrets, if they are not to be generated (e.g. <secret0>,<secret1>,<secret2>)"
+    echo -e "  -mv,   --medco_version   VAL  Override the version of MedCo used"
     echo -e "  -h,    --help \n"
     example
 }
@@ -28,6 +29,7 @@ NETWORK_NAME=
 NODE_IDX=
 NB_NODES=
 SECRETS=
+MEDCO_VERSION_OVERRIDE=
 
 # Args while-loop
 while [ "$1" != "" ];
@@ -45,6 +47,9 @@ do
 	 -s  | --secrets )      shift
      						          SECRETS=$1
   			                  ;;
+   -mv  | --medco_version  )  shift
+                          MEDCO_VERSION_OVERRIDE=$1
+                          ;;
    -h   | --help )        help
                           exit
                           ;;
@@ -63,7 +68,7 @@ margs_check $margs "$NETWORK_NAME" "$NB_NODES" "$NODE_IDX"
 
 set -u
 # generate convenience variables
-export_variables "$NETWORK_NAME" "$NODE_IDX"
+export_variables "$NETWORK_NAME" "$NODE_IDX" "$MEDCO_VERSION_OVERRIDE"
 if [[ ! -d ${CONF_FOLDER} ]] || [[ ! -d ${COMPOSE_FOLDER} ]] || [[ -f ${CONF_FOLDER}/group.toml ]]; then
     echo "The compose or configuration profile folder does not exist, or the step 2 has already been executed. Aborting."
     exit 2

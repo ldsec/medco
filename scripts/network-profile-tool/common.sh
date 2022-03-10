@@ -46,8 +46,9 @@ function margs_check {
 # Arguments of the function:
 #   $1: network name
 #   $2: node index
+#   $3: medco version override (can be empty)
 function export_variables {
-  source ../../scripts/versions.sh
+  source ../../scripts/versions.sh "$3"
 
   PROFILE_NAME="network-$1-node$2"
   SCRIPT_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"

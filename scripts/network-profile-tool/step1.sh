@@ -20,6 +20,7 @@ function help {
     echo -e "  -sk,   --secret_key      VAL  Unlynx node private key, if it is not to be generated"
     echo -e "  -crt,  --certificate     VAL  Filepath to certificate (*.crt), if it is not to be generated"
     echo -e "  -k,    --key             VAL  Filepath to certificate key (*.key), if it is not to be generated"
+    echo -e "  -mv,   --medco_version   VAL  Override the version of MedCo used"
     echo -e "  -h,    --help \n"
     example
 }
@@ -36,6 +37,7 @@ PUB_KEY=
 PRIV_KEY=
 CRT=
 KEY=
+MEDCO_VERSION_OVERRIDE=
 
 # Args while-loop
 while [ "$1" != "" ];
@@ -64,6 +66,9 @@ do
                           ;;
    -k  | --key  )  shift
                           KEY=$1
+                          ;;
+   -mv  | --medco_version  )  shift
+                          MEDCO_VERSION_OVERRIDE=$1
                           ;;
    -h   | --help )        help
                           exit
@@ -103,7 +108,7 @@ else
 fi
 
 # generate convenience variables
-export_variables "$NETWORK_NAME" "$NODE_IDX"
+export_variables "$NETWORK_NAME" "$NODE_IDX" "$MEDCO_VERSION_OVERRIDE"
 if [[ -d ${COMPOSE_FOLDER} ]]; then
     echo "The profile folder exists. Aborting."
     exit 2
