@@ -39,7 +39,7 @@ jobs:
       MEDCO_DB_HOST: localhost
       MEDCO_DB_PORT: 5432
       MEDCO_DB_USER: postgres
-      MEDCO_DB_PASSWORD: postgres
+      MEDCO_DB_PASSWORD: changeme
       MEDCO_DB_NAME: postgres
       MEDCO_USER_USERNAME: test
       MEDCO_USER_PASSWORD: test

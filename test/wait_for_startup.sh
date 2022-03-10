@@ -5,7 +5,7 @@ DB_NUMBER=${1:-9}
 DB_HOST=${2:-localhost}
 DB_PORT=${3:-5432}
 DB_USER=${4:-postgres}
-DB_PASSWORD=${5:-postgres}
+DB_PASSWORD=${5:-changeme}
 DB_NAME=${6:-postgres}
 
 #check if the number of connections to the postgresql server is at least as much as DB_NUMBER to detect that the startup phase has begun
