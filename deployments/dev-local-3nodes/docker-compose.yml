@@ -6,6 +6,7 @@ services:
       service: i2b2
     environment:
       - I2B2_DB_NAME=i2b2medcosrv0
+      - I2B2_DB_PW=${DB_ALL_USERS_PASSWORD:?}
       - I2B2_DOMAIN_NAME=i2b2medcosrv0
       - WILDFLY_ADMIN_PASSWORD=${I2B2_WILDFLY_PASSWORD:?}
       - I2B2_SERVICE_PASSWORD=${I2B2_SERVICE_PASSWORD:?}
@@ -56,7 +57,9 @@ services:
       - OIDC_JWT_ISSUERS=https://${MEDCO_NODE_HOST:?}/auth/realms/master
       - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD:?}
       - MC_DB_NAME=medcoconnectorsrv0
+      - MC_DB_PASSWORD=${DB_ALL_USERS_PASSWORD:?}
       - I2B2_DB_NAME=i2b2medcosrv0
+      - I2B2_DB_PASSWORD=${DB_ALL_USERS_PASSWORD:?}
       - LOG_LEVEL=${CONNECTOR_LOGLEVEL:?}
       - "MEDCO_NODES_URL=\
         https://${MEDCO_NODE_HOST:?}/local-3nodes/medco-0,\
@@ -88,6 +91,7 @@ services:
       service: i2b2
     environment:
       - I2B2_DB_NAME=i2b2medcosrv1
+      - I2B2_DB_PW=${DB_ALL_USERS_PASSWORD:?}
       - I2B2_DOMAIN_NAME=i2b2medcosrv1
       - WILDFLY_ADMIN_PASSWORD=${I2B2_WILDFLY_PASSWORD:?}
       - I2B2_SERVICE_PASSWORD=${I2B2_SERVICE_PASSWORD:?}
@@ -139,7 +143,9 @@ services:
       - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD:?}
       - LOG_LEVEL=${CONNECTOR_LOGLEVEL:?}
       - MC_DB_NAME=medcoconnectorsrv1
+      - MC_DB_PASSWORD=${DB_ALL_USERS_PASSWORD:?}
       - I2B2_DB_NAME=i2b2medcosrv1
+      - I2B2_DB_PASSWORD=${DB_ALL_USERS_PASSWORD:?}
       - "MEDCO_NODES_URL=\
         https://${MEDCO_NODE_HOST:?}/local-3nodes/medco-0,\
         https://${MEDCO_NODE_HOST:?}/local-3nodes/medco-1,\
@@ -156,6 +162,7 @@ services:
       service: i2b2
     environment:
       - I2B2_DB_NAME=i2b2medcosrv2
+      - I2B2_DB_PW=${DB_ALL_USERS_PASSWORD:?}
       - I2B2_DOMAIN_NAME=i2b2medcosrv2
       - WILDFLY_ADMIN_PASSWORD=${I2B2_WILDFLY_PASSWORD:?}
       - I2B2_SERVICE_PASSWORD=${I2B2_SERVICE_PASSWORD:?}
@@ -207,7 +214,9 @@ services:
       - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD:?}
       - LOG_LEVEL=${CONNECTOR_LOGLEVEL:?}
       - MC_DB_NAME=medcoconnectorsrv2
+      - MC_DB_PASSWORD=${DB_ALL_USERS_PASSWORD:?}
       - I2B2_DB_NAME=i2b2medcosrv2
+      - I2B2_DB_PASSWORD=${DB_ALL_USERS_PASSWORD:?}
       - "MEDCO_NODES_URL=\
         https://${MEDCO_NODE_HOST:?}/local-3nodes/medco-0,\
         https://${MEDCO_NODE_HOST:?}/local-3nodes/medco-1,\
@@ -291,6 +300,7 @@ services:
       - "8081:8080"
     environment:
       - KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD:?}
+      - DB_PASSWORD=${DB_ALL_USERS_PASSWORD:?}
     depends_on:
       - postgresql
     networks:

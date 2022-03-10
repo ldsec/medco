@@ -1,6 +1,6 @@
-CREATE ROLE i2b2 LOGIN PASSWORD 'i2b2';
-CREATE ROLE keycloak LOGIN PASSWORD 'keycloak';
-CREATE ROLE medcoconnector LOGIN PASSWORD 'medcoconnector';
+CREATE ROLE i2b2 LOGIN PASSWORD 'changeme';
+CREATE ROLE keycloak LOGIN PASSWORD 'changeme';
+CREATE ROLE medcoconnector LOGIN PASSWORD 'changeme';
 ALTER USER i2b2 CREATEDB;
 ALTER USER keycloak CREATEDB;
 ALTER USER medcoconnector CREATEDB;

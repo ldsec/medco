@@ -8,12 +8,12 @@ services:
       - I2B2_DB_HOST=postgresql
       - I2B2_DB_PORT=5432
       - I2B2_DB_USER=i2b2
-      - I2B2_DB_PW=i2b2
+      - I2B2_DB_PW=changeme
       - I2B2_DB_NAME=i2b2medco
-      - WILDFLY_ADMIN_PASSWORD=admin
+      - WILDFLY_ADMIN_PASSWORD=changeme
       - I2B2_DOMAIN_NAME=i2b2medco
-      - I2B2_SERVICE_PASSWORD=pFjy3EjDVwLfT2rB9xkK
-      - DEFAULT_USER_PASSWORD=demouser
+      - I2B2_SERVICE_PASSWORD=changeme
+      - DEFAULT_USER_PASSWORD=changeme
       - AXIS2_LOGLEVEL=INFO
 
   medco-unlynx:
@@ -56,7 +56,7 @@ services:
   postgresql:
     image: postgres:9.6
     environment:
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_PASSWORD=changeme
     volumes:
       - medcodb:/var/lib/postgresql/data
       - ../build/package/postgresql/initdb-data:/docker-entrypoint-initdb.d
@@ -67,7 +67,7 @@ services:
       context: ../build/package/pgadmin
     environment:
       - PGADMIN_DEFAULT_EMAIL=admin
-      - PGADMIN_DEFAULT_PASSWORD=admin
+      - PGADMIN_DEFAULT_PASSWORD=changeme
     logging:
       driver: none
 
@@ -77,13 +77,13 @@ services:
       context: ../build/package/keycloak
     environment:
       - KEYCLOAK_USER=keycloak
-      - KEYCLOAK_PASSWORD=keycloak
+      - KEYCLOAK_PASSWORD=changeme
       - DB_VENDOR=postgres
       - DB_ADDR=postgresql
       - DB_PORT=5432
       - DB_DATABASE=keycloak
       - DB_USER=keycloak
-      - DB_PASSWORD=keycloak
+      - DB_PASSWORD=changeme
 
   glowing-bear-medco:
     image: ghcr.io/ldsec/glowing-bear-medco:${GLOWING_BEAR_MEDCO_VERSION:?}
@@ -108,7 +108,7 @@ services:
       - I2B2_LOGIN_DOMAIN=i2b2medco
       - I2B2_LOGIN_PROJECT=MedCo
       - I2B2_LOGIN_USER=medcouser
-      - I2B2_LOGIN_PASSWORD=demouser
+      - I2B2_LOGIN_PASSWORD=changeme
       - I2B2_WAIT_TIME_SECONDS=450
       - I2B2_ONT_MAX_ELEMENTS=200
       - LOG_LEVEL=3
@@ -125,12 +125,12 @@ services:
       - MC_DB_HOST=postgresql
       - MC_DB_PORT=5432
       - MC_DB_USER=medcoconnector
-      - MC_DB_PASSWORD=medcoconnector
+      - MC_DB_PASSWORD=changeme
       - MC_DB_NAME=medcoconnector
       - I2B2_DB_HOST=postgresql
       - I2B2_DB_PORT=5432
       - I2B2_DB_USER=i2b2
-      - I2B2_DB_PASSWORD=i2b2
+      - I2B2_DB_PASSWORD=changeme
       - I2B2_DB_NAME=i2b2medco
     volumes:
       - ./dev-local-3nodes/configuration:/medco-configuration
@@ -182,12 +182,12 @@ services:
       - I2B2_DB_PORT=5432
       - I2B2_DB_NAME=i2b2medco
       - I2B2_DB_USER=i2b2
-      - I2B2_DB_PASSWORD=i2b2
+      - I2B2_DB_PASSWORD=changeme
       - MC_DB_HOST=localhost
       - MC_DB_PORT=5432
       - MC_DB_NAME=medcoconnector
       - MC_DB_USER=medcoconnector
-      - MC_DB_PASSWORD=medcoconnector
+      - MC_DB_PASSWORD=changeme
     volumes:
       - ./dev-local-3nodes/configuration:/medco-configuration
       - ../test/data:/data
