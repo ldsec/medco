@@ -260,6 +260,7 @@ services:
       - "5432:5432"
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?}
+      - DB_ALL_USERS_PASSWORD=${DB_ALL_USERS_PASSWORD:?}
     networks:
       inter-nodes:
         ipv4_address: 172.31.1.202

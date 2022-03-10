@@ -57,6 +57,7 @@ services:
     image: ${PG_DOCKER_TAG:?}
     environment:
       - POSTGRES_PASSWORD=changeme
+      - DB_ALL_USERS_PASSWORD=changeme
     volumes:
       - medcodb:/var/lib/postgresql/data
       - ../build/package/postgresql/initdb-data:/docker-entrypoint-initdb.d
