@@ -4,6 +4,8 @@ services:
     extends:
       file: ../docker-compose-definitions.yml
       service: i2b2
+    ports:
+      - "8090:8080"
     environment:
       - I2B2_DB_NAME=i2b2medcosrv0
       - I2B2_DB_PW=${DB_ALL_USERS_PASSWORD:?}
@@ -269,8 +271,6 @@ services:
     extends:
       file: ../docker-compose-definitions.yml
       service: pg-admin
-    ports:
-      - "81:80"
     environment:
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD:?}
     networks:
@@ -281,8 +281,6 @@ services:
     extends:
       file: ../docker-compose-definitions.yml
       service: keycloak
-    ports:
-      - "8081:8080"
     environment:
       - KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD:?}
       - DB_PASSWORD=${DB_ALL_USERS_PASSWORD:?}
