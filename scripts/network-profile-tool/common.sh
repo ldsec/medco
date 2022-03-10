@@ -47,14 +47,15 @@ function margs_check {
 #   $1: network name
 #   $2: node index
 function export_variables {
+  source ../../scripts/versions.sh
+
   PROFILE_NAME="network-$1-node$2"
   SCRIPT_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-  MEDCO_DOCKER="${DOCKER_REGISTRY:-$(make --no-print-directory -C ../../ docker_registry)}/medco:${MEDCO_SETUP_VER:-$(make --no-print-directory -C ../../ medco_version)}"
   COMPOSE_FOLDER="${SCRIPT_FOLDER}/../../deployments/${PROFILE_NAME}"
   CONF_FOLDER="${COMPOSE_FOLDER}/configuration"
-  MEDCO_BIN=(docker run -v "$CONF_FOLDER:/medco-configuration" -u "$(id -u):$(id -g)" "${MEDCO_DOCKER}")
+  MEDCO_BIN=(docker run -v "$CONF_FOLDER:/medco-configuration" -u "$(id -u):$(id -g)" "${MEDCO_DOCKER_TAG}")
 
-  export PROFILE_NAME SCRIPT_FOLDER MEDCO_DOCKER COMPOSE_FOLDER CONF_FOLDER MEDCO_BIN
+  export PROFILE_NAME SCRIPT_FOLDER COMPOSE_FOLDER CONF_FOLDER MEDCO_BIN
 }
 
 # Performs check of necessary dependencies.

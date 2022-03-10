@@ -49,14 +49,14 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build Docker images
-        run: make -C deployments/dev-local-3nodes build
+        run: source scripts/versions.sh && make -C deployments/dev-local-3nodes build
 
       - name: Get test data
         run: make download_test_data
 
       - name: Start deployment and wait for it to be ready
         run: |
-          make -C deployments/dev-local-3nodes up-d
+          source scripts/versions.sh && make -C deployments/dev-local-3nodes up-d
           bash test/wait_for_startup.sh $MEDCO_DB_NUMBER $MEDCO_DB_HOST $MEDCO_DB_PORT $MEDCO_DB_USER $MEDCO_DB_PASSWORD $MEDCO_DB_NAME
 
       - name: Run integration tests (depending on deployment)
@@ -66,7 +66,7 @@ jobs:
         run: bash test/test_cli_preloading.sh $MEDCO_USER_USERNAME $MEDCO_USER_PASSWORD
 
       - name: Load data in deployment
-        run: make -C deployments/dev-local-3nodes load_test_data
+        run: source scripts/versions.sh && make -C deployments/dev-local-3nodes load_test_data
 
       - name: Run e2e queries after loading
         run: bash test/test_cli_postloading.sh $MEDCO_USER_USERNAME $MEDCO_USER_PASSWORD

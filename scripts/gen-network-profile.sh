@@ -11,7 +11,6 @@ rm -rf "network-${NETWORK_NAME:?}-"*
 popd
 
 # generate step 1
-export MEDCO_SETUP_VER=dev
 pushd "./network-profile-tool"
 for IDX in 0 1 2; do
   bash step1.sh -nn "$NETWORK_NAME" -ni "$IDX" -ha "192.168.56.11${IDX}" -ua "192.168.57.11${IDX}"
