@@ -4,7 +4,7 @@ if [[ -n "$1" ]]; then
   # if provided, use first argument for version
   MEDCO_VERSION=$1
 
-elif [[ $GITHUB_REF == refs/tags/* ]]; then
+elif [[ ${GITHUB_REF:-} == refs/tags/* ]]; then
   # if in the CI and under a tag, override
   MEDCO_VERSION=${GITHUB_REF#refs/tags/}
 
