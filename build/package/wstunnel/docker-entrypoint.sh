@@ -22,21 +22,28 @@ else
 fi
 
 # run clients
-for i in {0..999}; do
-  NODE_IDX=$(printf "%03d" "$i")
+if [[ -n "$CLIENTS_LISTEN_ADDRESSES" ]]; then
+  IFS=',' read -ra LISTEN_ADDRESSES_ARR <<< "$CLIENTS_LISTEN_ADDRESSES"
+  IFS=',' read -ra WS_SERVER_URLS_ARR <<< "$CLIENTS_WS_SERVER_URLS"
+  IFS=',' read -ra WS_SERVER_PATH_PREFIXES_ARR <<< "$CLIENTS_WS_SERVER_PATH_PREFIXES"
+  IFS=',' read -ra DEST_ADDRESSES_ARR <<< "$CLIENTS_DEST_ADDRESSES"
 
-  LISTEN_ADDRESS_VAR=CLIENT_${NODE_IDX}_LISTEN_ADDRESS
-  WS_SERVER_URL_VAR=CLIENT_${NODE_IDX}_WS_SERVER_URL
-  WS_SERVER_PATH_PREFIX_VAR=CLIENT_${NODE_IDX}_WS_SERVER_PATH_PREFIX
-  DEST_ADDRESS_VAR=CLIENT_${NODE_IDX}_DEST_ADDRESS
+  NB_CLIENTS=${#LISTEN_ADDRESSES_ARR[@]}
+  echo "WS TUNNEL: about to start $NB_CLIENTS clients..."
+  for ((i=0; i<NB_CLIENTS; i++)); do
+    LISTEN_ADDRESS=${LISTEN_ADDRESSES_ARR[i]}
+    WS_SERVER_URL=${WS_SERVER_URLS_ARR[i]}
+    WS_SERVER_PATH_PREFIX=${WS_SERVER_PATH_PREFIXES_ARR[i]}
+    DEST_ADDRESS=${DEST_ADDRESSES_ARR[i]}
 
-  if [[ -n "${!LISTEN_ADDRESS_VAR}" ]]; then
-    /wstunnel -L "${!LISTEN_ADDRESS_VAR}:${!DEST_ADDRESS_VAR}" \
-      --upgradePathPrefix="${!WS_SERVER_PATH_PREFIX_VAR}" \
-      "${!WS_SERVER_URL_VAR}" &
-    echo "WS TUNNEL: ran client on ${!LISTEN_ADDRESS_VAR}"
-  fi
-done
+    /wstunnel -L "$LISTEN_ADDRESS:$DEST_ADDRESS" \
+      --upgradePathPrefix="$WS_SERVER_PATH_PREFIX" \
+      "$WS_SERVER_URL" &
+    echo "WS TUNNEL: ran client on $LISTEN_ADDRESS"
+  done
+else
+  echo "WS TUNNEL: no client was ran"
+fi
 
 # wait on subshells and return exit code
 wait -n

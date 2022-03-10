@@ -38,6 +38,10 @@ services:
     environment:
       - SERVER_LISTEN_URL=ws://0.0.0.0:2003
       - SERVER_DEST_ADDRESS=medco-unlynx-srv0:2001
+      - CLIENTS_LISTEN_ADDRESSES=
+      - CLIENTS_WS_SERVER_URLS=
+      - CLIENTS_WS_SERVER_PATH_PREFIXES=
+      - CLIENTS_DEST_ADDRESSES=
     networks:
       inter-nodes:
         ipv4_address: 172.31.1.103
@@ -119,6 +123,10 @@ services:
     environment:
       - SERVER_LISTEN_URL=ws://0.0.0.0:2003
       - SERVER_DEST_ADDRESS=medco-unlynx-srv1:2003
+      - CLIENTS_LISTEN_ADDRESSES=
+      - CLIENTS_WS_SERVER_URLS=
+      - CLIENTS_WS_SERVER_PATH_PREFIXES=
+      - CLIENTS_DEST_ADDRESSES=
     networks:
       inter-nodes:
         ipv4_address: 172.31.1.113
@@ -186,6 +194,10 @@ services:
     environment:
       - SERVER_LISTEN_URL=ws://0.0.0.0:2003
       - SERVER_DEST_ADDRESS=medco-unlynx-srv2:2005
+      - CLIENTS_LISTEN_ADDRESSES=
+      - CLIENTS_WS_SERVER_URLS=
+      - CLIENTS_WS_SERVER_PATH_PREFIXES=
+      - CLIENTS_DEST_ADDRESSES=
     networks:
       inter-nodes:
         ipv4_address: 172.31.1.123
@@ -224,18 +236,10 @@ services:
     environment:
       - SERVER_LISTEN_URL=
       - SERVER_DEST_ADDRESS=
-      - CLIENT_000_LISTEN_ADDRESS=0.0.0.0:3000
-      - CLIENT_000_WS_SERVER_URL=wss://nginx:443
-      - CLIENT_000_WS_SERVER_PATH_PREFIX=local-3nodes/wstunnel-unlynx-0
-      - CLIENT_000_DEST_ADDRESS=medco-unlynx-srv0:2001
-      - CLIENT_001_LISTEN_ADDRESS=0.0.0.0:3001
-      - CLIENT_001_WS_SERVER_URL=wss://nginx:443
-      - CLIENT_001_WS_SERVER_PATH_PREFIX=local-3nodes/wstunnel-unlynx-1
-      - CLIENT_001_DEST_ADDRESS=medco-unlynx-srv1:2003
-      - CLIENT_002_LISTEN_ADDRESS=0.0.0.0:3002
-      - CLIENT_002_WS_SERVER_URL=wss://nginx:443
-      - CLIENT_002_WS_SERVER_PATH_PREFIX=local-3nodes/wstunnel-unlynx-2
-      - CLIENT_002_DEST_ADDRESS=medco-unlynx-srv2:2005
+      - CLIENTS_LISTEN_ADDRESSES=0.0.0.0:3000,0.0.0.0:3001,0.0.0.0:3002
+      - CLIENTS_WS_SERVER_URLS=wss://nginx:443,wss://nginx:443,wss://nginx:443
+      - CLIENTS_WS_SERVER_PATH_PREFIXES=local-3nodes/wstunnel-unlynx-0,local-3nodes/wstunnel-unlynx-1,local-3nodes/wstunnel-unlynx-2
+      - CLIENTS_DEST_ADDRESSES=medco-unlynx-srv0:2001,medco-unlynx-srv1:2003,medco-unlynx-srv2:2005
     networks:
       inter-nodes:
         ipv4_address: 172.31.1.205
