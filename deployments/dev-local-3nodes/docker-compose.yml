@@ -7,12 +7,15 @@ services:
     environment:
       - I2B2_DB_NAME=i2b2medcosrv0
       - I2B2_DOMAIN_NAME=i2b2medcosrv0
-      - AXIS2_LOGLEVEL=DEBUG
+      - WILDFLY_ADMIN_PASSWORD=${I2B2_WILDFLY_PASSWORD:?}
+      - I2B2_SERVICE_PASSWORD=${I2B2_SERVICE_PASSWORD:?}
+      - DEFAULT_USER_PASSWORD=${I2B2_USER_PASSWORD:?}
+      - AXIS2_LOGLEVEL=${I2B2_LOGLEVEL:?}
     ports:
       - "8090:8080"
     networks:
       inter-nodes:
-        ipv4_address: 172.31.0.100
+        ipv4_address: 172.31.1.100
 
   medco-unlynx-srv0:
     extends:
@@ -20,10 +23,10 @@ services:
       service: medco-unlynx
     environment:
       - MEDCO_NODE_IDX=0
-      - UNLYNX_DEBUG_LEVEL=3
+      - UNLYNX_DEBUG_LEVEL=${UNLYNX_LOGLEVEL:?}
     networks:
       inter-nodes:
-        ipv4_address: 172.31.0.101
+        ipv4_address: 172.31.1.101
     volumes:
       - ./configuration:/medco-configuration
 
@@ -36,7 +39,7 @@ services:
       - SERVER_DEST_ADDRESS=medco-unlynx-srv0:2001
     networks:
       inter-nodes:
-        ipv4_address: 172.31.0.103
+        ipv4_address: 172.31.1.103
     volumes:
       - ./configuration:/medco-configuration
 
@@ -49,15 +52,19 @@ services:
     environment:
       - I2B2_HIVE_URL=http://i2b2-srv0:8080/i2b2/services
       - I2B2_LOGIN_DOMAIN=i2b2medcosrv0
-      - I2B2_LOGIN_USER=e2etest
-      - I2B2_LOGIN_PASSWORD=e2etest
-      - LOG_LEVEL=5
       - MEDCO_NODE_IDX=0
+      - OIDC_JWT_ISSUERS=https://${MEDCO_NODE_HOST:?}/auth/realms/master
+      - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD:?}
       - MC_DB_NAME=medcoconnectorsrv0
       - I2B2_DB_NAME=i2b2medcosrv0
+      - LOG_LEVEL=${CONNECTOR_LOGLEVEL:?}
+      - "MEDCO_NODES_URL=\
+        https://${MEDCO_NODE_HOST:?}/local-3nodes/medco-0,\
+        https://${MEDCO_NODE_HOST:?}/local-3nodes/medco-1,\
+        https://${MEDCO_NODE_HOST:?}/local-3nodes/medco-2"
     networks:
       inter-nodes:
-        ipv4_address: 172.31.0.102
+        ipv4_address: 172.31.1.102
     volumes:
       - ./configuration:/medco-configuration
 
@@ -70,7 +77,10 @@ services:
       - "443:443"
     networks:
       inter-nodes:
-        ipv4_address: 172.31.0.200
+        ipv4_address: 172.31.1.200
+    volumes:
+      - ./configuration/certificate.crt:/medco-configuration/certificate.crt
+      - ./configuration/certificate.key:/medco-configuration/certificate.key
 
   i2b2-srv1:
     extends:
@@ -79,12 +89,15 @@ services:
     environment:
       - I2B2_DB_NAME=i2b2medcosrv1
       - I2B2_DOMAIN_NAME=i2b2medcosrv1
-      - AXIS2_LOGLEVEL=DEBUG
+      - WILDFLY_ADMIN_PASSWORD=${I2B2_WILDFLY_PASSWORD:?}
+      - I2B2_SERVICE_PASSWORD=${I2B2_SERVICE_PASSWORD:?}
+      - DEFAULT_USER_PASSWORD=${I2B2_USER_PASSWORD:?}
+      - AXIS2_LOGLEVEL=${I2B2_LOGLEVEL:?}
     ports:
       - "8091:8080"
     networks:
       inter-nodes:
-        ipv4_address: 172.31.0.110
+        ipv4_address: 172.31.1.110
 
   medco-unlynx-srv1:
     extends:
@@ -92,10 +105,10 @@ services:
       service: medco-unlynx
     environment:
       - MEDCO_NODE_IDX=1
-      - UNLYNX_DEBUG_LEVEL=3
+      - UNLYNX_DEBUG_LEVEL=${UNLYNX_LOGLEVEL:?}
     networks:
       inter-nodes:
-        ipv4_address: 172.31.0.111
+        ipv4_address: 172.31.1.111
     volumes:
       - ./configuration:/medco-configuration
 
@@ -108,7 +121,7 @@ services:
       - SERVER_DEST_ADDRESS=medco-unlynx-srv1:2003
     networks:
       inter-nodes:
-        ipv4_address: 172.31.0.113
+        ipv4_address: 172.31.1.113
     volumes:
       - ./configuration:/medco-configuration
 
@@ -121,15 +134,19 @@ services:
     environment:
       - I2B2_HIVE_URL=http://i2b2-srv1:8080/i2b2/services
       - I2B2_LOGIN_DOMAIN=i2b2medcosrv1
-      - I2B2_LOGIN_USER=e2etest
-      - I2B2_LOGIN_PASSWORD=e2etest
-      - LOG_LEVEL=5
       - MEDCO_NODE_IDX=1
+      - OIDC_JWT_ISSUERS=https://${MEDCO_NODE_HOST:?}/auth/realms/master
+      - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD:?}
+      - LOG_LEVEL=${CONNECTOR_LOGLEVEL:?}
       - MC_DB_NAME=medcoconnectorsrv1
       - I2B2_DB_NAME=i2b2medcosrv1
+      - "MEDCO_NODES_URL=\
+        https://${MEDCO_NODE_HOST:?}/local-3nodes/medco-0,\
+        https://${MEDCO_NODE_HOST:?}/local-3nodes/medco-1,\
+        https://${MEDCO_NODE_HOST:?}/local-3nodes/medco-2"
     networks:
       inter-nodes:
-        ipv4_address: 172.31.0.112
+        ipv4_address: 172.31.1.112
     volumes:
       - ./configuration:/medco-configuration
 
@@ -140,12 +157,15 @@ services:
     environment:
       - I2B2_DB_NAME=i2b2medcosrv2
       - I2B2_DOMAIN_NAME=i2b2medcosrv2
-      - AXIS2_LOGLEVEL=DEBUG
+      - WILDFLY_ADMIN_PASSWORD=${I2B2_WILDFLY_PASSWORD:?}
+      - I2B2_SERVICE_PASSWORD=${I2B2_SERVICE_PASSWORD:?}
+      - DEFAULT_USER_PASSWORD=${I2B2_USER_PASSWORD:?}
+      - AXIS2_LOGLEVEL=${I2B2_LOGLEVEL:?}
     ports:
       - "8092:8080"
     networks:
       inter-nodes:
-        ipv4_address: 172.31.0.120
+        ipv4_address: 172.31.1.120
 
   medco-unlynx-srv2:
     extends:
@@ -153,10 +173,10 @@ services:
       service: medco-unlynx
     environment:
       - MEDCO_NODE_IDX=2
-      - UNLYNX_DEBUG_LEVEL=3
+      - UNLYNX_DEBUG_LEVEL=${UNLYNX_LOGLEVEL:?}
     networks:
       inter-nodes:
-        ipv4_address: 172.31.0.121
+        ipv4_address: 172.31.1.121
     volumes:
       - ./configuration:/medco-configuration
 
@@ -169,7 +189,7 @@ services:
       - SERVER_DEST_ADDRESS=medco-unlynx-srv2:2005
     networks:
       inter-nodes:
-        ipv4_address: 172.31.0.123
+        ipv4_address: 172.31.1.123
     volumes:
       - ./configuration:/medco-configuration
 
@@ -182,15 +202,21 @@ services:
     environment:
       - I2B2_HIVE_URL=http://i2b2-srv2:8080/i2b2/services
       - I2B2_LOGIN_DOMAIN=i2b2medcosrv2
-      - I2B2_LOGIN_USER=e2etest
-      - I2B2_LOGIN_PASSWORD=e2etest
-      - LOG_LEVEL=5
       - MEDCO_NODE_IDX=2
+      - OIDC_JWT_ISSUERS=https://${MEDCO_NODE_HOST:?}/auth/realms/master
+      - I2B2_LOGIN_PASSWORD=${I2B2_USER_PASSWORD:?}
+      - LOG_LEVEL=${CONNECTOR_LOGLEVEL:?}
       - MC_DB_NAME=medcoconnectorsrv2
       - I2B2_DB_NAME=i2b2medcosrv2
+      - "MEDCO_NODES_URL=\
+        https://${MEDCO_NODE_HOST:?}/local-3nodes/medco-0,\
+        https://${MEDCO_NODE_HOST:?}/local-3nodes/medco-1,\
+        https://${MEDCO_NODE_HOST:?}/local-3nodes/medco-2"
     networks:
       inter-nodes:
-        ipv4_address: 172.31.0.122
+        ipv4_address: 172.31.1.122
+    volumes:
+      - ./configuration:/medco-configuration
 
   medco-unlynx-wstunnel-client:
     extends:
@@ -200,22 +226,37 @@ services:
       - SERVER_LISTEN_URL=
       - SERVER_DEST_ADDRESS=
       - CLIENT_000_LISTEN_ADDRESS=0.0.0.0:3000
-      - CLIENT_000_WS_SERVER_URL=ws://medco-unlynx-wstunnel-srv0:2003
-      - CLIENT_000_WS_SERVER_PATH_PREFIX=""
+      - CLIENT_000_WS_SERVER_URL=wss://nginx:443
+      - CLIENT_000_WS_SERVER_PATH_PREFIX=local-3nodes/wstunnel-unlynx-0
       - CLIENT_000_DEST_ADDRESS=medco-unlynx-srv0:2001
       - CLIENT_001_LISTEN_ADDRESS=0.0.0.0:3001
-      - CLIENT_001_WS_SERVER_URL=ws://medco-unlynx-wstunnel-srv1:2003
-      - CLIENT_001_WS_SERVER_PATH_PREFIX=""
+      - CLIENT_001_WS_SERVER_URL=wss://nginx:443
+      - CLIENT_001_WS_SERVER_PATH_PREFIX=local-3nodes/wstunnel-unlynx-1
       - CLIENT_001_DEST_ADDRESS=medco-unlynx-srv1:2003
       - CLIENT_002_LISTEN_ADDRESS=0.0.0.0:3002
-      - CLIENT_002_WS_SERVER_URL=ws://medco-unlynx-wstunnel-srv2:2003
-      - CLIENT_002_WS_SERVER_PATH_PREFIX=""
+      - CLIENT_002_WS_SERVER_URL=wss://nginx:443
+      - CLIENT_002_WS_SERVER_PATH_PREFIX=local-3nodes/wstunnel-unlynx-2
       - CLIENT_002_DEST_ADDRESS=medco-unlynx-srv2:2005
     networks:
       inter-nodes:
-        ipv4_address: 172.31.0.205
+        ipv4_address: 172.31.1.205
     volumes:
       - ./configuration:/medco-configuration
+
+  #XXX : optional? or not ? or run gb dev alongside?
+  glowing-bear-medco:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: glowing-bear-medco
+    ports:
+      - "82:80"
+    environment:
+      - GB_MEDCO_NODE_URL=https://${MEDCO_NODE_HOST:?}/local-3nodes/medco-0
+      - GB_KEYCLOAK_URL=https://${MEDCO_NODE_HOST:?}/auth
+      - GB_FOOTER_TEXT=MedCo development deployment
+    networks:
+      inter-nodes:
+        ipv4_address: 172.31.1.206
 
   postgresql:
     extends:
@@ -223,19 +264,24 @@ services:
       service: postgresql
     ports:
       - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?}
     networks:
       inter-nodes:
-        ipv4_address: 172.31.0.202
+        ipv4_address: 172.31.1.202
 
+  #XXX optional? not?
   pg-admin:
     extends:
       file: ../docker-compose-definitions.yml
       service: pg-admin
     ports:
       - "81:80"
+    environment:
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD:?}
     networks:
       inter-nodes:
-        ipv4_address: 172.31.0.203
+        ipv4_address: 172.31.1.203
 
   keycloak:
     extends:
@@ -243,18 +289,20 @@ services:
       service: keycloak
     ports:
       - "8081:8080"
+    environment:
+      - KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD:?}
     depends_on:
       - postgresql
     networks:
       inter-nodes:
-        ipv4_address: 172.31.0.204
+        ipv4_address: 172.31.1.204
 
 networks:
   inter-nodes:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.31.0.0/24
+        - subnet: 172.31.1.0/24
 
 volumes:
   medcodb:
