@@ -17,6 +17,7 @@ func NonInteractiveSetup(c *cli.Context) error {
 
 	// cli arguments
 	serverBindingStr := c.String(optionServerBinding)
+	serverBindingPublicStr := c.String(optionServerBindingPublic)
 	description := c.String(optionDescription)
 	privateTomlPath := c.String(optionPrivateTomlPath)
 	publicTomlPath := c.String(optionPublicTomlPath)
@@ -61,6 +62,7 @@ func NonInteractiveSetup(c *cli.Context) error {
 	serverBinding := network.NewTLSAddress(serverBindingStr)
 	services := app.GenerateServiceKeyPairs()
 
+	// generate private.toml
 	conf := &app.CothorityConfig{
 		Suite:       libunlynx.SuiTe.String(),
 		Public:      pubStr,
@@ -70,17 +72,24 @@ func NonInteractiveSetup(c *cli.Context) error {
 		Description: description,
 		URL:         wsURLStr,
 	}
-
-	server := app.NewServerToml(libunlynx.SuiTe, public, serverBinding, conf.Description, services)
-	server.URL = conf.URL
-
-	group := app.NewGroupToml(server)
-
 	if err := conf.Save(privateTomlPath); err != nil {
 		err := fmt.Errorf("failed saving private.toml")
 		log.Error(err)
 		return cli.NewExitError(err, 3)
 	}
+
+	// generate public.toml / group.toml
+	var publicServerBinding network.Address
+	if serverBindingPublicStr == "" {
+		publicServerBinding = serverBinding
+	} else {
+		// if serverBindingPublic is provided, set it in the public/group file
+		publicServerBinding = network.NewTLSAddress(serverBindingPublicStr)
+	}
+
+	server := app.NewServerToml(libunlynx.SuiTe, public, publicServerBinding, description, services)
+	server.URL = conf.URL
+	group := app.NewGroupToml(server)
 	if err := group.Save(publicTomlPath); err != nil {
 		err := fmt.Errorf("failed saving group.toml")
 		log.Error(err)
