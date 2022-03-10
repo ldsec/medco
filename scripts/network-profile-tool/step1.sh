@@ -123,16 +123,19 @@ mkdir "${COMPOSE_FOLDER}" "${CONF_FOLDER}"
 echo -n "${HTTPS_ADDRESS}" > "${CONF_FOLDER}/srv${NODE_IDX}-nodednsname.txt"
 
 # ===================== unlynx keys =========================
+UNLYNX_WSTUNNEL_ADDRESS="medco-unlynx-wstunnel:3$NODE_IDX"
+
 unlynx_setup_args=(
   medco-unlynx server setupNonInteractive
   --serverBinding "$UNLYNX_ADDRESS"
+  --serverBindingPublic "$UNLYNX_WSTUNNEL_ADDRESS"
   --wsUrl "http://medco-unlynx:2002"
   --description "${PROFILE_NAME}_medco_unlynx_server"
   --privateTomlPath "/medco-configuration/srv${NODE_IDX}-private.toml"
   --publicTomlPath "/medco-configuration/srv${NODE_IDX}-public.toml"
 )
 
-echo "### Generating unlynx keys with address ${UNLYNX_ADDRESS}"
+echo "### Generating unlynx keys with address ${UNLYNX_ADDRESS} and WebSocket tunnel address $UNLYNX_WSTUNNEL_ADDRESS"
 if [[ -n "$PUB_KEY" ]]; then
   echo "### Using pre-generated unlynx key ${PUB_KEY}"
   unlynx_setup_args=("${unlynx_setup_args[@]}" --pubKey "${PUB_KEY}" --privKey "${PRIV_KEY}")
