@@ -4,7 +4,7 @@ set -Eeuo pipefail
 EXEC=$@
 
 # trust the certificates of other nodes
-if [[ -d /medco-configuration ]]; then
+if [[ -d /medco-configuration && $(id -u) -eq 0 ]]; then
   NB_CA_CERTS=$(find /medco-configuration -maxdepth 1 -name '*.crt' | wc -l)
   if [[ "$NB_CA_CERTS" != 0 ]]; then
     cp -f /medco-configuration/*.crt /usr/local/share/ca-certificates/
