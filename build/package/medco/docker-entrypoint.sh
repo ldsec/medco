@@ -8,10 +8,10 @@ if [[ -d /medco-configuration ]]; then
   NB_CA_CERTS=$(find /medco-configuration -maxdepth 1 -name '*.crt' | wc -l)
   if [[ "$NB_CA_CERTS" != 0 ]]; then
     cp -f /medco-configuration/*.crt /usr/local/share/ca-certificates/
-    >&2 update-ca-certificates
-    >&2 echo "MedCo ($EXEC): $NB_CA_CERTS CA certificates added"
+    update-ca-certificates >> /update-ca-certificates.log 2>&1
+    echo "MedCo ($EXEC): $NB_CA_CERTS CA certificates added" >> /update-ca-certificates.log 2>&1
   else
-    >&2 echo "MedCo ($EXEC): no CA certificate added"
+    echo "MedCo ($EXEC): no CA certificate added" >> /update-ca-certificates.log 2>&1
   fi
 fi
 
