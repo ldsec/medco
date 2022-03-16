@@ -13,10 +13,11 @@ RUN yum update -y && \
     yum -y install wget git ant && \
     yum clean all
 COPY install-i2b2.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/install-i2b2.sh
+RUN chown jboss:jboss /usr/local/bin/install-i2b2.sh && \
+    chmod +x /usr/local/bin/install-i2b2.sh
 COPY patches "$I2B2_PATCHES_DIR"
 RUN mkdir -p "$I2B2_SRC_DIR" && \
-    chown -R jboss:jboss "$I2B2_SRC_DIR"
+    chown -R jboss:jboss "$I2B2_SRC_DIR" "$I2B2_PATCHES_DIR"
 USER jboss
 
 # install i2b2
