@@ -34,19 +34,25 @@ It follows the Golang standard project layout.
 A description of the available deployment profiles, along with a detailed guide on how to use them, is available 
 [here](https://ldsec.gitbook.io/medco-documentation/system-administrators/deployment).
 
-### Building docker images
+### Retrieve repository and prepare environment
+Run the following commands to clone the MedCo repository and to select a version of MedCo.
+See the [deployments README](deployments/) for more information on selecting the version. 
+
+```shell
+git clone https://github.com/CHUV-DS/medco.git
+cd medco/deployments/dev-local-3nodes
+source ../../scripts/versions.sh
+```
+
+### Build docker images
 Run the following commands to build the MedCo docker images from source.
 ```shell
-git clone https://github.com/ldsec/medco.git
-cd medco/deployments/dev-local-3nodes
 make build
 ```
 
-### Downloading docker images
+### Download docker images
 Run the following commands to download the MedCo docker images.
 ```shell
-git clone https://github.com/ldsec/medco.git
-cd medco/deployments/test-local-3nodes
 make pull
 ```
 

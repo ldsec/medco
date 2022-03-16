@@ -1,6 +1,25 @@
 # MedCo Deployment
 
-## WebSocket tunneling of the Unlynx traffic
+## Running or building the deployment
+### Select a version
+Specifically for the `dev-local-3nodes` deployment, a version must be selected before running any command.
+Otherwise, docker-compose will error out.
+To do so, run the following command after replacing `<version>` with:
+- `dev` for a local development environment (for building images only);
+- any version, which if it exists on the container registry can be pulled, otherwise it can be built locally, e.g. `v3.0.0`;
+- leave empty for generating a default version number based on the current git HEAD.
+
+```shell
+source ../../scripts/versions.sh <version>
+```
+
+### Customize configuration
+Edit the `.env` file to change:
+- the default passwords;
+- if needed the different log levels.
+
+## Architectural informations
+### WebSocket tunneling of the Unlynx traffic
 The schema below shows the communication flow within a MedCo node, highlighting how the WebSocket tunnel mechanism is
 set up in the case of a network of 3 nodes and within node 0. The boxes are docker containers. Note that the `wstunnel`
 container runs several processes, a server process that handles connections from the other nodes, and as many clients
