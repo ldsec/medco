@@ -63,7 +63,7 @@ services:
       - ../build/package/postgresql/initdb-data:/docker-entrypoint-initdb.d
 
   pg-admin:
-    image: ${PGADMIN_TAG:?}
+    image: ${PGADMIN_DOCKER_TAG:?}
     build:
       context: ../build/package/pgadmin
     environment:

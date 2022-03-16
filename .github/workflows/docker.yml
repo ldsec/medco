@@ -39,17 +39,15 @@ jobs:
       - name: Get MedCo version
         id: versions
         run: |
-          source scripts/versions.sh
-          echo ::set-output name=MEDCO_VERSION::${MEDCO_VERSION}
-          
-          echo ::set-output name=MEDCO_DOCKER_TAG::${MEDCO_DOCKER_TAG}
-          echo ::set-output name=I2B2_DOCKER_TAG::${I2B2_DOCKER_TAG}
-          echo ::set-output name=KEYCLOAK_DOCKER_TAG::${KEYCLOAK_DOCKER_TAG}
-          echo ::set-output name=WSTUNNEL_DOCKER_TAG::${WSTUNNEL_DOCKER_TAG}
-          echo ::set-output name=NGINX_DOCKER_TAG::${NGINX_DOCKER_TAG}
-          echo ::set-output name=PGADMIN_TAG::${PGADMIN_TAG}
-          
-          echo ::set-output name=GB_DOCKER_TAG::${GB_DOCKER_TAG}
+          source scripts/versions.sh && \
+          echo ::set-output name=MEDCO_VERSION::${MEDCO_VERSION} && \
+          echo ::set-output name=MEDCO_DOCKER_TAG::${MEDCO_DOCKER_TAG} && \
+          echo ::set-output name=I2B2_DOCKER_TAG::${I2B2_DOCKER_TAG} && \
+          echo ::set-output name=KEYCLOAK_DOCKER_TAG::${KEYCLOAK_DOCKER_TAG} && \
+          echo ::set-output name=WSTUNNEL_DOCKER_TAG::${WSTUNNEL_DOCKER_TAG} && \
+          echo ::set-output name=NGINX_DOCKER_TAG::${NGINX_DOCKER_TAG} && \
+          echo ::set-output name=PGADMIN_DOCKER_TAG::${PGADMIN_DOCKER_TAG} && \
+          echo ::set-output name=GB_DOCKER_TAG::${GB_DOCKER_TAG} && \
           echo ::set-output name=PG_DOCKER_TAG::${PG_DOCKER_TAG}
 
       - name: Build and push medco
@@ -120,6 +118,6 @@ jobs:
           # todo: temporarily disabled
           # push: ${{ github.event_name != 'pull_request' }}
           push: false
-          tags: ${{ steps.versions.outputs.PGADMIN_TAG }}
+          tags: ${{ steps.versions.outputs.PGADMIN_DOCKER_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
