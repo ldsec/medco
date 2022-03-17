@@ -5,7 +5,6 @@ import (
 
 	libunlynx "github.com/ldsec/unlynx/lib"
 	"go.dedis.ch/kyber/v3"
-	"go.dedis.ch/kyber/v3/util/key"
 	"go.dedis.ch/onet/v3"
 	"go.dedis.ch/onet/v3/log"
 	"go.dedis.ch/onet/v3/network"
@@ -16,19 +15,14 @@ type API struct {
 	*onet.Client
 	ClientID   string
 	entryPoint *network.ServerIdentity
-	public     kyber.Point
-	private    kyber.Scalar
 }
 
 // NewMedCoClient constructor of a client.
 func NewMedCoClient(entryPoint *network.ServerIdentity, clientID string) *API {
-	keys := key.NewKeyPair(libunlynx.SuiTe)
 	newClient := &API{
 		Client:     onet.NewClient(libunlynx.SuiTe, Name),
 		ClientID:   clientID,
 		entryPoint: entryPoint,
-		public:     keys.Public,
-		private:    keys.Private,
 	}
 	return newClient
 }

@@ -208,7 +208,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 		return fmt.Errorf("while parsing patient set id: %v", err)
 	}
 
-	//update medco connector result instance
+	// update medco connector result instance
 	timer = time.Now()
 	err = updateResultInstanceTable(queryID, patientCount, patientIDs, patientSetID)
 	q.Result.Timers.AddTimers("medco-connector-update-result-instance", timer, nil)
