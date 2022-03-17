@@ -2,10 +2,11 @@ package loader
 
 import (
 	"bytes"
-	"go.dedis.ch/onet/v3/log"
 	"io"
 	"os"
 	"os/exec"
+
+	"go.dedis.ch/onet/v3/log"
 )
 
 // DBSettings stores the database settings

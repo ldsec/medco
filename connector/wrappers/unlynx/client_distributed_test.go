@@ -1,18 +1,20 @@
+//go:build integration_test
 // +build integration_test
 
 package unlynx
 
 import (
-	"github.com/ldsec/medco/connector/util/server"
-	libunlynx "github.com/ldsec/unlynx/lib"
-	"github.com/sirupsen/logrus"
-	"go.dedis.ch/onet/v3"
-	"go.dedis.ch/onet/v3/app"
 	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
 	"time"
+
+	utilserver "github.com/ldsec/medco/connector/util/server"
+	libunlynx "github.com/ldsec/unlynx/lib"
+	"github.com/sirupsen/logrus"
+	"go.dedis.ch/onet/v3"
+	"go.dedis.ch/onet/v3/app"
 )
 
 // warning: needs medco deployment dev-3nodes-local running
@@ -67,7 +69,7 @@ func TestGetQueryTermsDDT(t *testing.T) {
 }
 
 // todo: need to submit to all 3 nodes
-//func TestAggregateAndKeySwitchDummyFlags(t *testing.T) {
+// func TestAggregateAndKeySwitchDummyFlags(t *testing.T) {
 //	privKey, pubKey := libunlynx.GenKey()
 //	pubKeySer, err := libunlynx.SerializePoint(pubKey)
 //	if err != nil {
@@ -114,4 +116,4 @@ func TestGetQueryTermsDDT(t *testing.T) {
 //	t.Log(<-value)
 //	t.Log(<-value)
 //	t.Log(<-value)
-//}
+// }

@@ -8,7 +8,8 @@ test_local: test_go_fmt test_go_lint test_go_unit
 test_go_fmt:
 	@echo Checking correct formatting of files
 	@{ \
-		files=$$( go fmt ./... ); \
+  		GO111MODULE=off go get -u golang.org/x/tools/cmd/goimports; \
+		files=$$( goimports -w -l . ); \
 		if [ -n "$$files" ]; then \
 		echo "Files not properly formatted: $$files"; \
 		exit 1; \

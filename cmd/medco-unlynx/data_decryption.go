@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/ldsec/unlynx/lib"
-	"github.com/urfave/cli"
-	"go.dedis.ch/onet/v3/log"
 	"io"
 	"os"
 	"strconv"
+
+	libunlynx "github.com/ldsec/unlynx/lib"
+	"github.com/urfave/cli"
+	"go.dedis.ch/onet/v3/log"
 )
 
 func decryptIntFromApp(c *cli.Context) error {

@@ -2,11 +2,12 @@ package servicesmedco
 
 import (
 	"fmt"
-	"github.com/ldsec/unlynx/lib"
+	"time"
+
+	libunlynx "github.com/ldsec/unlynx/lib"
 	"go.dedis.ch/kyber/v3"
 	"go.dedis.ch/onet/v3"
 	"go.dedis.ch/onet/v3/network"
-	"time"
 )
 
 func init() {
