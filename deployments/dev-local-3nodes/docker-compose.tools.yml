@@ -24,6 +24,8 @@ services:
       - MEDCO_NODE_IDX=0
     volumes:
       - ./configuration:/medco-configuration
+    networks:
+      inter-nodes:
 
   medco-loader-srv1:
     extends:
@@ -38,6 +40,8 @@ services:
       - MEDCO_NODE_IDX=1
     volumes:
       - ./configuration:/medco-configuration
+    networks:
+      inter-nodes:
 
   medco-loader-srv2:
     extends:
@@ -52,3 +56,10 @@ services:
       - MEDCO_NODE_IDX=2
     volumes:
       - ./configuration:/medco-configuration
+    networks:
+      inter-nodes:
+
+networks:
+  inter-nodes:
+    external:
+      name: dev-local-3nodes_inter-nodes
