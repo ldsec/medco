@@ -171,12 +171,12 @@ services:
       - LOG_LEVEL=3
       - UNLYNX_GROUP_FILE_PATH=/medco-configuration/group.toml
       - MEDCO_NODE_IDX=0
-      - I2B2_DB_HOST=localhost
+      - I2B2_DB_HOST=postgresql
       - I2B2_DB_PORT=5432
       - I2B2_DB_NAME=i2b2medco
       - I2B2_DB_USER=i2b2
       - I2B2_DB_PASSWORD=changeme
-      - MC_DB_HOST=localhost
+      - MC_DB_HOST=postgresql
       - MC_DB_PORT=5432
       - MC_DB_NAME=medcoconnector
       - MC_DB_USER=medcoconnector
@@ -184,4 +184,3 @@ services:
     volumes:
       - ./dev-local-3nodes/configuration:/medco-configuration
       - ../test/data:/data
-    network_mode: host

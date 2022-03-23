@@ -20,9 +20,7 @@ services:
     environment:
       - LOG_LEVEL=${LOADER_LOGLEVEL:?}
       - MEDCO_NODE_IDX=${MEDCO_NODE_IDX:?}
-      - I2B2_DB_HOST=${MEDCO_NODE_DNS_NAME:?}
       - I2B2_DB_PASSWORD=${DB_ALL_USERS_PASSWORD:?}
-      - MC_DB_HOST=${MEDCO_NODE_DNS_NAME:?}
       - MC_DB_PASSWORD=${DB_ALL_USERS_PASSWORD:?}
     volumes:
       - ./configuration:/medco-configuration
