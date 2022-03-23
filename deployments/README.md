@@ -23,8 +23,9 @@ Edit the `.env` file to change:
 The schema below shows the communication flow within a MedCo node, highlighting how the WebSocket tunnel mechanism is
 set up in the case of a network of 3 nodes and within node 0. The boxes are docker containers. Note that the `wstunnel`
 container runs several processes, a server process that handles connections from the other nodes, and as many clients
-processes as there are other nodes in the network (in this example 3-1=2 client processes). Note as well that all
-incoming connections from the other nodes pass through the reverse proxy nginx.
+processes as there are other nodes in the network (in this example 3-1=2 client processes). The clients are listening to
+a port in the `3000-3999` range, for the port `3XXX`, the node index is `XXX`. Note as well that all incoming 
+connections from the other nodes pass through the reverse proxy nginx.
 
 ```
 |------------ unlynx -----------|   |---------- wstunnel ---------|   |--------- nginx --------|   :--- internet / other nodes ---:
@@ -35,7 +36,7 @@ incoming connections from the other nodes pass through the reverse proxy nginx.
 |    * client for node 1        <--->    * TCP port 3001          |   :                        :   :                              :
 |                               |   |    * tunneled WS            <-------------------------------->  HTTP node 1                 :
 |                               |   |  tunnel client for node 2   |   :                        :   :                              :
-|    * client for node 2        <--->    * TCP port 3001          |   :                        :   :                              :
+|    * client for node 2        <--->    * TCP port 3002          |   :                        :   :                              :
 |                               |   |    * tunneled WS            <-------------------------------->  HTTP node 2                 :
 |                               |   |-----------------------------|   :                        :   :                              :
 |                               |                                     |                        |   :                              :

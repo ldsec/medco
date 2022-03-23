@@ -14,6 +14,7 @@ It follows the Golang standard project layout.
     - *pgadmin*: pgadmin docker
     - *postgresql*: postgresql docker
     - *medco*: MedCo binaries docker
+    - *wstunnel*: WebSocket tunnel for unlynx communications
 - *cmd*: binaries
     - *medco-cli-client*: REST API CLI client
     - *medco-connector-server*: REST API server
@@ -21,8 +22,7 @@ It follows the Golang standard project layout.
     - *medco-unlynx*: Unlynx server
 - *connector*: implementation of the REST API server
 - *deployments*: docker-compose files, parameters and configuration for different deployment profiles
-    - *[dev-local-3nodes](https://ldsec.gitbook.io/medco-documentation/developers/local-development-deployment)*: profile that deploys 3 MedCo nodes on a single machine for development purposes
-    - *[test-local-3nodes](https://ldsec.gitbook.io/medco-documentation/system-administrators/deployment/local-test-deployment)*: profile that deploys 3 MedCo nodes on a single machine for test purposes
+    - *[dev-local-3nodes](https://ldsec.gitbook.io/medco-documentation/developers/local-development-deployment)*: profile that deploys 3 MedCo nodes on a single machine for development or test purposes
 - *loader*: implementation of the ETL tool
 - *scripts*: various utility scripts
     - *network-profile-tool*: scripts to generate the deployment profiles files for the [Network Deployment](https://ldsec.gitbook.io/medco-documentation/system-administrators/deployment/network-deployment) profile
