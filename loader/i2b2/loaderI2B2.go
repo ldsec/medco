@@ -3,17 +3,18 @@ package loaderi2b2
 import (
 	"encoding/csv"
 	"fmt"
-	"github.com/ldsec/medco/loader"
-	"github.com/ldsec/medco/unlynx/services"
-	"github.com/ldsec/unlynx/lib"
-	"go.dedis.ch/kyber/v3"
-	"go.dedis.ch/onet/v3"
-	"go.dedis.ch/onet/v3/log"
 	"math/rand"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/ldsec/medco/loader"
+	servicesmedco "github.com/ldsec/medco/unlynx/services"
+	libunlynx "github.com/ldsec/unlynx/lib"
+	"go.dedis.ch/kyber/v3"
+	"go.dedis.ch/onet/v3"
+	"go.dedis.ch/onet/v3/log"
 )
 
 func init() {

@@ -2,16 +2,17 @@ package main
 
 import (
 	"fmt"
-	"github.com/ldsec/medco/unlynx/services"
+	"os"
+	"path"
+	"strconv"
+	"strings"
+
+	servicesmedco "github.com/ldsec/medco/unlynx/services"
 	libunlynx "github.com/ldsec/unlynx/lib"
 	"github.com/urfave/cli"
 	"go.dedis.ch/kyber/v3"
 	"go.dedis.ch/onet/v3/app"
 	"go.dedis.ch/onet/v3/log"
-	"os"
-	"path"
-	"strconv"
-	"strings"
 )
 
 func generateTaggingSecrets(c *cli.Context) error {

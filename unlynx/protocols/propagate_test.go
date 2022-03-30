@@ -1,16 +1,18 @@
+//go:build unit_test
 // +build unit_test
 
 package protocols
 
 import (
 	"bytes"
-	"github.com/stretchr/testify/require"
-	"go.dedis.ch/kyber/v3/suites"
-	"golang.org/x/xerrors"
 	"reflect"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
+	"go.dedis.ch/kyber/v3/suites"
+	"golang.org/x/xerrors"
 
 	"go.dedis.ch/onet/v3"
 	"go.dedis.ch/onet/v3/log"

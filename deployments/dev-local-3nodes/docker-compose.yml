@@ -23,13 +23,13 @@ services:
       service: medco-unlynx
     ports:
       - "2001:2001"
-      - "2002:2002"
     environment:
       - MEDCO_NODE_IDX=0
       - UNLYNX_DEBUG_LEVEL=3
     networks:
       intra-node-srv0:
       inter-nodes:
+        ipv4_address: 172.31.0.101
     volumes:
       - ./configuration:/medco-configuration
 
@@ -61,16 +61,10 @@ services:
       service: nginx
     ports:
       - "80:80"
-      - "2021:2001"
-      - "2022:2002"
-    environment:
-      - MEDCO_NODE_IDX=0
-      - UNLYNX_PORT_0=2001
-      - UNLYNX_PORT_1=2002
     networks:
       intra-node-srv0:
       inter-nodes:
-        ipv4_address: 172.31.0.101
+        ipv4_address: 172.31.0.200
 
   i2b2-srv1:
     extends:
@@ -151,7 +145,6 @@ services:
       service: medco-unlynx
     ports:
         - "2005:2005"
-        - "2006:2006"
     environment:
       - MEDCO_NODE_IDX=2
       - UNLYNX_DEBUG_LEVEL=3

@@ -1,11 +1,13 @@
+//go:build unit_test
 // +build unit_test
 
 package identifiers_test
 
 import (
+	"testing"
+
 	"github.com/ldsec/medco/loader/identifiers"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestAlleleMaping(t *testing.T) {

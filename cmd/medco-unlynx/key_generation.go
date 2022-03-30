@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/ldsec/unlynx/lib"
-	"github.com/urfave/cli"
-	"go.dedis.ch/onet/v3/log"
 	"io"
 	"os"
+
+	libunlynx "github.com/ldsec/unlynx/lib"
+	"github.com/urfave/cli"
+	"go.dedis.ch/onet/v3/log"
 )
 
 func keyGenerationFromApp(c *cli.Context) error {

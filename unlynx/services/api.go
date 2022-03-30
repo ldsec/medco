@@ -1,13 +1,13 @@
 package servicesmedco
 
 import (
-	"github.com/ldsec/unlynx/lib"
+	"time"
+
+	libunlynx "github.com/ldsec/unlynx/lib"
 	"go.dedis.ch/kyber/v3"
-	"go.dedis.ch/kyber/v3/util/key"
 	"go.dedis.ch/onet/v3"
 	"go.dedis.ch/onet/v3/log"
 	"go.dedis.ch/onet/v3/network"
-	"time"
 )
 
 // API represents a client with the server to which he is connected and its public/private key pair.
@@ -15,25 +15,20 @@ type API struct {
 	*onet.Client
 	ClientID   string
 	entryPoint *network.ServerIdentity
-	public     kyber.Point
-	private    kyber.Scalar
 }
 
 // NewMedCoClient constructor of a client.
 func NewMedCoClient(entryPoint *network.ServerIdentity, clientID string) *API {
-	keys := key.NewKeyPair(libunlynx.SuiTe)
 	newClient := &API{
 		Client:     onet.NewClient(libunlynx.SuiTe, Name),
 		ClientID:   clientID,
 		entryPoint: entryPoint,
-		public:     keys.Public,
-		private:    keys.Private,
 	}
 	return newClient
 }
 
 // Send Queries
-//______________________________________________________________________________________________________________________
+// ______________________________________________________________________________________________________________________
 
 // SendSurveyDDTRequestTerms sends the encrypted query terms and DDT tags those terms (the array of terms is ordered).
 func (c *API) SendSurveyDDTRequestTerms(entities *onet.Roster, surveyID SurveyID, terms libunlynx.CipherVector, proofs bool, testing bool) (*SurveyID, []libunlynx.GroupingKey, TimeResults, error) {
