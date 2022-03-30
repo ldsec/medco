@@ -3,12 +3,13 @@ package utilserver
 import (
 	"context"
 	"errors"
-	"github.com/lestrrat-go/jwx/jwk"
-	"github.com/lestrrat-go/jwx/jws"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/lestrrat-go/jwx/jwk"
+	"github.com/lestrrat-go/jwx/jws"
+	"github.com/sirupsen/logrus"
 )
 
 // oidcProvider is the definition of an OIDC identity provider

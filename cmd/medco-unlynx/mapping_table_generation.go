@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"strconv"
+
 	"github.com/urfave/cli"
 	"go.dedis.ch/kyber/v3"
 	"go.dedis.ch/kyber/v3/suites"
 	"go.dedis.ch/onet/v3/log"
-	"os"
-	"strconv"
 )
 
 func mappingTableGenFromApp(c *cli.Context) error {

@@ -4,16 +4,17 @@ import (
 	"bufio"
 	"database/sql"
 	"fmt"
+	"os"
+	"path/filepath"
+
 	"github.com/BurntSushi/toml"
 	"github.com/ldsec/medco/loader"
-	"github.com/ldsec/medco/loader/genomic"
-	"github.com/ldsec/medco/loader/i2b2"
+	loadergenomic "github.com/ldsec/medco/loader/genomic"
+	loaderi2b2 "github.com/ldsec/medco/loader/i2b2"
 	_ "github.com/lib/pq"
 	"github.com/urfave/cli"
 	"go.dedis.ch/onet/v3/app"
 	"go.dedis.ch/onet/v3/log"
-	"os"
-	"path/filepath"
 )
 
 // Loader functions

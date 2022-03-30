@@ -28,12 +28,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ secrets.LDS_PKG_PAT_USERNAME }}
-          password: ${{ secrets.LDS_PKG_PAT }}
+# todo: temporarily disabled
+#      - name: Login to GitHub Container Registry
+#        uses: docker/login-action@v1
+#        with:
+#          registry: ghcr.io
+#          username: ${{ secrets.LDS_PKG_PAT_USERNAME }}
+#          password: ${{ secrets.LDS_PKG_PAT }}
 
       - name: Get MedCo version
         id: get_version
@@ -49,7 +50,9 @@ jobs:
         with:
           file: ./build/package/medco/Dockerfile
           build-args: MEDCO_VERSION=${{ steps.get_version.outputs.version }}
-          push: ${{ github.event_name != 'pull_request' }}
+          # todo: temporarily disabled
+          # push: ${{ github.event_name != 'pull_request' }}
+          push: false
           tags: ghcr.io/ldsec/medco:${{ steps.get_version.outputs.version }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
@@ -59,7 +62,9 @@ jobs:
         with:
           context: ./build/package/i2b2/
           file: ./build/package/i2b2/Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
+          # todo: temporarily disabled
+          # push: ${{ github.event_name != 'pull_request' }}
+          push: false
           tags: ghcr.io/ldsec/i2b2-medco:${{ steps.get_version.outputs.version }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
@@ -69,7 +74,9 @@ jobs:
         with:
           context: ./build/package/keycloak/
           file: ./build/package/keycloak/Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
+          # todo: temporarily disabled
+          # push: ${{ github.event_name != 'pull_request' }}
+          push: false
           tags: ghcr.io/ldsec/keycloak-medco:${{ steps.get_version.outputs.version }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
@@ -79,7 +86,9 @@ jobs:
         with:
           context: ./build/package/nginx/
           file: ./build/package/nginx/Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
+          # todo: temporarily disabled
+          # push: ${{ github.event_name != 'pull_request' }}
+          push: false
           tags: ghcr.io/ldsec/nginx-medco:${{ steps.get_version.outputs.version }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
@@ -89,7 +98,9 @@ jobs:
         with:
           context: ./build/package/pgadmin/
           file: ./build/package/pgadmin/Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
+          # todo: temporarily disabled
+          # push: ${{ github.event_name != 'pull_request' }}
+          push: false
           tags: ghcr.io/ldsec/pgadmin-medco:${{ steps.get_version.outputs.version }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache

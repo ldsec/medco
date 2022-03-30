@@ -1,11 +1,12 @@
 package protocols
 
 import (
-	"golang.org/x/xerrors"
 	"reflect"
 	"strings"
 	"sync"
 	"time"
+
+	"golang.org/x/xerrors"
 
 	"go.dedis.ch/onet/v3"
 	"go.dedis.ch/onet/v3/log"

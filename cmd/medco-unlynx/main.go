@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/ldsec/medco"
 	"os"
 
-	"github.com/ldsec/unlynx/lib"
+	"github.com/ldsec/medco"
+
+	libunlynx "github.com/ldsec/unlynx/lib"
 	"github.com/urfave/cli"
 	"go.dedis.ch/onet/v3/app"
 	"go.dedis.ch/onet/v3/log"
@@ -44,6 +45,8 @@ const (
 	optionProvidedPubKey = "pubKey"
 
 	optionProvidedPrivKey = "privKey"
+
+	optionWsURL = "wsUrl"
 
 	optionProvidedSecrets      = "secrets"
 	optionProvidedSecretsShort = "s"
@@ -146,6 +149,10 @@ func main() {
 		cli.StringFlag{
 			Name:  optionProvidedPrivKey,
 			Usage: "Provided private key (optional)",
+		},
+		cli.StringFlag{
+			Name:  optionWsURL,
+			Usage: "Unlynx / onet WebSocket URL, e.g. ws://medco-unlynx:2002",
 		},
 	}
 
