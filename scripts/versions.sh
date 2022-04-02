@@ -10,10 +10,10 @@ elif [[ ${GITHUB_REF:-} == refs/tags/* ]]; then
 
 else
   # get version from git describe
-  MEDCO_VERSION=$(git describe --tags 2> /dev/null)
+  MEDCO_VERSION=$(git describe --tags 2> /dev/null || true)
 
   # if failed because of no available tag, only use commit
-  if [[ $? -ne 0 ]]; then
+  if [[ -z "$MEDCO_VERSION" ]]; then
     MEDCO_VERSION="v0.0.0-dev-$(git describe --tags --always)"
   fi
 fi
