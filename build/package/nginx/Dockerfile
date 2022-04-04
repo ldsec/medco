@@ -1,8 +1,7 @@
 FROM nginx:1.20.1
 
 # run-time variables
-ENV HTTP_SCHEME="http" \
-    ALL_TIMEOUTS_SECONDS="600" \
+ENV ALL_TIMEOUTS_SECONDS="600" \
     PROD_CONFIG="true"
 
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh

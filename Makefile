@@ -1,5 +1,3 @@
-MEDCO_VERSION := $(shell scripts/version.sh)
-GB_VERSION := v3.0.0
 
 # test commands
 .PHONY: test test_go_fmt test_go_lint test_codecov_unit test_codecov_e2e
@@ -39,7 +37,7 @@ test_go_integration:
 	go test -v -race -short --tags=integration_test -p=1 ./...
 
 # utility commands
-.PHONY:	test_unlynx_loop swagger swagger-gen download_test_data medco_version gb_version
+.PHONY:	test_unlynx_loop swagger swagger-gen download_test_data
 test_unlynx_loop:
 	for i in $$( seq 100 ); \
 		do echo "******* Run $$i"; echo; \
@@ -78,9 +76,3 @@ swagger:
 download_test_data:
 	./test/data/download.sh genomic_small
 	./test/data/download.sh i2b2
-
-medco_version:
-	@echo $(MEDCO_VERSION)
-
-gb_version:
-	@echo $(GB_VERSION)

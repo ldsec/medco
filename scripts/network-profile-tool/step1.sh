@@ -20,6 +20,7 @@ function help {
     echo -e "  -sk,   --secret_key      VAL  Unlynx node private key, if it is not to be generated"
     echo -e "  -crt,  --certificate     VAL  Filepath to certificate (*.crt), if it is not to be generated"
     echo -e "  -k,    --key             VAL  Filepath to certificate key (*.key), if it is not to be generated"
+    echo -e "  -mv,   --medco_version   VAL  Override the version of MedCo used"
     echo -e "  -h,    --help \n"
     example
 }
@@ -36,6 +37,7 @@ PUB_KEY=
 PRIV_KEY=
 CRT=
 KEY=
+MEDCO_VERSION_OVERRIDE=
 
 # Args while-loop
 while [ "$1" != "" ];
@@ -64,6 +66,9 @@ do
                           ;;
    -k  | --key  )  shift
                           KEY=$1
+                          ;;
+   -mv  | --medco_version  )  shift
+                          MEDCO_VERSION_OVERRIDE=$1
                           ;;
    -h   | --help )        help
                           exit
@@ -103,7 +108,7 @@ else
 fi
 
 # generate convenience variables
-export_variables "$NETWORK_NAME" "$NODE_IDX"
+export_variables "$NETWORK_NAME" "$NODE_IDX" "$MEDCO_VERSION_OVERRIDE"
 if [[ -d ${COMPOSE_FOLDER} ]]; then
     echo "The profile folder exists. Aborting."
     exit 2
@@ -118,16 +123,19 @@ mkdir "${COMPOSE_FOLDER}" "${CONF_FOLDER}"
 echo -n "${HTTPS_ADDRESS}" > "${CONF_FOLDER}/srv${NODE_IDX}-nodednsname.txt"
 
 # ===================== unlynx keys =========================
+UNLYNX_WSTUNNEL_ADDRESS="medco-unlynx-wstunnel:3$NODE_IDX"
+
 unlynx_setup_args=(
   medco-unlynx server setupNonInteractive
   --serverBinding "$UNLYNX_ADDRESS"
+  --serverBindingPublic "$UNLYNX_WSTUNNEL_ADDRESS"
   --wsUrl "http://medco-unlynx:2002"
   --description "${PROFILE_NAME}_medco_unlynx_server"
   --privateTomlPath "/medco-configuration/srv${NODE_IDX}-private.toml"
   --publicTomlPath "/medco-configuration/srv${NODE_IDX}-public.toml"
 )
 
-echo "### Generating unlynx keys with address ${UNLYNX_ADDRESS}"
+echo "### Generating unlynx keys with address ${UNLYNX_ADDRESS} and WebSocket tunnel address $UNLYNX_WSTUNNEL_ADDRESS"
 if [[ -n "$PUB_KEY" ]]; then
   echo "### Using pre-generated unlynx key ${PUB_KEY}"
   unlynx_setup_args=("${unlynx_setup_args[@]}" --pubKey "${PUB_KEY}" --privKey "${PRIV_KEY}")
@@ -205,16 +213,24 @@ MEDCO_NODE_IDX=${NODE_IDX}
 MEDCO_PROFILE_NAME=${PROFILE_NAME}
 MEDCO_NETWORK_NAME=${NETWORK_NAME}
 
-I2B2_WILDFLY_PASSWORD=replaceme
-I2B2_SERVICE_PASSWORD=replaceme
-I2B2_USER_PASSWORD=replaceme
-POSTGRES_PASSWORD=replaceme
-KEYCLOAK_PASSWORD=replaceme
+I2B2_WILDFLY_PASSWORD=changeme
+I2B2_SERVICE_PASSWORD=changeme
+I2B2_USER_PASSWORD=changeme
+POSTGRES_PASSWORD=changeme
+KEYCLOAK_PASSWORD=changeme
+
+# this controls the password used for all database users except admin (keycloak, i2b2, medcoconnector)
+DB_ALL_USERS_PASSWORD=changeme
 
 KEYCLOAK_REALM=master
 KEYCLOAK_CLIENT_ID=medco
 KEYCLOAK_USER_CLAIM=preferred_username
 
+I2B2_LOGLEVEL=INFO
+UNLYNX_LOGLEVEL=1
+CONNECTOR_LOGLEVEL=3
+CLICLIENT_LOGLEVEL=3
+LOADER_LOGLEVEL=3
 EOF
 echo "### Compose profile generated!"
 
