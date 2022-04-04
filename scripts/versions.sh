@@ -19,12 +19,12 @@ else
 fi
 export MEDCO_VERSION
 
-export MEDCO_DOCKER_TAG=ghcr.io/chuv-ds/medco:$MEDCO_VERSION
-export I2B2_DOCKER_TAG=ghcr.io/chuv-ds/i2b2-medco:$MEDCO_VERSION
-export KEYCLOAK_DOCKER_TAG=ghcr.io/chuv-ds/keycloak-medco:$MEDCO_VERSION
-export WSTUNNEL_DOCKER_TAG=ghcr.io/chuv-ds/medco-unlynx-wstunnel:$MEDCO_VERSION
-export NGINX_DOCKER_TAG=ghcr.io/chuv-ds/nginx-medco:$MEDCO_VERSION
-export PGADMIN_DOCKER_TAG=ghcr.io/chuv-ds/pgadmin-medco:$MEDCO_VERSION
+export MEDCO_DOCKER_TAG=chuvdslab/medco:$MEDCO_VERSION
+export I2B2_DOCKER_TAG=chuvdslab/i2b2-medco:$MEDCO_VERSION
+export KEYCLOAK_DOCKER_TAG=chuvdslab/keycloak-medco:$MEDCO_VERSION
+export WSTUNNEL_DOCKER_TAG=chuvdslab/medco-unlynx-wstunnel:$MEDCO_VERSION
+export NGINX_DOCKER_TAG=chuvdslab/nginx-medco:$MEDCO_VERSION
+export PGADMIN_DOCKER_TAG=chuvdslab/pgadmin-medco:$MEDCO_VERSION
 
 export GB_DOCKER_TAG=ghcr.io/ldsec/glowing-bear-medco:v3.0.0
 export PG_DOCKER_TAG=postgres:9.6
