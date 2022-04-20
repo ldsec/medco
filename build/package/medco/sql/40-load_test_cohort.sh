@@ -17,8 +17,8 @@ EOSQL
 psql $PSQL_PARAMS -d "$MC_DB_NAME" <<-EOSQL
 
 INSERT INTO query_tools.saved_cohorts(
-cohort_id, user_id, cohort_name, query_id, create_date, update_date)
-VALUES (-1, 'test', 'testCohort', -1, '2020-08-25 13:57:00', '2020-08-25 13:57:00')
-ON CONFLICT DO NOTHING;
+        cohort_id, user_id, cohort_name, query_id, create_date, update_date, predefined, default_flag)
+        VALUES (-1, 'test', 'testCohort', -1, '2020-08-25 13:57:00', '2020-08-25 13:57:00', FALSE, FALSE)
+        ON CONFLICT DO NOTHING;
 
 EOSQL

@@ -36,6 +36,12 @@ func (o *PutCohortsReader) ReadResponse(response runtime.ClientResponse, consume
 			return nil, err
 		}
 		return nil, result
+	case 403:
+		result := NewPutCohortsForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
 	case 404:
 		result := NewPutCohortsNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -105,6 +111,39 @@ func (o *PutCohortsBadRequest) GetPayload() *PutCohortsBadRequestBody {
 func (o *PutCohortsBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(PutCohortsBadRequestBody)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewPutCohortsForbidden creates a PutCohortsForbidden with default headers values
+func NewPutCohortsForbidden() *PutCohortsForbidden {
+	return &PutCohortsForbidden{}
+}
+
+/*PutCohortsForbidden handles this case with default header values.
+
+Request is valid and user is authenticated, but not authorized to perform this action.
+*/
+type PutCohortsForbidden struct {
+	Payload *PutCohortsForbiddenBody
+}
+
+func (o *PutCohortsForbidden) Error() string {
+	return fmt.Sprintf("[PUT /node/explore/cohorts/{name}][%d] putCohortsForbidden  %+v", 403, o.Payload)
+}
+
+func (o *PutCohortsForbidden) GetPayload() *PutCohortsForbiddenBody {
+	return o.Payload
+}
+
+func (o *PutCohortsForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(PutCohortsForbiddenBody)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -396,6 +435,38 @@ func (o *PutCohortsDefaultBody) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (o *PutCohortsDefaultBody) UnmarshalBinary(b []byte) error {
 	var res PutCohortsDefaultBody
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+/*PutCohortsForbiddenBody put cohorts forbidden body
+swagger:model PutCohortsForbiddenBody
+*/
+type PutCohortsForbiddenBody struct {
+
+	// message
+	Message string `json:"message,omitempty"`
+}
+
+// Validate validates this put cohorts forbidden body
+func (o *PutCohortsForbiddenBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *PutCohortsForbiddenBody) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *PutCohortsForbiddenBody) UnmarshalBinary(b []byte) error {
+	var res PutCohortsForbiddenBody
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

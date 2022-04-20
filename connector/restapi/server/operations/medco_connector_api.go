@@ -91,6 +91,9 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 		MedcoNodePutCohortsHandler: medco_node.PutCohortsHandlerFunc(func(params medco_node.PutCohortsParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_node.PutCohorts has not yet been implemented")
 		}),
+		MedcoNodePutDefaultCohortHandler: medco_node.PutDefaultCohortHandlerFunc(func(params medco_node.PutDefaultCohortParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation medco_node.PutDefaultCohort has not yet been implemented")
+		}),
 		SurvivalAnalysisSurvivalAnalysisHandler: survival_analysis.SurvivalAnalysisHandlerFunc(func(params survival_analysis.SurvivalAnalysisParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation survival_analysis.SurvivalAnalysis has not yet been implemented")
 		}),
@@ -169,6 +172,8 @@ type MedcoConnectorAPI struct {
 	MedcoNodePostCohortsPatientListHandler medco_node.PostCohortsPatientListHandler
 	// MedcoNodePutCohortsHandler sets the operation handler for the put cohorts operation
 	MedcoNodePutCohortsHandler medco_node.PutCohortsHandler
+	// MedcoNodePutDefaultCohortHandler sets the operation handler for the put default cohort operation
+	MedcoNodePutDefaultCohortHandler medco_node.PutDefaultCohortHandler
 	// SurvivalAnalysisSurvivalAnalysisHandler sets the operation handler for the survival analysis operation
 	SurvivalAnalysisSurvivalAnalysisHandler survival_analysis.SurvivalAnalysisHandler
 	// ServeError is called when an error is received, there is a default handler
@@ -292,6 +297,9 @@ func (o *MedcoConnectorAPI) Validate() error {
 	}
 	if o.MedcoNodePutCohortsHandler == nil {
 		unregistered = append(unregistered, "medco_node.PutCohortsHandler")
+	}
+	if o.MedcoNodePutDefaultCohortHandler == nil {
+		unregistered = append(unregistered, "medco_node.PutDefaultCohortHandler")
 	}
 	if o.SurvivalAnalysisSurvivalAnalysisHandler == nil {
 		unregistered = append(unregistered, "survival_analysis.SurvivalAnalysisHandler")
@@ -450,6 +458,10 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
 	o.handlers["PUT"]["/node/explore/cohorts/{name}"] = medco_node.NewPutCohorts(o.context, o.MedcoNodePutCohortsHandler)
+	if o.handlers["PUT"] == nil {
+		o.handlers["PUT"] = make(map[string]http.Handler)
+	}
+	o.handlers["PUT"]["/node/explore/default-cohort/{name}"] = medco_node.NewPutDefaultCohort(o.context, o.MedcoNodePutDefaultCohortHandler)
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}

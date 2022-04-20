@@ -35,6 +35,50 @@ func (o *DeleteCohortsOK) WriteResponse(rw http.ResponseWriter, producer runtime
 	rw.WriteHeader(200)
 }
 
+// DeleteCohortsForbiddenCode is the HTTP code returned for type DeleteCohortsForbidden
+const DeleteCohortsForbiddenCode int = 403
+
+/*DeleteCohortsForbidden Request is valid and user is authenticated, but not authorized to perform this action.
+
+swagger:response deleteCohortsForbidden
+*/
+type DeleteCohortsForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *DeleteCohortsForbiddenBody `json:"body,omitempty"`
+}
+
+// NewDeleteCohortsForbidden creates DeleteCohortsForbidden with default headers values
+func NewDeleteCohortsForbidden() *DeleteCohortsForbidden {
+
+	return &DeleteCohortsForbidden{}
+}
+
+// WithPayload adds the payload to the delete cohorts forbidden response
+func (o *DeleteCohortsForbidden) WithPayload(payload *DeleteCohortsForbiddenBody) *DeleteCohortsForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete cohorts forbidden response
+func (o *DeleteCohortsForbidden) SetPayload(payload *DeleteCohortsForbiddenBody) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteCohortsForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // DeleteCohortsNotFoundCode is the HTTP code returned for type DeleteCohortsNotFound
 const DeleteCohortsNotFoundCode int = 404
 

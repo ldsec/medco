@@ -49,12 +49,17 @@ func ExecuteGetCohorts(token, username, password string, disableTLSCheck bool, r
 		return err
 	}
 	logrus.Debug("Writing headers")
-	resultCSV.Write([]string{"node_index", "cohort_name", "cohort_id", "query_id", "creation_date", "update_date", "query_timing", "panels"})
+	resultCSV.Write([]string{"node_index", "cohort_name", "cohort_id", "query_id", "creation_date", "update_date", "predefined", "default", "query_timing", "panels"})
 
 	for nodeIndex, nodeResult := range cohorts {
 		for _, cohortInfo := range nodeResult {
 			logrus.Debugf("Writing result %d", nodeIndex)
 			panelJSONs, err := marshal(cohortInfo.QueryDefinition.Panels)
+			if err != nil {
+				err = fmt.Errorf("cohorts request marshalling results: %s", err.Error())
+				logrus.Error(err)
+				return err
+			}
 			// removing the quotes from the marshalling process eases parsing of the produced file
 			panelJSONs = strings.Replace(panelJSONs, `"`, "", -1)
 			err = resultCSV.Write([]string{
@@ -64,6 +69,8 @@ func ExecuteGetCohorts(token, username, password string, disableTLSCheck bool, r
 				strconv.Itoa(cohortInfo.QueryID),
 				cohortInfo.CreationDate.Format(time.RFC3339),
 				cohortInfo.UpdateDate.Format(time.RFC3339),
+				strconv.FormatBool(cohortInfo.Predefined),
+				strconv.FormatBool(cohortInfo.Default),
 				string(cohortInfo.QueryDefinition.QueryTiming),
 				panelJSONs,
 			})

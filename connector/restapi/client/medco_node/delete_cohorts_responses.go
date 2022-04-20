@@ -28,6 +28,12 @@ func (o *DeleteCohortsReader) ReadResponse(response runtime.ClientResponse, cons
 			return nil, err
 		}
 		return result, nil
+	case 403:
+		result := NewDeleteCohortsForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
 	case 404:
 		result := NewDeleteCohortsNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -63,6 +69,39 @@ func (o *DeleteCohortsOK) Error() string {
 }
 
 func (o *DeleteCohortsOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	return nil
+}
+
+// NewDeleteCohortsForbidden creates a DeleteCohortsForbidden with default headers values
+func NewDeleteCohortsForbidden() *DeleteCohortsForbidden {
+	return &DeleteCohortsForbidden{}
+}
+
+/*DeleteCohortsForbidden handles this case with default header values.
+
+Request is valid and user is authenticated, but not authorized to perform this action.
+*/
+type DeleteCohortsForbidden struct {
+	Payload *DeleteCohortsForbiddenBody
+}
+
+func (o *DeleteCohortsForbidden) Error() string {
+	return fmt.Sprintf("[DELETE /node/explore/cohorts/{name}][%d] deleteCohortsForbidden  %+v", 403, o.Payload)
+}
+
+func (o *DeleteCohortsForbidden) GetPayload() *DeleteCohortsForbiddenBody {
+	return o.Payload
+}
+
+func (o *DeleteCohortsForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(DeleteCohortsForbiddenBody)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
 
 	return nil
 }
@@ -167,6 +206,38 @@ func (o *DeleteCohortsDefaultBody) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (o *DeleteCohortsDefaultBody) UnmarshalBinary(b []byte) error {
 	var res DeleteCohortsDefaultBody
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+/*DeleteCohortsForbiddenBody delete cohorts forbidden body
+swagger:model DeleteCohortsForbiddenBody
+*/
+type DeleteCohortsForbiddenBody struct {
+
+	// message
+	Message string `json:"message,omitempty"`
+}
+
+// Validate validates this delete cohorts forbidden body
+func (o *DeleteCohortsForbiddenBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *DeleteCohortsForbiddenBody) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *DeleteCohortsForbiddenBody) UnmarshalBinary(b []byte) error {
+	var res DeleteCohortsForbiddenBody
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

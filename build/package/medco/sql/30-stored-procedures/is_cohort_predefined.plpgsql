@@ -1,0 +1,17 @@
+-- pl/pgsql function checks whether a cohort is predefined or not
+
+CREATE OR REPLACE FUNCTION query_tools.is_cohort_predefined(user_id varchar, cohort_name varchar)
+  RETURNS boolean
+  STABLE
+  PARALLEL SAFE
+  AS $$
+DECLARE
+  predefined_ boolean;
+BEGIN
+  EXECUTE 'SELECT predefined FROM query_tools.saved_cohorts
+WHERE user_id = $1 and cohort_name = $2'
+  USING user_id, cohort_name INTO predefined_;
+  RETURN predefined_;
+END;
+$$
+LANGUAGE plpgsql

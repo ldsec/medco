@@ -333,6 +333,8 @@ paths:
           description: "Updated cohort"
         400:
           $ref : "#/responses/badRequestResponse"
+        403:
+          $ref : '#/responses/forbiddenResponse'
         404:
           $ref : "#/responses/notFoundResponse"
         409:
@@ -357,12 +359,39 @@ paths:
       responses:
         200:
           description: "Deleted cohort"
+        403:
+          $ref : '#/responses/forbiddenResponse'
         404:
           $ref : '#/responses/notFoundResponse'
         default:
           $ref: '#/responses/errorResponse'
       security:
         - medco-jwt: ["medco-explore"]
+
+
+  /node/explore/default-cohort/{name}:
+    put:
+      tags:
+        - "medco-node"
+      summary: "Change the default cohort of the user"
+      operationId: "putDefaultCohort"
+      parameters:
+        - in: "path"
+          name: "name"
+          description: "Name of the cohort to set as the new default cohort"
+          required: true
+          type: "string"
+          pattern: '^\w+$'
+      responses:
+        200:
+          description: "Default cohort updated"
+        404:
+          $ref : '#/responses/notFoundResponse'
+        default:
+          $ref: '#/responses/errorResponse'
+      security:
+        - medco-jwt: ["medco-explore"]
+      
 
   /node/explore/cohorts/patient-list:
     post:
@@ -749,6 +778,10 @@ responses:
             type: "string"
           updateDate:
             type: "string"
+          predefined:
+            type: "boolean"
+          defaultFlag:
+            type: "boolean"
           queryDefinition:
             type: "object"
             properties:

@@ -17,8 +17,8 @@ psql $PSQL_PARAMS -d "$MC_DB_NAME" <<-EOSQL
 
 
         INSERT INTO query_tools.saved_cohorts(
-        cohort_id, user_id, cohort_name, query_id, create_date, update_date)
-        VALUES (-42, 'test', 'testCohortBioref', -42, '2020-08-25 13:57:00', '2020-08-25 13:57:00')
+        cohort_id, user_id, cohort_name, query_id, create_date, update_date, predefined, default_flag)
+        VALUES (-42, 'test', 'testCohortBioref', -42, '2020-08-25 13:57:00', '2020-08-25 13:57:00', FALSE, FALSE)
         ON CONFLICT DO NOTHING;
 
         --it could be nice to create a second test cohort containing only a subset of the patients

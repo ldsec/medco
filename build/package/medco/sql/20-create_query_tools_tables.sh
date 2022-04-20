@@ -47,6 +47,8 @@ CREATE TABLE IF NOT EXISTS query_tools.saved_cohorts
     query_id INTEGER NOT  NULL,
     create_date TIMESTAMP WITHOUT TIME ZONE,
     update_date TIMESTAMP WITHOUT TIME ZONE,
+    predefined BOOLEAN NOT NULL,
+    default_flag BOOLEAN NOT NULL,
     CONSTRAINT saved_cohorts_pkey PRIMARY KEY (cohort_id),
     CONSTRAINT saved_cohorts_user_id_cohort_name_key UNIQUE (user_id, cohort_name),
     CONSTRAINT query_tool_fk_psc_ri FOREIGN KEY (query_id)

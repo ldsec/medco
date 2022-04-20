@@ -13,6 +13,8 @@ type Cohort struct {
 	CohortName      string
 	CreationDate    time.Time
 	UpdateDate      time.Time
+	Predefined      bool
+	Default         bool
 	QueryDefinition struct {
 		Panels      []*models.Panel
 		QueryTiming models.Timing

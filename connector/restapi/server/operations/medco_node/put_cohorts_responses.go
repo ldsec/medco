@@ -79,6 +79,50 @@ func (o *PutCohortsBadRequest) WriteResponse(rw http.ResponseWriter, producer ru
 	}
 }
 
+// PutCohortsForbiddenCode is the HTTP code returned for type PutCohortsForbidden
+const PutCohortsForbiddenCode int = 403
+
+/*PutCohortsForbidden Request is valid and user is authenticated, but not authorized to perform this action.
+
+swagger:response putCohortsForbidden
+*/
+type PutCohortsForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *PutCohortsForbiddenBody `json:"body,omitempty"`
+}
+
+// NewPutCohortsForbidden creates PutCohortsForbidden with default headers values
+func NewPutCohortsForbidden() *PutCohortsForbidden {
+
+	return &PutCohortsForbidden{}
+}
+
+// WithPayload adds the payload to the put cohorts forbidden response
+func (o *PutCohortsForbidden) WithPayload(payload *PutCohortsForbiddenBody) *PutCohortsForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the put cohorts forbidden response
+func (o *PutCohortsForbidden) SetPayload(payload *PutCohortsForbiddenBody) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *PutCohortsForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // PutCohortsNotFoundCode is the HTTP code returned for type PutCohortsNotFound
 const PutCohortsNotFoundCode int = 404
 

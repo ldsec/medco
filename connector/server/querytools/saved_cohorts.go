@@ -65,6 +65,9 @@ func GetSavedCohorts(userID string, limit int) ([]medcomodels.Cohort, error) {
 	var name string
 	var createDate time.Time
 	var updateDate time.Time
+	var predefined bool
+	var defaultFlag bool
+
 	var cohorts = make([]medcomodels.Cohort, 0)
 	record := new(string)
 	for rows.Next() {
@@ -98,12 +101,24 @@ func GetSavedCohorts(userID string, limit int) ([]medcomodels.Cohort, error) {
 			err = fmt.Errorf("while parsing update date string \"%s\": %s, DB operation: %s", cells[4], err.Error(), description)
 			return nil, err
 		}
+		predefined, err = strconv.ParseBool(strings.Trim(cells[5], `"`))
+		if err != nil {
+			err = fmt.Errorf("while parsing predefined string \"%s\": %s, DB operation: %s", cells[5], err.Error(), description)
+			return nil, err
+		}
+		defaultFlag, err = strconv.ParseBool(strings.Trim(cells[6], `"`))
+		if err != nil {
+			err = fmt.Errorf("while parsing default flag string \"%s\": %s, DB operation: %s", cells[6], err.Error(), description)
+			return nil, err
+		}
 		newCohort := medcomodels.Cohort{
 			CohortID:     id,
 			QueryID:      qid,
 			CohortName:   name,
 			CreationDate: createDate,
 			UpdateDate:   updateDate,
+			Predefined:   predefined,
+			Default:      defaultFlag,
 		}
 		logrus.Tracef("got cohort %+v", newCohort)
 		cohorts = append(cohorts, newCohort)
@@ -143,7 +158,7 @@ func GetDate(userID string, cohortID int) (time.Time, error) {
 
 }
 
-// InsertCohort runs a SQL query to either insert a new cohort or update an existing one
+// InsertCohort runs a SQL query to either insert a new cohort
 func InsertCohort(userID string, queryID int, cohortName string, createDate, updateDate time.Time) (int, error) {
 	description := fmt.Sprintf(
 		"InsertCohort (user ID: %s, query ID: %d, cohort name: %s, create date: %s, update date: %s), procedure: %s",
@@ -172,7 +187,7 @@ func InsertCohort(userID string, queryID int, cohortName string, createDate, upd
 	return cohortID, err
 }
 
-// UpdateCohort runs a SQL query to either insert a new cohort or update an existing one
+// UpdateCohort runs a SQL query to update an existing cohort
 func UpdateCohort(cohortName, userID string, queryID int, updateDate time.Time) (int, error) {
 	description := fmt.Sprintf("UpdateCohort (cohort name: %s, user ID: %s, query ID: %d, update time: %s), procedure: %s", cohortName, userID, queryID, updateDate.Format(time.RFC3339), "query_tools.update_cohort")
 	logrus.Debugf("running: %s", description)
@@ -228,4 +243,43 @@ func RemoveCohort(userID, cohortName string) error {
 	}
 	logrus.Debugf("successfully deleted, DB operation: %s", description)
 	return nil
+}
+
+// UpdateDefaultCohort changes the default cohort
+func UpdateDefaultCohort(userID, cohortName string) error {
+	description := fmt.Sprintf("UpdateDefaultCohort (user ID: %s, cohort name: %s), procedure : %s", userID, cohortName, "query_tools.update_default_cohort")
+	logrus.Debugf("running: %s", description)
+	res := utilserver.DBConnection.QueryRow("SELECT query_tools.update_default_cohort($1, $2);", userID, cohortName)
+	var cohortID sql.NullInt32
+	err := res.Scan(&cohortID)
+	if err != nil {
+		err = fmt.Errorf("while executing procedure: %s, DB operation: %s", err.Error(), description)
+		return err
+	}
+	if !cohortID.Valid {
+		err = fmt.Errorf("cohort to set as default not found, DB operation: %s", description)
+		return err
+	}
+	logrus.Debugf("successfully changed default status, DB operation: %s", description)
+	return nil
+
+}
+
+// IsCohortPredefined returns true if the cohort is predefined, an error if the cohort does not exist
+func IsCohortPredefined(userID, cohortName string) (bool, error) {
+	description := fmt.Sprintf("IsCohortPredefined (user ID: %s, cohort name: %s), procedure : %s", userID, cohortName, "query_tools.is_cohort_predefined")
+	logrus.Debugf("running: %s", description)
+	res := utilserver.DBConnection.QueryRow("SELECT query_tools.is_cohort_predefined($1, $2);", userID, cohortName)
+	var isPredefined sql.NullBool
+	err := res.Scan(&isPredefined)
+	if err != nil {
+		err = fmt.Errorf("while executing procedure: %s, DB operation: %s", err.Error(), description)
+		return false, err
+	}
+	if !isPredefined.Valid {
+		err = fmt.Errorf("cohort to check the predefined status not found, DB operation: %s", description)
+		return false, err
+	}
+	logrus.Debugf("successfully checked predefined status, DB operation: %s", description)
+	return isPredefined.Bool, nil
 }
