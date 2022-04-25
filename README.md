@@ -21,11 +21,11 @@ It follows the Golang standard project layout.
     - *medco-loader*: ETL tool
     - *medco-unlynx*: Unlynx server
 - *connector*: implementation of the REST API server
-- *deployments*: docker-compose files, parameters and configuration for different deployment profiles
-    - *[dev-local-3nodes](https://ldsec.gitbook.io/medco-documentation/developers/local-development-deployment)*: profile that deploys 3 MedCo nodes on a single machine for development or test purposes
+- *[deployments](deployments/)*: deployment documentation, docker-compose files, parameters and configuration for different deployment profiles
+    - *dev-local-3nodes*: profile that deploys 3 MedCo nodes on a single machine for development or test purposes
 - *loader*: implementation of the ETL tool
 - *scripts*: various utility scripts
-    - *network-profile-tool*: scripts to generate the deployment profiles files for the [Network Deployment](https://ldsec.gitbook.io/medco-documentation/system-administrators/deployment/network-deployment) profile
+    - *[network-profile-tool](scripts/network-profile-tool/)*: documentation and tool to generate network deployment profiles files
 - *test*: testing scripts
     - *test/data*: script to download the test datasets
 - *unlynx*: implementation of the unlynx wrapper
