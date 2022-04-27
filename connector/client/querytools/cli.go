@@ -213,6 +213,34 @@ func ExecuteRemoveCohorts(token, username, password, cohortName string, disableT
 
 }
 
+// ExecutePutDefaultCohort executes a put default cohort query
+func ExecutePutDefaultCohort(token, username, password, cohortName string, disableTLSCheck bool) error {
+	accessToken, err := utilclient.RetrieveOrGetNewAccessToken(token, username, password, disableTLSCheck)
+	if err != nil {
+		err = fmt.Errorf("while retrieving access token: %s", err.Error())
+		logrus.Error(err)
+		return err
+	}
+	logrus.Debug("access token received")
+	logrus.Tracef("token %s", accessToken)
+
+	// calling API
+	putDefaultCohort, err := NewPutDefaultCohort(accessToken, cohortName, disableTLSCheck)
+	if err != nil {
+		err = fmt.Errorf("while crafting new put default request: %s", err.Error())
+		logrus.Error(err)
+		return err
+	}
+
+	err = putDefaultCohort.Execute()
+	if err != nil {
+		err = fmt.Errorf("default cohort request execution: %s", err.Error())
+		logrus.Error(err)
+		return err
+	}
+	return nil
+}
+
 // ExecuteCohortsPatientList executes a cohorts patient list query
 func ExecuteCohortsPatientList(token, username, password, cohortName, resultFile, timerFile string, disableTLSCheck bool) error {
 	accessToken, err := utilclient.RetrieveOrGetNewAccessToken(token, username, password, disableTLSCheck)

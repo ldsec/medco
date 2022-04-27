@@ -12,7 +12,7 @@ DO
 \$\$
 BEGIN
 IF  NOT EXISTS (SELECT * FROM pg_type where typname='status_enum') AS type_count  THEN
-CREATE TYPE status_enum AS ENUM ('running','completed','error');
+CREATE TYPE status_enum AS ENUM ('running','completed','error','predefined');
 END IF;
 END
 \$\$

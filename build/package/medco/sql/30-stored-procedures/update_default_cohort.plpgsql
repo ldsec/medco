@@ -1,6 +1,6 @@
 -- pl/pgsql function that sets the the default flag to FALSE to the current default saved cohort and then set the default flag of the new dfault to true
 
-CREATE OR REPLACE FUNCTION query_tools.update_default_cohort(cohort_name varchar, user_id varchar)
+CREATE OR REPLACE FUNCTION query_tools.update_default_cohort(user_id varchar, cohort_name varchar)
   RETURNS integer
   VOLATILE
   PARALLEL UNSAFE

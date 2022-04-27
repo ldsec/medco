@@ -196,6 +196,8 @@ func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *m
 				CohortName:      cohort.CohortName,
 				CohortID:        int64(cohort.CohortID),
 				QueryID:         queryID,
+				Predefined:      cohort.Predefined,
+				DefaultFlag:     cohort.Default,
 				CreationDate:    cohort.CreationDate.Format(time.RFC3339Nano),
 				UpdateDate:      cohort.UpdateDate.Format(time.RFC3339Nano),
 				QueryDefinition: queryDefinition,
