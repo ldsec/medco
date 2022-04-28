@@ -1,4 +1,12 @@
-FROM ghcr.io/erebe/wstunnel:latest
+FROM alpine:latest
+
+# --- replacement for ghcr.io/erebe/wstunnel:latest image
+ENV WSTUNNEL_BIN_URL=https://github.com/erebe/wstunnel/releases/download/v4.1/wstunnel-x64-linux
+RUN wget -O /wstunnel "$WSTUNNEL_BIN_URL" && \
+    adduser -D abc && chmod +x /wstunnel
+USER abc
+WORKDIR /
+# ---
 
 # WS tunnel server variables
 ENV SERVER_LISTEN_URL=ws://0.0.0.0:2003 \
