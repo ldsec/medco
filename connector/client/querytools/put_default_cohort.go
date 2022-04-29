@@ -16,6 +16,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// PutDefaultCohort is a MedCo client query for setting the default cohort
 type PutDefaultCohort struct {
 	// httpMedCoClients are the HTTP clients for the MedCo connectors
 	httpMedCoClients []*client.MedcoCli
@@ -25,6 +26,7 @@ type PutDefaultCohort struct {
 	cohortName string
 }
 
+// NewPutDefaultCohort creates a new put default cohort query
 func NewPutDefaultCohort(token, cohortName string, disableTLSCheck bool) (putDefaultCohort *PutDefaultCohort, err error) {
 	putDefaultCohort = &PutDefaultCohort{
 		authToken:  token,
@@ -101,12 +103,12 @@ func (putDefaultCohort *PutDefaultCohort) Execute() (err error) {
 	return
 }
 
-func (putCohorts *PutDefaultCohort) submitToNode(nodeIdx int) (*medco_node.PutDefaultCohortOK, error) {
+func (putDefaultCohort *PutDefaultCohort) submitToNode(nodeIdx int) (*medco_node.PutDefaultCohortOK, error) {
 	params := medco_node.NewPutDefaultCohortParamsWithTimeout(time.Duration(utilclient.QueryTimeoutSeconds) * time.Second)
 
-	params.SetName(putCohorts.cohortName)
+	params.SetName(putDefaultCohort.cohortName)
 
-	response, err := putCohorts.httpMedCoClients[nodeIdx].MedcoNode.PutDefaultCohort(params, httptransport.BearerToken(putCohorts.authToken))
+	response, err := putDefaultCohort.httpMedCoClients[nodeIdx].MedcoNode.PutDefaultCohort(params, httptransport.BearerToken(putDefaultCohort.authToken))
 	if err != nil {
 		return nil, err
 	}

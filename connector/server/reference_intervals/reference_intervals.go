@@ -145,6 +145,7 @@ func outlierRemoval(observations []QueryResult) (outputObs []QueryResult, err er
 	return outlierRemovalHelper(observations, mean, std)
 }
 
+// CohortInformation contains patient ID list and a flag for empty definition panel
 type CohortInformation struct {
 	PatientIDs   []int64 // a list of patient IDs
 	IsEmptyPanel bool    // True iff the client set no constraint in the panel definition. The population selected would in this case consist of all patients.

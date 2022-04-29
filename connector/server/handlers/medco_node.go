@@ -161,7 +161,7 @@ func MedCoNodeExploreQueryHandler(params medco_node.ExploreQueryParams, principa
 		}})
 }
 
-// MedCoNodeGetCohortsHandler handles GET /medco/node/explore/cohorts  API endpoint
+// MedCoNodeGetCohortsHandler handles GET /medco/node/explore/cohorts API endpoint
 func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *models.User) middleware.Responder {
 	userID := principal.ID
 	cohorts, err := querytoolsserver.GetSavedCohorts(userID, int(*params.Limit))
@@ -209,7 +209,7 @@ func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *m
 
 }
 
-// MedCoNodePostCohortsPatientListHandler handles POST /medco/node/explore/cohorts/patientList  API endpoint
+// MedCoNodePostCohortsPatientListHandler handles POST /medco/node/explore/cohorts/patientList API endpoint
 func MedCoNodePostCohortsPatientListHandler(params medco_node.PostCohortsPatientListParams, principal *models.User) middleware.Responder {
 	body := params.CohortsPatientListRequest
 	authorizedQueryType, err := utilserver.FetchAuthorizedExploreQueryType(principal)
@@ -264,7 +264,7 @@ func MedCoNodePostCohortsPatientListHandler(params medco_node.PostCohortsPatient
 
 }
 
-// MedCoNodePostCohortsHandler handles POST /medco/node/explore/cohorts  API endpoint
+// MedCoNodePostCohortsHandler handles POST /medco/node/explore/cohorts API endpoint
 func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal *models.User) middleware.Responder {
 
 	cohort := params.CohortsRequest
@@ -315,7 +315,7 @@ func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal 
 	return medco_node.NewPostCohortsOK()
 }
 
-// MedCoNodePutCohortsHandler handles PUT /medco/node/explore/cohorts  API endpoint
+// MedCoNodePutCohortsHandler handles PUT /medco/node/explore/cohorts API endpoint
 func MedCoNodePutCohortsHandler(params medco_node.PutCohortsParams, principal *models.User) middleware.Responder {
 
 	cohort := params.CohortsRequest
@@ -389,7 +389,7 @@ func MedCoNodePutCohortsHandler(params medco_node.PutCohortsParams, principal *m
 	return medco_node.NewPutCohortsOK()
 }
 
-// MedCoNodeDeleteCohortsHandler handles DELETE /medco/node/explore/cohorts  API endpoint
+// MedCoNodeDeleteCohortsHandler handles DELETE /medco/node/explore/cohorts API endpoint
 func MedCoNodeDeleteCohortsHandler(params medco_node.DeleteCohortsParams, principal *models.User) middleware.Responder {
 	cohortName := params.Name
 	user := principal.ID
@@ -434,6 +434,7 @@ func MedCoNodeDeleteCohortsHandler(params medco_node.DeleteCohortsParams, princi
 
 }
 
+// MedCoNodePutDefaultCohortHandler handles PUT /medco/node/explore/default-cohort API endpoint
 func MedCoNodePutDefaultCohortHandler(params medco_node.PutDefaultCohortParams, principal *models.User) middleware.Responder {
 	cohortName := params.Name
 	user := principal.ID
