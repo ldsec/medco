@@ -3,15 +3,22 @@ package i2b2
 import (
 	"encoding/xml"
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 
 	"github.com/ldsec/medco/connector/restapi/models"
 	utilserver "github.com/ldsec/medco/connector/util/server"
+	"github.com/sirupsen/logrus"
+)
+
+var (
+	any             = strings.ToUpper(string(models.TimingAny))
+	sameinstancenum = strings.ToUpper(string(models.TimingSameinstancenum))
 )
 
 // NewCrcPsmReqFromQueryDef returns a new request object for i2b2 psm request
-func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, resultOutputs []ResultOutputName, queryTiming models.Timing) Request {
+func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, querySequenceOperators []*models.TimingSequenceInfo, querySequencePanels []*models.Panel, resultOutputs []ResultOutputName, queryTiming models.Timing) (Request, error) {
 
 	// PSM header
 	psmHeader := PsmHeader{
@@ -40,55 +47,79 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, res
 	// embed query in request
 	for p, queryPanel := range queryPanels {
 
-		invert := "0"
-		if *queryPanel.Not {
-			invert = "1"
-		}
-
-		i2b2Panel := Panel{
-			PanelNumber:          strconv.Itoa(p + 1),
-			PanelAccuracyScale:   "100",
-			Invert:               invert,
-			PanelTiming:          strings.ToUpper(string(queryPanel.PanelTiming)),
-			TotalItemOccurrences: "1",
-		}
-
-		for _, queryItem := range queryPanel.ConceptItems {
-			i2b2Item := Item{
-				ItemKey: convertPathToI2b2Format(*queryItem.QueryTerm),
-			}
-			if queryItem.Operator != "" && queryItem.Modifier == nil {
-				i2b2Item.ConstrainByValue = &ConstrainByValue{
-					ValueType:       queryItem.Type,
-					ValueOperator:   queryItem.Operator,
-					ValueConstraint: queryItem.Value,
-				}
-			}
-			if queryItem.Modifier != nil {
-				i2b2Item.ConstrainByModifier = &ConstrainByModifier{
-					AppliedPath: strings.ReplaceAll(*queryItem.Modifier.AppliedPath, "/", `\`),
-					ModifierKey: convertPathToI2b2Format(*queryItem.Modifier.ModifierKey),
-				}
-				if queryItem.Operator != "" {
-					i2b2Item.ConstrainByModifier.ConstrainByValue = &ConstrainByValue{
-						ValueType:       queryItem.Type,
-						ValueOperator:   queryItem.Operator,
-						ValueConstraint: queryItem.Value,
-					}
-				}
-			}
-			i2b2Panel.Items = append(i2b2Panel.Items, i2b2Item)
-		}
-
-		for _, cohort := range queryPanel.CohortItems {
-
-			i2b2Item := Item{
-				ItemKey: cohort,
-			}
-			i2b2Panel.Items = append(i2b2Panel.Items, i2b2Item)
-		}
+		i2b2Panel := apiPanelToI2b2Panel(queryPanel)
+		i2b2Panel.PanelNumber = strconv.Itoa(p + 1)
 
 		psmRequest.Panels = append(psmRequest.Panels, i2b2Panel)
+
+	}
+
+	// embed subqueries and subquery constraint if sequences are in use
+
+	if nOfSequenceOperators := len(querySequenceOperators); nOfSequenceOperators > 0 {
+		logrus.Warnf("When using sequential query, the timings of the main query and the selection panels are set to %s", models.TimingAny)
+		psmRequest.QueryTiming = any
+		for i := range psmRequest.Panels {
+			psmRequest.Panels[i].PanelTiming = any
+		}
+		// this is tested in previous validation, where a 4XX error is returned.
+		// if the exception passes until here, a 5XX will be issued
+		if nOfSequenceOperators+1 != len(querySequencePanels) {
+			err := fmt.Errorf("the number of items in query sequence info + 1 is not equal to this of panels: got %d sequence operator and %d panels", nOfSequenceOperators, len(querySequencePanels))
+			return NewRequest(), err
+		}
+
+		// same comment as before
+		if err := validateQuerySequenceOperators(querySequencePanels); err != nil {
+			return NewRequest(), err
+		}
+
+		for i, querySequencePanel := range querySequencePanels {
+			querySequenceElement := apiPanelToI2b2Panel(querySequencePanel)
+			querySequenceElement.PanelNumber = "0"
+			// for sequential query, it is necessary to override the panel timing attribute
+			logrus.Warnf("The panel timing attribute of temporal sequence element set to %s", models.TimingSameinstancenum)
+			querySequenceElement.PanelTiming = sameinstancenum
+
+			subQueryStringID := queryName + "_SUBQUERY_" + strconv.Itoa(i)
+
+			subquery := Subquery{
+				QueryType:   "EVENT",
+				QueryName:   subQueryStringID,
+				QueryID:     subQueryStringID,
+				QueryTiming: sameinstancenum,
+				Panels:      []Panel{querySequenceElement},
+			}
+			psmRequest.Subqueries = append(psmRequest.Subqueries, subquery)
+		}
+
+		for i, querySequenceOperator := range querySequenceOperators {
+			subqueryConstraint := SubqueryConstraint{
+				Operator: *querySequenceOperator.When,
+				FirstQuery: SubqueryConstraintOperand{
+					QueryID:           psmRequest.Subqueries[i].QueryID,
+					AggregateOperator: *querySequenceOperator.WhichObservationFirst,
+					JoinColumn:        *querySequenceOperator.WhichDateFirst,
+				},
+				SecondQuery: SubqueryConstraintOperand{
+					QueryID:           psmRequest.Subqueries[i+1].QueryID,
+					AggregateOperator: *querySequenceOperator.WhichObservationSecond,
+					JoinColumn:        *querySequenceOperator.WhichDateSecond,
+				},
+			}
+
+			for _, span := range querySequenceOperator.Spans {
+				span := Span{
+					SpanValue: int(*span.Value),
+					Units:     *span.Units,
+					Operator:  *span.Operator,
+				}
+				subqueryConstraint.Spans = append(subqueryConstraint.Spans, span)
+
+			}
+
+			psmRequest.SubqueryConstraints = append(psmRequest.SubqueryConstraints, subqueryConstraint)
+		}
 	}
 
 	// embed result outputs
@@ -103,7 +134,18 @@ func NewCrcPsmReqFromQueryDef(queryName string, queryPanels []*models.Panel, res
 	return NewRequestWithBody(CrcPsmReqFromQueryDefMessageBody{
 		PsmHeader:  psmHeader,
 		PsmRequest: psmRequest,
-	})
+	}), nil
+}
+
+func validateQuerySequenceOperators(panels []*models.Panel) error {
+
+	for _, panel := range panels {
+		if len(panel.CohortItems) > 0 {
+			return fmt.Errorf("there must be no cohort item in sequential panels, only concept items: got %v", panel.CohortItems)
+		}
+	}
+	return nil
+
 }
 
 // --- request
@@ -135,12 +177,14 @@ type PsmRequestFromQueryDef struct {
 	Type string `xml:"xsi:type,attr"`
 	Xsi  string `xml:"xmlns:xsi,attr"`
 
-	QueryName        string  `xml:"query_definition>query_name"`
-	QueryDescription string  `xml:"query_definition>query_description"`
-	QueryID          string  `xml:"query_definition>query_id"`
-	QueryTiming      string  `xml:"query_definition>query_timing"`
-	SpecificityScale string  `xml:"query_definition>specificity_scale"`
-	Panels           []Panel `xml:"query_definition>panel"`
+	QueryName           string               `xml:"query_definition>query_name"`
+	QueryDescription    string               `xml:"query_definition>query_description"`
+	QueryID             string               `xml:"query_definition>query_id"`
+	QueryTiming         string               `xml:"query_definition>query_timing"`
+	SpecificityScale    string               `xml:"query_definition>specificity_scale"`
+	Panels              []Panel              `xml:"query_definition>panel"`
+	Subqueries          []Subquery           `xml:"query_definition>subquery"`
+	SubqueryConstraints []SubqueryConstraint `xml:"query_definition>subquery_constraint"`
 
 	ResultOutputs []ResultOutput `xml:"result_output_list>result_output"`
 }
@@ -181,6 +225,39 @@ type ConstrainByValue struct {
 	ValueType       string `xml:"value_type"`
 	ValueOperator   string `xml:"value_operator"`
 	ValueConstraint string `xml:"value_constraint"`
+}
+
+// Subquery is an i2b2 XML subquery
+type Subquery struct {
+	QueryType        string  `xml:"query_type"`
+	QueryName        string  `xml:"query_name"`
+	QueryDescription string  `xml:"query_description"`
+	QueryID          string  `xml:"query_id"`
+	QueryTiming      string  `xml:"query_timing"`
+	SpecificityScale string  `xml:"specificity_scale"`
+	Panels           []Panel `xml:"panel"`
+}
+
+// SubqueryConstraint is an i2b2 XML suquery_constraint
+type SubqueryConstraint struct {
+	FirstQuery  SubqueryConstraintOperand `xml:"first_query"`
+	Operator    string                    `xml:"operator"`
+	SecondQuery SubqueryConstraintOperand `xml:"second_query"`
+	Spans       []Span                    `xml:"span"`
+}
+
+// Span is an i2b2 XML span
+type Span struct {
+	SpanValue int    `xml:"span_value"`
+	Units     string `xml:"units"`
+	Operator  string `xml:"operator"`
+}
+
+// SubqueryConstraintOperand is a helper structure for SubqueryConstraint
+type SubqueryConstraintOperand struct {
+	QueryID           string `xml:"query_id"`
+	JoinColumn        string `xml:"join_column"`
+	AggregateOperator string `xml:"aggregate_operator"`
 }
 
 // ResultOutput is an i2b2 XML requested result type

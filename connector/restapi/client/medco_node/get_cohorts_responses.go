@@ -228,53 +228,42 @@ swagger:model GetCohortsOKBodyItems0QueryDefinition
 */
 type GetCohortsOKBodyItems0QueryDefinition struct {
 
-	// panels
-	Panels []*models.Panel `json:"panels"`
-
 	// query timing
 	QueryTiming models.Timing `json:"queryTiming,omitempty"`
+
+	// query timing sequence
+	QueryTimingSequence []*models.TimingSequenceInfo `json:"queryTimingSequence"`
+
+	// selection panels
+	SelectionPanels []*models.Panel `json:"selectionPanels"`
+
+	// sequential panels
+	SequentialPanels []*models.Panel `json:"sequentialPanels"`
 }
 
 // Validate validates this get cohorts o k body items0 query definition
 func (o *GetCohortsOKBodyItems0QueryDefinition) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := o.validatePanels(formats); err != nil {
+	if err := o.validateQueryTiming(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := o.validateQueryTiming(formats); err != nil {
+	if err := o.validateQueryTimingSequence(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateSelectionPanels(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateSequentialPanels(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (o *GetCohortsOKBodyItems0QueryDefinition) validatePanels(formats strfmt.Registry) error {
-
-	if swag.IsZero(o.Panels) { // not required
-		return nil
-	}
-
-	for i := 0; i < len(o.Panels); i++ {
-		if swag.IsZero(o.Panels[i]) { // not required
-			continue
-		}
-
-		if o.Panels[i] != nil {
-			if err := o.Panels[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("queryDefinition" + "." + "panels" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
-	}
-
 	return nil
 }
 
@@ -289,6 +278,81 @@ func (o *GetCohortsOKBodyItems0QueryDefinition) validateQueryTiming(formats strf
 			return ve.ValidateName("queryDefinition" + "." + "queryTiming")
 		}
 		return err
+	}
+
+	return nil
+}
+
+func (o *GetCohortsOKBodyItems0QueryDefinition) validateQueryTimingSequence(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.QueryTimingSequence) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(o.QueryTimingSequence); i++ {
+		if swag.IsZero(o.QueryTimingSequence[i]) { // not required
+			continue
+		}
+
+		if o.QueryTimingSequence[i] != nil {
+			if err := o.QueryTimingSequence[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("queryDefinition" + "." + "queryTimingSequence" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (o *GetCohortsOKBodyItems0QueryDefinition) validateSelectionPanels(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.SelectionPanels) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(o.SelectionPanels); i++ {
+		if swag.IsZero(o.SelectionPanels[i]) { // not required
+			continue
+		}
+
+		if o.SelectionPanels[i] != nil {
+			if err := o.SelectionPanels[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("queryDefinition" + "." + "selectionPanels" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (o *GetCohortsOKBodyItems0QueryDefinition) validateSequentialPanels(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.SequentialPanels) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(o.SequentialPanels); i++ {
+		if swag.IsZero(o.SequentialPanels[i]) { // not required
+			continue
+		}
+
+		if o.SequentialPanels[i] != nil {
+			if err := o.SequentialPanels[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("queryDefinition" + "." + "sequentialPanels" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil

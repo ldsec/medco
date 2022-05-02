@@ -1,0 +1,41 @@
+time_resolution: "week"
+time_limit: 6
+cohort_name: "testCohort"
+start_concept_path: "/SPHN/SPHNv2020.1/FophDiagnosis/"
+starts_when: "earliest"
+end_concept_path: "/SPHN/SPHNv2020.1/DeathStatus/"
+end_modifier:
+  modifier_key: "/SPHN/DeathStatus-status/death/"
+  applied_path: "/SPHNv2020.1/DeathStatus/"
+ends_when: "earliest"
+sub_groups:
+  - group_name: "All"
+    group_timing: "any"
+    sequential_panels:
+      - not: false
+        panel_timing: "any"
+        concept_items:
+          - path: "/SPHN/SPHNv2020.1/FophDiagnosis/"
+      - not: false
+        panel_timing: "any"
+        concept_items:
+          - path: "/SPHN/SPHNv2020.1/DeathStatus/"
+            modifier:
+              modifier_key: "/SPHN/DeathStatus-status/death/"
+              applied_path: "/SPHNv2020.1/DeathStatus/"
+    sequence_of_events: []
+  - group_name: "None"
+    group_timing: "any"
+    sequential_panels:
+      - not: false
+        panel_timing: "any"
+        concept_items:
+          - path: "/SPHN/SPHNv2020.1/DeathStatus/"
+            modifier:
+              modifier_key: "/SPHN/DeathStatus-status/death/"
+              applied_path: "/SPHNv2020.1/DeathStatus/"
+      - not: false
+        panel_timing: "any"
+        concept_items:
+          - path: "/SPHN/SPHNv2020.1/FophDiagnosis/"
+    sequence_of_events: []

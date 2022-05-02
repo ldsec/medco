@@ -64,17 +64,17 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 		err = fmt.Errorf("while inserting explore result instance: %s", err.Error())
 		return
 	}
-	defer func(e error) {
-		if e != nil {
+	defer func() {
+		if err != nil {
 			logrus.Info("Updating Explore Result instance with error status")
 			qtError := querytoolsserver.UpdateErrorExploreResultInstance(queryID)
 			if qtError != nil {
-				e = fmt.Errorf("while inserting a status error in result instance table: %s", qtError.Error())
+				err = fmt.Errorf("while inserting a status error in result instance table: %s", qtError.Error())
 			} else {
 				logrus.Info("Updating Explore Result instance with error status")
 			}
 		}
-	}(err)
+	}()
 
 	// todo: breakdown in i2b2 / count / patient list
 
@@ -105,7 +105,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 		return
 	}
 
-	patientCount, patientSetID, err := i2b2.ExecutePsmQuery(q.ID, q.Query.Panels, q.Query.QueryTiming)
+	patientCount, patientSetID, err := i2b2.ExecutePsmQuery(q.ID, q.Query.SelectionPanels, q.Query.QueryTimingSequence, q.Query.SequentialPanels, q.Query.QueryTiming)
 	if err != nil {
 		err = fmt.Errorf("during I2B2 PSM query exection: %s", err.Error())
 		return
@@ -249,7 +249,13 @@ func (q *ExploreQuery) maskPatientIDs(patientIDs []string, patientDummyFlags []s
 }
 
 func (q *ExploreQuery) getEncQueryTerms() (encQueryTerms []string) {
-	for _, panel := range q.Query.Panels {
+	selectionTerms := getEncQueryTermsHelper(q.Query.SelectionPanels)
+	sequentialTerms := getEncQueryTermsHelper(q.Query.SequentialPanels)
+	return append(selectionTerms, sequentialTerms...)
+}
+
+func getEncQueryTermsHelper(panels []*models.Panel) (encQueryTerms []string) {
+	for _, panel := range panels {
 		for _, item := range panel.ConceptItems {
 			if *item.Encrypted {
 				encQueryTerms = append(encQueryTerms, *item.QueryTerm)
@@ -261,7 +267,7 @@ func (q *ExploreQuery) getEncQueryTerms() (encQueryTerms []string) {
 
 func (q *ExploreQuery) convertI2b2PsmQueryPanels(taggedQueryTerms map[string]string) (err error) {
 
-	for _, panel := range q.Query.Panels {
+	for _, panel := range append(q.Query.SelectionPanels, q.Query.SequentialPanels...) {
 		for _, item := range panel.ConceptItems {
 			if *item.Encrypted {
 				if tag, ok := taggedQueryTerms[*item.QueryTerm]; ok {
@@ -310,7 +316,27 @@ func (q *ExploreQuery) convertI2b2PsmQueryPanels(taggedQueryTerms map[string]str
 // isValid checks the validity of the query
 func (q *ExploreQuery) isValid() (err error) {
 	if len(q.ID) == 0 || q.Query == nil || len(q.Query.UserPublicKey) == 0 {
-		err = errors.New("Query " + q.ID + " is invalid")
+		err = errors.New("query " + q.ID + " is invalid")
+		logrus.Error(err)
+	}
+
+	nOfSequenceItems := len(q.Query.QueryTimingSequence)
+	nOfSequentialPanels := len(q.Query.SequentialPanels)
+
+	isASequenceQuery := (nOfSequenceItems > 0) || (nOfSequentialPanels > 0)
+
+	//check number of sequential query
+	for _, panel := range q.Query.SequentialPanels {
+		if len(panel.CohortItems) > 0 {
+			err = fmt.Errorf("query %s is invalid: a sequential query can only have concept items in its selection panels, cohort item(s) was/were found", q.ID)
+			logrus.Error(err)
+			return
+		}
+	}
+
+	if (isASequenceQuery) && (nOfSequenceItems+1 != nOfSequentialPanels) {
+		err = fmt.Errorf("query %s is invalid: in a sequential query, the number of"+
+			" sequence information items + 1 must be equal to the number of sequential panels: found %d sequence info items against %d panels", q.ID, nOfSequenceItems, nOfSequentialPanels)
 		logrus.Error(err)
 	}
 	return

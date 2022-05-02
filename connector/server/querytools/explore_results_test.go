@@ -63,7 +63,7 @@ func TestCheckQueryID(t *testing.T) {
 }
 
 func TestGetQueryDefinition(t *testing.T) {
-	const queryDefinition = `{"panels":[{"cohortItems":null,"conceptItems":[{"encrypted":false,"queryTerm":"/E2ETEST/SPHNv2020.1/DeathStatus/"}],"not":false,"panelTiming":"any"}],"queryTiming":"any"}`
+	const queryDefinition = `{"selectionPanels":[{"cohortItems":null,"conceptItems":[{"encrypted":false,"queryTerm":"/E2ETEST/SPHNv2020.1/DeathStatus/"}],"not":false,"panelTiming":"any"}],"queryTiming":"any"}`
 
 	utilserver.TestDBConnection(t)
 	res, err := GetQueryDefinition(-1)

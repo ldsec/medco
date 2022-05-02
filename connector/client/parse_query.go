@@ -14,19 +14,82 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// ParseQueryString parses the query string given as input
+// ParseQueryString separates the query string in two parts: selection panels and sequential panels.
+// Selection panels are separated by AND whereas sequential ones are separated by THEN.
+// The definitions of sequential and selection panels are separated by WITH.
+// For instance: "a AND b WITH c THEN d" is a correct syntax and gives two sequential panels and two selection panels.
+// Types of panels must be grouped, in other words there is at most 1 WITH, "a AND b WITH c THEN d WITH e AND f" is not correct and should be written
+// "a AND b AND e AND f WITH c THEN d" or "c THEN d WITH a AND b AND e AND f".
+// Inside a panel, OR and NOT can be used with either type of panels, but cohort item can only be used with selection panels.
+func ParseQueryString(queryString string) (selection, sequential []string, err error) {
+	logrus.Info("Client query is: ", queryString)
+	panelGroups := strings.Split(queryString, " WITH ")
+	nOfPanels := len(panelGroups)
+	if nOfPanels > 2 {
+		err = fmt.Errorf("in query string parsing: there should be at most 2 strings separated by the keyword 'WITH', found: %d", nOfPanels)
+		return
+	}
+	if nOfPanels == 2 {
+		thenInLeftOperand := strings.Contains(panelGroups[0], " THEN ")
+		andInLeftOperand := strings.Contains(panelGroups[0], " AND ")
+		thenInRightOperand := strings.Contains(panelGroups[1], " THEN ")
+		andInRightOperand := strings.Contains(panelGroups[1], " AND ")
+
+		if thenInLeftOperand && thenInRightOperand {
+			err = errors.New("in query string parsing: THEN keyword found in both sides of WITH operator")
+			return
+		}
+		if andInLeftOperand && andInRightOperand {
+			err = errors.New("in query string parsing: AND keyword found in both sides of WITH operator")
+			return
+		}
+
+		if andInLeftOperand && thenInLeftOperand {
+			err = errors.New("in query string parsing: mixing THEN and AND keywords in left operand of WITH keyword")
+			return
+		}
+
+		if andInRightOperand && thenInRightOperand {
+			err = errors.New("in query string parsing: mixing THEN and AND keywords in right operand of WITH keyword")
+			return
+		}
+
+		if strings.Contains(panelGroups[0], " THEN ") || strings.Contains(panelGroups[1], " AND ") {
+			selection = strings.Split(panelGroups[1], " AND ")
+			sequential = strings.Split(panelGroups[0], " THEN ")
+		} else {
+			selection = strings.Split(panelGroups[0], " AND ")
+			sequential = strings.Split(panelGroups[1], " THEN ")
+		}
+
+		return
+	}
+	if strings.Contains(panelGroups[0], " THEN ") && strings.Contains(panelGroups[0], " AND ") {
+		err = errors.New("in query string parsing: mixing THEN and AND keywords without WITH keyword")
+		return
+	}
+
+	if strings.Contains(panelGroups[0], " THEN ") {
+		sequential = strings.Split(panelGroups[0], " THEN ")
+		return
+	}
+	selection = strings.Split(panelGroups[0], " AND ")
+	return
+
+}
+
+// ParsePanels parses the panel strings given as input
 // A query string is a list of panels concatenated by " AND ".
 // Each panel is a list of query items, in the format parsed by parseQueryItem, concatenated by " OR ".
 // Each query item can be OR-ed n times with itself (and so lengthening the panel's query items list) using the syntax query_item^n.
 // The first element of a panel can be a "NOT". In this case the panel is negated.
 // The last element of a panel can be the panel timing, whose value either "any", "samevisit", or "sameinstancenum".
 // If omitted, the panel timing is defaulted to "any".
-func ParseQueryString(queryString string) (panels []*models.Panel, err error) {
-	logrus.Info("Client query is: ", queryString)
+func ParsePanels(panelStrings []string) (panels []*models.Panel, err error) {
 
 	panels = make([]*models.Panel, 0)
 
-	for _, queryPanel := range strings.Split(queryString, " AND ") {
+	for _, queryPanel := range panelStrings {
 
 		var newPanel models.Panel
 		var not bool
@@ -250,5 +313,189 @@ func loadQueryFile(queryFilePath string) (conceptItems []*models.PanelConceptIte
 		cohortItems = append(cohortItems, cohortItem...)
 	}
 
+	return
+}
+
+// ParseSequences parses a string to a list of temporal sequence information.
+// Multiple sequence information groups must be separated with columns ":".
+// The different attributes inside a group must be separated with commas ",".
+func ParseSequences(sequenceString string) (sequences []*models.TimingSequenceInfo, err error) {
+
+	if sequenceString == "" {
+		return
+	}
+
+	var seq *models.TimingSequenceInfo
+
+	for _, sequenceString := range strings.Split(sequenceString, ":") {
+		seq, err = parseSequence(sequenceString)
+		if err != nil {
+			err = fmt.Errorf("while parsing temporal sequence information: %s", err.Error())
+			return
+		}
+		sequences = append(sequences, seq)
+	}
+	return
+
+}
+
+func parseSequence(sequenceString string) (sequence *models.TimingSequenceInfo, err error) {
+	sequenceInfoStrings := strings.Split(sequenceString, ",")
+
+	// the 5 mandatory items are:
+	// 1. the operator (before, before or same time, same time)
+	// 2. which occurence should be considered for the left operand (first, any, last)
+	// 3. what date should be considered for the left operand (startdate, enddate)
+	// 4. which occurence should be considered for the right operand (first, any, last)
+	// 5. what date should be considered for the right operand (startdate, enddate)
+
+	// the following 3 optionally and repeating items are:
+	// 6. the span operator (less, equal or less, equal, greater or  less, greater)
+	// 7. the span value (an integer)
+	// 8. the unit (hours, days, months, years)
+
+	nOfElements := len(sequenceInfoStrings)
+	if (nOfElements < 5) || (((nOfElements - 5) % 3) != 0) {
+		err = fmt.Errorf("sequence info is expected to be composed of 5 + 3 * n elements separated by commas, n being any natural number: sequence info string \"%s\"", sequenceString)
+		return
+	}
+
+	sequence = &models.TimingSequenceInfo{}
+
+	sequence.When = new(string)
+
+	switch infoWhen := sequenceInfoStrings[0]; infoWhen {
+	case "before":
+		*sequence.When = models.TimingSequenceInfoWhenLESS
+	case "beforeorsametime":
+		*sequence.When = models.TimingSequenceInfoWhenLESSEQUAL
+	case "sametime":
+		*sequence.When = models.TimingSequenceInfoWhenEQUAL
+	default:
+		err = fmt.Errorf(`the first element of the info string is expected to be "before", "beforeorsametime" or "sametime": got "%s"`, infoWhen)
+		return
+	}
+
+	sequence.WhichObservationFirst = new(string)
+
+	switch whichObservation := sequenceInfoStrings[1]; whichObservation {
+	case "first":
+		*sequence.WhichObservationFirst = models.TimingSequenceInfoWhichObservationFirstFIRST
+	case "any":
+		*sequence.WhichObservationFirst = models.TimingSequenceInfoWhichObservationFirstANY
+	case "last":
+		*sequence.WhichObservationFirst = models.TimingSequenceInfoWhichObservationFirstLAST
+	default:
+		err = fmt.Errorf(`the second element of the info string is expected to be "first", "any" or "last": got "%s"`, whichObservation)
+		return
+	}
+
+	sequence.WhichDateFirst = new(string)
+
+	switch whichDate := sequenceInfoStrings[2]; whichDate {
+	case "startdate":
+		*sequence.WhichDateFirst = models.TimingSequenceInfoWhichDateFirstSTARTDATE
+	case "enddate":
+		*sequence.WhichDateFirst = models.TimingSequenceInfoWhichDateFirstENDDATE
+	default:
+		err = fmt.Errorf(`the third element of the info string is expected to be "startdate" or "enddate": got "%s"`, whichDate)
+		return
+	}
+
+	sequence.WhichObservationSecond = new(string)
+
+	switch whichObservation := sequenceInfoStrings[3]; whichObservation {
+	case "first":
+		*sequence.WhichObservationSecond = models.TimingSequenceInfoWhichObservationSecondFIRST
+	case "any":
+		*sequence.WhichObservationSecond = models.TimingSequenceInfoWhichObservationSecondANY
+	case "last":
+		*sequence.WhichObservationSecond = models.TimingSequenceInfoWhichObservationSecondLAST
+	default:
+		err = fmt.Errorf(`the fourth element of the info string is expected to be "first", "any" or "last": got "%s"`, whichObservation)
+		return
+	}
+
+	sequence.WhichDateSecond = new(string)
+
+	switch whichDate := sequenceInfoStrings[4]; whichDate {
+	case "startdate":
+		*sequence.WhichDateSecond = models.TimingSequenceInfoWhichDateSecondSTARTDATE
+	case "enddate":
+		*sequence.WhichDateSecond = models.TimingSequenceInfoWhichDateSecondENDDATE
+	default:
+		err = fmt.Errorf(`the fifth element of the info string is expected to be "startdate" or "enddate": got "%s"`, whichDate)
+		return
+	}
+
+	nOfSpans := (nOfElements - 5) / 3
+
+	if nOfSpans > 0 {
+		sequence.Spans = make([]*models.TimingSequenceSpan, nOfSpans)
+		for i := 0; i < nOfSpans; i++ {
+			index := 5 + i*3
+			sequence.Spans[i], err = parseSpan(sequenceInfoStrings[index : index+3])
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	return
+}
+
+func parseSpan(spanString []string) (span *models.TimingSequenceSpan, err error) {
+	if len(spanString) != 3 {
+		err = fmt.Errorf("parseSpan expects a slice of three strings, got %d elements", len(spanString))
+		return
+	}
+	span = &models.TimingSequenceSpan{
+		Operator: new(string),
+		Value:    new(int64),
+		Units:    new(string),
+	}
+	switch operatorString := spanString[0]; operatorString {
+	case "less":
+
+		*span.Operator = models.TimingSequenceSpanOperatorLESS
+	case "lessorequal":
+
+		*span.Operator = models.TimingSequenceSpanOperatorLESSEQUAL
+	case "equal":
+
+		*span.Operator = models.TimingSequenceSpanOperatorEQUAL
+	case "moreorequal":
+
+		*span.Operator = models.TimingSequenceSpanOperatorGREATEREQUAL
+	case "more":
+
+		*span.Operator = models.TimingSequenceSpanOperatorGREATER
+	default:
+		err = fmt.Errorf(`the operator element of the span constraint is expected to be one of "less", "less or equal", "equal", "more or equal", "more": got "%s"`, operatorString)
+		return
+	}
+
+	*span.Value, err = strconv.ParseInt(spanString[1], 10, 64)
+	if err != nil {
+		err = fmt.Errorf(`while parsing integer value "%s" of span constraint: %s`, spanString[1], err.Error())
+		return
+	}
+
+	switch units := spanString[2]; units {
+	case "hours":
+
+		*span.Units = models.TimingSequenceSpanUnitsHOUR
+	case "days":
+
+		*span.Units = models.TimingSequenceSpanUnitsDAY
+	case "months":
+
+		*span.Units = models.TimingSequenceSpanUnitsMONTH
+	case "years":
+
+		*span.Units = models.TimingSequenceSpanUnitsYEAR
+	default:
+		err = fmt.Errorf(`the unit element of the span constraint is expected to be one of "hours", "days", "months", "years": got "%s"`, units)
+		return
+	}
 	return
 }

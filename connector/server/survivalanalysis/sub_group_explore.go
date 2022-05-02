@@ -8,9 +8,20 @@ import (
 )
 
 // SubGroupExplore executes an I2B2 Explore query with panels
-func SubGroupExplore(queryName string, subGroupIndex int, panels []*models.Panel, groupTiming models.Timing) ([]int64, error) {
+func SubGroupExplore(queryName string, subGroupIndex int, startDefinitionPanel *models.Panel, selectionPanels, sequentialPanels []*models.Panel, sequences []*models.TimingSequenceInfo, groupTiming models.Timing) ([]int64, error) {
 
-	_, patientSetID, err := i2b2.ExecutePsmQuery(queryName+"_SUBGROUP_"+strconv.Itoa(subGroupIndex), panels, groupTiming)
+	tmpSelectionPanels := []*models.Panel{startDefinitionPanel}
+	if len(selectionPanels) > 0 {
+		tmpSelectionPanels = append(tmpSelectionPanels, selectionPanels...)
+	}
+
+	_, patientSetID, err := i2b2.ExecutePsmQuery(
+		queryName+"_SUBGROUP_"+strconv.Itoa(subGroupIndex),
+		tmpSelectionPanels,
+		sequences,
+		sequentialPanels,
+		groupTiming,
+	)
 	if err != nil {
 		return nil, err
 	}

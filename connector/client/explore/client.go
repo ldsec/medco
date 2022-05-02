@@ -18,7 +18,7 @@ import (
 
 // ExecuteClientQuery executes and displays the result of the MedCo client query.
 // endpoint on the server: /node/explore/query
-func ExecuteClientQuery(token, username, password, queryString, queryTiming, resultOutputFilePath string, disableTLSCheck bool) (err error) {
+func ExecuteClientQuery(token, username, password, queryString, queryTiming, querySequences, resultOutputFilePath string, disableTLSCheck bool) (err error) {
 
 	// get token
 	accessToken, err := utilclient.RetrieveOrGetNewAccessToken(token, username, password, disableTLSCheck)
@@ -27,13 +27,29 @@ func ExecuteClientQuery(token, username, password, queryString, queryTiming, res
 	}
 
 	// parse query string
-	panels, err := medcoclient.ParseQueryString(queryString)
+	selectionPanelString, sequentialPanelString, err := medcoclient.ParseQueryString(queryString)
+	if err != nil {
+		return
+	}
+
+	selectionPanels, err := medcoclient.ParsePanels(selectionPanelString)
+	if err != nil {
+		return
+	}
+
+	sequentialPanels, err := medcoclient.ParsePanels(sequentialPanelString)
+	if err != nil {
+		return
+	}
+
+	// parse query sequences
+	sequences, err := medcoclient.ParseSequences(querySequences)
 	if err != nil {
 		return
 	}
 
 	// encrypt item keys
-	for _, panel := range panels {
+	for _, panel := range append(selectionPanels, sequentialPanels...) {
 		for _, item := range panel.ConceptItems {
 			if *item.Encrypted {
 				queryTermInt, err := strconv.ParseInt(*item.QueryTerm, 10, 64)
@@ -50,7 +66,7 @@ func ExecuteClientQuery(token, username, password, queryString, queryTiming, res
 	}
 
 	// execute query
-	clientQuery, err := NewExploreQuery(accessToken, panels, models.Timing(strings.ToLower(queryTiming)), disableTLSCheck)
+	clientQuery, err := NewExploreQuery(accessToken, selectionPanels, sequentialPanels, models.Timing(strings.ToLower(queryTiming)), sequences, disableTLSCheck)
 	if err != nil {
 		return
 	}

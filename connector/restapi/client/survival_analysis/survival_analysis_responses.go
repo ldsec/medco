@@ -1183,8 +1183,14 @@ type SurvivalAnalysisParamsBodySubGroupDefinitionsItems0 struct {
 	// Pattern: ^\w+$
 	GroupName string `json:"groupName,omitempty"`
 
-	// panels
-	Panels []*models.Panel `json:"panels"`
+	// query timing sequence
+	QueryTimingSequence []*models.TimingSequenceInfo `json:"queryTimingSequence"`
+
+	// selection panels
+	SelectionPanels []*models.Panel `json:"selectionPanels"`
+
+	// sequential panels
+	SequentialPanels []*models.Panel `json:"sequentialPanels"`
 
 	// sub group timing
 	SubGroupTiming models.Timing `json:"subGroupTiming,omitempty"`
@@ -1198,7 +1204,15 @@ func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) Validate(formats s
 		res = append(res, err)
 	}
 
-	if err := o.validatePanels(formats); err != nil {
+	if err := o.validateQueryTimingSequence(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateSelectionPanels(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateSequentialPanels(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -1225,21 +1239,71 @@ func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) validateGroupName(
 	return nil
 }
 
-func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) validatePanels(formats strfmt.Registry) error {
+func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) validateQueryTimingSequence(formats strfmt.Registry) error {
 
-	if swag.IsZero(o.Panels) { // not required
+	if swag.IsZero(o.QueryTimingSequence) { // not required
 		return nil
 	}
 
-	for i := 0; i < len(o.Panels); i++ {
-		if swag.IsZero(o.Panels[i]) { // not required
+	for i := 0; i < len(o.QueryTimingSequence); i++ {
+		if swag.IsZero(o.QueryTimingSequence[i]) { // not required
 			continue
 		}
 
-		if o.Panels[i] != nil {
-			if err := o.Panels[i].Validate(formats); err != nil {
+		if o.QueryTimingSequence[i] != nil {
+			if err := o.QueryTimingSequence[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("panels" + "." + strconv.Itoa(i))
+					return ve.ValidateName("queryTimingSequence" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) validateSelectionPanels(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.SelectionPanels) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(o.SelectionPanels); i++ {
+		if swag.IsZero(o.SelectionPanels[i]) { // not required
+			continue
+		}
+
+		if o.SelectionPanels[i] != nil {
+			if err := o.SelectionPanels[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("selectionPanels" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) validateSequentialPanels(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.SequentialPanels) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(o.SequentialPanels); i++ {
+		if swag.IsZero(o.SequentialPanels[i]) { // not required
+			continue
+		}
+
+		if o.SequentialPanels[i] != nil {
+			if err := o.SequentialPanels[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("sequentialPanels" + "." + strconv.Itoa(i))
 				}
 				return err
 			}

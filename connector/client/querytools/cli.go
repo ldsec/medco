@@ -49,14 +49,33 @@ func ExecuteGetCohorts(token, username, password string, disableTLSCheck bool, r
 		return err
 	}
 	logrus.Debug("Writing headers")
-	resultCSV.Write([]string{"node_index", "cohort_name", "cohort_id", "query_id", "creation_date", "update_date", "query_timing", "panels"})
+	resultCSV.Write([]string{"node_index", "cohort_name", "cohort_id", "query_id", "creation_date", "update_date", "query_timing", "query_timing_sequence", "selection_panels", "sequential_panels"})
 
 	for nodeIndex, nodeResult := range cohorts {
 		for _, cohortInfo := range nodeResult {
 			logrus.Debugf("Writing result %d", nodeIndex)
-			panelJSONs, err := marshal(cohortInfo.QueryDefinition.Panels)
+			selectionPanelJSONs, err := marshalPanels(cohortInfo.QueryDefinition.SelectionPanels)
+			if err != nil {
+				err = fmt.Errorf("cohorts request writing results: %s", err.Error())
+				logrus.Error(err)
+				return err
+			}
+			sequentialPanelJSONs, err := marshalPanels(cohortInfo.QueryDefinition.SequentialPanels)
+			if err != nil {
+				err = fmt.Errorf("cohorts request writing results: %s", err.Error())
+				logrus.Error(err)
+				return err
+			}
+			queryTimingSequenceJSONs, err := marshalSequenceInfo(cohortInfo.QueryDefinition.QueryTimingSequence)
+			if err != nil {
+				err = fmt.Errorf("cohorts request writing results: %s", err.Error())
+				logrus.Error(err)
+				return err
+			}
 			// removing the quotes from the marshalling process eases parsing of the produced file
-			panelJSONs = strings.Replace(panelJSONs, `"`, "", -1)
+			selectionPanelJSONs = strings.Replace(selectionPanelJSONs, `"`, "", -1)
+			sequentialPanelJSONs = strings.Replace(sequentialPanelJSONs, `"`, "", -1)
+			queryTimingSequenceJSONs = strings.Replace(queryTimingSequenceJSONs, `"`, "", -1)
 			err = resultCSV.Write([]string{
 				strconv.Itoa(nodeIndex),
 				cohortInfo.CohortName,
@@ -65,7 +84,9 @@ func ExecuteGetCohorts(token, username, password string, disableTLSCheck bool, r
 				cohortInfo.CreationDate.Format(time.RFC3339),
 				cohortInfo.UpdateDate.Format(time.RFC3339),
 				string(cohortInfo.QueryDefinition.QueryTiming),
-				panelJSONs,
+				queryTimingSequenceJSONs,
+				selectionPanelJSONs,
+				sequentialPanelJSONs,
 			})
 			if err != nil {
 				err = fmt.Errorf("cohorts request writing results: %s", err.Error())
@@ -273,7 +294,7 @@ func ExecuteCohortsPatientList(token, username, password, cohortName, resultFile
 
 	return nil
 }
-func marshal(panels []*models.Panel) (res string, err error) {
+func marshalPanels(panels []*models.Panel) (res string, err error) {
 	panelStrings := make([]string, 0)
 	var marshalledPanel []byte
 	for _, panel := range panels {
@@ -287,4 +308,20 @@ func marshal(panels []*models.Panel) (res string, err error) {
 		}
 	}
 	return fmt.Sprintf(`{"panels":[%s]}`, strings.Join(panelStrings, ",")), nil
+}
+
+func marshalSequenceInfo(sequences []*models.TimingSequenceInfo) (res string, err error) {
+	sequenceStrings := make([]string, 0)
+	var marshalledSequence []byte
+	for _, sequence := range sequences {
+		if sequence != nil {
+			marshalledSequence, err = sequence.MarshalBinary()
+			if err != nil {
+				err = fmt.Errorf("while marshalling temporal sequence info: %s", err.Error())
+				return "", err
+			}
+			sequenceStrings = append(sequenceStrings, string(marshalledSequence))
+		}
+	}
+	return fmt.Sprintf(`{"temporalSequence":[%s]}`, strings.Join(sequenceStrings, ",")), nil
 }

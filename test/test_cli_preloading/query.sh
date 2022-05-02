@@ -74,6 +74,19 @@ test4() {
 
 }
 
+
+test5() {
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv \
+  query -s "${2}" "${1}"
+  result="$(awk -F "\"*,\"*" '{print $2}' ../result.csv)"
+  if [ "${result}" != "${3}" ];
+  then
+  echo "query temporal sequence ${2}: test failed"
+  echo "result: ${result}" && echo "expected result: ${3}"
+  exit 1
+  fi
+}
+
 query1="enc::1 OR enc::2 AND enc::3"
 resultQuery1="$(printf -- "count\n1\n1\n1")"
 
@@ -115,6 +128,11 @@ resultQuery12="$(printf -- "count\n1\n1\n1")"
 
 query13="clr::/E2ETEST/e2etest/3/:/E2ETEST/modifiers/3text/:/e2etest/3/::LIKE[end]:TEXT:bc"
 resultQuery13="$(printf -- "count\n0\n0\n0")"
+
+query14="clr::/SPHN/SPHNv2020.1/FophDiagnosis/ OR clr::/SPHN/SPHNv2020.1/DeathStatus/ WITH clr::/SPHN/SPHNv2020.1/FophDiagnosis/ THEN clr::/SPHN/SPHNv2020.1/DeathStatus/ THEN clr::/SPHN/SPHNv2020.1/DeathStatus/"
+resultQuery14a="$(printf -- "count\n228\n228\n228")"
+
+resultQuery14b="$(printf -- "count\n0\n0\n0")"
 
 pushd deployments/dev-local-3nodes/
 echo "Testing query with test user..."
@@ -159,6 +177,11 @@ test4 "sameinstancenum" "sameinstancenum" "sameinstancenum" "sameinstancenum" "$
 test4 "samevisit" "samevisit" "samevisit" "samevisit" "${timingResultZeroExpected}"
 test4 "sameinstancenum" "sameinstancenum" "any" "sameinstancenum" "${timingResultNonZeroExpected}"
 test4 "samevisit" "samevisit" "any" "samevisit" "${timingResultNonZeroExpected}"
+
+echo "Testing query with event sequences features..."
+
+test5 "${query14}" "before,first,startdate,first,startdate:sametime,first,startdate,first,startdate" "${resultQuery14a}"
+test5 "${query14}" "sametime,first,startdate,first,startdate,moreorequal,23,days,more,12,days,less,30,hours:sametime,first,startdate,first,startdate,moreorequal,20,days,more,11,days,more,23,hours" "${resultQuery14b}"
 
 popd
 exit 0

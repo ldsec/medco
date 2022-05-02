@@ -622,15 +622,29 @@ func init() {
     "exploreQuery": {
       "description": "MedCo-Explore query",
       "properties": {
-        "panels": {
-          "description": "i2b2 panels (linked by an AND)",
+        "queryTiming": {
+          "$ref": "#/definitions/timing"
+        },
+        "queryTimingSequence": {
+          "description": "A collection of timingSequenceInfo that, if present, determines the temporal relations between the panels. The element at position i determines the relation between the panels at position i and i + 1.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/timingSequenceInfo"
+          }
+        },
+        "selectionPanels": {
+          "description": "i2b2 selection panels (linked by an AND)",
           "type": "array",
           "items": {
             "$ref": "#/definitions/panel"
           }
         },
-        "queryTiming": {
-          "$ref": "#/definitions/timing"
+        "sequentialPanels": {
+          "description": "i2b2 sequential panels (linked by a sequential operator)",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/panel"
+          }
         },
         "userPublicKey": {
           "type": "string",
@@ -995,6 +1009,100 @@ func init() {
         "sameinstancenum"
       ]
     },
+    "timingSequenceInfo": {
+      "description": "The info according to which the temporal relation between two panels is determined. The observations identified by the first panel occur before the observations identified by the second panel if the {whichDateFirst} of the {whichObservationFirst} observation in the first panel occurs {when} the {whichDateSecond} of the {whichObservationSecond} observation in the second panel. ",
+      "type": "object",
+      "required": [
+        "whichDateFirst",
+        "whichObservationFirst",
+        "when",
+        "whichDateSecond",
+        "whichObservationSecond"
+      ],
+      "properties": {
+        "spans": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/timingSequenceSpan"
+          }
+        },
+        "when": {
+          "type": "string",
+          "default": "LESS",
+          "enum": [
+            "LESS",
+            "LESSEQUAL",
+            "EQUAL"
+          ]
+        },
+        "whichDateFirst": {
+          "type": "string",
+          "default": "STARTDATE",
+          "enum": [
+            "STARTDATE",
+            "ENDDATE"
+          ]
+        },
+        "whichDateSecond": {
+          "type": "string",
+          "default": "STARTDATE",
+          "enum": [
+            "STARTDATE",
+            "ENDDATE"
+          ]
+        },
+        "whichObservationFirst": {
+          "type": "string",
+          "default": "ANY",
+          "enum": [
+            "FIRST",
+            "LAST",
+            "ANY"
+          ]
+        },
+        "whichObservationSecond": {
+          "type": "string",
+          "default": "ANY",
+          "enum": [
+            "FIRST",
+            "LAST",
+            "ANY"
+          ]
+        }
+      }
+    },
+    "timingSequenceSpan": {
+      "type": "object",
+      "required": [
+        "value",
+        "units",
+        "operator"
+      ],
+      "properties": {
+        "operator": {
+          "type": "string",
+          "enum": [
+            "LESS",
+            "LESSEQUAL",
+            "EQUAL",
+            "GREATEREQUAL",
+            "GREATER"
+          ]
+        },
+        "units": {
+          "type": "string",
+          "enum": [
+            "HOUR",
+            "DAY",
+            "MONTH",
+            "YEAR"
+          ]
+        },
+        "value": {
+          "type": "integer"
+        }
+      }
+    },
     "user": {
       "type": "object",
       "properties": {
@@ -1215,7 +1323,19 @@ func init() {
                   "type": "string",
                   "pattern": "^\\w+$"
                 },
-                "panels": {
+                "queryTimingSequence": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/timingSequenceInfo"
+                  }
+                },
+                "selectionPanels": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/panel"
+                  }
+                },
+                "sequentialPanels": {
                   "type": "array",
                   "items": {
                     "$ref": "#/definitions/panel"
@@ -1398,14 +1518,26 @@ func init() {
             "queryDefinition": {
               "type": "object",
               "properties": {
-                "panels": {
+                "queryTiming": {
+                  "$ref": "#/definitions/timing"
+                },
+                "queryTimingSequence": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/timingSequenceInfo"
+                  }
+                },
+                "selectionPanels": {
                   "type": "array",
                   "items": {
                     "$ref": "#/definitions/panel"
                   }
                 },
-                "queryTiming": {
-                  "$ref": "#/definitions/timing"
+                "sequentialPanels": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/panel"
+                  }
                 }
               }
             },
@@ -2702,14 +2834,26 @@ func init() {
         "queryDefinition": {
           "type": "object",
           "properties": {
-            "panels": {
+            "queryTiming": {
+              "$ref": "#/definitions/timing"
+            },
+            "queryTimingSequence": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/timingSequenceInfo"
+              }
+            },
+            "selectionPanels": {
               "type": "array",
               "items": {
                 "$ref": "#/definitions/panel"
               }
             },
-            "queryTiming": {
-              "$ref": "#/definitions/timing"
+            "sequentialPanels": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/panel"
+              }
             }
           }
         },
@@ -2724,14 +2868,26 @@ func init() {
     "GetCohortsOKBodyItems0QueryDefinition": {
       "type": "object",
       "properties": {
-        "panels": {
+        "queryTiming": {
+          "$ref": "#/definitions/timing"
+        },
+        "queryTimingSequence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/timingSequenceInfo"
+          }
+        },
+        "selectionPanels": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/panel"
           }
         },
-        "queryTiming": {
-          "$ref": "#/definitions/timing"
+        "sequentialPanels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/panel"
+          }
         }
       }
     },
@@ -2940,7 +3096,19 @@ func init() {
           "type": "string",
           "pattern": "^\\w+$"
         },
-        "panels": {
+        "queryTimingSequence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/timingSequenceInfo"
+          }
+        },
+        "selectionPanels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/panel"
+          }
+        },
+        "sequentialPanels": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/panel"
@@ -3057,15 +3225,29 @@ func init() {
     "exploreQuery": {
       "description": "MedCo-Explore query",
       "properties": {
-        "panels": {
-          "description": "i2b2 panels (linked by an AND)",
+        "queryTiming": {
+          "$ref": "#/definitions/timing"
+        },
+        "queryTimingSequence": {
+          "description": "A collection of timingSequenceInfo that, if present, determines the temporal relations between the panels. The element at position i determines the relation between the panels at position i and i + 1.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/timingSequenceInfo"
+          }
+        },
+        "selectionPanels": {
+          "description": "i2b2 selection panels (linked by an AND)",
           "type": "array",
           "items": {
             "$ref": "#/definitions/panel"
           }
         },
-        "queryTiming": {
-          "$ref": "#/definitions/timing"
+        "sequentialPanels": {
+          "description": "i2b2 sequential panels (linked by a sequential operator)",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/panel"
+          }
         },
         "userPublicKey": {
           "type": "string",
@@ -3360,6 +3542,100 @@ func init() {
         "sameinstancenum"
       ]
     },
+    "timingSequenceInfo": {
+      "description": "The info according to which the temporal relation between two panels is determined. The observations identified by the first panel occur before the observations identified by the second panel if the {whichDateFirst} of the {whichObservationFirst} observation in the first panel occurs {when} the {whichDateSecond} of the {whichObservationSecond} observation in the second panel. ",
+      "type": "object",
+      "required": [
+        "whichDateFirst",
+        "whichObservationFirst",
+        "when",
+        "whichDateSecond",
+        "whichObservationSecond"
+      ],
+      "properties": {
+        "spans": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/timingSequenceSpan"
+          }
+        },
+        "when": {
+          "type": "string",
+          "default": "LESS",
+          "enum": [
+            "LESS",
+            "LESSEQUAL",
+            "EQUAL"
+          ]
+        },
+        "whichDateFirst": {
+          "type": "string",
+          "default": "STARTDATE",
+          "enum": [
+            "STARTDATE",
+            "ENDDATE"
+          ]
+        },
+        "whichDateSecond": {
+          "type": "string",
+          "default": "STARTDATE",
+          "enum": [
+            "STARTDATE",
+            "ENDDATE"
+          ]
+        },
+        "whichObservationFirst": {
+          "type": "string",
+          "default": "ANY",
+          "enum": [
+            "FIRST",
+            "LAST",
+            "ANY"
+          ]
+        },
+        "whichObservationSecond": {
+          "type": "string",
+          "default": "ANY",
+          "enum": [
+            "FIRST",
+            "LAST",
+            "ANY"
+          ]
+        }
+      }
+    },
+    "timingSequenceSpan": {
+      "type": "object",
+      "required": [
+        "value",
+        "units",
+        "operator"
+      ],
+      "properties": {
+        "operator": {
+          "type": "string",
+          "enum": [
+            "LESS",
+            "LESSEQUAL",
+            "EQUAL",
+            "GREATEREQUAL",
+            "GREATER"
+          ]
+        },
+        "units": {
+          "type": "string",
+          "enum": [
+            "HOUR",
+            "DAY",
+            "MONTH",
+            "YEAR"
+          ]
+        },
+        "value": {
+          "type": "integer"
+        }
+      }
+    },
     "user": {
       "type": "object",
       "properties": {
@@ -3580,7 +3856,19 @@ func init() {
                   "type": "string",
                   "pattern": "^\\w+$"
                 },
-                "panels": {
+                "queryTimingSequence": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/timingSequenceInfo"
+                  }
+                },
+                "selectionPanels": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/panel"
+                  }
+                },
+                "sequentialPanels": {
                   "type": "array",
                   "items": {
                     "$ref": "#/definitions/panel"
@@ -3763,14 +4051,26 @@ func init() {
             "queryDefinition": {
               "type": "object",
               "properties": {
-                "panels": {
+                "queryTiming": {
+                  "$ref": "#/definitions/timing"
+                },
+                "queryTimingSequence": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/timingSequenceInfo"
+                  }
+                },
+                "selectionPanels": {
                   "type": "array",
                   "items": {
                     "$ref": "#/definitions/panel"
                   }
                 },
-                "queryTiming": {
-                  "$ref": "#/definitions/timing"
+                "sequentialPanels": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/panel"
+                  }
                 }
               }
             },

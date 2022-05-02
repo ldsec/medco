@@ -135,19 +135,18 @@ func (q *Query) Execute() error {
 			item := &models.PanelConceptItemsItems0{
 				QueryTerm: &q.StartConcept,
 			}
-			newPanel := &models.Panel{
+			startPanel := &models.Panel{
 				ConceptItems: []*models.PanelConceptItemsItems0{
 					item,
 				},
 				Not:         &not,
 				PanelTiming: models.TimingAny,
 			}
-			panels := append(definition.Panels, newPanel)
 
 			timer = time.Now()
 			logrus.Infof("Survival analysis: I2B2 explore for subgroup %d", i)
-			logrus.Tracef("Survival analysis: panels %+v", panels)
-			patientList, err := SubGroupExplore(q.QueryName, i, panels, definition.SubGroupTiming)
+			logrus.Tracef("Survival analysis: selection panels %+v, sequential panels: %+v", definition.SelectionPanels, definition.SequentialPanels)
+			patientList, err := SubGroupExplore(q.QueryName, i, startPanel, definition.SelectionPanels, definition.SequentialPanels, definition.QueryTimingSequence, definition.SubGroupTiming)
 			if err != nil {
 				returnedErr := fmt.Errorf("during subgroup explore procedure")
 				logrus.Errorf("%s: %s", returnedErr.Error(), err.Error())
@@ -534,7 +533,7 @@ func processGroupResult(errChan chan error, newEventGroup *EventGroup, sqlTimePo
 			}})
 
 	}
-	return timers
+	return
 
 }
 
@@ -551,18 +550,19 @@ func fullCohort(startConcept string) []*survival_analysis.SurvivalAnalysisParams
 		Encrypted: encrypted,
 		QueryTerm: term,
 	}
+	any := models.Timing(strings.ToUpper(string(models.TimingAny)))
 	newPanels := make([]*models.Panel, 1)
 	newPanels[0] = &models.Panel{
 		ConceptItems: newItems,
 		Not:          not,
-		PanelTiming:  models.TimingAny,
+		PanelTiming:  any,
 	}
 
 	return []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0{
 		{
-			GroupName:      "Full cohort",
-			Panels:         newPanels,
-			SubGroupTiming: models.TimingAny,
+			GroupName:       "Full cohort",
+			SelectionPanels: newPanels,
+			SubGroupTiming:  any,
 		},
 	}
 }

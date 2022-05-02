@@ -13,24 +13,83 @@ end_modifier:
 ends_when: "earliest"
 sub_groups:
   - group_name: "AAA"
-    group_timing: "any"
-    panels:
+    selection_panels:
       - not: false
         panel_timing: "any"
-        items:
+        concept_items:
+          - path: "/path/4/"
+    sequential_panels:
+      - not: false
+        panel_timing: "any"
+        concept_items:
           - path: "/path/1/"
           - path: "/path/2/"
             modifier:
               modifier_key: "/key1/"
               applied_path: "/appliedpath1/"
+        cohort_items:
+          - "testCohort1"
+          - "testCohort2"
       - not : true
         panel_timing: "sameinstancenum"
-        items:
+        concept_items:
           - path: "/path/3/"
+            value: "23"
+            type: "NUMBER"
+            operator: "EQ"
+    sequence_of_events:
+      - which_date_first: "startdate"
+        which_date_second: "enddate"
+        which_observation_first: "any"
+        which_observation_second: "last"
+        when: "sametime"
+        spans:
+          - operator: "less"
+            value: 34
+            units: "years"
+          - operator: "equal"
+            value: 21
+            units: "days"
   - group_name: "BBB"
-    group_timing: "sameinstancenum"
-    panels:
+    selection_panels:
       - not: false
         panel_timing: "any"
-        items:
+        concept_items:
+          - path: "/path/3/"
+    sequential_panels:
+      - not: false
+        panel_timing: "any"
+        concept_items:
           - path: "/path/4/"
+      - not : true
+        panel_timing: "sameinstancenum"
+        concept_items:
+          - path: "/path/3/"
+    sequence_of_events:
+      - {}
+  - group_name: "CCC"
+    group_timing: "sameinstancenum"
+    selection_panels:
+      - not: false
+        panel_timing: "any"
+        concept_items:
+          - path: "/path/4/"
+  - group_name: "DDD"
+    selection_panels:
+      - not: false
+        panel_timing: "any"
+        concept_items:
+          - path: "/path/7/"
+    sequential_panels:
+      - not: false
+        concept_items:
+          - path: "/path/4/"
+      - not : true
+        panel_timing: "sameinstancenum"
+        concept_items:
+          - path: "/path/3/"
+      - not : true
+        panel_timing: "sameinstancenum"
+        concept_items:
+          - path: "/path/7/"
+    sequence_of_events: []
