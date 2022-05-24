@@ -1,0 +1,2 @@
+filterOne,{"panels":[{"cohortItems":null,"conceptItems":[{"encrypted":false,"queryTerm":"/E2ETEST/SPHNv2020.1/DeathStatus/"}],"not":false,"panelTiming":"any"}],"queryTiming":"any"}
+filterTwo,{"panels":[{"cohortItems":null,"conceptItems":[{"encrypted":false,"queryTerm":"/E2ETEST/SPHNv2020.1/DeathStatus/"}],"not":false,"panelTiming":"any"}],"queryTiming":"any"}

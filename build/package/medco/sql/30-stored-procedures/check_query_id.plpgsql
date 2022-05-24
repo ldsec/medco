@@ -10,7 +10,7 @@ DECLARE
 BEGIN
   EXECUTE '
 SELECT COUNT(query_id) FROM query_tools.explore_query_results
-WHERE user_id = $1 AND query_id = $2'
+WHERE (user_id = $1 AND query_id = $2 AND NOT predefined) or (query_id = $2 AND predefined)'
   USING user_id,
   query_id INTO size_;
   RETURN (size_ = 1);

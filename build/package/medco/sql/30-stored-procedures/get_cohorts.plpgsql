@@ -14,7 +14,7 @@ CREATE OR REPLACE FUNCTION query_tools.get_cohorts(user_id varchar, number_limit
   AS $$
 DECLARE
   query_ text := 'SELECT cohort_id, query_id, cohort_name, create_date, update_date, predefined, default_flag FROM query_tools.saved_cohorts
-WHERE user_id = $1
+WHERE user_id = $1 or predefined
 ORDER BY update_date DESC, cohort_name';
 BEGIN
   IF number_limit > 0 THEN
