@@ -21,6 +21,7 @@ do
 
 QUERY_NAME=predefined_${QUERY_DATE}_$((++QUERY_NUMBER))
 
+# these sed functions separate the name from the panels
 DEFINITION=$(sed 's/^[^,]*,//g' <<< $p)
 FILTER_NAME=$(sed 's/,.*$//g' <<< $p)
 
@@ -31,10 +32,10 @@ INSERT INTO query_tools.explore_query_results(
 	VALUES ('${QUERY_NAME}', 'allUsers', 'predefined', '${DEFINITION}');
 
 INSERT INTO query_tools.saved_cohorts(
-	user_id, cohort_name, query_id,  predefined, default_flag)
+	user_id, cohort_name, query_id,  predefined)
 	VALUES ('allUsers', '${FILTER_NAME}',
     (SELECT query_id FROM query_tools.explore_query_results WHERE query_name = '${QUERY_NAME}'),
-  TRUE, FALSE);
+  TRUE);
 COMMIT;
 EOSQL
 

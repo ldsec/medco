@@ -1,0 +1,18 @@
+-- pl/pgsql function that returns the cohort ID of the default filter, if any, for a given user ID
+
+CREATE OR REPLACE FUNCTION query_tools.get_default_filter(user_id varchar)
+  RETURNS integer
+  STABLE
+  PARALLEL SAFE
+  AS $$
+DECLARE
+  default_filter_id_ integer;
+BEGIN
+  EXECUTE 'SELECT default_filter_id FROM query_tools.default_filters
+WHERE user_id =$1'
+  USING user_id
+  INTO default_filter_id_;
+  RETURN default_filter_id_;
+END;
+$$
+LANGUAGE plpgsql

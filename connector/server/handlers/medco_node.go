@@ -384,7 +384,12 @@ func MedCoNodePutCohortsHandler(params medco_node.PutCohortsParams, principal *m
 		})
 	}
 
-	querytoolsserver.UpdateCohort(cohortName, principal.ID, int(*cohort.QueryID), updateDate)
+	_, err = querytoolsserver.UpdateCohort(cohortName, principal.ID, int(*cohort.QueryID), updateDate)
+	if err != nil {
+		return medco_node.NewPutCohortsDefault(500).WithPayload(&medco_node.PutCohortsDefaultBody{
+			Message: "Update cohort execution error: " + err.Error(),
+		})
+	}
 
 	return medco_node.NewPutCohortsOK()
 }

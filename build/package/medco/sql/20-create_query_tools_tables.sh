@@ -48,13 +48,27 @@ CREATE TABLE IF NOT EXISTS query_tools.saved_cohorts
     create_date TIMESTAMP WITHOUT TIME ZONE,
     update_date TIMESTAMP WITHOUT TIME ZONE,
     predefined BOOLEAN NOT NULL,
-    default_flag BOOLEAN NOT NULL,
     CONSTRAINT saved_cohorts_pkey PRIMARY KEY (cohort_id),
     CONSTRAINT saved_cohorts_user_id_cohort_name_key UNIQUE (user_id, cohort_name),
-    CONSTRAINT query_tool_fk_psc_ri FOREIGN KEY (query_id)
+    CONSTRAINT query_tools_fk_psc_ri FOREIGN KEY (query_id)
         REFERENCES query_tools.explore_query_results (query_id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
+)
+
+EOSQL
+
+#create default filters table
+psql $PSQL_PARAMS -d "$MC_DB_NAME"<<-EOSQL
+CREATE TABLE query_tools.default_filters
+(
+    user_id character varying(255) NOT NULL,
+    default_filter_id INTEGER NOT NULL,
+    CONSTRAINT default_filters_user_id UNIQUE (user_id),
+    CONSTRAINT query_tools_fk_psc_ri FOREIGN KEY (default_filter_id)
+        REFERENCES query_tools.saved_cohorts (cohort_id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
 )
 
 EOSQL
