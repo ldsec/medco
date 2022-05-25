@@ -5,6 +5,8 @@
 You can find more information about the MedCo project [here](https://medco.epfl.ch/).
 For further details, support, and contacts, you can check the [MedCo Technical Documentation](https://ldsec.gitbook.io/medco-documentation/).
 
+**Notice:** This version of MedCo is not maintained anymore and is only available for archival and research purposes. The current version of the platform is developed and maintained by [Tune Insight SA](https://tuneinsight.com/).
+
 ## Source code organization
 It follows the Golang standard project layout.
 - *build/package*: docker images definitions
