@@ -369,6 +369,19 @@ paths:
         - medco-jwt: ["medco-explore"]
 
 
+  /node/explore/default-cohort:
+    get:
+      tags:
+        -  "medco-node"
+      summary: "Returns the default cohort name of the user, if any"
+      operationId: "getDefaultCohort"
+      responses:
+        200:
+          $ref: '#/responses/getDefaultCohortResponse'
+        default:
+          $ref: '#/responses/errorResponse'
+      security:
+        - medco-jwt: ["medco-explore"]
   /node/explore/default-cohort/{name}:
     put:
       tags:
@@ -780,8 +793,6 @@ responses:
             type: "string"
           predefined:
             type: "boolean"
-          defaultFlag:
-            type: "boolean"
           queryDefinition:
             type: "object"
             properties:
@@ -804,7 +815,10 @@ responses:
         timers:
           $ref: "#/definitions/timers"
 
-
+  getDefaultCohortResponse:
+    description: "Name of cohort/filter retrieved"
+    schema:
+      type: "string"
 
   exploreStatisticsResponse:
     description: "Explore statistics histograms"

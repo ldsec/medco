@@ -140,7 +140,6 @@ func convertCohort(apiRes []*medco_node.GetCohortsOKBodyItems0) (res []medcomode
 			return
 		}
 
-		res[i].Default = apiCohort.DefaultFlag
 		res[i].Predefined = apiCohort.Predefined
 
 		res[i].QueryID = int(apiCohort.QueryID)

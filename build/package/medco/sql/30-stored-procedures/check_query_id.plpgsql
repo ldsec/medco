@@ -7,12 +7,14 @@ CREATE OR REPLACE FUNCTION query_tools.check_query_id(user_id varchar, query_id 
   AS $$
 DECLARE
   size_ integer;
+  query_status varchar := 'predefined' ;
 BEGIN
   EXECUTE '
 SELECT COUNT(query_id) FROM query_tools.explore_query_results
-WHERE (user_id = $1 AND query_id = $2 AND NOT predefined) or (query_id = $2 AND predefined)'
+WHERE (user_id = $1 AND query_id = $2) or (query_id = $2 AND query_status = $3::status_enum)'
   USING user_id,
-  query_id INTO size_;
+  query_id,
+  query_status INTO size_;
   RETURN (size_ = 1);
 END;
 $$

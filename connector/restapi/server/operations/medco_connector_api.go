@@ -70,6 +70,9 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 		MedcoNodeGetCohortsHandler: medco_node.GetCohortsHandlerFunc(func(params medco_node.GetCohortsParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_node.GetCohorts has not yet been implemented")
 		}),
+		MedcoNodeGetDefaultCohortHandler: medco_node.GetDefaultCohortHandlerFunc(func(params medco_node.GetDefaultCohortParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation medco_node.GetDefaultCohort has not yet been implemented")
+		}),
 		MedcoNodeGetExploreQueryHandler: medco_node.GetExploreQueryHandlerFunc(func(params medco_node.GetExploreQueryParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_node.GetExploreQuery has not yet been implemented")
 		}),
@@ -158,6 +161,8 @@ type MedcoConnectorAPI struct {
 	ExploreStatisticsExploreStatisticsHandler explore_statistics.ExploreStatisticsHandler
 	// MedcoNodeGetCohortsHandler sets the operation handler for the get cohorts operation
 	MedcoNodeGetCohortsHandler medco_node.GetCohortsHandler
+	// MedcoNodeGetDefaultCohortHandler sets the operation handler for the get default cohort operation
+	MedcoNodeGetDefaultCohortHandler medco_node.GetDefaultCohortHandler
 	// MedcoNodeGetExploreQueryHandler sets the operation handler for the get explore query operation
 	MedcoNodeGetExploreQueryHandler medco_node.GetExploreQueryHandler
 	// MedcoNetworkGetMetadataHandler sets the operation handler for the get metadata operation
@@ -276,6 +281,9 @@ func (o *MedcoConnectorAPI) Validate() error {
 	}
 	if o.MedcoNodeGetCohortsHandler == nil {
 		unregistered = append(unregistered, "medco_node.GetCohortsHandler")
+	}
+	if o.MedcoNodeGetDefaultCohortHandler == nil {
+		unregistered = append(unregistered, "medco_node.GetDefaultCohortHandler")
 	}
 	if o.MedcoNodeGetExploreQueryHandler == nil {
 		unregistered = append(unregistered, "medco_node.GetExploreQueryHandler")
@@ -430,6 +438,10 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/node/explore/cohorts"] = medco_node.NewGetCohorts(o.context, o.MedcoNodeGetCohortsHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/node/explore/default-cohort"] = medco_node.NewGetDefaultCohort(o.context, o.MedcoNodeGetDefaultCohortHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}

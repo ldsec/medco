@@ -4,11 +4,11 @@ set -Eeuo pipefail
 USERNAME=${1:-test}
 PASSWORD=${2:-test}
 
-getSavedCohortHeaders="node_index,cohort_name,cohort_id,query_id,creation_date,update_date,predefined,default,query_timing,panels"
-getSavedCohort1="$(printf -- "node_index cohort_name cohort_id query_id predefined default query_timing panels\n\
-0 testCohort -1 -1 false false any \"{panels:[{cohortItems:null,conceptItems:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any}]}\"\n\
-1 testCohort -1 -1 false false any \"{panels:[{cohortItems:null,conceptItems:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any}]}\"\n\
-2 testCohort -1 -1 false false any \"{panels:[{cohortItems:null,conceptItems:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any}]}\"")"
+getSavedCohortHeaders="node_index,cohort_name,cohort_id,query_id,creation_date,update_date,predefined,query_timing,panels"
+getSavedCohort1="$(printf -- "node_index cohort_name cohort_id query_id predefined query_timing panels\n\
+0 testCohort -1 -1 false any \"{panels:[{cohortItems:null,conceptItems:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any}]}\"\n\
+1 testCohort -1 -1 false any \"{panels:[{cohortItems:null,conceptItems:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any}]}\"\n\
+2 testCohort -1 -1 false any \"{panels:[{cohortItems:null,conceptItems:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any}]}\"")"
 getSavedCohort2="$(printf -- "node_index cohort_name query_id\n0 testCohort2 -1\n0 testCohort -1\n1 testCohort2 -1\n1 testCohort -1\n2 testCohort2 -1\n2 testCohort -1")"
 test1 () {
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv get-saved-cohorts
@@ -20,7 +20,7 @@ test1 () {
   exit 1
   fi
 
-  result="$(awk -vFPAT='("[^"]+")|([^,]+)' '{print $1,$2,$3,$4,$7,$8,$9,$10}' ../result.csv | grep -v testCohortBioref | grep -v testPredefinedCohort)"
+  result="$(awk -vFPAT='("[^"]+")|([^,]+)' '{print $1,$2,$3,$4,$7,$8,$9}' ../result.csv | grep -v testCohortBioref | grep -v testPredefinedCohort)"
   if [ "${result}" != "${getSavedCohort1}" ];
   then
   echo "get-saved-cohorts content before update: test failed"
@@ -51,7 +51,7 @@ test1 () {
 
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD remove-saved-cohorts -c testCohort2
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv get-saved-cohorts
-  result="$(awk -vFPAT='("[^"]+")|([^,]+)' '{print $1,$2,$3,$4,$7,$8,$9,$10}' ../result.csv | grep -v testCohortBioref | grep -v testPredefinedCohort)"
+  result="$(awk -vFPAT='("[^"]+")|([^,]+)' '{print $1,$2,$3,$4,$7,$8,$9}' ../result.csv | grep -v testCohortBioref | grep -v testPredefinedCohort)"
   if [ "${result}" != "${getSavedCohort1}" ];
   then
   echo "get-saved-cohorts content after removing new cohorts: test failed"
@@ -197,7 +197,7 @@ function updatePredefinedCohortWithCredentials() { docker-compose -f docker-comp
   upsc -c testPredefinedCohort -q -99,-99,-99 ; };
 expectedError3="[403] putCohortsForbidden"
 test6() {
-  updatePredefinedCohortWithCredentials "test" "test" > ../dumped_logs_to_remove.txt 2>&1
+  updatePredefinedCohortWithCredentials $USERNAME $PASSWORD> ../dumped_logs_to_remove.txt 2>&1
 
   #check the error description
   description="$(awk 'END{print}' ../dumped_logs_to_remove.txt)"
@@ -211,6 +211,75 @@ test6() {
   rm ../dumped_logs_to_remove.txt
 
 }
+
+function insertNewCohortWithCredentials() {
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user ${1} --password ${2} \
+  addsc -c ${3} -q ${4};
+}
+
+function removeCohortWithCredentials() {
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user ${1} --password ${2} \
+  rmsc -c ${3};
+}
+
+function setDefaultFitlerWithCredentials() { docker-compose -f docker-compose.tools.yml run medco-cli-client --user ${1} --password ${2} \
+  sdc -c ${3} ; };
+
+function getDefaultFitlerWithCredentials() { docker-compose -f docker-compose.tools.yml run medco-cli-client --user ${1} --password ${2} --o /data/result.csv \
+  gdc ; };
+
+expectedDefault1="node_index,cohort_name\n1,\n2,\n3,\n"
+expectedDefault2="node_index,cohort_name\n1,testCohort\n2,testCohort\n3,testCohort\n"
+expectedDefault3="node_index,cohort_name\n1,testCohortAA\n2,testCohortAA\n3,testCohortAA\n"
+test7() {
+  # in case it was not removed before
+  removeCohortWithCredentials $USERNAME $PASSWORD "testCohortAA"
+  getDefaultFitlerWithCredentials $USERNAME $PASSWORD
+
+  description="$(awk '{print $0}' ../result.csv)"
+  if [[ "${description}" != "${expectedDefault1}" ]];
+  then
+  echo "cohorts patient list: test failed"
+  echo "result is ${description}: expected \"${expectedDefault1}\""
+  exit 1
+  fi
+
+  setDefaultFitlerWithCredentials $USERNAME $PASSWORD "testCohort"
+  getDefaultFitlerWithCredentials $USERNAME $PASSWORD
+
+  description="$(awk '{print $0}' ../result.csv)"
+  if [[ "${description}" != "${expectedDefault2}" ]];
+  then
+  echo "cohorts patient list: test failed"
+  echo "result ${description}: expected \"${expectedDefault2}\""
+  exit 1
+  fi
+
+   
+  insertNewCohortWithCredentials $1 $2 "testCohortAA" "-1,-1,-1"
+  setDefaultFitlerWithCredentials $USERNAME $PASSWORD "testCohortAA"
+  getDefaultFitlerWithCredentials $USERNAME $PASSWORD
+
+  description="$(awk '{print $0}' ../result.csv)"
+  if [[ "${description}" != "${expectedDefault3}" ]];
+  then
+  echo "cohorts patient list: test failed"
+  echo "result is ${description}: expected \"${expectedDefault3}\""
+  exit 1
+  fi
+
+  removeCohortWithCredentials $USERNAME $PASSWORD "testCohortAA"
+  getDefaultFitlerWithCredentials $USERNAME $PASSWORD
+
+  description="$(awk '{print $0}' ../result.csv)"
+  if [[ "${description}" != "${expectedDefault1}" ]];
+  then
+  echo "cohorts patient list: test failed"
+  echo "result is ${description}: expected \"${expectedDefault1}\""
+  exit 1
+  fi
+}
+
 
 
 pushd deployments/dev-local-3nodes/

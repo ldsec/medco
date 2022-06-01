@@ -122,9 +122,6 @@ type GetCohortsOKBodyItems0 struct {
 	// creation date
 	CreationDate string `json:"creationDate,omitempty"`
 
-	// default flag
-	DefaultFlag bool `json:"defaultFlag,omitempty"`
-
 	// predefined
 	Predefined bool `json:"predefined,omitempty"`
 

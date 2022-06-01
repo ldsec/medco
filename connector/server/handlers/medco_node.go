@@ -197,7 +197,6 @@ func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *m
 				CohortID:        int64(cohort.CohortID),
 				QueryID:         queryID,
 				Predefined:      cohort.Predefined,
-				DefaultFlag:     cohort.Default,
 				CreationDate:    cohort.CreationDate.Format(time.RFC3339Nano),
 				UpdateDate:      cohort.UpdateDate.Format(time.RFC3339Nano),
 				QueryDefinition: queryDefinition,
@@ -392,6 +391,25 @@ func MedCoNodePutCohortsHandler(params medco_node.PutCohortsParams, principal *m
 	}
 
 	return medco_node.NewPutCohortsOK()
+}
+
+func MedCoNodeGetDefaultCohortHandler(_ medco_node.GetDefaultCohortParams, principal *models.User) middleware.Responder {
+	user := principal.ID
+
+	cohortName, err := querytoolsserver.GetDefaultFilter(user)
+	if err != nil {
+		return medco_node.NewGetDefaultCohortDefault(500).WithPayload(&medco_node.GetDefaultCohortDefaultBody{
+			Message: "Get default cohort execution error: " + err.Error(),
+		})
+	}
+
+	var returnName string
+	if cohortName != nil {
+		returnName = *cohortName
+	} else {
+		logrus.Debugf("No default cohort/filter found for user %s", user)
+	}
+	return medco_node.NewGetDefaultCohortOK().WithPayload(returnName)
 }
 
 // MedCoNodeDeleteCohortsHandler handles DELETE /medco/node/explore/cohorts API endpoint

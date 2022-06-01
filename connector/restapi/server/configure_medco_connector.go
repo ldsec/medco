@@ -95,6 +95,9 @@ func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
 	api.MedcoNodeDeleteCohortsHandler = medco_node.DeleteCohortsHandlerFunc(handlers.MedCoNodeDeleteCohortsHandler)
 
 	// /node/explore/default-cohort
+	api.MedcoNodeGetDefaultCohortHandler = medco_node.GetDefaultCohortHandlerFunc(handlers.MedCoNodeGetDefaultCohortHandler)
+
+	// /node/explore/default-cohort
 	api.MedcoNodePutDefaultCohortHandler = medco_node.PutDefaultCohortHandlerFunc(handlers.MedCoNodePutDefaultCohortHandler)
 
 	// /node/explore/cohorts/patientList

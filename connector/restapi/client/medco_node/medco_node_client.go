@@ -37,6 +37,8 @@ type ClientService interface {
 
 	GetCohorts(params *GetCohortsParams, authInfo runtime.ClientAuthInfoWriter) (*GetCohortsOK, error)
 
+	GetDefaultCohort(params *GetDefaultCohortParams, authInfo runtime.ClientAuthInfoWriter) (*GetDefaultCohortOK, error)
+
 	GetExploreQuery(params *GetExploreQueryParams, authInfo runtime.ClientAuthInfoWriter) (*GetExploreQueryOK, error)
 
 	PostCohorts(params *PostCohortsParams, authInfo runtime.ClientAuthInfoWriter) (*PostCohortsOK, error)
@@ -251,6 +253,40 @@ func (a *Client) GetCohorts(params *GetCohortsParams, authInfo runtime.ClientAut
 	}
 	// unexpected success response
 	unexpectedSuccess := result.(*GetCohortsDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+  GetDefaultCohort returns the default cohort name of the user if any
+*/
+func (a *Client) GetDefaultCohort(params *GetDefaultCohortParams, authInfo runtime.ClientAuthInfoWriter) (*GetDefaultCohortOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetDefaultCohortParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getDefaultCohort",
+		Method:             "GET",
+		PathPattern:        "/node/explore/default-cohort",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &GetDefaultCohortReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetDefaultCohortOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*GetDefaultCohortDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 

@@ -66,7 +66,6 @@ func GetSavedCohorts(userID string, limit int) ([]medcomodels.Cohort, error) {
 	var createDate time.Time
 	var updateDate time.Time
 	var predefined bool
-	var defaultFlag bool
 
 	var cohorts = make([]medcomodels.Cohort, 0)
 	record := new(string)
@@ -106,11 +105,6 @@ func GetSavedCohorts(userID string, limit int) ([]medcomodels.Cohort, error) {
 			err = fmt.Errorf("while parsing predefined string \"%s\": %s, DB operation: %s", cells[5], err.Error(), description)
 			return nil, err
 		}
-		defaultFlag, err = strconv.ParseBool(strings.Trim(cells[6], `"`))
-		if err != nil {
-			err = fmt.Errorf("while parsing default flag string \"%s\": %s, DB operation: %s", cells[6], err.Error(), description)
-			return nil, err
-		}
 		newCohort := medcomodels.Cohort{
 			CohortID:     id,
 			QueryID:      qid,
@@ -118,7 +112,6 @@ func GetSavedCohorts(userID string, limit int) ([]medcomodels.Cohort, error) {
 			CreationDate: createDate,
 			UpdateDate:   updateDate,
 			Predefined:   predefined,
-			Default:      defaultFlag,
 		}
 		logrus.Tracef("got cohort %+v", newCohort)
 		cohorts = append(cohorts, newCohort)
@@ -247,9 +240,9 @@ func RemoveCohort(userID, cohortName string) error {
 
 // UpdateDefaultCohort changes the default cohort
 func UpdateDefaultCohort(userID, cohortName string) error {
-	description := fmt.Sprintf("UpdateDefaultCohort (user ID: %s, cohort name: %s), procedure : %s", userID, cohortName, "query_tools.update_default_cohort")
+	description := fmt.Sprintf("UpdateDefaultCohort (user ID: %s, cohort name: %s), procedure : %s", userID, cohortName, "query_tools.update_default_filter")
 	logrus.Debugf("running: %s", description)
-	res := utilserver.DBConnection.QueryRow("SELECT query_tools.update_default_cohort($1, $2);", userID, cohortName)
+	res := utilserver.DBConnection.QueryRow("SELECT query_tools.update_default_filter($1, $2);", userID, cohortName)
 	var cohortID sql.NullInt32
 	err := res.Scan(&cohortID)
 	if err != nil {
@@ -288,28 +281,28 @@ func RemoveDefaultFilter(userID string) (*int, error) {
 	return returnValue, nil
 }
 
-// GetDefautlFilter returns the default filter id, if any, of a given patient,
+// GetDefautlFilter returns the cohort name of the default filter, if any, of a given patient,
 // returns nil integer pointer if the user does not have any default filter
-func GetDefaultFilter(userID string) (*int, error) {
-	var returnID *int
+func GetDefaultFilter(userID string) (*string, error) {
+	var returnName *string
 	description := fmt.Sprintf("GetDefaultFilter (user ID: %s), procedure : %s", userID, "query_tools.get_default_filter")
 	logrus.Debugf("running: %s", description)
 	res := utilserver.DBConnection.QueryRow("SELECT query_tools.get_default_filter($1)", userID)
-	var filterID sql.NullInt64
-	err := res.Scan(&filterID)
+	var filterName sql.NullString
+	err := res.Scan(&filterName)
 	if err != nil {
 		err = fmt.Errorf("while executing procedure: %s, DB operation: %s", err.Error(), description)
 		return nil, err
 	}
-	if !filterID.Valid {
+	if !filterName.Valid {
 		logrus.Debugf("no default filter has been defined, DB operation: %s", description)
 	} else {
-		returnID = new(int)
-		*returnID = int(filterID.Int64)
+		returnName = new(string)
+		*returnName = filterName.String
 	}
 
 	logrus.Debugf("successfully removed default filter if any, DB operation: %s", description)
-	return returnID, nil
+	return returnName, nil
 }
 
 // UpdateDefautlFilter insert or the update the default filter of a given patient with the given cohort ID

@@ -465,6 +465,30 @@ func init() {
         }
       }
     },
+    "/node/explore/default-cohort": {
+      "get": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
+        ],
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Returns the default cohort name of the user, if any",
+        "operationId": "getDefaultCohort",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/getDefaultCohortResponse"
+          },
+          "default": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      }
+    },
     "/node/explore/default-cohort/{name}": {
       "put": {
         "security": [
@@ -1647,9 +1671,6 @@ func init() {
             "creationDate": {
               "type": "string"
             },
-            "defaultFlag": {
-              "type": "boolean"
-            },
             "predefined": {
               "type": "boolean"
             },
@@ -1675,6 +1696,12 @@ func init() {
             }
           }
         }
+      }
+    },
+    "getDefaultCohortResponse": {
+      "description": "Name of cohort/filter retrieved",
+      "schema": {
+        "type": "string"
       }
     },
     "networkMetadataResponse": {
@@ -2789,6 +2816,41 @@ func init() {
         }
       }
     },
+    "/node/explore/default-cohort": {
+      "get": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
+        ],
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Returns the default cohort name of the user, if any",
+        "operationId": "getDefaultCohort",
+        "responses": {
+          "200": {
+            "description": "Name of cohort/filter retrieved",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "default": {
+            "description": "Error response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/node/explore/default-cohort/{name}": {
       "put": {
         "security": [
@@ -3199,9 +3261,6 @@ func init() {
         },
         "creationDate": {
           "type": "string"
-        },
-        "defaultFlag": {
-          "type": "boolean"
         },
         "predefined": {
           "type": "boolean"
@@ -4464,9 +4523,6 @@ func init() {
             "creationDate": {
               "type": "string"
             },
-            "defaultFlag": {
-              "type": "boolean"
-            },
             "predefined": {
               "type": "boolean"
             },
@@ -4492,6 +4548,12 @@ func init() {
             }
           }
         }
+      }
+    },
+    "getDefaultCohortResponse": {
+      "description": "Name of cohort/filter retrieved",
+      "schema": {
+        "type": "string"
       }
     },
     "networkMetadataResponse": {

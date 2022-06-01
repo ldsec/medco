@@ -482,12 +482,27 @@ func main() {
 			},
 		},
 		{
+			Name:        "get-default-cohort",
+			Aliases:     []string{"gdc"},
+			Usage:       "Retrieve the default cohort or filter.",
+			Description: "Set the cohort passed as argument to be the user's default cohort/filter. If another cohort was previously defined, this one is upset (there is at most one default cohort per user).",
+			Action: func(c *cli.Context) error {
+				return querytoolsclient.ExecuteGetDefaultCohort(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.GlobalBool("disableTLSCheck"),
+					c.GlobalString("outputFile"),
+				)
+			},
+		},
+		{
 			Name:        "set-default-cohort",
 			Aliases:     []string{"sdc"},
 			Usage:       "Change the default cohort.",
 			Flags:       setDefaultCohortFlag,
 			ArgsUsage:   "-c cohortName",
-			Description: "Set the cohort passed as argument to be the user's default cohort. If another cohort was previously defined, this one is upset (there is at most one default cohort per user).",
+			Description: "Set the cohort passed as argument to be the user's default cohort/filter. If another cohort was previously defined, this one is upset (there is at most one default cohort per user).",
 			Action: func(c *cli.Context) error {
 				return querytoolsclient.ExecutePutDefaultCohort(
 					c.GlobalString("token"),
