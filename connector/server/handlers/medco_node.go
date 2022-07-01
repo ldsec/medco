@@ -393,6 +393,7 @@ func MedCoNodePutCohortsHandler(params medco_node.PutCohortsParams, principal *m
 	return medco_node.NewPutCohortsOK()
 }
 
+// MedCoNodeGetDefaultCohortHandler handles GET /medco/node/explore/default-cohort API endpoint
 func MedCoNodeGetDefaultCohortHandler(_ medco_node.GetDefaultCohortParams, principal *models.User) middleware.Responder {
 	user := principal.ID
 

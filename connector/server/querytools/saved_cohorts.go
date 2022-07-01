@@ -258,7 +258,7 @@ func UpdateDefaultCohort(userID, cohortName string) error {
 
 }
 
-// RemoveDefautlFilter removes the default filter/cohort, if any, of a given patient
+// RemoveDefaultFilter removes the default filter/cohort, if any, of a given patient
 func RemoveDefaultFilter(userID string) (*int, error) {
 	var returnValue *int
 	description := fmt.Sprintf("RemoveDefaultFilter (user ID: %s), procedure : %s", userID, "query_tools.remove_default_filter")
@@ -281,7 +281,7 @@ func RemoveDefaultFilter(userID string) (*int, error) {
 	return returnValue, nil
 }
 
-// GetDefautlFilter returns the cohort name of the default filter, if any, of a given patient,
+// GetDefaultFilter returns the cohort name of the default filter, if any, of a given patient,
 // returns nil integer pointer if the user does not have any default filter
 func GetDefaultFilter(userID string) (*string, error) {
 	var returnName *string
@@ -305,7 +305,7 @@ func GetDefaultFilter(userID string) (*string, error) {
 	return returnName, nil
 }
 
-// UpdateDefautlFilter insert or the update the default filter of a given patient with the given cohort ID
+// UpdateDefaultFilter insert or the update the default filter of a given patient with the given cohort ID
 func UpdateDefaultFilter(userID string, filterID int) (int, error) {
 
 	description := fmt.Sprintf("UpdateDefaultFilter (user ID: %s, filter ID: %d), procedure : %s", userID, filterID, "query_tools.update_default_filter")
