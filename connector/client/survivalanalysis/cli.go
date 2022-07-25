@@ -17,6 +17,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const (
+	defaultTiming = models.TimingAny
+)
+
 // ClientResultElement holds the information for the CLI whole susrvival analysis loop
 type ClientResultElement struct {
 	ClearTimePoint     string
@@ -70,6 +74,11 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 		go func() {
 			defer wait.Done()
 			parameters, err := NewParametersFromFile(parameterFileURL)
+			if err != nil {
+				errChan <- err
+				return
+			}
+			err = validateUserInputSequenceOfEvents(parameters)
 			if err != nil {
 				errChan <- err
 				return
@@ -159,21 +168,22 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 	// --- convert panels
 	timer := time.Now()
 	logrus.Info("Survival analysis: converting panels")
-	panels, err := convertPanel(parameters)
+	subGroups, err := convertParametersToSubGroupDefinition(parameters)
 	if err != nil {
 		err = fmt.Errorf("while converting panels: %s", err.Error())
 		logrus.Error(err)
 		return
 	}
 	logrus.Info("Survival analysis: panels converted")
-	for _, panel := range panels {
-		logrus.Trace(modelPanelsToString(panel))
+	for _, subGroup := range subGroups {
+		logrus.Tracef("converted panel: %s", modelPanelsToString(subGroup))
+
 	}
 
 	// --- execute query
 	timer = time.Now()
 	logrus.Info("Survival analysis: executing query")
-	results, timers, userPrivateKey, err := executeQuery(accessToken, panels, parameters, disableTLSCheck)
+	results, timers, userPrivateKey, err := executeQuery(accessToken, subGroups, parameters, disableTLSCheck)
 	if err != nil {
 		err = fmt.Errorf("while executing survival analysis results: %s", err.Error())
 		logrus.Error(err)
@@ -315,7 +325,17 @@ resLoop:
 
 }
 
-func convertPanel(parameters *Parameters) ([]*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0, error) {
+func validateUserInputSequenceOfEvents(parameters *Parameters) error {
+	for _, subGroup := range parameters.SubGroups {
+		err := validateSequenceOfEvents(subGroup.SequenceOfEvents, len(subGroup.SequentialPanels))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func convertParametersToSubGroupDefinition(parameters *Parameters) ([]*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0, error) {
 	panels := make([]*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0, len(parameters.SubGroups))
 	var err error
 	for i, selection := range parameters.SubGroups {
@@ -326,8 +346,9 @@ func convertPanel(parameters *Parameters) ([]*survival_analysis.SurvivalAnalysis
 			err = fmt.Errorf("while parsing sub group timing: %s", err.Error())
 			return nil, err
 		}
-		newPanels := make([]*models.Panel, len(selection.Panels))
-		for j, panel := range selection.Panels {
+		tmpPanels := make([]*models.Panel, len(selection.SelectionPanels)+len(selection.SequentialPanels))
+
+		for j, panel := range append(selection.SelectionPanels, selection.SequentialPanels...) {
 			newPanel := &models.Panel{}
 			newPanel.PanelTiming, err = timingFromStringToModel(panel.PanelTiming)
 			if err != nil {
@@ -336,14 +357,14 @@ func convertPanel(parameters *Parameters) ([]*survival_analysis.SurvivalAnalysis
 			}
 			newPanel.Not = new(bool)
 			*newPanel.Not = panel.Not
-			newItems := make([]*models.PanelConceptItemsItems0, len(panel.Items))
-			for k, item := range panel.Items {
+			newConceptItems := make([]*models.PanelConceptItemsItems0, len(panel.ConceptItems))
+			for k, conceptItem := range panel.ConceptItems {
 				encrypted := new(bool)
 				itemString := new(string)
 				*encrypted = false
-				*itemString = item.Path
+				*itemString = conceptItem.Path
 				var modifier *models.PanelConceptItemsItems0Modifier
-				if mod := item.Modifier; mod != nil {
+				if mod := conceptItem.Modifier; mod != nil {
 					modifier = &models.PanelConceptItemsItems0Modifier{
 						ModifierKey: new(string),
 						AppliedPath: new(string),
@@ -352,16 +373,30 @@ func convertPanel(parameters *Parameters) ([]*survival_analysis.SurvivalAnalysis
 					*modifier.AppliedPath = mod.AppliedPath
 
 				}
-				newItems[k] = &models.PanelConceptItemsItems0{
+				newConceptItems[k] = &models.PanelConceptItemsItems0{
 					Encrypted: encrypted,
 					QueryTerm: itemString,
 					Modifier:  modifier,
+					Operator:  conceptItem.Operator,
+					Type:      conceptItem.Type,
+					Value:     conceptItem.Value,
 				}
 			}
-			newPanel.ConceptItems = newItems
-			newPanels[j] = newPanel
+
+			newPanel.CohortItems = append(newPanel.CohortItems, panel.CohortItems...)
+
+			newPanel.ConceptItems = newConceptItems
+
+			tmpPanels[j] = newPanel
 		}
-		newSelection.Panels = newPanels
+		newSelection.SelectionPanels = tmpPanels[:len(selection.SelectionPanels)]
+		newSelection.SequentialPanels = tmpPanels[len(selection.SelectionPanels):]
+		sequenceOfEvents := defaultedSequenceOfEvents(selection.SequenceOfEvents, len(selection.SequentialPanels))
+		newSelection.QueryTimingSequence, err = convertParametersToSequenceInfo(sequenceOfEvents)
+		if err != nil {
+			err = fmt.Errorf("while parsing temporal sequence info: %s", err.Error())
+			return nil, err
+		}
 		panels[i] = newSelection
 	}
 	return panels, nil
@@ -472,33 +507,52 @@ func panelValidation(panel []*models.PanelConceptItemsItems0) (err error) {
 
 func modelPanelsToString(subGroup *survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) string {
 
-	panelStrings := make([]string, 0, len(subGroup.Panels))
-	for _, panel := range subGroup.Panels {
+	panelStrings := make([]string, 0, len(subGroup.SelectionPanels)+len(subGroup.SequentialPanels))
+	for _, panel := range append(subGroup.SelectionPanels, subGroup.SequentialPanels...) {
 		itemStrings := make([]string, 0, len(panel.ConceptItems))
 		for _, item := range panel.ConceptItems {
-			itemStrings = append(itemStrings, fmt.Sprintf("{Encrypted:%t Modifier:%v Operator:%s QueryTerm:%s Value:%s}",
+			itemStrings = append(itemStrings, fmt.Sprintf("{Encrypted:%t Modifier:%s QueryTerm:%s Type:%s Value:%s Operator:%s}",
 				*item.Encrypted,
-				item.Modifier,
-				item.Operator,
+				stringModifier(item.Modifier),
 				*item.QueryTerm,
-				item.Value))
+				item.Type,
+				item.Value,
+				item.Operator))
 		}
 		itemArray := "[" + strings.Join(itemStrings, " ") + "]"
 		panelStrings = append(panelStrings, fmt.Sprintf("{Items:%s Not:%t}", itemArray, *panel.Not))
 	}
-	panelArray := "[" + strings.Join(panelStrings, " ") + "]"
-	return fmt.Sprintf("{GroupName:%s QueryTiming:%s Panels:%s", subGroup.GroupName, subGroup.SubGroupTiming, panelArray)
+	selectionPanelArray := "[" + strings.Join(panelStrings[:len(subGroup.SelectionPanels)], " ") + "]"
+	sequentialPanelArray := "[" + strings.Join(panelStrings[len(subGroup.SelectionPanels):], " ") + "]"
+	return fmt.Sprintf("{GroupName:%s QueryTiming:%s SelectionPanels:%s SequentialPanels:%s TimingSequence:%v", subGroup.GroupName, subGroup.SubGroupTiming, selectionPanelArray, sequentialPanelArray, subGroup.QueryTimingSequence)
+}
+
+func stringModifier(modifier *models.PanelConceptItemsItems0Modifier) string {
+	if modifier == nil {
+		return ""
+	}
+	appliedPathString := ""
+	modifierKeyString := ""
+	if modifier.AppliedPath != nil {
+		appliedPathString = *modifier.AppliedPath
+	}
+	if modifier.ModifierKey != nil {
+		modifierKeyString = *modifier.ModifierKey
+	}
+	return fmt.Sprintf("{AppliedPath:%s ModifierKey:%s}", appliedPathString, modifierKeyString)
 }
 
 func timingFromStringToModel(timingString string) (models.Timing, error) {
 	switch candidate := strings.ToLower(strings.TrimSpace(timingString)); candidate {
 	case string(models.TimingAny):
 		return models.TimingAny, nil
+	case "":
+		return defaultTiming, nil
 	case string(models.TimingSameinstancenum):
 		return models.TimingSameinstancenum, nil
 	case string(models.TimingSamevisit):
 		return models.TimingSamevisit, nil
 	default:
-		return "", fmt.Errorf("candidate %s is not implemented, musit be one of any, sameinstancenum, samevisit", timingString)
+		return "", fmt.Errorf("candidate %s is not implemented, must be one of any, sameinstancenum, samevisit", timingString)
 	}
 }

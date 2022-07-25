@@ -99,7 +99,7 @@ func (getCohorts *GetCohorts) Execute() (results [][]medcomodels.Cohort, err err
 		case err = <-errChan:
 			return
 		case <-timeout:
-			err = fmt.Errorf("Timeout %d seconds elapsed", utilclient.QueryToolsTimeoutSeconds)
+			err = fmt.Errorf("timeout %d seconds elapsed", utilclient.QueryToolsTimeoutSeconds)
 			logrus.Error(err)
 			return
 		case nodeRes := <-resultChan:
@@ -142,7 +142,9 @@ func convertCohort(apiRes []*medco_node.GetCohortsOKBodyItems0) (res []medcomode
 		res[i].QueryID = int(apiCohort.QueryID)
 		if apiCohort.QueryDefinition != nil {
 			res[i].QueryDefinition.QueryTiming = apiCohort.QueryDefinition.QueryTiming
-			res[i].QueryDefinition.Panels = apiCohort.QueryDefinition.Panels
+			res[i].QueryDefinition.SelectionPanels = apiCohort.QueryDefinition.SelectionPanels
+			res[i].QueryDefinition.SequentialPanels = apiCohort.QueryDefinition.SequentialPanels
+			res[i].QueryDefinition.QueryTimingSequence = apiCohort.QueryDefinition.QueryTimingSequence
 		}
 
 	}

@@ -11,10 +11,9 @@ rm -rf "network-${NETWORK_NAME:?}-"*
 popd
 
 # generate step 1
-export MEDCO_SETUP_VER=dev
 pushd "./network-profile-tool"
 for IDX in 0 1 2; do
-  bash step1.sh -nn "$NETWORK_NAME" -ni "$IDX" -ha "192.168.56.11${IDX}" -ua "192.168.57.11${IDX}"
+  bash step1.sh -mv dev -nn "$NETWORK_NAME" -ni "$IDX" -ha "192.168.56.11${IDX}" -ua "192.168.57.11${IDX}"
   #bash step1.sh -nn "$NETWORK_NAME" -ni "$IDX" -ha "test-medco-http-node${IDX}.misba.ch" -ua "192.168.57.11${IDX}"
 done
 popd
@@ -40,6 +39,6 @@ popd
 # generate step 2
 pushd "./network-profile-tool"
 for IDX in 0 1 2; do
-  bash step2.sh -nn "$NETWORK_NAME" -ni "$IDX" -nb 3
+  bash step2.sh -mv dev -nn "$NETWORK_NAME" -ni "$IDX" -nb 3
 done
 popd

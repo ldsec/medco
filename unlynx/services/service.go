@@ -196,12 +196,12 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 	log.Lvl2(s.ServerIdentity().String(), " received a SurveyShuffleRequest:", ssr.SurveyID, "(root =", root, ")")
 
 	if root {
-		//Message sent to root node:
-		//1. collect encrypted data from children
-		//2. run shuffling protocol
-		//3. distributed shuffled data to children
-		//4. start key-switching
-		//5. return data to client
+		// Message sent to root node:
+		// 1. collect encrypted data from children
+		// 2. run shuffling protocol
+		// 3. distributed shuffled data to children
+		// 4. start key-switching
+		// 5. return data to client
 
 		if ssr.ShuffleTarget == nil || len(ssr.ShuffleTarget) == 0 {
 			return nil, xerrors.Errorf(s.ServerIdentity().String() + " for survey" + string(ssr.SurveyID) + "has no data to shuffle")
@@ -299,12 +299,12 @@ func (s *Service) HandleSurveyShuffleRequest(ssr *SurveyShuffleRequest) (network
 		return &Result{Result: libunlynx.CipherVector{keySwitchingResult[index]}, TR: surveyShuffle.TR}, nil
 
 	}
-	//if message sent to children node:
-	//1. Send encrypted data to root node
-	//2. participate in shuffling
-	//3. receive shuffled data from root node
-	//4. start key-switching
-	//5. return data to client
+	// if message sent to children node:
+	// 1. Send encrypted data to root node
+	// 2. participate in shuffling
+	// 3. receive shuffled data from root node
+	// 4. start key-switching
+	// 5. return data to client
 
 	mapTR := make(map[string]time.Duration)
 	surveyShuffle := SurveyShuffle{
@@ -434,7 +434,7 @@ func (s *Service) HandleSurveyAggRequest(sar *SurveyAggRequest) (network.Message
 }
 
 // Protocol Handlers
-//______________________________________________________________________________________________________________________
+// ______________________________________________________________________________________________________________________
 
 // whatRequest fetches the data from the correct map based on the configuration string ('target')
 func (s *Service) whatRequest(target string) (bool, libunlynx.CipherVector, kyber.Point, error) {
@@ -583,7 +583,7 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance,
 		keySwitch := pi.(*protocolsunlynx.KeySwitchingProtocol)
 
 		if tn.IsRoot() {
-			//define which map to retrieve the values to key switch
+			// define which map to retrieve the values to key switch
 			proofs, data, cPubKey, err := s.whatRequest(string(target))
 			if err != nil {
 				return nil, err
@@ -742,7 +742,7 @@ func (s *Service) StartProtocol(name, typeQ string, pc ProtocolConfig,
 }
 
 // Service Phases
-//______________________________________________________________________________________________________________________
+// ______________________________________________________________________________________________________________________
 
 // TaggingPhase performs the private grouping on the currently collected data.
 func (s *Service) TaggingPhase(targetSurvey *SurveyDDTRequest,
@@ -823,7 +823,7 @@ func (s *Service) KeySwitchingPhase(targetSurvey SurveyID, typeQ string, roster 
 }
 
 // Support functions
-//______________________________________________________________________________________________________________________
+// ______________________________________________________________________________________________________________________
 
 type secretDDT struct {
 	ServerID string

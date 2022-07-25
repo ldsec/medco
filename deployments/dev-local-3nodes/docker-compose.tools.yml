@@ -5,7 +5,9 @@ services:
       file: ../docker-compose-definitions.yml
       service: medco-cli-client
     environment:
-      - LOG_LEVEL=5
+      - OIDC_REQ_TOKEN_URL=https://${MEDCO_NODE_HOST:?}/auth/realms/master/protocol/openid-connect/token
+      - MEDCO_CONNECTOR_URL=https://${MEDCO_NODE_HOST:?}/local-3nodes/medco-0
+      - LOG_LEVEL=${CLICLIENT_LOGLEVEL:?}
     volumes:
       - ./configuration:/medco-configuration
 
@@ -13,46 +15,51 @@ services:
     extends:
       file: ../docker-compose-definitions.yml
       service: medco-loader
-    command: >-
-      -debug 2 v0 --group /medco-configuration/group.toml --entryPointIdx 0
-      --ont_clinical /dataset/tcga_cbio/clinical_data.csv --sen /dataset/sensitive.txt
-      --ont_genomic /dataset/tcga_cbio/videodemo_mutation_data.csv --clinical /dataset/tcga_cbio/clinical_data.csv
-      --genomic /dataset/tcga_cbio/videodemo_mutation_data.csv --output /dataset/ --dbHost localhost --dbPort 5432
-      --dbName i2b2medcosrv0 --dbUser i2b2 --dbPassword i2b2
     environment:
-      - LOG_LEVEL=3
+      - LOG_LEVEL=${LOADER_LOGLEVEL:?}
       - I2B2_DB_NAME=i2b2medcosrv0
+      - I2B2_DB_PASSWORD=${DB_ALL_USERS_PASSWORD:?}
       - MC_DB_NAME=medcoconnectorsrv0
+      - MC_DB_PASSWORD=${DB_ALL_USERS_PASSWORD:?}
       - MEDCO_NODE_IDX=0
+    volumes:
+      - ./configuration:/medco-configuration
+    networks:
+      inter-nodes:
 
   medco-loader-srv1:
     extends:
       file: ../docker-compose-definitions.yml
       service: medco-loader
-    command: >-
-      -debug 2 v0 --group /medco-configuration/group.toml --entryPointIdx 1
-      --ont_clinical /dataset/tcga_cbio/clinical_data.csv --sen /dataset/sensitive.txt
-      --ont_genomic /dataset/tcga_cbio/videodemo_mutation_data.csv --clinical /dataset/tcga_cbio/clinical_data.csv
-      --genomic /dataset/tcga_cbio/videodemo_mutation_data.csv --output /dataset/ --dbHost localhost --dbPort 5432
-      --dbName i2b2medcosrv1 --dbUser i2b2 --dbPassword i2b2
     environment:
-      - LOG_LEVEL=3
+      - LOG_LEVEL=${LOADER_LOGLEVEL:?}
       - I2B2_DB_NAME=i2b2medcosrv1
+      - I2B2_DB_PASSWORD=${DB_ALL_USERS_PASSWORD:?}
       - MC_DB_NAME=medcoconnectorsrv1
+      - MC_DB_PASSWORD=${DB_ALL_USERS_PASSWORD:?}
       - MEDCO_NODE_IDX=1
+    volumes:
+      - ./configuration:/medco-configuration
+    networks:
+      inter-nodes:
 
   medco-loader-srv2:
     extends:
       file: ../docker-compose-definitions.yml
       service: medco-loader
-    command: >-
-      -debug 2 v0 --group /medco-configuration/group.toml --entryPointIdx 2
-      --ont_clinical /dataset/tcga_cbio/clinical_data.csv --sen /dataset/sensitive.txt
-      --ont_genomic /dataset/tcga_cbio/videodemo_mutation_data.csv --clinical /dataset/tcga_cbio/clinical_data.csv
-      --genomic /dataset/tcga_cbio/videodemo_mutation_data.csv --output /dataset/ --dbHost localhost --dbPort 5432
-      --dbName i2b2medcosrv2 --dbUser i2b2 --dbPassword i2b2
     environment:
-      - LOG_LEVEL=3
+      - LOG_LEVEL=${LOADER_LOGLEVEL:?}
       - I2B2_DB_NAME=i2b2medcosrv2
+      - I2B2_DB_PASSWORD=${DB_ALL_USERS_PASSWORD:?}
       - MC_DB_NAME=medcoconnectorsrv2
+      - MC_DB_PASSWORD=${DB_ALL_USERS_PASSWORD:?}
       - MEDCO_NODE_IDX=2
+    volumes:
+      - ./configuration:/medco-configuration
+    networks:
+      inter-nodes:
+
+networks:
+  inter-nodes:
+    external:
+      name: dev-local-3nodes_inter-nodes

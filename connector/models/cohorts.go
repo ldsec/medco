@@ -14,7 +14,9 @@ type Cohort struct {
 	CreationDate    time.Time
 	UpdateDate      time.Time
 	QueryDefinition struct {
-		Panels      []*models.Panel
-		QueryTiming models.Timing
+		SequentialPanels    []*models.Panel
+		SelectionPanels     []*models.Panel
+		QueryTiming         models.Timing
+		QueryTimingSequence []*models.TimingSequenceInfo
 	}
 }

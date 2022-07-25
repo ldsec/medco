@@ -16,6 +16,7 @@ function help {
     echo -e "  -nb,   --nb_nodes      VAL  Total number of nodes in the network (e.g. 3)"
     echo -e "OPTIONAL:"
     echo -e "  -s,    --secrets       VAL  Unlynx DDT secrets, if they are not to be generated (e.g. <secret0>,<secret1>,<secret2>)"
+    echo -e "  -mv,   --medco_version   VAL  Override the version of MedCo used"
     echo -e "  -h,    --help \n"
     example
 }
@@ -28,6 +29,7 @@ NETWORK_NAME=
 NODE_IDX=
 NB_NODES=
 SECRETS=
+MEDCO_VERSION_OVERRIDE=
 
 # Args while-loop
 while [ "$1" != "" ];
@@ -45,6 +47,9 @@ do
 	 -s  | --secrets )      shift
      						          SECRETS=$1
   			                  ;;
+   -mv  | --medco_version  )  shift
+                          MEDCO_VERSION_OVERRIDE=$1
+                          ;;
    -h   | --help )        help
                           exit
                           ;;
@@ -63,7 +68,7 @@ margs_check $margs "$NETWORK_NAME" "$NB_NODES" "$NODE_IDX"
 
 set -u
 # generate convenience variables
-export_variables "$NETWORK_NAME" "$NODE_IDX"
+export_variables "$NETWORK_NAME" "$NODE_IDX" "$MEDCO_VERSION_OVERRIDE"
 if [[ ! -d ${CONF_FOLDER} ]] || [[ ! -d ${COMPOSE_FOLDER} ]] || [[ -f ${CONF_FOLDER}/group.toml ]]; then
     echo "The compose or configuration profile folder does not exist, or the step 2 has already been executed. Aborting."
     exit 2
@@ -119,16 +124,23 @@ echo "### unlynx secrets generated"
 # ===================== compose profile =====================
 echo "### Updating compose profile"
 declare -a MEDCO_NODES_URL OIDC_JWKS_URLS OIDC_JWT_ISSUERS OIDC_CLIENT_IDS OIDC_JWT_USER_ID_CLAIMS
+declare -a WS_CLIENTS_LISTEN_ADDRESSES WS_CLIENTS_WS_SERVER_URLS WS_CLIENTS_WS_SERVER_PATH_PREFIXES WS_CLIENTS_DEST_ADDRESSES
 pushd "${CONF_FOLDER}"
-ITER_IDX=0
-for nodednsname in srv*-nodednsname.txt; do
-  MEDCO_NODES_URL+=("https://$(<"${nodednsname}")/medco")
-  OIDC_JWKS_URLS+=("https://$(<"${nodednsname}")/auth/realms/master/protocol/openid-connect/certs")
-  OIDC_JWT_ISSUERS+=("https://$(<"${nodednsname}")/auth/realms/master")
+
+for ((i=0; i<NB_NODES; i++)); do
+  CURR_NODE_IDX=$(printf "%03d" "$i")
+  CURR_NODE_DNS_NAME=$(<"srv$CURR_NODE_IDX-nodednsname.txt")
+
+  MEDCO_NODES_URL+=("https://$CURR_NODE_DNS_NAME/medco")
+  OIDC_JWKS_URLS+=("https://$CURR_NODE_DNS_NAME/auth/realms/master/protocol/openid-connect/certs")
+  OIDC_JWT_ISSUERS+=("https://$CURR_NODE_DNS_NAME/auth/realms/master")
   OIDC_CLIENT_IDS+=("medco")
   OIDC_JWT_USER_ID_CLAIMS+=("preferred_username")
 
-  ITER_IDX=$((ITER_IDX+1))
+  WS_CLIENTS_LISTEN_ADDRESSES+=("0.0.0.0:3$CURR_NODE_IDX")
+  WS_CLIENTS_WS_SERVER_URLS+=("wss://$CURR_NODE_DNS_NAME:443")
+  WS_CLIENTS_WS_SERVER_PATH_PREFIXES+=("unlynx")
+  WS_CLIENTS_DEST_ADDRESSES+=("medco-unlynx:2001")
 done
 popd
 
@@ -139,5 +151,10 @@ OIDC_JWKS_URLS=${OIDC_JWKS_URLS[*]}
 OIDC_JWT_ISSUERS=${OIDC_JWT_ISSUERS[*]}
 OIDC_CLIENT_IDS=${OIDC_CLIENT_IDS[*]}
 OIDC_JWT_USER_ID_CLAIMS=${OIDC_JWT_USER_ID_CLAIMS[*]}
+
+WS_CLIENTS_LISTEN_ADDRESSES=${WS_CLIENTS_LISTEN_ADDRESSES[*]}
+WS_CLIENTS_WS_SERVER_URLS=${WS_CLIENTS_WS_SERVER_URLS[*]}
+WS_CLIENTS_WS_SERVER_PATH_PREFIXES=${WS_CLIENTS_WS_SERVER_PATH_PREFIXES[*]}
+WS_CLIENTS_DEST_ADDRESSES=${WS_CLIENTS_DEST_ADDRESSES[*]}
 EOF
 echo "### DONE! MedCo profile ready"

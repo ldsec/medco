@@ -44,13 +44,13 @@ func SetForTesting() {
 	DBPort = 5432
 	DBName = "medcoconnectorsrv0"
 	DBLoginUser = "medcoconnector"
-	DBLoginPassword = "medcoconnector"
+	DBLoginPassword = "changeme"
 
 	I2B2DBHost = "localhost"
 	I2B2DBPort = 5432
 	I2B2DBName = "i2b2medcosrv0"
 	I2B2DBLoginUser = "i2b2"
-	I2B2DBLoginPassword = "i2b2"
+	I2B2DBLoginPassword = "changeme"
 
 	SetLogLevel("5")
 }

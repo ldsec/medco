@@ -33,6 +33,9 @@ const (
 	optionServerBinding      = "serverBinding"
 	optionServerBindingShort = "sb"
 
+	optionServerBindingPublic      = "serverBindingPublic"
+	optionServerBindingPublicShort = "sbp"
+
 	optionDescription      = "description"
 	optionDescriptionShort = "desc"
 
@@ -129,6 +132,10 @@ func main() {
 		cli.StringFlag{
 			Name:  optionServerBinding + ", " + optionServerBindingShort,
 			Usage: "Server binding address in the form of address:port",
+		},
+		cli.StringFlag{
+			Name:  optionServerBindingPublic + ", " + optionServerBindingPublicShort,
+			Usage: "Public server binding address in the form of address:port (optional, only if different from serverBinding)",
 		},
 		cli.StringFlag{
 			Name:  optionDescription + ", " + optionDescriptionShort,

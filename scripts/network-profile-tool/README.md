@@ -12,6 +12,8 @@ All the participating nodes must do the following prior to start the generation 
 - Agree to a common and unique network name which must contain only basic characters: `a-z`, `A-Z`, `0-9` and `-` (note that underscores are NOT supported), e.g. `test-network-deployment-1`;
 - Agree on the participating nodes in the network and their unique index number, which must start at 0 and increase without gap in the numbering, e.g. "0, 1, 2".
 
+Please note also that you need to have the MedCo docker images built locally. [Please refer to the deployments README to do so.](../deployments/README.md)
+
 ## Script execution step 1
 Execute the script `step1.sh` with the proper arguments in order to generate part of the deployment profile.
 Some examples follow.
@@ -51,6 +53,7 @@ Definition of all arguments:
 - `--secret_key` (optional): unlynx node private key, if it is not to be generated
 - `--certificate` (optional): filepath to certificate (*.crt), if it is not to be generated
 - `--key` (optional): filepath to certificate key (*.key), if it is not to be generated
+- `--medco_version` (optional): version of medco to be used
 
 ## Intermediate step
 ### Share public archive with all other nodes

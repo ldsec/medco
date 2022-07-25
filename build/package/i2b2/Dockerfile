@@ -13,10 +13,11 @@ RUN yum update -y && \
     yum -y install wget git ant && \
     yum clean all
 COPY install-i2b2.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/install-i2b2.sh
+RUN chown jboss:jboss /usr/local/bin/install-i2b2.sh && \
+    chmod +x /usr/local/bin/install-i2b2.sh
 COPY patches "$I2B2_PATCHES_DIR"
 RUN mkdir -p "$I2B2_SRC_DIR" && \
-    chown -R jboss:jboss "$I2B2_SRC_DIR"
+    chown -R jboss:jboss "$I2B2_SRC_DIR" "$I2B2_PATCHES_DIR"
 USER jboss
 
 # install i2b2
@@ -63,13 +64,14 @@ RUN sed -i 's/Xmx512m/Xmx2048m/g' $JBOSS_HOME/bin/standalone.conf && \
     sed -i 's/MaxMetaspaceSize=256m/MaxMetaspaceSize=1024m/g' $JBOSS_HOME/bin/standalone.conf && \
     chmod +x /usr/local/bin/docker-entrypoint.sh && \
     mkdir -p "$I2B2_COMPRESSED_DATA_DIR" "$I2B2_DATA_DIR" "$I2B2_FR_FILES_DIR" && \
-    chown -R jboss:jboss "$I2B2_DATA_DIR" "$JBOSS_HOME" && \
+    chown -R jboss:jboss /usr/local/bin/docker-entrypoint.sh "$I2B2_DATA_DIR" "$JBOSS_HOME" && \
     yum update -y && \
     yum -y install wget git ant postgresql && \
     yum clean all
 RUN git clone --depth 1 --branch "$I2B2_DATA_VERSION" https://github.com/i2b2/i2b2-data.git "$I2B2_DATA_DIR" && \
     GZIP=-9 tar -cvzf "$I2B2_COMPRESSED_DATA_DIR"/i2b2-data.tar.gz "$I2B2_DATA_DIR" && \
-    rm -rf "$I2B2_DATA_DIR"/{*,.*} || true
+    rm -rf "$I2B2_DATA_DIR"/{*,.*} || true && \
+    chown -R jboss:jboss "$I2B2_COMPRESSED_DATA_DIR"
 USER jboss
 
 # run

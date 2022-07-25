@@ -18,7 +18,7 @@ echo "Initialising i2b2 database"
 EOSQL
 
     # uncompress the i2b2 data
-    tar -xf "$I2B2_COMPRESSED_DATA_DIR"/"i2b2-data.tar.gz" -C "$I2B2_DATA_DIR" --strip-components 1
+    tar -xf "$I2B2_COMPRESSED_DATA_DIR/i2b2-data.tar.gz" -C "$I2B2_DATA_DIR" --strip-components 1
 
     # run loading scripts
     for f in "$I2B2_SQL_DIR"/*.sh; do

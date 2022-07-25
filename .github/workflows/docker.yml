@@ -28,32 +28,43 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
-# todo: temporarily disabled
-#      - name: Login to GitHub Container Registry
-#        uses: docker/login-action@v1
-#        with:
-#          registry: ghcr.io
-#          username: ${{ secrets.LDS_PKG_PAT_USERNAME }}
-#          password: ${{ secrets.LDS_PKG_PAT }}
+      - name: Login to Container Registry
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USER }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
       - name: Get MedCo version
-        id: get_version
+        id: versions
         run: |
-          VERSION=$(make medco_version)
-          if [[ $GITHUB_REF == refs/tags/* ]]; then
-            VERSION=${GITHUB_REF#refs/tags/}
-          fi
-          echo ::set-output name=version::${VERSION}
+          source scripts/versions.sh && \
+          echo ::set-output name=MEDCO_VERSION::${MEDCO_VERSION} && \
+          echo ::set-output name=MEDCO_DOCKER_TAG::${MEDCO_DOCKER_TAG} && \
+          echo ::set-output name=I2B2_DOCKER_TAG::${I2B2_DOCKER_TAG} && \
+          echo ::set-output name=KEYCLOAK_DOCKER_TAG::${KEYCLOAK_DOCKER_TAG} && \
+          echo ::set-output name=WSTUNNEL_DOCKER_TAG::${WSTUNNEL_DOCKER_TAG} && \
+          echo ::set-output name=NGINX_DOCKER_TAG::${NGINX_DOCKER_TAG} && \
+          echo ::set-output name=PGADMIN_DOCKER_TAG::${PGADMIN_DOCKER_TAG} && \
+          echo ::set-output name=GB_DOCKER_TAG::${GB_DOCKER_TAG} && \
+          echo ::set-output name=PG_DOCKER_TAG::${PG_DOCKER_TAG}
 
       - name: Build and push medco
         uses: docker/build-push-action@v2
         with:
           file: ./build/package/medco/Dockerfile
-          build-args: MEDCO_VERSION=${{ steps.get_version.outputs.version }}
-          # todo: temporarily disabled
-          # push: ${{ github.event_name != 'pull_request' }}
-          push: false
-          tags: ghcr.io/ldsec/medco:${{ steps.get_version.outputs.version }}
+          build-args: MEDCO_VERSION=${{ steps.versions.outputs.MEDCO_VERSION }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.versions.outputs.MEDCO_DOCKER_TAG }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Build and push wstunnel
+        uses: docker/build-push-action@v2
+        with:
+          context: ./build/package/wstunnel/
+          file: ./build/package/wstunnel/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.versions.outputs.WSTUNNEL_DOCKER_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
 
@@ -62,10 +73,8 @@ jobs:
         with:
           context: ./build/package/i2b2/
           file: ./build/package/i2b2/Dockerfile
-          # todo: temporarily disabled
-          # push: ${{ github.event_name != 'pull_request' }}
-          push: false
-          tags: ghcr.io/ldsec/i2b2-medco:${{ steps.get_version.outputs.version }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.versions.outputs.I2B2_DOCKER_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
 
@@ -74,10 +83,8 @@ jobs:
         with:
           context: ./build/package/keycloak/
           file: ./build/package/keycloak/Dockerfile
-          # todo: temporarily disabled
-          # push: ${{ github.event_name != 'pull_request' }}
-          push: false
-          tags: ghcr.io/ldsec/keycloak-medco:${{ steps.get_version.outputs.version }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.versions.outputs.KEYCLOAK_DOCKER_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
 
@@ -86,10 +93,8 @@ jobs:
         with:
           context: ./build/package/nginx/
           file: ./build/package/nginx/Dockerfile
-          # todo: temporarily disabled
-          # push: ${{ github.event_name != 'pull_request' }}
-          push: false
-          tags: ghcr.io/ldsec/nginx-medco:${{ steps.get_version.outputs.version }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.versions.outputs.NGINX_DOCKER_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
 
@@ -98,9 +103,7 @@ jobs:
         with:
           context: ./build/package/pgadmin/
           file: ./build/package/pgadmin/Dockerfile
-          # todo: temporarily disabled
-          # push: ${{ github.event_name != 'pull_request' }}
-          push: false
-          tags: ghcr.io/ldsec/pgadmin-medco:${{ steps.get_version.outputs.version }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.versions.outputs.PGADMIN_DOCKER_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
