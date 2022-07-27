@@ -158,11 +158,7 @@ func TestCensoringEvent(t *testing.T) {
 		1138: {},
 	}
 
-	// the second argument is a subset of the first argument, an error is expected
-	emptyResult, patientWithoutCensoring, err := censoringEvent(map[int64]time.Time{}, patientsNoEndEvent, []string{"A168", "A125"}, []string{"@"})
-	assert.Error(t, err)
-
-	emptyResult, patientWithoutCensoring, err = censoringEvent(fullStartEventMap, map[int64]struct{}{}, []string{"A168", "A125"}, []string{"@"})
+	emptyResult, patientWithoutCensoring, err := censoredDates(fullStartEventMap, map[int64]struct{}{}, false)
 	assert.NoError(t, err)
 	assert.Empty(t, emptyResult)
 	assert.Empty(t, patientWithoutCensoring)
@@ -184,20 +180,11 @@ func TestCensoringEvent(t *testing.T) {
 		assert.Equal(t, expectedCensoring[1138], secondTime)
 	}
 
-	results, patientWithoutCensoring, err := censoringEvent(fullStartEventMap, patientsNoEndEvent, []string{}, []string{"@"})
+	results, patientWithoutCensoring, err := censoredDates(fullStartEventMap, patientsNoEndEvent, false)
 	expectedCensoringAuxiliary(t, patientWithoutCensoring, results)
 
-	results, patientWithoutCensoring, err = censoringEvent(fullStartEventMap, patientsNoEndEvent, []string{"A168", "A125"}, []string{})
+	results, patientWithoutCensoring, err = censoredDates(fullStartEventMap, patientsNoEndEvent, true)
 	expectedCensoringAuxiliary(t, patientWithoutCensoring, results)
-
-	results, patientWithoutCensoring, err = censoringEvent(fullStartEventMap, patientsNoEndEvent, []string{"A168", "A125"}, []string{"@"})
-	expectedCensoringAuxiliary(t, patientWithoutCensoring, results)
-
-	// put all possible concept and modifier codes, expecting empty results, but no error
-	emptyResult, patientWithoutCensoring, err = censoringEvent(fullStartEventMap, patientsNoEndEvent, []string{"A168", "A125", "DEM|SEX:f"}, []string{"@", "126:1", "171:0"})
-	assert.NoError(t, err)
-	assert.Empty(t, emptyResult)
-	assert.Empty(t, patientWithoutCensoring)
 
 	// put start events that do not occur before any other events
 	absoluteLatest, err := time.Parse(sqlDateFormat, "1972-02-15")
@@ -208,10 +195,18 @@ func TestCensoringEvent(t *testing.T) {
 		1138: absoluteLatest,
 	}
 
-	emptyResult, patientWithoutCensoring, err = censoringEvent(lateStartEventMap, patientsNoEndEvent, []string{}, []string{})
+	emptyResult, patientWithoutCensoring, err = censoredDates(lateStartEventMap, patientsNoEndEvent, false)
 	assert.NoError(t, err)
 	assert.Empty(t, emptyResult)
 	_, isIn := patientWithoutCensoring[1137]
+	assert.True(t, isIn)
+	_, isIn = patientWithoutCensoring[1138]
+	assert.True(t, isIn)
+
+	emptyResult, patientWithoutCensoring, err = censoredDates(lateStartEventMap, patientsNoEndEvent, true)
+	assert.NoError(t, err)
+	assert.Empty(t, emptyResult)
+	_, isIn = patientWithoutCensoring[1137]
 	assert.True(t, isIn)
 	_, isIn = patientWithoutCensoring[1138]
 	assert.True(t, isIn)

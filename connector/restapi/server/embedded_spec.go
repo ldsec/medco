@@ -1246,12 +1246,20 @@ func init() {
           "startConcept",
           "startsWhen",
           "endConcept",
-          "endsWhen"
+          "endsWhen",
+          "censoringFrom"
         ],
         "properties": {
           "ID": {
             "type": "string",
             "pattern": "^[\\w:-]+$"
+          },
+          "censoringFrom": {
+            "type": "string",
+            "enum": [
+              "encounters",
+              "observations"
+            ]
           },
           "cohortName": {
             "type": "string",
@@ -1948,12 +1956,20 @@ func init() {
                 "startConcept",
                 "startsWhen",
                 "endConcept",
-                "endsWhen"
+                "endsWhen",
+                "censoringFrom"
               ],
               "properties": {
                 "ID": {
                   "type": "string",
                   "pattern": "^[\\w:-]+$"
+                },
+                "censoringFrom": {
+                  "type": "string",
+                  "enum": [
+                    "encounters",
+                    "observations"
+                  ]
                 },
                 "cohortName": {
                   "type": "string",
@@ -3779,12 +3795,20 @@ func init() {
           "startConcept",
           "startsWhen",
           "endConcept",
-          "endsWhen"
+          "endsWhen",
+          "censoringFrom"
         ],
         "properties": {
           "ID": {
             "type": "string",
             "pattern": "^[\\w:-]+$"
+          },
+          "censoringFrom": {
+            "type": "string",
+            "enum": [
+              "encounters",
+              "observations"
+            ]
           },
           "cohortName": {
             "type": "string",

@@ -38,6 +38,7 @@ type Query struct {
 	EndConcept          string
 	EndModifier         *survival_analysis.SurvivalAnalysisParamsBodyEndModifier
 	EndsWhen            *string
+	CensoringFrom       *string
 	Result              *struct {
 		Timers    medcomodels.Timers
 		EncEvents EventGroups
@@ -57,7 +58,8 @@ func NewQuery(UserID,
 	StartsWhen *string,
 	EndConcept string,
 	EndModifier *survival_analysis.SurvivalAnalysisParamsBodyEndModifier,
-	EndsWhen *string) *Query {
+	EndsWhen *string,
+	CensoringFrom *string) *Query {
 	res := &Query{
 		UserPublicKey:       UserPublicKey,
 		UserID:              UserID,
@@ -72,6 +74,7 @@ func NewQuery(UserID,
 		EndConcept:          EndConcept,
 		EndModifier:         EndModifier,
 		EndsWhen:            EndsWhen,
+		CensoringFrom:       CensoringFrom,
 		Result: &struct {
 			Timers    medcomodels.Timers
 			EncEvents EventGroups
@@ -168,6 +171,7 @@ func (q *Query) Execute() error {
 				endConceptCodes,
 				endModifierCodes,
 				*q.EndsWhen == survival_analysis.SurvivalAnalysisBodyEndsWhenEarliest,
+				*q.CensoringFrom == survival_analysis.SurvivalAnalysisBodyCensoringFromEncounters,
 				int64(timeLimitInDays),
 			)
 

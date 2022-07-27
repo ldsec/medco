@@ -72,6 +72,7 @@ test2 () {
    -w first \
    -e clr::/SPHN/SPHNv2020.1/DeathStatus/:/SPHN/DeathStatus-status/death/:/SPHNv2020.1/DeathStatus/ \
    -z earliest \
+   -r ${2} \
    -d /data/timers.csv
 
   result="$(awk -F',' 'NR==1{print $0}' ../timers.csv)"
@@ -83,10 +84,10 @@ test2 () {
   fi
 
   result="$(awk -F',' 'NR==1, NR==7 {print $0}' ../result.csv)"
-  if [ "${result}" != "${2}" ];
+  if [ "${result}" != "${3}" ];
   then
   echo "survival analysis $1: test failed"
-  echo "result: ${result}" && echo "expected result: ${2}"
+  echo "result: ${result}" && echo "expected result: ${3}"
   exit 1
   fi
 
@@ -196,10 +197,11 @@ echo "Testing saved-cohorts features..."
 test1
 
 echo "Testing survival analysis features..."
-test2 "day" "${survivalDays}"
-test2 "week" "${survivalWeeks}"
-test2 "month" "${survivalMonths}"
-test2 "year" "${survivalYears}"
+test2 "day" "observations" "${survivalDays}"
+test2 "week" "observations" "${survivalWeeks}"
+test2 "month" "observations" "${survivalMonths}"
+test2 "year" "observations" "${survivalYears}"
+test2 "day" "encounters" "${survivalDays}"
 
 test3 "${survivalSubGroup1}" "${survivalSubGroup2}"
 

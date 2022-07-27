@@ -29,7 +29,7 @@ type ClientResultElement struct {
 }
 
 // ExecuteClientSurvival creates a survival analysis form parameters given in parameter file, and makes a call to the API to executes this query
-func ExecuteClientSurvival(token, parameterFileURL, username, password string, disableTLSCheck bool, resultFile string, timerFile string, limit int, cohortName string, granularity, startItem, startsWhen, endItem, endsWhen string) (err error) {
+func ExecuteClientSurvival(token, parameterFileURL, username, password string, disableTLSCheck bool, resultFile string, timerFile string, limit int, cohortName string, granularity, startItem, startsWhen, endItem, endsWhen, censoringFrom string) (err error) {
 
 	err = inputValidation(parameterFileURL, limit, cohortName, startItem, endItem)
 	if err != nil {
@@ -159,6 +159,7 @@ func ExecuteClientSurvival(token, parameterFileURL, username, password string, d
 				endConcept,
 				endModifier,
 				endsWhen,
+				censoringFrom,
 				nil,
 			}
 		}
@@ -258,6 +259,11 @@ func executeQuery(accessToken string, panels []*survival_analysis.SurvivalAnalys
 		return
 	}
 
+	censoringFrom, err := parseCensoringFrom(parameters.CensoringFrom)
+	if err != nil {
+		logrus.Errorf("when parsing censoringFrom argument: %s", err.Error())
+	}
+
 	query, err := NewSurvivalAnalysis(
 		accessToken,
 		parameters.CohortName,
@@ -270,6 +276,7 @@ func executeQuery(accessToken string, panels []*survival_analysis.SurvivalAnalys
 		parameters.EndConceptPath,
 		APIendModifier,
 		endsWhen,
+		censoringFrom,
 		disableTLSCheck,
 	)
 	userPrivateKey = query.userPrivateKey

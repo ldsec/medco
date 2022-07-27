@@ -71,7 +71,8 @@ func produceParameters() *Parameters {
 			ModifierKey: "/any/end/modifier/key/",
 			AppliedPath: "/any/end/path/%",
 		},
-		EndsWhen: "earliest",
+		EndsWhen:      "earliest",
+		CensoringFrom: "visits",
 		SubGroups: []*subGroup{
 			{
 				GroupName: "AAA",

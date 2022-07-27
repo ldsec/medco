@@ -39,6 +39,7 @@ type SurvivalAnalysis struct {
 	endConceptPath   string
 	endModifier      *survival_analysis.SurvivalAnalysisParamsBodyEndModifier
 	endsWhen         string
+	censoringFrom    string
 
 	subGroupDefinitions []*survival_analysis.SurvivalAnalysisParamsBodySubGroupDefinitionsItems0
 
@@ -66,6 +67,7 @@ func NewSurvivalAnalysis(
 	endConcept string,
 	endModifier *survival_analysis.SurvivalAnalysisParamsBodyEndModifier,
 	endsWhen string,
+	censoringFrom string,
 	disableTLSCheck bool,
 ) (q *SurvivalAnalysis, err error) {
 	q = &SurvivalAnalysis{
@@ -81,6 +83,7 @@ func NewSurvivalAnalysis(
 		endsWhen:            endsWhen,
 		limit:               limit,
 		granularity:         granularity,
+		censoringFrom:       censoringFrom,
 		formats:             strfmt.Default,
 		timers:              make(map[string]time.Duration),
 	}

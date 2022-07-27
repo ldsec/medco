@@ -541,6 +541,11 @@ parameters:
           enum:
             - earliest
             - latest
+        censoringFrom:
+          type: "string"
+          enum:
+            - encounters
+            - observations
       required:
         - ID
         - userPublicKey
@@ -551,6 +556,7 @@ parameters:
         - startsWhen
         - endConcept
         - endsWhen
+        - censoringFrom
 
 responses:
   errorResponse:

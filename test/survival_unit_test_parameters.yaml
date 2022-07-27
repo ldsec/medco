@@ -11,6 +11,7 @@ end_modifier:
   modifier_key : "/any/end/modifier/key/"
   applied_path: "/any/end/path/%"
 ends_when: "earliest"
+censoring_from: "visits"
 sub_groups:
   - group_name: "AAA"
     selection_panels:
