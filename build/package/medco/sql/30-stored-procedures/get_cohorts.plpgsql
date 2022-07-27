@@ -6,13 +6,15 @@ CREATE OR REPLACE FUNCTION query_tools.get_cohorts(user_id varchar, number_limit
     query_id integer,
     cohort_name varchar,
     create_date timestamp,
-    update_date timestamp)
+    update_date timestamp,
+    predefined boolean
+    )
   STABLE
   PARALLEL SAFE
   AS $$
 DECLARE
-  query_ text := 'SELECT cohort_id, query_id, cohort_name, create_date, update_date FROM query_tools.saved_cohorts
-WHERE user_id = $1
+  query_ text := 'SELECT cohort_id, query_id, cohort_name, create_date, update_date, predefined FROM query_tools.saved_cohorts
+WHERE user_id = $1 or predefined
 ORDER BY update_date DESC, cohort_name';
 BEGIN
   IF number_limit > 0 THEN

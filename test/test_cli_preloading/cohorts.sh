@@ -4,11 +4,11 @@ set -Eeuo pipefail
 USERNAME=${1:-test}
 PASSWORD=${2:-test}
 
-getSavedCohortHeaders="node_index,cohort_name,cohort_id,query_id,creation_date,update_date,query_timing,panels"
-getSavedCohort1="$(printf -- "node_index cohort_name cohort_id query_id query_timing panels\n\
-0 testCohort -1 -1 any \"{panels:[{cohortItems:null,conceptItems:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any}]}\"\n\
-1 testCohort -1 -1 any \"{panels:[{cohortItems:null,conceptItems:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any}]}\"\n\
-2 testCohort -1 -1 any \"{panels:[{cohortItems:null,conceptItems:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any}]}\"")"
+getSavedCohortHeaders="node_index,cohort_name,cohort_id,query_id,creation_date,update_date,predefined,query_timing,panels"
+getSavedCohort1="$(printf -- "node_index cohort_name cohort_id query_id predefined query_timing panels\n\
+0 testCohort -1 -1 false any \"{panels:[{cohortItems:null,conceptItems:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any}]}\"\n\
+1 testCohort -1 -1 false any \"{panels:[{cohortItems:null,conceptItems:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any}]}\"\n\
+2 testCohort -1 -1 false any \"{panels:[{cohortItems:null,conceptItems:[{encrypted:false,queryTerm:/E2ETEST/SPHNv2020.1/DeathStatus/}],not:false,panelTiming:any}]}\"")"
 getSavedCohort2="$(printf -- "node_index cohort_name query_id\n0 testCohort2 -1\n0 testCohort -1\n1 testCohort2 -1\n1 testCohort -1\n2 testCohort2 -1\n2 testCohort -1")"
 test1 () {
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv get-saved-cohorts
@@ -20,7 +20,7 @@ test1 () {
   exit 1
   fi
 
-  result="$(awk -vFPAT='("[^"]+")|([^,]+)' '{print $1,$2,$3,$4,$7,$8}' ../result.csv)"
+  result="$(awk -vFPAT='("[^"]+")|([^,]+)' '{print $1,$2,$3,$4,$7,$8,$9}' ../result.csv | grep -v testCohortBioref | grep -v testPredefinedCohort)"
   if [ "${result}" != "${getSavedCohort1}" ];
   then
   echo "get-saved-cohorts content before update: test failed"
@@ -30,7 +30,7 @@ test1 () {
 
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD add-saved-cohorts -c testCohort2 -q $(echo -1,-1,-1)
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv get-saved-cohorts
-  result="$(awk -F',' '{print $1,$2,$4}' ../result.csv)"
+  result="$(awk -F',' '{print $1,$2,$4}' ../result.csv | grep -v testCohortBioref | grep -v testPredefinedCohort)"
   if [ "${result}" != "${getSavedCohort2}" ];
   then
   echo "get-saved-cohorts content after added new cohort: test failed"
@@ -41,7 +41,7 @@ test1 () {
 
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD update-saved-cohorts -c testCohort2 -q $(echo -1,-1,-1)
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv get-saved-cohorts
-  result="$(awk -F',' '{print $1,$2,$4}' ../result.csv)"
+  result="$(awk -F',' '{print $1,$2,$4}' ../result.csv | grep -v testCohortBioref | grep -v testPredefinedCohort)"
   if [ "${result}" != "${getSavedCohort2}" ];
   then
   echo "get-saved-cohorts content after update: test failed"
@@ -51,7 +51,7 @@ test1 () {
 
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD remove-saved-cohorts -c testCohort2
   docker-compose -f docker-compose.tools.yml run medco-cli-client --user $USERNAME --password $PASSWORD --o /data/result.csv get-saved-cohorts
-  result="$(awk -vFPAT='("[^"]+")|([^,]+)' '{print $1,$2,$3,$4,$7,$8}' ../result.csv)"
+  result="$(awk -vFPAT='("[^"]+")|([^,]+)' '{print $1,$2,$3,$4,$7,$8,$9}' ../result.csv | grep -v testCohortBioref | grep -v testPredefinedCohort)"
   if [ "${result}" != "${getSavedCohort1}" ];
   then
   echo "get-saved-cohorts content after removing new cohorts: test failed"
@@ -123,7 +123,7 @@ patientList="$(printf -- "Node idx 0\n1137,1138,1139,1140,1141,1142,1143,1144,11
 1198,1199,1200,1201,1202,1203,1204,1205,1206,1207,1208,1209,1210,1211,1212,1213,1214,1215,1216,1217,1218,1219,1220,1221,1222,1223,1224,1225,1226,1227,1228,1229,1230,1231,1232,1233,1234,1235,1236,1237,1238,1239,1240,1241,1242,1243,1244,1245,1246,1247,1248,1249,1250,1251,1252,1253,1254,1255,1256,1257,1258,1259,1260,1261,1262,1263,1264,1265,1266,\
 1267,1268,1269,1270,1271,1272,1273,1274,1275,1276,1277,1278,1279,1280,1281,1282,1283,1284,1285,1286,1287,1288,1289,1290,1291,1292,1293,1294,1295,1296,1297,1298,1299,1300,1301,1302,1303,1304,1305,1306,1307,1308,1309,1310,1311,1312,1313,1314,1315,1316,1317,1318,1319,1320,1321,1322,1323,1324,1325,1326,1327,1328,1329,1330,1331,1332,1333,1334,1335,\
 1336,1337,1338,1339,1340,1341,1342,1343,1344,1345,1346,1347,1348,1349,1350,1351,1352,1353,1354,1355,1356,1357,1358,1359,1360,1361,1362,1363,1364")"
-expectedError="is not authorized to query patient lists"
+expectedError1="is not authorized to query patient lists"
 test4() {
 
   cohortPatientListWithCredentials "test" "test"
@@ -164,7 +164,7 @@ test4() {
 
   # check the error description
   description="$(awk 'END{print}' ../dumped_logs_to_remove.txt)"
-  if [[ "${description}" != *"${expectedError}"* ]];
+  if [[ "${description}" != *"${expectedError1}"* ]];
   then
   echo "cohorts patient list: test failed"
   echo "last line of log is ${description}: expected to contain  \"${expectedError}\""
@@ -173,6 +173,114 @@ test4() {
 
   rm ../dumped_logs_to_remove.txt
 }
+
+function removePredefinedCohortWithCredentials() { docker-compose -f docker-compose.tools.yml run medco-cli-client --user ${1} --password ${2} --o /data/result.csv \
+  rmsc -c testPredefinedCohort ; };
+expectedError2="[403] deleteCohortsForbidden"
+test5() {
+  removePredefinedCohortWithCredentials "test" "test" > ../dumped_logs_to_remove.txt 2>&1
+
+  #check the error description
+  description="$(awk 'END{print}' ../dumped_logs_to_remove.txt)"
+  if [[ "${description}" != *"${expectedError2}"* ]];
+  then
+  echo "cohorts patient list: test failed"
+  echo "last line of log is ${description}: expected to contain  \"${expectedError2}\""
+  exit 1
+  fi
+
+  rm ../dumped_logs_to_remove.txt
+
+}
+
+function updatePredefinedCohortWithCredentials() { docker-compose -f docker-compose.tools.yml run medco-cli-client --user ${1} --password ${2} --o /data/result.csv \
+  upsc -c testPredefinedCohort -q -99,-99,-99 ; };
+expectedError3="[403] putCohortsForbidden"
+test6() {
+  updatePredefinedCohortWithCredentials $USERNAME $PASSWORD> ../dumped_logs_to_remove.txt 2>&1
+
+  #check the error description
+  description="$(awk 'END{print}' ../dumped_logs_to_remove.txt)"
+  if [[ "${description}" != *"${expectedError3}"* ]];
+  then
+  echo "cohorts patient list: test failed"
+  echo "last line of log is ${description}: expected to contain  \"${expectedError3}\""
+  exit 1
+  fi
+
+  rm ../dumped_logs_to_remove.txt
+
+}
+
+function insertNewCohortWithCredentials() {
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user ${1} --password ${2} \
+  addsc -c ${3} -q ${4};
+}
+
+function removeCohortWithCredentials() {
+  docker-compose -f docker-compose.tools.yml run medco-cli-client --user ${1} --password ${2} \
+  rmsc -c ${3};
+}
+
+function setDefaultFitlerWithCredentials() { docker-compose -f docker-compose.tools.yml run medco-cli-client --user ${1} --password ${2} \
+  sdc -c ${3} ; };
+
+function getDefaultFitlerWithCredentials() { docker-compose -f docker-compose.tools.yml run medco-cli-client --user ${1} --password ${2} --o /data/result.csv \
+  gdc ; };
+
+expectedDefault1="node_index,cohort_name\n1,\n2,\n3,\n"
+expectedDefault2="node_index,cohort_name\n1,testCohort\n2,testCohort\n3,testCohort\n"
+expectedDefault3="node_index,cohort_name\n1,testCohortAA\n2,testCohortAA\n3,testCohortAA\n"
+test7() {
+  # in case it was not removed before
+  removeCohortWithCredentials $USERNAME $PASSWORD "testCohortAA"
+  getDefaultFitlerWithCredentials $USERNAME $PASSWORD
+
+  description="$(awk '{print $0}' ../result.csv)"
+  if [[ "${description}" != "${expectedDefault1}" ]];
+  then
+  echo "cohorts patient list: test failed"
+  echo "result is ${description}: expected \"${expectedDefault1}\""
+  exit 1
+  fi
+
+  setDefaultFitlerWithCredentials $USERNAME $PASSWORD "testCohort"
+  getDefaultFitlerWithCredentials $USERNAME $PASSWORD
+
+  description="$(awk '{print $0}' ../result.csv)"
+  if [[ "${description}" != "${expectedDefault2}" ]];
+  then
+  echo "cohorts patient list: test failed"
+  echo "result ${description}: expected \"${expectedDefault2}\""
+  exit 1
+  fi
+
+   
+  insertNewCohortWithCredentials $1 $2 "testCohortAA" "-1,-1,-1"
+  setDefaultFitlerWithCredentials $USERNAME $PASSWORD "testCohortAA"
+  getDefaultFitlerWithCredentials $USERNAME $PASSWORD
+
+  description="$(awk '{print $0}' ../result.csv)"
+  if [[ "${description}" != "${expectedDefault3}" ]];
+  then
+  echo "cohorts patient list: test failed"
+  echo "result is ${description}: expected \"${expectedDefault3}\""
+  exit 1
+  fi
+
+  removeCohortWithCredentials $USERNAME $PASSWORD "testCohortAA"
+  getDefaultFitlerWithCredentials $USERNAME $PASSWORD
+
+  description="$(awk '{print $0}' ../result.csv)"
+  if [[ "${description}" != "${expectedDefault1}" ]];
+  then
+  echo "cohorts patient list: test failed"
+  echo "result is ${description}: expected \"${expectedDefault1}\""
+  exit 1
+  fi
+}
+
+
 
 pushd deployments/dev-local-3nodes/
 echo "Testing saved-cohorts features..."
@@ -188,6 +296,10 @@ test3 "${survivalSubGroup1}" "${survivalSubGroup2}"
 
 echo "Testing cohorts-patient-list"
 test4
+
+echo "Testing predefined cohorts"
+test5
+test6
 
 popd
 exit 0

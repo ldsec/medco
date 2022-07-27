@@ -188,6 +188,15 @@ func main() {
 	}
 
 	//--- query tools command flags
+	setDefaultCohortFlag := []cli.Flag{
+		cli.StringFlag{
+			Name:     "cohortName, c",
+			Usage:    "Name of the cohort to be set as the default cohort",
+			Required: true,
+		},
+	}
+
+	//--- query tools command flags
 	cohortsPatientListFlag := []cli.Flag{
 		cli.StringFlag{
 			Name:     "cohortName, c",
@@ -464,6 +473,38 @@ func main() {
 			Description: "Removes a cohort for a given name. If the user does not have a cohort with this name in DB, an error is sent.",
 			Action: func(c *cli.Context) error {
 				return querytoolsclient.ExecuteRemoveCohorts(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.String("cohortName"),
+					c.GlobalBool("disableTLSCheck"),
+				)
+			},
+		},
+		{
+			Name:        "get-default-cohort",
+			Aliases:     []string{"gdc"},
+			Usage:       "Retrieve the default cohort or filter.",
+			Description: "Set the cohort passed as argument to be the user's default cohort/filter. If another cohort was previously defined, this one is upset (there is at most one default cohort per user).",
+			Action: func(c *cli.Context) error {
+				return querytoolsclient.ExecuteGetDefaultCohort(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.GlobalBool("disableTLSCheck"),
+					c.GlobalString("outputFile"),
+				)
+			},
+		},
+		{
+			Name:        "set-default-cohort",
+			Aliases:     []string{"sdc"},
+			Usage:       "Change the default cohort.",
+			Flags:       setDefaultCohortFlag,
+			ArgsUsage:   "-c cohortName",
+			Description: "Set the cohort passed as argument to be the user's default cohort/filter. If another cohort was previously defined, this one is upset (there is at most one default cohort per user).",
+			Action: func(c *cli.Context) error {
+				return querytoolsclient.ExecutePutDefaultCohort(
 					c.GlobalString("token"),
 					c.GlobalString("user"),
 					c.GlobalString("password"),

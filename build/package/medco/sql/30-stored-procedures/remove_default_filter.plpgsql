@@ -1,0 +1,19 @@
+-- pl/pgsql function that removes the default filter, if any, for a given user ID
+
+CREATE OR REPLACE FUNCTION query_tools.remove_default_filter(user_id varchar)
+  RETURNS integer
+  VOLATILE
+  PARALLEL UNSAFE
+  AS $$
+DECLARE
+  default_filter_id_ integer;
+BEGIN
+  EXECUTE 'DELETE FROM query_tools.default_filters
+	WHERE user_id = $1
+  RETURNING default_filter_id'
+  USING user_id
+  INTO default_filter_id_;
+  RETURN default_filter_id_;
+END;
+$$
+LANGUAGE plpgsql

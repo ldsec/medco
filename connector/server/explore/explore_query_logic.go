@@ -19,6 +19,7 @@ import (
 // todo: log query (with associated status)
 // todo: put user + query type + unique ID in query id
 
+// PatientSetResult encodes the requested patient set result from the query
 type PatientSetResult struct {
 	EncCount string
 	// The list of patients from the cohort created from the inclusion and exclusion criterias.
@@ -113,6 +114,8 @@ func (q *ExploreQuery) FetchLocalPatients(timer time.Time) (patientsInfos LocalP
 }
 
 // TODO for each field verify has the rights to see them
+
+// LocalPatientsInfos encode the patient list query at local node
 type LocalPatientsInfos struct {
 	PatientIDs        []string
 	PatientDummyFlags []string
@@ -209,6 +212,7 @@ func (q *ExploreQuery) Execute(queryType ExploreQueryType) (err error) {
 	return
 }
 
+// ProcessPatientsList encrypts and switches key of patient list result
 func (r *PatientSetResult) ProcessPatientsList(queryType ExploreQueryType, frontEndQueryName string, patientsInfos LocalPatientsInfos, userPublicKey string, Timers *medcomodels.Timers) (err error) {
 	var timer time.Time
 

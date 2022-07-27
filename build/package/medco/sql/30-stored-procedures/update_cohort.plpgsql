@@ -9,7 +9,7 @@ DECLARE
   cohort_id integer;
 BEGIN
   EXECUTE 'UPDATE query_tools.saved_cohorts
-SET query_id=$3, update_date= $4
+SET query_id=$3, update_date=$4, predefined = FALSE
 WHERE cohort_name = $1 AND user_id = $2
 RETURNING cohort_id'
   USING cohort_name,

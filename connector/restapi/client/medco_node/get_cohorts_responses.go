@@ -163,6 +163,9 @@ type GetCohortsOKBodyItems0 struct {
 	// creation date
 	CreationDate string `json:"creationDate,omitempty"`
 
+	// predefined
+	Predefined bool `json:"predefined,omitempty"`
+
 	// query definition
 	QueryDefinition *GetCohortsOKBodyItems0QueryDefinition `json:"queryDefinition,omitempty"`
 

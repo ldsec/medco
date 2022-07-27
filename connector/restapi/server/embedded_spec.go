@@ -368,6 +368,9 @@ func init() {
           "400": {
             "$ref": "#/responses/badRequestResponse"
           },
+          "403": {
+            "$ref": "#/responses/forbiddenResponse"
+          },
           "404": {
             "$ref": "#/responses/notFoundResponse"
           },
@@ -449,6 +452,70 @@ func init() {
         "responses": {
           "200": {
             "description": "Deleted cohort"
+          },
+          "403": {
+            "$ref": "#/responses/forbiddenResponse"
+          },
+          "404": {
+            "$ref": "#/responses/notFoundResponse"
+          },
+          "default": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      }
+    },
+    "/node/explore/default-cohort": {
+      "get": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
+        ],
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Returns the default cohort name of the user, if any",
+        "operationId": "getDefaultCohort",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/getDefaultCohortResponse"
+          },
+          "default": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      }
+    },
+    "/node/explore/default-cohort/{name}": {
+      "put": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
+        ],
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Change the default cohort of the user",
+        "operationId": "putDefaultCohort",
+        "parameters": [
+          {
+            "pattern": "^\\w+$",
+            "type": "string",
+            "description": "Name of the cohort to set as the new default cohort",
+            "name": "name",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default cohort updated"
           },
           "404": {
             "$ref": "#/responses/notFoundResponse"
@@ -1604,6 +1671,9 @@ func init() {
             "creationDate": {
               "type": "string"
             },
+            "predefined": {
+              "type": "boolean"
+            },
             "queryDefinition": {
               "type": "object",
               "properties": {
@@ -1626,6 +1696,12 @@ func init() {
             }
           }
         }
+      }
+    },
+    "getDefaultCohortResponse": {
+      "description": "Name of cohort/filter retrieved",
+      "schema": {
+        "type": "string"
       }
     },
     "networkMetadataResponse": {
@@ -2533,6 +2609,17 @@ func init() {
               }
             }
           },
+          "403": {
+            "description": "Request is valid and user is authenticated, but not authorized to perform this action.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
           "404": {
             "description": "Not found.",
             "schema": {
@@ -2692,6 +2779,105 @@ func init() {
         "responses": {
           "200": {
             "description": "Deleted cohort"
+          },
+          "403": {
+            "description": "Request is valid and user is authenticated, but not authorized to perform this action.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/node/explore/default-cohort": {
+      "get": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
+        ],
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Returns the default cohort name of the user, if any",
+        "operationId": "getDefaultCohort",
+        "responses": {
+          "200": {
+            "description": "Name of cohort/filter retrieved",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "default": {
+            "description": "Error response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/node/explore/default-cohort/{name}": {
+      "put": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
+        ],
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Change the default cohort of the user",
+        "operationId": "putDefaultCohort",
+        "parameters": [
+          {
+            "pattern": "^\\w+$",
+            "type": "string",
+            "description": "Name of the cohort to set as the new default cohort",
+            "name": "name",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default cohort updated"
           },
           "404": {
             "description": "Not found.",
@@ -3075,6 +3261,9 @@ func init() {
         },
         "creationDate": {
           "type": "string"
+        },
+        "predefined": {
+          "type": "boolean"
         },
         "queryDefinition": {
           "type": "object",
@@ -4334,6 +4523,9 @@ func init() {
             "creationDate": {
               "type": "string"
             },
+            "predefined": {
+              "type": "boolean"
+            },
             "queryDefinition": {
               "type": "object",
               "properties": {
@@ -4356,6 +4548,12 @@ func init() {
             }
           }
         }
+      }
+    },
+    "getDefaultCohortResponse": {
+      "description": "Name of cohort/filter retrieved",
+      "schema": {
+        "type": "string"
       }
     },
     "networkMetadataResponse": {

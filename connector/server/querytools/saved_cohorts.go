@@ -65,6 +65,8 @@ func GetSavedCohorts(userID string, limit int) ([]medcomodels.Cohort, error) {
 	var name string
 	var createDate time.Time
 	var updateDate time.Time
+	var predefined bool
+
 	var cohorts = make([]medcomodels.Cohort, 0)
 	record := new(string)
 	for rows.Next() {
@@ -98,12 +100,18 @@ func GetSavedCohorts(userID string, limit int) ([]medcomodels.Cohort, error) {
 			err = fmt.Errorf("while parsing update date string \"%s\": %s, DB operation: %s", cells[4], err.Error(), description)
 			return nil, err
 		}
+		predefined, err = strconv.ParseBool(strings.Trim(cells[5], `"`))
+		if err != nil {
+			err = fmt.Errorf("while parsing predefined string \"%s\": %s, DB operation: %s", cells[5], err.Error(), description)
+			return nil, err
+		}
 		newCohort := medcomodels.Cohort{
 			CohortID:     id,
 			QueryID:      qid,
 			CohortName:   name,
 			CreationDate: createDate,
 			UpdateDate:   updateDate,
+			Predefined:   predefined,
 		}
 		logrus.Tracef("got cohort %+v", newCohort)
 		cohorts = append(cohorts, newCohort)
@@ -143,7 +151,7 @@ func GetDate(userID string, cohortID int) (time.Time, error) {
 
 }
 
-// InsertCohort runs a SQL query to either insert a new cohort or update an existing one
+// InsertCohort runs a SQL query to either insert a new cohort
 func InsertCohort(userID string, queryID int, cohortName string, createDate, updateDate time.Time) (int, error) {
 	description := fmt.Sprintf(
 		"InsertCohort (user ID: %s, query ID: %d, cohort name: %s, create date: %s, update date: %s), procedure: %s",
@@ -172,7 +180,7 @@ func InsertCohort(userID string, queryID int, cohortName string, createDate, upd
 	return cohortID, err
 }
 
-// UpdateCohort runs a SQL query to either insert a new cohort or update an existing one
+// UpdateCohort runs a SQL query to update an existing cohort
 func UpdateCohort(cohortName, userID string, queryID int, updateDate time.Time) (int, error) {
 	description := fmt.Sprintf("UpdateCohort (cohort name: %s, user ID: %s, query ID: %d, update time: %s), procedure: %s", cohortName, userID, queryID, updateDate.Format(time.RFC3339), "query_tools.update_cohort")
 	logrus.Debugf("running: %s", description)
@@ -228,4 +236,115 @@ func RemoveCohort(userID, cohortName string) error {
 	}
 	logrus.Debugf("successfully deleted, DB operation: %s", description)
 	return nil
+}
+
+// UpdateDefaultCohort changes the default cohort
+func UpdateDefaultCohort(userID, cohortName string) error {
+	description := fmt.Sprintf("UpdateDefaultCohort (user ID: %s, cohort name: %s), procedure : %s", userID, cohortName, "query_tools.update_default_filter")
+	logrus.Debugf("running: %s", description)
+	res := utilserver.DBConnection.QueryRow("SELECT query_tools.update_default_filter($1, $2);", userID, cohortName)
+	var cohortID sql.NullInt32
+	err := res.Scan(&cohortID)
+	if err != nil {
+		err = fmt.Errorf("while executing procedure: %s, DB operation: %s", err.Error(), description)
+		return err
+	}
+	if !cohortID.Valid {
+		err = fmt.Errorf("cohort to set as default not found, DB operation: %s", description)
+		return err
+	}
+	logrus.Debugf("successfully changed default status, DB operation: %s", description)
+	return nil
+
+}
+
+// RemoveDefaultFilter removes the default filter/cohort, if any, of a given patient
+func RemoveDefaultFilter(userID string) (*int, error) {
+	var returnValue *int
+	description := fmt.Sprintf("RemoveDefaultFilter (user ID: %s), procedure : %s", userID, "query_tools.remove_default_filter")
+	logrus.Debugf("running: %s", description)
+	res := utilserver.DBConnection.QueryRow("SELECT query_tools.remove_default_filter($1)", userID)
+	var removedFilterID sql.NullInt64
+	err := res.Scan(&removedFilterID)
+	if err != nil {
+		err = fmt.Errorf("while executing procedure: %s, DB operation: %s", err.Error(), description)
+		return nil, err
+	}
+	if !removedFilterID.Valid {
+		logrus.Debugf("no default filter has been defined, DB operation: %s", description)
+	} else {
+		returnValue = new(int)
+		*returnValue = int(removedFilterID.Int64)
+	}
+
+	logrus.Debugf("successfully removed default filter if any, DB operation: %s", description)
+	return returnValue, nil
+}
+
+// GetDefaultFilter returns the cohort name of the default filter, if any, of a given patient,
+// returns nil integer pointer if the user does not have any default filter
+func GetDefaultFilter(userID string) (*string, error) {
+	var returnName *string
+	description := fmt.Sprintf("GetDefaultFilter (user ID: %s), procedure : %s", userID, "query_tools.get_default_filter")
+	logrus.Debugf("running: %s", description)
+	res := utilserver.DBConnection.QueryRow("SELECT query_tools.get_default_filter($1)", userID)
+	var filterName sql.NullString
+	err := res.Scan(&filterName)
+	if err != nil {
+		err = fmt.Errorf("while executing procedure: %s, DB operation: %s", err.Error(), description)
+		return nil, err
+	}
+	if !filterName.Valid {
+		logrus.Debugf("no default filter has been defined, DB operation: %s", description)
+	} else {
+		returnName = new(string)
+		*returnName = filterName.String
+	}
+
+	logrus.Debugf("successfully removed default filter if any, DB operation: %s", description)
+	return returnName, nil
+}
+
+// UpdateDefaultFilter insert or the update the default filter of a given patient with the given cohort ID
+func UpdateDefaultFilter(userID string, filterID int) (int, error) {
+
+	description := fmt.Sprintf("UpdateDefaultFilter (user ID: %s, filter ID: %d), procedure : %s", userID, filterID, "query_tools.update_default_filter")
+	logrus.Debugf("running: %s", description)
+	res := utilserver.DBConnection.QueryRow("SELECT query_tools.update_default_filter($1, $2)", userID, filterID)
+	var updatedFilterID sql.NullInt64
+	err := res.Scan(&updatedFilterID)
+	if err != nil {
+		err = fmt.Errorf("while executing procedure: %s, DB operation: %s", err.Error(), description)
+		return 0, err
+	}
+	if !updatedFilterID.Valid {
+		err = fmt.Errorf("no filter could be inserted or updated, DB operation: %s", description)
+		return 0, err
+	}
+	if updatedFilterID.Int64 != int64(filterID) {
+		err = fmt.Errorf("updated filer value is not equal to the one provided before DB update operation, DB operation: %s", description)
+		return 0, err
+	}
+
+	logrus.Debugf("successfully updated default filter if any, DB operation: %s", description)
+	return int(updatedFilterID.Int64), nil
+}
+
+// IsCohortPredefined returns true if the cohort is predefined, an error if the cohort does not exist
+func IsCohortPredefined(userID, cohortName string) (bool, error) {
+	description := fmt.Sprintf("IsCohortPredefined (user ID: %s, cohort name: %s), procedure : %s", userID, cohortName, "query_tools.is_cohort_predefined")
+	logrus.Debugf("running: %s", description)
+	res := utilserver.DBConnection.QueryRow("SELECT query_tools.is_cohort_predefined($1, $2);", userID, cohortName)
+	var isPredefined sql.NullBool
+	err := res.Scan(&isPredefined)
+	if err != nil {
+		err = fmt.Errorf("while executing procedure: %s, DB operation: %s", err.Error(), description)
+		return false, err
+	}
+	if !isPredefined.Valid {
+		err = fmt.Errorf("cohort to check the predefined status not found, DB operation: %s", description)
+		return false, err
+	}
+	logrus.Debugf("successfully checked predefined status, DB operation: %s", description)
+	return isPredefined.Bool, nil
 }

@@ -161,7 +161,7 @@ func MedCoNodeExploreQueryHandler(params medco_node.ExploreQueryParams, principa
 		}})
 }
 
-// MedCoNodeGetCohortsHandler handles GET /medco/node/explore/cohorts  API endpoint
+// MedCoNodeGetCohortsHandler handles GET /medco/node/explore/cohorts API endpoint
 func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *models.User) middleware.Responder {
 	userID := principal.ID
 	cohorts, err := querytoolsserver.GetSavedCohorts(userID, int(*params.Limit))
@@ -196,6 +196,7 @@ func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *m
 				CohortName:      cohort.CohortName,
 				CohortID:        int64(cohort.CohortID),
 				QueryID:         queryID,
+				Predefined:      cohort.Predefined,
 				CreationDate:    cohort.CreationDate.Format(time.RFC3339Nano),
 				UpdateDate:      cohort.UpdateDate.Format(time.RFC3339Nano),
 				QueryDefinition: queryDefinition,
@@ -207,7 +208,7 @@ func MedCoNodeGetCohortsHandler(params medco_node.GetCohortsParams, principal *m
 
 }
 
-// MedCoNodePostCohortsPatientListHandler handles POST /medco/node/explore/cohorts/patientList  API endpoint
+// MedCoNodePostCohortsPatientListHandler handles POST /medco/node/explore/cohorts/patientList API endpoint
 func MedCoNodePostCohortsPatientListHandler(params medco_node.PostCohortsPatientListParams, principal *models.User) middleware.Responder {
 	body := params.CohortsPatientListRequest
 	authorizedQueryType, err := utilserver.FetchAuthorizedExploreQueryType(principal)
@@ -262,7 +263,7 @@ func MedCoNodePostCohortsPatientListHandler(params medco_node.PostCohortsPatient
 
 }
 
-// MedCoNodePostCohortsHandler handles POST /medco/node/explore/cohorts  API endpoint
+// MedCoNodePostCohortsHandler handles POST /medco/node/explore/cohorts API endpoint
 func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal *models.User) middleware.Responder {
 
 	cohort := params.CohortsRequest
@@ -313,7 +314,7 @@ func MedCoNodePostCohortsHandler(params medco_node.PostCohortsParams, principal 
 	return medco_node.NewPostCohortsOK()
 }
 
-// MedCoNodePutCohortsHandler handles PUT /medco/node/explore/cohorts  API endpoint
+// MedCoNodePutCohortsHandler handles PUT /medco/node/explore/cohorts API endpoint
 func MedCoNodePutCohortsHandler(params medco_node.PutCohortsParams, principal *models.User) middleware.Responder {
 
 	cohort := params.CohortsRequest
@@ -339,6 +340,8 @@ func MedCoNodePutCohortsHandler(params medco_node.PutCohortsParams, principal *m
 			Message: fmt.Sprintf("String %s is not a date with RF3339 layout", *cohort.UpdateDate),
 		})
 	}
+
+	// check if the cohort exists
 	cohorts, err := querytoolsserver.GetSavedCohorts(principal.ID, 0)
 	if err != nil {
 		return medco_node.NewPutCohortsDefault(500).WithPayload(&medco_node.PutCohortsDefaultBody{
@@ -361,30 +364,85 @@ func MedCoNodePutCohortsHandler(params medco_node.PutCohortsParams, principal *m
 		}
 	}
 	if !found {
-		return medco_node.NewPutCohortsNotFound()
+		return medco_node.NewPutCohortsNotFound().WithPayload(&medco_node.PutCohortsNotFoundBody{
+			Message: fmt.Sprintf("Cohort %s not found. Try add-saved-cohorts instead of update-saved-cohorts", cohortName),
+		})
 	}
 
-	querytoolsserver.UpdateCohort(cohortName, principal.ID, int(*cohort.QueryID), updateDate)
+	// check if the cohort is predefined
+	isPredefined, err := querytoolsserver.IsCohortPredefined(principal.ID, cohortName)
+	if err != nil {
+		return medco_node.NewPutCohortsDefault(500).WithPayload(&medco_node.PutCohortsDefaultBody{
+			Message: "Update cohort execution error: " + err.Error(),
+		})
+	}
+
+	if isPredefined {
+		return medco_node.NewPutCohortsForbidden().WithPayload(&medco_node.PutCohortsForbiddenBody{
+			Message: fmt.Sprintf("Updating predefined cohort %s not allowed", cohortName),
+		})
+	}
+
+	_, err = querytoolsserver.UpdateCohort(cohortName, principal.ID, int(*cohort.QueryID), updateDate)
+	if err != nil {
+		return medco_node.NewPutCohortsDefault(500).WithPayload(&medco_node.PutCohortsDefaultBody{
+			Message: "Update cohort execution error: " + err.Error(),
+		})
+	}
 
 	return medco_node.NewPutCohortsOK()
 }
 
-// MedCoNodeDeleteCohortsHandler handles DELETE /medco/node/explore/cohorts  API endpoint
+// MedCoNodeGetDefaultCohortHandler handles GET /medco/node/explore/default-cohort API endpoint
+func MedCoNodeGetDefaultCohortHandler(_ medco_node.GetDefaultCohortParams, principal *models.User) middleware.Responder {
+	user := principal.ID
+
+	cohortName, err := querytoolsserver.GetDefaultFilter(user)
+	if err != nil {
+		return medco_node.NewGetDefaultCohortDefault(500).WithPayload(&medco_node.GetDefaultCohortDefaultBody{
+			Message: "Get default cohort execution error: " + err.Error(),
+		})
+	}
+
+	var returnName string
+	if cohortName != nil {
+		returnName = *cohortName
+	} else {
+		logrus.Debugf("No default cohort/filter found for user %s", user)
+	}
+	return medco_node.NewGetDefaultCohortOK().WithPayload(returnName)
+}
+
+// MedCoNodeDeleteCohortsHandler handles DELETE /medco/node/explore/cohorts API endpoint
 func MedCoNodeDeleteCohortsHandler(params medco_node.DeleteCohortsParams, principal *models.User) middleware.Responder {
 	cohortName := params.Name
 	user := principal.ID
 
-	// check if cohort exists
+	// check if the cohort exists
 	hasCohort, err := querytoolsserver.DoesCohortExist(user, cohortName)
 	if err != nil {
 		return medco_node.NewDeleteCohortsDefault(500).WithPayload(&medco_node.DeleteCohortsDefaultBody{
 			Message: "Delete cohort execution error: " + err.Error(),
 		})
 	}
-	logrus.Trace("hasCohort", hasCohort)
+
 	if !hasCohort {
 		return medco_node.NewDeleteCohortsNotFound().WithPayload(&medco_node.DeleteCohortsNotFoundBody{
 			Message: fmt.Sprintf("Cohort %s not found", cohortName),
+		})
+	}
+
+	// check if the cohort is predefined
+	isPredefined, err := querytoolsserver.IsCohortPredefined(user, cohortName)
+	if err != nil {
+		return medco_node.NewDeleteCohortsDefault(500).WithPayload(&medco_node.DeleteCohortsDefaultBody{
+			Message: "Delete cohort execution error: " + err.Error(),
+		})
+	}
+
+	if isPredefined {
+		return medco_node.NewDeleteCohortsForbidden().WithPayload(&medco_node.DeleteCohortsForbiddenBody{
+			Message: fmt.Sprintf("Removing predefined cohort %s not allowed", cohortName),
 		})
 	}
 
@@ -398,4 +456,32 @@ func MedCoNodeDeleteCohortsHandler(params medco_node.DeleteCohortsParams, princi
 
 	return medco_node.NewDeleteCohortsOK()
 
+}
+
+// MedCoNodePutDefaultCohortHandler handles PUT /medco/node/explore/default-cohort API endpoint
+func MedCoNodePutDefaultCohortHandler(params medco_node.PutDefaultCohortParams, principal *models.User) middleware.Responder {
+	cohortName := params.Name
+	user := principal.ID
+
+	// check if cohort exists
+	hasCohort, err := querytoolsserver.DoesCohortExist(user, cohortName)
+	if err != nil {
+		return medco_node.NewPutDefaultCohortDefault(500).WithPayload(&medco_node.PutDefaultCohortDefaultBody{
+			Message: "Put default cohort execution error: " + err.Error(),
+		})
+	}
+	if !hasCohort {
+		return medco_node.NewPutDefaultCohortNotFound().WithPayload(&medco_node.PutDefaultCohortNotFoundBody{
+			Message: fmt.Sprintf("Cohort %s not found", cohortName),
+		})
+	}
+
+	err = querytoolsserver.UpdateDefaultCohort(user, cohortName)
+	if err != nil {
+		return medco_node.NewPutDefaultCohortDefault(500).WithPayload(&medco_node.PutDefaultCohortDefaultBody{
+			Message: "Put default cohort execution error: " + err.Error(),
+		})
+	}
+
+	return medco_node.NewPutDefaultCohortOK()
 }

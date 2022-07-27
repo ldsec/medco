@@ -70,6 +70,9 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 		MedcoNodeGetCohortsHandler: medco_node.GetCohortsHandlerFunc(func(params medco_node.GetCohortsParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_node.GetCohorts has not yet been implemented")
 		}),
+		MedcoNodeGetDefaultCohortHandler: medco_node.GetDefaultCohortHandlerFunc(func(params medco_node.GetDefaultCohortParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation medco_node.GetDefaultCohort has not yet been implemented")
+		}),
 		MedcoNodeGetExploreQueryHandler: medco_node.GetExploreQueryHandlerFunc(func(params medco_node.GetExploreQueryParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_node.GetExploreQuery has not yet been implemented")
 		}),
@@ -90,6 +93,9 @@ func NewMedcoConnectorAPI(spec *loads.Document) *MedcoConnectorAPI {
 		}),
 		MedcoNodePutCohortsHandler: medco_node.PutCohortsHandlerFunc(func(params medco_node.PutCohortsParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation medco_node.PutCohorts has not yet been implemented")
+		}),
+		MedcoNodePutDefaultCohortHandler: medco_node.PutDefaultCohortHandlerFunc(func(params medco_node.PutDefaultCohortParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation medco_node.PutDefaultCohort has not yet been implemented")
 		}),
 		SurvivalAnalysisSurvivalAnalysisHandler: survival_analysis.SurvivalAnalysisHandlerFunc(func(params survival_analysis.SurvivalAnalysisParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation survival_analysis.SurvivalAnalysis has not yet been implemented")
@@ -155,6 +161,8 @@ type MedcoConnectorAPI struct {
 	ExploreStatisticsExploreStatisticsHandler explore_statistics.ExploreStatisticsHandler
 	// MedcoNodeGetCohortsHandler sets the operation handler for the get cohorts operation
 	MedcoNodeGetCohortsHandler medco_node.GetCohortsHandler
+	// MedcoNodeGetDefaultCohortHandler sets the operation handler for the get default cohort operation
+	MedcoNodeGetDefaultCohortHandler medco_node.GetDefaultCohortHandler
 	// MedcoNodeGetExploreQueryHandler sets the operation handler for the get explore query operation
 	MedcoNodeGetExploreQueryHandler medco_node.GetExploreQueryHandler
 	// MedcoNetworkGetMetadataHandler sets the operation handler for the get metadata operation
@@ -169,6 +177,8 @@ type MedcoConnectorAPI struct {
 	MedcoNodePostCohortsPatientListHandler medco_node.PostCohortsPatientListHandler
 	// MedcoNodePutCohortsHandler sets the operation handler for the put cohorts operation
 	MedcoNodePutCohortsHandler medco_node.PutCohortsHandler
+	// MedcoNodePutDefaultCohortHandler sets the operation handler for the put default cohort operation
+	MedcoNodePutDefaultCohortHandler medco_node.PutDefaultCohortHandler
 	// SurvivalAnalysisSurvivalAnalysisHandler sets the operation handler for the survival analysis operation
 	SurvivalAnalysisSurvivalAnalysisHandler survival_analysis.SurvivalAnalysisHandler
 	// ServeError is called when an error is received, there is a default handler
@@ -272,6 +282,9 @@ func (o *MedcoConnectorAPI) Validate() error {
 	if o.MedcoNodeGetCohortsHandler == nil {
 		unregistered = append(unregistered, "medco_node.GetCohortsHandler")
 	}
+	if o.MedcoNodeGetDefaultCohortHandler == nil {
+		unregistered = append(unregistered, "medco_node.GetDefaultCohortHandler")
+	}
 	if o.MedcoNodeGetExploreQueryHandler == nil {
 		unregistered = append(unregistered, "medco_node.GetExploreQueryHandler")
 	}
@@ -292,6 +305,9 @@ func (o *MedcoConnectorAPI) Validate() error {
 	}
 	if o.MedcoNodePutCohortsHandler == nil {
 		unregistered = append(unregistered, "medco_node.PutCohortsHandler")
+	}
+	if o.MedcoNodePutDefaultCohortHandler == nil {
+		unregistered = append(unregistered, "medco_node.PutDefaultCohortHandler")
 	}
 	if o.SurvivalAnalysisSurvivalAnalysisHandler == nil {
 		unregistered = append(unregistered, "survival_analysis.SurvivalAnalysisHandler")
@@ -425,6 +441,10 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
+	o.handlers["GET"]["/node/explore/default-cohort"] = medco_node.NewGetDefaultCohort(o.context, o.MedcoNodeGetDefaultCohortHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
 	o.handlers["GET"]["/node/explore/query/{queryId}"] = medco_node.NewGetExploreQuery(o.context, o.MedcoNodeGetExploreQueryHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
@@ -450,6 +470,10 @@ func (o *MedcoConnectorAPI) initHandlerCache() {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
 	o.handlers["PUT"]["/node/explore/cohorts/{name}"] = medco_node.NewPutCohorts(o.context, o.MedcoNodePutCohortsHandler)
+	if o.handlers["PUT"] == nil {
+		o.handlers["PUT"] = make(map[string]http.Handler)
+	}
+	o.handlers["PUT"]["/node/explore/default-cohort/{name}"] = medco_node.NewPutDefaultCohort(o.context, o.MedcoNodePutDefaultCohortHandler)
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}

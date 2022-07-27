@@ -257,6 +257,38 @@ func (o *PutCohortsDefaultBody) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
+// PutCohortsForbiddenBody put cohorts forbidden body
+//
+// swagger:model PutCohortsForbiddenBody
+type PutCohortsForbiddenBody struct {
+
+	// message
+	Message string `json:"message,omitempty"`
+}
+
+// Validate validates this put cohorts forbidden body
+func (o *PutCohortsForbiddenBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *PutCohortsForbiddenBody) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *PutCohortsForbiddenBody) UnmarshalBinary(b []byte) error {
+	var res PutCohortsForbiddenBody
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
 // PutCohortsNotFoundBody put cohorts not found body
 //
 // swagger:model PutCohortsNotFoundBody
