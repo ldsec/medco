@@ -8,18 +8,19 @@ end_modifier:
   modifier_key: "/SPHN/DeathStatus-status/death/"
   applied_path: "/SPHNv2020.1/DeathStatus/"
 ends_when: "earliest"
+censoring_from: "observations"
 sub_groups:
   - group_name: "Female"
     group_timing: "any"
-    panels:
+    selection_panels:
       - not: false
         panel_timing: "any"
-        items:
+        concept_items:
           - path: "/I2B2/I2B2/Demographics/Gender/Female/"
   - group_name: "Male"
     group_timing: "any"
-    panels:
+    selection_panels:
       - not: false
         panel_timing: "any"
-        items:
+        concept_items:
           - path: "/I2B2/I2B2/Demographics/Gender/Male/"

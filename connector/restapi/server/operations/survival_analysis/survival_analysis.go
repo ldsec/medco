@@ -120,6 +120,11 @@ type SurvivalAnalysisBody struct {
 	// Pattern: ^[\w:-]+$
 	ID *string `json:"ID"`
 
+	// censoring from
+	// Required: true
+	// Enum: [encounters observations]
+	CensoringFrom *string `json:"censoringFrom"`
+
 	// cohort name
 	// Required: true
 	// Pattern: ^\w+$
@@ -176,6 +181,10 @@ func (o *SurvivalAnalysisBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := o.validateID(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateCensoringFrom(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -236,6 +245,49 @@ func (o *SurvivalAnalysisBody) validateID(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Pattern("body"+"."+"ID", "body", string(*o.ID), `^[\w:-]+$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var survivalAnalysisBodyTypeCensoringFromPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["encounters","observations"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		survivalAnalysisBodyTypeCensoringFromPropEnum = append(survivalAnalysisBodyTypeCensoringFromPropEnum, v)
+	}
+}
+
+const (
+
+	// SurvivalAnalysisBodyCensoringFromEncounters captures enum value "encounters"
+	SurvivalAnalysisBodyCensoringFromEncounters string = "encounters"
+
+	// SurvivalAnalysisBodyCensoringFromObservations captures enum value "observations"
+	SurvivalAnalysisBodyCensoringFromObservations string = "observations"
+)
+
+// prop value enum
+func (o *SurvivalAnalysisBody) validateCensoringFromEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, survivalAnalysisBodyTypeCensoringFromPropEnum, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *SurvivalAnalysisBody) validateCensoringFrom(formats strfmt.Registry) error {
+
+	if err := validate.Required("body"+"."+"censoringFrom", "body", o.CensoringFrom); err != nil {
+		return err
+	}
+
+	// value enum
+	if err := o.validateCensoringFromEnum("body"+"."+"censoringFrom", "body", *o.CensoringFrom); err != nil {
 		return err
 	}
 
@@ -1062,8 +1114,14 @@ type SurvivalAnalysisParamsBodySubGroupDefinitionsItems0 struct {
 	// Pattern: ^\w+$
 	GroupName string `json:"groupName,omitempty"`
 
-	// panels
-	Panels []*models.Panel `json:"panels"`
+	// query timing sequence
+	QueryTimingSequence []*models.TimingSequenceInfo `json:"queryTimingSequence"`
+
+	// selection panels
+	SelectionPanels []*models.Panel `json:"selectionPanels"`
+
+	// sequential panels
+	SequentialPanels []*models.Panel `json:"sequentialPanels"`
 
 	// sub group timing
 	SubGroupTiming models.Timing `json:"subGroupTiming,omitempty"`
@@ -1077,7 +1135,15 @@ func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) Validate(formats s
 		res = append(res, err)
 	}
 
-	if err := o.validatePanels(formats); err != nil {
+	if err := o.validateQueryTimingSequence(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateSelectionPanels(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateSequentialPanels(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -1104,21 +1170,71 @@ func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) validateGroupName(
 	return nil
 }
 
-func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) validatePanels(formats strfmt.Registry) error {
+func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) validateQueryTimingSequence(formats strfmt.Registry) error {
 
-	if swag.IsZero(o.Panels) { // not required
+	if swag.IsZero(o.QueryTimingSequence) { // not required
 		return nil
 	}
 
-	for i := 0; i < len(o.Panels); i++ {
-		if swag.IsZero(o.Panels[i]) { // not required
+	for i := 0; i < len(o.QueryTimingSequence); i++ {
+		if swag.IsZero(o.QueryTimingSequence[i]) { // not required
 			continue
 		}
 
-		if o.Panels[i] != nil {
-			if err := o.Panels[i].Validate(formats); err != nil {
+		if o.QueryTimingSequence[i] != nil {
+			if err := o.QueryTimingSequence[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("panels" + "." + strconv.Itoa(i))
+					return ve.ValidateName("queryTimingSequence" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) validateSelectionPanels(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.SelectionPanels) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(o.SelectionPanels); i++ {
+		if swag.IsZero(o.SelectionPanels[i]) { // not required
+			continue
+		}
+
+		if o.SelectionPanels[i] != nil {
+			if err := o.SelectionPanels[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("selectionPanels" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (o *SurvivalAnalysisParamsBodySubGroupDefinitionsItems0) validateSequentialPanels(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.SequentialPanels) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(o.SequentialPanels); i++ {
+		if swag.IsZero(o.SequentialPanels[i]) { // not required
+			continue
+		}
+
+		if o.SequentialPanels[i] != nil {
+			if err := o.SequentialPanels[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("sequentialPanels" + "." + strconv.Itoa(i))
 				}
 				return err
 			}

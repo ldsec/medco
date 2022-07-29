@@ -477,10 +477,18 @@ parameters:
                 pattern: '^\w+$'
               subGroupTiming:
                 $ref: '#/definitions/timing'
-              panels:
+              selectionPanels:
                 type: "array"
                 items:
                   $ref: '#/definitions/panel'
+              sequentialPanels:
+                type: "array"
+                items:
+                  $ref: '#/definitions/panel'
+              queryTimingSequence:
+                type: "array"
+                items:
+                  $ref: "#/definitions/timingSequenceInfo"
           maxItems: 4
         timeLimit:
           type: "integer"
@@ -533,6 +541,11 @@ parameters:
           enum:
             - earliest
             - latest
+        censoringFrom:
+          type: "string"
+          enum:
+            - encounters
+            - observations
       required:
         - ID
         - userPublicKey
@@ -543,6 +556,7 @@ parameters:
         - startsWhen
         - endConcept
         - endsWhen
+        - censoringFrom
 
 responses:
   errorResponse:
@@ -677,12 +691,20 @@ responses:
           queryDefinition:
             type: "object"
             properties:
-              panels:
+              selectionPanels:
+                type: "array"
+                items:
+                  $ref: "#/definitions/panel"
+              sequentialPanels:
                 type: "array"
                 items:
                   $ref: "#/definitions/panel"
               queryTiming:
                 $ref: "#/definitions/timing"
+              queryTimingSequence:
+                type: "array"
+                items:
+                  $ref: "#/definitions/timingSequenceInfo"
 
   getCohortsPatientListResponse:
     description: "Queried patient list"
@@ -896,13 +918,25 @@ definitions:
       userPublicKey:
         type: "string"
         pattern: '^[\w=-]+$'
-      panels:
+      selectionPanels:
         type: "array"
-        description: "i2b2 panels (linked by an AND)"
+        description: "i2b2 selection panels (linked by an AND)"
         items:
           $ref: "#/definitions/panel"
+      sequentialPanels:
+        type: "array"
+        description: "i2b2 sequential panels (linked by a sequential operator)"
+        items:
+          $ref: "#/definitions/panel"
+      # queryTiming and queryTimingSequence cannot be used together
       queryTiming:
         $ref: "#/definitions/timing"
+      queryTimingSequence:
+        type: "array"
+        items:
+          $ref: "#/definitions/timingSequenceInfo"
+        description: "A collection of timingSequenceInfo that, if present, determines the temporal relations between the panels.
+        The element at position i determines the relation between the panels at position i and i + 1."
   panel:
     type: "object"
     required: [not]
@@ -1049,6 +1083,81 @@ definitions:
       - samevisit
       - sameinstancenum
     default: "any"
+
+  timingSequenceInfo:
+    type: "object"
+    required: [whichDateFirst, whichObservationFirst, when, whichDateSecond, whichObservationSecond]
+    description: "The info according to which the temporal relation between two panels is determined.
+    The observations identified by the first panel occur before the observations identified by the second panel if
+    the {whichDateFirst} of the {whichObservationFirst} observation in the first panel
+    occurs {when}
+    the {whichDateSecond} of the {whichObservationSecond} observation in the second panel.
+    "
+    properties:
+      whichDateFirst:
+        type: string
+        enum:
+          - STARTDATE
+          - ENDDATE
+        default: "STARTDATE"
+      whichObservationFirst:
+        type: "string"
+        enum:
+          - FIRST
+          - LAST
+          - ANY
+        default: "ANY"
+      when:
+        type: "string"
+        enum:
+          - LESS
+          - LESSEQUAL
+          - EQUAL
+        default: "LESS"
+      whichDateSecond:
+        type: string
+        enum:
+          - STARTDATE
+          - ENDDATE
+        default: "STARTDATE"
+      whichObservationSecond:
+        type: "string"
+        enum:
+          - FIRST
+          - LAST
+          - ANY
+        default: "ANY"
+      spans:
+        type: "array"
+        items:
+          $ref: "#/definitions/timingSequenceSpan"
+
+
+  timingSequenceSpan:
+    type: "object"
+    required: [value, units, operator]
+    properties:
+      
+      value:
+        type: "integer"
+      units:
+        type: string
+        enum:
+          - HOUR
+          - DAY
+          - MONTH
+          - YEAR
+      operator:
+        type: string
+        enum:
+          - LESS
+          - LESSEQUAL
+          - EQUAL
+          - GREATEREQUAL
+          - GREATER
+      
+
+
 
   timers:
     type: "array"

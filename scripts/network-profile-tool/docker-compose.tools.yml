@@ -9,6 +9,7 @@ services:
       - MEDCO_CONNECTOR_URL=https://${MEDCO_NODE_DNS_NAME}/medco
       - OIDC_REQ_TOKEN_URL=https://${MEDCO_NODE_DNS_NAME:?}/auth/realms/${KEYCLOAK_REALM:?}/protocol/openid-connect/token
       - OIDC_REQ_TOKEN_CLIENT_ID=${KEYCLOAK_CLIENT_ID:?}
+      - LOG_LEVEL=${CLICLIENT_LOGLEVEL:?}
     volumes:
       - ./configuration:/medco-configuration
 
@@ -17,8 +18,9 @@ services:
       file: ../docker-compose-definitions.yml
       service: medco-loader
     environment:
+      - LOG_LEVEL=${LOADER_LOGLEVEL:?}
       - MEDCO_NODE_IDX=${MEDCO_NODE_IDX:?}
-      - I2B2_DB_HOST=${MEDCO_NODE_DNS_NAME:?}
-      - MC_DB_HOST=${MEDCO_NODE_DNS_NAME:?}
+      - I2B2_DB_PASSWORD=${DB_ALL_USERS_PASSWORD:?}
+      - MC_DB_PASSWORD=${DB_ALL_USERS_PASSWORD:?}
     volumes:
       - ./configuration:/medco-configuration

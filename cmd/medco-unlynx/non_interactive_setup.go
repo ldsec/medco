@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/ldsec/unlynx/lib"
+
+	libunlynx "github.com/ldsec/unlynx/lib"
 	"github.com/urfave/cli"
 	"go.dedis.ch/kyber/v3/util/encoding"
 	"go.dedis.ch/kyber/v3/util/key"
@@ -15,14 +16,16 @@ import (
 func NonInteractiveSetup(c *cli.Context) error {
 
 	// cli arguments
-	serverBindingStr := c.String("serverBinding")
-	description := c.String("description")
-	privateTomlPath := c.String("privateTomlPath")
-	publicTomlPath := c.String("publicTomlPath")
+	serverBindingStr := c.String(optionServerBinding)
+	serverBindingPublicStr := c.String(optionServerBindingPublic)
+	description := c.String(optionDescription)
+	privateTomlPath := c.String(optionPrivateTomlPath)
+	publicTomlPath := c.String(optionPublicTomlPath)
+	wsURLStr := c.String(optionWsURL)
 
 	// provided keys (optional)
-	providedPubKey := c.String("pubKey")
-	providedPrivKey := c.String("privKey")
+	providedPubKey := c.String(optionProvidedPubKey)
+	providedPrivKey := c.String(optionProvidedPrivKey)
 
 	if serverBindingStr == "" || description == "" || privateTomlPath == "" || publicTomlPath == "" {
 		err := fmt.Errorf("arguments not OK")
@@ -59,6 +62,7 @@ func NonInteractiveSetup(c *cli.Context) error {
 	serverBinding := network.NewTLSAddress(serverBindingStr)
 	services := app.GenerateServiceKeyPairs()
 
+	// generate private.toml
 	conf := &app.CothorityConfig{
 		Suite:       libunlynx.SuiTe.String(),
 		Public:      pubStr,
@@ -66,16 +70,26 @@ func NonInteractiveSetup(c *cli.Context) error {
 		Address:     serverBinding,
 		Services:    services,
 		Description: description,
+		URL:         wsURLStr,
 	}
-
-	server := app.NewServerToml(libunlynx.SuiTe, public, serverBinding, conf.Description, services)
-	group := app.NewGroupToml(server)
-
 	if err := conf.Save(privateTomlPath); err != nil {
 		err := fmt.Errorf("failed saving private.toml")
 		log.Error(err)
 		return cli.NewExitError(err, 3)
 	}
+
+	// generate public.toml / group.toml
+	var publicServerBinding network.Address
+	if serverBindingPublicStr == "" {
+		publicServerBinding = serverBinding
+	} else {
+		// if serverBindingPublic is provided, set it in the public/group file
+		publicServerBinding = network.NewTLSAddress(serverBindingPublicStr)
+	}
+
+	server := app.NewServerToml(libunlynx.SuiTe, public, publicServerBinding, description, services)
+	server.URL = conf.URL
+	group := app.NewGroupToml(server)
 	if err := group.Save(publicTomlPath); err != nil {
 		err := fmt.Errorf("failed saving group.toml")
 		log.Error(err)

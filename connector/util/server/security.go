@@ -2,6 +2,7 @@ package utilserver
 
 import (
 	"errors"
+
 	"github.com/ldsec/medco/connector/restapi/models"
 	"github.com/lestrrat-go/jwx/jwt"
 	"github.com/sirupsen/logrus"

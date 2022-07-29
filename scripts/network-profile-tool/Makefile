@@ -1,7 +1,6 @@
-export MEDCO_VERSION := $(shell make --no-print-directory -C ../../ medco_version)
-export GLOWING_BEAR_MEDCO_VERSION := $(shell make --no-print-directory -C ../../ gb_version)
+SHELL := /bin/bash
 
-.PHONY: build pull up stop down load_test_data
+.PHONY: build pull up stop down docker-compose docker-compose.tools load_test_data
 build:
 	docker-compose -f docker-compose.yml -f docker-compose.tools.yml build
 
@@ -16,6 +15,14 @@ stop:
 
 down:
 	docker-compose -f docker-compose.yml down
+
+# use environment variable ARGS to pass arguments to docker-compose: make docker-compose ARGS="up -d"
+docker-compose:
+	docker-compose -f docker-compose.yml $(ARGS)
+
+# use environment variable ARGS to pass arguments to docker-compose.tools: make docker-compose.tools ARGS="run ..."
+docker-compose.tools:
+	docker-compose -f docker-compose.tools.yml $(ARGS)
 
 load_test_data:
 	docker-compose -f docker-compose.tools.yml run medco-loader v0 \

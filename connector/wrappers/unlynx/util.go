@@ -2,14 +2,15 @@ package unlynx
 
 import (
 	"errors"
-	"github.com/ldsec/medco/connector/util/server"
+	"os"
+	"strconv"
+
+	utilserver "github.com/ldsec/medco/connector/util/server"
 	servicesmedco "github.com/ldsec/medco/unlynx/services"
 	libunlynx "github.com/ldsec/unlynx/lib"
 	"github.com/sirupsen/logrus"
 	"go.dedis.ch/onet/v3"
 	"go.dedis.ch/onet/v3/app"
-	"os"
-	"strconv"
 )
 
 // serializeCipherVector serializes a vector of cipher texts into a string-encoded slice

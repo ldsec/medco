@@ -1,11 +1,12 @@
 package loaderi2b2
 
 import (
-	"github.com/ldsec/unlynx/lib"
-	"go.dedis.ch/kyber/v3"
-	"go.dedis.ch/onet/v3/log"
 	"strconv"
 	"strings"
+
+	libunlynx "github.com/ldsec/unlynx/lib"
+	"go.dedis.ch/kyber/v3"
+	"go.dedis.ch/onet/v3/log"
 )
 
 // ####----HELPER STRUCTS----####

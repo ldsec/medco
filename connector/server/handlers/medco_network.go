@@ -1,12 +1,13 @@
 package handlers
 
 import (
+	"strconv"
+
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/ldsec/medco/connector/restapi/models"
 	"github.com/ldsec/medco/connector/restapi/server/operations/medco_network"
-	"github.com/ldsec/medco/connector/util/server"
+	utilserver "github.com/ldsec/medco/connector/util/server"
 	"github.com/ldsec/medco/connector/wrappers/unlynx"
-	"strconv"
 )
 
 // MedCoNetworkGetMetadataHandler handles /medco/network API endpoint

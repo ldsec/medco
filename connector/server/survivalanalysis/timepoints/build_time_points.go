@@ -15,6 +15,7 @@ func BuildTimePoints(
 	endConceptCodes []string,
 	endModifierCodes []string,
 	endEarliest bool,
+	censoringFromEncounter bool,
 	maxLimit int64,
 ) (
 	eventAggregates map[int64]*medcomodels.Events,
@@ -47,7 +48,7 @@ func BuildTimePoints(
 	timers.AddTimers("build-time-points-sequential-data-event-of-interest", timer, nil)
 
 	timer = time.Now()
-	patientsToCensoringEvent, patientWithoutAnyEndEvent, err := censoringEvent(patientsToStartEvent, patientsWithoutEnd, endConceptCodes, endModifierCodes)
+	patientsToCensoringEvent, patientWithoutAnyEndEvent, err := censoredDates(patientsToStartEvent, patientsWithoutEnd, censoringFromEncounter)
 	if err != nil {
 		return
 	}

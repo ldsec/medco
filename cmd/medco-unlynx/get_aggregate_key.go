@@ -3,11 +3,12 @@ package main
 import (
 	"encoding/base64"
 	"fmt"
+	"os"
+	"path"
+
 	"github.com/urfave/cli"
 	"go.dedis.ch/onet/v3/app"
 	"go.dedis.ch/onet/v3/log"
-	"os"
-	"path"
 )
 
 func getAggregateKey(c *cli.Context) error {

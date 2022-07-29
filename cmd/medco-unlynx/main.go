@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/ldsec/medco"
 	"os"
 
-	"github.com/ldsec/unlynx/lib"
+	"github.com/ldsec/medco"
+
+	libunlynx "github.com/ldsec/unlynx/lib"
 	"github.com/urfave/cli"
 	"go.dedis.ch/onet/v3/app"
 	"go.dedis.ch/onet/v3/log"
@@ -32,6 +33,9 @@ const (
 	optionServerBinding      = "serverBinding"
 	optionServerBindingShort = "sb"
 
+	optionServerBindingPublic      = "serverBindingPublic"
+	optionServerBindingPublicShort = "sbp"
+
 	optionDescription      = "description"
 	optionDescriptionShort = "desc"
 
@@ -44,6 +48,8 @@ const (
 	optionProvidedPubKey = "pubKey"
 
 	optionProvidedPrivKey = "privKey"
+
+	optionWsURL = "wsUrl"
 
 	optionProvidedSecrets      = "secrets"
 	optionProvidedSecretsShort = "s"
@@ -128,6 +134,10 @@ func main() {
 			Usage: "Server binding address in the form of address:port",
 		},
 		cli.StringFlag{
+			Name:  optionServerBindingPublic + ", " + optionServerBindingPublicShort,
+			Usage: "Public server binding address in the form of address:port (optional, only if different from serverBinding)",
+		},
+		cli.StringFlag{
 			Name:  optionDescription + ", " + optionDescriptionShort,
 			Usage: "Description of the node for the toml files",
 		},
@@ -146,6 +156,10 @@ func main() {
 		cli.StringFlag{
 			Name:  optionProvidedPrivKey,
 			Usage: "Provided private key (optional)",
+		},
+		cli.StringFlag{
+			Name:  optionWsURL,
+			Usage: "Unlynx / onet WebSocket URL, e.g. ws://medco-unlynx:2002",
 		},
 	}
 

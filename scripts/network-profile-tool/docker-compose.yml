@@ -8,8 +8,8 @@ services:
       - WILDFLY_ADMIN_PASSWORD=${I2B2_WILDFLY_PASSWORD:?}
       - I2B2_SERVICE_PASSWORD=${I2B2_SERVICE_PASSWORD:?}
       - DEFAULT_USER_PASSWORD=${I2B2_USER_PASSWORD:?}
-    networks:
-      - medco-network
+      - I2B2_DB_PW=${DB_ALL_USERS_PASSWORD:?}
+      - AXIS2_LOGLEVEL=${I2B2_LOGLEVEL:?}
 
   medco-unlynx:
     extends:
@@ -17,10 +17,23 @@ services:
       service: medco-unlynx
     environment:
       - MEDCO_NODE_IDX=${MEDCO_NODE_IDX:?}
+      - UNLYNX_DEBUG_LEVEL=${UNLYNX_LOGLEVEL:?}
     volumes:
       - ./configuration:/medco-configuration
-    networks:
-      - medco-network
+
+  medco-unlynx-wstunnel:
+    extends:
+      file: ../docker-compose-definitions.yml
+      service: medco-unlynx-wstunnel
+    environment:
+      - SERVER_LISTEN_URL=ws://0.0.0.0:2003
+      - SERVER_DEST_ADDRESS=medco-unlynx:2001
+      - CLIENTS_LISTEN_ADDRESSES=${WS_CLIENTS_LISTEN_ADDRESSES:?}
+      - CLIENTS_WS_SERVER_URLS=${WS_CLIENTS_WS_SERVER_URLS:?}
+      - CLIENTS_WS_SERVER_PATH_PREFIXES=${WS_CLIENTS_WS_SERVER_PATH_PREFIXES:?}
+      - CLIENTS_DEST_ADDRESSES=${WS_CLIENTS_DEST_ADDRESSES:?}
+    volumes:
+      - ./configuration:/medco-configuration
 
   medco-connector:
     extends:
@@ -34,10 +47,11 @@ services:
       - OIDC_CLIENT_IDS=${OIDC_CLIENT_IDS:?}
       - OIDC_JWT_USER_ID_CLAIMS=${OIDC_JWT_USER_ID_CLAIMS:?}
       - MEDCO_NODES_URL=${MEDCO_NODES_URL:?}
+      - MC_DB_PASSWORD=${DB_ALL_USERS_PASSWORD:?}
+      - I2B2_DB_PASSWORD=${DB_ALL_USERS_PASSWORD:?}
+      - LOG_LEVEL=${CONNECTOR_LOGLEVEL:?}
     volumes:
       - ./configuration:/medco-configuration
-    networks:
-      - medco-network
 
   glowing-bear-medco:
     extends:
@@ -49,8 +63,6 @@ services:
       - GB_KEYCLOAK_REALM=${KEYCLOAK_REALM:?}
       - GB_KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID:?}
       - GB_FOOTER_TEXT=MedCo network ${MEDCO_NETWORK_NAME:?}, node ${MEDCO_NODE_IDX:?} / ${MEDCO_NODE_DNS_NAME:?}
-    networks:
-      - medco-network
 
   nginx:
     extends:
@@ -59,17 +71,11 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "2001:2001"
-      - "2002:2002"
     environment:
-      - HTTP_SCHEME=https
       - PROD_CONFIG=true
     volumes:
-      - ./configuration/group.toml:/medco-configuration/group.toml
       - ./configuration/certificate.crt:/medco-configuration/certificate.crt
       - ./configuration/certificate.key:/medco-configuration/certificate.key
-    networks:
-      - medco-network
 
   postgresql:
     extends:
@@ -77,10 +83,9 @@ services:
       service: postgresql
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?}
+      - DB_ALL_USERS_PASSWORD=${DB_ALL_USERS_PASSWORD:?}
     ports:
       - "5432:5432"
-    networks:
-      - medco-network
 
   keycloak:
     extends:
@@ -88,14 +93,9 @@ services:
       service: keycloak
     environment:
       - KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD:?}
+      - DB_PASSWORD=${DB_ALL_USERS_PASSWORD:?}
     depends_on:
       - postgresql
-    networks:
-      - medco-network
 
 volumes:
   medcodb:
-
-networks:
-  medco-network:
-    driver: bridge

@@ -2,9 +2,10 @@ package identifiers
 
 import (
 	"errors"
-	"go.dedis.ch/onet/v3/log"
 	"regexp"
 	"strconv"
+
+	"go.dedis.ch/onet/v3/log"
 )
 
 /*

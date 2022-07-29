@@ -55,6 +55,10 @@ func main() {
 			Usage: "Query timing: any|samevisit|sameinstancenum",
 			Value: "any",
 		},
+		cli.StringFlag{
+			Name:  "sequences, s",
+			Usage: "Event sequence: before|beforeorsametime|sametime,first|any|last,startdate|enddate,first|any|last,startdate|enddate",
+		},
 	}
 
 	//--- genomic annotations get values command flags
@@ -121,6 +125,11 @@ func main() {
 			Name:  "endsWhen, z",
 			Usage: "In case of multiple occurences of end concept in observations, specifies if the earliest or the latest is taken",
 			Value: "earliest",
+		},
+		cli.StringFlag{
+			Name:  "censoringFrom, r",
+			Usage: "Determine whether the right-censoring date must be taken from observations or encounters",
+			Value: "encounters",
 		},
 	}
 
@@ -277,7 +286,7 @@ func main() {
 			Aliases:   []string{"q"},
 			Usage:     "Query the MedCo network",
 			Flags:     queryFlags,
-			ArgsUsage: "[-t timing] query_string",
+			ArgsUsage: "[-t timing] [-s sequences] query_string",
 			Action: func(c *cli.Context) error {
 				return exploreclient.ExecuteClientQuery(
 					c.GlobalString("token"),
@@ -285,6 +294,7 @@ func main() {
 					c.GlobalString("password"),
 					strings.Join(c.Args(), " "),
 					c.String("timing"),
+					c.String("sequences"),
 					c.GlobalString("outputFile"),
 					c.GlobalBool("disableTLSCheck"),
 				)
@@ -358,6 +368,7 @@ func main() {
 					c.String("startsWhen"),
 					c.String("endConcept"),
 					c.String("endsWhen"),
+					c.String("censoringFrom"),
 				)
 
 			},
