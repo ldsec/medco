@@ -231,6 +231,41 @@ func init() {
         }
       }
     },
+    "/node/explore-statistics/query": {
+      "post": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore-statistics"
+            ]
+          }
+        ],
+        "tags": [
+          "explore statistics"
+        ],
+        "summary": "Queries the server to obtain the histogram of the distribution linked to the concept sent as parameter to the request.",
+        "operationId": "exploreStatistics",
+        "parameters": [
+          {
+            "$ref": "#/parameters/exploreStatisticsRequest"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/exploreStatisticsResponse"
+          },
+          "400": {
+            "$ref": "#/responses/badRequestResponse"
+          },
+          "404": {
+            "$ref": "#/responses/notFoundResponse"
+          },
+          "default": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      }
+    },
     "/node/explore/cohorts": {
       "get": {
         "security": [
@@ -333,6 +368,9 @@ func init() {
           "400": {
             "$ref": "#/responses/badRequestResponse"
           },
+          "403": {
+            "$ref": "#/responses/forbiddenResponse"
+          },
           "404": {
             "$ref": "#/responses/notFoundResponse"
           },
@@ -414,6 +452,70 @@ func init() {
         "responses": {
           "200": {
             "description": "Deleted cohort"
+          },
+          "403": {
+            "$ref": "#/responses/forbiddenResponse"
+          },
+          "404": {
+            "$ref": "#/responses/notFoundResponse"
+          },
+          "default": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      }
+    },
+    "/node/explore/default-cohort": {
+      "get": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
+        ],
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Returns the default cohort name of the user, if any",
+        "operationId": "getDefaultCohort",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/getDefaultCohortResponse"
+          },
+          "default": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      }
+    },
+    "/node/explore/default-cohort/{name}": {
+      "put": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
+        ],
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Change the default cohort of the user",
+        "operationId": "putDefaultCohort",
+        "parameters": [
+          {
+            "pattern": "^\\w+$",
+            "type": "string",
+            "description": "Name of the cohort to set as the new default cohort",
+            "name": "name",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default cohort updated"
           },
           "404": {
             "$ref": "#/responses/notFoundResponse"
@@ -615,6 +717,28 @@ func init() {
           }
         },
         "NormalUnits": {
+          "type": "string"
+        }
+      }
+    },
+    "clearInterval": {
+      "description": "Explore statistics encrypted bucket of the histogram",
+      "type": "object",
+      "required": [
+        "count",
+        "lowerBound",
+        "higherBound"
+      ],
+      "properties": {
+        "count": {
+          "description": "The encrypted count for this bucket",
+          "type": "integer",
+          "format": "int64"
+        },
+        "higherBound": {
+          "type": "string"
+        },
+        "lowerBound": {
           "type": "string"
         }
       }
@@ -822,6 +946,27 @@ func init() {
         }
       }
     },
+    "intervalBucket": {
+      "description": "Explore statistics encrypted bucket of the histogram",
+      "type": "object",
+      "required": [
+        "encCount",
+        "lowerBound",
+        "higherBound"
+      ],
+      "properties": {
+        "encCount": {
+          "description": "The encrypted count for this bucket",
+          "type": "string"
+        },
+        "higherBound": {
+          "type": "string"
+        },
+        "lowerBound": {
+          "type": "string"
+        }
+      }
+    },
     "metadataxml": {
       "type": "object",
       "properties": {
@@ -965,7 +1110,8 @@ func init() {
         "medco-network",
         "medco-explore",
         "medco-genomic-annotations",
-        "medco-survival-analysis"
+        "medco-survival-analysis",
+        "medco-explore-statistics"
       ]
     },
     "timers": {
@@ -1120,6 +1266,79 @@ func init() {
       "required": true,
       "schema": {
         "$ref": "#/definitions/exploreSearch"
+      }
+    },
+    "exploreStatisticsRequest": {
+      "description": "User public key, cohort name, modifier or concept information, interval size, minimum and maximum value of concept or modifier",
+      "name": "body",
+      "in": "body",
+      "required": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "string",
+            "pattern": "^[\\w:-]+$"
+          },
+          "bucketSize": {
+            "type": "number"
+          },
+          "cohortDefinition": {
+            "type": "object",
+            "properties": {
+              "isPanelEmpty": {
+                "description": "This is set to true if the cohort passed as parameter is empty, this happens if the inclusion or exclusion constraints are empty",
+                "type": "boolean"
+              },
+              "panels": {
+                "description": "i2b2 panels (linked by an AND)",
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/panel"
+                }
+              },
+              "queryTiming": {
+                "$ref": "#/definitions/timing"
+              }
+            }
+          },
+          "concepts": {
+            "description": "A list of the paths of concepts used as analytes",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
+            }
+          },
+          "minObservation": {
+            "type": "number"
+          },
+          "modifiers": {
+            "description": "A list describing the modifiers used as analytes",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "modifierKey",
+                "appliedPath"
+              ],
+              "properties": {
+                "appliedPath": {
+                  "type": "string",
+                  "pattern": "^((\\/[^\\/]+)+\\/%?)$"
+                },
+                "modifierKey": {
+                  "type": "string",
+                  "pattern": "^((\\/[^\\/]+)+\\/)$"
+                }
+              }
+            }
+          },
+          "userPublicKey": {
+            "type": "string",
+            "pattern": "^[\\w=-]+$"
+          }
+        }
       }
     },
     "survivalAnalysisRequest": {
@@ -1351,6 +1570,63 @@ func init() {
         }
       }
     },
+    "exploreStatisticsResponse": {
+      "description": "Explore statistics histograms",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "cohortQueryID": {
+            "description": "The ID of the record saved in the medco db which contains information about the patient set of the cohort corresponding to the inclusion/exclusion criterias specified by the user",
+            "type": "integer"
+          },
+          "encryptedCohortCount": {
+            "type": "string"
+          },
+          "encryptedPatientList": {
+            "description": "list of encrypted masked patient IDs.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "globalTimers": {
+            "description": "Timers for work happening outside of the construction of the histograms",
+            "$ref": "#/definitions/timers"
+          },
+          "patientSetID": {
+            "description": "ID returned by the i2b2 query about the cohort based on the inclusion and exclusion constraints fed the input of the front end query.",
+            "type": "integer"
+          },
+          "results": {
+            "description": "Each item of this array contains the histogram of a specific analyte (concept or modifier).",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "analyteName": {
+                  "description": "The name of the analyte used to build this histogram",
+                  "type": "string"
+                },
+                "intervals": {
+                  "description": "the encrypted counts of each bucket of the histogram",
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "$ref": "#/definitions/intervalBucket"
+                  }
+                },
+                "timers": {
+                  "$ref": "#/definitions/timers"
+                },
+                "unit": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "forbiddenResponse": {
       "description": "Request is valid and user is authenticated, but not authorized to perform this action.",
       "schema": {
@@ -1395,6 +1671,9 @@ func init() {
             "creationDate": {
               "type": "string"
             },
+            "predefined": {
+              "type": "boolean"
+            },
             "queryDefinition": {
               "type": "object",
               "properties": {
@@ -1417,6 +1696,12 @@ func init() {
             }
           }
         }
+      }
+    },
+    "getDefaultCohortResponse": {
+      "description": "Name of cohort/filter retrieved",
+      "schema": {
+        "type": "string"
       }
     },
     "networkMetadataResponse": {
@@ -1966,6 +2251,155 @@ func init() {
         }
       }
     },
+    "/node/explore-statistics/query": {
+      "post": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore-statistics"
+            ]
+          }
+        ],
+        "tags": [
+          "explore statistics"
+        ],
+        "summary": "Queries the server to obtain the histogram of the distribution linked to the concept sent as parameter to the request.",
+        "operationId": "exploreStatistics",
+        "parameters": [
+          {
+            "description": "User public key, cohort name, modifier or concept information, interval size, minimum and maximum value of concept or modifier",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ID": {
+                  "type": "string",
+                  "pattern": "^[\\w:-]+$"
+                },
+                "bucketSize": {
+                  "type": "number"
+                },
+                "cohortDefinition": {
+                  "type": "object",
+                  "properties": {
+                    "isPanelEmpty": {
+                      "description": "This is set to true if the cohort passed as parameter is empty, this happens if the inclusion or exclusion constraints are empty",
+                      "type": "boolean"
+                    },
+                    "panels": {
+                      "description": "i2b2 panels (linked by an AND)",
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/definitions/panel"
+                      }
+                    },
+                    "queryTiming": {
+                      "$ref": "#/definitions/timing"
+                    }
+                  }
+                },
+                "concepts": {
+                  "description": "A list of the paths of concepts used as analytes",
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
+                  }
+                },
+                "minObservation": {
+                  "type": "number"
+                },
+                "modifiers": {
+                  "description": "A list describing the modifiers used as analytes",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/ModifiersItems0"
+                  }
+                },
+                "userPublicKey": {
+                  "type": "string",
+                  "pattern": "^[\\w=-]+$"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Explore statistics histograms",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "cohortQueryID": {
+                  "description": "The ID of the record saved in the medco db which contains information about the patient set of the cohort corresponding to the inclusion/exclusion criterias specified by the user",
+                  "type": "integer"
+                },
+                "encryptedCohortCount": {
+                  "type": "string"
+                },
+                "encryptedPatientList": {
+                  "description": "list of encrypted masked patient IDs.",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "globalTimers": {
+                  "description": "Timers for work happening outside of the construction of the histograms",
+                  "$ref": "#/definitions/timers"
+                },
+                "patientSetID": {
+                  "description": "ID returned by the i2b2 query about the cohort based on the inclusion and exclusion constraints fed the input of the front end query.",
+                  "type": "integer"
+                },
+                "results": {
+                  "description": "Each item of this array contains the histogram of a specific analyte (concept or modifier).",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/ResultsItems0"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad user input in request.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/node/explore/cohorts": {
       "get": {
         "security": [
@@ -2175,6 +2609,17 @@ func init() {
               }
             }
           },
+          "403": {
+            "description": "Request is valid and user is authenticated, but not authorized to perform this action.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
           "404": {
             "description": "Not found.",
             "schema": {
@@ -2334,6 +2779,105 @@ func init() {
         "responses": {
           "200": {
             "description": "Deleted cohort"
+          },
+          "403": {
+            "description": "Request is valid and user is authenticated, but not authorized to perform this action.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/node/explore/default-cohort": {
+      "get": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
+        ],
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Returns the default cohort name of the user, if any",
+        "operationId": "getDefaultCohort",
+        "responses": {
+          "200": {
+            "description": "Name of cohort/filter retrieved",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "default": {
+            "description": "Error response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/node/explore/default-cohort/{name}": {
+      "put": {
+        "security": [
+          {
+            "medco-jwt": [
+              "medco-explore"
+            ]
+          }
+        ],
+        "tags": [
+          "medco-node"
+        ],
+        "summary": "Change the default cohort of the user",
+        "operationId": "putDefaultCohort",
+        "parameters": [
+          {
+            "pattern": "^\\w+$",
+            "type": "string",
+            "description": "Name of the cohort to set as the new default cohort",
+            "name": "name",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default cohort updated"
           },
           "404": {
             "description": "Not found.",
@@ -2687,6 +3231,25 @@ func init() {
         }
       }
     },
+    "ExploreStatisticsParamsBodyCohortDefinition": {
+      "type": "object",
+      "properties": {
+        "isPanelEmpty": {
+          "description": "This is set to true if the cohort passed as parameter is empty, this happens if the inclusion or exclusion constraints are empty",
+          "type": "boolean"
+        },
+        "panels": {
+          "description": "i2b2 panels (linked by an AND)",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/panel"
+          }
+        },
+        "queryTiming": {
+          "$ref": "#/definitions/timing"
+        }
+      }
+    },
     "GetCohortsOKBodyItems0": {
       "type": "object",
       "properties": {
@@ -2698,6 +3261,9 @@ func init() {
         },
         "creationDate": {
           "type": "string"
+        },
+        "predefined": {
+          "type": "boolean"
         },
         "queryDefinition": {
           "type": "object",
@@ -2776,6 +3342,23 @@ func init() {
         },
         "Version": {
           "type": "string"
+        }
+      }
+    },
+    "ModifiersItems0": {
+      "type": "object",
+      "required": [
+        "modifierKey",
+        "appliedPath"
+      ],
+      "properties": {
+        "appliedPath": {
+          "type": "string",
+          "pattern": "^((\\/[^\\/]+)+\\/%?)$"
+        },
+        "modifierKey": {
+          "type": "string",
+          "pattern": "^((\\/[^\\/]+)+\\/)$"
         }
       }
     },
@@ -2877,16 +3460,22 @@ func init() {
     "ResultsItems0": {
       "type": "object",
       "properties": {
-        "groupID": {
+        "analyteName": {
+          "description": "The name of the analyte used to build this histogram",
           "type": "string"
         },
-        "groupResults": {
+        "intervals": {
+          "description": "the encrypted counts of each bucket of the histogram",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/ResultsItems0GroupResultsItems0"
+            "type": "object",
+            "$ref": "#/definitions/intervalBucket"
           }
         },
-        "initialCount": {
+        "timers": {
+          "$ref": "#/definitions/timers"
+        },
+        "unit": {
           "type": "string"
         }
       }
@@ -3051,6 +3640,28 @@ func init() {
           "items": {
             "$ref": "#/definitions/restApiAuthorization"
           }
+        }
+      }
+    },
+    "clearInterval": {
+      "description": "Explore statistics encrypted bucket of the histogram",
+      "type": "object",
+      "required": [
+        "count",
+        "lowerBound",
+        "higherBound"
+      ],
+      "properties": {
+        "count": {
+          "description": "The encrypted count for this bucket",
+          "type": "integer",
+          "format": "int64"
+        },
+        "higherBound": {
+          "type": "string"
+        },
+        "lowerBound": {
+          "type": "string"
         }
       }
     },
@@ -3257,6 +3868,27 @@ func init() {
         }
       }
     },
+    "intervalBucket": {
+      "description": "Explore statistics encrypted bucket of the histogram",
+      "type": "object",
+      "required": [
+        "encCount",
+        "lowerBound",
+        "higherBound"
+      ],
+      "properties": {
+        "encCount": {
+          "description": "The encrypted count for this bucket",
+          "type": "string"
+        },
+        "higherBound": {
+          "type": "string"
+        },
+        "lowerBound": {
+          "type": "string"
+        }
+      }
+    },
     "metadataxml": {
       "type": "object",
       "properties": {
@@ -3342,7 +3974,8 @@ func init() {
         "medco-network",
         "medco-explore",
         "medco-genomic-annotations",
-        "medco-survival-analysis"
+        "medco-survival-analysis",
+        "medco-explore-statistics"
       ]
     },
     "timers": {
@@ -3485,6 +4118,79 @@ func init() {
       "required": true,
       "schema": {
         "$ref": "#/definitions/exploreSearch"
+      }
+    },
+    "exploreStatisticsRequest": {
+      "description": "User public key, cohort name, modifier or concept information, interval size, minimum and maximum value of concept or modifier",
+      "name": "body",
+      "in": "body",
+      "required": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "string",
+            "pattern": "^[\\w:-]+$"
+          },
+          "bucketSize": {
+            "type": "number"
+          },
+          "cohortDefinition": {
+            "type": "object",
+            "properties": {
+              "isPanelEmpty": {
+                "description": "This is set to true if the cohort passed as parameter is empty, this happens if the inclusion or exclusion constraints are empty",
+                "type": "boolean"
+              },
+              "panels": {
+                "description": "i2b2 panels (linked by an AND)",
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/panel"
+                }
+              },
+              "queryTiming": {
+                "$ref": "#/definitions/timing"
+              }
+            }
+          },
+          "concepts": {
+            "description": "A list of the paths of concepts used as analytes",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^\\/$|^((\\/[^\\/]+)+\\/?)$"
+            }
+          },
+          "minObservation": {
+            "type": "number"
+          },
+          "modifiers": {
+            "description": "A list describing the modifiers used as analytes",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "modifierKey",
+                "appliedPath"
+              ],
+              "properties": {
+                "appliedPath": {
+                  "type": "string",
+                  "pattern": "^((\\/[^\\/]+)+\\/%?)$"
+                },
+                "modifierKey": {
+                  "type": "string",
+                  "pattern": "^((\\/[^\\/]+)+\\/)$"
+                }
+              }
+            }
+          },
+          "userPublicKey": {
+            "type": "string",
+            "pattern": "^[\\w=-]+$"
+          }
+        }
       }
     },
     "survivalAnalysisRequest": {
@@ -3716,6 +4422,63 @@ func init() {
         }
       }
     },
+    "exploreStatisticsResponse": {
+      "description": "Explore statistics histograms",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "cohortQueryID": {
+            "description": "The ID of the record saved in the medco db which contains information about the patient set of the cohort corresponding to the inclusion/exclusion criterias specified by the user",
+            "type": "integer"
+          },
+          "encryptedCohortCount": {
+            "type": "string"
+          },
+          "encryptedPatientList": {
+            "description": "list of encrypted masked patient IDs.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "globalTimers": {
+            "description": "Timers for work happening outside of the construction of the histograms",
+            "$ref": "#/definitions/timers"
+          },
+          "patientSetID": {
+            "description": "ID returned by the i2b2 query about the cohort based on the inclusion and exclusion constraints fed the input of the front end query.",
+            "type": "integer"
+          },
+          "results": {
+            "description": "Each item of this array contains the histogram of a specific analyte (concept or modifier).",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "analyteName": {
+                  "description": "The name of the analyte used to build this histogram",
+                  "type": "string"
+                },
+                "intervals": {
+                  "description": "the encrypted counts of each bucket of the histogram",
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "$ref": "#/definitions/intervalBucket"
+                  }
+                },
+                "timers": {
+                  "$ref": "#/definitions/timers"
+                },
+                "unit": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "forbiddenResponse": {
       "description": "Request is valid and user is authenticated, but not authorized to perform this action.",
       "schema": {
@@ -3760,6 +4523,9 @@ func init() {
             "creationDate": {
               "type": "string"
             },
+            "predefined": {
+              "type": "boolean"
+            },
             "queryDefinition": {
               "type": "object",
               "properties": {
@@ -3782,6 +4548,12 @@ func init() {
             }
           }
         }
+      }
+    },
+    "getDefaultCohortResponse": {
+      "description": "Name of cohort/filter retrieved",
+      "schema": {
+        "type": "string"
       }
     },
     "networkMetadataResponse": {

@@ -1,0 +1,22 @@
+-- pl/pgsql function that sets the current default saved cohort or filter
+
+CREATE OR REPLACE FUNCTION query_tools.update_default_filter(user_id varchar, cohort_name varchar)
+  RETURNS integer
+  VOLATILE
+  PARALLEL UNSAFE
+  AS $$
+DECLARE
+  cohort_id_current integer;
+BEGIN
+  EXECUTE 'INSERT INTO query_tools.default_filters(
+  user_id, default_filter_id)
+	SELECT $1, cohort_id FROM query_tools.saved_cohorts WHERE cohort_name = $2
+  ON CONFLICT (user_id) DO UPDATE SET default_filter_id = excluded.default_filter_id
+  RETURNING default_filter_id'
+  USING user_id,
+  cohort_name
+  INTO cohort_id_current;
+  RETURN cohort_id_current;
+END;
+$$
+LANGUAGE plpgsql

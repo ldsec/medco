@@ -141,3 +141,33 @@ func TestDoesCohortExist(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, false, exists)
 }
+
+func TestPredefinedFilter(t *testing.T) {
+	utilserver.TestDBConnection(t)
+
+	value, err := UpdateDefaultFilter("test", -1)
+	assert.NoError(t, err)
+	assert.Equal(t, -1, value)
+
+	value, err = UpdateDefaultFilter("test", -99)
+	assert.NoError(t, err)
+	assert.Equal(t, -99, value)
+
+	got, err := GetDefaultFilter("test")
+	assert.NoError(t, err)
+	assert.NotNil(t, got)
+	assert.Equal(t, -99, *got)
+
+	removed, err := RemoveDefaultFilter("test")
+	assert.NoError(t, err)
+	assert.NotNil(t, removed)
+	assert.Equal(t, -99, *removed)
+
+	removed, err = RemoveDefaultFilter("test")
+	assert.NoError(t, err)
+	assert.Nil(t, removed)
+
+	got, err = GetDefaultFilter("test")
+	assert.NoError(t, err)
+	assert.Nil(t, got)
+}

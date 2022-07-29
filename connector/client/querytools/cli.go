@@ -49,12 +49,17 @@ func ExecuteGetCohorts(token, username, password string, disableTLSCheck bool, r
 		return err
 	}
 	logrus.Debug("Writing headers")
-	resultCSV.Write([]string{"node_index", "cohort_name", "cohort_id", "query_id", "creation_date", "update_date", "query_timing", "panels"})
+	resultCSV.Write([]string{"node_index", "cohort_name", "cohort_id", "query_id", "creation_date", "update_date", "predefined", "query_timing", "panels"})
 
 	for nodeIndex, nodeResult := range cohorts {
 		for _, cohortInfo := range nodeResult {
 			logrus.Debugf("Writing result %d", nodeIndex)
 			panelJSONs, err := marshal(cohortInfo.QueryDefinition.Panels)
+			if err != nil {
+				err = fmt.Errorf("cohorts request marshalling results: %s", err.Error())
+				logrus.Error(err)
+				return err
+			}
 			// removing the quotes from the marshalling process eases parsing of the produced file
 			panelJSONs = strings.Replace(panelJSONs, `"`, "", -1)
 			err = resultCSV.Write([]string{
@@ -64,6 +69,7 @@ func ExecuteGetCohorts(token, username, password string, disableTLSCheck bool, r
 				strconv.Itoa(cohortInfo.QueryID),
 				cohortInfo.CreationDate.Format(time.RFC3339),
 				cohortInfo.UpdateDate.Format(time.RFC3339),
+				strconv.FormatBool(cohortInfo.Predefined),
 				string(cohortInfo.QueryDefinition.QueryTiming),
 				panelJSONs,
 			})
@@ -204,6 +210,105 @@ func ExecuteRemoveCohorts(token, username, password, cohortName string, disableT
 	}
 	return nil
 
+}
+
+// ExecuteGetDefaultCohort executes a get default cohort Query
+func ExecuteGetDefaultCohort(token, username, password string, disableTLSCheck bool, resultFile string) error {
+	accessToken, err := utilclient.RetrieveOrGetNewAccessToken(token, username, password, disableTLSCheck)
+	if err != nil {
+		err = fmt.Errorf("while retrieving access token: %s", err.Error())
+		logrus.Error(err)
+		return err
+	}
+	logrus.Debug("access token received")
+	logrus.Tracef("token %s", accessToken)
+
+	// calling API
+	getDefaultCohort, err := NewGetDefaultCohort(accessToken, disableTLSCheck)
+	if err != nil {
+		err = fmt.Errorf("while crafting new get default request: %s", err.Error())
+		logrus.Error(err)
+		return err
+	}
+
+	cohortNames, err := getDefaultCohort.Execute()
+	if err != nil {
+		err = fmt.Errorf("get default cohort request execution: %s", err.Error())
+		logrus.Error(err)
+
+	}
+
+	resultCSV, err := utilclient.NewCSV(resultFile)
+	if err != nil {
+		err = fmt.Errorf("cohorts request writing results: %s", err.Error())
+		logrus.Error(err)
+		return err
+	}
+	logrus.Debug("Writing headers")
+	err = resultCSV.Write([]string{"node_index", "cohort_name"})
+	if err != nil {
+		err = fmt.Errorf("cohorts request writing headers to result file: %s", err.Error())
+		logrus.Error(err)
+		return err
+	}
+
+	logrus.Debug("Writing results")
+	for idx, cohortName := range cohortNames {
+		err = resultCSV.Write([]string{strconv.Itoa(idx), cohortName})
+		if err != nil {
+			err = fmt.Errorf("cohorts requestwriting results to result file: %s", err.Error())
+			logrus.Error(err)
+			return err
+		}
+
+	}
+
+	// TODO this piece of code is redundant
+	logrus.Debug("Flushing result file")
+	err = resultCSV.Flush()
+	if err != nil {
+		err = fmt.Errorf("cohorts request flushing result file: %s", err.Error())
+		logrus.Error(err)
+		return err
+	}
+
+	logrus.Debug("Closing result file")
+	err = resultCSV.Close()
+	if err != nil {
+		err = fmt.Errorf("cohorts request closing file: %s", err.Error())
+		logrus.Error(err)
+		return err
+	}
+
+	return err
+}
+
+// ExecutePutDefaultCohort executes a put default cohort query
+func ExecutePutDefaultCohort(token, username, password, cohortName string, disableTLSCheck bool) error {
+	accessToken, err := utilclient.RetrieveOrGetNewAccessToken(token, username, password, disableTLSCheck)
+	if err != nil {
+		err = fmt.Errorf("while retrieving access token: %s", err.Error())
+		logrus.Error(err)
+		return err
+	}
+	logrus.Debug("access token received")
+	logrus.Tracef("token %s", accessToken)
+
+	// calling API
+	putDefaultCohort, err := NewPutDefaultCohort(accessToken, cohortName, disableTLSCheck)
+	if err != nil {
+		err = fmt.Errorf("while crafting new put default request: %s", err.Error())
+		logrus.Error(err)
+		return err
+	}
+
+	err = putDefaultCohort.Execute()
+	if err != nil {
+		err = fmt.Errorf("update default cohort request execution: %s", err.Error())
+		logrus.Error(err)
+		return err
+	}
+	return nil
 }
 
 // ExecuteCohortsPatientList executes a cohorts patient list query

@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+!/usr/bin/env bash
 set -Eeuo pipefail
 
 USERNAME=${1:-test}
@@ -251,6 +251,7 @@ resultSearchConceptChildren1="PATH  TYPE
 
 searchConceptChildren2="/E2ETEST/e2etest/"
 resultSearchConceptChildren2="PATH  TYPE
+                              /E2ETEST/e2etest/bioref/ concept
                               /E2ETEST/e2etest/1/ concept
                               /E2ETEST/e2etest/2/ concept
                               /E2ETEST/e2etest/3/ concept

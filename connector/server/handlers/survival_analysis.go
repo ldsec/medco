@@ -3,10 +3,10 @@ package handlers
 import (
 	"fmt"
 
+	"github.com/go-openapi/runtime/middleware"
 	querytoolsserver "github.com/ldsec/medco/connector/server/querytools"
 	survivalserver "github.com/ldsec/medco/connector/server/survivalanalysis"
 
-	"github.com/go-openapi/runtime/middleware"
 	"github.com/ldsec/medco/connector/restapi/models"
 	"github.com/ldsec/medco/connector/restapi/server/operations/survival_analysis"
 	"github.com/sirupsen/logrus"

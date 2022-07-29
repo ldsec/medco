@@ -222,6 +222,27 @@ paths:
           $ref: "#/responses/errorResponse"
       security:
         - medco-jwt: ["medco-genomic-annotations"]
+
+  /node/explore-statistics/query:
+    post :
+      tags:
+        - "explore statistics"
+      summary: "Queries the server to obtain the histogram of the distribution linked to the concept sent as parameter to the request."
+      operationId: "exploreStatistics"
+      parameters:
+        - $ref: "#/parameters/exploreStatisticsRequest"
+      responses:
+        200:
+          $ref: "#/responses/exploreStatisticsResponse"
+        400:
+          $ref : "#/responses/badRequestResponse"
+        404:
+          $ref : "#/responses/notFoundResponse"
+        default:
+          $ref: '#/responses/errorResponse'
+      security:
+        - medco-jwt: ["medco-explore-statistics"]
+
   /node/analysis/survival/query:
     post :
       tags:
@@ -312,6 +333,8 @@ paths:
           description: "Updated cohort"
         400:
           $ref : "#/responses/badRequestResponse"
+        403:
+          $ref : '#/responses/forbiddenResponse'
         404:
           $ref : "#/responses/notFoundResponse"
         409:
@@ -336,12 +359,52 @@ paths:
       responses:
         200:
           description: "Deleted cohort"
+        403:
+          $ref : '#/responses/forbiddenResponse'
         404:
           $ref : '#/responses/notFoundResponse'
         default:
           $ref: '#/responses/errorResponse'
       security:
         - medco-jwt: ["medco-explore"]
+
+
+  /node/explore/default-cohort:
+    get:
+      tags:
+        -  "medco-node"
+      summary: "Returns the default cohort name of the user, if any"
+      operationId: "getDefaultCohort"
+      responses:
+        200:
+          $ref: '#/responses/getDefaultCohortResponse'
+        default:
+          $ref: '#/responses/errorResponse'
+      security:
+        - medco-jwt: ["medco-explore"]
+  /node/explore/default-cohort/{name}:
+    put:
+      tags:
+        - "medco-node"
+      summary: "Change the default cohort of the user"
+      operationId: "putDefaultCohort"
+      parameters:
+        - in: "path"
+          name: "name"
+          description: "Name of the cohort to set as the new default cohort"
+          required: true
+          type: "string"
+          pattern: '^\w+$'
+      responses:
+        200:
+          description: "Default cohort updated"
+        404:
+          $ref : '#/responses/notFoundResponse'
+        default:
+          $ref: '#/responses/errorResponse'
+      security:
+        - medco-jwt: ["medco-explore"]
+      
 
   /node/explore/cohorts/patient-list:
     post:
@@ -428,7 +491,7 @@ parameters:
         - queryID
         - creationDate
         - updateDate
-  
+
   cohortsPatientListRequest:
     in: "body"
     description: "Cohort patient list request"
@@ -449,6 +512,60 @@ parameters:
       required:
         - cohortName
         - userPublicKey
+
+  exploreStatisticsRequest:
+    in: "body"
+    description: "User public key, cohort name, modifier or concept information, interval size, minimum and maximum value of concept or modifier"
+    name: "body"
+    required: true
+    schema:
+      type: "object"
+      properties:
+        ID:
+          type: "string"
+          pattern: '^[\w:-]+$'
+        userPublicKey:
+          type: "string"
+          pattern: '^[\w=-]+$'
+        minObservation:
+          type: "number"
+        bucketSize:
+          type: "number"
+        concepts:
+          type: "array"
+          description: "A list of the paths of concepts used as analytes"
+          items:
+            type: "string"
+            pattern:  '^\/$|^((\/[^\/]+)+\/?)$'
+        modifiers:
+          type: "array"
+          description: "A list describing the modifiers used as analytes"
+          items:
+            type: "object"
+            properties:
+              modifierKey:
+                type: "string"
+                pattern: '^((\/[^\/]+)+\/)$'
+              appliedPath:
+                type: "string"
+                pattern: '^((\/[^\/]+)+\/%?)$'
+            required:
+              - modifierKey
+              - appliedPath
+        cohortDefinition:
+          type: "object"
+          properties:
+            panels:
+              type: "array"
+              description: "i2b2 panels (linked by an AND)"
+              items:
+                $ref: "#/definitions/panel"
+            queryTiming:
+              $ref: "#/definitions/timing"
+            isPanelEmpty:
+              description: "This is set to true if the cohort passed as parameter is empty, this happens if the inclusion or exclusion constraints are empty"
+              type: "boolean"
+
 
   survivalAnalysisRequest:
     in: "body"
@@ -576,7 +693,7 @@ responses:
       properties:
         message:
           type: "string"
-  
+
   forbiddenResponse:
     description: "Request is valid and user is authenticated, but not authorized to perform this action."
     schema:
@@ -674,6 +791,8 @@ responses:
             type: "string"
           updateDate:
             type: "string"
+          predefined:
+            type: "boolean"
           queryDefinition:
             type: "object"
             properties:
@@ -695,6 +814,52 @@ responses:
             type: "string"
         timers:
           $ref: "#/definitions/timers"
+
+  getDefaultCohortResponse:
+    description: "Name of cohort/filter retrieved"
+    schema:
+      type: "string"
+
+  exploreStatisticsResponse:
+    description: "Explore statistics histograms"
+    schema:
+      type: "object"
+      properties:
+        encryptedPatientList:
+          description: "list of encrypted masked patient IDs."
+          type: "array"
+          items:
+            type: "string"
+        encryptedCohortCount:
+          type: "string"
+        patientSetID:
+          description: "ID returned by the i2b2 query about the cohort based on the inclusion and exclusion constraints fed the input of the front end query."
+          type: "integer"
+        cohortQueryID:
+          description: "The ID of the record saved in the medco db which contains information about the patient set of the cohort corresponding to the inclusion/exclusion criterias specified by the user"
+          type: "integer"
+        globalTimers:
+          description: "Timers for work happening outside of the construction of the histograms"
+          $ref: "#/definitions/timers"
+        results:
+          description: "Each item of this array contains the histogram of a specific analyte (concept or modifier)."
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              timers:
+                $ref: "#/definitions/timers"
+              intervals:
+                description: "the encrypted counts of each bucket of the histogram"
+                type: "array"
+                items:
+                  type: "object"
+                  $ref: "#/definitions/intervalBucket"
+              unit:
+                type: "string"
+              analyteName:
+                description: "The name of the analyte used to build this histogram"
+                type: "string"
 
   survivalAnalysisResponse:
     description: "Queried survival analysis"
@@ -1022,6 +1187,7 @@ definitions:
       - medco-explore
       - medco-genomic-annotations
       - medco-survival-analysis
+      - medco-explore-statistics
 
   user:
     type: "object"
@@ -1049,6 +1215,33 @@ definitions:
       - samevisit
       - sameinstancenum
     default: "any"
+
+  clearInterval:
+    description: "Explore statistics encrypted bucket of the histogram"
+    type: "object"
+    required: ["count", "lowerBound", "higherBound"]
+    properties:
+      count:
+        description: "The encrypted count for this bucket"
+        type: "integer"
+        format: "int64"
+      lowerBound:
+        type: "string"
+      higherBound:
+        type: "string"
+
+  intervalBucket:
+    description: "Explore statistics encrypted bucket of the histogram"
+    type: "object"
+    required: ["encCount", "lowerBound", "higherBound"]
+    properties:
+      encCount:
+        description: "The encrypted count for this bucket"
+        type: "string"
+      lowerBound:
+        type: "string"
+      higherBound:
+        type: "string"
 
   timers:
     type: "array"

@@ -9,6 +9,7 @@ import (
 	"github.com/urfave/cli"
 
 	exploreclient "github.com/ldsec/medco/connector/client/explore"
+	explorestatisticsclient "github.com/ldsec/medco/connector/client/explorestatistics"
 	querytoolsclient "github.com/ldsec/medco/connector/client/querytools"
 	survivalclient "github.com/ldsec/medco/connector/client/survivalanalysis"
 )
@@ -77,6 +78,19 @@ func main() {
 			Name:  "encrypted, e",
 			Usage: "Return encrypted variant id",
 		},
+	}
+	//--- explore statistics command flags
+	exploreStatsFlags := []cli.Flag{
+		cli.StringFlag{
+			Name:  "dumpFile, d",
+			Usage: "Output file for the timers CSV. Printed to stdout if omitted.",
+			Value: "",
+		},
+		cli.IntFlag{
+			Name:  "nbBuckets, b",
+			Usage: "Number of buckets/bins in the requested histogram.",
+		},
+		// this is supposed to be a required argument, but we need -1 for testing, and -1 is not possible to pass as an argument here
 	}
 	//--- survival analysis command flags
 	survivalAnalysisFlag := []cli.Flag{
@@ -174,6 +188,15 @@ func main() {
 	}
 
 	//--- query tools command flags
+	setDefaultCohortFlag := []cli.Flag{
+		cli.StringFlag{
+			Name:     "cohortName, c",
+			Usage:    "Name of the cohort to be set as the default cohort",
+			Required: true,
+		},
+	}
+
+	//--- query tools command flags
 	cohortsPatientListFlag := []cli.Flag{
 		cli.StringFlag{
 			Name:     "cohortName, c",
@@ -202,6 +225,27 @@ func main() {
 					c.Args().Get(0),
 					c.GlobalString(("outputFile")),
 					c.GlobalBool("disableTLSCheck"))
+			},
+		},
+		{
+			Name:      "explore-stats",
+			Aliases:   []string{"exp-s"},
+			Flags:     exploreStatsFlags,
+			Usage:     "Get the histogram of the number of observations about a concept (or modifier) in the context of the selected cohort",
+			ArgsUsage: "conceptPath cohortName -b nbBuckets [-d dumpfile]",
+			Action: func(c *cli.Context) error {
+				return explorestatisticsclient.ExecuteClientExploreStatistics(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					strings.Join(c.Args(), " "),
+					c.GlobalString("timing"),
+					strings.Join(c.Args(), " "),
+					c.Int64("nbBuckets"),
+					c.GlobalBool("disableTLSCheck"),
+					c.GlobalString("outputFile"),
+					c.String("dumpFile"),
+				)
 			},
 		},
 
@@ -429,6 +473,38 @@ func main() {
 			Description: "Removes a cohort for a given name. If the user does not have a cohort with this name in DB, an error is sent.",
 			Action: func(c *cli.Context) error {
 				return querytoolsclient.ExecuteRemoveCohorts(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.String("cohortName"),
+					c.GlobalBool("disableTLSCheck"),
+				)
+			},
+		},
+		{
+			Name:        "get-default-cohort",
+			Aliases:     []string{"gdc"},
+			Usage:       "Retrieve the default cohort or filter.",
+			Description: "Set the cohort passed as argument to be the user's default cohort/filter. If another cohort was previously defined, this one is upset (there is at most one default cohort per user).",
+			Action: func(c *cli.Context) error {
+				return querytoolsclient.ExecuteGetDefaultCohort(
+					c.GlobalString("token"),
+					c.GlobalString("user"),
+					c.GlobalString("password"),
+					c.GlobalBool("disableTLSCheck"),
+					c.GlobalString("outputFile"),
+				)
+			},
+		},
+		{
+			Name:        "set-default-cohort",
+			Aliases:     []string{"sdc"},
+			Usage:       "Change the default cohort.",
+			Flags:       setDefaultCohortFlag,
+			ArgsUsage:   "-c cohortName",
+			Description: "Set the cohort passed as argument to be the user's default cohort/filter. If another cohort was previously defined, this one is upset (there is at most one default cohort per user).",
+			Action: func(c *cli.Context) error {
+				return querytoolsclient.ExecutePutDefaultCohort(
 					c.GlobalString("token"),
 					c.GlobalString("user"),
 					c.GlobalString("password"),

@@ -10,6 +10,7 @@ import (
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 
+	"github.com/ldsec/medco/connector/restapi/client/explore_statistics"
 	"github.com/ldsec/medco/connector/restapi/client/genomic_annotations"
 	"github.com/ldsec/medco/connector/restapi/client/medco_network"
 	"github.com/ldsec/medco/connector/restapi/client/medco_node"
@@ -58,6 +59,7 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *MedcoCli {
 
 	cli := new(MedcoCli)
 	cli.Transport = transport
+	cli.ExploreStatistics = explore_statistics.New(transport, formats)
 	cli.GenomicAnnotations = genomic_annotations.New(transport, formats)
 	cli.MedcoNetwork = medco_network.New(transport, formats)
 	cli.MedcoNode = medco_node.New(transport, formats)
@@ -106,6 +108,8 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 
 // MedcoCli is a client for medco cli
 type MedcoCli struct {
+	ExploreStatistics explore_statistics.ClientService
+
 	GenomicAnnotations genomic_annotations.ClientService
 
 	MedcoNetwork medco_network.ClientService
@@ -120,6 +124,7 @@ type MedcoCli struct {
 // SetTransport changes the transport on the client and all its subresources
 func (c *MedcoCli) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
+	c.ExploreStatistics.SetTransport(transport)
 	c.GenomicAnnotations.SetTransport(transport)
 	c.MedcoNetwork.SetTransport(transport)
 	c.MedcoNode.SetTransport(transport)

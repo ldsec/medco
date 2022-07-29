@@ -9,7 +9,7 @@ DECLARE
   size_ integer;
 BEGIN
   EXECUTE 'SELECT COUNT(cohort_id) FROM query_tools.saved_cohorts
-WHERE user_id = $1 and cohort_name = $2'
+WHERE (user_id = $1 and cohort_name = $2 and not predefined) or (cohort_name = $2 and predefined)'
   USING user_id, cohort_name INTO size_;
   RETURN (size_ = 1);
 END;

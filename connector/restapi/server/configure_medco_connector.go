@@ -15,6 +15,7 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 
 	"github.com/ldsec/medco/connector/restapi/server/operations"
+	"github.com/ldsec/medco/connector/restapi/server/operations/explore_statistics"
 	"github.com/ldsec/medco/connector/restapi/server/operations/genomic_annotations"
 	"github.com/ldsec/medco/connector/restapi/server/operations/medco_network"
 	"github.com/ldsec/medco/connector/restapi/server/operations/medco_node"
@@ -93,11 +94,19 @@ func configureAPI(api *operations.MedcoConnectorAPI) http.Handler {
 	// /node/explore/cohorts
 	api.MedcoNodeDeleteCohortsHandler = medco_node.DeleteCohortsHandlerFunc(handlers.MedCoNodeDeleteCohortsHandler)
 
+	// /node/explore/default-cohort
+	api.MedcoNodeGetDefaultCohortHandler = medco_node.GetDefaultCohortHandlerFunc(handlers.MedCoNodeGetDefaultCohortHandler)
+
+	// /node/explore/default-cohort
+	api.MedcoNodePutDefaultCohortHandler = medco_node.PutDefaultCohortHandlerFunc(handlers.MedCoNodePutDefaultCohortHandler)
+
 	// /node/explore/cohorts/patientList
 	api.MedcoNodePostCohortsPatientListHandler = medco_node.PostCohortsPatientListHandlerFunc(handlers.MedCoNodePostCohortsPatientListHandler)
 
 	// /node/analysis/survival/query
 	api.SurvivalAnalysisSurvivalAnalysisHandler = survival_analysis.SurvivalAnalysisHandlerFunc(handlers.MedCoSurvivalAnalysisHandler)
+
+	api.ExploreStatisticsExploreStatisticsHandler = explore_statistics.ExploreStatisticsHandlerFunc(handlers.ExploreStatisticsHandler)
 
 	api.ServerShutdown = func() {}
 

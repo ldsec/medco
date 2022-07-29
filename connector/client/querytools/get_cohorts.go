@@ -139,6 +139,9 @@ func convertCohort(apiRes []*medco_node.GetCohortsOKBodyItems0) (res []medcomode
 		if err != nil {
 			return
 		}
+
+		res[i].Predefined = apiCohort.Predefined
+
 		res[i].QueryID = int(apiCohort.QueryID)
 		if apiCohort.QueryDefinition != nil {
 			res[i].QueryDefinition.QueryTiming = apiCohort.QueryDefinition.QueryTiming

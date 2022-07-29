@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/ldsec/medco/connector/restapi/models"
-
 	"github.com/ldsec/medco/loader/identifiers"
 	"github.com/sirupsen/logrus"
 )
@@ -163,8 +162,8 @@ func ParseQueryItem(queryItem string) (conceptItems []*models.PanelConceptItemsI
 
 		if len(contentFieldFields) == 3 { // there is a modifier field
 			modifier := &models.PanelConceptItemsItems0Modifier{
-				AppliedPath: &contentFieldFields[2],
 				ModifierKey: &contentFieldFields[1],
+				AppliedPath: &contentFieldFields[2],
 			}
 
 			item.Modifier = modifier
